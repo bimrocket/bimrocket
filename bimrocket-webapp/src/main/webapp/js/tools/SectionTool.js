@@ -63,7 +63,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     planeStencilMat.stencilZFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZPass = THREE.ReplaceStencilOp;
     var loader = new THREE.TextureLoader();
-    loader.load("textures/asfalt.png", 
+    loader.load("textures/cement.png", 
       function(texture) 
       {
         texture.wrapS = THREE.RepeatWrapping;

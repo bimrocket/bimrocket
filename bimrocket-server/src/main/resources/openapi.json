@@ -1,0 +1,17 @@
+{
+  "info" : {
+    "title": "BIMROCKET API",
+    "description": "BIMROCKET HTTP REST API",
+    "contact": {
+      "name": "API Support",
+      "url": "http://bimrocket.org",
+      "email": "realor@santfeliu.cat"
+    },
+    "license": {
+      "name": "LGPLv3",
+      "url": "https://www.gnu.org/licenses/lgpl.txt"
+    },
+    "version": "1.0"
+  },
+  "servers" : [{ "url" : "api" }]
+}

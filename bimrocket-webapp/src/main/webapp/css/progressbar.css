@@ -1,0 +1,64 @@
+.progress_bar
+{
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: 50%;
+  height: 40px;
+}
+
+.progress_bar .message
+{
+  color: black;
+  position:absolute;
+  height: 20px;
+  top:0;
+  left:0;
+  right:0;
+  text-align: left;
+}
+
+.progress_bar .bar
+{
+  background-color: white;
+  position:absolute;
+  height: 16px;
+  bottom:4px;
+  left:0;
+  right:0;
+  border: 1px solid #808080;
+  line-height: 17px;
+  color:black;
+  text-align: center;
+  box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.3);
+}
+
+.progress_bar .progress
+{
+  background-color: #f0a0a0;
+  position:absolute;
+  height: 16px;
+  left:0;
+  top:0;
+  border:none;
+}
+
+.progress_bar .progress.undeterminate
+{
+  background-color: white;
+  background-image: url(images/progressbar.gif);
+  background-size: 136px 100%;
+  background-position:0 0;
+  background-repeat:repeat-x;
+}
+
+.progress_bar .percent
+{
+  position:absolute;
+  height: 16px;
+  left:0;
+  right:0;
+}
+
+
+

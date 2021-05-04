@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>BIMROCKET</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <link href="css/bimrocket.css" type="text/css" rel="stylesheet"/>
+    <link href="css/common.css" type="text/css" rel="stylesheet"/>
+    <link href="css/menu.css" type="text/css" rel="stylesheet"/>
+    <link href="css/panel.css" type="text/css" rel="stylesheet"/>
+    <link href="css/toolbar.css" type="text/css" rel="stylesheet"/>
+    <link href="css/outliner.css" type="text/css" rel="stylesheet"/>
+    <link href="css/tabbedpanel.css" type="text/css" rel="stylesheet"/>
+    <link href="css/inspector.css" type="text/css" rel="stylesheet"/>
+    <link href="css/tools.css" type="text/css" rel="stylesheet"/>
+    <link href="css/progressbar.css" type="text/css" rel="stylesheet"/>
+    <link href="css/controllers.css" type="text/css" rel="stylesheet"/>
+    <link href="css/dialog.css" type="text/css" rel="stylesheet"/>
+    <script src="js/i18n/I18N.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/bimrocket.js"></script>
+    <script src="js/io/IOService.js"></script>
+    <script src="js/io/WebdavService.js"></script>
+    <script src="js/io/ComponentService.js"></script>
+    <script src="js/io/ColladaLoader.js"></script>
+    <script src="js/io/OBJLoader.js"></script>
+    <script src="js/io/STLLoader.js"></script>
+    <script src="js/io/GISLoader.js"></script>
+    <script src="js/io/GeoJSONLoader.js"></script>
+    <script src="js/io/GMLLoader.js"></script>
+    <script src="js/io/STEP.js"></script>
+    <script src="js/io/IFC.js"></script>
+    <script src="js/io/IFC4.js"></script>
+    <script src="js/io/OBJExporter.js"></script>
+    <script src="js/io/ColladaExporter.js"></script>
+    <script src="js/io/STLExporter.js"></script>
+    <script src="js/io/IOManager.js"></script>
+    <script src="js/utils/Expression.js"></script>
+    <script src="js/utils/GeometryUtils.js"></script>
+    <script src="js/utils/ObjectUtils.js"></script>
+    <script src="js/utils/ObjectUtils.js"></script>
+    <script src="js/utils/Detector.js"></script>
+    <script src="js/utils/Utils.js"></script>
+    <script src="js/ui/Menu.js"></script>
+    <script src="js/ui/ToolBar.js"></script>
+    <script src="js/ui/Panel.js"></script>
+    <script src="js/ui/Outliner.js"></script>
+    <script src="js/ui/Inspector.js"></script>
+    <script src="js/ui/Statistics.js"></script>
+    <script src="js/ui/ProgressBar.js"></script>
+    <script src="js/ui/Dialog.js"></script>
+    <script src="js/ui/MessageDialog.js"></script>
+    <script src="js/solid/Solid.js"></script>
+    <script src="js/solid/SolidGeometry.js"></script>
+    <script src="js/solid/BSP.js"></script>
+    <script src="js/tools/Tool.js"></script>
+    <script src="js/tools/IOServiceTool.js"></script>
+    <script src="js/tools/NewSceneTool.js"></script>
+    <script src="js/tools/OpenCloudTool.js"></script>
+    <script src="js/tools/SaveCloudTool.js"></script>
+    <script src="js/tools/OpenLocalTool.js"></script>
+    <script src="js/tools/SaveLocalTool.js"></script>
+    <script src="js/tools/SelectTool.js"></script>
+    <script src="js/tools/OrbitTool.js"></script>
+    <script src="js/tools/FlyTool.js"></script>
+    <script src="js/tools/AutoOrbitTool.js"></script>
+    <script src="js/tools/MoveTool.js"></script>
+    <script src="js/tools/RotateTool.js"></script>
+    <script src="js/tools/ScaleTool.js"></script>
+    <script src="js/tools/DrawTool.js"></script>
+    <script src="js/tools/SectionTool.js"></script>
+    <script src="js/tools/PushPullTool.js"></script>
+    <script src="js/tools/BooleanOperationTool.js"></script>
+    <script src="js/tools/ClipTool.js"></script>
+    <script src="js/tools/MakeSolidTool.js"></script>
+    <script src="js/tools/MeasureDistanceTool.js"></script>
+    <script src="js/tools/PrintTool.js"></script>
+    <script src="js/tools/OptionsTool.js"></script>
+    <script src="js/tools/ZoomAllTool.js"></script>
+    <script src="js/tools/CenterSelectionTool.js"></script>
+    <script src="js/tools/ActivateCameraTool.js"></script>
+    <script src="js/tools/AddObjectTool.js"></script>
+    <script src="js/tools/RemoveTool.js"></script>
+    <script src="js/tools/CloneTool.js"></script>
+    <script src="js/tools/CutTool.js"></script>
+    <script src="js/tools/PasteTool.js"></script>
+    <script src="js/tools/VisibilityTool.js"></script>
+    <script src="js/tools/ResetMatrixTool.js"></script>
+    <script src="js/tools/InspectGeometryTool.js"></script>
+    <script src="js/tools/StartControllersTool.js"></script>
+    <script src="js/tools/StopControllersTool.js"></script>
+    <script src="js/tools/CreateControllerTool.js"></script>
+    <script src="js/tools/BIMLayersTool.js"></script>
+    <script src="js/tools/BIMLayoutTool.js"></script>
+    <script src="js/tools/BIMDataTool.js"></script>
+    <script src="js/tools/OutlinerTool.js"></script>
+    <script src="js/tools/InspectorTool.js"></script>
+    <script src="js/tools/StatisticsTool.js"></script>
+    <script src="js/tools/LoadControllersTool.js"></script>
+    <script src="js/tools/SaveControllersTool.js"></script>
+    <script src="js/controllers/lib/Brain4it.js"></script>
+    <script src="js/controllers/Controller.js"></script>
+    <script src="js/controllers/PanelController.js"></script>
+    <script src="js/controllers/AnimationController.js"></script>
+    <script src="js/controllers/PushButtonController.js"></script>
+    <script src="js/controllers/ToggleButtonController.js"></script>
+    <script src="js/controllers/ColorController.js"></script>
+    <script src="js/controllers/LightController.js"></script>
+    <script src="js/controllers/RotationController.js"></script>
+    <script src="js/controllers/DisplayController.js"></script>
+    <script src="js/controllers/ProximityController.js"></script>
+    <script src="js/controllers/TranslationController.js"></script>
+    <script src="js/controllers/Brain4itWatchController.js"></script>
+    <script src="js/controllers/Brain4itPostController.js"></script>
+    <script src="js/controllers/LoadController.js"></script>
+    <script src="js/controllers/WFSController.js"></script>
+    <script src="js/controllers/AutoPilotController.js"></script>
+  </head>
+  <body>
+    <header id="header">
+      <a href="#" id="logo" onclick="BIMROCKET.application.showLogo()">
+        <img src="css/images/bimrocket.svg" title="BIMROCKET" alt="BIMROCKET">
+      </a>
+    </header>
+    
+    <div id="toolbar"></div>
+    
+    <div id="container"></div>
+        
+    <div id="progress_bar"></div>
+    
+    <div id="load_panel" onclick="BIMROCKET.application.hideLogo()">
+      <div id="load_message">
+        <img src="css/images/bimrocket.svg" title="BIMROCKET" alt="BIMROCKET">
+      </div>
+    </div>
+  </body>
+</html>

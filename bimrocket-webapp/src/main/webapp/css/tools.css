@@ -1,0 +1,542 @@
+/*
+    Created on : 07-sep-2014, 9:09:03
+    Author     : realor
+*/
+
+.service_panel
+{
+  position:absolute;
+  top:4px;
+  left:4px;
+  right:4px;
+  bottom:4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+}
+
+.service_panel .header
+{
+  width:100%;
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:22px;
+}
+
+.service_panel .header .image_button.home
+{
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:20px;
+  background-image: url(images/home.svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.service_panel .header .image_button.back
+{
+  position:absolute;
+  left:24px;
+  top:0;
+  bottom:0;
+  width:20px;
+  background-image: url(images/back.svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.service_panel .header .image_button.home:hover
+{
+  cursor:pointer;
+  background-color: #ffa0a0;
+  border-radius: 2px;
+}
+
+.service_panel .header .image_button.back:hover
+{
+  cursor:pointer;
+  background-color: #ffa0a0;
+  border-radius: 2px;
+}
+
+.service_panel .header .directory
+{
+  position:absolute;
+  left:48px;
+  right:0;
+  top:0;
+  bottom:0;
+  font-size:13px;
+  font-weight:normal;
+  text-align: left;
+  line-height: 20px;
+  padding:1px;
+  padding-left: 2px;
+  color: #804040;
+  border: 1px solid #c0c0c0;
+}
+
+.service_panel .path_entries
+{
+  position: absolute;
+  top:24px;
+  left:0;
+  right:0;
+  bottom:88px;
+  overflow-y: auto;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+  border:1px solid #c0c0c0;
+}
+
+.service_panel .entry_box
+{
+  position:absolute;
+  bottom:64px;
+  left:0;
+  right:0;
+  height:20px;
+  text-align: right;
+  border:1px solid #c0c0c0;
+}
+
+.service_panel .entry_input
+{
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  margin:0;
+  padding:0;
+  width:100%;
+  height: 20px;
+  border:none;
+  background: transparent;
+  color:black;
+  font-size: 13px;
+}
+
+.service_panel .options_box
+{
+  position:absolute;
+  bottom:40px;
+  left:0;
+  right:0;
+  height:24px;
+  text-align: left;
+}
+
+.service_panel .options_box label
+{
+  vertical-align: middle;
+}
+
+.service_panel .options_box input
+{
+  vertical-align: middle;
+}
+
+.service_panel .footer
+{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:40px;
+}
+
+.service_panel .footer .buttons_panel
+{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  text-align: right;
+}
+
+.service_panel .entry
+{
+  text-align: left;
+  cursor:pointer;
+  padding: 2px;
+  font-size:13px;
+  background-position: 2px center;
+  background-repeat: no-repeat;
+  padding-left: 20px;
+}
+
+.service_panel .entry.service
+{
+  color: #404040;
+  font-weight:bold;
+  background-image: url(images/service.svg);
+  background-position: 2px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.service_panel .entry.collection
+{
+  color: #404040;
+  background-image: url(images/collection.svg);
+  background-position: 2px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.service_panel .entry.object
+{
+  color: #606060;
+  background-image: url(images/object.svg);
+  background-position: 2px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.service_panel .entry:hover
+{
+  color:black;
+  animation: item_hover 1s;
+  background-color: #C0C0C0;
+  color: black;
+}
+
+.service_panel .entry.selected,
+.service_panel .entry.selected:hover
+{
+  color:black;
+  background-color:#F0A0A0;
+  animation: none;
+}
+
+.bim_layers_header
+{
+  border:1px solid transparent;
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+  text-align: left;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.bim_layers_header input,
+.bim_layers_header span
+{
+  line-height: 18px;
+  vertical-align: middle;  
+}
+
+.bim_layers_panel
+{
+  border:1px solid gray;
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 20px;
+  bottom: 4px;
+  overflow: auto;
+  border: 1px solid #c0c0c0;
+}
+
+.bim_layers_panel .layer
+{
+  text-align: left;
+  color: #606060;
+  font-size:12px;
+  height: 20px;
+  line-height: 20px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.bim_layers_panel .layer input
+{
+  line-height: 18px;
+  vertical-align: middle;  
+}
+
+.bim_layers_panel .layer a
+{
+  text-decoration: none;
+  outline: none;
+  color: #606060;
+  text-align: left;
+  line-height: 18px;
+  padding: 1px;
+  vertical-align: middle;
+}
+
+.bim_layers_panel .layer a:hover
+{
+  animation: item_hover 1s;
+  background-color: #D0D0D0;
+  color:black;  
+}
+
+
+.bim_layout_panel
+{
+  position: absolute;
+  top: 0;
+  left:0;
+  right:0;
+  bottom:0;
+  overflow: auto;
+  padding: 0;
+  border: none;
+}
+
+.bim_layout_panel span
+{
+  text-align: left;
+  line-height: 18px;
+  margin-left: 18px;
+  padding: 1px;
+  vertical-align: middle;
+}
+
+.bim_layout_panel span:hover
+{
+  cursor: pointer;
+  animation: item_hover 1s;
+  background-color: #D0D0D0;
+  color:black;
+}
+
+.bim_layout_panel span.selected
+{
+  background-color:#F0A0A0;
+  color:black;
+  animation: none;  
+}
+
+.bim_layout_panel ul,
+.bim_layout_panel li
+{
+  list-style: none;
+  margin-left:6px;
+  padding-left:0;
+  text-align: left;
+}
+
+.bim_layout_panel > ul
+{
+  margin-left: 0;
+  margin-top: 4px;
+}
+
+.bim_layout_panel li
+{
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  white-space: nowrap;
+}
+
+.bim_layout_panel li.IfcSite
+{
+  background-image: url(images/IFC/IfcSite.svg);
+  background-size: 16px 16px;
+}
+
+.bim_layout_panel li.IfcBuilding
+{
+  background-image: url(images/IFC/IfcBuilding.svg);
+  background-size: 16px 16px;
+}
+
+.bim_layout_panel li.IfcBuildingStorey
+{
+  background-image: url(images/IFC/IfcBuildingStorey.svg);
+  background-size: 16px 16px;
+}
+
+.bim_layout_panel li.IfcSpace
+{
+  background-image: url(images/IFC/IfcSpace.svg);
+  background-size: 16px 16px;
+}
+
+.tool_button.opencloud
+{
+  background-image: url(images/tools/opencloud.svg);
+}
+
+.tool_button.savecloud
+{
+  background-image: url(images/tools/savecloud.svg);
+}
+
+.tool_button.openlocal
+{
+  background-image: url(images/tools/openlocal.svg);
+}
+
+.tool_button.savelocal
+{
+  background-image: url(images/tools/savelocal.svg);
+}
+
+.tool_button.orbit
+{
+  background-image: url(images/tools/orbit.svg);
+}
+
+.tool_button.auto_orbit
+{
+  background-image: url(images/tools/auto_orbit.svg);
+}
+
+.tool_button.fly
+{
+  background-image: url(images/tools/fly.svg);
+}
+
+.tool_button.draw
+{
+  background-image: url(images/tools/draw.svg);
+}
+
+.tool_button.select
+{
+  background-image: url(images/tools/select.svg);
+}
+
+.tool_button.rotate
+{
+  background-image: url(images/tools/rotate.svg);
+}
+
+.tool_button.move
+{
+  background-image: url(images/tools/move.svg);
+}
+
+.tool_button.scale
+{
+  background-image: url(images/tools/scale.svg);
+}
+
+.tool_button.options
+{
+  background-image: url(images/tools/options.svg);
+}
+
+.tool_button.bim_layers
+{
+  background-image: url(images/tools/bim_layers.svg);
+}
+
+.tool_button.measure_distance
+{
+  background-image: url(images/tools/measure_distance.svg);
+}
+
+.tool_button.print
+{
+  background-image: url(images/tools/print.svg);
+}
+
+.tool_button.zoom_all
+{
+  background-image: url(images/tools/zoom_all.svg);
+}
+
+.tool_button.show
+{
+  background-image: url(images/tools/show.svg);  
+}
+
+.tool_button.hide
+{
+  background-image: url(images/tools/hide.svg);  
+}
+
+.tool_button.center_selection
+{
+  background-image: url(images/tools/center_selection.svg);  
+}
+
+.tool_button.focus_selection
+{
+  background-image: url(images/tools/focus_selection.svg);  
+}
+
+.tool_button.bim_layout
+{
+  background-image: url(images/tools/bim_layout.svg);
+}
+
+.tool_button.new_scene
+{
+  background-image: url(images/tools/new_scene.svg);  
+}
+
+.tool_button.outliner
+{
+  background-image: url(images/tools/outliner.svg);  
+}
+
+.tool_button.inspector
+{
+  background-image: url(images/tools/inspector.svg);  
+}
+
+.tool_button.statistics
+{
+  background-image: url(images/tools/statistics.svg);  
+}
+
+.tool_button.section
+{
+  background-image: url(images/tools/section.svg);    
+}
+
+div.option_block
+{
+  margin-top:6px;
+}
+
+.controller_list li
+{
+  list-style-type: none;
+  margin:6px 3px 6px 3px;
+}
+
+.controller_list li label
+{
+  display: block;
+  vertical-align: middle;
+}
+
+.controller_list li input
+{
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.controller_list li span
+{
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.controller_list li span.type
+{
+  color: #806060;
+  margin-right: 4px;
+}

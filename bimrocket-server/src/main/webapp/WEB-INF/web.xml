@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+  
+  <context-param>
+    <param-name>bimrocket.beans</param-name>
+    <param-value>bcfDAO</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>bcfDAO.class</param-name>
+    <param-value>org.bimrocket.dao.OrientDAOConnectionFactory</param-value>
+  </context-param>
+  <context-param>
+    <param-name>bcfDAO.url</param-name>
+    <param-value>remote:localhost/ifcdb</param-value>
+  </context-param>
+  <context-param>
+    <param-name>bcfDAO.username</param-name>
+    <param-value>root</param-value>
+  </context-param>
+  <context-param>
+    <param-name>bcfDAO.password</param-name>
+    <param-value>dankeuve1</param-value>
+  </context-param>
+
+  <servlet>
+    <servlet-name>api</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+      <param-name>jakarta.ws.rs.Application</param-name>
+      <param-value>org.bimrocket.api.BimRocketApplication</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>api</servlet-name>
+    <url-pattern>/api/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>cloudfs</servlet-name>
+    <servlet-class>org.bimrocket.cloudfs.WebdavServlet</servlet-class>
+    <init-param>
+      <param-name>BASE_PROPERTY</param-name>
+      <param-value>user.home</param-value>
+    </init-param>
+    <init-param>
+      <param-name>BASE_DIR_NAME</param-name>
+      <param-value>cloudfs</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>cloudfs</servlet-name>
+    <url-pattern>/cloudfs/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>printsvc</servlet-name>
+    <servlet-class>org.bimrocket.printsvc.PrintServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>printsvc</servlet-name>
+    <url-pattern>/printsvc/*</url-pattern>
+  </servlet-mapping>
+
+  <session-config>
+    <session-timeout>
+      30
+    </session-timeout>
+  </session-config>
+</web-app>

@@ -1,0 +1,231 @@
+/* inspector */
+
+ul.inspector
+{
+  margin-top: 2px;
+  margin-left: 0;
+  list-style: none;
+  padding-left:0;
+  text-align: left;  
+}
+
+ul.inspector ul
+{
+  list-style: none;
+  margin-left:0px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.inspector li
+{
+  list-style: none;
+  margin-left:0px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.inspector ul.expanded
+{
+  visibility: visible;
+}
+
+ul.inspector ul.collapsed
+{
+  display :none;
+}
+
+ul.inspector li.section
+{
+  padding-left: 0;
+  margin-left: 0;
+  color: #202020;
+  white-space: nowrap;
+  border-bottom: 1px solid gray;
+}
+
+ul.inspector li.section li.section
+{
+  padding-left: 0;
+  margin-left: 8px;
+  color: #202020;
+  white-space: nowrap;
+  border:none;
+  border-top: 1px solid lightgrey;
+}
+
+ul.inspector li.section li.section:first-child
+{
+  border-top:none;
+}
+
+ul.inspector li.section > span
+{
+  display:inline-block;
+  text-align: left;
+  color: #202020;
+  font-size:13px;
+  padding:1px 3px 1px 14px;
+  background-repeat: no-repeat;
+  background-position: 2px center;
+}
+
+ul.inspector li.section > span.add_button
+{
+  display:inline-block;
+  padding: 0px;
+  width: 12px;
+  height:12px;
+  background-repeat: no-repeat;
+  background-position: 2px center;
+  background-image: url(images/add.svg);
+  vertical-align: middle;
+}
+
+ul.inspector li.section > span.remove_button
+{
+  display:inline-block;
+  padding: 0px;
+  width: 12px;
+  height:12px;
+  background-repeat: no-repeat;
+  background-position: 2px center;
+  background-image: url(images/remove.svg);
+  vertical-align: middle;
+}
+
+ul.inspector li.section > span:hover
+{
+  cursor:pointer;
+  color: #802020;
+}
+
+ul.inspector li.section > span.collapse
+{
+  background-image:url(images/collapse.svg);
+}
+
+ul.inspector li.section > span.expand
+{
+  background-image:url(images/expand.svg);
+}
+
+ul.inspector li.property
+{
+  background-image: url(images/inspector/default.svg);
+  background-position: 0 1px;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  white-space:normal;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property > span.label
+{
+  margin-left: 18px;
+  text-align: left;
+  color: #606060;
+  font-size:12px;
+  line-height: 18px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property > span.value
+{
+  text-align: left;
+  font-size:12px;
+  margin-left: 2px;
+  line-height: 18px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property.editable > span.label
+{
+  cursor: pointer;  
+}
+
+ul.inspector li.property.editable > span.value
+{
+  color: #202020;
+  cursor: pointer;
+}
+
+ul.inspector li.property.string
+{
+  background-image: url(images/inspector/string.svg);
+}
+
+ul.inspector li.property.number
+{
+  background-image: url(images/inspector/number.svg);
+}
+
+ul.inspector li.property.boolean
+{
+  background-image: url(images/inspector/boolean.svg);
+}
+
+ul.inspector li.property.material span.name
+{
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property.material span.color
+{
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #202020;
+  vertical-align: middle;
+}
+
+ul.inspector li.property ul.list_3 li
+{
+  margin: 3px 0px 3px 8px;
+}
+
+ul.inspector li.property ul.list_3 li label
+{
+  color: gray;
+  display: inline-block;
+  width:16px;
+}
+
+ul.inspector li.property ul.list_3 li input
+{
+  width:160px;
+}
+
+div.inspector_info
+{
+  margin-top: 2px;
+  margin-left: 4px;
+  text-align: left;
+}
+
+ul.inspector_list
+{
+  margin-top: 4px;
+  margin-left: 4px;
+  padding-left:0;
+  text-align: left;    
+  list-style-type:none;
+}
+
+ul.inspector_list li
+{
+  margin-left: 4px;
+  background-image: url(images/outliner/default.svg);
+  background-size: 16px 16px;
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
+  white-space: nowrap;
+  padding-left: 20px;
+  line-height: 18px;
+}

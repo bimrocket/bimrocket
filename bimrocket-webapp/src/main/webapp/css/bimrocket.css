@@ -1,0 +1,109 @@
+/* 
+    Created on : 14-sep-2019, 9:07:32
+    Author     : realor
+*/
+
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+#container
+{
+  position: absolute;
+  top:68px;
+  bottom:0;
+  left:0;
+  right:0;
+}
+
+@keyframes fade_out_logo
+{
+  0% {opacity: 1}
+  100% {opacity: 0; visibility: hidden; }
+}
+
+@keyframes fade_in_logo
+{
+  0% {opacity: 0; visibility: visible; }
+  100% {opacity: 1; }
+}
+
+#load_panel
+{
+  z-index: 1000;
+  background: black;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+}
+
+#load_panel.visible
+{
+  animation: fade_in_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+#load_panel.hidden
+{
+  animation: fade_out_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+#load_message
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+#load_message img
+{
+  width: 400px;
+  max-width: 80%;
+}
+
+header
+{
+}
+
+header #logo
+{
+  float:left;
+  background-color: #B00000;
+  height: 28px;
+  display: inline-block;
+  width: 140px;
+  padding-top: 0;
+  text-align: center;
+}
+
+header #logo img
+{
+  height: 28px;
+}
+
+header nav
+{
+  position: absolute;
+  top: 0;
+  left: 140px;
+  right:0;
+  bottom:0;
+  background-color: #254441;
+}
+
+#toolbar
+{
+  position:absolute;
+  top:28px;
+  left:0px;
+  right:0px;
+  height: 40px;
+  text-align: left;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}

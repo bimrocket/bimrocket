@@ -1,0 +1,31 @@
+THREE:
+- Multiple selection
+- snap vertices
+- Configuration: selection color, panel transparency
+- Improve tools: move, rotate, scale, boolean_op, orbit, fly
+- New extrusion tool
+- New revolution tool
+- Improve icons (toolbar, outliner, inspector)
+- Inspector: add/remove property
+- New script tool
+- Improve BIM data tool for browse all IFC data
+
+UI:
+- Inspector: boolean editor
+- Inspector: material editor
+
+I/O:
+- BIMROCKET bjs format (controller support)
+- IFC: Fix difference half space solids (JOV)
+- IFC: Suport Ellipses curves
+- IFC: Suport composite curves: Ellipses trimmed
+- IFC: Holes in ElementParts?
+ 
+BIMROCKET SERVER:
+- Controllers/connectors
+- putStream(InputStream, name, format)
+- InputStream getStream(name, format)
+- InputStream getStreamByQuery(query, format)
+
+
+

@@ -1,0 +1,63 @@
+/* 
+    Created on : 06-mar-2015, 21:15:24
+    Author     : realor
+*/
+body
+{
+  font-family: Arial;
+  font-size: 14px;
+}
+
+li
+{
+  list-style: none;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+li.moveup:hover,
+li.directory:hover,
+li.file:hover
+{
+  background-color: #F0F080;
+}
+
+li.moveup
+{
+  background: url(images/moveup.png) no-repeat left;  
+  padding-left: 20px;
+}
+
+li.moveup a
+{
+  color: red;
+}
+
+li.directory
+{
+  background: url(images/directory.png) no-repeat left;
+  padding-left: 20px;
+}
+
+li.directory a 
+{
+  color: green;
+}
+
+li.file
+{
+  background: url(images/file.png) no-repeat left;
+  padding-left: 20px;
+}
+
+li.file a
+{
+  color: blue;
+  vertical-align: middle;
+}
+
+li > a
+{
+  text-decoration: none;
+  display:block;
+}

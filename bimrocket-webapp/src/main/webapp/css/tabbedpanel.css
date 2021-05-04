@@ -1,0 +1,48 @@
+/* tabbedpanel */
+.tab_selectors
+{
+  position: absolute;
+  top: 0;
+  left:0;
+  right:0;
+  height:20px;
+  border-bottom:1px solid gray;
+  text-align: left;
+}
+
+.tab_selectors .tab
+{
+  display:inline-block;
+  cursor: pointer;
+  line-height: 20px;
+  padding-left: 4px;
+  padding-right: 4px;
+  color: gray;  
+  border: 1px solid transparent;
+}
+
+.tab_selectors .tab.selected
+{
+  border: 1px solid gray;
+  border-bottom: none;
+  color: black;
+}
+
+.tab_panels
+{
+  position: absolute;
+  top: 21px;
+  left:0;
+  right:0;
+  bottom: 0;
+}
+
+.tab_panels > .panel
+{
+  position: absolute;
+  top: 0;
+  left:0;
+  right:0;
+  bottom: 0;
+  overflow: auto;
+}

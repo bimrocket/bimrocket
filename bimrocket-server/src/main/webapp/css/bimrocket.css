@@ -1,0 +1,40 @@
+/* 
+    Created on : 25-apr-2021, 18:00:00
+    Author     : realor
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+body
+{
+  background: #202050;
+  color: white;
+  font-family: Montserrat, Arial;
+  font-size: 14px;
+}
+
+#logo span
+{
+  font-size: 24px;
+  font-weight: bold;
+  vertical-align: middle;
+  color: #8040FF;
+  margin-left: 4px;
+}
+
+#logo img
+{
+  width: 300px;
+  vertical-align: middle;
+}
+
+a
+{
+  color: white;
+  text-decoration: none;
+}
+
+a:hover
+{
+  color: #8090FF;  
+}

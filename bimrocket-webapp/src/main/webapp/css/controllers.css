@@ -1,0 +1,169 @@
+div.rounded_button
+{
+  display: block;
+  background-color: #f7f7f7;
+  background-image: -webkit-gradient(linear, left top, left bottom, to(#d7d7d7), from(#e7e7e7));
+  background-image: -webkit-linear-gradient(top, #d7d7d7, #e7e7e7); 
+  background-image: -moz-linear-gradient(top, #d7d7d7, #e7e7e7); 
+  background-image: -ms-linear-gradient(top, #d7d7d7, #e7e7e7); 
+  background-image: -o-linear-gradient(top, #d7d7d7, #e7e7e7);
+  color: gray;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4px;
+  margin-bottom:4px;
+  width: 100px;
+  height: 100px;
+  position: relative;
+  text-align: center;
+  line-height: 100px;
+  border-radius: 50%;
+  box-shadow: 0px 5px 10px #588, inset 0px 2px 3px #fff;
+  text-shadow:0 1px 0 white;
+}
+
+div.rounded_button:hover
+{
+  cursor:pointer;
+}
+
+div.rounded_button.pressed,
+div.rounded_button:active
+{
+  box-shadow: 0px 1px 4px #588, inset 0px 2px 3px #fff;
+  background-image: -webkit-gradient(linear, left top, left bottom, to(#d0d0d0), from(#f0f0f0));
+  background-image: -webkit-linear-gradient(top, #d0d0d0, #f0f0f0); 
+  background-image: -moz-linear-gradient(top, #d0d0d0, #f0f0f0); 
+  background-image: -ms-linear-gradient(top, #d0d0d0, #f0f0f0); 
+  background-image: -o-linear-gradient(top, #d0d0d0, #f0f0f0);
+}
+
+
+span.toggle_button {
+  position:relative;
+  display:inline-block;
+  width:80px;
+  height:100px;
+  background-color:#bbb;
+  -webkit-border-radius:4px;
+  -moz-border-radius:4px;
+  border-radius:4px;
+  text-align:center;
+}
+
+span.toggle_button input {
+  width:100%;
+  height:100%;
+  margin:0 0;
+  padding:0 0;
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  z-index:2;
+  cursor:pointer;
+  opacity:0;
+  filter:alpha(opacity=0);
+}
+
+span.toggle_button label {
+  display:block;
+  position:absolute;
+  top:1px;
+  right:1px;
+  bottom:1px;
+  left:1px;
+  background-image:-webkit-linear-gradient(top,#fff 0%,#ddd 50%,#fff 50%,#eee 100%);
+  background-image:-moz-linear-gradient(top,#fff 0%,#ddd 50%,#fff 50%,#eee 100%);
+  background-image:-ms-linear-gradient(top,#fff 0%,#ddd 50%,#fff 50%,#eee 100%);
+  background-image:-o-linear-gradient(top,#fff 0%,#ddd 50%,#fff 50%,#eee 100%);
+  background-image:linear-gradient(top,#fff 0%,#ddd 50%,#fff 50%,#eee 100%);
+  -webkit-box-shadow:0 2px 3px rgba(0,0,0,0.4),
+    inset 0 -1px 1px #888,
+    inset 0 -5px 1px #bbb,
+    inset 0 -6px 0 white;
+  -moz-box-shadow:0 2px 3px rgba(0,0,0,0.4),
+    inset 0 -1px 1px #888,
+    inset 0 -5px 1px #bbb,
+    inset 0 -6px 0 white;
+  box-shadow:0 2px 3px rgba(0,0,0,0.4),
+    inset 0 -1px 1px #888,
+    inset 0 -5px 1px #bbb,
+    inset 0 -6px 0 white;
+  -webkit-border-radius:3px;
+  -moz-border-radius:3px;
+  border-radius:3px;
+  font:normal 11px Arial,Sans-Serif;
+  color:#666;
+  text-shadow:0 1px 0 white;
+  cursor:text;
+}
+
+span.toggle_button label:before {
+  content:attr(data-off);
+  position:absolute;
+  top:14px;
+  right:0;
+  left:0;
+  z-index:4;
+}
+
+span.toggle_button label:after {
+  content:attr(data-on);
+  position:absolute;
+  right:0;
+  bottom:17px;
+  left:0;
+  text-shadow:0 -1px 0 #eee;
+}
+
+span.toggle_button input:checked + label {
+  background-image:-webkit-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
+  background-image:-moz-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
+  background-image:-ms-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
+  background-image:-o-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
+  background-image:linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
+  -webkit-box-shadow:0 0 1px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+  -moz-box-shadow:0 0 1px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+  box-shadow:0 0 1px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+}
+
+span.toggle_button input:checked:hover + label {
+  -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+  -moz-box-shadow:0 1px 3px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+  box-shadow:0 1px 3px rgba(0,0,0,0.4),
+    inset 0 1px 7px -1px #ccc,
+    inset 0 5px 1px #fafafa,
+    inset 0 6px 0 white;
+}
+
+span.toggle_button input:checked + label:before {
+  z-index:1;
+  top:17px;
+}
+
+span.toggle_button input:checked + label:after {
+  bottom:15px;
+  z-index:4;
+}
+
+div.display
+{
+  font-size: 24px;
+}

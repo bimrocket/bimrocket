@@ -1,0 +1,88 @@
+/* common.css */
+
+body
+{
+  font-family: Montserrat, Arial;
+  font-size: 12px;
+  background-color: #F0F0F0;
+  margin: 0px;
+  overflow: hidden;
+  color:#606060;
+}
+
+input, button, select
+{
+  font-family: Montserrat, Arial;
+  font-size: 12px;
+  padding:2px;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+}
+
+input:focus, button:focus, select:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+button
+{
+  background-color: #f0f0f0;
+  color:#404040;
+  border: 1px solid #ff8080;
+  border-radius: 3px;
+  margin: 3px;
+  box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
+}
+
+button:hover
+{
+  background-color: #ffe0e0;
+}
+
+button:active
+{
+  box-shadow:none;
+  outline: none;
+}
+
+
+/* scrollbars */
+
+::-webkit-scrollbar 
+{
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track 
+{
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb 
+{
+  background: #ffb0b0;
+  border-radius: 0;
+}
+
+/* animation */
+
+@keyframes item_hover
+{
+  from {background-color: transparent;}
+  to {background-color: #C0C0C0;color: black;}
+}
+
+@keyframes fade_in
+{
+  from {opacity:0;}
+  to {opacity:1;}
+}
+
+@keyframes fade_out
+{
+  from {opacity:1;}
+  to {opacity:0;}
+}

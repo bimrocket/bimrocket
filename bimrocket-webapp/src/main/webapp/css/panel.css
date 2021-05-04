@@ -1,0 +1,126 @@
+div.panel
+{
+  text-align: center;
+  background-color: rgba(255,255,255,0.8);
+  border: 1px solid #a0a0a0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+  overflow:hidden;
+  display:none;
+  box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.3);
+  backdrop-filter: blur(6px);
+}
+
+div.panel.left
+{
+  position: absolute;
+  width: 250px;
+  left:0;
+  bottom:0;
+}
+
+div.panel.right
+{
+  position:absolute;
+  width: 250px;
+  right:0;
+  bottom:0;
+}
+
+div.panel.show
+{
+  display:block;
+}
+
+div.panel.show.minimized > .body
+{
+  display:none;
+}
+
+div.panel > .header
+{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:24px;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+  line-height: 24px;
+}
+
+div.panel > .header > .title
+{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left: 0;
+  right:0;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+div.panel > .header > div.close
+{
+  position:absolute;
+  top:0;
+  right:0;
+  bottom:0;  
+  width: 16px;
+  height: 16px;
+  margin: 4px;
+  padding:0;
+  background-image: url(images/close.svg);
+  background-repeat: no-repeat;
+  background-size: 9px 9px;
+  background-position: center center;
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #f6f6f6;
+}
+
+div.panel > .header > div.close:hover
+{
+  background-color: #ffb0b0; 
+}
+
+div.panel > .header > button:focus
+{
+  border: 1px solid black;
+  outline:none;
+}
+
+div.panel > .body
+{
+  position:absolute;
+  top:25px;
+  left:0;
+  right:0;
+  bottom:0;
+  overflow: auto;
+}
+
+div.panel > .body.center
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+
+.animate > div.panel
+{
+  transition: height 1s, bottom 1s;
+}
+
+@media all and (max-width : 768px)
+{
+  div.panel.show
+  {
+    display:block;
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+}

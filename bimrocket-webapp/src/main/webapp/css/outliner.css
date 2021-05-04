@@ -1,0 +1,153 @@
+/* outliner */
+
+ul.outliner
+{
+  margin-top: 2px;
+  margin-left: 0;
+}
+
+ul.outliner,
+ul.outliner ul,
+ul.outliner li
+{
+  list-style: none;
+  margin-left:6px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.outliner li
+{
+  background-image: url(images/outliner/default.svg);
+  background-size: 16px 16px;
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
+  white-space: nowrap;
+}
+
+ul.outliner span
+{
+  margin-left: 18px;
+  padding: 1px;
+  line-height: 18px;
+  vertical-align:middle;
+}
+
+ul.outliner span:hover
+{
+  cursor: pointer;
+  animation: item_hover 1s;
+  background-color: #C0C0C0;
+  color: black;
+}
+
+ul.outliner span.selected,
+ul.outliner span.selected:hover
+{
+  background-color:#F0A0A0;
+  color:black;
+  animation: none;
+}
+
+ul.outliner .cut
+{
+  color:blue;
+  font-style: italic;
+}
+
+ul.outliner .selected.cut
+{
+  color:blue;
+  font-style: italic;
+}
+
+ul.outliner .active_camera
+{
+  font-weight: bold;
+}
+
+ul.outliner .hidden
+{
+  color:#C0C0C0;  
+}
+
+ul.outliner .selected.hidden
+{
+  color:#707070;
+}
+
+ul.outliner .collapsed
+{
+  display:none;
+}
+
+ul.outliner .expanded
+{
+  visibility:visible;
+}
+
+ul.outliner button
+{
+  padding:0;
+  font-size:9px;
+  width:9px;
+  height:9px;
+  vertical-align:middle;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border:none;
+  text-align: center;
+  margin-left: -11px;
+  margin-right: 2px;
+  outline: none;
+  box-shadow: none;
+}
+
+ul.outliner button.collapse
+{
+  background-image:url(images/collapse.svg);
+}
+
+ul.outliner button.expand
+{
+  background-image:url(images/expand.svg);
+}
+
+ul.outliner button:hover
+{
+  cursor:pointer;
+}
+
+/* object icons */
+
+ul.outliner li.Brep
+{
+  background-image: url(images/outliner/brep.svg)
+}
+
+ul.outliner li.Solid
+{
+  background-image: url(images/outliner/solid.svg)
+}
+
+ul.outliner li.Group
+{
+  background-image: url(images/outliner/group.svg)
+}
+
+ul.outliner li.AmbientLight,
+ul.outliner li.DirectionalLight,
+ul.outliner li.PointLight,
+ul.outliner li.AreaLight,
+ul.outliner li.HemisphereLight,
+ul.outliner li.SpotLight
+{
+  background-image: url(images/outliner/light.svg);
+}
+
+ul.outliner li.PerspectiveCamera,
+ul.outliner li.OrthographicCamera
+{
+  background-image: url(images/outliner/camera.svg);  
+}

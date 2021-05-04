@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="116"
+   height="28"
+   viewBox="0 0 30.691655 7.4083327"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="bimrocket.svg"
+   inkscape:version="1.0.1 (0767f8302a, 2020-10-17)">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#969696"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.9999998"
+     inkscape:cx="66.48073"
+     inkscape:cy="17.275663"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="true"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="948"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:snap-global="true"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-paths="true"
+     inkscape:bbox-paths="true"
+     inkscape:snap-midpoints="true"
+     inkscape:snap-center="true"
+     objecttolerance="10000"
+     inkscape:snap-path-clip="true"
+     inkscape:snap-path-mask="true"
+     inkscape:snap-perpendicular="true"
+     inkscape:snap-tangential="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid833"
+       spacingx="0.13229164"
+       spacingy="0.13229164" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       aria-label="BIMROCKET"
+       id="text1573"
+       style="font-size:22.5778px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#fffff8;fill-opacity:1;stroke-width:0.264583"
+       transform="matrix(0.80307969,0,0,0.80307969,1.784592,0.66929522)">
+      <g
+         aria-label="BIMROCKET"
+         id="text848"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.86793px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:Montserrat;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke-width:0.043908">
+        <path
+           d="m 7.4067707,3.8749775 q 0.2920758,0.092491 0.4575854,0.3115475 0.1655097,0.2141889 0.1655097,0.5306044 0,0.4478495 -0.350491,0.691246 Q 7.3337518,5.646904 6.6668454,5.646904 H 4.9046547 V 2.239353 h 1.6648321 q 0.623095,0 0.9541142,0.2385286 0.3358872,0.2385286 0.3358872,0.6474347 0,0.2482644 -0.1216982,0.4429816 Q 7.6209596,3.7630151 7.4067707,3.8749775 Z M 5.6883915,2.8332405 v 0.8032084 h 0.7837367 q 0.2920758,0 0.4429816,-0.1022265 0.1509058,-0.1022265 0.1509058,-0.3018117 0,-0.1995851 -0.1509058,-0.2969437 Q 6.764204,2.8332405 6.4721282,2.8332405 Z m 0.9200387,2.219776 q 0.3115475,0 0.4673213,-0.1022265 0.1606417,-0.1022265 0.1606417,-0.3164154 0,-0.4235099 -0.627963,-0.4235099 H 5.6883915 v 0.8421518 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';fill:#ffffff;fill-opacity:1"
+           id="path2019" />
+        <path
+           d="M 8.6316636,2.239353 H 9.4202682 V 5.646904 H 8.6316636 Z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';fill:#ffffff;fill-opacity:1"
+           id="path2021" />
+        <path
+           d="m 13.329824,5.646904 -0.0049,-2.0445306 -1.002794,1.6843038 H 11.966804 L 10.968878,3.6461848 V 5.646904 H 10.228953 V 2.239353 h 0.652303 l 1.275397,2.1175496 1.255926,-2.1175496 h 0.647435 l 0.0097,3.407551 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:'Montserrat Bold';fill:#ffffff;fill-opacity:1"
+           id="path2023" />
+        <path
+           d="M 17.355983,5.646904 16.577114,4.5516198 Q 16.44568,4.5662235 16.30451,4.5662235 H 15.389339 V 5.646904 H 15.029112 V 2.239353 h 1.275398 q 0.652303,0 1.022265,0.3115476 0.369963,0.3115475 0.369963,0.8567556 0,0.3991703 -0.204453,0.6766423 -0.199585,0.2726041 -0.574416,0.3943023 l 0.832416,1.1683032 z m -1.061209,-1.38736 q 0.506265,0 0.774001,-0.2239248 0.267736,-0.2239248 0.267736,-0.627963 0,-0.413774 -0.267736,-0.6328309 Q 16.801039,2.5509006 16.294774,2.5509006 H 15.389339 V 4.259544 Z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2025" />
+        <path
+           d="m 20.036539,5.6761116 q -0.506264,0 -0.920038,-0.2239248 -0.408907,-0.2287927 -0.642567,-0.623095 -0.228793,-0.3943024 -0.228793,-0.8859633 0,-0.4916609 0.228793,-0.8859632 0.23366,-0.3943024 0.642567,-0.6182271 0.413774,-0.2287927 0.920038,-0.2287927 0.506265,0 0.910303,0.2239247 0.408906,0.2239248 0.642567,0.6230951 0.233661,0.3943023 0.233661,0.8859632 0,0.4916609 -0.233661,0.8908312 -0.233661,0.3943023 -0.642567,0.6182271 -0.404038,0.2239248 -0.910303,0.2239248 z m 0,-0.3212834 q 0.404038,0 0.73019,-0.1801134 0.326151,-0.1849813 0.511132,-0.5062647 0.184982,-0.3261513 0.184982,-0.7253216 0,-0.3991702 -0.184982,-0.7204536 -0.184981,-0.3261513 -0.511132,-0.5062647 -0.326152,-0.1849814 -0.73019,-0.1849814 -0.404038,0 -0.735057,0.1849814 -0.326151,0.1801134 -0.516001,0.5062647 -0.184981,0.3212834 -0.184981,0.7204536 0,0.3991703 0.184981,0.7253216 0.18985,0.3212834 0.516001,0.5062647 0.331019,0.1801134 0.735057,0.1801134 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2027" />
+        <path
+           d="m 24.115104,5.6761116 q -0.506265,0 -0.915171,-0.2239248 Q 22.795895,5.228262 22.562234,4.8339597 22.333442,4.4347894 22.333442,3.9431285 q 0,-0.4916609 0.228792,-0.8859632 0.233661,-0.3991703 0.642567,-0.6230951 0.408906,-0.2239247 0.915171,-0.2239247 0.379699,0 0.700982,0.1265661 0.321283,0.1265662 0.545208,0.3699627 L 25.137369,2.935467 q -0.39917,-0.4040382 -1.007661,-0.4040382 -0.404038,0 -0.735058,0.1849814 -0.331019,0.1849813 -0.520868,0.5062647 -0.184981,0.3212834 -0.184981,0.7204536 0,0.3991703 0.184981,0.7204536 0.189849,0.3212834 0.520868,0.5062648 0.33102,0.1849813 0.735058,0.1849813 0.613359,0 1.007661,-0.4089061 l 0.228793,0.2287927 q -0.223925,0.2433965 -0.550076,0.3748306 -0.321283,0.1265662 -0.700982,0.1265662 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2029" />
+        <path
+           d="M 27.190419,4.045355 26.494305,4.7512049 V 5.646904 H 26.134078 V 2.239353 h 0.360227 V 4.2984874 L 28.495024,2.239353 h 0.413775 l -1.474983,1.5431338 1.577209,1.8644172 h -0.428378 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2031" />
+        <path
+           d="M 32.004496,5.3353565 V 5.646904 H 29.594871 V 2.239353 h 2.336606 v 0.3115476 h -1.976379 v 1.2121145 h 1.76219 v 0.3066796 h -1.76219 v 1.2656618 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2033" />
+        <path
+           d="M 33.518043,2.5509006 H 32.320532 V 2.239353 H 35.07578 V 2.5509006 H 33.878269 V 5.646904 h -0.360226 z"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Montserrat;-inkscape-font-specification:Montserrat;fill:#ffffff;fill-opacity:1;stroke-width:0.043908"
+           id="path2035" />
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-size:9.66417px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;stroke-width:0.0871697"
+         x="11.302661"
+         y="-5.9803958"
+         id="text2017"><tspan
+           sodipodi:role="line"
+           id="tspan2015"
+           x="11.302661"
+           y="-5.9803958"
+           style="stroke-width:0.0871697" /></text>
+    </g>
+    <g
+       id="g874"
+       style="opacity:1;fill:#395700;fill-opacity:1;stroke:none"
+       transform="translate(-0.01361757,0.13268027)" />
+    <path
+       id="path846"
+       style="fill:#ffffff;stroke-width:0.33674;stroke-linecap:square;stroke-dashoffset:1.51181"
+       d="M 2.621028,1.9843742 A 1.8520832,1.8520832 0 0 0 0.79374936,3.8364575 1.8520832,1.8520832 0 0 0 1.9843743,5.5660676 V 4.8947909 H 2.2489577 V 5.6456495 A 1.8520832,1.8520832 0 0 0 2.513541,5.6833733 V 4.8947909 H 2.7781243 V 5.68389 A 1.8520832,1.8520832 0 0 0 3.0427077,5.6451328 V 4.8947909 H 3.307291 V 5.5665843 A 1.8520832,1.8520832 0 0 0 4.497916,3.8364575 1.8520832,1.8520832 0 0 0 2.6458327,1.9843742 a 1.8520832,1.8520832 0 0 0 -0.024805,0 z M 2.6458327,2.6458325 3.307291,3.3072909 V 4.6302075 H 1.9843743 V 3.3072909 Z" />
+  </g>
+</svg>

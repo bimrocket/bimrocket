@@ -114,6 +114,20 @@ div.panel > .body.center
   transition: height 1s, bottom 1s;
 }
 
+div.resizer
+{
+  width: 4px;
+  position: absolute;
+  bottom: 0;
+  background: transparent;
+  z-index: 10;
+}
+
+div.resizer:hover
+{
+  cursor: col-resize;  
+}
+
 @media all and (max-width : 768px)
 {
   div.panel.show

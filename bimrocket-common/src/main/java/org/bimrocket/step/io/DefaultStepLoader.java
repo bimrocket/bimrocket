@@ -66,7 +66,7 @@ public class DefaultStepLoader extends StepLoader<Model>
   }
   
   @Override
-  public StepBuilder createBuilder(ExpressType type)
+  public StepBuilder<?> createBuilder(ExpressType type)
   {
     if (type instanceof ExpressCollection)
     {

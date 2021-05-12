@@ -7,7 +7,7 @@ BIMROCKET.IFC = {
   MIN_CIRCLE_SEGMENTS : 16, // minimum circle segments
   CIRCLE_SEGMENTS_BY_RADIUS : 64, // circle segments by meter of radius
   HALF_SPACE_SIZE : 10000,
-  
+
   helpers : {},
 
   createBaseEntity : function(schema)
@@ -21,7 +21,7 @@ BIMROCKET.IFC = {
           let ifcClass = this.constructor;
           while (ifcClass)
           {
-            let helperClass = 
+            let helperClass =
               BIMROCKET.IFC.helpers[ifcClass.ifcClassName + "Helper"];
             if (helperClass)
             {
@@ -444,7 +444,7 @@ BIMROCKET.IFC.STEPLoader = class extends THREE.Loader
     return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress);
   }
 };
-  
+
 BIMROCKET.IFC.Materials =
 {
   IfcWall : new THREE.MeshPhongMaterial({
@@ -563,7 +563,7 @@ BIMROCKET.IFC.helpers.IfcProductHelper = class
       let name = product.Name ?
         product.Name : product.constructor.ifcClassName;
 
-      if (name.length >= 2 && name[0] === BIMROCKET.HIDDEN_PREFIX) 
+      if (name.length >= 2 && name[0] === BIMROCKET.HIDDEN_PREFIX)
       {
         name = name.substring(1);
       }
@@ -995,7 +995,7 @@ BIMROCKET.IFC.helpers.IfcPolygonalFaceSetHelper = class
 
         let triangles = BIMROCKET.GeometryUtils.triangulateFace(faceVertices,
           faceHoles);
-          
+
         for (let t = 0; t < triangles.length; t++)
         {
           let triangle = triangles[t];
@@ -1300,28 +1300,64 @@ BIMROCKET.IFC.helpers.IfcCircleProfileDefHelper = class
     if (this.shape === null)
     {
       var profile = this.instance;
-
-      var profMat = profile.Position.helper.getMatrix();
       var radius = profile.Radius;
+      var profMat = profile.Position.helper.getMatrix();
+
       var shape = new THREE.Shape();
-      var incr = 2 * Math.PI / 16;
-      var point = new THREE.Vector3(radius, 0, 0);
-      point.applyMatrix4(profMat);
-      shape.moveTo(point.x, point.y);
-      for (var rad = incr; rad < 2 * Math.PI; rad += incr)
-      {
-        point = new THREE.Vector3(
-          radius * Math.cos(rad),
-          radius * Math.sin(rad), 0);
-        point.applyMatrix4(profMat);
-        shape.lineTo(point.x, point.y);
-      }
-      shape.closePath();
+      this.makeCircularPath(shape, radius, profMat, 16);
+
+      this.shape = shape;
+    }
+    return this.shape;
+  }
+
+  makeCircularPath(path, radius, matrix, divisions)
+  {
+    const incr = 2 * Math.PI / divisions;
+    const point = new THREE.Vector3(radius, 0, 0);
+    point.applyMatrix4(matrix);
+    path.moveTo(point.x, point.y);
+    for (let rad = incr; rad < 2 * Math.PI; rad += incr)
+    {
+      point.set(radius * Math.cos(rad), radius * Math.sin(rad), 0);
+      point.applyMatrix4(matrix);
+      path.lineTo(point.x, point.y);
+    }
+    path.closePath();
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcCircleHollowProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcCircleProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+    this.shape = null;
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      var profile = this.instance;
+      var radius = profile.Radius;
+      var thickness = profile.WallThickness;
+      var profMat = profile.Position.helper.getMatrix();
+
+      var shape = new THREE.Shape();
+      this.makeCircularPath(shape, radius, profMat, 16);
+
+      var path = new THREE.Path();
+      this.makeCircularPath(path, radius - thickness, profMat, 16);
+      shape.holes.push(path);
+
       this.shape = shape;
     }
     return this.shape;
   }
 };
+
 
 BIMROCKET.IFC.helpers.IfcIShapeProfileDefHelper = class
   extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
@@ -1703,7 +1739,7 @@ BIMROCKET.IFC.helpers.IfcConnectedFaceSetHelper = class
       let indices = [];
 
       let geometry = new BIMROCKET.SolidGeometry();
-      
+
       for (let f = 0; f < faces.length; f++)
       {
         let face = faces[f]; // IfcFace

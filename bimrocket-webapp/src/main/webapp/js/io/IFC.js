@@ -54,9 +54,13 @@ BIMROCKET.IFC = {
 
   getCircleSegments : function(radius)
   {
-    return Math.max(
+    let segments = Math.max(
       BIMROCKET.IFC.MIN_CIRCLE_SEGMENTS,
       Math.ceil(BIMROCKET.IFC.CIRCLE_SEGMENTS_BY_RADIUS * radius));
+      
+    if (segments % 2 === 1) segments++;
+    
+    return segments;
   },
 
   cloneObject3D : function(object)
@@ -1303,19 +1307,21 @@ BIMROCKET.IFC.helpers.IfcCircleProfileDefHelper = class
       var radius = profile.Radius;
       var profMat = profile.Position.helper.getMatrix();
 
-      var shape = new THREE.Shape();
-      this.makeCircularPath(shape, radius, profMat, 16);
+      const segments = BIMROCKET.IFC.getCircleSegments(radius);
+      const shape = new THREE.Shape();
+      this.makeCircularPath(shape, radius, profMat, segments);
 
       this.shape = shape;
     }
     return this.shape;
   }
 
-  makeCircularPath(path, radius, matrix, divisions)
+  makeCircularPath(path, radius, matrix, segments)
   {
-    const incr = 2 * Math.PI / divisions;
+    const incr = 2 * Math.PI / segments;
     const point = new THREE.Vector3(radius, 0, 0);
     point.applyMatrix4(matrix);
+
     path.moveTo(point.x, point.y);
     for (let rad = incr; rad < 2 * Math.PI; rad += incr)
     {
@@ -1345,11 +1351,12 @@ BIMROCKET.IFC.helpers.IfcCircleHollowProfileDefHelper = class
       var thickness = profile.WallThickness;
       var profMat = profile.Position.helper.getMatrix();
 
-      var shape = new THREE.Shape();
-      this.makeCircularPath(shape, radius, profMat, 16);
+      const segments = BIMROCKET.IFC.getCircleSegments(radius);
+      const shape = new THREE.Shape();
+      this.makeCircularPath(shape, radius, profMat, segments);
 
       var path = new THREE.Path();
-      this.makeCircularPath(path, radius - thickness, profMat, 16);
+      this.makeCircularPath(path, radius - thickness, profMat, segments);
       shape.holes.push(path);
 
       this.shape = shape;

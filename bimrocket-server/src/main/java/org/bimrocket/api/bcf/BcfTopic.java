@@ -65,7 +65,7 @@ public class BcfTopic
   private Integer index;
 
   @JsonProperty("labels")
-  private List<String> labels = new ArrayList<String>();
+  private List<String> labels = new ArrayList<>();
 
   @JsonProperty("creation_date")
   private String creationDate;
@@ -93,6 +93,9 @@ public class BcfTopic
 
   @JsonIgnore
   private String projectId;
+  
+  @JsonIgnore
+  private int lastViewpointIndex;
   
   public String getId()
   {
@@ -262,5 +265,20 @@ public class BcfTopic
   public void setProjectId(String projectId)
   {
     this.projectId = projectId;
+  }
+
+  public int getLastViewpointIndex()
+  {
+    return lastViewpointIndex;
+  }
+
+  public void setLastViewpointIndex(int lastViewpointIndex)
+  {
+    this.lastViewpointIndex = lastViewpointIndex;
+  }
+  
+  public void incrementLastViewpointIndex()
+  {
+    this.lastViewpointIndex++;
   }
 }

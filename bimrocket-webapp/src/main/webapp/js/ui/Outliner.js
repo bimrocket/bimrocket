@@ -15,7 +15,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     this.activeCameraLabel = null;
     this.cutLabels = [];
     
-    var scope = this;
+    const scope = this;
 
     application.addEventListener("selection", function(event)
     {

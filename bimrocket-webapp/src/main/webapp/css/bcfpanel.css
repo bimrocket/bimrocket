@@ -1,0 +1,198 @@
+/* bcf panel */
+
+.bcf_panel
+{
+  --labelWidth: 100px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  text-align: left;
+}
+
+.bcf_panel a
+{
+  text-decoration: none;
+}
+
+.bcf_panel a:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+table.bcf_topic_table
+{
+  padding: 4px;
+  border: 1px solid #c0c0c0;
+  box-sizing:border-box;
+  border-collapse: collapse;
+  width:calc(100% - 8px);
+  margin: 0 auto;
+  margin-top: 6px;
+}
+
+table.bcf_topic_table > thead > tr
+{
+  border-bottom: 1px solid #c0c0c0;
+  background-color: #fff0f0;
+}
+
+table.bcf_topic_table > tbody > tr
+{
+  border-bottom: 1px solid #d0d0d0;
+}
+
+table.bcf_topic_table > tbody > tr:hover
+{
+  background-color: #f0f0f0;
+}
+
+.bcf_body
+{
+  padding: 4px;
+}
+
+.bcf_body > div
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--labelWidth), max-content));
+  align-items:flex-start;
+  margin-bottom: 2px;
+}
+
+.bcf_body > div > label
+{
+  padding: 2px;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0px;
+}
+
+.bcf_body > div > input,
+.bcf_body > div > select,
+.bcf_body > div > textarea,
+.bcf_body > div > div
+{
+  padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 1000px;
+}
+
+.bcf_body > div.bcf_description
+{
+  display: block;  
+}
+
+.bcf_body > div.bcf_description textarea
+{
+  resize: vertical;
+}
+
+.bcf_panel .bcf_buttons
+{
+  display: block;
+  text-align: center;
+}
+
+.bcf_body > .bcf_topic_nav
+{
+  display: grid;
+  grid-template-columns: min-content auto min-content;
+  align-items: center;
+}
+
+.bcf_body > .bcf_topic_nav > span
+{
+  text-align: center;
+}
+
+.bcf_project_setup
+{
+  padding: 4px;  
+}
+
+.bcf_project_setup > div
+{
+  padding-bottom:4px;
+}
+
+.bcf_project_setup > div > label
+{
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bcf_project_setup > div > input,
+.bcf_project_setup > div > textarea
+{
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bcf_project_setup > div > textarea
+{
+  font-family: monospace;
+  resize: vertical;
+  min-height: 200px;
+}
+
+.bcf_tabs
+{
+  padding: 4px;
+}
+
+.bcf_tabs .tab_panel
+{
+  padding: 4px;  
+}
+
+.bcf_tabs .tab_panel label
+{
+  padding: 2px;
+  display: block;
+  box-sizing: border-box;
+  width:100%;
+  margin-top: 4px;  
+}
+
+.bcf_tabs .tab_panel textarea
+{
+  padding: 2px;
+  display: block;
+  box-sizing: border-box;
+  width:100%;
+  margin: 0px;
+  resize: vertical;
+}
+
+ul.bcf_list
+{
+  padding-left: 2px;
+  list-style-type: none;
+  margin-top: 0;
+}
+
+ul.bcf_list li
+{
+  margin-bottom: 4px;  
+}
+
+.bcf_tabs li .bcf_comment_author
+{
+  color: black;
+}
+
+.bcf_tabs li .bcf_comment_text
+{
+  display:block;
+}

@@ -30,19 +30,14 @@
  */
 package org.bimrocket.dao;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  *
  * @author realor
- * @param <E> type to manage persistence
  */
-public interface DAO<E>
+public interface DaoConnection extends AutoCloseable
 {
-  public abstract List<E> find(Map<String, Object> filter);
-  public abstract E select(Object id);
-  public abstract E insert(E entity);
-  public abstract E update(E entity);
-  public abstract boolean delete(Object id);
+  <E> Dao<E> getDao(Class<E> cls);
+  
+  @Override
+  void close();
 }

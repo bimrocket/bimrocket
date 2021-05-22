@@ -28,76 +28,34 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao;
+package org.bimrocket.dao.orientdb;
 
-import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.db.OrientDBConfig;
-import com.orientechnologies.orient.object.db.ODatabaseObjectPool;
+import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.DaoConnection;
 
 
-public class OrientDAOConnectionFactory implements DAOConnectionFactory
+public class OrientDaoConnection implements DaoConnection
 {
-  private ODatabaseObjectPool dbPool;
-  private String url;
-  private String username;
-  private String password;
+  private final ODatabaseObject db;
 
-  public String getUrl()
+  OrientDaoConnection(ODatabaseObject db)
   {
-    return url;
-  }
-
-  public void setUrl(String url)
-  {
-    this.url = url;
-  }
-
-  public String getUsername()
-  {
-    return username;
-  }
-
-  public void setUsername(String username)
-  {
-    this.username = username;
-  }
-
-  public String getPassword()
-  {
-    return password;
-  }
-
-  public void setPassword(String password)
-  {
-    this.password = password;
-  }
-  
-  public OrientDAOConnectionFactory()
-  {
-    Orient.instance().removeShutdownHook();        
+    this.db = db;
   }
   
   @Override
-  public DAOConnection getConnection()
+  public <E> Dao<E> getDao(Class<E> cls)
   {
-    if (dbPool == null)
-    {
-      synchronized(this)
-      {
-        dbPool = new ODatabaseObjectPool(url,
-          username, password, OrientDBConfig.defaultConfig());
-      }
-    }    
-    return new OrientDAOConnection(dbPool.acquire());
-  }  
-  
+    return new OrientDao<>(db, cls);
+  }
+
   @Override
   public void close()
   {
-    if (dbPool != null)
+    if (db != null)
     {
-      dbPool.close();
+      db.close();
     }
-    Orient.instance().shutdown();
   }
 }

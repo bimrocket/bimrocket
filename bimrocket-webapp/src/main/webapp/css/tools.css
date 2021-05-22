@@ -509,6 +509,28 @@
 div.option_block
 {
   margin-top:6px;
+  margin-bottom:2px;
+  border-top: 1px solid #d0d0d0;
+  padding: 6px;
+  padding-bottom: 0;
+}
+
+div.option_block.inline label
+{
+  margin-right: 4px;
+}
+
+div.option_block.stack label
+{
+  display: block;
+  margin-bottom: 2px;
+}
+
+div.option_block input.back_color
+{
+  vertical-align: middle;
+  margin-left: 4px;
+  padding: 0px;
 }
 
 .controller_list li

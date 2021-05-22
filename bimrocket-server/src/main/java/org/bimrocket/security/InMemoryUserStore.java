@@ -28,32 +28,34 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao;
+package org.bimrocket.security;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-
-public class OrientDAOConnection implements DAOConnection
+/**
+ *
+ * @author realor
+ */
+public class InMemoryUserStore implements UserStore
 {
-  private final ODatabaseObject db;
-
-  OrientDAOConnection(ODatabaseObject db)
+  private final Set<String> userRoles = new HashSet<>();
+  
+  public InMemoryUserStore()
   {
-    this.db = db;
+    userRoles.add("BASIC");
   }
   
   @Override
-  public <E> DAO<E> getDAO(Class<E> cls)
+  public boolean validateCredential(String username, String password)
   {
-    return new OrientDAO<>(db, cls);
+    return username != null && username.trim().length() > 0;
   }
 
   @Override
-  public void close()
+  public Set<String> getRoles(String username)
   {
-    if (db != null)
-    {
-      db.close();
-    }
-  }
+    return username != null ? userRoles : Collections.emptySet();
+  }  
 }

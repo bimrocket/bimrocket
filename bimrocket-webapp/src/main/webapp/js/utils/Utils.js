@@ -48,34 +48,6 @@ function toHTML(text)
   return html;
 };
 
-function createButton(id, label, className, listener)
-{
-  var button = document.createElement("button");
-  if (id)
-  {
-    button.id = id;
-  }
-  if (label)
-  {
-    button.innerHTML = label;
-  }
-  button.className = className;
-
-  button.addEventListener("touchstart", function(e)
-  { e.preventDefault(); button.className = className + ' pressed'; }, false);
-
-  button.addEventListener("touchend", function(e)
-  { e.preventDefault(); button.className = className; listener(e); }, false);
-
-  button.addEventListener("mousedown", function(e)
-  { e.preventDefault(); button.className = className + ' pressed'; }, false);
-
-  button.addEventListener("mouseup", function(e)
-  { e.preventDefault(); button.className = className; listener(e); }, false);
-
-  return button;
-};
-
 // task : { run : fn, message: string, iterations: fn }
 function executeTasks(tasks, onCompleted, onProgress, notifyMillis, delay)
 {

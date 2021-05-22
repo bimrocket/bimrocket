@@ -52,9 +52,6 @@ public class IfcEndpoint
 {
   @Context
   ServletContext context;
-        
-  @HeaderParam("Authorization") 
-  String autho;
 
   /* Auth */
   

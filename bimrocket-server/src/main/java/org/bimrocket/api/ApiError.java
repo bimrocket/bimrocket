@@ -28,60 +28,73 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.bcf;
+package org.bimrocket.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 /**
  *
  * @author realor
  */
-public class BcfProject
+public class ApiError
 {
-  @Id
-  @JsonProperty("project_id")
-  private String id;
+  @JsonProperty("code")
+  private int code;
 
-  @JsonProperty("name")
-  private String name;
+  @JsonProperty("message")
+  private String message;
+
+  public int getCode()
+  {
+    return code;
+  }
+
+  public void setCode(int code)
+  {
+    this.code = code;
+  }
   
-  @JsonIgnore
-  private int lastTopicIndex;
-
-  public String getId()
+  public String getMessage()
   {
-    return id;
+    return message;
   }
 
-  public void setId(String id)
+  public void setMessage(String message)
   {
-    this.id = id;
+    this.message = message;
   }
 
-  public String getName()
+  public static Response response(int status, String message)
   {
-    return name;
+    ApiError error = new ApiError();
+    error.code = status;
+    error.message = message;
+    Response response = Response.status(status).entity(error).build();
+    return response;
   }
 
-  public void setName(String name)
+  public static Response response(Exception ex)
   {
-    this.name = name;
+    ApiError error = new ApiError();
+    error.code = 500;
+    error.message = ex.getMessage();
+    if (error.message == null)
+    {
+      error.message = ex.toString();
+    }    
+    Response response = Response.serverError().entity(error).build();
+    return response;
   }
 
-  public int getLastTopicIndex()
+  public static WebApplicationException exception(int status, String message)
   {
-    return lastTopicIndex;
-  }
-
-  public void setLastTopicIndex(int lastTopicIndex)
+    return new WebApplicationException(response(status, message));
+  }  
+  
+  public static WebApplicationException exception(Exception ex)
   {
-    this.lastTopicIndex = lastTopicIndex;
-  }
-
-  public void incrementLastTopicIndex()
-  {
-    this.lastTopicIndex++;
-  }
+    return new WebApplicationException(response(ex));
+  }  
 }

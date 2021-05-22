@@ -52,7 +52,11 @@
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl
         ],
-        layout: "StandaloneLayout"
+        layout: "StandaloneLayout",
+        onComplete: function() {
+         // "basicAuth" is the key name of the security scheme in securityDefinitions
+          ui.preauthorizeBasic("basicAuth", "username", "password");
+        }
       });
       // End Swagger UI call region
 

@@ -1,0 +1,46 @@
+.tabbed_pane
+{
+}
+
+.tabbed_pane > .header
+{
+}
+
+.tabbed_pane > .header > a
+{
+  display: inline-block;
+  padding: 4px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: gray;
+}
+
+.tabbed_pane > .header > a.selected
+{
+  color: #202020;
+  border-color: #c0c0c0;
+  border-bottom: 3px solid #ffb0b0;
+}
+
+.tabbed_pane > .header > a:focus
+{
+  outline: none;
+  box-shadow: none;
+}
+
+.tabbed_pane > .body
+{
+  border: 1px solid #c0c0c0;
+  min-height: 100px;
+  margin-top: -1px;
+}
+
+.tabbed_pane > .body > .tab_panel
+{
+  display: none;
+}
+
+.tabbed_pane > .body > .tab_panel.selected
+{
+  display: block;
+}

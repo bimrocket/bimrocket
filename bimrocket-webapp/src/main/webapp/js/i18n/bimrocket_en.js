@@ -92,6 +92,10 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.activate_camera.label" : "Activate camera",
 
+  "tool.perspective.label" : "Perspective",
+
+  "tool.orthographic.label" : "Orthographic",
+
   "tool.zoom_all.label" : "Zoom all",
 
   "tool.center_selection.label" : "Center selection",
@@ -120,6 +124,9 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.bim_data.label" : "BIM data",
   "tool.bim_data.help" : "Shows BIM data",
+
+  "tool.bcf.label" : "BCF",
+  "tool.bcf.help" : "Shows BCF topics",
 
   "tool.outliner.label" : "Outliner",
   "tool.outliner.help" : "Outliner",

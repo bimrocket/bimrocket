@@ -31,32 +31,36 @@
 
 package org.bimrocket.api.bcf;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static java.util.Arrays.asList;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
 import java.util.List;
 import java.util.UUID;
 import java.util.Collections;
-import org.bimrocket.dao.DAO;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.bimrocket.dao.DAOConnection;
-import org.bimrocket.dao.DAOConnectionFactory;
 import jakarta.ws.rs.core.Response;
-import java.util.ArrayList;
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import org.bimrocket.api.ApiError;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.DaoConnectionFactory;
+import org.bimrocket.dao.DaoConnection;
+import org.bimrocket.odata.SimpleODataParser;
 
 /**
  *
@@ -66,22 +70,40 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Tag(name="BCF", description="BIM Collaboration Format")
 public class BcfEndpoint
 {
+  private static final String PROJECT_TEMPLATE = "project_template";
+  
+  private static final Map<String, String> topicFieldMap = new HashMap<>();
+  
+  static
+  {
+    topicFieldMap.put("topic_status", "topicStatus");
+    topicFieldMap.put("topic_type", "topicType");
+    topicFieldMap.put("priority", "priority");
+    topicFieldMap.put("assigned_to", "assignedTo");
+    topicFieldMap.put("creation_date", "creationDate");
+    topicFieldMap.put("index", "index");
+  }
+
   @Inject
   Application application;
-        
-  @HeaderParam("Authorization") 
-  String autho;
+
+  @Context
+  ContainerRequestContext context;
 
   /* Auth */
-  
+
   @GET
   @Path("/auth")
   @Produces(APPLICATION_JSON)
-  public List<String> getAuth()
+  @PermitAll
+  public BcfAuthentication getAuth()
   {
-    return new ArrayList<>();
+    BcfAuthentication auth = new BcfAuthentication();
+    auth.setHttpBasicSupported(true);
+
+    return auth;
   }
-  
+
   /* Projects */
 
   @GET
@@ -89,10 +111,14 @@ public class BcfEndpoint
   @Produces(APPLICATION_JSON)
   public List<BcfProject> getProjects()
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfProject> dao = conn.getDAO(BcfProject.class);
-      return dao.find(Collections.emptyMap());
+      Dao<BcfProject> dao = conn.getDao(BcfProject.class);
+      return dao.select(Collections.emptyMap(), asList("name"));
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -101,33 +127,15 @@ public class BcfEndpoint
   @Produces(APPLICATION_JSON)
   public BcfProject getProject(@PathParam("projectId") String projectId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfProject> dao = conn.getDAO(BcfProject.class);
+      Dao<BcfProject> dao = conn.getDao(BcfProject.class);
       return dao.select(projectId);
     }
-  }
-
-  @GET
-  @Path("/projects/{projectId}/extensions")
-  @Produces(APPLICATION_JSON)
-  public BcfExtensions getExtensions(@PathParam("projectId") String projectId)
-  {
-    try (DAOConnection conn = getDAOConnection())    
+    catch (Exception ex)
     {
-      DAO<BcfExtensions> dao = conn.getDAO(BcfExtensions.class);
-      List<BcfExtensions> extensionsList = dao.find(Collections.emptyMap());
-      if (extensionsList.isEmpty())
-      {
-        BcfExtensions extensions = new BcfExtensions();
-        dao.insert(extensions);
-        return extensions;
-      }
-      else
-      {
-        return extensionsList.get(0);
-      }
-    }    
+      throw ApiError.exception(ex);
+    }
   }
 
   @PUT
@@ -138,9 +146,9 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     BcfProject projectUpdate)
   {
-    try (DAOConnection conn = getDAOConnection())    
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfProject> dao = conn.getDAO(BcfProject.class);
+      Dao<BcfProject> dao = conn.getDao(BcfProject.class);
       BcfProject project = dao.select(projectId);
       if (project == null)
       {
@@ -152,9 +160,95 @@ public class BcfEndpoint
       else
       {
         project.setName(projectUpdate.getName());
-        project = dao.update(project);        
+        project = dao.update(project);
       }
       return project;
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
+  }
+
+  /* Extensions */
+
+  @GET
+  @Path("/projects/{projectId}/extensions")
+  @Produces(APPLICATION_JSON)
+  public BcfExtensions getExtensions(@PathParam("projectId") String projectId)
+  {
+    try (DaoConnection conn = getDaoConnection())
+    {
+      Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
+      BcfProject project = projectDao.select(projectId);
+      if (project == null)
+      {
+        project = new BcfProject();
+        project.setName("Project " + projectId);
+        project.setId(projectId);
+        projectDao.insert(project);
+      }
+
+      Dao<BcfExtensions> dao = conn.getDao(BcfExtensions.class);
+      BcfExtensions extensions = dao.select(projectId);
+      if (extensions == null)
+      {
+        extensions = new BcfExtensions();
+        BcfExtensions template = dao.select(PROJECT_TEMPLATE);
+        if (template == null)
+        {
+          extensions.setDefaultValues();
+        }
+        else
+        {
+          extensions = template;
+        }
+        extensions.setProjectId(projectId);
+        extensions = dao.insert(extensions);
+      }
+      return extensions;
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
+  }
+
+  @PUT
+  @Path("/projects/{projectId}/extensions")
+  @Produces(APPLICATION_JSON)
+  public BcfExtensions updateExtensions(
+    @PathParam("projectId") String projectId,
+    BcfExtensions extensionsUpdate)
+  {
+    try (DaoConnection conn = getDaoConnection())
+    {
+      Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
+      BcfProject project = projectDao.select(projectId);
+      if (project == null)
+      {
+        project = new BcfProject();
+        project.setName("Project " + projectId);
+        project.setId(projectId);
+        projectDao.insert(project);
+      }
+
+      Dao<BcfExtensions> dao = conn.getDao(BcfExtensions.class);
+      BcfExtensions extensions = dao.select(projectId);
+      if (extensions == null)
+      {
+        extensionsUpdate.setProjectId(projectId);
+        return dao.insert(extensionsUpdate);
+      }
+      else
+      {
+        extensionsUpdate.setProjectId(projectId);
+        return dao.update(extensionsUpdate);
+      }
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -164,18 +258,21 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics")
   @Produces(APPLICATION_JSON)
   public List<BcfTopic> getTopics(@PathParam("projectId") String projectId,
-    @QueryParam("topic_status") String topicStatus)
+    @QueryParam("$filter") String odataFilter,
+    @QueryParam("$orderBy") String odataOrderBy)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfTopic> dao = conn.getDAO(BcfTopic.class);
-      Map<String, Object> filter = new HashMap<>();
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);      
+      SimpleODataParser parser = new SimpleODataParser(topicFieldMap);
+      Map<String, Object> filter = parser.parseFilter(odataFilter);
       filter.put("projectId", projectId);
-      if (topicStatus != null)
-      {
-        filter.put("topicStatus", topicStatus);
-      }
-      return dao.find(filter);
+      List<String> orderBy = parser.parseOrderBy(odataOrderBy);
+      return dao.select(filter, orderBy);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -185,10 +282,14 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfTopic> dao = conn.getDAO(BcfTopic.class);
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       return dao.select(topicId);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -200,18 +301,40 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     BcfTopic topic)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfTopic> dao = conn.getDAO(BcfTopic.class);
+      Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
+      BcfProject project = projectDao.select(projectId);
+      if (project == null)
+      {
+        project = new BcfProject();
+        project.setName("Project " + projectId);
+        project.setId(projectId);
+        project.incrementLastTopicIndex();
+        project = projectDao.insert(project);
+      }
+      else
+      {
+        project.incrementLastTopicIndex();
+        project = projectDao.update(project);
+      }
+
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       topic.setId(UUID.randomUUID().toString());
       topic.setProjectId(projectId);
       String dateString = getDateString();
       String username = getUsername();
+
       topic.setCreationDate(dateString);
       topic.setCreationAuthor(username);
       topic.setModifyDate(dateString);
       topic.setModifyAuthor(username);
+      topic.setIndex(project.getLastTopicIndex());
       return dao.insert(topic);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -224,23 +347,30 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     BcfTopic topicUpdate)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfTopic> dao = conn.getDAO(BcfTopic.class);
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       BcfTopic topic = dao.select(topicId);
       if (topic == null) throw new RuntimeException("Topic not found");
-      
-      topic.setPriority(topicUpdate.getPriority());
+
       topic.setTitle(topicUpdate.getTitle());
+      topic.setTopicType(topicUpdate.getTopicType());
+      topic.setPriority(topicUpdate.getPriority());
+      topic.setStage(topicUpdate.getStage());
+      topic.setTopicStatus(topicUpdate.getTopicStatus());
+      topic.setReferenceLinks(topicUpdate.getReferenceLinks());
+      topic.setDescription(topicUpdate.getDescription());
       topic.setDueDate(topicUpdate.getDueDate());
       topic.setAssignedTo(topicUpdate.getAssignedTo());
-      topic.setModifyAuthor(topicUpdate.getModifyAuthor());
-      topic.setModifyDate(topicUpdate.getModifyDate());
       String dateString = getDateString();
       String username = getUsername();
       topic.setModifyDate(dateString);
       topic.setModifyAuthor(username);
       return dao.update(topic);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -251,12 +381,25 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfTopic> dao = conn.getDAO(BcfTopic.class);
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       dao.delete(topicId);
+
+      Map<String, Object> filter = new HashMap<>();
+      filter.put("topicId", topicId);
+
+      Dao<BcfComment> commentDao = conn.getDao(BcfComment.class);
+      commentDao.delete(filter);
+
+      Dao<BcfViewpoint> viewpointDao = conn.getDao(BcfViewpoint.class);
+      viewpointDao.delete(filter);
+      return Response.ok().build();
     }
-    return Response.ok().build();
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
   }
 
   /* Comments */
@@ -268,12 +411,16 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfComment> dao = conn.getDAO(BcfComment.class);
+      Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       Map<String, Object> filter = new HashMap<>();
-      filter.put("topicId", topicId);      
-      return dao.find(filter);
+      filter.put("topicId", topicId);
+      return dao.select(filter, asList("date"));
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -285,10 +432,14 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     @PathParam("commentId") String commentId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfComment> dao = conn.getDAO(BcfComment.class);
+      Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       return dao.select(commentId);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -301,16 +452,22 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     BcfComment comment)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfComment> dao = conn.getDAO(BcfComment.class);
+      Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       comment.setId(UUID.randomUUID().toString());
       comment.setTopicId(topicId);
       String dateString = getDateString();
       String username = getUsername();
+      comment.setAuthor(username);
+      comment.setDate(dateString);
       comment.setModifyDate(dateString);
       comment.setModifyAuthor(username);
       return dao.insert(comment);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -324,16 +481,24 @@ public class BcfEndpoint
     @PathParam("commentId") String commentId,
     BcfComment commentUpdate)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfComment> dao = conn.getDAO(BcfComment.class);
+      Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       BcfComment comment = dao.select(commentId);
       if (comment == null) throw new RuntimeException("Comment not found");
-      
+
       comment.setComment(commentUpdate.getComment());
       comment.setViewpointId(commentUpdate.getViewpointId());
       comment.setReplayToCommentId(comment.getReplayToCommentId());
+      String dateString = getDateString();
+      String username = getUsername();
+      comment.setModifyDate(dateString);
+      comment.setModifyAuthor(username);
       return dao.update(comment);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -345,12 +510,16 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     @PathParam("commentId") String commentId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfComment> dao = conn.getDAO(BcfComment.class);
+      Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       dao.delete(commentId);
+      return Response.ok().build();
     }
-    return Response.ok().build();
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
   }
 
   /* Viewpoints */
@@ -362,12 +531,16 @@ public class BcfEndpoint
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfViewpoint> dao = conn.getDAO(BcfViewpoint.class);
+      Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       Map<String, Object> filter = new HashMap<>();
       filter.put("topicId", topicId);
-      return dao.find(filter);
+      return dao.select(filter, asList("index"));
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -379,10 +552,14 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     @PathParam("viewpointId") String viewpointId)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfViewpoint> dao = conn.getDAO(BcfViewpoint.class);
+      Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       return dao.select(viewpointId);
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
     }
   }
 
@@ -395,33 +572,72 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId,
     BcfViewpoint viewpoint)
   {
-    try (DAOConnection conn = getDAOConnection())
+    try (DaoConnection conn = getDaoConnection())
     {
-      DAO<BcfViewpoint> dao = conn.getDAO(BcfViewpoint.class);
+      Dao<BcfTopic> topicDao = conn.getDao(BcfTopic.class);
+      BcfTopic topic = topicDao.select(topicId);
+      if (topic == null) return null;
+      topic.incrementLastViewpointIndex();
+      topicDao.update(topic);
+
+      Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       viewpoint.setId(UUID.randomUUID().toString());
       viewpoint.setTopicId(topicId);
+      viewpoint.setIndex(topic.getLastViewpointIndex());
+
       return dao.insert(viewpoint);
     }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
   }
-  
-  private DAOConnection getDAOConnection()
+
+  @DELETE
+  @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}")
+  @Consumes(APPLICATION_JSON)
+  public Response deleteViewpoint(
+    @PathParam("projectId") String projectId,
+    @PathParam("topicId") String topicId,
+    @PathParam("viewpointId") String viewpointId)
   {
-    DAOConnectionFactory daoFactory = 
-      (DAOConnectionFactory)application.getProperties().get("bcfDAO");
+    try (DaoConnection conn = getDaoConnection())
+    {
+      Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
+      dao.delete(viewpointId);
+      return Response.ok().build();
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
+  }
+
+  /* internal methods */
+
+  private DaoConnection getDaoConnection()
+  {
+    DaoConnectionFactory daoFactory =
+      (DaoConnectionFactory)application.getProperties().get("bcfDao");
     if (daoFactory == null) throw new RuntimeException("bcfDAO not found");
 
     return daoFactory.getConnection();
   }
-  
+
+  private String getUsername()
+  {
+    Object value = context.getProperty("username");
+    if (value instanceof String)
+    {
+      return String.valueOf(value);
+    }
+    return "anonymous";
+  }
+
   private String getDateString()
   {
     Date now = new Date();
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     return df.format(now);
-  }
-
-  private String getUsername()
-  {
-    return "anonymous";
   }
 }

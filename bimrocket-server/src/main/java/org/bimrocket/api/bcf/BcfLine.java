@@ -30,58 +30,37 @@
  */
 package org.bimrocket.api.bcf;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
 
 /**
  *
  * @author realor
  */
-public class BcfProject
+public class BcfLine
 {
-  @Id
-  @JsonProperty("project_id")
-  private String id;
+  @JsonProperty("start_point")
+  private BcfPoint startPoint;
+ 
+  @JsonProperty("end_point")
+  private BcfPoint endPoint;
 
-  @JsonProperty("name")
-  private String name;
-  
-  @JsonIgnore
-  private int lastTopicIndex;
-
-  public String getId()
+  public BcfPoint getStartPoint()
   {
-    return id;
+    return startPoint;
   }
 
-  public void setId(String id)
+  public void setStartPoint(BcfPoint startPoint)
   {
-    this.id = id;
+    this.startPoint = startPoint;
   }
 
-  public String getName()
+  public BcfPoint getEndPoint()
   {
-    return name;
+    return endPoint;
   }
 
-  public void setName(String name)
+  public void setEndPoint(BcfPoint endPoint)
   {
-    this.name = name;
-  }
-
-  public int getLastTopicIndex()
-  {
-    return lastTopicIndex;
-  }
-
-  public void setLastTopicIndex(int lastTopicIndex)
-  {
-    this.lastTopicIndex = lastTopicIndex;
-  }
-
-  public void incrementLastTopicIndex()
-  {
-    this.lastTopicIndex++;
+    this.endPoint = endPoint;
   }
 }

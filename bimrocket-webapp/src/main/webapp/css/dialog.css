@@ -114,6 +114,12 @@
   box-sizing: border-box;
 }
 
+.dialog .body .text_field label,
+.dialog .body .select_field label
+{
+  display: block;
+}
+
 .dialog .body div input,
 .dialog .body div select
 {
@@ -161,6 +167,11 @@
 .dialog .body.error span
 {
   color: #C00000;
+}
+
+.dialog .body.confirm span
+{
+  color: #D00000;
 }
 
 .dialog input[type="text"]

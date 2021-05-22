@@ -19,8 +19,8 @@ BIMROCKET.ActivateCameraTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    var application = this.application;
-    var object = application.selection.object;
+    const application = this.application;
+    const object = application.selection.object;
     if (object instanceof THREE.Camera)
     {
       application.activateCamera(object);

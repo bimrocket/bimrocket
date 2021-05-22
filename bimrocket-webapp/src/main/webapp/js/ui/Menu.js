@@ -176,7 +176,7 @@ BIMROCKET.MenuBar = class
     });
     element.appendChild(this.dropButtonElement);
 
-    var scope = this;
+    const scope = this;
     
     document.body.addEventListener("click", function(event)
     {
@@ -212,7 +212,7 @@ BIMROCKET.MenuBar = class
 
   addMenu(label)
   {
-    var menu = new BIMROCKET.Menu(label);
+    const menu = new BIMROCKET.Menu(label);
     menu.menuBar = this;
     this.menus.push(menu);
     this.listElement.appendChild(menu.itemElement);
@@ -243,7 +243,7 @@ BIMROCKET.MenuBar = class
   {
     if (!this.isVertical())
     {
-      var menu;
+      let menu;
       
       if (this.menuItem) // have previous menuItem
       {
@@ -292,7 +292,7 @@ BIMROCKET.MenuBar = class
   {
     for (var i = 0; i < this.menus.length; i++)
     {
-      var menu = this.menus[i];
+      let menu = this.menus[i];
       menu.hide(true);
     }
     this.menuItem = false;

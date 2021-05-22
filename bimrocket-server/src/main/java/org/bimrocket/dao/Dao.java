@@ -28,60 +28,26 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.bcf;
+package org.bimrocket.dao;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author realor
+ * @param <E> type to manage persistence
  */
-public class BcfProject
+public interface Dao<E>
 {
-  @Id
-  @JsonProperty("project_id")
-  private String id;
-
-  @JsonProperty("name")
-  private String name;
-  
-  @JsonIgnore
-  private int lastTopicIndex;
-
-  public String getId()
-  {
-    return id;
-  }
-
-  public void setId(String id)
-  {
-    this.id = id;
-  }
-
-  public String getName()
-  {
-    return name;
-  }
-
-  public void setName(String name)
-  {
-    this.name = name;
-  }
-
-  public int getLastTopicIndex()
-  {
-    return lastTopicIndex;
-  }
-
-  public void setLastTopicIndex(int lastTopicIndex)
-  {
-    this.lastTopicIndex = lastTopicIndex;
-  }
-
-  public void incrementLastTopicIndex()
-  {
-    this.lastTopicIndex++;
-  }
+  public abstract List<E> select(Map<String, Object> filter, 
+    Collection<String> orderBy);
+  public abstract Object select(String groupExpression, 
+    Map<String, Object> filter);
+  public abstract E select(Object id);
+  public abstract E insert(E entity);
+  public abstract E update(E entity);
+  public abstract boolean delete(Object id);
+  public abstract int delete(Map<String, Object> filter);
 }

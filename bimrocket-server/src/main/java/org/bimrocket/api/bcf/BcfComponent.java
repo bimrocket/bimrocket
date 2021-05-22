@@ -28,16 +28,52 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao;
+package org.bimrocket.api.bcf;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
  * @author realor
  */
-public interface DAOConnection extends AutoCloseable
+public class BcfComponent
 {
-  <E> DAO<E> getDAO(Class<E> cls);
-  
-  @Override
-  void close();
+  @JsonProperty("ifc_guid")
+  private String ifcGuid;
+
+  @JsonProperty("originating_system")  
+  private String originatingSystem;
+
+  @JsonProperty("authoring_tool_id")
+  private String authoringToolId;
+
+  public String getIfcGuid()
+  {
+    return ifcGuid;
+  }
+
+  public void setIfcGuid(String ifcGuid)
+  {
+    this.ifcGuid = ifcGuid;
+  }
+
+  public String getOriginatingSystem()
+  {
+    return originatingSystem;
+  }
+
+  public void setOriginatingSystem(String originatingSystem)
+  {
+    this.originatingSystem = originatingSystem;
+  }
+
+  public String getAuthoringToolId()
+  {
+    return authoringToolId;
+  }
+
+  public void setAuthoringToolId(String authoringToolId)
+  {
+    this.authoringToolId = authoringToolId;
+  }
 }

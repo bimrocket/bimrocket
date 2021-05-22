@@ -28,60 +28,16 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.bcf;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
+package org.bimrocket.dao;
 
 /**
  *
  * @author realor
  */
-public class BcfProject
+public interface DaoConnectionFactory extends AutoCloseable
 {
-  @Id
-  @JsonProperty("project_id")
-  private String id;
+  DaoConnection getConnection();
 
-  @JsonProperty("name")
-  private String name;
-  
-  @JsonIgnore
-  private int lastTopicIndex;
-
-  public String getId()
-  {
-    return id;
-  }
-
-  public void setId(String id)
-  {
-    this.id = id;
-  }
-
-  public String getName()
-  {
-    return name;
-  }
-
-  public void setName(String name)
-  {
-    this.name = name;
-  }
-
-  public int getLastTopicIndex()
-  {
-    return lastTopicIndex;
-  }
-
-  public void setLastTopicIndex(int lastTopicIndex)
-  {
-    this.lastTopicIndex = lastTopicIndex;
-  }
-
-  public void incrementLastTopicIndex()
-  {
-    this.lastTopicIndex++;
-  }
+  @Override
+  void close();  
 }

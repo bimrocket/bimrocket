@@ -60,6 +60,7 @@ public class BimRocketApplication extends ResourceConfig
   {
     LOGGER.log(Level.INFO, "BimRocket INIT");
     packages("org.bimrocket.api");
+    register(AuthenticationFilter.class);
     initBeans();
   }
   
@@ -107,7 +108,7 @@ public class BimRocketApplication extends ResourceConfig
       String beanClassName = context.getInitParameter(beanName + ".class");      
       Class<?> beanClass = Class.forName(beanClassName);
       BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
-      Object bean = beanClass.newInstance();
+      Object bean = beanClass.getDeclaredConstructor().newInstance();
       PropertyDescriptor[] properties = beanInfo.getPropertyDescriptors();
       for (PropertyDescriptor property : properties)
       {

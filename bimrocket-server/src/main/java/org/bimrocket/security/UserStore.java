@@ -28,16 +28,17 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao;
+package org.bimrocket.security;
+
+import java.util.Set;
 
 /**
  *
  * @author realor
  */
-public interface DAOConnectionFactory extends AutoCloseable
+public interface UserStore
 {
-  DAOConnection getConnection();
-
-  @Override
-  void close();  
+  public boolean validateCredential(String username, String password);
+  
+  public Set<String> getRoles(String username);
 }

@@ -5,8 +5,9 @@
   <groupId>org.bimrocket</groupId>
   <artifactId>bimrocket</artifactId>
   <version>1.0</version>
-  
-  <packaging>pom</packaging>
+  <name>bimrocket</name>
+  <description>bimrocket parent pom</description>
+  <packaging>pom</packaging>  
   
   <repositories>
     <repository>
@@ -14,7 +15,14 @@
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
   </repositories>
-    
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.test.skip>true</maven.test.skip>      
+  </properties>  
+          
   <build>
     <pluginManagement>
       <plugins>
@@ -33,6 +41,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
           <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
             <compilerArgs>
               <arg>-Xlint:all</arg>
             </compilerArgs>
@@ -47,10 +57,4 @@
     <module>bimrocket-webapp</module>
   </modules>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.test.skip>true</maven.test.skip>      
-  </properties>  
 </project>

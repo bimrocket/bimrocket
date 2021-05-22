@@ -5,6 +5,8 @@
   <groupId>org.bimrocket</groupId>
   <artifactId>bimrocket-common</artifactId>
   <version>1.0</version>
+  <name>bimrocket-common</name>
+  <description>bimrocket common classes</description>
   <packaging>jar</packaging>
 
   <parent>

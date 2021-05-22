@@ -3,24 +3,41 @@
   
   <context-param>
     <param-name>bimrocket.beans</param-name>
-    <param-value>bcfDAO</param-value>
+    <param-value>userStore,bcfDao</param-value>
   </context-param>
 
   <context-param>
-    <param-name>bcfDAO.class</param-name>
-    <param-value>org.bimrocket.dao.OrientDAOConnectionFactory</param-value>
+    <param-name>userStore.class</param-name>
+    <param-value>org.bimrocket.security.LdapUserStore</param-value>
   </context-param>
   <context-param>
-    <param-name>bcfDAO.url</param-name>
-    <param-value>remote:localhost/ifcdb</param-value>
+    <param-name>userStore.ldapUrl</param-name>
+    <param-value>ldap://dc1.santfeliu.local</param-value>
   </context-param>
   <context-param>
-    <param-name>bcfDAO.username</param-name>
+    <param-name>userStore.domain</param-name>
+    <param-value>santfeliu.local</param-value>
+  </context-param>
+  <context-param>
+    <param-name>userStore.searchBase</param-name>
+    <param-value>DC=santfeliu,DC=local</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>bcfDao.class</param-name>
+    <param-value>org.bimrocket.api.bcf.dao.BcfOrientDaoConnectionFactory</param-value>
+  </context-param>
+  <context-param>
+    <param-name>bcfDao.url</param-name>
+    <param-value>remote:localhost/bimdb</param-value>
+  </context-param>
+  <context-param>
+    <param-name>bcfDao.username</param-name>
     <param-value>root</param-value>
   </context-param>
   <context-param>
-    <param-name>bcfDAO.password</param-name>
-    <param-value>dankeuve1</param-value>
+    <param-name>bcfDao.password</param-name>
+    <param-value>orientdb</param-value>
   </context-param>
 
   <servlet>

@@ -125,10 +125,11 @@ BIMROCKET.ObjectUtils = class
       camera.right = 0.5 * boxWidth;
       camera.top = 0.5 * boxHeight;
       camera.bottom = -0.5 * boxHeight;
-      this.updateCameraAspectRatio(camera, aspect);
     }
+    camera.zoom = 1;
     camera.position.copy(center);
     camera.updateMatrix();
+    this.updateCameraAspectRatio(camera, aspect);
   }
 
   static updateCameraAspectRatio(camera, aspect)
@@ -155,7 +156,6 @@ BIMROCKET.ObjectUtils = class
         camera.left -= w;
         camera.right += w;
       }
-      camera.zoom = 1;
       camera.updateProjectionMatrix();
     }
   }

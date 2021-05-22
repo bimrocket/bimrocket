@@ -42,148 +42,35 @@ BIMROCKET.Dialog = class
 
   addText(text, className)
   {
-    var textElem = document.createElement("span");
-    textElem.innerHTML = text;
-    if (className)
-    {
-      textElem.className = className;
-    }
-    this.bodyElem.appendChild(textElem);
-    return textElem;
+    return Controls.addText(this.bodyElem, text, className);
   }
 
   addCode(text, className)
   {
-    var textElem = document.createElement("pre");
-    textElem.innerHTML = text;
-    if (className)
-    {
-      textElem.className = className;
-    }
-    this.bodyElem.appendChild(textElem);
-    return textElem;
+    return Controls.addCode(this.bodyElem, text, className);
   }
 
   addTextField(name, label, value, className)
   {
-    var groupElem = document.createElement("div");
-    groupElem.className = className || "text_field";
-    this.bodyElem.appendChild(groupElem);
-
-    var labelElem = document.createElement("label");
-    labelElem.htmlFor = name;
-    labelElem.innerHTML = label;
-    labelElem.style.display = "block";
-    groupElem.appendChild(labelElem);
-
-    var inputElem = document.createElement("input");
-    inputElem.id = name;
-    inputElem.name = name;
-    inputElem.type = "text";
-    inputElem.style.display = "block";
-    if (value) inputElem.value = value;
-    groupElem.appendChild(inputElem);
-
-    return inputElem;
+    return Controls.addTextField(this.bodyElem, name, label, value, 
+      className || "text_field");
   }
 
   addSelectField(name, label, options, value, className)
   {
-    var groupElem = document.createElement("div");
-    groupElem.className = className || "select_field";
-    this.bodyElem.appendChild(groupElem);
-
-    var labelElem = document.createElement("label");
-    labelElem.htmlFor = name;
-    labelElem.innerHTML = label;
-    labelElem.style.display = "block";
-    groupElem.appendChild(labelElem);
-
-    var selectElem = document.createElement("select");
-    selectElem.id = name;
-    selectElem.name = name;
-    selectElem.style.display = "block";
-    groupElem.appendChild(selectElem);
-
-    var found = false;
-    for (var i = 0; i < options.length; i++)
-    {
-      var option = options[i];
-      var optionElem = document.createElement("option");
-      if (option instanceof Array)
-      {
-        optionElem.value = option[0];
-        optionElem.innerHTML = option[1];
-      }
-      else
-      {
-        optionElem.value = option;
-        optionElem.innerHTML = option;
-      }
-      selectElem.appendChild(optionElem);
-      if (optionElem.value === value) found = true;
-    }
-    if (value)
-    {
-      if (!found)
-      {
-        var optionElem = document.createElement("option");
-        optionElem.value = value;
-        optionElem.innerHTML = value;
-        selectElem.appendChild(optionElem);
-      }
-      selectElem.value = value;
-    }
-    return selectElem;
+    return Controls.addSelectField(this.bodyElem, name, label, 
+      options, value, className || "select_field");
   }
 
   addRadioButtons(name, options, value, className)
   {
-    var groupElem = document.createElement("div");
-    groupElem.className = className || "radio_buttons";
-    this.bodyElem.appendChild(groupElem);
-
-    var hiddenElem = document.createElement("input");
-    hiddenElem.type = "hidden";
-    groupElem.appendChild(hiddenElem);
-
-    for (var i = 0; i < options.length; i++)
-    {
-      var option = options[i];
-
-      var radioElem = document.createElement("input");
-      radioElem.id = name + "_" + i;
-      radioElem.type = "radio";
-      radioElem.name = name;
-      radioElem.value = option instanceof Array ? option[0] : option;
-      if (value === radioElem.value)
-      {
-        radioElem.checked = true;
-        hiddenElem.value = radioElem.value;
-      }
-      radioElem.addEventListener("click", function(event)
-      {
-        var elem = event.target || event.srcElement;
-        hiddenElem.value = elem.value;
-      }, false);
-      groupElem.appendChild(radioElem);
-
-      var labelElem = document.createElement("label");
-      labelElem.innerHTML = option instanceof Array ? option[1] : option;
-      labelElem.htmlFor = radioElem.id;
-      groupElem.appendChild(labelElem);
-    }
-    return hiddenElem;
+    return Controls.addRadioButtons(this.bodyElem, name, options, 
+      value, className || "radio_buttons");
   }
 
   addButton(name, label, action)
   {
-    var scope = this;
-    var buttonElem = document.createElement("button");
-    buttonElem.id = name;
-    buttonElem.innerHTML = label;
-    buttonElem.addEventListener("click", function(){action(scope);}, false);
-    this.footerElem.appendChild(buttonElem);
+    return Controls.addButton(this.footerElem, name, label, action);
   }
 
   show(parentNode)

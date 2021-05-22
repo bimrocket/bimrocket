@@ -28,42 +28,47 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao;
+package org.bimrocket.dao.orientdb;
 
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.sql.executor.OResult;
+import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import jakarta.persistence.Id;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.beanutils.BeanUtils;
+import org.bimrocket.dao.Dao;
 
 /**
  *
  * @author realor
  * @param <E> the type managed by this DAO
  */
-public class OrientDAO<E> implements DAO<E>
+public class OrientDao<E> implements Dao<E>
 {
   private final ODatabaseObject db;
   private final Class<E> cls;
   private static final Map<Class<?>, Field> idFields = new HashMap<>();
 
-  public OrientDAO(ODatabaseObject db, Class<E> cls)
+  public OrientDao(ODatabaseObject db, Class<E> cls)
   {
     this.db = db;
     this.cls = cls;
-    db.getEntityManager().registerEntityClass(cls);
   }
 
   @Override
-  public List<E> find(Map<String, Object> filter)
+  public List<E> select(Map<String, Object> filter, Collection<String> orderBy)
   {
-    String sql = "select * from " + cls.getSimpleName();
+    String query = "select * from " + cls.getSimpleName();
 
-    sql += getFilterSql(filter);
+    query += addFilter(filter) + addOrderBy(orderBy);
 
-    List<E> list = db.objectQuery(sql);
+    List<E> list = db.objectQuery(query, filter);
     for (int i = 0; i < list.size(); i++)
     {
       list.set(i, db.detachAll(list.get(i), true));
@@ -72,18 +77,35 @@ public class OrientDAO<E> implements DAO<E>
   }
 
   @Override
+  public Object select(String groupExpression, Map<String, Object> filter)
+  {
+    String query = "select " + groupExpression + " from " + cls.getSimpleName();
+
+    query += addFilter(filter);
+
+    OResultSet resultSet = db.query(query, filter);
+
+    if (resultSet.hasNext())
+    {
+      OResult result = resultSet.next();
+      return result.getProperty(groupExpression);
+    }
+    return null;
+  }
+
+  @Override
   public E select(Object id)
   {
     E dbEntity = internalLoad(id);
     if (dbEntity == null) return null;
 
-    return db.detach(dbEntity, true);
+    return db.detachAll(dbEntity, true);
   }
 
   @Override
   public E insert(E entity)
   {
-    return db.detach(db.save(entity), true);
+    return db.detachAll(db.save(entity), true);
   }
 
   @Override
@@ -98,7 +120,7 @@ public class OrientDAO<E> implements DAO<E>
       if (dbEntity == null) return null;
 
       BeanUtils.copyProperties(dbEntity, entity);
-      return db.detach(db.save(dbEntity), true);
+      return db.detachAll(db.save(dbEntity), true);
     }
     catch (Exception ex)
     {
@@ -109,22 +131,68 @@ public class OrientDAO<E> implements DAO<E>
   @Override
   public boolean delete(Object id)
   {
-    E dbEntity = internalLoad(id);
-    if (dbEntity != null)
+    Field idField = getIdField(cls);
+
+    String query = "select from " + cls.getSimpleName() +
+      " where " + idField.getName() + " = ?";
+
+    OResultSet resultSet = db.command(query, id);
+
+    if (resultSet.hasNext())
     {
-      db.delete(dbEntity);
-      return true;
+      OResult result = resultSet.next();
+      removeObject(result.getElement().get());
+      return true;      
     }
     return false;
+  }
+
+  @Override
+  public int delete(Map<String, Object> filter)
+  {
+    String query = "select from " + cls.getSimpleName();
+
+    query += addFilter(filter);
+
+    OResultSet resultSet = db.command(query, filter);
+
+    int count = 0;
+    while (resultSet.hasNext())
+    {
+      OResult result = resultSet.next();
+      removeObject(result.getElement().get());
+      count++;
+    }
+    return count;
+  }
+  
+  private void removeObject(Object object)
+  {
+    if (object instanceof OElement)
+    {
+      OElement element = (OElement)object;    
+
+      System.out.println("delete " + element.getSchemaType().get().getName() + 
+        " " + element.getIdentity());
+      db.delete(element.getIdentity());
+
+      Set<String> propertyNames = element.getPropertyNames();
+
+      for (String propertyName : propertyNames)
+      {
+        Object property = element.getProperty(propertyName);
+        removeObject(property);
+      }
+    }
   }
 
   private E internalLoad(Object id)
   {
     Field idField = getIdField(cls);
 
-    String sql = "select * from " + cls.getSimpleName() +
+    String query = "select from " + cls.getSimpleName() +
       " where " + idField.getName() + " = ?";
-    List<E> result = db.objectQuery(sql, id);
+    List<E> result = db.objectQuery(query, id);
     if (!result.isEmpty())
     {
       return result.get(0);
@@ -132,7 +200,7 @@ public class OrientDAO<E> implements DAO<E>
     return null;
   }
 
-  private String getFilterSql(Map<String, Object> filter)
+  private String addFilter(Map<String, Object> filter)
   {
     StringBuilder buffer = new StringBuilder();
     int i = 0;
@@ -146,16 +214,25 @@ public class OrientDAO<E> implements DAO<E>
       {
         buffer.append(" and ");
       }
-      buffer.append(field).append(" = ");
+      buffer.append(field).append(" = :").append(field);
+      i++;
+    }
+    return buffer.toString();
+  }
 
-      Object value = filter.get(field);
-      if (value instanceof String)
+  private String addOrderBy(Collection<String> orderBy)
+  {
+    StringBuilder buffer = new StringBuilder();
+    int i = 0;
+    for (String field : orderBy)
+    {
+      if (i == 0)
       {
-        buffer.append('\'').append(value).append('\'');
+        buffer.append(" order by ").append(field);
       }
       else
       {
-        buffer.append(value);
+        buffer.append(", ").append(field);
       }
       i++;
     }
@@ -173,6 +250,7 @@ public class OrientDAO<E> implements DAO<E>
         if (field.isAnnotationPresent(Id.class))
         {
           idField = field;
+          idField.setAccessible(true);
           idFields.put(cls, idField);
           break;
         }

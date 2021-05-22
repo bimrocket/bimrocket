@@ -1,13 +1,13 @@
-/* 
+/*
  * OptionsTool.js
- * 
+ *
  * @autor: realor
  */
 
 BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 {
   constructor(application, options)
-  {    
+  {
     super(application);
     this.name = "options";
     this.label = "tool.options.label";
@@ -23,7 +23,7 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     this.panel = application.createPanel(
       "panel_" + this.name, this.label, "left");
-    
+
     var helpElem = document.createElement("div");
     helpElem.innerHTML = I18N.get(this.help);
     this.panel.bodyElem.appendChild(helpElem);
@@ -33,21 +33,24 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     // Frame rate divisor
 
-    var frdElem = document.createElement("div");
+    const frdElem = document.createElement("div");
     frdElem.className = "option_block";
     this.panel.bodyElem.appendChild(frdElem);
 
-    var frdLabel = document.createElement("label");
+    const frdValueDiv = document.createElement("div");
+    frdElem.appendChild(frdValueDiv);
+
+    const frdLabel = document.createElement("label");
     frdLabel.innerHTML = "Frame rate divisor:";
     frdLabel.htmlFor = "frd_range";
-    frdElem.appendChild(frdLabel);
+    frdValueDiv.appendChild(frdLabel);
 
     this.frdValue = document.createElement("span");
     this.frdValue.innerHTML = "";
     this.frdValue.id = "frd_value";
     this.frdValue.innerHTML = application.frameRateDivisor;
     this.frdValue.style.marginLeft = "4px";
-    frdElem.appendChild(this.frdValue);
+    frdValueDiv.appendChild(this.frdValue);
 
     this.frdRange = document.createElement("input");
     this.frdRange.id = "frd_range";
@@ -63,45 +66,24 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     frdElem.appendChild(this.frdRange);
 
-    var scope = this;
+    const scope = this;
 
-    this.frdRange.addEventListener("input", 
-      function() {
-       scope.frdValue.innerHTML = scope.frdRange.value;
-     }, false);
+    this.frdRange.addEventListener("input",
+      () => scope.frdValue.innerHTML = scope.frdRange.value, false);
 
-    this.frdRange.addEventListener("change", 
-      function() {
-        application.frameRateDivisor = parseInt(scope.frdRange.value);
-     }, false);
+    this.frdRange.addEventListener("change",
+      () => application.frameRateDivisor = parseInt(scope.frdRange.value), 
+      false);
 
     // Selection Paint mode
 
-    var selPaintModeElem = document.createElement("div");
-    selPaintModeElem.className = "option_block";
+    this.selPaintModeSelect = Controls.addSelectField(this.panel.bodyElem, 
+      "selpaint_mode", "Selection paint mode:", 
+      [[BIMROCKET.Application.EDGES_SELECTION, "Edges"], 
+       [BIMROCKET.Application.FACES_SELECTION, "Faces"]], null, 
+     "option_block inline");
 
-    this.panel.bodyElem.appendChild(selPaintModeElem);
-    
-    var selPaintModeLabel = document.createElement("label");
-    selPaintModeLabel.innerHTML = "Selection paint mode: ";
-    selPaintModeLabel.htmlFor = "sel_paint_mode";
-    selPaintModeElem.appendChild(selPaintModeLabel);
-    
-    this.selPaintModeSelect = document.createElement("select");
-    this.selPaintModeSelect.id = "sel_paint_mode";
-    selPaintModeElem.appendChild(this.selPaintModeSelect);
-
-    var selEdges = document.createElement("option");
-    selEdges.value = BIMROCKET.Application.EDGES_SELECTION;
-    selEdges.innerHTML = BIMROCKET.Application.EDGES_SELECTION;
-    this.selPaintModeSelect.appendChild(selEdges);
-    
-    var selTriangles = document.createElement("option");
-    selTriangles.value = BIMROCKET.Application.FACES_SELECTION;
-    selTriangles.innerHTML = BIMROCKET.Application.FACES_SELECTION;
-    this.selPaintModeSelect.appendChild(selTriangles);
-    
-    this.selPaintModeSelect.addEventListener("change", function(event)
+    this.selPaintModeSelect.addEventListener("change", (event) =>
     {
       application.selectionPaintMode = scope.selPaintModeSelect.value;
       application.updateSelection();
@@ -109,36 +91,101 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     // Show hidden selection
 
-    var hiddenSelElem = document.createElement("div");
+    const hiddenSelElem = document.createElement("div");
     hiddenSelElem.className = "option_block";
     this.panel.bodyElem.appendChild(hiddenSelElem);
-    
-    var hiddenSelLabel = document.createElement("label");
+
+    const hiddenSelLabel = document.createElement("label");
     hiddenSelLabel.innerHTML = "Show hidden selection: ";
     hiddenSelLabel.htmlFor = "hidden_sel";
     hiddenSelLabel.style = "vertical-align:middle";
 
     hiddenSelElem.appendChild(hiddenSelLabel);
-    
+
     this.hiddenSelCheckBox = document.createElement("input");
     this.hiddenSelCheckBox.id = "hidden_sel";
     this.hiddenSelCheckBox.type = "checkbox";
     this.hiddenSelCheckBox.style = "vertical-align:middle";
     hiddenSelElem.appendChild(this.hiddenSelCheckBox);
 
-    this.hiddenSelCheckBox.addEventListener("change", function(event)
+    this.hiddenSelCheckBox.addEventListener("change", (event) =>
     {
       application.showHiddenSelection = scope.hiddenSelCheckBox.checked;
       application.updateSelection();
     });
-  
+    
+    // Background color
+    
+    this.backSelect = Controls.addSelectField(this.panel.bodyElem, 
+      "backcolor_sel", "Background color:", 
+      [["solid", "Solid"], ["gradient", "Gradient"]], 
+      null, "option_block stack");
+    const backColorElem = this.backSelect.parentElement;
+
+    this.backSelect.addEventListener("change", (event) =>
+    {
+      if (scope.backSelect.value === "solid")
+      {
+        scope.backColorInput2.style.display = "none";
+        application.backgroundColor = scope.backColorInput1.value;
+      }
+      else
+      {
+        scope.backColorInput2.style.display = "";
+        application.backgroundColor1 = scope.backColorInput1.value;
+        application.backgroundColor2 = scope.backColorInput2.value;
+      }
+    }, false);
+
+    this.backColorInput1 = document.createElement("input");
+    this.backColorInput1.id = "back_color1";
+    this.backColorInput1.type = "color";
+    this.backColorInput1.className = "back_color";
+    backColorElem.appendChild(this.backColorInput1);
+
+    this.backColorInput2 = document.createElement("input");
+    this.backColorInput2.id = "back_color2";
+    this.backColorInput2.type = "color";
+    this.backColorInput2.className = "back_color";
+    backColorElem.appendChild(this.backColorInput2);
+
+    this.backColorInput1.addEventListener("input", (event) =>
+    {
+      if (scope.backSelect.value === "solid")
+      {
+        application.backgroundColor = scope.backColorInput1.value;
+      }
+      else
+      {
+        application.backgroundColor1 = scope.backColorInput1.value;
+      }
+    }, false);
+
+    this.backColorInput2.addEventListener("input", (event) =>
+      application.backgroundColor2 = scope.backColorInput2.value, false);
   }
 
   activate()
   {
     this.panel.visible = true;
 
-    var report = [];
+    const application = this.application;
+
+    this.backColorInput1.value = application.backgroundColor1;
+    this.backColorInput2.value = application.backgroundColor2;
+
+    if (application.backgroundColor1 === application.backgroundColor2)
+    {
+      this.backSelect.value = "solid";
+      this.backColorInput2.style.display = "none";
+    }
+    else
+    {
+      this.backSelect.value = "gradient";
+      this.backColorInput2.style.display = "";
+    }
+
+    let report = [];
     report.push(["BIMROCKET version", BIMROCKET.VERSION]);
     report.push(["ThreeJS revision", THREE.REVISION]);
     if (!window.WebGLRenderingContext)
@@ -167,9 +214,9 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
         var dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
         if (dbgRenderInfo !== null)
         {
-          report.push(["Unmsk. rendered", 
+          report.push(["Unmsk. rendered",
             gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL)]);
-          report.push(["Unmsk. vendor", 
+          report.push(["Unmsk. vendor",
             gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL)]);
         }
       }
@@ -178,18 +225,18 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
         report.push(["WebGL status", "ERROR"]);
       }
     }
-    var text = '<table style="text-align:left;font-size:10px">';
-    for (var i = 0; i < report.length; i++)
+    let text = '<table style="text-align:left;font-size:10px">';
+    for (let i = 0; i < report.length; i++)
     {
       text += '<tr>';
-      text += '<td style="width:40%;vertical-align:top">' + 
+      text += '<td style="width:40%;vertical-align:top">' +
         report[i][0] + ':</td><td style="width:60%">' + report[i][1] + '</td>';
       text += '</tr>';
     }
     text += '</table>';
     this.reportElem.innerHTML = text;
     this.frdValue.innerHTML = this.application.frameRateDivisor;
-    
+
     this.selPaintModeSelect.value = this.application.selectionPaintMode;
     this.hiddenSelCheckBox.checked = this.application.showHiddenSelection;
   }

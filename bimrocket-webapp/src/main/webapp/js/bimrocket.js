@@ -17,12 +17,16 @@ BIMROCKET.Application = class
   {
     this.scene = null;
     this.camera = null;
+    this.perspectiveCamera = null;
+    this.orthographicCamera = null;
     this.baseObject = null;
     this.clippingPlane = null;
     this.clippingGroup = null;
     this.overlays = null;
     this.tools = {};
     this.tool = null;
+    this._backgroundColor1 = null;
+    this._backgroundColor2 = null;
 
     /* IO services */
     this.services = []; /* BIMROCKET.IOService */
@@ -55,7 +59,9 @@ BIMROCKET.Application = class
    	THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
 
     this.container = document.getElementById('container');
-    var container = this.container;
+    const container = this.container;
+    this.restoreBackground();
+    this.updateBackground();
 
     // renderer
     if (Detector.webgl)
@@ -67,7 +73,8 @@ BIMROCKET.Application = class
       this.renderer = new THREE.CanvasRenderer({antialias: true});
     }
     let renderer = this.renderer;
-    renderer.setClearColor(new THREE.Color(0xC0C8FF));
+    renderer.alpha = true;
+    renderer.setClearColor(0x000000, 0);
     renderer.sortObjects = false;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -93,6 +100,24 @@ BIMROCKET.Application = class
     // general tabbed panel
     this.progressBar = new BIMROCKET.ProgressBar(progressBarElem);
 
+    // outliner
+    this.outliner = new BIMROCKET.Outliner(this);
+    this.outliner.visible = true;
+    this.panelManager.addPanel(this.outliner);
+
+    // inspector
+    this.inspector = new BIMROCKET.Inspector(this);
+    this.inspector.visible = true;
+    this.panelManager.addPanel(this.inspector);
+
+    // statistics
+    this.statistics = new BIMROCKET.Statistics(this);
+    this.panelManager.addPanel(this.statistics);
+
+    // statistics
+    this.bcfPanel = new BIMROCKET.BCFPanel(this);
+    this.panelManager.addPanel(this.bcfPanel);
+
     // tools
     const newSceneTool = new BIMROCKET.NewSceneTool(this);
     const openCloudTool = new BIMROCKET.OpenCloudTool(this);
@@ -112,15 +137,19 @@ BIMROCKET.Application = class
     const rotateTool = new BIMROCKET.RotateTool(this);
     const scaleTool = new BIMROCKET.ScaleTool(this);
     const unionTool = new BIMROCKET.BooleanOperationTool(this,
-      {operation: "union", label : "tool.union.label"});
+      {"operation": "union", label : "tool.union.label"});
     const intersectionTool = new BIMROCKET.BooleanOperationTool(this,
-      {operation: "intersect", label : "tool.intersection.label"});
+      {"operation": "intersect", label : "tool.intersection.label"});
     const subtractionTool = new BIMROCKET.BooleanOperationTool(this,
-      {operation: "subtract", label : "tool.subtraction.label"});
+      {"operation": "subtract", label : "tool.subtraction.label"});
     const clipTool = new BIMROCKET.ClipTool(this);
     const makeSolidTool = new BIMROCKET.MakeSolidTool(this);
     const measureDistanceTool = new BIMROCKET.MeasureDistanceTool(this);
     const activateCameraTool = new BIMROCKET.ActivateCameraTool(this);
+    const perspectiveTool = new BIMROCKET.CameraProjectionTool(this, 
+      {"type" : "perspective", label : "tool.perspective.label"});
+    const orthographicTool = new BIMROCKET.CameraProjectionTool(this, 
+      {"type" : "orthographic", label : "tool.orthographic.label"});
     const addGroupTool = new BIMROCKET.AddObjectTool(this,
       {objectType: "group", label : "tool.add_group.label"});
     const addBoxTool = new BIMROCKET.AddObjectTool(this,
@@ -152,6 +181,7 @@ BIMROCKET.Application = class
     const bimLayersTool = new BIMROCKET.BIMLayersTool(this);
     const bimLayoutTool = new BIMROCKET.BIMLayoutTool(this);
     const bimDataTool = new BIMROCKET.BIMDataTool(this);
+    const bcfTool = new BIMROCKET.BCFTool(this);
     const outlinerTool = new BIMROCKET.OutlinerTool(this);
     const inspectorTool = new BIMROCKET.InspectorTool(this);
     const statisticsTool = new BIMROCKET.StatisticsTool(this);
@@ -183,6 +213,8 @@ BIMROCKET.Application = class
     this.addTool(sectionTool);
     this.addTool(measureDistanceTool);
     this.addTool(activateCameraTool);
+    this.addTool(perspectiveTool);
+    this.addTool(orthographicTool);
     this.addTool(inspectGeometryTool);
     this.addTool(resetMatrixTool);
     this.addTool(addGroupTool);
@@ -203,6 +235,7 @@ BIMROCKET.Application = class
     this.addTool(bimLayersTool);
     this.addTool(bimLayoutTool);
     this.addTool(bimDataTool);
+    this.addTool(bcfTool);
     this.addTool(outlinerTool);
     this.addTool(inspectorTool);
     this.addTool(statisticsTool);
@@ -240,6 +273,9 @@ BIMROCKET.Application = class
     viewMenu.addMenuItem(hideTool);
     viewMenu.addMenuItem(centerSelectionTool);
     viewMenu.addMenuItem(focusSelectionTool);
+    const projectionMenu = viewMenu.addMenu("Projection");
+    projectionMenu.addMenuItem(perspectiveTool);
+    projectionMenu.addMenuItem(orthographicTool);
     viewMenu.addMenuItem(activateCameraTool);
     viewMenu.addMenuItem(sectionTool);
 
@@ -294,6 +330,7 @@ BIMROCKET.Application = class
     panelsMenu.addMenuItem(outlinerTool);
     panelsMenu.addMenuItem(inspectorTool);
     panelsMenu.addMenuItem(statisticsTool);
+    panelsMenu.addMenuItem(bcfTool);
 
     // toolBar
     const toolBar = new BIMROCKET.ToolBar(this, toolBarElem);
@@ -322,20 +359,6 @@ BIMROCKET.Application = class
     toolBar.addToolButton(rotateTool);
     toolBar.addToolButton(scaleTool);
 
-    // outliner
-    this.outliner = new BIMROCKET.Outliner(this);
-    this.outliner.visible = true;
-    this.panelManager.addPanel(this.outliner);
-
-    // inspector
-    this.inspector = new BIMROCKET.Inspector(this);
-    this.inspector.visible = true;
-    this.panelManager.addPanel(this.inspector);
-
-    // statistics
-    this.statistics = new BIMROCKET.Statistics(this);
-    this.panelManager.addPanel(this.statistics);
-
     // Services
     var protocol = location.protocol + "//";
     var host = location.host;
@@ -347,13 +370,13 @@ BIMROCKET.Application = class
     this.addService(svc2);
 
     // listeners
-    window.addEventListener('resize', this.onResize.bind(this), false);
+    window.addEventListener("resize", this.onResize.bind(this), false);
 
-    this.addEventListener("scene", function(event)
+    this.addEventListener("scene", event => 
     {
       if (event.type === "cameraActivated")
       {
-        application.hideSelectionLines();
+        application.repaint();
       }
       else if (event.type !== "cut")
       {
@@ -363,7 +386,7 @@ BIMROCKET.Application = class
               event.source instanceof BIMROCKET.Inspector)
           {
             // if inspector change a camera
-            var camera = event.object;
+            const camera = event.object;
             camera.updateProjectionMatrix();
           }
           else if (application.selection.contains(event.object))
@@ -375,7 +398,7 @@ BIMROCKET.Application = class
       }
     });
 
-    this.addEventListener("selection", function(event)
+    this.addEventListener("selection", event => 
     {
       if (event.type === "changed")
       {
@@ -460,8 +483,8 @@ BIMROCKET.Application = class
 
   initScene(object)
   {
-    var application = this;
-    var container = this.container;
+    const application = this;
+    const container = this.container;
 
     if (this.scene)
     {
@@ -470,16 +493,16 @@ BIMROCKET.Application = class
     }
 
     this.scene = new THREE.Scene();
-    var scene = this.scene;
+    const scene = this.scene;
     scene.name = "Scene";
 
     // Add lights
-    var ambientLight = new THREE.AmbientLight(0x303030);
+    const ambientLight = new THREE.AmbientLight(0x303030);
     ambientLight.name = "AmbientLight";
     ambientLight.updateMatrix();
     scene.add(ambientLight);
 
-    var sunLight = new THREE.DirectionalLight(0xFFFFFF);
+    const sunLight = new THREE.DirectionalLight(0xFFFFFF);
     sunLight.position.x = 1000;
     sunLight.position.y = 800;
     sunLight.position.z = 800;
@@ -488,7 +511,7 @@ BIMROCKET.Application = class
     sunLight.updateMatrix();
     scene.add(sunLight);
 
-    var sunLight2 = new THREE.DirectionalLight(0xFFFFFF);
+    const sunLight2 = new THREE.DirectionalLight(0xFFFFFF);
     sunLight2.position.x = -1000;
     sunLight2.position.y = -1000;
     sunLight2.position.z = 800;
@@ -498,16 +521,17 @@ BIMROCKET.Application = class
     scene.add(sunLight2);
 
     // initial camera
-    camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -100, 100);
+    var camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -100, 100);
     camera.position.set(0, -30, 2);
-    camera.name = "Orthografic";
+    camera.name = "Orthographic";
     camera.updateProjectionMatrix();
     camera.updateMatrix();
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.updateMatrix();
     scene.add(camera);
+    this.orthographicCamera = camera;
 
-    var camera = new THREE.PerspectiveCamera(60,
+    camera = new THREE.PerspectiveCamera(60,
       container.clientWidth / container.clientHeight, 0.1, 2000);
     camera.position.set(0, -10, 0.2);
     camera.name = "Perspective";
@@ -517,6 +541,7 @@ BIMROCKET.Application = class
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.updateMatrix();
     scene.add(camera);
+    this.perspectiveCamera = camera;
 
     this.camera = camera;
 
@@ -559,11 +584,11 @@ BIMROCKET.Application = class
 
     // Add ground
 
-    var groundMaterial = new THREE.MeshPhongMaterial(
-      {color: 0x808080, shininess: 1, depthWrite: true});
-    groundMaterial.polygonOffset = true;
-    groundMaterial.polygonOffsetFactor = 2.0;
-    groundMaterial.polygonOffsetUnits = 1.5;
+//    var groundMaterial = new THREE.MeshPhongMaterial(
+//      {color: 0x808080, shininess: 1, depthWrite: true});
+//    groundMaterial.polygonOffset = true;
+//    groundMaterial.polygonOffsetFactor = 2.0;
+//    groundMaterial.polygonOffsetUnits = 1.5;
 
 //    var textureLoader = new THREE.TextureLoader();
 //    var groundTexture = textureLoader.load("textures/desert.png",
@@ -591,7 +616,7 @@ BIMROCKET.Application = class
     this.overlays.matrixAutoUpdate = false;
     this.scene.add(this.overlays);
 
-    var changeEvent = {type : "structureChanged",
+    let changeEvent = {type : "structureChanged",
       object : this.scene, parent : null, source : this};
     this.notifyEventListeners("scene", changeEvent);
 
@@ -609,6 +634,77 @@ BIMROCKET.Application = class
   repaint()
   {
     this.needsRepaint = true;
+  }
+
+  get backgroundColor()
+  {
+    return this._backgroundColor1;
+  }
+
+  set backgroundColor(color)
+  {
+    this._backgroundColor1 = color;
+    this._backgroundColor2 = color;
+    this.updateBackground();
+    this.saveBackground();
+  }
+  
+  get backgroundColor1()
+  {
+    return this._backgroundColor1;
+  }
+
+  set backgroundColor1(color)
+  {
+    this._backgroundColor1 = color;
+    this.updateBackground();
+    this.saveBackground();
+  }
+
+  get backgroundColor2()
+  {
+    return this._backgroundColor2;
+  }
+
+  set backgroundColor2(color)
+  {
+    this._backgroundColor2 = color;
+    this.updateBackground();
+    this.saveBackground();
+  }
+  
+  updateBackground()
+  {
+    if (this._backgroundColor1 === this._backgroundColor2)
+    {
+      this.container.style.background = this._backgroundColor1;
+    }
+    else
+    {
+      this.container.style.background = "linear-gradient(" + 
+        this._backgroundColor1 + "," + this._backgroundColor2 + ")";     
+    }
+  }
+
+  restoreBackground()
+  {
+    this._backgroundColor1 = 
+      window.localStorage.getItem("bimrocket.backgroundColor1");
+    if (this._backgroundColor1 === null)
+      this._backgroundColor1 = "#E0E0FF";
+
+    this._backgroundColor2 = 
+      window.localStorage.getItem("bimrocket.backgroundColor2"); 
+    if (this._backgroundColor2 === null)
+      this._backgroundColor2 = "#E0F0E0";    
+  }
+  
+  saveBackground()
+  {
+    window.localStorage.setItem("bimrocket.backgroundColor1", 
+      this._backgroundColor1);
+    window.localStorage.setItem("bimrocket.backgroundColor2", 
+      this._backgroundColor2);    
   }
   
   updateSelection()
@@ -1151,7 +1247,7 @@ BIMROCKET.Application = class
     this.camera = camera;
     this.updateCameraAspectRatio();
 
-    var changeEvent = {type: "cameraActivated", object: camera,
+    const changeEvent = {type: "cameraActivated", object: camera,
       source : this};
     this.notifyEventListeners("scene", changeEvent);
   }
@@ -1159,8 +1255,8 @@ BIMROCKET.Application = class
   onResize()
   {
     this.updateCameraAspectRatio();
-    var container = this.container;
-    var renderer = this.renderer;
+    const container = this.container;
+    const renderer = this.renderer;
     renderer.setSize(container.clientWidth, container.clientHeight);
     this.repaint();
   }

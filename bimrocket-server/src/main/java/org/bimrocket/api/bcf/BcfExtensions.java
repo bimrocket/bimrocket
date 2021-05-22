@@ -30,7 +30,9 @@
  */
 package org.bimrocket.api.bcf;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,10 @@ import java.util.List;
  */
 public class BcfExtensions
 {
+  @Id
+  @JsonIgnore
+  private String projectId;
+  
   @JsonProperty("topic_type")
   private List<String> topicType = new ArrayList<>();
 
@@ -60,7 +66,7 @@ public class BcfExtensions
 
   @JsonProperty("stage")
   private List<String> stage = new ArrayList<>();
-
+  
   public List<String> getTopicType()
   {
     return topicType;
@@ -129,5 +135,32 @@ public class BcfExtensions
   public void setStage(List<String> stage)
   {
     this.stage = stage;
+  }
+
+  public String getProjectId()
+  {
+    return projectId;
+  }
+
+  public void setProjectId(String projectId)
+  {
+    this.projectId = projectId;
+  }
+
+  void setDefaultValues()
+  {
+    topicType.add("Architecture");
+    topicType.add("Structural");
+    topicType.add("Mechanical");
+    topicType.add("Electrical");
+    topicType.add("Plumbing");
+    
+    topicStatus.add("Open");
+    topicStatus.add("Reopen");
+    topicStatus.add("Closed");
+    
+    priority.add("Low");
+    priority.add("Medium");
+    priority.add("High");   
   }
 }

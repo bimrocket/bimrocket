@@ -36,9 +36,9 @@ package org.bimrocket.api.bcf;
  */
 public class BcfVector
 {
-  double x;
-  double y;
-  double z;
+  protected double x;
+  protected double y;
+  protected double z;
 
   public BcfVector()
   {    
@@ -80,4 +80,10 @@ public class BcfVector
   {
     this.z = z;
   }  
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "(" + x + ", " + y + ", " + z + ")"; 
+  }
 }

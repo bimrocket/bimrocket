@@ -42,7 +42,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       propElem : null
     };
 
-    var scope = this;
+    const scope = this;
 
     application.addEventListener("selection", function(event)
     {

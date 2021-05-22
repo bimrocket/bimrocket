@@ -27,7 +27,7 @@ BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
     application.scene.updateMatrixWorld(true);
     BIMROCKET.ObjectUtils.zoomAll(camera, application.baseObject, aspect);
 
-    var changeEvent = {type: "nodeChanged", object: camera, source : this};
+    const changeEvent = {type: "nodeChanged", object: camera, source : this};
     application.notifyEventListeners("scene", changeEvent);
   }
 };

@@ -10,7 +10,7 @@ body
   color:#606060;
 }
 
-input, button, select
+input, button, select, textarea
 {
   font-family: Montserrat, Arial;
   font-size: 12px;
@@ -19,7 +19,7 @@ input, button, select
   border-radius: 2px;
 }
 
-input:focus, button:focus, select:focus
+input:focus, button:focus, select:focus, textarea:focus
 {
   outline: none;
   box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
@@ -36,9 +36,26 @@ button
   box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
 }
 
+select
+{
+  background-color: white;  
+}
+
+button:disabled
+{
+  outline: none;
+  color: #c0c0c0;
+  border: 1px solid #ffc0c0;
+}
+
+button:disabled:hover
+{
+  background-color: #f0f0f0;  
+}
+
 button:hover
 {
-  background-color: #ffe0e0;
+  background-color: #ffd8d8;
 }
 
 button:active
@@ -47,6 +64,27 @@ button:active
   outline: none;
 }
 
+input[readonly]
+{
+  background: #f0f0f0;
+  color: #a0a0a0;
+}
+
+/* selection */
+
+::-moz-selection,
+select::-moz-selection
+{
+  color: #200000;
+  background: #ffb0b0;
+}
+
+::selection,
+select::selection
+{
+  color: #200000;
+  background: #ffb0b0;
+}
 
 /* scrollbars */
 

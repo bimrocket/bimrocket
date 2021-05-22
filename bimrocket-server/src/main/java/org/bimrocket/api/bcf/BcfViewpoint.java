@@ -33,6 +33,8 @@ package org.bimrocket.api.bcf;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Id;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -48,11 +50,17 @@ public class BcfViewpoint
   private Integer index;
 
   @JsonProperty("orthogonal_camera")
-  private BcfOrthogonalCamera ortogonalCamera;
+  private BcfOrthogonalCamera orthogonalCamera;
 
   @JsonProperty("perspective_camera")
   private BcfPerspectiveCamera perspectiveCamera;
 
+  @JsonProperty("lines")
+  List<BcfLine> lines = new ArrayList<>();
+  
+  @JsonProperty("components")
+  BcfComponents components;
+  
   @JsonIgnore
   private String topicId;
   
@@ -76,14 +84,14 @@ public class BcfViewpoint
     this.index = index;
   }
 
-  public BcfOrthogonalCamera getOrtogonalCamera()
+  public BcfOrthogonalCamera getOrthogonalCamera()
   {
-    return ortogonalCamera;
+    return orthogonalCamera;
   }
 
-  public void setOrtogonalCamera(BcfOrthogonalCamera ortogonalCamera)
+  public void setOrthogonalCamera(BcfOrthogonalCamera orthogonalCamera)
   {
-    this.ortogonalCamera = ortogonalCamera;
+    this.orthogonalCamera = orthogonalCamera;
   }
 
   public BcfPerspectiveCamera getPerspectiveCamera()
@@ -96,6 +104,26 @@ public class BcfViewpoint
     this.perspectiveCamera = perspectiveCamera;
   }
 
+  public List<BcfLine> getLines()
+  {
+    return lines;
+  }
+
+  public void setLines(List<BcfLine> lines)
+  {
+    this.lines = lines;
+  }
+
+  public BcfComponents getComponents()
+  {
+    return components;
+  }
+
+  public void setComponents(BcfComponents components)
+  {
+    this.components = components;
+  }
+  
   public String getTopicId()
   {
     return topicId;

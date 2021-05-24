@@ -53,6 +53,7 @@
   </build>
 
   <modules>
+    <module>bimrocket-common</module>
     <module>bimrocket-server</module>
     <module>bimrocket-webapp</module>
   </modules>

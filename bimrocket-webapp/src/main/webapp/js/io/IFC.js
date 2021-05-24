@@ -57,9 +57,9 @@ BIMROCKET.IFC = {
     let segments = Math.max(
       BIMROCKET.IFC.MIN_CIRCLE_SEGMENTS,
       Math.ceil(BIMROCKET.IFC.CIRCLE_SEGMENTS_BY_RADIUS * radius));
-      
+
     if (segments % 2 === 1) segments++;
-    
+
     return segments;
   },
 
@@ -727,20 +727,25 @@ BIMROCKET.IFC.helpers.IfcHalfSpaceSolidHelper = class
       var flag = halfSpace.AgreementFlag === '.T.';
       var plane = surface.Position;
 
-      var shape = new THREE.Shape();
-      shape.moveTo(-size, -size);
-      shape.lineTo(size, -size);
-      shape.lineTo(size, size);
-      shape.lineTo(-size, size);
-      shape.closePath();
+      const geometry = new BIMROCKET.SolidGeometry();
+      let vertices = geometry.vertices;
+      vertices.push(new THREE.Vector3(-size, -size, 0));
+      vertices.push(new THREE.Vector3(size, -size, 0));
+      vertices.push(new THREE.Vector3(size, size, 0));
+      vertices.push(new THREE.Vector3(-size, size, 0));
 
-      var extrudeSettings = {
-        steps: 1,
-        depth: size,
-        bevelEnabled: false
-      };
+      vertices.push(new THREE.Vector3(-size, -size, size));
+      vertices.push(new THREE.Vector3(size, -size, size));
+      vertices.push(new THREE.Vector3(size, size, size));
+      vertices.push(new THREE.Vector3(-size, size, size));
 
-      var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      geometry.addFace(3, 2, 1, 0);
+      geometry.addFace(4, 5, 6, 7);
+      geometry.addFace(0, 1, 5, 4);
+      geometry.addFace(1, 2, 6, 5);
+      geometry.addFace(2, 3, 7, 6);
+      geometry.addFace(3, 0, 4, 7);
+
       var matrix = plane.helper.getMatrix();
       if (flag)
       {
@@ -778,10 +783,13 @@ BIMROCKET.IFC.helpers.IfcPolygonalBoundedHalfSpaceHelper = class
       var base = halfSpace.Position;
       var flag = halfSpace.AgreementFlag === '.T.';
       var boundary = halfSpace.PolygonalBoundary;
+      var geometry;
+
       if (surface instanceof schema.IfcPlane)
       {
         var size = BIMROCKET.IFC.HALF_SPACE_SIZE;
 
+        var geometry;
         var plane = surface.Position;
         var curvePoints = boundary.helper.getPoints();
 
@@ -799,7 +807,8 @@ BIMROCKET.IFC.helpers.IfcPolygonalBoundedHalfSpaceHelper = class
           bevelEnabled: false
         };
 
-        var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geometry = new BIMROCKET.ExtrudeSolidGeometry(shape, extrudeSettings);
+
         geometry.applyMatrix4(base.helper.getMatrix());
         var polygonSolid = new BIMROCKET.Solid(geometry);
 
@@ -810,7 +819,8 @@ BIMROCKET.IFC.helpers.IfcPolygonalBoundedHalfSpaceHelper = class
         shape.lineTo(-size, size);
         shape.closePath();
 
-        geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        geometry = new BIMROCKET.ExtrudeSolidGeometry(shape, extrudeSettings);
+
         var matrix = plane.helper.getMatrix();
         if (!flag)
         {
@@ -1031,6 +1041,7 @@ BIMROCKET.IFC.helpers.IfcExtrudedAreaSolidHelper = class
       var solid = this.instance;
       var schema = this.schema;
 
+      var geometry;
       var profileDef = solid.SweptArea;
       var matrix = solid.Position.helper.getMatrix();
       var direction = solid.ExtrudedDirection.helper.getDirection();
@@ -1051,7 +1062,8 @@ BIMROCKET.IFC.helpers.IfcExtrudedAreaSolidHelper = class
             bevelEnabled: false
           };
 
-          var geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+          geometry = new BIMROCKET.ExtrudeSolidGeometry(shape, extrudeSettings);
+
           var a = extrudeVector.x / extrudeVector.z;
           var b = extrudeVector.y / extrudeVector.z;
           var shearMatrix = new THREE.Matrix4();

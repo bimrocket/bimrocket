@@ -6,14 +6,12 @@ BIMROCKET.GeometryUtils = class
   static _vector3 = new THREE.Vector3;
   static _vector4 = new THREE.Vector3;
   static _vector5 = new THREE.Vector3;
-  static _vector6 = new THREE.Vector3;
   static _plane1 = new THREE.Plane;
-  static _array = [null];
 
-  static pointOnLine (point, line)
+  static pointOnLine(point, line)
   {
-    var v1 = this._vector1;
-    var v2 = this._vector2;
+    var v1 = BIMROCKET.GeometryUtils._vector1;
+    var v2 = BIMROCKET.GeometryUtils._vector2;
     v1.copy(point).sub(line.start);
     v2.copy(line.end).sub(line.start);
     var v1LengthSq = v1.lengthSq();
@@ -26,7 +24,7 @@ BIMROCKET.GeometryUtils = class
       if (projection >= 0 && projection <= v2Length)
       {
         var distance = Math.sqrt(v1LengthSq - projection * projection);
-        return distance < this.PRECISION;
+        return distance < BIMROCKET.GeometryUtils.PRECISION;
       }
     }
     return false;
@@ -34,10 +32,10 @@ BIMROCKET.GeometryUtils = class
 
   static linesIntersect(line1, line2, position)
   {
-    var vector1 = this._vector3;
-    var vector2 = this._vector4;
-    var normal = this._vector5;
-    var plane = this._plane1;
+    const vector1 = BIMROCKET.GeometryUtils._vector3;
+    const vector2 = BIMROCKET.GeometryUtils._vector4;
+    const normal = BIMROCKET.GeometryUtils._vector5;
+    const plane = BIMROCKET.GeometryUtils._plane1;
 
     vector1.subVectors(line1.end, line1.start).normalize();
     vector2.subVectors(line2.end, line2.start).normalize();
@@ -67,6 +65,8 @@ BIMROCKET.GeometryUtils = class
   static calculateNormal(vertexPositions, accessor, normal)
   {
     if (!(normal instanceof THREE.Vector3)) normal = new THREE.Vector3();
+    else normal.set(0, 0, 0);
+    
     // Newell's method
     var count = vertexPositions.length;
     var pi, pj;
@@ -91,11 +91,12 @@ BIMROCKET.GeometryUtils = class
     return normal;
   }
 
+  /* triangulate a 3D face */
   static triangulateFace(vertices, holes)
   {
-    var vx = new THREE.Vector3();
-    var vy = new THREE.Vector3();
-    var vz = new THREE.Vector3();
+    const vx = BIMROCKET.GeometryUtils._vector1;
+    const vy = BIMROCKET.GeometryUtils._vector2;
+    const vz = BIMROCKET.GeometryUtils._vector3;
 
     BIMROCKET.GeometryUtils.calculateNormal(vertices, null, vz);
     var v0 = vertices[0];

@@ -6,6 +6,9 @@
 
 BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
 {
+  static INDEXED_TRIANGLES = 0;
+  static TRIANGLE_SOUP = 1;
+  
   constructor()
   {
     super();
@@ -13,6 +16,7 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
     this.vertices = []; // THREE.Vector3
     this.faces = []; // BIMROCKET.Face
     this.isManifold = false;
+    this.generationMode = this.constructor.TRIANGLE_SOUP;
   }
 
   addFace(...vertices)
@@ -39,9 +43,8 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
 
   update()
   {
-    if (false)
+    if (this.generationMode === this.constructor.INDEXED_TRIANGLES)
     {
-      // indexed triangles
       this.setFromPoints(this.vertices);
 
       const indices = [];
@@ -58,9 +61,8 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
       }
       this.setIndex(indices);
     }
-    else
+    else // TRIANGLE_SOUP
     {
-      // triangle soap
       var vertices = this.vertices;
       var triangles = [];
       var normals = [];

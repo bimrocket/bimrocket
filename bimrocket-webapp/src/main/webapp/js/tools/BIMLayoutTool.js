@@ -39,6 +39,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     this.layoutPanelElem = document.createElement("div");
     this.layoutPanelElem.className = "bim_layout_panel";
     this.panel.bodyElem.appendChild(this.layoutPanelElem);
+    this.panel.bodyElem.classList.add("padding");
 
     let scope = this;
     this.showAllButton = document.createElement("button");
@@ -49,9 +50,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     }, false);
     this.layoutPanelElem.appendChild(this.showAllButton);
 
-    this.layoutListElem = document.createElement("ul");
-    this.layoutListElem.className = "bim_layout_list";
-    this.layoutPanelElem.appendChild(this.layoutListElem);
+    this.layoutTree = new BIMROCKET.Tree(this.layoutPanelElem);
   }
 
   activate()
@@ -65,6 +64,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
     const application = this.application;
     const container = application.container;
+    const scope = this;
     container.addEventListener('mousedown', this._onMouseDown, false);
     application.addEventListener('animation', this._animate);
 
@@ -123,59 +123,43 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
     exploreObject(this.application.baseObject);
 
-    this.layoutListElem.innerHTML = "";
+    this.layoutTree.clear();
+    const layoutTree = this.layoutTree;
 
     for (let s = 0; s < sites.length; s++)
     {
       site = sites[s];
 
-      let siteItemElem = document.createElement("li");
-      siteItemElem.className = "IfcSite";
-      this.layoutListElem.appendChild(siteItemElem);
-
-      this.createSiteLabel(site.object, siteItemElem);
-
-      let siteListElem = document.createElement("ul");
-      siteItemElem.appendChild(siteListElem);
+      const siteTreeNode = layoutTree.addNode(site.object.name, () => 
+        this.focusOnObject(site.object, "IfcSite", "front"), "IfcSite");
 
       for (var b = 0; b < site.buildings.length; b++)
       {
         let building = site.buildings[b];
 
-        var buildingItemElem = document.createElement("li");
-        buildingItemElem.className = "IfcBuilding";
-        siteListElem.appendChild(buildingItemElem);
-
-        this.createBuildingLabel(building.object, buildingItemElem);
-
-        var buildingListElem = document.createElement("ul");
-        buildingItemElem.appendChild(buildingListElem);
+        const buildingTreeNode = siteTreeNode.addNode(building.object.name, 
+        () => this.focusOnObject(building.object, "IfcBuilding", "front"), 
+        "IfcBuilding");
 
         for (let st = 0; st < building.storeys.length; st++)
         {
           let storey = building.storeys[st];
 
-          let storeyItemElem = document.createElement("li");
-          storeyItemElem.className = "IfcBuildingStorey";
-          buildingListElem.appendChild(storeyItemElem);
-
-          this.createStoreyLabel(storey.object, storeyItemElem);
-
-          let storeyListElem = document.createElement("ul");
-          storeyItemElem.appendChild(storeyListElem);
+          const storeyTreeNode = buildingTreeNode.addNode(storey.object.name, 
+          () => this.focusOnObject(storey.object, "IfcBuildingStorey", "top"), 
+          "IfcBuildingStorey");
 
           for (let sp = 0; sp < storey.spaces.length; sp++)
           {
             let space = storey.spaces[sp];
 
-            let spaceItemElem = document.createElement("li");
-            spaceItemElem.className = "IfcSpace";
-            storeyListElem.appendChild(spaceItemElem);
-
-            this.createSpaceLabel(space.object, spaceItemElem);
+            const spaceTreeNode = storeyTreeNode.addNode(space.object.name, 
+            () => this.focusOnObject(space.object, "IfcSpace", "top"), 
+            "IfcSpace");
           }
         }
       }
+      siteTreeNode.expand(2);
     }
   }
 
@@ -251,74 +235,6 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     container.removeEventListener('mouseup', this._onMouseUp, false);
   }
 
-  createSiteLabel(object, elem)
-  {
-    let siteSpanElem = document.createElement("span");
-    siteSpanElem.innerHTML = object.name;
-    elem.appendChild(siteSpanElem);
-    const scope = this;
-    if (object === this.selectedObject)
-    {
-      siteSpanElem.className = "selected";
-    }
-    siteSpanElem.addEventListener("click", function()
-    {
-      scope.selectTreeElem(siteSpanElem);
-      scope.focusOnObject(object, "IfcSite", "front");
-    }, false);
-  }
-
-  createBuildingLabel(object, elem)
-  {
-    let buildingSpanElem = document.createElement("span");
-    buildingSpanElem.innerHTML = object.name;
-    elem.appendChild(buildingSpanElem);
-    const scope = this;
-    if (object === this.selectedObject)
-    {
-      buildingSpanElem.className = "selected";
-    }
-    buildingSpanElem.addEventListener("click", function()
-    {
-      scope.selectTreeElem(buildingSpanElem);
-      scope.focusOnObject(object, "IfcBuilding", "front");
-    }, false);
-  }
-
-  createStoreyLabel(object, elem)
-  {
-    let storeySpanElem = document.createElement("span");
-    storeySpanElem.innerHTML = object.name;
-    elem.appendChild(storeySpanElem);
-    const scope = this;
-    if (object === this.selectedObject)
-    {
-      storeySpanElem.className = "selected";
-    }
-    storeySpanElem.addEventListener("click", function()
-    {
-      scope.selectTreeElem(storeySpanElem);
-      scope.focusOnObject(object, "IfcBuildingStorey", "top");
-    }, false);
-  }
-
-  createSpaceLabel(object, elem)
-  {
-    let spaceSpanElem = document.createElement("span");
-    spaceSpanElem.innerHTML = object.name;
-    elem.appendChild(spaceSpanElem);
-    const scope = this;
-    if (object === this.selectedObject)
-    {
-      spaceSpanElem.className = "selected";
-    }
-    spaceSpanElem.addEventListener("click", function()
-    {
-      scope.selectTreeElem(spaceSpanElem);
-      scope.focusOnObject(object, "IfcBuildingStorey", "top");
-    }, false);
-  }
-
   showAll()
   {
     let application = this.application;
@@ -343,7 +259,6 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     });
 
     this.pointCamera(90, 0);
-    this.selectTreeElem(null);
     this.selectedObject = application.baseObject;
     application.selection.set(application.baseObject);
   }
@@ -406,19 +321,6 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     }
     this.selectedObject = object;
     application.selection.set(object);
-  }
-
-  selectTreeElem(elem)
-  {
-    var selection = this.layoutListElem.getElementsByClassName("selected");  
-    if (selection.length > 0)
-    {
-      selection[0].className = null;
-    }
-    if (elem)
-    {
-      elem.className = "selected";
-    }
   }
 
   pointCamera(phiDeg, tethaDeg)

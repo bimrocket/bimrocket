@@ -109,6 +109,11 @@ div.panel > .body.center
   align-items: center;  
 }
 
+div.panel > .body.padding
+{
+  padding: 4px;
+}
+
 .animate > div.panel
 {
   transition: height 1s, bottom 1s;

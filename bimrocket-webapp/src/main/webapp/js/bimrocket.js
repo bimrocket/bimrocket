@@ -12,7 +12,7 @@ BIMROCKET.Application = class
 {
   static EDGES_SELECTION = "edges";
   static FACES_SELECTION = "faces";
-  
+
   constructor()
   {
     this.scene = null;
@@ -32,16 +32,16 @@ BIMROCKET.Application = class
     this.services = []; /* BIMROCKET.IOService */
 
     /* selection */
-    this.selection = new BIMROCKET.Selection(this);
+    this.selection = new BIMROCKET.Selection(this, true);
     this.selectionPaintMode = BIMROCKET.Application.EDGES_SELECTION;
-    this.showHiddenSelection = false;
-    
+    this.deepSelection = true;
+
     this.clock = new THREE.Clock();
-    
+
     this.autoRepaint = false;
     this.needsRepaint = true;
     this.frameRateDivisor = 1;
-    
+
     /* internal properties */
     this._cutObjects = [];
     this._eventListeners = {
@@ -54,7 +54,7 @@ BIMROCKET.Application = class
     this._axisLines = null;
 
     let application = this;
-    
+
    	THREE.Object3D.DefaultMatrixAutoUpdate = false;
    	THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
 
@@ -80,14 +80,28 @@ BIMROCKET.Application = class
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(this.renderer.domElement);
 
-    /* materials */
+    /* selection materials */
+        
     this.selectionMaterial = new THREE.LineBasicMaterial(
       {color: 0x0000ff, linewidth: 1.5, depthTest: true, depthWrite: true,
        polygonOffset: true, polygonOffsetFactor: 2});
-    this.hiddenSelectionMaterial = new THREE.LineBasicMaterial(
+    this.deepSelectionMaterial = new THREE.LineBasicMaterial(
       {color: 0x0000ff, linewidth: 1, depthTest: false, depthWrite: false});
+    
+    this.invisibleSelectionMaterial = new THREE.LineBasicMaterial(
+      {color: 0x0000ff, opacity: 0.1, transparent: true, 
+       linewidth: 1.5, depthTest: true, depthWrite: true, 
+       polygonOffset: true, polygonOffsetFactor: 2});
+    this.invisibleDeepSelectionMaterial = new THREE.LineBasicMaterial(
+      {color: 0x0000ff, opacity: 0.1, transparent : true, 
+       linewidth: 1, depthTest: false, depthWrite: false});
+    
     this.boxSelectionMaterial = new THREE.LineBasicMaterial(
       {color: 0x0000ff, linewidth: 1.5, depthTest: true, depthWrite: true,
+       polygonOffset: true, polygonOffsetFactor: 2});
+    this.boxInvisibleSelectionMaterial = new THREE.LineBasicMaterial(
+      {color: 0x0000ff, opacity: 0.1, transparent : true, 
+       linewidth: 1.5, depthTest: true, depthWrite: true,
        polygonOffset: true, polygonOffsetFactor: 2});
 
     /* panels */
@@ -146,9 +160,9 @@ BIMROCKET.Application = class
     const makeSolidTool = new BIMROCKET.MakeSolidTool(this);
     const measureDistanceTool = new BIMROCKET.MeasureDistanceTool(this);
     const activateCameraTool = new BIMROCKET.ActivateCameraTool(this);
-    const perspectiveTool = new BIMROCKET.CameraProjectionTool(this, 
+    const perspectiveTool = new BIMROCKET.CameraProjectionTool(this,
       {"type" : "perspective", label : "tool.perspective.label"});
-    const orthographicTool = new BIMROCKET.CameraProjectionTool(this, 
+    const orthographicTool = new BIMROCKET.CameraProjectionTool(this,
       {"type" : "orthographic", label : "tool.orthographic.label"});
     const addGroupTool = new BIMROCKET.AddObjectTool(this,
       {objectType: "group", label : "tool.add_group.label"});
@@ -167,17 +181,26 @@ BIMROCKET.Application = class
     const focusSelectionTool = new BIMROCKET.CenterSelectionTool(this,
       {name : "focus_selection", label : "tool.focus_selection.label",
        focusOnSelection : true, className : "focus_selection"});
+
     const showTool = new BIMROCKET.VisibilityTool(this,
-      {name : "show", label : "tool.show.label", className : "show"});
+      {name : "show", label : "tool.show.label", className : "show",
+       visible : true });
     const hideTool = new BIMROCKET.VisibilityTool(this,
-      {name : "hide", label : "tool.hide.label",
-       edgesVisible : false, facesVisible : false, className : "hide"});
-    const showFacesTool = new BIMROCKET.VisibilityTool(this,
-      {name : "show_faces", label : "tool.show_faces.label",
-       edgesVisible : false});
-    const showEdgesTool = new BIMROCKET.VisibilityTool(this,
-      {name : "show_edges", label : "tool.show_edges.label",
-       facesVisible : false});
+      {name : "hide", label : "tool.hide.label", className : "hide",
+        visible : false });
+    const facesStyleTool = new BIMROCKET.StyleTool(this,
+      {name : "faces_style", label : "tool.faces_style.label",
+       edgesVisible : false, facesVisible : true});
+    const edgesStyleTool = new BIMROCKET.StyleTool(this,
+      {name : "edges_style", label : "tool.edges_style.label",
+       edgesVisible : true, facesVisible : false});
+    const facesEdgesStyleTool = new BIMROCKET.StyleTool(this,
+      {name : "faces_edges_style", label : "tool.faces_edges_style.label",
+       edgesVisible : true, facesVisible : true});
+    const hiddenStyleTool = new BIMROCKET.StyleTool(this,
+      {name : "hidden_style", label : "tool.hidden_style.label",
+       edgesVisible : false, facesVisible : false});
+
     const bimLayersTool = new BIMROCKET.BIMLayersTool(this);
     const bimLayoutTool = new BIMROCKET.BIMLayoutTool(this);
     const bimDataTool = new BIMROCKET.BIMDataTool(this);
@@ -230,8 +253,10 @@ BIMROCKET.Application = class
     this.addTool(focusSelectionTool);
     this.addTool(showTool);
     this.addTool(hideTool);
-    this.addTool(showFacesTool);
-    this.addTool(showEdgesTool);
+    this.addTool(edgesStyleTool);
+    this.addTool(facesStyleTool);
+    this.addTool(facesEdgesStyleTool);
+    this.addTool(hiddenStyleTool);
     this.addTool(bimLayersTool);
     this.addTool(bimLayoutTool);
     this.addTool(bimDataTool);
@@ -258,7 +283,6 @@ BIMROCKET.Application = class
     fileMenu.addMenuItem(printTool);
 
     const editMenu = menuBar.addMenu("Edit");
-    editMenu.addMenuItem(selectTool);
     editMenu.addMenuItem(cutTool);
     editMenu.addMenuItem(pasteTool);
     editMenu.addMenuItem(removeTool);
@@ -271,6 +295,11 @@ BIMROCKET.Application = class
     viewMenu.addMenuItem(zoomAllTool);
     viewMenu.addMenuItem(showTool);
     viewMenu.addMenuItem(hideTool);
+    const styleMenu = viewMenu.addMenu("Style");
+    styleMenu.addMenuItem(edgesStyleTool);
+    styleMenu.addMenuItem(facesStyleTool);
+    styleMenu.addMenuItem(facesEdgesStyleTool);
+    styleMenu.addMenuItem(hiddenStyleTool);
     viewMenu.addMenuItem(centerSelectionTool);
     viewMenu.addMenuItem(focusSelectionTool);
     const projectionMenu = viewMenu.addMenu("Projection");
@@ -279,13 +308,16 @@ BIMROCKET.Application = class
     viewMenu.addMenuItem(activateCameraTool);
     viewMenu.addMenuItem(sectionTool);
 
+    const selectMenu = menuBar.addMenu("Select");
+    selectMenu.addMenuItem(selectTool);
+
     const designMenu = menuBar.addMenu("Design");
     const addMenu = designMenu.addMenu("Add");
     addMenu.addMenuItem(addBoxTool);
     addMenu.addMenuItem(addCylinderTool);
     addMenu.addMenuItem(addSphereTool);
     addMenu.addMenuItem(addGroupTool);
-    const booleanOperationMenu = designMenu.addMenu("Boolean operation");    
+    const booleanOperationMenu = designMenu.addMenu("Boolean operation");
     booleanOperationMenu.addMenuItem(unionTool);
     booleanOperationMenu.addMenuItem(intersectionTool);
     booleanOperationMenu.addMenuItem(subtractionTool);
@@ -349,9 +381,9 @@ BIMROCKET.Application = class
     toolBar.addToolButton(zoomAllTool);
     toolBar.addToolButton(showTool);
     toolBar.addToolButton(hideTool);
-    toolBar.addToolButton(sectionTool);
     toolBar.addToolButton(centerSelectionTool);
     toolBar.addToolButton(focusSelectionTool);
+    toolBar.addToolButton(sectionTool);
     toolBar.addToolButton(bimLayoutTool);
     toolBar.addToolButton(bimLayersTool);
     toolBar.addToolButton(measureDistanceTool);
@@ -372,7 +404,7 @@ BIMROCKET.Application = class
     // listeners
     window.addEventListener("resize", this.onResize.bind(this), false);
 
-    this.addEventListener("scene", event => 
+    this.addEventListener("scene", event =>
     {
       if (event.type === "cameraActivated")
       {
@@ -398,7 +430,7 @@ BIMROCKET.Application = class
       }
     });
 
-    this.addEventListener("selection", event => 
+    this.addEventListener("selection", event =>
     {
       if (event.type === "changed")
       {
@@ -435,7 +467,7 @@ BIMROCKET.Application = class
     // init scene
     this.initScene();
     animate();
-    
+
     setTimeout(function() {
       application.hideLogo();
     }, 1000);
@@ -469,7 +501,7 @@ BIMROCKET.Application = class
         onError : function(error)
         {
           application.progressBar.visible = false;
-          var messageDialog = 
+          var messageDialog =
             new BIMROCKET.MessageDialog("ERROR", error, "error");
           messageDialog.show();
         }
@@ -549,12 +581,12 @@ BIMROCKET.Application = class
     this.baseObject = new THREE.Group();
     this.baseObject.name = "Base";
     this.baseObject.userData.selection = {type : "none"};
-    
+
     this.baseObject.updateMatrix();
 
     scene.add(this.baseObject);
 
-//    var boxGeometry = new THREE.BoxGeometry(1, 1, 1);    
+//    var boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 //    var boxMaterial = new THREE.MeshPhongMaterial({
 //       color : new THREE.Color(0xff0000),
 //       flatShading: true,
@@ -576,7 +608,7 @@ BIMROCKET.Application = class
       }
       else
       {
-        application.scene.updateMatrixWorld(true);    
+        application.scene.updateMatrixWorld(true);
         BIMROCKET.ObjectUtils.zoomAll(this.camera, this.baseObject);
       }
       object.updateMatrix();
@@ -648,7 +680,7 @@ BIMROCKET.Application = class
     this.updateBackground();
     this.saveBackground();
   }
-  
+
   get backgroundColor1()
   {
     return this._backgroundColor1;
@@ -672,7 +704,7 @@ BIMROCKET.Application = class
     this.updateBackground();
     this.saveBackground();
   }
-  
+
   updateBackground()
   {
     if (this._backgroundColor1 === this._backgroundColor2)
@@ -681,39 +713,39 @@ BIMROCKET.Application = class
     }
     else
     {
-      this.container.style.background = "linear-gradient(" + 
-        this._backgroundColor1 + "," + this._backgroundColor2 + ")";     
+      this.container.style.background = "linear-gradient(" +
+        this._backgroundColor1 + "," + this._backgroundColor2 + ")";
     }
   }
 
   restoreBackground()
   {
-    this._backgroundColor1 = 
+    this._backgroundColor1 =
       window.localStorage.getItem("bimrocket.backgroundColor1");
     if (this._backgroundColor1 === null)
       this._backgroundColor1 = "#E0E0FF";
 
-    this._backgroundColor2 = 
-      window.localStorage.getItem("bimrocket.backgroundColor2"); 
+    this._backgroundColor2 =
+      window.localStorage.getItem("bimrocket.backgroundColor2");
     if (this._backgroundColor2 === null)
-      this._backgroundColor2 = "#E0F0E0";    
+      this._backgroundColor2 = "#E0F0E0";
   }
-  
+
   saveBackground()
   {
-    window.localStorage.setItem("bimrocket.backgroundColor1", 
+    window.localStorage.setItem("bimrocket.backgroundColor1",
       this._backgroundColor1);
-    window.localStorage.setItem("bimrocket.backgroundColor2", 
-      this._backgroundColor2);    
+    window.localStorage.setItem("bimrocket.backgroundColor2",
+      this._backgroundColor2);
   }
-  
+
   updateSelection()
   {
     this.hideSelectionLines();
     this.showSelectionLines();
 
     this.hideAxisLines();
-    this.showAxisLines();    
+    this.showAxisLines();
   }
 
   hideSelectionLines()
@@ -748,17 +780,18 @@ BIMROCKET.Application = class
 
   collectLines(object, linesGroup)
   {
+    let material = this.getSelectionMaterial(object);          
+
     if (object instanceof BIMROCKET.Solid)
     {
       var solid = object;
+
       if (this.selectionPaintMode === BIMROCKET.Application.EDGES_SELECTION)
       {
         let edgesGeometry = solid.edgesGeometry;
         if (edgesGeometry)
         {
-          let lines = new THREE.LineSegments(edgesGeometry, 
-            this.showHiddenSelection ? 
-              this.hiddenSelectionMaterial : this.selectionMaterial);
+          let lines = new THREE.LineSegments(edgesGeometry, material);
 
           lines.name = "SelectionLines";
           lines.raycast = function(){};
@@ -777,10 +810,8 @@ BIMROCKET.Application = class
         {
           let edgeMap = new BIMROCKET.EdgeMap(geometry);
           let edgesGeometry = edgeMap.getEdgesGeometry(0);
-          
-          let lines = new THREE.LineSegments(edgesGeometry,
-            this.showHiddenSelection ? 
-              this.hiddenSelectionMaterial : this.selectionMaterial);
+
+          let lines = new THREE.LineSegments(edgesGeometry, material);
           lines.name = "SelectionLines";
           lines.raycast = function(){};
 
@@ -822,9 +853,7 @@ BIMROCKET.Application = class
       object.updateMatrixWorld();
       let edgesGeometry = new THREE.EdgesGeometry(object.geometry);
 
-      let lines = new THREE.LineSegments(edgesGeometry,
-        this.showHiddenSelection ? 
-        this.hiddenSelectionMaterial : this.selectionMaterial);
+      let lines = new THREE.LineSegments(edgesGeometry, material);
       lines.raycast = function(){};
       lines.name = "OuterLines";
       object.matrixWorld.decompose(
@@ -851,13 +880,13 @@ BIMROCKET.Application = class
       }
       else if (selectionType === "box")
       {
-        var box = BIMROCKET.ObjectUtils.getLocalBoundingBox(object);
+        var box = BIMROCKET.ObjectUtils.getLocalBoundingBox(object, true);
         if (!box.isEmpty())
         {
           var geometry = BIMROCKET.ObjectUtils.getBoxGeometry(box);
 
-          var lines = new THREE.LineSegments(geometry,
-            this.boxSelectionMaterial);
+          var lines = new THREE.LineSegments(geometry, object.visible ? 
+            this.boxSelectionMaterial : this.boxInvisibleSelectionMaterial);
           lines.raycast = function(){};
 
           object.updateMatrixWorld();
@@ -867,6 +896,20 @@ BIMROCKET.Application = class
           linesGroup.add(lines);
         }
       }
+    }
+  }
+  
+  getSelectionMaterial(object)
+  {
+    if (object.visible)
+    {
+      return this.deepSelection ?
+        this.deepSelectionMaterial : this.selectionMaterial;
+    }
+    else
+    {
+      return this.deepSelection ?
+        this.invisibleDeepSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }
 
@@ -978,7 +1021,7 @@ BIMROCKET.Application = class
     {
       tool = this.tools[tool];
     }
-    
+
     var toolEvent;
     if (tool && tool.immediate)
     {
@@ -1049,12 +1092,12 @@ BIMROCKET.Application = class
       if (parent)
       {
         parent.remove(object);
-      }      
+      }
       let removeEvent = {type : "removed", object : object, parent : parent,
         source : this};
       this.notifyEventListeners("scene", removeEvent);
 
-      this.selection.remove(object);      
+      this.selection.remove(object);
     }
   }
 
@@ -1129,7 +1172,7 @@ BIMROCKET.Application = class
   {
     let sceneEvent = {type: "nodeChanged", object: object,
       source : this};
-    this.notifyEventListeners("scene", sceneEvent);    
+    this.notifyEventListeners("scene", sceneEvent);
   }
 
   selectParentObject()
@@ -1144,7 +1187,7 @@ BIMROCKET.Application = class
     }
   }
 
-  updateVisibility(objects, edgesVisible, facesVisible, recursive)
+  updateVisibility(objects, visible)
   {
     if (objects === null)
     {
@@ -1154,19 +1197,44 @@ BIMROCKET.Application = class
     {
       objects = [objects];
     }
-    
-    if (objects.length > 0)
-    {
-      for (let i = 0; i < objects.length; i++)
-      {
-        let object = objects[i];
-        BIMROCKET.ObjectUtils.updateVisibility(object, 
-          edgesVisible, facesVisible, recursive);
 
-        let sceneEvent = {type: "nodeChanged", object: object,
-          source : this};
-        this.notifyEventListeners("scene", sceneEvent);
-      }
+    let set = BIMROCKET.ObjectUtils.updateVisibility(objects, visible);
+    let iterator = set.values();
+    let item = iterator.next();
+
+    while (!item.done)
+    {
+      let object = item.value;
+      let sceneEvent = {type: "nodeChanged", object: object,
+        source : this};
+      this.notifyEventListeners("scene", sceneEvent);
+      item = iterator.next();
+    }
+  }
+
+  updateStyle(objects, edgesVisible, facesVisible)
+  {
+    if (objects === null)
+    {
+      objects = this.selection.objects;
+    }
+    else if (objects instanceof THREE.Object3D)
+    {
+      objects = [objects];
+    }
+
+    let set = BIMROCKET.ObjectUtils.updateStyle(objects,
+      edgesVisible, facesVisible);
+    let iterator = set.values();
+    let item = iterator.next();
+
+    while (!item.done)
+    {
+      let object = item.value;
+      let sceneEvent = {type: "nodeChanged", object: object,
+        source : this};
+      this.notifyEventListeners("scene", sceneEvent);
+      item = iterator.next();
     }
   }
 
@@ -1187,11 +1255,11 @@ BIMROCKET.Application = class
     });
   }
 
-  createController(controllerClass = null, object = null, 
+  createController(controllerClass = null, object = null,
     name = null, start = false)
   {
     if (controllerClass === null) return;
-    
+
     if (object === null)
     {
       object = this.baseObject;
@@ -1205,16 +1273,16 @@ BIMROCKET.Application = class
     {
       object.controllers = [controller];
     }
-    
+
     if (start)
     {
       controller.start();
     }
-    
+
     let sceneEvent = {type: "nodeChanged", object: object,
       source : this};
     this.notifyEventListeners("scene", sceneEvent);
-    
+
     return controller;
   }
 
@@ -1282,139 +1350,6 @@ BIMROCKET.Application = class
   hideLogo()
   {
     document.getElementById("load_panel").className = "hidden";
-  }
-};
-
-BIMROCKET.Selection = class
-{
-  constructor(application)
-  {
-    this.application = application;
-    this._objects = new Set();
-  }
-
-  get iterator()
-  {
-    return this._objects.values();
-  }
-
-  get objects()
-  {
-    return Array.from(this._objects);
-  }
-
-  get object()
-  {
-    let objects = this._objects;
-    return objects.size === 0 ? null : objects.values().next().value;
-  }
-
-  contains(object)
-  {
-    return this._objects.has(object);
-  }
-
-  isEmpty()
-  {
-    return this._objects.size === 0;
-  }
-
-  get size()
-  {
-    return this._objects.size;
-  }
-
-  set(...objects)
-  {
-    this._objects.clear();
-    this._add(objects);
-    this._notifyListeners();
-  }
-
-  add(...objects)
-  {
-    this._add(objects);
-    this._notifyListeners();
-  }
-
-  remove(...objects)
-  {
-    let size = this._objects.size;
-
-    for (let i = 0; i < objects.length; i++)
-    {
-      let object = objects[i];
-      this._objects.delete(object);
-    }
-    
-    if (size !== this._objects.size)
-    {
-      this._notifyListeners();
-    }
-  }
-
-  clear()
-  {
-    if (this._objects.size > 0)
-    {
-      this._objects.clear();
-      this._notifyListeners();
-    }
-  }
-
-  _add(objects)
-  {
-    for (let i = 0; i < objects.length; i++)
-    {
-      let object = objects[i];
-      if (object instanceof THREE.Object3D)
-      {
-        this._objects.add(object);
-      }
-    }
-    this._reduce();
-  }
-
-  _notifyListeners()
-  {
-    let selectionEvent = {type : "changed", objects : this.objects};
-    this.application.notifyEventListeners("selection", selectionEvent);
-  }
-
-  _reduce()
-  {
-    let objects = this._objects;
-    if (objects.size > 1)
-    {
-      let toRemove = [];
-      let iterator = objects.values();
-      let item = iterator.next();
-      while (!item.done)
-      {
-        let object = item.value;
-        if (this._isContained(object))
-        {
-          toRemove.push(object);
-        }
-        item = iterator.next();
-      }
-      for (let i = 0; i < toRemove.length; i++)
-      {
-        this._objects.delete(toRemove[i]);
-      }
-    }
-  }
-
-  _isContained(object)
-  {
-    let contained = false;
-    let parent = object.parent;
-    while (parent && !contained)
-    {
-      contained = this._objects.has(parent);
-      parent = parent.parent;
-    }
-    return contained;
   }
 };
 

@@ -1,0 +1,166 @@
+/* 
+    Created on : 29-may-2021, 12:48:19
+    Author     : realor
+*/
+
+ul.tree li.IfcBeam
+{
+  background-image: url(images/ifc/IfcBeam.svg);
+}
+
+ul.tree li.IfcBuilding
+{
+  background-image: url(images/ifc/IfcBuilding.svg);
+}
+
+ul.tree li.IfcBuildingStorey
+{
+  background-image: url(images/ifc/IfcBuildingStorey.svg);
+}
+
+ul.tree li.IfcClassification
+{
+  background-image: url(images/ifc/IfcClassification.svg);
+}
+
+ul.tree li.IfcClassificationReference
+{
+  background-image: url(images/ifc/IfcClassificationReference.svg);
+}
+
+ul.tree li.IfcColumn
+{
+  background-image: url(images/ifc/IfcColumn.svg);
+}
+
+ul.tree li.IfcCovering
+{
+  background-image: url(images/ifc/IfcCovering.svg);
+}
+
+ul.tree li.IfcCurtainWall
+{
+  background-image: url(images/ifc/IfcCurtainWall.svg);
+}
+
+ul.tree li.IfcDoor
+{
+  background-image: url(images/ifc/IfcDoor.svg);
+}
+
+ul.tree li.IfcFlowFitting
+{
+  background-image: url(images/ifc/IfcFlowFitting.svg);
+}
+
+ul.tree li.IfcFlowSegment
+{
+  background-image: url(images/ifc/IfcFlowSegment.svg);
+}
+
+ul.tree li.IfcFlowTerminal
+{
+  background-image: url(images/ifc/IfcFlowTerminal.svg);
+}
+
+ul.tree li.IfcFooting
+{
+  background-image: url(images/ifc/IfcFooting.svg);
+}
+
+ul.tree li.IfcFurnishingElement
+{
+  background-image: url(images/ifc/IfcFurnishingElement.svg);
+}
+
+ul.tree li.IfcGroup
+{
+  background-image: url(images/ifc/IfcGroup.svg);
+}
+
+ul.tree li.IfcMember
+{
+  background-image: url(images/ifc/IfcMember.svg);
+}
+
+ul.tree li.IfcOpeningElement
+{
+  background-image: url(images/ifc/IfcOpeningElement.svg);
+}
+
+ul.tree li.IfcPlate
+{
+  background-image: url(images/ifc/IfcPlate.svg);
+}
+
+ul.tree li.IfcPile
+{
+  background-image: url(images/ifc/IfcPile.svg);
+}
+
+ul.tree li.IfcRailing
+{
+  background-image: url(images/ifc/IfcRailing.svg);
+}
+
+ul.tree li.IfcRamp
+{
+  background-image: url(images/ifc/IfcRamp.svg);
+}
+
+ul.tree li.IfcRampFlight
+{
+  background-image: url(images/ifc/IfcRamp.svg);
+}
+
+ul.tree li.IfcRoof
+{
+  background-image: url(images/ifc/IfcRoof.svg);
+}
+
+ul.tree li.IfcSite
+{
+  background-image: url(images/ifc/IfcSite.svg);
+}
+
+ul.tree li.IfcSlab
+{
+  background-image: url(images/ifc/IfcSlab.svg);
+}
+
+ul.tree li.IfcSpace
+{
+  background-image: url(images/ifc/IfcSpace.svg);
+}
+
+ul.tree li.IfcStair
+{
+  background-image: url(images/ifc/IfcStair.svg);
+}
+
+ul.tree li.IfcStairFlight
+{
+  background-image: url(images/ifc/IfcStairFlight.svg);
+}
+
+ul.tree li.IfcType
+{
+  background-image: url(images/ifc/IfcType.svg);
+}
+
+ul.tree li.IfcWall
+{
+  background-image: url(images/ifc/IfcWall.svg);
+}
+
+ul.tree li.IfcWallStandardCase
+{
+  background-image: url(images/ifc/IfcWallStandardCase.svg);
+}
+
+ul.tree li.IfcWindow
+{
+  background-image: url(images/ifc/IfcWindow.svg);
+}
+
+

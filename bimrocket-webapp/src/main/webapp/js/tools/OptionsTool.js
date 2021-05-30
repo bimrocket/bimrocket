@@ -89,28 +89,28 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
       application.updateSelection();
     });
 
-    // Show hidden selection
+    // Enable/disable deep selection
 
-    const hiddenSelElem = document.createElement("div");
-    hiddenSelElem.className = "option_block";
-    this.panel.bodyElem.appendChild(hiddenSelElem);
+    const deepSelElem = document.createElement("div");
+    deepSelElem.className = "option_block";
+    this.panel.bodyElem.appendChild(deepSelElem);
 
-    const hiddenSelLabel = document.createElement("label");
-    hiddenSelLabel.innerHTML = "Show hidden selection: ";
-    hiddenSelLabel.htmlFor = "hidden_sel";
-    hiddenSelLabel.style = "vertical-align:middle";
+    const deepSelLabel = document.createElement("label");
+    deepSelLabel.innerHTML = "Deep selection: ";
+    deepSelLabel.htmlFor = "deep_sel";
+    deepSelLabel.style = "vertical-align:middle";
 
-    hiddenSelElem.appendChild(hiddenSelLabel);
+    deepSelElem.appendChild(deepSelLabel);
 
-    this.hiddenSelCheckBox = document.createElement("input");
-    this.hiddenSelCheckBox.id = "hidden_sel";
-    this.hiddenSelCheckBox.type = "checkbox";
-    this.hiddenSelCheckBox.style = "vertical-align:middle";
-    hiddenSelElem.appendChild(this.hiddenSelCheckBox);
+    this.deepSelCheckBox = document.createElement("input");
+    this.deepSelCheckBox.id = "deep_sel";
+    this.deepSelCheckBox.type = "checkbox";
+    this.deepSelCheckBox.style = "vertical-align:middle";
+    deepSelElem.appendChild(this.deepSelCheckBox);
 
-    this.hiddenSelCheckBox.addEventListener("change", (event) =>
+    this.deepSelCheckBox.addEventListener("change", (event) =>
     {
-      application.showHiddenSelection = scope.hiddenSelCheckBox.checked;
+      application.deepSelection = scope.deepSelCheckBox.checked;
       application.updateSelection();
     });
     
@@ -238,7 +238,7 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.frdValue.innerHTML = this.application.frameRateDivisor;
 
     this.selPaintModeSelect.value = this.application.selectionPaintMode;
-    this.hiddenSelCheckBox.checked = this.application.showHiddenSelection;
+    this.deepSelCheckBox.checked = this.application.deepSelection;
   }
 
   deactivate()

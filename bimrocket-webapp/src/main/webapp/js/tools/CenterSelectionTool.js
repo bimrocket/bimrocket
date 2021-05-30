@@ -28,9 +28,8 @@ BIMROCKET.CenterSelectionTool = class extends BIMROCKET.Tool
     {
       if (this.focusOnSelection)
       {
-        application.updateVisibility(application.baseObject, 
-          false, false, true);
-        application.updateVisibility(objects, true, true, true);
+        application.updateVisibility(application.baseObject, false);
+        application.updateVisibility(objects, true);
       }
       const container = application.container;
       const aspect = container.clientWidth / container.clientHeight;   

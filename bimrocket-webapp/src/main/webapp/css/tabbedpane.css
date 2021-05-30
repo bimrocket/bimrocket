@@ -38,6 +38,7 @@
 .tabbed_pane > .body > .tab_panel
 {
   display: none;
+  overflow: auto;
 }
 
 .tabbed_pane > .body > .tab_panel.selected

@@ -29,53 +29,79 @@ BIMROCKET.ObjectUtils = class
       }
     });
   }
-  
-  static updateVisibility(objects, edgesVisible, facesVisible, recursive)
+
+  static updateVisibility(objects, visible)
   {
+    const set = new Set();
+    
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
     
+    function traverse(object)
+    {
+      object.visible = visible;
+      set.add(object);
+
+      if (!(object instanceof BIMROCKET.Solid))
+      {
+        const children = object.children;
+        for (let i = 0; i < children.length; i++)
+        {
+          traverse(children[i]);
+        }
+      }
+    }
+    
     for (let i = 0; i < objects.length; i++)
     {
       let object = objects[i];
- 
-      if (edgesVisible || facesVisible)
-      {
-        object.traverseAncestors(function(parent)
-        {
-          parent.visible = true;
-        });
-      }
       
+      traverse(object);
+
+      if (visible && !set.has(object.parent))
+      {
+        // make ancestors visible
+        object.traverseAncestors(ancestor => 
+        { ancestor.visible = true; set.add(ancestor); });
+      }
+    }
+    return set;
+  }
+  
+  static updateStyle(objects, edgesVisible, facesVisible)
+  {
+    const set = new Set();
+
+    if (objects instanceof THREE.Object3D)
+    {
+      objects = [objects];
+    }
+    
+    function traverse(object)
+    {
       if (object instanceof BIMROCKET.Solid)
       {
         object.edgesVisible = edgesVisible;
         object.facesVisible = facesVisible;
+        set.add(object);
       }
-      else if (object.name.indexOf(BIMROCKET.HIDDEN_PREFIX) === -1)
-      {
-        if (object instanceof THREE.Line)
+      else
+      {        
+        const children = object.children;
+        for (let i = 0; i < children.length; i++)
         {
-          object.visible = edgesVisible;
+          traverse(children[i]);
         }
-        else if (object instanceof THREE.Mesh)
-        {
-          object.visible = facesVisible;
-        }
-        else // Group or Object3D
-        {
-          object.visible = edgesVisible || facesVisible;
-        }
-      }
-
-      if (recursive)
-      {
-        BIMROCKET.ObjectUtils.updateVisibility(object.children, 
-          edgesVisible, facesVisible, true);
-      }
+      }       
     }
+    
+    for (let i = 0; i < objects.length; i++)
+    {
+      traverse(objects[i]);
+    }
+    return set;
   }
   
   static zoomAll(camera, objects, aspect, invisible)
@@ -209,14 +235,14 @@ BIMROCKET.ObjectUtils = class
     return box;
   }
 
-  static getLocalBoundingBox(object)
+  static getLocalBoundingBox(object, all)
   {
     var box = new THREE.Box3(); // empty box
     var objectBox = new THREE.Box3();
 
     var extendBox = function(object, box, toBaseMatrix)
     {
-      if (object.visible)
+      if (object.visible || all)
       {
         if (object instanceof THREE.Mesh ||
             object instanceof THREE.Line ||

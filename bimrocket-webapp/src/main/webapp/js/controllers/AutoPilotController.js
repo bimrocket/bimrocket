@@ -48,7 +48,7 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
     this._vehicles = application.scene.getObjectByName(this.vehicles.value);
     this._trafficLights = application.scene.getObjectByName(this.trafficLights.value);
 
-    application.updateVisibility(this.object, false, true, true);
+    application.updateVisibility(this.object, true);
 
     application.addEventListener("animation", this._animate);
   }

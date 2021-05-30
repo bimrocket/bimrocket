@@ -206,7 +206,7 @@ BIMROCKET.IFC = {
             object = object.getObjectByName(BIMROCKET.IFC.RepresentationName);
             if (object)
             {
-              BIMROCKET.ObjectUtils.updateVisibility(object, false, false, true);
+              BIMROCKET.ObjectUtils.updateStyle(object, false, false);
             }
           }
           else if (ifcClassName === "IfcSite" ||
@@ -385,6 +385,7 @@ BIMROCKET.IFC.File = class
     this.schema = BIMROCKET.IFC4;
     this.entities = {};
     this.products = [];
+    this.typeProducts = [];
     this.relationships = [];
   }
 
@@ -402,6 +403,10 @@ BIMROCKET.IFC.File = class
     if (entity instanceof this.schema.IfcProduct)
     {
       this.products.push(entity);
+    }
+    else if (entity instanceof this.schema.IfcTypeProduct)
+    {
+      this.typeProducts.push(entity);
     }
     else if (entity instanceof this.schema.IfcRelationship)
     {
@@ -2163,6 +2168,37 @@ BIMROCKET.IFC.helpers.IfcRelationshipHelper = class
   }
 };
 
+BIMROCKET.IFC.helpers.IfcRelDefinesByTypeHelper = class
+  extends BIMROCKET.IFC.helpers.IfcRelationshipHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  relate()
+  {
+    var rel = this.instance;
+    var schema = this.schema;
+
+    var objects = rel.RelatedObjects;
+    var type = rel.RelatingType;
+    const typeData = { ifcClassName: type.constructor.ifcClassName };
+    for (let key in type)
+    {
+      typeData[key] = type[key];
+    };
+    for (let i = 0; i < objects.length; i++)
+    {
+      if (objects[i].helper.getObject3D)
+      {
+        let object3D = objects[i].helper.getObject3D();
+        object3D.userData["IFC_type"] = typeData;
+      }
+    }
+  }
+};
+
 BIMROCKET.IFC.helpers.IfcRelAssociatesClassificationHelper = class
   extends BIMROCKET.IFC.helpers.IfcRelationshipHelper
 {
@@ -2177,14 +2213,70 @@ BIMROCKET.IFC.helpers.IfcRelAssociatesClassificationHelper = class
     var schema = this.schema;
 
     var ifcObjects = rel.RelatedObjects;
-    var ifcClassification = rel.RelatingClassification;
-    if (ifcClassification instanceof schema.IfcClassificationReference)
+    var ifcClassifRef = rel.RelatingClassification;
+    if (ifcClassifRef instanceof schema.IfcClassificationReference)
     {
       for (var i = 0; i < ifcObjects.length; i++)
       {
         var ifcObject = ifcObjects[i];
-        // TODO: add info in userData
-        // console.info(ifcObject, ifcClassification);
+        if (ifcObject.helper && ifcObject.helper.getObject3D)
+        {
+          let object3D = ifcObject.helper.getObject3D();
+
+          let ifcClassification = ifcClassifRef.ReferencedSource || {};
+          let classifName = "Unnamed";
+          if (ifcClassification.Name)
+          {
+            classifName = ifcClassification.Name;
+            if (ifcClassification.Edition)
+            {
+              classifName += "_" + ifcClassification.Edition;
+            }
+          }
+          let classifData = {};
+
+          object3D.userData["IFC_classification_" + classifName] = classifData;
+          for (let key in ifcClassifRef)
+          {
+            classifData[key] = ifcClassifRef[key];
+          };
+        }
+      }
+    }
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcRelAssignsToGroupHelper = class
+  extends BIMROCKET.IFC.helpers.IfcRelationshipHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  relate()
+  {
+    var rel = this.instance;
+    var schema = this.schema;
+
+    var ifcObjects = rel.RelatedObjects;
+    var ifcObjectsType = rel.RelatedObjectsType;
+    var ifcGroup = rel.RelatingGroup;
+    let groupName = ifcGroup.Name || ifcGroup.GlobalId;
+    let groupData = { ifcClassName: ifcGroup.constructor.ifcClassName };
+    for (let key in ifcGroup)
+    {
+      groupData[key] = ifcGroup[key];
+    };
+    groupName = ifcGroup.constructor.ifcClassName + "_" + groupName;
+    
+    for (var i = 0; i < ifcObjects.length; i++)
+    {
+      var ifcObject = ifcObjects[i];
+      if (ifcObject.helper && ifcObject.helper.getObject3D)
+      {
+        let object3D = ifcObject.helper.getObject3D();
+        object3D.userData["IFC_group_" + groupName] = groupData;
       }
     }
   }
@@ -2269,19 +2361,6 @@ BIMROCKET.IFC.helpers.IfcRelContainedInSpatialStructureHelper = class
                 }
               }
             }
-
-//            if (!(ifcRelatedProduct instanceof schema.IfcDoor ||
-//                  ifcRelatedProduct instanceof schema.IfcWindow))
-//            {
-//              var object3D = ifcRelatedProduct.helper.getObject3D();
-//              if (object3D)
-//              {
-//                if (object3D.parent !== containerObject3D)
-//                {
-//                  containerObject3D.attach(object3D);
-//                }
-//              }
-//            }
           }
         }
       }

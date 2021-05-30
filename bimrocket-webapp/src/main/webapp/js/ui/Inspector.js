@@ -44,7 +44,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
 
     const scope = this;
 
-    application.addEventListener("selection", function(event)
+    application.addEventListener("selection", event =>
     {
       if (event.objects.length <= 1)
       {
@@ -56,9 +56,10 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       }
     });
 
-    application.addEventListener("scene", function(event)
+    application.addEventListener("scene", event =>
     {
       if (event.type === "nodeChanged" &&
+        application.selection.size === 1 &&
         application.selection.object === event.object && 
          event.source !== this)
       {

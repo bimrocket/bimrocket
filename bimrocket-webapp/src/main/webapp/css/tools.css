@@ -222,72 +222,19 @@
 
 .bim_layers_header
 {
-  border:1px solid transparent;
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  top: 0;
-  bottom: 0;
-  overflow: auto;
   text-align: left;
-  font-weight: bold;
-  vertical-align: middle;
+  margin-bottom: 6px;
 }
 
-.bim_layers_header input,
-.bim_layers_header span
+.bim_layers_header label
 {
-  line-height: 18px;
-  vertical-align: middle;  
+  margin-right: 4px;
 }
 
-.bim_layers_panel
-{
-  border:1px solid gray;
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  top: 20px;
-  bottom: 4px;
-  overflow: auto;
-  border: 1px solid #c0c0c0;
-}
-
-.bim_layers_panel .layer
+.bim_layers_tabs
 {
   text-align: left;
-  color: #606060;
-  font-size:12px;
-  height: 20px;
-  line-height: 20px;
-  vertical-align: middle;
-  white-space: nowrap;
 }
-
-.bim_layers_panel .layer input
-{
-  line-height: 18px;
-  vertical-align: middle;  
-}
-
-.bim_layers_panel .layer a
-{
-  text-decoration: none;
-  outline: none;
-  color: #606060;
-  text-align: left;
-  line-height: 18px;
-  padding: 1px;
-  vertical-align: middle;
-}
-
-.bim_layers_panel .layer a:hover
-{
-  animation: item_hover 1s;
-  background-color: #D0D0D0;
-  color:black;  
-}
-
 
 .bim_layout_panel
 {
@@ -299,76 +246,6 @@
   overflow: auto;
   padding: 0;
   border: none;
-}
-
-.bim_layout_panel span
-{
-  text-align: left;
-  line-height: 18px;
-  margin-left: 18px;
-  padding: 1px;
-  vertical-align: middle;
-}
-
-.bim_layout_panel span:hover
-{
-  cursor: pointer;
-  animation: item_hover 1s;
-  background-color: #D0D0D0;
-  color:black;
-}
-
-.bim_layout_panel span.selected
-{
-  background-color:#F0A0A0;
-  color:black;
-  animation: none;  
-}
-
-.bim_layout_panel ul,
-.bim_layout_panel li
-{
-  list-style: none;
-  margin-left:6px;
-  padding-left:0;
-  text-align: left;
-}
-
-.bim_layout_panel > ul
-{
-  margin-left: 0;
-  margin-top: 4px;
-}
-
-.bim_layout_panel li
-{
-  background-position: 0 0;
-  background-repeat: no-repeat;
-  white-space: nowrap;
-}
-
-.bim_layout_panel li.IfcSite
-{
-  background-image: url(images/IFC/IfcSite.svg);
-  background-size: 16px 16px;
-}
-
-.bim_layout_panel li.IfcBuilding
-{
-  background-image: url(images/IFC/IfcBuilding.svg);
-  background-size: 16px 16px;
-}
-
-.bim_layout_panel li.IfcBuildingStorey
-{
-  background-image: url(images/IFC/IfcBuildingStorey.svg);
-  background-size: 16px 16px;
-}
-
-.bim_layout_panel li.IfcSpace
-{
-  background-image: url(images/IFC/IfcSpace.svg);
-  background-size: 16px 16px;
 }
 
 .tool_button.opencloud

@@ -1,0 +1,104 @@
+ul.tree
+{
+  margin-top: 2px;
+  margin-left: 0;
+}
+
+ul.tree,
+ul.tree ul,
+ul.tree li
+{
+  list-style: none;
+  margin-left:6px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.tree li
+{
+  text-align: left;
+  color: #606060;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding-left:0px;
+  list-style-type: none;
+  line-height: 18px;
+  background-image: url(images/outliner/default.svg);
+  background-size: 16px 16px;
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
+}
+
+ul.tree li > button
+{
+  padding:0;
+  width:9px;
+  height:9px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border:none;
+  text-align: center;
+  margin-left: -11px;
+  margin-right: 2px;
+  outline: none;
+  box-shadow: none;
+}
+
+ul.tree li.expanded > button
+{
+  background-image: url(images/collapse.svg);
+}
+
+ul.tree li.collapsed > button
+{
+  background-image: url(images/expand.svg);
+}
+
+ul.tree li > button:hover
+{
+  background-color: transparent;
+  cursor: pointer;
+}
+
+ul.tree li > button:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+ul.tree li a
+{
+  margin-left: 18px;
+  padding: 1px;
+  line-height: 18px;
+  vertical-align:middle;
+  text-decoration: none;
+  color: #606060;
+}
+
+ul.tree li a:hover
+{
+  animation: item_hover 1s;
+  background-color: #D0D0D0;
+  color:black;  
+}
+
+ul.tree li a:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+ul.tree li.collapsed > ul
+{
+  display: none;
+}
+
+ul.tree li.expanded > ul
+{
+  display: block;
+}
+

@@ -15,25 +15,9 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
     this.className = "bim_layers";
     this.setOptions(options);
 
-    this._onProductClick = this.onProductClick.bind(this);
-    this._onFacesClick = this.onFacesClick.bind(this);
-    this._onEdgesClick = this.onEdgesClick.bind(this);
-    this._onAllFacesClick = this.onAllFacesClick.bind(this);
-    this._onAllEdgesClick = this.onAllEdgesClick.bind(this);
-    this.layers = {
-      "IfcOpeningElement" : {
-        name : "IfcOpeningElement",
-        objects : [],
-        edgesVisible : false,
-        facesVisible : false
-      },
-      "IfcSpace" : {
-        name : "IfcSpace",
-        objects : [],
-        edgesVisible : true,
-        facesVisible : false
-      }
-    };
+    this.types = {};
+    this.classifications = {};
+    this.groups = {};
     this.createPanel();
   }
 
@@ -41,92 +25,41 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
   {
     this.panel = this.application.createPanel(
       "panel_" + this.name, this.label, "left");
+    this.panel.bodyElem.classList.add("padding");
 
-    this.headerElem = document.createElement("div");
-    this.headerElem.className = "bim_layers_header";
+    this.exploreButton = Controls.addButton(this.panel.bodyElem,
+      "bim_layers_explore", "Explore selection", () => this.explore());
 
-    let edgesCheckbox = document.createElement("input");
-    edgesCheckbox.type = "checkbox";
-    edgesCheckbox.id = "all-layer-edges";
-    edgesCheckbox.checked = true;
-    edgesCheckbox.title = "Edges";
-    edgesCheckbox.addEventListener("click", this._onAllEdgesClick, false);
-    this.headerElem.appendChild(edgesCheckbox);
+    // tabs
 
-    let facesCheckbox = document.createElement("input");
-    facesCheckbox.type = "checkbox";
-    facesCheckbox.id = "all-layer-faces";
-    facesCheckbox.checked = true;
-    facesCheckbox.title = "Faces";
-    facesCheckbox.addEventListener("click", this._onAllFacesClick, false);
-    this.headerElem.appendChild(facesCheckbox);
+    this.tabbedPane = new BIMROCKET.TabbedPane(this.panel.bodyElem);
+    this.tabbedPane.paneElem.classList.add("bim_layers_tabs");
 
-    let textElem = document.createElement("span");
-    textElem.innerHTML = "IFC products:";
-    this.headerElem.appendChild(textElem);
+    this.typesPanelElem =
+      this.tabbedPane.addTab("ifc_types", "Types");
+    this.typesTree = new BIMROCKET.Tree(this.typesPanelElem);
 
-    this.layersElem = document.createElement("div");
-    this.layersElem.className = "bim_layers_panel";
+    this.classifPanelElem =
+      this.tabbedPane.addTab("ifc_classif", "Classifications");
+    this.classifTree = new BIMROCKET.Tree(this.classifPanelElem);
 
-    this.panel.bodyElem.appendChild(this.headerElem);
-    this.panel.bodyElem.appendChild(this.layersElem);
+    this.groupsPanelElem =
+      this.tabbedPane.addTab("ifc_groups", "Groups");
+    this.groupsTree = new BIMROCKET.Tree(this.groupsPanelElem);
   }
 
   activate()
   {
     this.panel.visible = true;
-
-    this.layersElem.innerHTML = "";
-
-    for (let layerName in this.layers)
+    if (this.needsUpdate())
     {
-      let layer = this.layers[layerName];
-      layer.objects = [];
+      this.types = {};
+      this.classifications = {};
+      this.groups = {};
+      this.typesTree.clear();
+      this.classifTree.clear();
+      this.groupsTree.clear();
     }
-    this.findLayers();
-
-    let layerNames = Object.keys(this.layers);
-    layerNames.sort();
-
-    for (let i = 0; i < layerNames.length; i++)
-    {
-      let layer = this.layers[layerNames[i]];
-      let objects = layer.objects;
-      if (objects.length > 0)
-      {
-        let layerElem = document.createElement("div");
-        layerElem.className = "layer";
-
-        let edgesCheckbox = document.createElement("input");
-        edgesCheckbox.type = "checkbox";
-        edgesCheckbox.id = "layer-edges-" + layer.name;
-        edgesCheckbox.checked = layer.edgesVisible;
-        edgesCheckbox.className = "edges";
-        edgesCheckbox.title = "Edges";
-        edgesCheckbox.addEventListener("click", this._onEdgesClick, false);
-        layerElem.appendChild(edgesCheckbox);
-
-        let facesCheckbox = document.createElement("input");
-        facesCheckbox.type = "checkbox";
-        facesCheckbox.id = "layer-faces-" + layer.name;
-        facesCheckbox.checked = layer.facesVisible;
-        facesCheckbox.className = "faces";
-        facesCheckbox.title = "Faces";
-        facesCheckbox.addEventListener("click", this._onFacesClick, false);
-        layerElem.appendChild(facesCheckbox);
-
-        let linkElem = document.createElement("a");
-        linkElem.id = "layer-" + layer.name;
-        linkElem.href="#";
-        let objects = layer.objects;
-        linkElem.innerHTML = layer.name + " (" + objects.length + ")";
-        linkElem.addEventListener("click", this._onProductClick, false);
-        layerElem.appendChild(linkElem);
-        
-        this.layersElem.appendChild(layerElem);
-      }
-    }
-    this.updateAllLayersVisibility();
   }
 
   deactivate()
@@ -134,130 +67,268 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
     this.panel.visible = false;
   }
 
-  findLayers()
+  explore()
   {
-    let layers = this.layers;
-
-    this.application.baseObject.traverse(function(object)
+    let baseObjects = this.application.selection.objects;
+    if (baseObjects.length === 0)
     {
-      if (object.userData.IFC && object.type === "Object3D")
-      {
-        let ifcClassName = object.userData.IFC.ifcClassName;
-        let layer = layers[ifcClassName];
-        if (layer)
-        {
-          layer.objects.push(object);
-        }
-        else
-        {
-          layer = {
-            name : ifcClassName,
-            objects : [object],
-            edgesVisible : true,
-            facesVisible : true
-          };
-          layers[ifcClassName] = layer;
-        }
-      }
-    });
-    return layers;
+      baseObjects = [this.application.baseObject];
+    }
+    // types
+    this.findTypes(baseObjects);
+    this.showTypes();
+
+    // classifications
+    this.findClassifications(baseObjects);
+    this.showClassifications();
+
+    // groups
+    this.findGroups(baseObjects);
+    this.showGroups();
   }
 
-  updateLayerVisibility(layer)
+  findTypes(baseObjects)
   {
-    let objects = layer.objects;
-    for (let i = 0; i < objects.length; i++)
+    this.types = {};
+    let types = this.types;
+
+    for (let i = 0; i < baseObjects.length; i++)
     {
-      let object = objects[i];
-      object = object.getObjectByName(BIMROCKET.IFC.RepresentationName);
-      if (object)
+      baseObjects[i].traverse(object =>
       {
-        this.application.updateVisibility(object,
-          layer.edgesVisible, layer.facesVisible, true);
+        if (object.userData.IFC && object.userData.IFC.ifcClassName &&
+            object.type === "Object3D")
+        {
+          let ifcClassName = object.userData.IFC.ifcClassName;
+          let type = types[ifcClassName];
+          if (type)
+          {
+            type.objects.push(object);
+          }
+          else
+          {
+            type = {
+              name : ifcClassName,
+              objects : [object],
+              subTypes : {}
+            };
+            types[ifcClassName] = type;
+          }
+
+          let typeName = object.userData.IFC_type ?
+            object.userData.IFC_type.Name || "Unnamed" : "Others";
+
+          let subType = type.subTypes[typeName];
+          if (subType)
+          {
+            subType.objects.push(object);
+          }
+          else
+          {
+            subType = {
+              name : typeName,
+              objects : [object]
+            };
+            type.subTypes[typeName] = subType;
+          }
+        }
+      });
+    }
+  }
+
+  findClassifications(baseObjects)
+  {
+    this.classifications = {};
+    let classifs = this.classifications;
+
+    for (let i = 0; i < baseObjects.length; i++)
+    {
+      baseObjects[i].traverse(object =>
+      {
+        if (object.userData.IFC && object.type === "Object3D")
+        {
+          for (let key in object.userData)
+          {
+            if (key.indexOf("IFC_classification_") === 0)
+            {
+              let classifName = key.substring(19);
+              if (classifs[classifName] === undefined)
+              {
+                classifs[classifName] = {
+                  name : classifName,
+                  references : {}
+                };
+              }
+              let classifData = object.userData[key];
+              let identification = classifData.Identification;
+              let references = classifs[classifName].references;
+              if (references[identification] === undefined)
+              {
+                references[identification] = {
+                  identification : identification,
+                  name : classifData.Name,
+                  objects : []
+                };
+              }
+              references[identification].objects.push(object);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  findGroups(baseObjects)
+  {
+    this.groups = {};
+    let groups = this.groups;
+
+    for (let i = 0; i < baseObjects.length; i++)
+    {
+      baseObjects[i].traverse(object =>
+      {
+        if (object.userData.IFC && object.type === "Object3D")
+        {
+          for (let key in object.userData)
+          {
+            if (key.indexOf("IFC_group_") === 0)
+            {
+              let group = object.userData[key];
+              let groupName = key.substring(10);
+              if (groups[groupName] === undefined)
+              {
+                groups[groupName] = {
+                  ifcClassName: group.ifcClassName,
+                  name : groupName,
+                  objects : []
+                };
+              }
+              groups[groupName].objects.push(object);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  showTypes()
+  {
+    let typeNames = Object.keys(this.types);
+    typeNames.sort();
+
+    this.typesTree.clear();
+
+    for (let i = 0; i < typeNames.length; i++)
+    {
+      let type = this.types[typeNames[i]];
+      let objects = type.objects;
+      let label = type.name + " (" + objects.length + ")";
+      let className = typeNames[i];
+      let node = this.typesTree.addNode(label, event =>
+        this.selectObjects(event, objects), className);
+
+      let subTypes = type.subTypes;
+      let subTypeNames = Object.keys(subTypes);
+      subTypeNames.sort();
+      if (subTypeNames.length !== 1 || subTypeNames[0] !== "Others")
+      {
+        for (let j = 0; j < subTypeNames.length; j++)
+        {
+          let subTypeName = subTypeNames[j];
+          let subType = subTypes[subTypeName];
+          let subObjects = subType.objects;
+          let subLabel = subTypeName + " (" + subObjects.length + ")";
+          let subNode = node.addNode(subLabel, event =>
+            this.selectObjects(event, subObjects), "IfcType");
+        }
       }
     }
   }
 
-  updateAllLayersVisibility()
+  showClassifications()
   {
-    for (let layerName in this.layers)
+    let classifNames = Object.keys(this.classifications);
+    classifNames.sort();
+
+    this.classifTree.clear();
+
+    for (let i = 0; i < classifNames.length; i++)
     {
-      let layer = this.layers[layerName];
-      this.updateLayerVisibility(layer);
+      let classif = this.classifications[classifNames[i]];
+      let label = classif.name;
+      let node = this.classifTree.addNode(label, null, "IfcClassification");
+      if (classifNames.length === 1) node.expand();
+
+      let references = classif.references;
+      let referenceIds = Object.keys(references);
+      referenceIds.sort();
+      for (let j = 0; j < referenceIds.length; j++)
+      {
+        let referenceId = referenceIds[j];
+        let reference = references[referenceId];
+        let objects = reference.objects;
+        let subLabel = referenceId;
+        if (reference.name) subLabel += ": " + reference.name;
+        subLabel += " (" + objects.length + ")";
+        let subNode = node.addNode(subLabel, event =>
+          this.selectObjects(event, objects), "IfcClassificationReference");
+      }
+    }
+  }
+
+  showGroups()
+  {
+    let groupNames = Object.keys(this.groups);
+    groupNames.sort();
+
+    this.groupsTree.clear();
+
+    for (let i = 0; i < groupNames.length; i++)
+    {
+      let group = this.groups[groupNames[i]];
+      let objects = group.objects;
+      let label = group.name + " (" + objects.length + ")";
+      let node = this.groupsTree.addNode(label, event =>
+        this.selectObjects(event, objects), "IfcGroup");
+    }
+  }
+
+  selectObjects(event, objects)
+  {
+    event.preventDefault();
+
+    const selection = this.application.selection;
+    if (event.shiftKey)
+    {
+      selection.add(...objects);
+    }
+    else if (event.ctrlKey)
+    {
+      selection.remove(...objects);
+    }
+    else
+    {
+      selection.set(...objects);
     }
   }
   
-  onProductClick(event)
+  needsUpdate()
   {
-    let sourceElem = event.target;
-    let id = sourceElem.id;
-    let layerName = id.substring(6);
-    let application = this.application;
-    let objects = [];
-    application.scene.traverse(function(object)
+    /* update is needed if objects were removed */
+    const types = this.types;
+    const baseObject = this.application.baseObject;
+    for (let key in types)
     {
-      let ifc = object._ifc;
-      if (ifc)
+      let type = types[key];
+      let objects = type.objects;
+      for (let i = 0; i < objects.length; i++)
       {
-        if (ifc.constructor.ifcClassName === layerName)
-        {
-          objects.push(object);
-        }
+        let object = objects[i];
+        if (!BIMROCKET.ObjectUtils.isObjectDescendantOf(object, baseObject))
+          return true;
       }
-    });
-    application.selection.set(...objects);
-  }
-
-  onFacesClick(event)
-  {
-    let sourceElem = event.target;
-    let id = sourceElem.id;
-    let layerName = id.substring(12);
-    let layer = this.layers[layerName];
-    layer.facesVisible = sourceElem.checked;
-    this.updateLayerVisibility(layer);
-  }
-
-  onEdgesClick(event)
-  {
-    let sourceElem = event.target;
-    let id = sourceElem.id;
-    let layerName = id.substring(12);
-    let layer = this.layers[layerName];
-    layer.edgesVisible = sourceElem.checked;
-    this.updateLayerVisibility(layer);
-  }
-
-  onAllFacesClick(event)
-  {
-    let sourceElem = event.target;
-    let elems = this.layersElem.getElementsByClassName("faces");
-    for (let i = 0; i < elems.length; i++)
-    {
-      elems[i].checked = sourceElem.checked;
     }
-    for (let layerName in this.layers)
-    {
-      let layer = this.layers[layerName];
-      layer.facesVisible = sourceElem.checked;
-    }
-    this.updateAllLayersVisibility();
-  }
-
-  onAllEdgesClick(event)
-  {
-    let sourceElem = event.target;
-    let elems = this.layersElem.getElementsByClassName("edges");
-    for (let i = 0; i < elems.length; i++)
-    {
-      elems[i].checked = sourceElem.checked;
-    }
-    for (let layerName in this.layers)
-    {
-      let layer = this.layers[layerName];
-      layer.edgesVisible = sourceElem.checked;
-    }
-    this.updateAllLayersVisibility();
+    return false;
   }
 };
 

@@ -63,8 +63,8 @@ BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
         {
           application.addObject(result, application.baseObject, true);      
         }
-        application.updateVisibility(solid, false, false, false);
-        application.updateVisibility(operands, false, false, false);
+        application.updateVisibility(solid, false);
+        application.updateVisibility(operands, false);
       }
       else
       {

@@ -183,7 +183,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       var objectId = parseInt(objectIdString, 10);
       if (isNaN(objectId)) objectId = objectIdString;
       scope.lastSelectedLabel = labelElem;
-      scope.selectObjectById(objectId, event.shiftKey);
+      scope.selectObjectById(objectId, event);
     };    
     
     let hasChildren = this.childCount(object) > 0;
@@ -281,25 +281,30 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     }
   }
     
-  selectObjectById(objectId, add = false)
+  selectObjectById(objectId, event)
   {
-    let application = this.application;
+    const application = this.application;
+    const selection = application.selection;
     let object = application.scene.getObjectById(objectId, true);
     if (object)
     {
-      if (add)
+      if (event.shiftKey)
       {
-        application.selection.add(object);        
+        selection.add(object);        
+      }
+      else if (event.ctrlKey)
+      {
+        selection.remove(object);        
       }
       else
       {
-        application.selection.set(object);        
+        selection.set(object);
       }
       this.updateSelection();
     }
-    else if (!add)
+    else
     {
-      application.selection.clear();
+      selection.clear();
       this.updateSelection();
     }
   }

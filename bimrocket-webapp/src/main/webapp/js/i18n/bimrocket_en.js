@@ -85,10 +85,14 @@ I18N.add('BIMROCKET', 'en' , {
   "tool.show.label" : "Show",
 
   "tool.hide.label" : "Hide",
-
-  "tool.show_faces.label" : "Show faces only",
   
-  "tool.show_edges.label" : "Show edges only",
+  "tool.faces_style.label" : "Faces only",
+
+  "tool.edges_style.label" : "Edges only",
+
+  "tool.faces_edges_style.label" : "Faces & edges",
+
+  "tool.hidden_style.label" : "Hidden",
 
   "tool.activate_camera.label" : "Activate camera",
 

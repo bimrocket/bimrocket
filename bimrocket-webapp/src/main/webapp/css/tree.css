@@ -1,3 +1,5 @@
+/* tree.css */
+
 ul.tree
 {
   margin-top: 2px;
@@ -23,7 +25,6 @@ ul.tree li
   padding-left:0px;
   list-style-type: none;
   line-height: 18px;
-  background-image: url(images/outliner/default.svg);
   background-size: 16px 16px;
   background-position: 0px 0px;
   background-repeat: no-repeat;
@@ -63,8 +64,10 @@ ul.tree li > button:hover
 
 ul.tree li > button:focus
 {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
   transition: all 0.4s ease;
 }
 
@@ -87,8 +90,10 @@ ul.tree li a:hover
 
 ul.tree li a:focus
 {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
   transition: all 0.4s ease;
 }
 

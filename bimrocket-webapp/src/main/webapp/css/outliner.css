@@ -1,4 +1,4 @@
-/* outliner */
+/* outliner.css */
 
 ul.outliner
 {
@@ -18,14 +18,13 @@ ul.outliner li
 
 ul.outliner li
 {
-  background-image: url(images/outliner/default.svg);
   background-size: 16px 16px;
   background-position: 0px 0px;
   background-repeat: no-repeat;
   white-space: nowrap;
 }
 
-ul.outliner span
+ul.outliner a
 {
   margin-left: 18px;
   padding: 1px;
@@ -33,7 +32,7 @@ ul.outliner span
   vertical-align:middle;
 }
 
-ul.outliner span:hover
+ul.outliner a:hover
 {
   cursor: pointer;
   animation: item_hover 1s;
@@ -41,8 +40,8 @@ ul.outliner span:hover
   color: black;
 }
 
-ul.outliner span.selected,
-ul.outliner span.selected:hover
+ul.outliner a.selected,
+ul.outliner a.selected:hover
 {
   background-color:#F0A0A0;
   color:black;
@@ -92,7 +91,6 @@ ul.outliner button
   font-size:9px;
   width:9px;
   height:9px;
-  vertical-align:middle;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center center;
@@ -119,35 +117,35 @@ ul.outliner button:hover
   cursor:pointer;
 }
 
-/* object icons */
+/* tree images */
 
-ul.outliner li.Brep
+ul.tree li
 {
-  background-image: url(images/outliner/brep.svg)
+  background-image: url(images/outliner/default.svg);
 }
 
-ul.outliner li.Solid
+ul.tree li.Solid
 {
   background-image: url(images/outliner/solid.svg)
 }
 
-ul.outliner li.Group
+ul.tree li.Group
 {
   background-image: url(images/outliner/group.svg)
 }
 
-ul.outliner li.AmbientLight,
-ul.outliner li.DirectionalLight,
-ul.outliner li.PointLight,
-ul.outliner li.AreaLight,
-ul.outliner li.HemisphereLight,
-ul.outliner li.SpotLight
+ul.tree li.AmbientLight,
+ul.tree li.DirectionalLight,
+ul.tree li.PointLight,
+ul.tree li.AreaLight,
+ul.tree li.HemisphereLight,
+ul.tree li.SpotLight
 {
   background-image: url(images/outliner/light.svg);
 }
 
-ul.outliner li.PerspectiveCamera,
-ul.outliner li.OrthographicCamera
+ul.tree li.PerspectiveCamera,
+ul.tree li.OrthographicCamera
 {
   background-image: url(images/outliner/camera.svg);  
 }

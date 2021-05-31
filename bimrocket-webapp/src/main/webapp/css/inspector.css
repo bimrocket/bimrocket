@@ -1,4 +1,4 @@
-/* inspector */
+/* inspector.css */
 
 ul.inspector
 {
@@ -42,6 +42,7 @@ ul.inspector li.section
   color: #202020;
   white-space: nowrap;
   border-bottom: 1px solid gray;
+  background-image: none;
 }
 
 ul.inspector li.section li.section

@@ -215,6 +215,19 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     }
   }
   
+  getObjectClass(object)
+  {
+    if (object.type === "Object3D" && 
+       object.userData.IFC && object.userData.IFC.ifcClassName)
+    {
+      return object.userData.IFC.ifcClassName;
+    }
+    else
+    {
+      return object.type;
+    }    
+  }
+
   showSelectedObjects(objects)
   {
     this.bodyElem.innerHTML = "";
@@ -231,8 +244,9 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     {
       let object = objects[i];
       let label = object.name || object.id;
+      let className = this.getObjectClass(object);
       selectionTree.addNode(label, 
-        event => this.application.selectObjects(event, [object]));
+        event => this.application.selectObjects(event, [object]), className);
     }
   }
 
@@ -325,12 +339,9 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     
       if (editor)
       {
-        let scope = this;
-        let listener = function()
-        {
-          scope.startEdition(object, propertyName, renderer, editor, propElem);
-        };
-        labelElem.addEventListener("click", listener, false);    
+        labelElem.addEventListener("click", event => 
+          this.startEdition(object, propertyName, renderer, editor, propElem),
+          false);    
         propElem.className += " editable";
       }    
     }
@@ -343,11 +354,9 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     let valueElem = renderer.render(propertyValue, propElem);
     if (editor)
     {
-      let listener = function()
-      {
-        scope.startEdition(object, propertyName, renderer, editor, propElem);
-      };
-      valueElem.addEventListener("click", listener, false);
+      valueElem.addEventListener("click", () => 
+        this.startEdition(object, propertyName, renderer, editor, propElem),
+        false);
     }
   }
     
@@ -365,7 +374,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       let valueElem = dialog.addTextField("propertyValue", "Value:", 
         "");
 
-      dialog.addButton("accept", "Accept", function()
+      dialog.addButton("accept", "Accept", () => 
       {
         dialog.hide();
         let propertyName = nameElem.value;
@@ -388,11 +397,8 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
         }
         scope.showProperties(object);
       });
-      dialog.addButton("cancel", "Cancel", function()
-      {
-        dialog.hide();
-      });
-      dialog.show();      
+      dialog.addButton("cancel", "Cancel", () => dialog.hide());
+      dialog.show();
       nameElem.focus();
     }; 
     
@@ -907,6 +913,9 @@ BIMROCKET.BooleanEditor = class extends BIMROCKET.PropertyEditor
 
   edit(value, propElem)
   {
+    let valueElem = document.createElement("span");
+    propElem.appendChild(valueElem);
+
     let checked = value;
     this.inspector.endEdition(!checked);
   }

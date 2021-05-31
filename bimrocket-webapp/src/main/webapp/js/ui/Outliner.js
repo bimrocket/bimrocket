@@ -136,9 +136,22 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
   {
     this.bodyElem.innerHTML = "";
     let listElem = document.createElement('ul');
-    listElem.className = "outliner";
+    listElem.className = "tree outliner";
     this.bodyElem.appendChild(listElem);
     this.populateList(this.application.scene, listElem);
+  }
+  
+  getObjectClass(object)
+  {
+    if (object.type === "Object3D" && 
+       object.userData.IFC && object.userData.IFC.ifcClassName)
+    {
+      return object.userData.IFC.ifcClassName;
+    }
+    else
+    {
+      return object.type;
+    }    
   }
 
   populateList(object, parentListElem)
@@ -151,9 +164,8 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       // li
       let itemElem = document.createElement('li');
       itemElem.id = 'ol-li-' + object.id;
-      itemElem.className = object.type;
+      itemElem.className = this.getObjectClass(object);
       parentListElem.appendChild(itemElem);
-
       this.populateItem(object, itemElem);
     }
   }
@@ -199,7 +211,8 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     }
 
     // label
-    let labelElem = document.createElement('span');
+    let labelElem = document.createElement('a');
+    labelElem.href = "#";
     let labelId = 'ol-lab-' + object.id;
     labelElem.id = labelId;
     labelElem._selected = false;

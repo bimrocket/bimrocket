@@ -225,7 +225,7 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
       let label = type.name + " (" + objects.length + ")";
       let className = typeNames[i];
       let node = this.typesTree.addNode(label, event =>
-        this.selectObjects(event, objects), className);
+        this.application.selectObjects(event, objects), className);
 
       let subTypes = type.subTypes;
       let subTypeNames = Object.keys(subTypes);
@@ -239,7 +239,7 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
           let subObjects = subType.objects;
           let subLabel = subTypeName + " (" + subObjects.length + ")";
           let subNode = node.addNode(subLabel, event =>
-            this.selectObjects(event, subObjects), "IfcType");
+            this.application.selectObjects(event, subObjects), "IfcType");
         }
       }
     }
@@ -271,7 +271,8 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
         if (reference.name) subLabel += ": " + reference.name;
         subLabel += " (" + objects.length + ")";
         let subNode = node.addNode(subLabel, event =>
-          this.selectObjects(event, objects), "IfcClassificationReference");
+          this.application.selectObjects(event, objects), 
+          "IfcClassificationReference");
       }
     }
   }
@@ -289,29 +290,10 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
       let objects = group.objects;
       let label = group.name + " (" + objects.length + ")";
       let node = this.groupsTree.addNode(label, event =>
-        this.selectObjects(event, objects), "IfcGroup");
+        this.application.selectObjects(event, objects), "IfcGroup");
     }
   }
 
-  selectObjects(event, objects)
-  {
-    event.preventDefault();
-
-    const selection = this.application.selection;
-    if (event.shiftKey)
-    {
-      selection.add(...objects);
-    }
-    else if (event.ctrlKey)
-    {
-      selection.remove(...objects);
-    }
-    else
-    {
-      selection.set(...objects);
-    }
-  }
-  
   needsUpdate()
   {
     /* update is needed if objects were removed */

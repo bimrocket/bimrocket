@@ -288,18 +288,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     let object = application.scene.getObjectById(objectId, true);
     if (object)
     {
-      if (event.shiftKey)
-      {
-        selection.add(object);        
-      }
-      else if (event.ctrlKey)
-      {
-        selection.remove(object);        
-      }
-      else
-      {
-        selection.set(object);
-      }
+      application.selectObjects(event, [object]);
       this.updateSelection();
     }
     else

@@ -1238,6 +1238,25 @@ BIMROCKET.Application = class
     }
   }
 
+  selectObjects(event, objects)
+  {
+    event.preventDefault();
+
+    const selection = this.selection;
+    if (event.shiftKey)
+    {
+      selection.add(...objects);
+    }
+    else if (event.ctrlKey)
+    {
+      selection.remove(...objects);
+    }
+    else
+    {
+      selection.set(...objects);
+    }
+  }
+
   handleControllers(handler, object)
   {
     if (object === undefined) object = this.scene;

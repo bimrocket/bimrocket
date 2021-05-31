@@ -225,16 +225,14 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       I18N.get("inspector.objects_selected") + ":";
     this.bodyElem.appendChild(infoElem);
     
-    let topListElem = document.createElement("ul");
-    topListElem.className = 'inspector_list';
-    this.bodyElem.appendChild(topListElem);
+    const selectionTree = new BIMROCKET.Tree(this.bodyElem);
 
     for (let i = 0; i < objects.length; i++)
     {
-      var object = objects[i];
-      var itemElem = document.createElement("li");
-      itemElem.innerHTML = object.name || object.id;
-      topListElem.appendChild(itemElem);
+      let object = objects[i];
+      let label = object.name || object.id;
+      selectionTree.addNode(label, 
+        event => this.application.selectObjects(event, [object]));
     }
   }
 

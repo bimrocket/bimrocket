@@ -25,6 +25,8 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.select_by_name.label" : "Select by name",
 
+  "tool.select_parent.label" : "Select parent",
+
   "tool.options.label" : "Options",
   "tool.options.help" : "Setup options",
 

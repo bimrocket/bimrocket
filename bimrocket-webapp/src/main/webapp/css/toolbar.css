@@ -36,11 +36,20 @@
   box-shadow:inset 4px 4px 4px rgba(0, 0, 0, 0.2);
 }
 
-.tool_button:hover,
-.tool_button:focus
+.tool_button:hover
 {
   background-color: #ffc0c0;
   outline:none;
+}
+
+.tool_button:focus
+{
+  border-style: dotted;
+  border-color: black;
+  border-width: 1px;
+  outline: none;
+  transition: all 0.4s ease;
+  box-shadow: none;
 }
 
 .tool_button.selected,

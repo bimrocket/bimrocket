@@ -57,9 +57,9 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
   {
     if (!this.isCanvasEvent(event)) return;
 
-    var application = this.application;
-    var scene = application.scene;
-    var selection = application.selection;
+    const application = this.application;
+    const scene = application.scene;
+    const selection = application.selection;
 
     var mousePosition = this.getMousePosition(event);
     var intersect = this.intersect(mousePosition, scene, true);
@@ -82,20 +82,8 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
       if (parent && parent.userData.selection.group)
       {
         object = parent;
-      }
-      
-      if (event.shiftKey)
-      {
-        selection.add(object);        
-      }
-      else if (event.ctrlKey)
-      {
-        selection.remove(object);        
-      }
-      else
-      {
-        selection.set(object);
-      }
+      }      
+      application.selectObjects(event, [object]);
     }
     else
     {

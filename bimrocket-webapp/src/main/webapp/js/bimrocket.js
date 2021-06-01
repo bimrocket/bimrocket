@@ -141,6 +141,9 @@ BIMROCKET.Application = class
     const optionsTool = new BIMROCKET.OptionsTool(this);
     const printTool = new BIMROCKET.PrintTool(this);
     const selectTool = new BIMROCKET.SelectTool(this);
+    const selectReprTool = new BIMROCKET.SelectByNameTool(this, 
+    {propertyName : BIMROCKET.IFC.RepresentationName, 
+     label: BIMROCKET.IFC.RepresentationName});    
     const orbitTool = new BIMROCKET.OrbitTool(this);
     const flyTool = new BIMROCKET.FlyTool(this);
     const autoOrbitTool = new BIMROCKET.AutoOrbitTool(this);
@@ -222,6 +225,7 @@ BIMROCKET.Application = class
     this.addTool(optionsTool);
     this.addTool(printTool);
     this.addTool(selectTool);
+    this.addTool(selectReprTool);
     this.addTool(orbitTool);
     this.addTool(flyTool);
     this.addTool(autoOrbitTool);
@@ -310,6 +314,7 @@ BIMROCKET.Application = class
 
     const selectMenu = menuBar.addMenu("Select");
     selectMenu.addMenuItem(selectTool);
+    selectMenu.addMenuItem(selectReprTool);
 
     const designMenu = menuBar.addMenu("Design");
     const addMenu = designMenu.addMenu("Add");

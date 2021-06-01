@@ -23,6 +23,8 @@ I18N.add('BIMROCKET', 'en' , {
   "tool.select.label" : "Select",
   "tool.select.help" : "Mouse click: select",
 
+  "tool.select_by_name.label" : "Select by name",
+
   "tool.options.label" : "Options",
   "tool.options.help" : "Setup options",
 

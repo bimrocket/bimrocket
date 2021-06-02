@@ -60,10 +60,10 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     {
       if (event.type === "nodeChanged" &&
         application.selection.size === 1 &&
-        application.selection.object === event.object && 
-         event.source !== this)
+        event.objects.includes(application.selection.object) && 
+        event.source !== this)
       {
-        scope.showProperties(event.object);
+        scope.showProperties(application.selection.object);
       }
     });
   }
@@ -479,7 +479,8 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     }
     this.stopEdition();
 
-    let changeEvent = {type: "nodeChanged", object: this.object, source : this};
+    let changeEvent = {type: "nodeChanged", objects: [this.object], 
+      source : this};
     this.application.notifyEventListeners("scene", changeEvent);
   }
 

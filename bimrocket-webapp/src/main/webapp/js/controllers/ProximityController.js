@@ -42,29 +42,33 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
     {
       if (this._objects)
       {
-        if (event.object.parent === this._objects)
+        for (let object of event.objects)
         {
-          let range = parseFloat(this.distance.value || 1);
-          let value = this.output.value;
-          let newValue = 0;
-          let children = this._objects.children;
-          let i = 0;
-          while (i < children.length && newValue === 0)
+          if (object.parent === this._objects)
           {
-            let child = children[i];
-            if (this.isNearObject(child, range)) newValue = 1;
-            i++;
-          }
-          if (newValue !== value)
-          {
-            this.output.value = newValue;
+            let range = parseFloat(this.distance.value || 1);
+            let value = this.output.value;
+            let newValue = 0;
+            let children = this._objects.children;
+            let i = 0;
+            while (i < children.length && newValue === 0)
+            {
+              let child = children[i];
+              if (this.isNearObject(child, range)) newValue = 1;
+              i++;
+            }
+            if (newValue !== value)
+            {
+              this.output.value = newValue;
+            }
           }
         }
       }
       else // camera
       {
         var camera = this.application.camera;
-        if (event.object === camera || event.object === this.object)
+        if (event.objects.includes(camera) || 
+            event.objects.includes(this.object))
         {
           let range = parseFloat(this.distance.value || 1);
           let value = this.output.value;

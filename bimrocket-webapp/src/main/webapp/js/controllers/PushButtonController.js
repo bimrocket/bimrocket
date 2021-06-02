@@ -45,7 +45,7 @@ BIMROCKET.PushButtonController = class extends BIMROCKET.PanelController
   {
     this.panel.visible = this.application.selection.contains(this.object);
     
-    if (event.type === "nodeChanged" && event.object === this.object)
+    if (event.type === "nodeChanged" && event.objects.includes(this.object))
     {
       this.update();
     }

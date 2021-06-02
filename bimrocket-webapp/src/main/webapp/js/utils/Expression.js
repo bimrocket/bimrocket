@@ -109,16 +109,16 @@ BIMROCKET.Expression = class
       changedObject = this.owner;
     }
 
-    let changeEvent = {type : "nodeChanged", object : changedObject,
+    let changeEvent = {type : "nodeChanged", objects : [changedObject],
       source: this.owner};
     
     this.application.notifyEventListeners("scene", changeEvent);
   }
 
-  isBoundTo(object)
+  isBoundTo(objects)
   {
-    return this._object === object || 
-      (this._object === null && this.owner === object);
+    return objects.includes(this._object) || 
+      (this._object === null && objects.includes(this.owner));
   }
   
   _parseIfNeeded()

@@ -24,7 +24,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
 
     application.addEventListener("scene", function(event)
     {
-      if (event.type === 'cut')
+      if (event.type === "cut")
       {
         for (let i = 0; i < scope.cutLabels.length; i++)
         {
@@ -37,16 +37,16 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
         for (let i = 0; i < objects.length; i++)
         {
           let object = objects[i];
-          let labelId = 'ol-lab-' + object.id;
+          let labelId = "ol-lab-" + object.id;
           let labelElem = document.getElementById(labelId);
           labelElem._cut = true;
           scope.updateLabelStyle(labelElem);
           scope.cutLabels.push(labelElem);
         }
       }
-      else if (event.type === 'added')
+      else if (event.type === "added")
       {
-        let parentListId = 'ol-ul-' + event.parent.id;
+        let parentListId = "ol-ul-" + event.parent.id;
         let parentListElem = document.getElementById(parentListId);
         if (parentListElem)
         {
@@ -54,28 +54,28 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
         }
         else
         {
-          let parentItemId = 'ol-li-' + event.parent.id;
+          let parentItemId = "ol-li-" + event.parent.id;
           let parentItemElem = document.getElementById(parentItemId);
           parentItemElem.innerHTML = "";
           scope.populateItem(event.parent, parentItemElem);
         }
       }
-      else if (event.type === 'removed')
+      else if (event.type === "removed")
       {
-        let itemId = 'ol-li-' + event.object.id;
+        let itemId = "ol-li-" + event.object.id;
         let itemElem = document.getElementById(itemId);
         if (itemElem)
         {
           itemElem.parentNode.removeChild(itemElem);
           if (scope.childCount(event.parent) === 0)
           {
-            let buttonElemId = 'ol-but-' + event.parent.id;
+            let buttonElemId = "ol-but-" + event.parent.id;
             let buttonElem = document.getElementById(buttonElemId);
             if (buttonElem)
             {
               buttonElem.parentNode.removeChild(buttonElem);
             }
-            let parentListId = 'ol-ul-' + event.parent.id;
+            let parentListId = "ol-ul-" + event.parent.id;
             let parentListElem = document.getElementById(parentListId);
             if (parentListElem)
             {
@@ -84,7 +84,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
           }
         }
       }
-      else if (event.type === 'pasted')
+      else if (event.type === "pasted")
       {
         for (let i = 0; i < scope.cutLabels.length; i++)
         {
@@ -97,19 +97,21 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
           scope.expandObject(event.objects[0]);
         }
       }
-      else if (event.type === 'nodeChanged')
+      else if (event.type === "nodeChanged")
       {
-        var object = event.object;
-        var labelId = 'ol-lab-' + object.id;
-        var labelElem = document.getElementById(labelId);
-        if (labelElem !== null)
+        for (let object of event.objects)
         {
-          scope.updateLabel(labelElem, object);
+          let labelId = "ol-lab-" + object.id;
+          let labelElem = document.getElementById(labelId);
+          if (labelElem !== null)
+          {
+            scope.updateLabel(labelElem, object);
+          }
         }
       }
-      else  if (event.type === 'cameraActivated')
+      else  if (event.type === "cameraActivated")
       {
-        var labelId = 'ol-lab-' + event.object.id;
+        var labelId = "ol-lab-" + event.object.id;
         var labelElem = document.getElementById(labelId);
         if (labelElem !== scope.activeCameraLabel)
         {
@@ -123,7 +125,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
           scope.activeCameraLabel = labelElem;
         }
       }
-      else if (event.type === 'structureChanged')
+      else if (event.type === "structureChanged")
       {
         scope.update();
       }
@@ -135,7 +137,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
   update()
   {
     this.bodyElem.innerHTML = "";
-    let listElem = document.createElement('ul');
+    let listElem = document.createElement("ul");
     listElem.className = "tree outliner";
     this.bodyElem.appendChild(listElem);
     this.populateList(this.application.scene, listElem);
@@ -158,12 +160,12 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
   {
     let name = object.name;
     if (name === null || name === undefined || name === '')
-      name = 'object-' + object.id;
+      name = "object-" + object.id;
     if (name.indexOf(BIMROCKET.HIDDEN_PREFIX) !== 0) // not hidden object
     {
       // li
-      let itemElem = document.createElement('li');
-      itemElem.id = 'ol-li-' + object.id;
+      let itemElem = document.createElement("li");
+      itemElem.id = "ol-li-" + object.id;
       itemElem.className = this.getObjectClass(object);
       parentListElem.appendChild(itemElem);
       this.populateItem(object, itemElem);
@@ -177,14 +179,14 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     const buttonListener = function(event)
     {
       let buttonElem = event.srcElement || event.target;
-      buttonElem.className = (buttonElem.className === 'expand') ? 
-        'collapse' : 'expand';
+      buttonElem.className = (buttonElem.className === "expand") ? 
+        "collapse" : "expand";
       let id = buttonElem.id.substring(7);
       let elem = document.getElementById("ol-ul-" + id);
       if (elem)
       {
-        elem.className = (elem.className === 'expanded') ? 
-          'collapsed' : 'expanded';
+        elem.className = (elem.className === "expanded") ? 
+          "collapsed" : "expanded";
       }
     };
 
@@ -202,33 +204,33 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     // expand/collapse button
     if (hasChildren)
     {
-      var buttonId = 'ol-but-' + object.id;
-      var buttonElem = document.createElement('button');
+      var buttonId = "ol-but-" + object.id;
+      var buttonElem = document.createElement("button");
       buttonElem.id = buttonId;
-      buttonElem.className = 'expand';
-      buttonElem.addEventListener('click', buttonListener);
+      buttonElem.className = "expand";
+      buttonElem.addEventListener("click", buttonListener);
       itemElem.appendChild(buttonElem);
     }
 
     // label
-    let labelElem = document.createElement('a');
+    let labelElem = document.createElement("a");
     labelElem.href = "#";
-    let labelId = 'ol-lab-' + object.id;
+    let labelId = "ol-lab-" + object.id;
     labelElem.id = labelId;
     labelElem._selected = false;
     labelElem._cut = false;
     this.updateLabel(labelElem, object);
-    labelElem.addEventListener('click', labelListener);
+    labelElem.addEventListener("click", labelListener);
     itemElem.appendChild(labelElem);
 
     // children
     if (hasChildren)
     {
       // ul
-      let listId = 'ol-ul-' + object.id;
-      let listElem = document.createElement('ul');
+      let listId = "ol-ul-" + object.id;
+      let listElem = document.createElement("ul");
       listElem.id = listId;
-      listElem.className = 'collapsed';
+      listElem.className = "collapsed";
       itemElem.appendChild(listElem);
 
       for (let i = 0; i < object.children.length; i++)
@@ -255,7 +257,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     for (let i = 0; i < objects.length; i++)
     {
       let object = objects[i];
-      let labelId = 'ol-lab-' + object.id;
+      let labelId = "ol-lab-" + object.id;
       let selectedLabel = document.getElementById(labelId);
       if (selectedLabel)
       {
@@ -286,10 +288,10 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     while (curr)
     {
       var id = curr.id;
-      var childrenElem = document.getElementById('ol-ul-' + id);
-      var buttonElem = document.getElementById('ol-but-' + id);
-      childrenElem.className = 'expanded';
-      buttonElem.className = 'collapse';
+      var childrenElem = document.getElementById("ol-ul-" + id);
+      var buttonElem = document.getElementById("ol-but-" + id);
+      childrenElem.className = "expanded";
+      buttonElem.className = "collapse";
       curr = curr.parent;
     }
   }

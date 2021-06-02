@@ -98,7 +98,7 @@ BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
     camera.lookAt(this.center);
     camera.updateMatrix(); 
 
-    var changeEvent = {type: "nodeChanged", object: camera, source : this};
+    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
   }
 };

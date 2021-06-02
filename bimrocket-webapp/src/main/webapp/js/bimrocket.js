@@ -422,17 +422,22 @@ BIMROCKET.Application = class
       {
         if (event.type === "nodeChanged")
         {
-          if (event.object instanceof THREE.Camera &&
-              event.source instanceof BIMROCKET.Inspector)
+          let updateSelection = false;
+          for (let object of event.objects)
           {
-            // if inspector change a camera
-            const camera = event.object;
-            camera.updateProjectionMatrix();
+            if (object instanceof THREE.Camera &&
+                event.source instanceof BIMROCKET.Inspector)
+            {
+              // inspector has changed a camera
+              const camera = object;
+              camera.updateProjectionMatrix();
+            }
+            else if (application.selection.contains(object))
+            {
+              updateSelection = true;
+            }
           }
-          else if (application.selection.contains(event.object))
-          {
-            application.updateSelection();
-          }
+          if (updateSelection) application.updateSelection();
         }
         application.repaint();
       }
@@ -1178,7 +1183,7 @@ BIMROCKET.Application = class
 
   notifyObjectUpdated(object)
   {
-    let sceneEvent = {type: "nodeChanged", object: object,
+    let sceneEvent = {type: "nodeChanged", objects: [object],
       source : this};
     this.notifyEventListeners("scene", sceneEvent);
   }
@@ -1207,17 +1212,11 @@ BIMROCKET.Application = class
     }
 
     let set = BIMROCKET.ObjectUtils.updateVisibility(objects, visible);
-    let iterator = set.values();
-    let item = iterator.next();
+    let changedObjects = Array.from(set);
 
-    while (!item.done)
-    {
-      let object = item.value;
-      let sceneEvent = {type: "nodeChanged", object: object,
-        source : this};
-      this.notifyEventListeners("scene", sceneEvent);
-      item = iterator.next();
-    }
+    let sceneEvent = {type: "nodeChanged", objects: changedObjects, 
+      source : this};
+    this.notifyEventListeners("scene", sceneEvent);
   }
 
   updateStyle(objects, edgesVisible, facesVisible)
@@ -1233,17 +1232,11 @@ BIMROCKET.Application = class
 
     let set = BIMROCKET.ObjectUtils.updateStyle(objects,
       edgesVisible, facesVisible);
-    let iterator = set.values();
-    let item = iterator.next();
+    let changedObjects = Array.from(set);
 
-    while (!item.done)
-    {
-      let object = item.value;
-      let sceneEvent = {type: "nodeChanged", object: object,
-        source : this};
-      this.notifyEventListeners("scene", sceneEvent);
-      item = iterator.next();
-    }
+    let sceneEvent = {type: "nodeChanged", objects: changedObjects, 
+      source : this};
+    this.notifyEventListeners("scene", sceneEvent);
   }
 
   selectObjects(event, objects)
@@ -1306,7 +1299,7 @@ BIMROCKET.Application = class
       controller.start();
     }
 
-    let sceneEvent = {type: "nodeChanged", object: object,
+    let sceneEvent = {type: "nodeChanged", objects: [object],
       source : this};
     this.notifyEventListeners("scene", sceneEvent);
 

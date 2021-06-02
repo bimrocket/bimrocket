@@ -200,7 +200,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     this.xDelta = 0;
     this.yDelta = 0;
 
-    var changeEvent = {type: "nodeChanged", object: camera, source : this};
+    var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
 
     this.updateCamera = false;
@@ -211,7 +211,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     var application = this.application;
     
     if ((event.type === "nodeChanged" || event.type === "cameraActivated") &&
-      application.camera === event.object && event.source !== this)
+      event.objects.includes(application.camera) && event.source !== this)
     {
       this.resetParameters();
     }

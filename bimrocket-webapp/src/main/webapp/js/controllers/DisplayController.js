@@ -40,7 +40,7 @@ BIMROCKET.DisplayController = class extends BIMROCKET.PanelController
   {
     this.panel.visible = this.application.selection.contains(this.object);
     
-    if (event.type === "nodeChanged" && this.input.isBoundTo(event.object))
+    if (event.type === "nodeChanged" && this.input.isBoundTo(event.objects))
     {
       this.update();
     }

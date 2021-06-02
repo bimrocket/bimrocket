@@ -851,7 +851,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     camera.updateMatrixWorld(true);
     const changeEvent = {type: "nodeChanged",
-      object: camera, source : this};
+      objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
 
     application.activateCamera(camera);

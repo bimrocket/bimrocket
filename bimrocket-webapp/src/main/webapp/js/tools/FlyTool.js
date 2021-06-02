@@ -380,7 +380,7 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
       camera.lookAt(this.target);
       camera.updateMatrix();
 
-      var changeEvent = {type: "nodeChanged", object: camera, source : this};
+      var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);
 
       this.updateCamera = false;
@@ -390,7 +390,7 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
   onScene(event)
   {
     if ((event.type === "nodeChanged" || event.type === "cameraActivated") &&
-      this.application.camera === event.object && event.source !== this)
+      event.objects.includes(this.application.camera) && event.source !== this)
     {
       this.resetParameters();
     }

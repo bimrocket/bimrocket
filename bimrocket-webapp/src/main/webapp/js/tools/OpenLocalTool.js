@@ -79,7 +79,8 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
             application.scene.updateMatrixWorld(true);
             BIMROCKET.ObjectUtils.zoomAll(camera, object, aspect);
             
-            let changeEvent = {type: "nodeChanged", object: camera, source : this};
+            let changeEvent = {type: "nodeChanged", objects: [camera], 
+              source : this};
             application.notifyEventListeners("scene", changeEvent);
           },
           onError : function(error)

@@ -115,7 +115,7 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
         object.updateMatrix();
       }
       const changeEvent = {type: "nodeChanged", 
-        object: this.objects[0], source : this};
+        objects: this.objects, source : this};
       application.notifyEventListeners("scene", changeEvent);  
     }
   }

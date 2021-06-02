@@ -89,7 +89,7 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
     this.rotateStart = this.rotateEnd;
 
     const changeEvent = {type: "nodeChanged", 
-      object: this.objects[0], source : this};
+      objects: this.objects, source : this};
     this.application.notifyEventListeners("scene", changeEvent);  
   }
 

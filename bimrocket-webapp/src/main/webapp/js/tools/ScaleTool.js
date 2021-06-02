@@ -94,7 +94,7 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
     this.scaleStart = this.scaleEnd;
 
     const changeEvent = {type: "nodeChanged", 
-      object: this.objects[0], source : this};
+      objects: this.objects, source : this};
     this.application.notifyEventListeners("scene", changeEvent);  
   }
 

@@ -193,7 +193,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
       application.scene.updateMatrixWorld(true);
       BIMROCKET.ObjectUtils.zoomAll(camera, this.selectedObject, aspect);
-      let changeEvent = {type: "nodeChanged", object: camera, source : this};
+      let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);
 
       this.updateCamera = false;
@@ -250,7 +250,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
           if (!obj.visible)
           {
             obj.visible = true;
-            var sceneEvent = {type: "nodeChanged", object: obj, 
+            var sceneEvent = {type: "nodeChanged", objects: [obj], 
               source : this};
             application.notifyEventListeners("scene", sceneEvent);
           }
@@ -301,7 +301,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
           if (oldVisibility !== obj.visible)
           {
-            let sceneEvent = {type: "nodeChanged", object: obj, 
+            let sceneEvent = {type: "nodeChanged", objects: [obj], 
               source : this};
             application.notifyEventListeners("scene", sceneEvent);
           }

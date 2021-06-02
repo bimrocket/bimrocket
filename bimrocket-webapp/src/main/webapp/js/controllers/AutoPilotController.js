@@ -121,7 +121,7 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
         this._sleep = Math.random() * 10;
         this.object.visible = false;
       }
-      var changeEvent = {type : "nodeChanged", object : this.object, 
+      var changeEvent = {type : "nodeChanged", objects : [this.object], 
         source: this};
       this.application.notifyEventListeners("scene", changeEvent);
     }

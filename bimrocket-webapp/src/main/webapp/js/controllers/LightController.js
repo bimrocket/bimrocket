@@ -40,7 +40,8 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
   onNodeChanged(event)
   {
     if (event.type === "nodeChanged" && 
-        (this.input.isBoundTo(event.object) || this.object === event.object))
+        (this.input.isBoundTo(event.objects) || 
+         event.objects.includes(this.object)))
     {
       this.update(false);
     }

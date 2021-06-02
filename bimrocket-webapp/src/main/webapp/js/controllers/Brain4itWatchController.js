@@ -42,7 +42,7 @@ BIMROCKET.Brain4itWatchController = class extends BIMROCKET.Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && event.object === this.object)
+    if (event.type === "nodeChanged" && event.objects.includes(this.object))
     {
       this.watch();
     }

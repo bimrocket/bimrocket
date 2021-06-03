@@ -147,6 +147,16 @@ BIMROCKET.Application = class
      label: BIMROCKET.IFC.RepresentationName});    
     const orbitTool = new BIMROCKET.OrbitTool(this);
     const flyTool = new BIMROCKET.FlyTool(this);
+    const topViewTool = new BIMROCKET.ViewTool(this, 
+      {label: "Top", x : 0, y : 0, z : 0});
+    const frontViewTool = new BIMROCKET.ViewTool(this, 
+      {label: "Front", x : 90, y : 0, z : 0});
+    const backViewTool = new BIMROCKET.ViewTool(this,
+      {label: "Back", x : -90, y : 0, z : 180});    
+    const leftViewTool = new BIMROCKET.ViewTool(this,
+      {label: "Left", x : 90, y : 90, z : 0});
+    const rightViewTool = new BIMROCKET.ViewTool(this,       
+      {label: "Right", x : -90, y : -90, z : 180});
     const autoOrbitTool = new BIMROCKET.AutoOrbitTool(this);
     const sectionTool = new BIMROCKET.SectionTool(this);
     const inspectGeometryTool = new BIMROCKET.InspectGeometryTool(this);
@@ -299,6 +309,12 @@ BIMROCKET.Application = class
     viewMenu.addMenuItem(orbitTool);
     viewMenu.addMenuItem(flyTool);
     viewMenu.addMenuItem(zoomAllTool);
+    const standardViewMenu = viewMenu.addMenu("Standard view");
+    standardViewMenu.addMenuItem(topViewTool);
+    standardViewMenu.addMenuItem(frontViewTool);
+    standardViewMenu.addMenuItem(backViewTool);
+    standardViewMenu.addMenuItem(leftViewTool);
+    standardViewMenu.addMenuItem(rightViewTool);    
     viewMenu.addMenuItem(showTool);
     viewMenu.addMenuItem(hideTool);
     const styleMenu = viewMenu.addMenu("Style");

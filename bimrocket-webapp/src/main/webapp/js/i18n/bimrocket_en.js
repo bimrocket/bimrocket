@@ -59,7 +59,7 @@ I18N.add('BIMROCKET', 'en' , {
   "tool.clip.label" : "Clip",
 
   "tool.orbit.label" : "Orbit",
-  "tool.orbit.help" : "Drag left mouse button: rotate, Mouse wheel: zoom, Mouse click: select, Alt+1-5: standard views",
+  "tool.orbit.help" : "Drag left mouse button: rotate, Drag right mouse button: pan, Mouse wheel: zoom.",
  
   "tool.auto_orbit.label" : "Auto orbit",
   "tool.auto_orbit.help" : "Auto orbit",
@@ -67,6 +67,8 @@ I18N.add('BIMROCKET', 'en' , {
   "tool.fly.label" : "Fly",
   "tool.fly.help" : "Cursor up: forward, Cursor down: backward, Cursor left: rotate left, Cursor right: rotate right, " +
     "Z: move left, X: move right, R: move up, F: move down, E: look down, D: look up",
+
+  "tool.view.label" : "View",
 
   "tool.section.label" : "Section",
   "tool.section.help" : "Mouse click on face to select the clipping plane. Mouse wheel to offset the clipping plane.",

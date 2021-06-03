@@ -1,19 +1,21 @@
 /*
- * ZoomAllTool.js
+ * ViewTool.js
  *
  * @autor: realor
  */
 
-BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
+BIMROCKET.ViewTool = class extends BIMROCKET.Tool
 {
   constructor(application, options)
   {
     super(application);
-    this.name = "zoom_all";
-    this.label = "tool.zoom_all.label";
-    this.help = "tool.zoom_all.help";
-    this.className = "zoom_all";
+    this.name = "view";
+    this.label = "tool.view.label";
+    this.className = "view";
     this.immediate = true;
+    this.x = 0; // degrees
+    this.y = 0; // degrees
+    this.z = 0; // degrees
     this.setOptions(options);
   }
 
@@ -23,6 +25,11 @@ BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
     const container = application.container;
     const aspect = container.clientWidth / container.clientHeight;
     const camera = application.camera;
+    
+    camera.rotation.x = THREE.MathUtils.degToRad(this.x);
+    camera.rotation.y = THREE.MathUtils.degToRad(this.y);
+    camera.rotation.z = THREE.MathUtils.degToRad(this.z);
+    camera.updateMatrix();
 
     application.scene.updateMatrixWorld(true);
     BIMROCKET.ObjectUtils.zoomAll(camera, application.baseObject, aspect);
@@ -31,3 +38,6 @@ BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
     application.notifyEventListeners("scene", changeEvent);
   }
 };
+
+
+

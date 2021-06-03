@@ -73,7 +73,6 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     this._onMouseDown = this.onMouseDown.bind(this);
     this._onMouseMove = this.onMouseMove.bind(this);
     this._onMouseWheel = this.onMouseWheel.bind(this);
-    this._onKeyDown = this.onKeyDown.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
@@ -98,7 +97,6 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     var application = this.application;
     var container = application.container;
 
-    document.addEventListener('keydown', this._onKeyDown, false);
     container.addEventListener('contextmenu', this._onContextMenu, false);
     container.addEventListener('mousedown', this._onMouseDown, false);
     container.addEventListener('mousewheel', this._onMouseWheel, false);
@@ -114,7 +112,6 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     var application = this.application;
     var container = application.container;
     
-    document.removeEventListener('keydown', this._onKeyDown, false);
     container.removeEventListener('contextmenu', this._onContextMenu, false);
     container.removeEventListener('mousedown', this._onMouseDown, false);
     container.removeEventListener('mousewheel', this._onMouseWheel, false);
@@ -208,12 +205,20 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
 
   onScene(event)
   {
-    var application = this.application;
-    
-    if ((event.type === "nodeChanged" || event.type === "cameraActivated") &&
-      event.objects.includes(application.camera) && event.source !== this)
+    const application = this.application;
+
+    if (event.source !== this)
     {
-      this.resetParameters();
+      const camera = application.camera;
+      
+      if (event.type === "nodeChanged" && event.objects.includes(camera))
+      {
+        this.resetParameters();
+      }
+      else if (event.type === "cameraActivated")
+      {
+        this.resetParameters();        
+      }
     }
   }
 
@@ -469,31 +474,6 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     if (delta !== 0)
     {
       this.zoomIn(delta);
-    }
-  }
-
-  onKeyDown(event)
-  {
-    if (event.altKey)
-    {
-      switch (event.keyCode)
-      {
-        case 220:
-          this.setView(Math.PI, this.EPS);
-          break;
-        case 50:
-          this.setView(Math.PI, Math.PI / 2);
-          break;
-        case 51:
-          this.setView(Math.PI / 2, Math.PI / 2);
-          break;
-        case 52:
-          this.setView(-Math.PI / 2, Math.PI / 2);
-          break;
-        case 53:
-          this.setView(0, Math.PI / 2);
-          break;
-      }
     }
   }
 

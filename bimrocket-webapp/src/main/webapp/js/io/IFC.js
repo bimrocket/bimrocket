@@ -149,9 +149,10 @@ BIMROCKET.IFC = {
         let productObject3D = product.helper.getObject3D();
         let productRepr =
           productObject3D.getObjectByName(BIMROCKET.IFC.RepresentationName);
-        if (productRepr instanceof BIMROCKET.Solid &&
-            //WARN: productRepr.geometry.faces.length > 0 &&
-            (productRepr.userData.IFC.ifcClassName === "IfcExtrudedAreaSolid" ||
+  
+        if (productRepr instanceof BIMROCKET.Solid &&           
+            (productRepr.geometry.faces.length <= 24 ||
+             productRepr.userData.IFC.ifcClassName === "IfcExtrudedAreaSolid" ||
              productRepr.userData.IFC.ifcClassName === "IfcBooleanResult" ||
              productRepr.userData.IFC.ifcClassName === "IfcBooleanClippingResult"))
         {

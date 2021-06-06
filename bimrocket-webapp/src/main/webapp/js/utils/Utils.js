@@ -49,7 +49,8 @@ function toHTML(text)
 };
 
 // task : { run : fn, message: string, iterations: fn }
-function executeTasks(tasks, onCompleted, onProgress, notifyMillis, delay)
+function executeTasks(tasks, onCompleted, onProgress, onError, 
+  notifyMillis, delay)
 {
   notifyMillis = notifyMillis || 100;
   delay = delay || 10;
@@ -77,7 +78,15 @@ function executeTasks(tasks, onCompleted, onProgress, notifyMillis, delay)
       var t0 = Date.now();
       do
       {
-        task.run(j++);
+        try
+        {
+          task.run(j++);
+        }
+        catch (ex)
+        {
+          if (onError) onError(ex);
+          return;
+        }
       } while (j < iterations && Date.now() - t0 < notifyMillis)
 
       if (j < iterations)

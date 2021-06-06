@@ -80,7 +80,7 @@ BIMROCKET.IFC = {
     return clonedObject;
   },
 
-  buildModel : function(file, onCompleted, onProgress)
+  buildModel : function(file, onCompleted, onProgress, onError)
   {
     const model = new THREE.Group();
 
@@ -360,7 +360,7 @@ BIMROCKET.IFC = {
         { run : paintObjects, message : "Painting objects..."},
         { run : groupObjects, message : "Grouping objects..."},
         { run : processProjectInfo, message : "Processing project info..."}],
-        function() { onCompleted(model); }, onProgress, 100, 10);
+        function() { onCompleted(model); }, onProgress, onError, 100, 10);
     }
     else
     {
@@ -451,7 +451,7 @@ BIMROCKET.IFC.STEPLoader = class extends THREE.Loader
     };
     parser.parse(text);
 
-    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress);
+    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress, onError);
   }
 };
 

@@ -1102,7 +1102,7 @@ BIMROCKET.IFC.helpers.IfcExtrudedAreaSolidHelper = class
   }
 };
 
-BIMROCKET.IFC.helpers.IfcFacetedBrepHelper = class
+BIMROCKET.IFC.helpers.IfcManifoldSolidBrepHelper = class
   extends BIMROCKET.IFC.helpers.IfcGeometricRepresentationItemHelper
 {
   constructor(instance, schema)
@@ -1774,7 +1774,8 @@ BIMROCKET.IFC.helpers.IfcConnectedFaceSetHelper = class
         for (let b = 0; b < bounds.length; b++)
         {
           let bound = bounds[b]; // IfcFaceBound
-          let loop = bound.Bound; // IfcLoop (IfcPolyLoop)
+          let loop = bound.Bound; // IfcLoop: 
+          // (IfcPolyLoop, IfcEdgeLoop, IfcVertexLoop)
           let loopVertices = loop.helper.getPoints();
           let loopOrientation = bound.Orientation;
           if (loopOrientation === ".F.")
@@ -1836,14 +1837,65 @@ BIMROCKET.IFC.helpers.IfcPolyLoopHelper = class
   {
     if (this.points === null)
     {
-      var loop = this.instance;
-      var polygon = loop.Polygon;
+      const loop = this.instance;
+      const polygon = loop.Polygon;
+      
       this.points = [];
-      for (var i = 0; i < polygon.length; i++)
+      for (let i = 0; i < polygon.length; i++)
       {
-        var point = polygon[i].helper.getPoint();
+        let point = polygon[i].helper.getPoint();
         this.points.push(point);
       }
+    }
+    return this.points;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcEdgeLoopHelper = class
+  extends BIMROCKET.IFC.helpers.IfcHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+    this.points = null;
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const edges = this.instance.EdgeList; // IfcOrientedEdge[]
+
+      this.points = [];
+      for (let i = 0; i < edges.length; i++)
+      {
+        let edge = edges[i];
+        let point = edge.Orientation === ".T." ?
+          edge.EdgeElement.EdgeStart.VertexGeometry.helper.getPoint() :
+          edge.EdgeElement.EdgeEnd.VertexGeometry.helper.getPoint();          
+        this.points.push(point);
+      }
+    }
+    return this.points;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcVertexLoopHelper = class
+  extends BIMROCKET.IFC.helpers.IfcHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+    this.points = null;
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const vertex = this.instance.LoopVertex; // IfcVertexPoint
+      const point = vertex.VertexGeometry.helper.getPoint();
+      this.points = [point];
     }
     return this.points;
   }

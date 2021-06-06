@@ -36,7 +36,7 @@ BIMROCKET.CenterSelectionTool = class extends BIMROCKET.Tool
       const camera = application.camera;
 
       application.scene.updateMatrixWorld(true);
-      BIMROCKET.ObjectUtils.zoomAll(camera, objects, aspect);
+      BIMROCKET.ObjectUtils.zoomAll(camera, objects, aspect, true);
 
       let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);

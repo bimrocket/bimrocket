@@ -105,6 +105,11 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
           }
         }
       }
+      if (object instanceof BIMROCKET.Solid)
+      {
+        this.createWriteableProperty(object, "edgesVisible", objListElem);
+        this.createWriteableProperty(object, "facesVisible", objListElem);
+      }
 
       var material = object.material;
       if (material)

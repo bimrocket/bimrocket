@@ -192,7 +192,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       camera.updateMatrix();
 
       application.scene.updateMatrixWorld(true);
-      BIMROCKET.ObjectUtils.zoomAll(camera, this.selectedObject, aspect);
+      BIMROCKET.ObjectUtils.zoomAll(camera, this.selectedObject, aspect, true);
       let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);
 
@@ -250,7 +250,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
           if (!obj.visible)
           {
             obj.visible = true;
-            var sceneEvent = {type: "nodeChanged", objects: [obj], 
+            const sceneEvent = {type: "nodeChanged", objects: [obj], 
               source : this};
             application.notifyEventListeners("scene", sceneEvent);
           }
@@ -309,8 +309,14 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       }
     });
 
-    let angle = THREE.Math.radToDeg(siteObject ? siteObject.rotation.z : 0);
-
+    let angle = 0;
+    if (siteObject)
+    {
+      const euler = new THREE.Euler();
+      euler.setFromRotationMatrix(siteObject.matrixWorld);
+      angle = THREE.Math.radToDeg(euler.z);
+    }
+    
     if (view === 'top')
     {
       this.pointCamera(0, angle);

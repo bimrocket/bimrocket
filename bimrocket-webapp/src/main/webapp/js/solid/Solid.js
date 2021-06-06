@@ -75,7 +75,6 @@ BIMROCKET.Solid = class extends THREE.Object3D
   set facesVisible(facesVisible)
   {
     this._facesObject.visible = facesVisible;
-    this.visible = this.facesVisible || this.edgesVisible;
   }
 
   get edgesVisible()
@@ -86,7 +85,6 @@ BIMROCKET.Solid = class extends THREE.Object3D
   set edgesVisible(edgesVisible)
   {
     this._edgesObject.visible = edgesVisible;
-    this.visible = this.facesVisible || this.edgesVisible;
   }
 
   get material()

@@ -40,6 +40,11 @@ ul.tree li.IfcCurtainWall
   background-image: url(images/ifc/IfcCurtainWall.svg);
 }
 
+ul.tree li.IfcDistributionFlowElement
+{
+  background-image: url(images/ifc/IfcDistributionFlowElement.svg);
+}
+
 ul.tree li.IfcDoor
 {
   background-image: url(images/ifc/IfcDoor.svg);

@@ -105,7 +105,7 @@ public class BcfEndpoint
   }
 
   /* Projects */
-
+  
   @GET
   @Path("/projects")
   @Produces(APPLICATION_JSON)

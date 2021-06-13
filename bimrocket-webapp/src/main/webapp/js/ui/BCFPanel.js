@@ -448,6 +448,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       console.info(topic);
       scope.showTopic(topic);
       scope.topics = null; // force topic list refresh
+      BIMROCKET.Toast.show("Topic saved.");      
     }
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
@@ -482,6 +483,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     {
       scope.showTopic();
       scope.topics = null; // force topic list refresh
+      BIMROCKET.Toast.show("Topic deleted.");
     }
 
     let projectId = this.getProjectId();
@@ -528,6 +530,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       console.info(comment);
       scope.commentGuid = null;
       scope.loadComments(true);
+      BIMROCKET.Toast.show("Comment saved.");
     }
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
@@ -558,6 +561,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     function reqListener()
     {
       scope.loadComments();
+      BIMROCKET.Toast.show("Comment deleted.");
     }
 
     let projectId = this.getProjectId();
@@ -646,6 +650,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       let viewpoint = JSON.parse(oReq.responseText);
       console.info(viewpoint);
       scope.loadViewpoints();
+      BIMROCKET.Toast.show("Viewpoint saved.");
     }
 
     let projectId = this.getProjectId();
@@ -665,6 +670,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     function reqListener()
     {
       scope.loadViewpoints();
+      BIMROCKET.Toast.show("Viewpoint deleted.");
     }
 
     let projectId = this.getProjectId();

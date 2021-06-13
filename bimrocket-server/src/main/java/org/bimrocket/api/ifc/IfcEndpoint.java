@@ -33,7 +33,6 @@ package org.bimrocket.api.ifc;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;

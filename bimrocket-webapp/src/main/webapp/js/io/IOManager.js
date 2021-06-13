@@ -1,76 +1,84 @@
 BIMROCKET.IOManager = class
 {
-  static loaders =
+  static formats = 
   {
     "dae" :
     {
-      cls: THREE.ColladaLoader,
+      description: "Collada (*.dae)",
+      extension: "dae",
+      loaderClass : THREE.ColladaLoader,
+      exporterClass : THREE.ColladaExporter,
       options : {}
     },
     "obj" :
     {
-      cls : THREE.OBJLoader,
+      description: "Wavefront object (*.obj)",
+      extension: "obj",
+      loaderClass : THREE.OBJLoader,
+      exporterClass : THREE.OBJExporter, 
       options : {}
     },
     "stl" :
     {
-      cls : THREE.STLLoader,
+      description : "Stereolithography (*.stl)",
+      extension: "stl",
+      loaderClass : THREE.STLLoader,
+      exporterClass : THREE.STLExporter,
       options : {}
     },
     "json" :
     {
-      cls : BIMROCKET.GeoJSONLoader,
+      description : "GeoJSON (*.json)",
+      extension: "json",
+      loaderClass : BIMROCKET.GeoJSONLoader,
       options : {}
     },
     "gml" :
     {
-      cls : BIMROCKET.GMLLoader,
+      description : "Geography markup language (*.gml)",
+      extension: "gml",
+      loaderClass : BIMROCKET.GMLLoader,
       options : {}
     },
     "ifc" :
     {
-      cls: BIMROCKET.IFC.STEPLoader,
-      options : {}          
-    }
+      description : "Industry foundation classes STEP (*.ifc)",
+      extension: "ifc",
+      loaderClass: BIMROCKET.IFC.STEPLoader,
+      options : {}
+    }            
   }
-
-  static exporters =
-  {
-    "dae" : 
-    {
-      cls : THREE.ColladaExporter,
-      options : {}
-    },
-    "obj" : 
-    {
-      cls : THREE.OBJExporter,
-      options : {}
-    },
-    "stl" : 
-    {
-      cls : THREE.STLExporter,
-      options : {}
-    }    
-  }
-
+  
   static getFormat(name)
   {
     let format = null;
-    let index = name.lastIndexOf(".");
-    if (index !== -1)
+    if (typeof name === "string")
     {
-      format = name.substring(index + 1).toLowerCase();
+      let index = name.lastIndexOf(".");
+      if (index !== -1)
+      {
+        format = name.substring(index + 1).toLowerCase();
+      }
     }
     return format;
+  }
+
+  static getFormatInfo(name)
+  {
+    let format = this.getFormat(name);
+    let formatInfo = format ?
+      BIMROCKET.IOManager.formats[format] :
+      BIMROCKET.IOManager.formats[name];
+    return formatInfo || null;
   }
 
   static createLoader(format)
   {
     let loader = null;
-    let formatInfo = this.loaders[format];
-    if (formatInfo)
+    let formatInfo = this.formats[format];
+    if (formatInfo && formatInfo.loaderClass)
     {
-      loader = new formatInfo.cls();
+      loader = new formatInfo.loaderClass();
     }
     return loader;
   }
@@ -78,10 +86,10 @@ BIMROCKET.IOManager = class
   static createExporter(format)
   {
     var exporter = null;
-    var formatInfo = this.exporters[format];
-    if (formatInfo)
+    var formatInfo = this.formats[format];
+    if (formatInfo && formatInfo.exporterClass)
     {
-      exporter = new formatInfo.cls();
+      exporter = new formatInfo.exporterClass();
     }
     return exporter;
   }
@@ -125,11 +133,12 @@ BIMROCKET.IOManager = class
         {
           if (request.readyState === 4)
           {
+            onProgress({progress : 100, message : ""});
+
             if (request.status === 0 ||
               request.status === 200 || request.status === 207)
             {
-              data = request.responseXML ?
-                request.responseXML : request.responseText;
+              data = request.responseText;
               try
               {
                 scope.parseData(loader, url, data, 
@@ -233,10 +242,18 @@ BIMROCKET.IOManager = class
   
   static parseObject(exporter, object, onCompleted, onProgress, onError)
   {
-    let data = exporter.parse(object);
-    if (typeof data === "string")
+    let data = "";
+    let result = exporter.parse(object);
+    if (result)
     {
-      data = new Blob([data], {type: 'text/plain'});
+      if (typeof result === "string")
+      {
+        data = new Blob([result], {type: 'text/plain'});
+      }
+      else if (typeof result.data === "string")
+      {
+        data = new Blob([result.data], {type: 'text/plain'});      
+      }
     }
     if (onCompleted) onCompleted(data);
     return data;
@@ -248,7 +265,7 @@ BIMROCKET.IOManager = class
     {
       let geometry = result;
       let material = new THREE.MeshPhongMaterial(
-        {color : 0x0000ff, side : THREE.DoubleSide});
+        {color : 0x008000, side : THREE.DoubleSide});
       let object = new THREE.Mesh(geometry, material);
       object.updateMatrix();
       return object;

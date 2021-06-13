@@ -40,6 +40,25 @@
     <param-value>orientdb</param-value>
   </context-param>
 
+  <context-param>
+    <param-name>cloudfs.baseProperty</param-name>
+    <param-value>user.home</param-value>
+  </context-param>
+  <context-param>
+    <param-name>cloudfs.baseDirectory</param-name>
+    <param-value>cloudfs</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>print.baseProperty</param-name>
+    <param-value>user.home</param-value>
+  </context-param>
+  <context-param>
+    <param-name>print.baseDirectory</param-name>
+    <param-value>cloudfs</param-value>
+  </context-param>
+
+
   <servlet>
     <servlet-name>api</servlet-name>
     <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
@@ -52,32 +71,6 @@
   <servlet-mapping>
     <servlet-name>api</servlet-name>
     <url-pattern>/api/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>cloudfs</servlet-name>
-    <servlet-class>org.bimrocket.cloudfs.WebdavServlet</servlet-class>
-    <init-param>
-      <param-name>BASE_PROPERTY</param-name>
-      <param-value>user.home</param-value>
-    </init-param>
-    <init-param>
-      <param-name>BASE_DIR_NAME</param-name>
-      <param-value>cloudfs</param-value>
-    </init-param>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>cloudfs</servlet-name>
-    <url-pattern>/cloudfs/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>printsvc</servlet-name>
-    <servlet-class>org.bimrocket.printsvc.PrintServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>printsvc</servlet-name>
-    <url-pattern>/printsvc/*</url-pattern>
   </servlet-mapping>
 
   <session-config>

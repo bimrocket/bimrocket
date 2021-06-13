@@ -1,0 +1,20 @@
+/* Toast */
+
+.toast
+{
+  display: grid;
+  color: blue;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0ff;
+  z-index: 10001;
+  -webkit-box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.63);
+  -moz-box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.63);
+  box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.63);
+  border: 1px solid #8080ff;
+  text-align: center;
+  vertical-align: middle;
+  padding: 2px;
+  opacity: 0;
+  transition: opacity 1s;
+}

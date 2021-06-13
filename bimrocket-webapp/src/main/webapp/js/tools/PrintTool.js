@@ -66,7 +66,7 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
     var application = this.application;
     var request = new XMLHttpRequest();
     var url = location.protocol + "//" + location.host +
-      "/bimrocket-server/printsvc/sample.pdf";
+      "/bimrocket-server/api/print/sample.pdf";
     console.info("print url: " + url);
     this.openLink.href = url;
 

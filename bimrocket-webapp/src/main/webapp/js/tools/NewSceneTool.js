@@ -22,6 +22,6 @@ BIMROCKET.NewSceneTool = class extends BIMROCKET.Tool
     var application = this.application;
 
     application.initScene();
-    application.useTool("opencloud");
+    application.useTool("cloud_explorer");
   }
 };

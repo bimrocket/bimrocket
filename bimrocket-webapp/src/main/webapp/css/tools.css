@@ -89,7 +89,7 @@
   top:24px;
   left:0;
   right:0;
-  bottom:88px;
+  bottom:52px;
   overflow-y: auto;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -98,61 +98,13 @@
   border:1px solid #c0c0c0;
 }
 
-.service_panel .entry_box
-{
-  position:absolute;
-  bottom:64px;
-  left:0;
-  right:0;
-  height:20px;
-  text-align: right;
-  border:1px solid #c0c0c0;
-}
-
-.service_panel .entry_input
-{
-  position: absolute;
-  left:0;
-  right:0;
-  top:0;
-  bottom:0;
-  margin:0;
-  padding:0;
-  width:100%;
-  height: 20px;
-  border:none;
-  background: transparent;
-  color:black;
-  font-size: 13px;
-}
-
-.service_panel .options_box
-{
-  position:absolute;
-  bottom:40px;
-  left:0;
-  right:0;
-  height:24px;
-  text-align: left;
-}
-
-.service_panel .options_box label
-{
-  vertical-align: middle;
-}
-
-.service_panel .options_box input
-{
-  vertical-align: middle;
-}
-
 .service_panel .footer
 {
   position:absolute;
   bottom:0;
   left:0;
   right:0;
-  height:40px;
+  height:50px;
 }
 
 .service_panel .footer .buttons_panel
@@ -246,6 +198,11 @@
   overflow: auto;
   padding: 0;
   border: none;
+}
+
+.tool_button.cloud_explorer
+{
+  background-image: url(images/tools/cloud_explorer.svg);
 }
 
 .tool_button.opencloud

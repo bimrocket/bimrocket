@@ -28,14 +28,29 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
+package org.bimrocket.api.cloudfs;
 
-package org.bimrocket.cloudfs;
+import jakarta.ws.rs.HttpMethod;
 
 /**
  *
  * @author realor
  */
-public interface CredentialsManager
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(value =
 {
-  public boolean isValid(Credentials credentials);
+  ElementType.METHOD
+})
+@Retention(value = RetentionPolicy.RUNTIME)
+@HttpMethod(value = "PROPFIND")
+@Documented
+public @interface PROPFIND
+{
 }
+

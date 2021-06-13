@@ -96,6 +96,7 @@ public class BimRocketApplication extends ResourceConfig
           closeableList.add((AutoCloseable)bean);
         }
         property(beanName, bean);
+        context.setAttribute(beanName, bean);
       }
     }
   }

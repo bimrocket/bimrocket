@@ -28,55 +28,29 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
+package org.bimrocket.api.cloudfs;
 
-package org.bimrocket.cloudfs;
-
-import java.io.Serializable;
+import jakarta.ws.rs.HttpMethod;
 
 /**
  *
  * @author realor
  */
-public class Credentials implements Serializable
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(value =
 {
-  public static final String ANONYMOUS = "anonymous";
-  private String userId;
-  private String password;
-
-  public Credentials()
-  {
-    userId = ANONYMOUS;
-  }
-  
-  public Credentials(String userId, String password)
-  {
-    this.userId = userId;
-    this.password = password;
-  }
-  
-  public String getUserId()
-  {
-    return userId;
-  }
-
-  public void setUserId(String userId)
-  {
-    this.userId = userId;
-  }
-
-  public String getPassword()
-  {
-    return password;
-  }
-
-  public void setPassword(String password)
-  {
-    this.password = password;
-  }
-  
-  @Override
-  public String toString()
-  {
-    return userId;
-  }
+  ElementType.METHOD
+})
+@Retention(value = RetentionPolicy.RUNTIME)
+@HttpMethod(value = "MKCOL")
+@Documented
+public @interface MKCOL
+{
 }
+

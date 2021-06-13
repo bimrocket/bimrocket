@@ -7,13 +7,10 @@
 I18N.add('BIMROCKET', 'en' , {
   "tool.new_scene.label" : "New scene",
   "tool.new_scene.help" : "New scene",
-  
-  "tool.opencloud.label" : "Open from cloud",
-  "tool.opencloud.help" : "Open from cloud",
-  
-  "tool.savecloud.label" : "Save to cloud",
-  "tool.savecloud.help" : "Save to cloud",
 
+  "tool.cloud_explorer.label" : "Cloud explorer",
+  "tool.cloud_explorer.help" : "Cloud explorer",
+  
   "tool.openlocal.label" : "Open from local disk",
   "tool.openlocal.help" : "Open from local disk",
   

@@ -15,41 +15,24 @@ BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
     this.className = "savelocal";
     this.url = null;
     this.setOptions(options);
-
-    this._onClickSave = this.onClickSave.bind(this);
-    this.createPanel();
-  }
-
-  createPanel()
-  {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
-    
-    this.filenameElem = document.createElement("input");
-    this.filenameElem.type = "text";
-    this.filenameElem.value = "scene.stl";
-    this.filenameElem.id = this.name + "_" + this.id + "_filename";
-    this.panel.bodyElem.appendChild(this.filenameElem);
-
-    this.saveButton = document.createElement("button");
-    this.saveButton.innerHTML = "Save";
-    this.saveButton.id = this.name + "_" + this.id + "_save";
-    this.panel.bodyElem.appendChild(this.saveButton);
-
-    this.saveButton.addEventListener("click", this._onClickSave, false);
   }
 
   activate()
   {
-    this.panel.visible = true;
+    let dialog = new BIMROCKET.SaveDialog("Save to local disk", "scene.stl");
+    dialog.onSave = (name, format, onlySelection) => 
+    {
+      this.onSave(name, format, onlySelection);
+    };
+    dialog.onCancel = () => { dialog.hide(); this.application.useTool(null); };
+    dialog.show();
   }
-
+  
   deactivate()
-  {
-    this.panel.visible = false;
+  {    
   }
 
-  onClickSave(event)
+  onSave(name, format, onlySelection)
   {
     if (this.url)
     {
@@ -58,8 +41,9 @@ BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
     let intent =
     {
       object : this.application.selection.object,
-      name : this.filenameElem.value || "scene.stl"
+      name : name || "scene.stl"
     };
+
     try
     {
       let data = BIMROCKET.IOManager.export(intent);
@@ -77,6 +61,7 @@ BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
       let messageDialog = new BIMROCKET.MessageDialog("ERROR", ex, "error");
       messageDialog.show();
     }
+    this.application.useTool(null);
   }
 };
 

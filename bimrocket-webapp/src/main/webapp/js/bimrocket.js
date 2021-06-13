@@ -134,8 +134,7 @@ BIMROCKET.Application = class
 
     // tools
     const newSceneTool = new BIMROCKET.NewSceneTool(this);
-    const openCloudTool = new BIMROCKET.OpenCloudTool(this);
-    const saveCloudTool = new BIMROCKET.SaveCloudTool(this);
+    const cloudExplorerTool = new BIMROCKET.CloudExplorerTool(this);
     const openLocalTool = new BIMROCKET.OpenLocalTool(this);
     const saveLocalTool = new BIMROCKET.SaveLocalTool(this);
     const optionsTool = new BIMROCKET.OptionsTool(this);
@@ -229,8 +228,7 @@ BIMROCKET.Application = class
     const saveControllersTool = new BIMROCKET.SaveControllersTool(this);
 
     this.addTool(newSceneTool);
-    this.addTool(openCloudTool);
-    this.addTool(saveCloudTool);
+    this.addTool(cloudExplorerTool);
     this.addTool(openLocalTool);
     this.addTool(saveLocalTool);
     this.addTool(optionsTool);
@@ -292,9 +290,8 @@ BIMROCKET.Application = class
 
     const fileMenu = menuBar.addMenu("File");
     fileMenu.addMenuItem(newSceneTool);
-    fileMenu.addMenuItem(openCloudTool);
+    fileMenu.addMenuItem(cloudExplorerTool);
     fileMenu.addMenuItem(openLocalTool);
-    fileMenu.addMenuItem(saveCloudTool);
     fileMenu.addMenuItem(saveLocalTool);
     fileMenu.addMenuItem(printTool);
 
@@ -350,18 +347,6 @@ BIMROCKET.Application = class
     designMenu.addMenuItem(inspectGeometryTool);
     designMenu.addMenuItem(resetMatrixTool);
 
-//    var testMenu = menuBar.addMenu("Test");
-//    testMenu.addMenuItem(unionTool);
-//    testMenu.addMenuItem(hideTool);
-//    var testMenu2 = testMenu.addMenu("Test2");
-//    testMenu2.addMenuItem(selectTool);
-//    var testMenu3 = testMenu2.addMenu("Test3");
-//    testMenu3.addMenuItem(intersectionTool);
-//    testMenu3.addMenuItem(selectTool);
-//    testMenu3.addMenuItem(orbitTool);
-//    testMenu2.addMenuItem(hideTool);
-//    testMenu.addMenuItem(hideTool);
-
     const transformMenu = menuBar.addMenu("Transform");
     transformMenu.addMenuItem(moveTool);
     transformMenu.addMenuItem(rotateTool);
@@ -381,20 +366,19 @@ BIMROCKET.Application = class
     bimMenu.addMenuItem(bimLayoutTool);
     bimMenu.addMenuItem(bimLayersTool);
     bimMenu.addMenuItem(bimDataTool);
+    bimMenu.addMenuItem(bcfTool);
 
     const panelsMenu = menuBar.addMenu("Panels");
     panelsMenu.addMenuItem(outlinerTool);
     panelsMenu.addMenuItem(inspectorTool);
     panelsMenu.addMenuItem(statisticsTool);
-    panelsMenu.addMenuItem(bcfTool);
 
     // toolBar
     const toolBar = new BIMROCKET.ToolBar(this, toolBarElem);
     this.toolBar = toolBar;
 
     toolBar.addToolButton(newSceneTool);
-    toolBar.addToolButton(openCloudTool);
-    toolBar.addToolButton(saveCloudTool);
+    toolBar.addToolButton(cloudExplorerTool);
     toolBar.addToolButton(openLocalTool);
     toolBar.addToolButton(saveLocalTool);
     toolBar.addToolButton(optionsTool);
@@ -419,9 +403,9 @@ BIMROCKET.Application = class
     var protocol = location.protocol + "//";
     var host = location.host;
     var svc1 = new BIMROCKET.WebdavService("svc1",
-      "Equipaments", protocol + host + "/bimrocket-server/cloudfs/equipaments");
+      "Repository", protocol + host + "/bimrocket-server/api/cloudfs/equipaments");
     var svc2 = new BIMROCKET.ComponentService("svc2",
-      "Components", protocol + host + "/bimrocket-server/cloudfs/components");
+      "Components", protocol + host + "/bimrocket-server/api/cloudfs/components");
     this.addService(svc1);
     this.addService(svc2);
 
@@ -491,7 +475,7 @@ BIMROCKET.Application = class
     };
 
     // use tool
-    this.useTool(openCloudTool);
+    this.useTool(cloudExplorerTool);
 
     // init scene
     this.initScene();
@@ -624,25 +608,6 @@ BIMROCKET.Application = class
 //    var box = new THREE.Mesh(boxGeometry, boxMaterial);
 //    this.baseObject.add(box);
 
-    // Add initial object
-    if (object instanceof THREE.Object3D)
-    {
-      this.baseObject.add(object);
-
-      var cameras = BIMROCKET.ObjectUtils.findCameras(object);
-      if (cameras.length > 0)
-      {
-        this.camera = cameras[0];
-        this.updateCameraAspectRatio();
-      }
-      else
-      {
-        application.scene.updateMatrixWorld(true);
-        BIMROCKET.ObjectUtils.zoomAll(this.camera, this.baseObject);
-      }
-      object.updateMatrix();
-    }
-
     // Add ground
 
 //    var groundMaterial = new THREE.MeshPhongMaterial(
@@ -677,13 +642,25 @@ BIMROCKET.Application = class
     this.overlays.matrixAutoUpdate = false;
     this.scene.add(this.overlays);
 
+    // Add initial object
+    if (object instanceof THREE.Object3D)
+    {
+      this.baseObject.add(object);
+
+      this.scene.updateMatrix();
+      this.scene.updateMatrixWorld(true);
+
+      let container = this.container;
+      let aspect = container.clientWidth / container.clientHeight;
+      let camera = this.camera;
+
+      BIMROCKET.ObjectUtils.zoomAll(camera, this.baseObject, aspect);
+    }
     let changeEvent = {type : "structureChanged",
       object : this.scene, parent : null, source : this};
     this.notifyEventListeners("scene", changeEvent);
 
-    this.selection.set(object || application.baseObject);
-
-    this.scene.updateMatrix();
+    this.selection.set(object || this.baseObject);
   }
 
   render()

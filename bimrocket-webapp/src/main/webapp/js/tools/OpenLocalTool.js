@@ -69,19 +69,20 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
           },
           onCompleted : function(object)
           {
-            application.addObject(object, application.baseObject);
-            application.progressBar.visible = false;
+            object.updateMatrix();
 
+            application.addObject(object, application.baseObject);
             let container = application.container;
             let aspect = container.clientWidth / container.clientHeight;
             let camera = application.camera;
 
-            application.scene.updateMatrixWorld(true);
+            object.updateMatrixWorld(true);
             BIMROCKET.ObjectUtils.zoomAll(camera, object, aspect);
-            
+
             let changeEvent = {type: "nodeChanged", objects: [camera], 
               source : this};
             application.notifyEventListeners("scene", changeEvent);
+            application.progressBar.visible = false;
           },
           onError : function(error)
           {

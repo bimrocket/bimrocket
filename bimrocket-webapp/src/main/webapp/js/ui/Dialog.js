@@ -56,6 +56,12 @@ BIMROCKET.Dialog = class
       className || "text_field");
   }
 
+  addPasswordField(name, label, value, className)
+  {
+    return Controls.addPasswordField(this.bodyElem, name, label, value, 
+      className || "text_field");
+  }
+
   addSelectField(name, label, options, value, className)
   {
     return Controls.addSelectField(this.bodyElem, name, label, 

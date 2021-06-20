@@ -398,7 +398,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      scope.topics = JSON.parse(oReq.responseText);
+      scope.topics = JSON.parse(request.responseText);
       console.info(scope.topics);
       scope.populateTopicTable();
     }    
@@ -433,9 +433,9 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       if (orderBy) query += "$orderBy=" + orderBy;
     }
 
-    const oReq = this.serverRequest("GET",
+    const request = this.serverRequest("GET",
       "projects/" + projectId + "/topics" + query, reqListener);
-    oReq.send();
+    request.send();
   }
 
   saveTopic()
@@ -444,7 +444,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      const topic = JSON.parse(oReq.responseText);
+      const topic = JSON.parse(request.responseText);
       console.info(topic);
       scope.showTopic(topic);
       scope.topics = null; // force topic list refresh
@@ -452,18 +452,18 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     }
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
-    var oReq;
+    var request;
     if (topicGuid) // update
     {
-      oReq = this.serverRequest("PUT",
+      request = this.serverRequest("PUT",
         "projects/" + projectId + "/topics/" + topicGuid, reqListener);
     }
     else // creation
     {
-      oReq = this.serverRequest("POST", "projects/" + projectId + "/topics",
+      request = this.serverRequest("POST", "projects/" + projectId + "/topics",
         reqListener);
     }
-    oReq.send(JSON.stringify({
+    request.send(JSON.stringify({
       "title" : this.titleElem.value,
       "topic_type" : this.topicTypeElem.value,
       "priority" : this.priorityElem.value,
@@ -490,9 +490,9 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let guid = this.guidElem.value;
     if (guid)
     {
-      const oReq = this.serverRequest("DELETE",
+      const request = this.serverRequest("DELETE",
         "projects/" + projectId + "/topics/" + guid, reqListener);
-      oReq.send();
+      request.send();
     }
   }
 
@@ -502,7 +502,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      scope.comments = JSON.parse(oReq.responseText);
+      scope.comments = JSON.parse(request.responseText);
       console.info(scope.comments);
       scope.populateCommentList();
       if (scrollBottom)
@@ -513,10 +513,10 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const oReq = this.serverRequest("GET",
+    const request = this.serverRequest("GET",
       "projects/" + projectId + "/topics/" + topicGuid + "/comments",
       reqListener);
-    oReq.send();
+    request.send();
   }
 
   saveComment()
@@ -526,7 +526,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     function reqListener()
     {
       scope.commentElem.value = null;
-      const comment = JSON.parse(oReq.responseText);
+      const comment = JSON.parse(request.responseText);
       console.info(comment);
       scope.commentGuid = null;
       scope.loadComments(true);
@@ -535,21 +535,21 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    var oReq;
+    var request;
 
     if (this.commentGuid) // update
     {
-      oReq = this.serverRequest("PUT",
+      request = this.serverRequest("PUT",
         "projects/" + projectId + "/topics/" + topicGuid + "/comments/" +
         this.commentGuid, reqListener);
     }
     else // creation
     {
-      oReq = this.serverRequest("POST",
+      request = this.serverRequest("POST",
         "projects/" + projectId + "/topics/" + topicGuid + "/comments",
         reqListener);
     }
-    oReq.send(JSON.stringify({
+    request.send(JSON.stringify({
       "comment" : this.commentElem.value
     }));
   }
@@ -568,10 +568,10 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let guid = this.guidElem.value;
     if (guid)
     {
-      const oReq = this.serverRequest("DELETE",
+      const request = this.serverRequest("DELETE",
         "projects/" + projectId + "/topics/" + guid +
         "/comments/" + comment.guid, reqListener);
-      oReq.send();
+      request.send();
     }
   }
 
@@ -588,7 +588,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      scope.viewpoints = JSON.parse(oReq.responseText);
+      scope.viewpoints = JSON.parse(request.responseText);
       console.info(scope.viewpoints);
       scope.populateViewpointList();
       if (focusOnFirst && scope.viewpoints.length > 0)
@@ -599,11 +599,11 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const oReq = this.serverRequest("GET",
+    const request = this.serverRequest("GET",
       "projects/" + projectId +
       "/topics/" + topicGuid + "/viewpoints", reqListener);
 
-    oReq.send();
+    request.send();
   }
 
   createViewpoint()
@@ -647,7 +647,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      let viewpoint = JSON.parse(oReq.responseText);
+      let viewpoint = JSON.parse(request.responseText);
       console.info(viewpoint);
       scope.loadViewpoints();
       BIMROCKET.Toast.show("Viewpoint saved.");
@@ -656,11 +656,11 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const oReq = this.serverRequest("POST",
+    const request = this.serverRequest("POST",
       "projects/" + projectId + "/topics/" + topicGuid + "/viewpoints",
       reqListener);
 
-    oReq.send(JSON.stringify(viewpoint));
+    request.send(JSON.stringify(viewpoint));
   }
 
   deleteViewpoint(viewpoint)
@@ -678,10 +678,10 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     if (guid)
     {
-      const oReq = this.serverRequest("DELETE",
+      const request = this.serverRequest("DELETE",
         "projects/" + projectId + "/topics/" + guid +
         "/viewpoints/" + viewpoint.guid, reqListener);
-      oReq.send();
+      request.send();
     }
   }
 
@@ -694,15 +694,15 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     function reqListener()
     {
-      scope.extensions = JSON.parse(oReq.responseText);
+      scope.extensions = JSON.parse(request.responseText);
       console.info(scope.extensions);
       scope.populateExtensions();
     }
 
-    const oReq = this.serverRequest("GET",
+    const request = this.serverRequest("GET",
       "projects/" + projectId + "/extensions", reqListener);
 
-    oReq.send();
+    request.send();
   }
   
   refreshProjects()
@@ -720,7 +720,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       scope.filterPanelElem.style.display = "";
       scope.topicTableElem.style.display = "";
       
-      let serverProjects = JSON.parse(oReq.responseText);
+      let serverProjects = JSON.parse(request.responseText);
       console.info(serverProjects);
 
       const projectIdSet = new Set();
@@ -759,8 +759,8 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       scope.updateExtensions();
     }
 
-    const oReq = this.serverRequest("GET", "projects", reqListener);
-    oReq.send();
+    const request = this.serverRequest("GET", "projects", reqListener);
+    request.send();
   }
   
   saveProjectName()
@@ -775,15 +775,15 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     {
       function reqListener()
       {
-        const project = JSON.parse(oReq.responseText);
+        const project = JSON.parse(request.responseText);
         console.info(project);
         options[index].label = project.name;
       }
       
       const projectId = this.getProjectId();
-      const oReq = this.serverRequest("PUT", "projects/" + projectId, 
+      const request = this.serverRequest("PUT", "projects/" + projectId, 
         reqListener);
-      oReq.send(JSON.stringify({
+      request.send(JSON.stringify({
         "name" : projectName
       }));
     }
@@ -799,15 +799,15 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     {
       function reqListener()
       {
-        scope.extensions = JSON.parse(oReq.responseText);
+        scope.extensions = JSON.parse(request.responseText);
         console.info(scope.extensions);
         scope.populateExtensions();
       }
       
       const projectId = this.getProjectId();
-      const oReq = this.serverRequest("PUT", "projects/" + projectId + 
+      const request = this.serverRequest("PUT", "projects/" + projectId + 
         "/extensions", reqListener);
-      oReq.send(extensions);
+      request.send(extensions);
     }
   }
 
@@ -1027,42 +1027,49 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   serverRequest(method, path, listener)
   {
-    const oReq = new XMLHttpRequest();
-    oReq.open(method, this.connUrlElem.value + "bcf/2.1/" + path);
-    if (listener) oReq.addEventListener("load", () =>
+    const request = new XMLHttpRequest();
+    request.onerror = error =>
     {
-      if (oReq.status === 200)
+      const dialog = new BIMROCKET.MessageDialog("ERROR", "Connection error", 
+        "error");
+      dialog.show();
+    };
+    if (listener) request.onload = () =>
+    {
+      if (request.status === 200)
       {
         listener();
       }
       else
       {
-        this.showError(oReq);
+        this.showError(request);
       }
-    });
-    oReq.setRequestHeader("Content-Type", "application/json");
+    };
+
+    request.open(method, this.connUrlElem.value + "bcf/2.1/" + path);
+    request.setRequestHeader("Content-Type", "application/json");
 
     const username = this.connUserElem.value;
     const password = this.connPasswordElem.value;
     if (username)
     {
       const userPass = username + ":" + password;
-      oReq.setRequestHeader("Authorization", "Basic " + btoa(userPass));
+      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
     }
-    return oReq;
+    return request;
   }
 
-  showError(oReq)
+  showError(request)
   {
     let message;
     try
     {
-      message = JSON.parse(oReq.response).message;
+      message = JSON.parse(request.response).message;
     }
     catch (ex)
     {
-      message = "Error " + oReq.status;
-    }    
+      message = "Error " + request.status;
+    }
     const dialog = new BIMROCKET.MessageDialog("ERROR", message, "error");
     dialog.show();
   }

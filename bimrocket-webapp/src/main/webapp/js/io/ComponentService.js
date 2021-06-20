@@ -1,5 +1,7 @@
 BIMROCKET.ComponentService = class extends BIMROCKET.IOService
 {
+  static type = "ComponentService";
+  
   constructor(name, description, url, username, password)
   {
     super(name, description, url, username, password);

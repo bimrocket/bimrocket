@@ -1,5 +1,7 @@
 BIMROCKET.WebdavService = class extends BIMROCKET.IOService
 {
+  static type = "WebdavService";
+
   constructor(name, description, url, username, password)
   {
     super(name, description, url, username, password);
@@ -12,10 +14,15 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
     const COLLECTION = BIMROCKET.IOMetadata.COLLECTION;
     const OBJECT = BIMROCKET.IOMetadata.OBJECT;
 
-    var url = this.url + path;
+    if (this.url && this.url.endsWith("/"))
+    {
+      this.url = this.url.substring(0, this.url.length - 1);
+    }
 
-    var baseUri = url;
-    var index = baseUri.indexOf("://");
+    let url = this.url + path;
+
+    let baseUri = url;
+    let index = baseUri.indexOf("://");
     if (index !== -1)
     {
       baseUri = baseUri.substring(index + 3);
@@ -32,41 +39,47 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
 
     // **** HTTP PROPFIND REQUEST ****
 
-    var metadata;
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function()
+    const request = new XMLHttpRequest();
+    let metadata;
+    request.onerror = error =>
     {
-      if (request.readyState === 4)
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200 || request.status === 207)
       {
-        if (request.status === 0 ||
-          request.status === 200 || request.status === 207)
+        try
         {
           // OK
-          var xml = request.responseXML;
-          var multiNode = xml.childNodes[0];
-          var responseNodes = multiNode.childNodes;
+          let xml = request.responseXML;
+          let multiNode = xml.childNodes[0];
+          let responseNodes = multiNode.childNodes;
           metadata = new BIMROCKET.IOMetadata();
-          var entries = [];
-          for (var i = 0; i < responseNodes.length; i++)
+          let entries = [];
+          for (let i = 0; i < responseNodes.length; i++)
           {
-            var responseNode = responseNodes[i];
+            let responseNode = responseNodes[i];
             if (responseNode.localName === "response")
             {
-              var hrefNode = responseNode.querySelector("href");
-              var hrefValue = hrefNode.textContent;
-              var fileName = hrefValue.substring(baseUri.length);
-              var isCollectionNode = responseNode.querySelector(
+              let hrefNode = responseNode.querySelector("href");
+              let hrefValue = hrefNode.textContent;
+              let fileName = hrefValue.substring(baseUri.length);
+              let isCollectionNode = responseNode.querySelector(
                 "propstat prop resourcetype collection") !== null;
+              if (fileName.indexOf("/") === 0) fileName = fileName.substring(1);
+
               if (fileName.length === 0) // requested resource
               {
-                index = hrefValue.lastIndexOf("/");
+                let index = hrefValue.lastIndexOf("/");
                 metadata.name = hrefValue.substring(index + 1);
                 metadata.description = metadata.name;
                 metadata.type = isCollectionNode ? COLLECTION : OBJECT;
               }
               else
               {
-                var entry = new BIMROCKET.IOMetadata(fileName, fileName,
+                let entry = new BIMROCKET.IOMetadata(fileName, fileName,
                   isCollectionNode ? COLLECTION : OBJECT);
                 entries.push(entry);
               }
@@ -80,12 +93,12 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
           else
           {
             // read OBJECT
-            var intent = 
+            const intent =
             {
               url : url,
               onCompleted : function(object)
               {
-                readyCallback(new BIMROCKET.IOResult(OK, "", path, 
+                readyCallback(new BIMROCKET.IOResult(OK, "", path,
                   metadata, null, object));
               },
               onProgress : progressCallback,
@@ -98,16 +111,29 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
             BIMROCKET.IOManager.load(intent);
           }
         }
-        else
+        catch (ex)
         {
-          // ERROR
-          readyCallback(new BIMROCKET.IOResult(ERROR, 
-            request.statusText + " (" + request.status + ")"));
+          readyCallback(new BIMROCKET.IOResult(ERROR, ex));
         }
+      }
+      else
+      {
+        if (request.responseXML)
+        {
+          let node =
+            request.responseXML.querySelector("error message");
+          if (node)
+          {
+            readyCallback(new BIMROCKET.IOResult(ERROR, node.textContent));
+            return;
+          }
+        }
+        readyCallback(new BIMROCKET.IOResult(ERROR, "Error " + request.status));
       }
     };
     request.open("PROPFIND", url, true);
-    request.setRequestHeader("depth", 1);
+    request.setRequestHeader("depth", "1");
+    this.setCredentials(request);
     request.send();
   }
 
@@ -116,38 +142,38 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
     const OK = BIMROCKET.IOResult.OK;
     const ERROR = BIMROCKET.IOResult.ERROR;
 
-    var url = this.url + path;
-    var request = new XMLHttpRequest();
-
-    request.onreadystatechange = function()
+    const url = this.url + path;
+    const request = new XMLHttpRequest();
+    request.onerror = error =>
     {
-      if (request.readyState === 4)
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200)
       {
-        if (request.status === 0 || request.status === 200)
-        {
-          readyCallback(new BIMROCKET.IOResult(OK));
-        }
-        else
-        {
-          readyCallback(new BIMROCKET.IOResult(ERROR, 
-            request.statusText + " (" + request.status + ")"));
-        }
+        readyCallback(new BIMROCKET.IOResult(OK));
+      }
+      else
+      {
+        readyCallback(new BIMROCKET.IOResult(ERROR,
+          "Save failed (error " + request.status + ")."));
       }
     };
-    var intent = 
+    const intent =
     {
       name : path,
       object : object,
-      onCompleted : function(data)
+      onCompleted : data =>
       {
         request.open("PUT", url, true);
+        this.setCredentials(request);
         request.send(data);
       },
       onProgress : progressCallback,
-      onError : function(message)
-      {
-        readyCallback(new BIMROCKET.IOResult(ERROR, message));
-      },
+      onError : message =>
+        readyCallback(new BIMROCKET.IOResult(ERROR, message)),
       options : options
     };
     BIMROCKET.IOManager.export(intent);
@@ -158,25 +184,65 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
     const OK = BIMROCKET.IOResult.OK;
     const ERROR = BIMROCKET.IOResult.ERROR;
 
-    var url = this.url + path;
-    var request = new XMLHttpRequest();
-
-    request.onreadystatechange = function()
+    const url = this.url + path;
+    const request = new XMLHttpRequest();
+    request.onerror = error =>
     {
-      if (request.readyState === 4)
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200)
       {
-        if (request.status === 0 || request.status === 200)
-        {
-          readyCallback(new BIMROCKET.IOResult(OK));
-        }
-        else
-        {
-          readyCallback(new BIMROCKET.IOResult(ERROR, 
-            request.statusText + " (" + request.status + ")"));
-        }
+        readyCallback(new BIMROCKET.IOResult(OK));
+      }
+      else
+      {
+        readyCallback(new BIMROCKET.IOResult(ERROR,
+          "Delete failed (error " + request.status + ")."));
       }
     };
     request.open("DELETE", url, true);
-    request.send();    
+    this.setCredentials(request);
+    request.send();
+  }
+  
+  makeCollection(path, readyCallback, progressCallback)
+  {
+    const OK = BIMROCKET.IOResult.OK;
+    const ERROR = BIMROCKET.IOResult.ERROR;
+
+    const url = this.url + path;
+    const request = new XMLHttpRequest();
+    request.onerror = error =>
+    {
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200 || request.status === 201)
+      {
+        readyCallback(new BIMROCKET.IOResult(OK));
+      }
+      else
+      {
+        readyCallback(new BIMROCKET.IOResult(ERROR,
+          "Collection creation failed (error " + request.status + ")."));
+      }
+    };
+    request.open("MKCOL", url, true);
+    this.setCredentials(request);
+    request.send();
+  }  
+
+  setCredentials(request)
+  {
+    if (this.username && this.password)
+    {
+      const userPass = this.username + ":" + this.password;
+      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
+    }
   }
 };

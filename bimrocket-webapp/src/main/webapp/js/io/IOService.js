@@ -1,6 +1,11 @@
 BIMROCKET.IOService = class
 {
-  constructor(name, description, url, username, password)
+  static SERVICE_TYPES =
+    [["WebdavService", "Webdav service"], 
+     ["ComponentService", "Component service"]];
+  
+  constructor(name, description = null, 
+    url = null, username = null, password = null)
   {
     this.name = name;
     this.description = description;
@@ -22,6 +27,12 @@ BIMROCKET.IOService = class
   }
   
   remove(path, readyCallback, progressCallback)
+  {
+    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
+      "Not implemented."));
+  }
+
+  makeCollection(path, readyCallback, progressCallback)
   {
     readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
       "Not implemented."));

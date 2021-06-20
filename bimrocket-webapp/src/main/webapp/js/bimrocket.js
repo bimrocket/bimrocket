@@ -29,7 +29,7 @@ BIMROCKET.Application = class
     this._backgroundColor2 = null;
 
     /* IO services */
-    this.services = []; /* BIMROCKET.IOService */
+    this.services = {}; /* BIMROCKET.IOService */
 
     /* selection */
     this.selection = new BIMROCKET.Selection(this, true);
@@ -113,24 +113,6 @@ BIMROCKET.Application = class
 
     // general tabbed panel
     this.progressBar = new BIMROCKET.ProgressBar(progressBarElem);
-
-    // outliner
-    this.outliner = new BIMROCKET.Outliner(this);
-    this.outliner.visible = true;
-    this.panelManager.addPanel(this.outliner);
-
-    // inspector
-    this.inspector = new BIMROCKET.Inspector(this);
-    this.inspector.visible = true;
-    this.panelManager.addPanel(this.inspector);
-
-    // statistics
-    this.statistics = new BIMROCKET.Statistics(this);
-    this.panelManager.addPanel(this.statistics);
-
-    // statistics
-    this.bcfPanel = new BIMROCKET.BCFPanel(this);
-    this.panelManager.addPanel(this.bcfPanel);
 
     // tools
     const newSceneTool = new BIMROCKET.NewSceneTool(this);
@@ -284,6 +266,26 @@ BIMROCKET.Application = class
     this.addTool(loadControllersTool);
     this.addTool(saveControllersTool);
 
+
+    // outliner
+    this.outliner = new BIMROCKET.Outliner(this);
+    this.outliner.visible = true;
+    this.panelManager.addPanel(this.outliner);
+
+    // inspector
+    this.inspector = new BIMROCKET.Inspector(this);
+    this.inspector.visible = true;
+    this.panelManager.addPanel(this.inspector);
+
+    // statistics
+    this.statistics = new BIMROCKET.Statistics(this);
+    this.panelManager.addPanel(this.statistics);
+
+    // bcfPanel
+    this.bcfPanel = new BIMROCKET.BCFPanel(this);
+    this.panelManager.addPanel(this.bcfPanel);
+
+
     // menuBar
     const menuBar = new BIMROCKET.MenuBar(this, headerElem);
     this.menuBar = menuBar;
@@ -400,12 +402,10 @@ BIMROCKET.Application = class
     toolBar.addToolButton(scaleTool);
 
     // Services
-    var protocol = location.protocol + "//";
-    var host = location.host;
-    var svc1 = new BIMROCKET.WebdavService("svc1",
-      "Repository", protocol + host + "/bimrocket-server/api/cloudfs/equipaments");
-    var svc2 = new BIMROCKET.ComponentService("svc2",
-      "Components", protocol + host + "/bimrocket-server/api/cloudfs/components");
+    const svc1 = new BIMROCKET.WebdavService("svc1",
+      "Repository", "/bimrocket-server/api/cloudfs");
+    const svc2 = new BIMROCKET.ComponentService("svc2",
+      "Components", "/bimrocket-server/api/cloudfs/components");
     this.addService(svc1);
     this.addService(svc2);
 
@@ -994,7 +994,14 @@ BIMROCKET.Application = class
 
   removeService(service)
   {
-    delete this.services[service.name];
+    if (typeof service === "string")
+    {
+      delete this.services[service];      
+    }
+    else
+    {
+      delete this.services[service.name];
+    }
   }
 
   addTool(tool)

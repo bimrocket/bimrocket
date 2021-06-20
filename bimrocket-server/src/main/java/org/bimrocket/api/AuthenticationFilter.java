@@ -33,18 +33,23 @@ package org.bimrocket.api;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import org.bimrocket.security.UserStore;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.TEXT_XML;
 
 /**
  *
@@ -83,7 +88,7 @@ public class AuthenticationFilter implements ContainerRequestFilter
         password = userPasswordParts.length > 1 ? userPasswordParts[1] : null;
       }
     }
-    
+
     Set<String> userRoles = userStore.getRoles(username);
 
     if (username != null)
@@ -95,20 +100,22 @@ public class AuthenticationFilter implements ContainerRequestFilter
       }
       else
       {
-        context.abortWith(ApiError.response(401, "Invalid credentials"));
+        context.abortWith(getErrorResponse(401, "Invalid credentials"));
         return;
       }
     }
 
-    Method method = resourceInfo.getResourceMethod();
-    if (!isValidResource(method, userRoles))
+    if (!isValidResource(userRoles))
     {
-      context.abortWith(ApiError.response(403, "Access denied"));
+      context.abortWith(getErrorResponse(403, "Access denied"));
+      return;
     }
   }
 
-  private boolean isValidResource(Method method, Set<String> userRoles)
+  private boolean isValidResource(Set<String> userRoles)
   {
+    Method method = resourceInfo.getResourceMethod();
+    
     if (method.isAnnotationPresent(PermitAll.class)) return true;
 
     RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
@@ -123,5 +130,32 @@ public class AuthenticationFilter implements ContainerRequestFilter
     }
     
     return !userRoles.isEmpty();
+  }
+  
+  private Response getErrorResponse(int statusCode, String message)
+  {
+    Method method = resourceInfo.getResourceMethod();
+    
+    Produces produces = method.getAnnotation(Produces.class);
+    if (produces != null)
+    {
+      String[] producesValue = produces.value();
+      List<String> contentTypes = Arrays.asList(producesValue);
+      if (contentTypes.contains(APPLICATION_JSON))
+      {
+        return ApiError.response(statusCode, message);
+      }
+      else if (contentTypes.contains(TEXT_XML))
+      {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        buffer.append("<error>");
+        buffer.append("<code>").append(statusCode).append("</code>");
+        buffer.append("<message>").append(message).append("</message>");
+        buffer.append("</error>");
+        return Response.status(statusCode).entity(buffer.toString()).build();
+      }
+    }
+    return Response.status(statusCode, message).build();
   }
 }

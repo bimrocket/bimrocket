@@ -33,6 +33,7 @@ package org.bimrocket.security;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -56,6 +57,6 @@ public class InMemoryUserStore implements UserStore
   @Override
   public Set<String> getRoles(String username)
   {
-    return username != null ? userRoles : Collections.emptySet();
-  }  
+    return StringUtils.isBlank(username) ? Collections.emptySet() : userRoles;
+  }
 }

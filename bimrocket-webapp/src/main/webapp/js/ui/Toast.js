@@ -15,7 +15,7 @@ BIMROCKET.Toast = class
     this.toastElem.style.height = height + "px";
     this.toastElem.style.left = "50%";
     this.toastElem.style.marginLeft = "-" + (width / 2) + "px";
-    this.toastElem.style.top = "50px";
+    this.toastElem.style.top = "80px";
     this.toastElem.innerHTML = message;
     this.toastElem.style.opacity = 0;
   }

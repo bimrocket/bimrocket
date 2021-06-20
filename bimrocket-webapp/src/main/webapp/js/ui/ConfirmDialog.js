@@ -13,12 +13,11 @@ BIMROCKET.ConfirmDialog = class extends BIMROCKET.Dialog
   {
     super(title, 300, 200);
     this.action = action;
-    let scope = this;
  
     this.bodyElem.classList.add(className);
     this.addText(message);
-    this.addButton("confirm_accept", acceptButtonText, () => scope.onAccept());
-    this.addButton("confirm_cancel", cancelButtonText, () => scope.onCancel());
+    this.addButton("confirm_accept", acceptButtonText, () => this.onAccept());
+    this.addButton("confirm_cancel", cancelButtonText, () => this.onCancel());
   }
   
   onAccept()

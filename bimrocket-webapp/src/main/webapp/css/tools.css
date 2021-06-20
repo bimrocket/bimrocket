@@ -81,16 +81,20 @@
   padding-left: 2px;
   color: #804040;
   border: 1px solid #c0c0c0;
+  overflow:hidden;
 }
 
 .service_panel .path_entries
 {
+  padding-left: 0;
   position: absolute;
   top:24px;
   left:0;
   right:0;
   bottom:52px;
   overflow-y: auto;
+  margin-top:0;
+  margin-bottom:0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
@@ -119,6 +123,7 @@
 
 .service_panel .entry
 {
+  list-style-type: none;
   text-align: left;
   cursor:pointer;
   padding: 2px;

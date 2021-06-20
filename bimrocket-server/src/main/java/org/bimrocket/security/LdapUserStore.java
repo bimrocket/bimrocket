@@ -112,7 +112,7 @@ public class LdapUserStore implements UserStore
   @Override
   public Set<String> getRoles(String username)
   {
-    return username != null ? userRoles : Collections.emptySet();
+    return StringUtils.isBlank(username) ? Collections.emptySet() : userRoles;
   }
 
   private boolean validateLdap(String username, String password)

@@ -106,6 +106,20 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       this.showFolderDialog());
     this.folderButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.folderButtonElem);
+
+    this.uploadButtonElem = document.createElement("button");
+    this.uploadButtonElem.innerHTML = "Upload";
+    this.uploadButtonElem.addEventListener('click', event =>
+      this.showUploadDialog());
+    this.uploadButtonElem.style.display = "none";
+    this.buttonsPanelElem.appendChild(this.uploadButtonElem);
+
+    this.downloadButtonElem = document.createElement("button");
+    this.downloadButtonElem.innerHTML = "Download";
+    this.downloadButtonElem.addEventListener('click', event =>
+      this.download(this.basePath + "/" + this.entryName));
+    this.downloadButtonElem.style.display = "none";
+    this.buttonsPanelElem.appendChild(this.downloadButtonElem);    
   }
 
   activate()
@@ -117,6 +131,117 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
   deactivate()
   {
     this.panel.visible = false;
+  }
+
+  showSaveDialog()
+  {
+    let dialog = new BIMROCKET.SaveDialog("Save to cloud", this.entryName);
+    dialog.onSave = (name, format, onlySelection) =>
+    {
+      this.entryName = name;
+      this.entryType = BIMROCKET.IOMetadata.OBJECT;
+      this.savePath(this.basePath + "/" + name);
+    };
+    dialog.show();
+  }
+
+  showAddDialog()
+  {
+    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
+    let dialog = new BIMROCKET.ServiceDialog("Add cloud service", serviceTypes);
+    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    {
+      const service = new BIMROCKET[serviceType];
+      service.name = name;
+      service.description = description;
+      service.url = url;
+      service.username = username;
+      service.password = password;
+      this.application.addService(service);
+      this.showServices();
+    };
+    dialog.show();
+  }
+
+  showEditDialog()
+  {
+    const service = this.application.services[this.entryName];
+
+    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
+    let dialog = new BIMROCKET.ServiceDialog("Edit cloud service",
+      serviceTypes, service.constructor.type, service.name, service.description,
+      service.url, service.username, service.password);
+    dialog.serviceTypeSelect.disabled = true;
+    dialog.nameElem.readOnly = true;
+    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    {
+      service.serviceType = serviceType;
+      service.description = description;
+      service.url = url;
+      service.username = username;
+      service.password = password;
+      this.showServices();
+    };
+    dialog.show();
+  }
+
+  showDeleteDialog()
+  {
+    let name = this.entryName;
+    if (this.basePath === "")
+    {
+      let dialog = new BIMROCKET.ConfirmDialog("Delete cloud service",
+        "Delete service " + name + "?",
+        () => {
+          this.entryName = "";
+          this.entryType = null;
+          this.application.removeService(name);
+          this.showServices();
+        });
+      dialog.show();
+    }
+    else
+    {
+      let dialog = new BIMROCKET.ConfirmDialog("Delete from cloud",
+        "Delete " + name + "?",
+        () => this.deletePath(this.basePath + "/" + name));
+      dialog.show();
+    }
+  }
+
+  showFolderDialog()
+  {
+    let dialog = new BIMROCKET.Dialog("Create folder in cloud service",
+      250, 130);
+    let elem = dialog.addTextField("folder_name", "Folder name");
+    dialog.addButton("folder_accept", "Create", () => dialog.onAccept());
+    dialog.addButton("folder_cancel", "Cancel", () => dialog.onCancel());
+
+    dialog.onAccept = () =>
+    {
+      this.makeFolder(this.basePath + "/" + elem.value);
+      dialog.hide();
+    };
+    dialog.onCancel = () =>
+    {
+      dialog.hide();
+    };
+    dialog.onShow = () =>
+    {
+      elem.focus();
+    };
+    dialog.show();
+  }
+  
+  showUploadDialog()
+  {
+    let inputFile = document.createElement("input");
+
+    inputFile.type = "file";
+
+    inputFile.addEventListener("change", 
+      event => this.upload(inputFile.files));
+    inputFile.click();
   }
 
   openPath(path)
@@ -220,6 +345,64 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     }
   }
 
+  download(path)
+  {
+    const application = this.application;
+    const parts = this.parsePath(path);
+    const serviceName = parts[0];
+    const servicePath = parts[1];
+    // call to service
+    const service = application.services[serviceName];
+    if (service)
+    {
+      const options = {};
+      this.showProgressBar();
+
+      service.download(servicePath, options,
+        result => { this.showButtonsPanel();
+          this.handleDownloadResult(result.data); },
+        data => this.setProgress(data.progress, data.message));
+    }
+  }
+
+  upload(files)
+  {
+    if (files.length > 0)
+    {
+      const application = this.application;
+      let file = files[0];
+      let reader = new FileReader();
+      reader.onload = event => 
+      {
+        const data = event.target.result;
+        const path = this.basePath + "/" + file.name;
+        const parts = this.parsePath(path);
+        const serviceName = parts[0];
+        const servicePath = parts[1];
+        // call to service
+        const service = application.services[serviceName];
+        if (service)
+        {
+          const options = {};
+          this.showProgressBar();
+          service.upload(data, servicePath, options, result =>
+            { 
+              this.entryName = file.name;
+              this.entryType = BIMROCKET.IOMetadata.OBJECT;
+              this.handleSaveResult(path, result);
+            });
+        }
+        else
+        {
+          const messageDialog = new BIMROCKET.MessageDialog("ERROR",
+            "Invalid service: " + serviceName, "error");
+          messageDialog.show();
+        }
+      };
+      reader.readAsText(file);
+    }
+  }
+
   handleOpenResult(path, result)
   {
     this.showButtonsPanel();
@@ -307,6 +490,22 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       // reload basePath
       this.openPath(this.basePath);
     }
+  }
+  
+  handleDownloadResult(data)
+  {
+    if (this.downloadUrl)
+    {
+      window.URL.revokeObjectURL(this.downloadUrl);
+    }
+    const blob = new Blob([data], {type : 'application/octet-stream'});
+    this.downloadUrl = window.URL.createObjectURL(blob);
+    let linkElem = document.createElement("a");
+    linkElem.download = this.entryName;
+    linkElem.target = "_blank";
+    linkElem.href = this.downloadUrl;
+    linkElem.style.display = "block";
+    linkElem.click();
   }
 
   showServices()
@@ -462,35 +661,23 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       this.addButtonElem.style.display = "inline";
       this.saveButtonElem.style.display = "none";
       this.folderButtonElem.style.display = "none";
-      if (entryType)
-      {
-        this.openButtonElem.style.display = "inline";
-        this.editButtonElem.style.display = "inline";
-        this.deleteButtonElem.style.display = "inline";
-      }
-      else
-      {
-        this.openButtonElem.style.display = "none";
-        this.editButtonElem.style.display = "none";
-        this.deleteButtonElem.style.display = "none";
-      }
+      this.uploadButtonElem.style.display = "none";
+      this.downloadButtonElem.style.display = "none";
+      this.openButtonElem.style.display = entryType ? "inline" : "none";
+      this.editButtonElem.style.display = entryType ? "inline" : "none";
+      this.deleteButtonElem.style.display = entryType ? "inline" : "none";
     }
     else
     {
       this.saveButtonElem.style.display = "inline";
       this.folderButtonElem.style.display = "inline";
+      this.uploadButtonElem.style.display = "inline";
       this.addButtonElem.style.display = "none";
       this.editButtonElem.style.display = "none";
-      if (entryType)
-      {
-        this.openButtonElem.style.display = "inline";
-        this.deleteButtonElem.style.display = "inline";        
-      }
-      else
-      {
-        this.openButtonElem.style.display = "none";
-        this.deleteButtonElem.style.display = "none";                
-      }
+      this.openButtonElem.style.display = entryType ? "inline" : "none";
+      this.deleteButtonElem.style.display = entryType ? "inline" : "none";
+      this.downloadButtonElem.style.display = 
+        entryType === BIMROCKET.IOMetadata.OBJECT ? "inline" : "none";
     }
   }
 
@@ -545,105 +732,5 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     if (a.name < b.name) return -1;
     if (a.name > b.name) return 1;
     return 0;
-  }
-
-  showSaveDialog()
-  {
-    let dialog = new BIMROCKET.SaveDialog("Save to cloud", this.entryName);
-    dialog.onSave = (name, format, onlySelection) =>
-    {
-      this.entryName = name;
-      this.entryType = BIMROCKET.IOMetadata.OBJECT;
-      this.savePath(this.basePath + "/" + name);
-    };
-    dialog.show();
-  }
-
-  showAddDialog()
-  {
-    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
-    let dialog = new BIMROCKET.ServiceDialog("Add cloud service", serviceTypes);
-    dialog.onSave = (serviceType, name, description, url, username, password) =>
-    {
-      const service = new BIMROCKET[serviceType];
-      service.name = name;
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
-      this.application.addService(service);
-      this.showServices();
-    };
-    dialog.show();
-  }
-
-  showEditDialog()
-  {
-    const service = this.application.services[this.entryName];
-
-    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
-    let dialog = new BIMROCKET.ServiceDialog("Edit cloud service",
-      serviceTypes, service.constructor.type, service.name, service.description,
-      service.url, service.username, service.password);
-    dialog.serviceTypeSelect.disabled = true;
-    dialog.nameElem.readOnly = true;
-    dialog.onSave = (serviceType, name, description, url, username, password) =>
-    {
-      service.serviceType = serviceType;
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
-      this.showServices();
-    };
-    dialog.show();
-  }
-
-  showDeleteDialog()
-  {
-    let name = this.entryName;
-    if (this.basePath === "")
-    {
-      let dialog = new BIMROCKET.ConfirmDialog("Delete cloud service",
-        "Delete service " + name + "?",
-        () => {
-          this.entryName = "";
-          this.entryType = null;
-          this.application.removeService(name);
-          this.showServices();
-        });
-      dialog.show();
-    }
-    else
-    {
-      let dialog = new BIMROCKET.ConfirmDialog("Delete from cloud",
-        "Delete " + name + "?",
-        () => this.deletePath(this.basePath + "/" + name));
-      dialog.show();
-    }
-  }
-
-  showFolderDialog()
-  {
-    let dialog = new BIMROCKET.Dialog("Create folder in cloud service",
-      250, 130);
-    let elem = dialog.addTextField("folder_name", "Folder name");
-    dialog.addButton("folder_accept", "Create", () => dialog.onAccept());
-    dialog.addButton("folder_cancel", "Cancel", () => dialog.onCancel());
-
-    dialog.onAccept = () =>
-    {
-      this.makeFolder(this.basePath + "/" + elem.value);
-      dialog.hide();
-    };
-    dialog.onCancel = () =>
-    {
-      dialog.hide();
-    };
-    dialog.onShow = () =>
-    {
-      elem.focus();
-    };
-    dialog.show();
   }
 };

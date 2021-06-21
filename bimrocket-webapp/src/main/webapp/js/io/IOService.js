@@ -25,6 +25,18 @@ BIMROCKET.IOService = class
     readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
       "Not implemented."));
   }
+
+  download(path, options, readyCallback, progressCallback)
+  {
+    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
+      "Not implemented."));
+  }
+
+  upload(data, path, options, readyCallback, progressCallback)
+  {
+    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
+      "Not implemented."));
+  }
   
   remove(path, readyCallback, progressCallback)
   {
@@ -44,14 +56,15 @@ BIMROCKET.IOResult = class
   static OK = 0;
   static ERROR = 1;
   
-  constructor(status, message, path, metadata, entries, object)
+  constructor(status, message, path, metadata, entries, object, data)
   {
     this.status = status;
     this.message = message;
     this.path = path;
     this.metadata = metadata;
     this.entries = entries; // IOMetadata
-    this.object = object;
+    this.object = object; // Object3D
+    this.data = data; // object data
   }
 };
 

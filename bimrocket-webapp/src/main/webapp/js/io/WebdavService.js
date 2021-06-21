@@ -137,6 +137,42 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
     request.send();
   }
 
+  download(path, options, readyCallback, progressCallback)
+  {
+    const OK = BIMROCKET.IOResult.OK;
+    const ERROR = BIMROCKET.IOResult.ERROR;
+    const OBJECT = BIMROCKET.IOMetadata.OBJECT;
+
+    if (this.url && this.url.endsWith("/"))
+    {
+      this.url = this.url.substring(0, this.url.length - 1);
+    }
+
+    let url = this.url + path;
+    
+    const request = new XMLHttpRequest();
+    let metadata;
+    request.onerror = error =>
+    {
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200)
+      {
+        const index = path.lastIndexOf("/");
+        let name = index !== -1 ? path.substring(index + 1) : path;
+        readyCallback(new BIMROCKET.IOResult(OK, "", path,
+          new BIMROCKET.IOMetadata(name, null, OBJECT, 0), 
+          null, null, request.response));
+      }
+    };
+    request.open("GET", url, true);
+    this.setCredentials(request);
+    request.send();
+  }
+
   save(object, path, options, readyCallback, progressCallback)
   {
     const OK = BIMROCKET.IOResult.OK;
@@ -177,6 +213,35 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
       options : options
     };
     BIMROCKET.IOManager.export(intent);
+  }
+  
+  upload(data, path, options, readyCallback, progressCallback)
+  {
+    const OK = BIMROCKET.IOResult.OK;
+    const ERROR = BIMROCKET.IOResult.ERROR;
+
+    const url = this.url + path;
+    const request = new XMLHttpRequest();
+    request.onerror = error =>
+    {
+      // ERROR
+      readyCallback(new BIMROCKET.IOResult(ERROR, "Connection error"));
+    };
+    request.onload = () =>
+    {
+      if (request.status === 200)
+      {
+        readyCallback(new BIMROCKET.IOResult(OK));
+      }
+      else
+      {
+        readyCallback(new BIMROCKET.IOResult(ERROR,
+          "Upload failed (error " + request.status + ")."));
+      }
+    };
+    request.open("PUT", url, true);
+    this.setCredentials(request);
+    request.send(data);
   }
 
   remove(path, readyCallback, progressCallback)

@@ -1,6 +1,6 @@
 BIMROCKET.WebdavService = class extends BIMROCKET.IOService
 {
-  static type = "WebdavService";
+  static className = "WebdavService";
 
   constructor(name, description, url, username, password)
   {

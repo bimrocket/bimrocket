@@ -1,5 +1,6 @@
-BIMROCKET.IOService = class
+BIMROCKET.IOService = class extends BIMROCKET.Service
 {
+  static type = "io";
   static SERVICE_TYPES =
     [["WebdavService", "Webdav service"], 
      ["ComponentService", "Component service"]];
@@ -7,11 +8,7 @@ BIMROCKET.IOService = class
   constructor(name, description = null, 
     url = null, username = null, password = null)
   {
-    this.name = name;
-    this.description = description;
-    this.url = url;
-    this.username = username;
-    this.password = password;
+    super(name, description, url, username, password);
   }
 
   open(path, options, readyCallback, progressCallback)

@@ -28,8 +28,8 @@ BIMROCKET.Application = class
     this._backgroundColor1 = null;
     this._backgroundColor2 = null;
 
-    /* IO services */
-    this.services = {}; /* BIMROCKET.IOService */
+    /* IO/BCF services */
+    this.services = { "io": {}, "bcf" : {}}; // BIMROCKET.Service
 
     /* selection */
     this.selection = new BIMROCKET.Selection(this, true);
@@ -401,14 +401,6 @@ BIMROCKET.Application = class
     toolBar.addToolButton(rotateTool);
     toolBar.addToolButton(scaleTool);
 
-    // Services
-    const svc1 = new BIMROCKET.WebdavService("svc1",
-      "Repository", "/bimrocket-server/api/cloudfs");
-    const svc2 = new BIMROCKET.ComponentService("svc2",
-      "Components", "/bimrocket-server/api/cloudfs/components");
-    this.addService(svc1);
-    this.addService(svc2);
-
     // listeners
     window.addEventListener("resize", this.onResize.bind(this), false);
 
@@ -473,6 +465,9 @@ BIMROCKET.Application = class
         }
       }
     };
+    
+    // restore services
+    this.restoreServices();
 
     // use tool
     this.useTool(cloudExplorerTool);
@@ -485,23 +480,23 @@ BIMROCKET.Application = class
       application.hideLogo();
     }, 1000);
 
-    var params = getQueryParams();
-    var url = params["url"];
+    const params = getQueryParams();
+    const url = params["url"];
     if (url)
     {
       var intent =
       {
         url : url,
-        onProgress : function(data)
+        onProgress : data => 
         {
           application.progressBar.progress = data.progress;
           application.progressBar.message = data.message;
         },
-        onCompleted : function(object)
+        onCompleted : object => 
         {
           application.initScene(object);
           application.progressBar.visible = false;
-          var toolName = params["tool"];
+          const toolName = params["tool"];
           if (toolName)
           {
             var tool = scope.tools[toolName];
@@ -511,10 +506,10 @@ BIMROCKET.Application = class
             }
           }
         },
-        onError : function(error)
+        onError : error =>
         {
           application.progressBar.visible = false;
-          var messageDialog =
+          const messageDialog =
             new BIMROCKET.MessageDialog("ERROR", error, "error");
           messageDialog.show();
         }
@@ -987,23 +982,74 @@ BIMROCKET.Application = class
     }
   }
 
-  addService(service)
+  addService(service, save = true)
   {
-    this.services[service.name] = service;
+    let type = service.constructor.type;
+    this.services[type][service.name] = service;
+    if (save) this.saveServices();
   }
 
-  removeService(service)
+  removeService(service, save = true)
   {
-    if (typeof service === "string")
+    let type = service.constructor.type;
+    delete this.services[type][service.name];
+    if (save) this.saveServices();
+  }
+
+  saveServices()
+  {
+    let data = [];
+    for (let type in this.services)
     {
-      delete this.services[service];      
+      let serviceByType = this.services[type];
+      for (let name in serviceByType)
+      {
+        let service = serviceByType[name];
+        data.push({
+          className : service.constructor.className, 
+          parameters: service.getParameters() 
+        });
+      }
+    }
+    let json = JSON.stringify(data);
+    window.localStorage.setItem("bimrocket.services", json);
+  }
+  
+  restoreServices()
+  {    
+    let json = window.localStorage.getItem("bimrocket.services");
+    if (json)
+    {
+      let array = JSON.parse(json);
+      for (let i = 0; i < array.length; i++)
+      {
+        let entry = array[i];
+        let className = entry.className;
+        let parameters = entry.parameters;
+        let service = new BIMROCKET[className]();
+        service.setParameters(parameters);   
+        this.addService(service, false);
+      }
     }
     else
     {
-      delete this.services[service.name];
+      this.createDefaultServices();
     }
   }
 
+  createDefaultServices()
+  {
+    // default services
+
+    const cloudfs = new BIMROCKET.WebdavService("cloudfs",
+      "Repository", "/bimrocket-server/api/cloudfs");
+    this.addService(cloudfs, false);
+
+    const bcf = new BIMROCKET.BCFService("bcf",
+      "BIMROCKET BCF", "/bimrocket-server/api");
+    this.addService(bcf, false); 
+  }
+  
   addTool(tool)
   {
     if (!this.tools[tool.name])

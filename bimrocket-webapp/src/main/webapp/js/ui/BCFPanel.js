@@ -9,6 +9,8 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.id = "bcf_panel";
     this.title = "BCF";
     this.position = "left";
+    
+    this.service = null;
 
     this.topics = null;
     this.extensions = null;
@@ -17,8 +19,6 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.comments = null;
     this.viewpointGuid = null;
     this.viewpoints = null;
-
-    const scope = this;
 
     // search panel
     this.searchPanelElem = document.createElement("div");
@@ -32,23 +32,28 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.connPanelElem.className = "bcf_body";
     this.searchPanelElem.appendChild(this.connPanelElem);
 
-    this.connUrlElem = Controls.addTextField(this.connPanelElem,
-      "bcfConn", "BCF URL:", localStorage.getItem("bimrocket.bcf.url") ||
-      "/bimrocket-server/api/");
-
-    this.connUserElem = Controls.addTextField(this.connPanelElem,
-      "bcfUser", "Username:", localStorage.getItem("bimrocket.bcf.username"));
-
-    this.connPasswordElem = Controls.addPasswordField(this.connPanelElem,
-      "bcfPassword", "Password:", 
-      localStorage.getItem("bimrocket.bcf.password"));
+    this.bcfServiceElem = Controls.addSelectField(this.connPanelElem, 
+      "bcfService", "BCF service:", []);
+    this.bcfServiceElem.addEventListener("change", 
+      event => {
+        let name = this.bcfServiceElem.value;
+        this.service = this.application.services.bcf[name];
+        this.filterPanelElem.style.display = "none";
+        this.topicTableElem.style.display = "none";
+      });
 
     this.connButtonsElem = document.createElement("div");
     this.connPanelElem.appendChild(this.connButtonsElem);
     this.connButtonsElem.className = "bcf_buttons";
 
-    Controls.addButton(this.connButtonsElem,
-      "bcfConnect", "Connect", () => scope.refreshProjects());
+    this.connectButton = Controls.addButton(this.connButtonsElem,
+      "bcfConnect", "Connect", () => this.refreshProjects());
+    this.addServiceButton = Controls.addButton(this.connButtonsElem,
+      "bcfAdd", "Add", () => this.showAddDialog());
+    this.editServiceButton = Controls.addButton(this.connButtonsElem,
+      "bcfEdit", "Edit", () => this.showEditDialog());
+    this.deleteServiceButton = Controls.addButton(this.connButtonsElem,
+      "bcfDelete", "Delete", () => this.showDeleteDialog());
 
     // filter panel
 
@@ -59,7 +64,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     this.projectElem = Controls.addSelectField(this.filterPanelElem,
       "bcfProject", "Project:");
-    this.projectElem.addEventListener("change", () => scope.changeProject());
+    this.projectElem.addEventListener("change", () => this.changeProject());
 
     this.statusFilterElem = Controls.addSelectField(this.filterPanelElem,
       "bcfStatusFilter", "Status:");
@@ -75,15 +80,15 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.filterPanelElem.appendChild(this.filterButtonsElem);
 
     this.searchTopicsButton = Controls.addButton(this.filterButtonsElem,
-      "searchTopics", "Search", () => scope.searchTopics());
+      "searchTopics", "Search", () => this.searchTopics());
     this.searchTopicsButton.disabled = true;
 
     this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
-      "setupProject", "Setup", () => scope.showProjectSetup());
+      "setupProject", "Setup", () => this.showProjectSetup());
     this.setupProjectButton.disabled = true;
 
     this.searchNewTopicButton = Controls.addButton(this.filterButtonsElem,
-      "searchNewTopic", "New", () => { scope.showTopic(); });
+      "searchNewTopic", "New", () => this.showTopic());
     this.searchNewTopicButton.disabled = true;
 
     // topic table
@@ -110,22 +115,22 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.detailBodyElem.appendChild(this.detailHeaderElem);
 
     this.backButton = Controls.addButton(this.detailHeaderElem,
-      "backTopics", "Back", () => scope.showTopicList());
+      "backTopics", "Back", () => this.showTopicList());
 
     this.topicNavElem = document.createElement("span");
     this.detailHeaderElem.appendChild(this.topicNavElem);
 
     this.previousTopicButton = Controls.addButton(this.topicNavElem,
-      "previousTopic", "<", () => scope.showPreviousTopic());
+      "previousTopic", "<", () => this.showPreviousTopic());
 
     this.topicSearchIndexElem = document.createElement("span");
     this.topicNavElem.appendChild(this.topicSearchIndexElem);
 
     this.nextTopicButton = Controls.addButton(this.topicNavElem,
-      "nextTopic", ">", () => scope.showNextTopic());
+      "nextTopic", ">", () => this.showNextTopic());
 
     this.detailNewTopicButton = Controls.addButton(this.detailHeaderElem,
-      "detailNewTopic", "New", () => { scope.showTopic(); });
+      "detailNewTopic", "New", () => this.showTopic());
 
     this.topicIndexElem = Controls.addTextField(this.detailBodyElem,
       "topic_index", "Index:");
@@ -160,13 +165,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.detailBodyElem.appendChild(this.detailButtonsElem);
 
     this.saveTopicButton = Controls.addButton(this.detailButtonsElem,
-      "saveTopic", "Save", () => scope.saveTopic());
+      "saveTopic", "Save", () => this.saveTopic());
 
     this.deleteTopicButton = Controls.addButton(this.detailButtonsElem,
       "deleteTopic", "Delete", () => {
       const dialog = new BIMROCKET.ConfirmDialog("Delete topic",
       "Really want to delete this topic?",
-      () => scope.deleteTopic(),
+      () => this.deleteTopic(),
       "Delete", "Cancel");
       dialog.show();
     });
@@ -186,7 +191,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.commentElem = Controls.addTextAreaField(this.commentsPanelElem,
       "comment", "Comment:");
     this.saveCommentButton = Controls.addButton(this.commentsPanelElem,
-      "saveComment", "Save", () => scope.saveComment());
+      "saveComment", "Save", () => this.saveComment());
 
     /* viewpoints panel */
 
@@ -198,7 +203,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.viewpointsPanelElem.appendChild(this.viewpointListElem);
 
     this.createViewpointButton = Controls.addButton(this.viewpointsPanelElem,
-      "createViewpoint", "Create", () => scope.createViewpoint());
+      "createViewpoint", "Create", () => this.createViewpoint());
 
     /* links panel */
 
@@ -242,7 +247,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.setupPanelElem.appendChild(this.setupBodyElem);
 
     this.backSetupButton = Controls.addButton(this.setupBodyElem,
-      "backSetup", "Back", () => scope.showTopicList());
+      "backSetup", "Back", () => this.showTopicList());
 
     this.projectNameElem = Controls.addTextField(this.setupBodyElem,
       "project_name", "Project name:");
@@ -252,7 +257,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.setupBodyElem.appendChild(this.saveProjectButtonsElem);
 
     this.saveProjectNameButton = Controls.addButton(this.saveProjectButtonsElem,
-      "saveProjectName", "Save", () => scope.saveProjectName());
+      "saveProjectName", "Save", () => this.saveProjectName());
 
     this.extensionsElem = Controls.addTextAreaField(this.setupBodyElem,
       "extensions_json", "Project extensions:");
@@ -264,7 +269,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     this.saveExtensionsButton = Controls.addButton(
       this.saveExtensionsButtonsElem, "saveExtensions", "Save", 
-      () => scope.saveProjectExtensions());
+      () => this.saveProjectExtensions());
   }
 
   clearTopics()
@@ -285,7 +290,6 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   showTopic(topic = null, index = -1)
   {
-    const scope = this;
     this.searchPanelElem.style.display = "none";
     this.detailPanelElem.style.display = "";
     this.setupPanelElem.style.display = "none";
@@ -394,76 +398,23 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     if (projectId === null) return;
 
-    const scope = this;
-
-    function reqListener()
+    let filter = {
+      "status" : this.statusFilterElem.value,
+      "priority" : this.priorityFilterElem.value,
+      "assignedTo" : this.assignedToFilterElem.value
+    };
+    this.service.getTopics(projectId, filter, topics => 
     {
-      scope.topics = JSON.parse(request.responseText);
-      console.info(scope.topics);
-      scope.populateTopicTable();
-    }    
-    let status = this.statusFilterElem.value;
-    let priority = this.priorityFilterElem.value;
-    let assignedTo = this.assignedToFilterElem.value;
-    let filters = [];
-    if (status)
-    {
-      filters.push("topic_status eq '" + status + "'");
-    }
-    if (priority)
-    {
-      filters.push("priority eq '" + priority + "'");
-    }
-    if (assignedTo)
-    {
-      filters.push("assigned_to eq '" + assignedTo + "'");
-    }
-    let filter = filters.length > 0 ? filters.join(" and ") : "";
-    let orderBy = "creation_date,index";
-
-    let query = "";
-    if (filter.length > 0 || orderBy.length > 0)
-    {
-      query = "?";
-      if (filter)
-      {
-        query += "$filter=" + filter;
-        if (orderBy) query += "&";
-      }
-      if (orderBy) query += "$orderBy=" + orderBy;
-    }
-
-    const request = this.serverRequest("GET",
-      "projects/" + projectId + "/topics" + query, reqListener);
-    request.send();
+      this.topics = topics; 
+      this.populateTopicTable(); 
+    }, this.onError);
   }
 
   saveTopic()
   {
-    const scope = this;
-
-    function reqListener()
-    {
-      const topic = JSON.parse(request.responseText);
-      console.info(topic);
-      scope.showTopic(topic);
-      scope.topics = null; // force topic list refresh
-      BIMROCKET.Toast.show("Topic saved.");      
-    }
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
-    var request;
-    if (topicGuid) // update
-    {
-      request = this.serverRequest("PUT",
-        "projects/" + projectId + "/topics/" + topicGuid, reqListener);
-    }
-    else // creation
-    {
-      request = this.serverRequest("POST", "projects/" + projectId + "/topics",
-        reqListener);
-    }
-    request.send(JSON.stringify({
+    let topic = {
       "title" : this.titleElem.value,
       "topic_type" : this.topicTypeElem.value,
       "priority" : this.priorityElem.value,
@@ -472,106 +423,106 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       "assigned_to" : this.assignedToElem.value,
       "description" : this.descriptionElem.value,
       "due_date" : this.addTime(this.dueDateElem.value)
-    }));
+    };
+    
+    const onCompleted = topic => 
+    {
+      this.showTopic(topic); 
+      this.topics = null;       
+      BIMROCKET.Toast.show("Topic saved.");
+    };
+    
+    if (topicGuid) // update
+    {
+      this.service.updateTopic(projectId, topicGuid, topic, 
+        onCompleted, this.onError);
+    }
+    else // creation
+    {
+      this.service.createTopic(projectId, topic, onCompleted, this.onError); 
+    }
   }
 
   deleteTopic()
   {
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = () =>
     {
-      scope.showTopic();
-      scope.topics = null; // force topic list refresh
+      this.showTopic();
+      this.topics = null; // force topic list refresh
       BIMROCKET.Toast.show("Topic deleted.");
-    }
+    };
 
     let projectId = this.getProjectId();
-    let guid = this.guidElem.value;
-    if (guid)
+    let topicGuid = this.guidElem.value;
+    if (topicGuid)
     {
-      const request = this.serverRequest("DELETE",
-        "projects/" + projectId + "/topics/" + guid, reqListener);
-      request.send();
+      this.service.deleteTopic(projectId, topicGuid, onCompleted, 
+        this.onError);
     }
   }
 
   loadComments(scrollBottom)
   {
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = comments =>
     {
-      scope.comments = JSON.parse(request.responseText);
-      console.info(scope.comments);
-      scope.populateCommentList();
+      this.comments = comments;
+      console.info(comments);
+      this.populateCommentList();
       if (scrollBottom)
       {
-        scope.detailPanelElem.scrollTop = scope.detailPanelElem.scrollHeight;
+        this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
       }
-    }
+    };
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const request = this.serverRequest("GET",
-      "projects/" + projectId + "/topics/" + topicGuid + "/comments",
-      reqListener);
-    request.send();
+    this.service.getComments(projectId, topicGuid, onCompleted, this.onError);
   }
 
   saveComment()
   {
-    const scope = this;
-
-    function reqListener()
-    {
-      scope.commentElem.value = null;
-      const comment = JSON.parse(request.responseText);
-      console.info(comment);
-      scope.commentGuid = null;
-      scope.loadComments(true);
-      BIMROCKET.Toast.show("Comment saved.");
-    }
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
+    let comment = 
+    {
+      "comment" : this.commentElem.value
+    };
 
-    var request;
+    const onCompleted = comment => 
+    {
+      this.commentElem.value = null;
+      console.info(comment);
+      this.commentGuid = null;
+      this.loadComments(true);
+      BIMROCKET.Toast.show("Comment saved.");
+    };
 
     if (this.commentGuid) // update
     {
-      request = this.serverRequest("PUT",
-        "projects/" + projectId + "/topics/" + topicGuid + "/comments/" +
-        this.commentGuid, reqListener);
+      this.service.updateComment(projectId, topicGuid, this.commentGuid, 
+        comment, onCompleted, this.onError);
     }
     else // creation
     {
-      request = this.serverRequest("POST",
-        "projects/" + projectId + "/topics/" + topicGuid + "/comments",
-        reqListener);
+      this.service.createComment(projectId, topicGuid, comment, 
+        onCompleted, this.onError);
     }
-    request.send(JSON.stringify({
-      "comment" : this.commentElem.value
-    }));
   }
 
   deleteComment(comment)
   {
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = () =>
     {
-      scope.loadComments();
+      this.loadComments();
       BIMROCKET.Toast.show("Comment deleted.");
-    }
+    };
 
     let projectId = this.getProjectId();
-    let guid = this.guidElem.value;
-    if (guid)
+    let topicGuid = this.guidElem.value;
+    if (topicGuid)
     {
-      const request = this.serverRequest("DELETE",
-        "projects/" + projectId + "/topics/" + guid +
-        "/comments/" + comment.guid, reqListener);
-      request.send();
+      this.service.deleteComment(projectId, topicGuid, comment.guid, 
+        onCompleted, this.onError);
     }
   }
 
@@ -584,31 +535,25 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   loadViewpoints(focusOnFirst)
   {
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = viewpoints =>
     {
-      scope.viewpoints = JSON.parse(request.responseText);
-      console.info(scope.viewpoints);
-      scope.populateViewpointList();
-      if (focusOnFirst && scope.viewpoints.length > 0)
+      this.viewpoints = viewpoints;
+      console.info(viewpoints);
+      this.populateViewpointList();
+      if (focusOnFirst && viewpoints.length > 0)
       {
-        scope.showViewpoint(scope.viewpoints[0]);
+        this.showViewpoint(viewpoints[0]);
       }
-    }
+    };
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const request = this.serverRequest("GET",
-      "projects/" + projectId +
-      "/topics/" + topicGuid + "/viewpoints", reqListener);
-
-    request.send();
+    this.service.getViewpoints(projectId, topicGuid, onCompleted, 
+      this.onError);
   }
 
   createViewpoint()
   {
-    const scope = this;
     const viewpoint = {};
     const camera = this.application.camera;
     const matrix = camera.matrixWorld;
@@ -645,43 +590,35 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       };
     }
 
-    function reqListener()
+    const onCompleted = viewpoint =>
     {
-      let viewpoint = JSON.parse(request.responseText);
       console.info(viewpoint);
-      scope.loadViewpoints();
+      this.loadViewpoints();
       BIMROCKET.Toast.show("Viewpoint saved.");
-    }
+    };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const request = this.serverRequest("POST",
-      "projects/" + projectId + "/topics/" + topicGuid + "/viewpoints",
-      reqListener);
-
-    request.send(JSON.stringify(viewpoint));
+    this.service.createViewpoint(projectId, topicGuid, viewpoint, 
+      onCompleted, this.onError);
   }
 
   deleteViewpoint(viewpoint)
   {
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = () =>
     {
-      scope.loadViewpoints();
+      this.loadViewpoints();
       BIMROCKET.Toast.show("Viewpoint deleted.");
-    }
+    };
 
     let projectId = this.getProjectId();
-    let guid = this.guidElem.value;
+    let topicGuid = this.guidElem.value;
 
-    if (guid)
+    if (topicGuid)
     {
-      const request = this.serverRequest("DELETE",
-        "projects/" + projectId + "/topics/" + guid +
-        "/viewpoints/" + viewpoint.guid, reqListener);
-      request.send();
+      this.service.deleteViewpoint(projectId, topicGuid, viewpoint.guid,
+        onCompleted, this.onError);
     }
   }
 
@@ -690,37 +627,25 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     if (projectId === null) return;
 
-    const scope = this;
-
-    function reqListener()
+    const onCompleted = extensions =>
     {
-      scope.extensions = JSON.parse(request.responseText);
-      console.info(scope.extensions);
-      scope.populateExtensions();
-    }
+      this.extensions = extensions;
+      console.info(extensions);
+      this.populateExtensions();
+    };
 
-    const request = this.serverRequest("GET",
-      "projects/" + projectId + "/extensions", reqListener);
-
-    request.send();
+    this.service.getExtensions(projectId, onCompleted, this.onError);
   }
   
   refreshProjects()
   {
-    const scope = this;
     const projects = [];
 
-    function reqListener()
+    const onCompleted = serverProjects =>
     {
-      localStorage.setItem("bimrocket.bcf.url", scope.connUrlElem.value);
-      localStorage.setItem("bimrocket.bcf.username", scope.connUserElem.value);
-      localStorage.setItem("bimrocket.bcf.password", 
-        scope.connPasswordElem.value);
+      this.filterPanelElem.style.display = "";
+      this.topicTableElem.style.display = "";
       
-      scope.filterPanelElem.style.display = "";
-      scope.topicTableElem.style.display = "";
-      
-      let serverProjects = JSON.parse(request.responseText);
       console.info(serverProjects);
 
       const projectIdSet = new Set();
@@ -733,7 +658,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
         projects.push([projectId, projectName]);
       }
 
-      const scene = scope.application.scene;
+      const scene = this.application.scene;
       scene.traverse(object =>
       {
         if (object._ifc instanceof BIMROCKET.IFC4.IfcProject)
@@ -747,25 +672,23 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
         }
       });
 
-      Controls.setSelectOptions(scope.projectElem, projects);
+      Controls.setSelectOptions(this.projectElem, projects);
       const disabled = projects.length === 0;
-      scope.searchTopicsButton.disabled = disabled;
-      scope.setupProjectButton.disabled = disabled;
-      scope.searchNewTopicButton.disabled = disabled;
+      this.searchTopicsButton.disabled = disabled;
+      this.setupProjectButton.disabled = disabled;
+      this.searchNewTopicButton.disabled = disabled;
       if (disabled)
       {
-        scope.clearTopics();
+        this.clearTopics();
       }
-      scope.updateExtensions();
-    }
+      this.updateExtensions();
+    };
 
-    const request = this.serverRequest("GET", "projects", reqListener);
-    request.send();
+    this.service.getProjects(onCompleted, this.onError);
   }
   
   saveProjectName()
   {
-    const scope = this;
     const projectName = this.projectNameElem.value;
     const index = this.projectElem.selectedIndex;
     const options = this.projectElem.options;
@@ -773,48 +696,56 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
             
     if (projectName !== oldProjectName)
     {
-      function reqListener()
+      const onCompleted = project =>
       {
-        const project = JSON.parse(request.responseText);
         console.info(project);
         options[index].label = project.name;
-      }
+        BIMROCKET.Toast.show("Project saved.");
+      };
       
       const projectId = this.getProjectId();
-      const request = this.serverRequest("PUT", "projects/" + projectId, 
-        reqListener);
-      request.send(JSON.stringify({
+      const project = {
         "name" : projectName
-      }));
+      };
+      this.service.updateProject(projectId, project, onCompleted, 
+        this.onError);
     }
   }
   
   saveProjectExtensions()
   {
-    const scope = this;
-    const extensions = this.extensionsElem.value;
-    const oldExtensions = JSON.stringify(this.extensions, null, 2);
+    const extensionsText = this.extensionsElem.value;
+    const oldExtensionsText = JSON.stringify(this.extensions, null, 2);
 
-    if (extensions !== oldExtensions)
+    if (extensionsText !== oldExtensionsText)
     {
-      function reqListener()
+      const onCompleted = extensions =>
       {
-        scope.extensions = JSON.parse(request.responseText);
-        console.info(scope.extensions);
-        scope.populateExtensions();
-      }
+        this.extensions = extensions;
+        console.info(extensions);
+        this.populateExtensions();
+        BIMROCKET.Toast.show("Project extensions saved.");
+      };
       
-      const projectId = this.getProjectId();
-      const request = this.serverRequest("PUT", "projects/" + projectId + 
-        "/extensions", reqListener);
-      request.send(extensions);
+      try
+      {
+        let extensions = JSON.parse(extensionsText);
+      
+        const projectId = this.getProjectId();
+        this.service.updateExtensions(projectId, extensions, onCompleted, 
+          this.onError);
+      }
+      catch (ex)
+      {
+        console.error(ex);
+      }
     }
   }
 
   showViewpoint(viewpoint)
   {
     const application = this.application;
-    var position, dir, up, camera;
+    let position, dir, up, camera;
 
     if (viewpoint.perspective_camera)
     {
@@ -877,7 +808,6 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   populateTopicTable()
   {
-    const scope = this;
     const topics = this.topics;
     const topicsElem = this.topicTableElem;
     topicsElem.tBodies[0].innerHTML = "";
@@ -887,14 +817,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       let rowElem = Controls.addTableRow(topicsElem);
       rowElem.children[0].innerHTML = topic.index;
       Controls.addLink(rowElem.children[1], topic.title, "#", null, null, () =>
-        { scope.showTopic(topic, i); });
+        { this.showTopic(topic, i); });
       rowElem.children[2].innerHTML = topic.topic_status;
     }
   }
 
   populateCommentList()
   {
-    const scope = this;
     const comments = this.comments;
     const commentsElem = this.commentListElem;
     commentsElem.innerHTML = "";
@@ -915,13 +844,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
       Controls.addText(itemListHeaderElem, authorDate, "bcf_comment_author");
       Controls.addButton(itemListHeaderElem, "updateComment", "Edit",
-         () => scope.editComment(comment),
+         () => this.editComment(comment),
         "bcf_edit_comment");
       Controls.addButton(itemListHeaderElem, "deleteComment", "Delete",
          () => {
            const dialog = new BIMROCKET.ConfirmDialog("Delete comment",
            "Really want to delete this comment?",
-           () => scope.deleteComment(comment),
+           () => this.deleteComment(comment),
            "Delete", "Cancel");
            dialog.show();
          },
@@ -934,7 +863,6 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   populateViewpointList()
   {
-    const scope = this;
     const viewpoints = this.viewpoints;
     const viewpointsElem = this.viewpointListElem;
     viewpointsElem.innerHTML = "";
@@ -953,13 +881,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       }
       Controls.addText(itemListElem, label, "bcf_viewpoint_text");
       Controls.addButton(itemListElem, "showViewpoint", "View",
-        () => scope.showViewpoint(viewpoint), "bcf_show_viewpoint");
+        () => this.showViewpoint(viewpoint), "bcf_show_viewpoint");
 
       Controls.addButton(itemListElem, "deleteViewpoint", "Delete",
         () => {
           const dialog = new BIMROCKET.ConfirmDialog("Delete viewpoint",
           "Really want to delete this viewpoint?",
-          () => scope.deleteViewpoint(viewpoint),
+          () => this.deleteViewpoint(viewpoint),
           "Delete", "Cancel");
           dialog.show();
         }, "bcf_delete_viewpoint");
@@ -997,7 +925,6 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
   changeProject()
   {
     this.clearTopics();
-    const scope = this;
     this.updateExtensions();
   }
 
@@ -1024,57 +951,113 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     const index = dateString.indexOf("T");
     return dateString.substring(0, index);
   }
-
-  serverRequest(method, path, listener)
+  
+  onError(error)
   {
-    const request = new XMLHttpRequest();
-    request.onerror = error =>
-    {
-      const dialog = new BIMROCKET.MessageDialog("ERROR", "Connection error", 
-        "error");
-      dialog.show();
-    };
-    if (listener) request.onload = () =>
-    {
-      if (request.status === 200)
-      {
-        listener();
-      }
-      else
-      {
-        this.showError(request);
-      }
-    };
-
-    request.open(method, this.connUrlElem.value + "bcf/2.1/" + path);
-    request.setRequestHeader("Content-Type", "application/json");
-
-    const username = this.connUserElem.value;
-    const password = this.connPasswordElem.value;
-    if (username)
-    {
-      const userPass = username + ":" + password;
-      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
-    }
-    return request;
-  }
-
-  showError(request)
-  {
-    let message;
-    try
-    {
-      message = JSON.parse(request.response).message;
-    }
-    catch (ex)
-    {
-      message = "Error " + request.status;
-    }
+    let message = error.message;
     const dialog = new BIMROCKET.MessageDialog("ERROR", message, "error");
-    dialog.show();
+    dialog.show();    
   }
 
   onShow()
   {
+    this.updateServices();
+  }
+  
+  updateServices()
+  {
+    const application = this.application;
+    const services = application.services.bcf;
+    let options = [];
+
+    for (let name in services)
+    {
+      let service = services[name];
+      options.push([service.name, service.description || service.name]);      
+    }
+    Controls.setSelectOptions(this.bcfServiceElem, options);
+
+    if (options.length > 0)
+    {
+      let name = this.bcfServiceElem.value;
+      this.service = application.services.bcf[name];
+    }
+    else
+    {
+      this.service = null;
+    }
+    let service = this.service;
+    this.connectButton.style.display = service ? "" : "none";
+    this.addServiceButton.style.display = "";
+    this.editServiceButton.style.display = service ? "" : "none";
+    this.deleteServiceButton.style.display = service ? "" : "none";    
+  }
+
+  showAddDialog()
+  {
+    let serviceTypes = ["BCF"];
+    let dialog = new BIMROCKET.ServiceDialog("Add BCF service", serviceTypes);
+    dialog.serviceTypeSelect.disabled = true;
+    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    {
+      const service = new BIMROCKET.BCFService();
+      service.name = name;
+      service.description = description;
+      service.url = url;
+      service.username = username;
+      service.password = password;
+      this.application.addService(service);
+      this.updateServices();
+      this.service = service;
+      this.bcfServiceElem.value = name;
+      this.filterPanelElem.style.display = "none";
+      this.topicTableElem.style.display = "none";
+    };
+    dialog.show();
+  }
+
+  showEditDialog()
+  {
+    if (this.service === null) return;
+    
+    const service = this.service;    
+    let serviceTypes = ["BCF"];
+    let dialog = new BIMROCKET.ServiceDialog("Edit BCF service",
+      serviceTypes, service.constructor.type, service.name, service.description,
+      service.url, service.username, service.password);
+    dialog.serviceTypeSelect.disabled = true;
+    dialog.nameElem.readOnly = true;
+    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    {
+      service.serviceType = serviceType;
+      service.description = description;
+      service.url = url;
+      service.username = username;
+      service.password = password;
+      this.application.addService(service);
+      this.updateServices();
+      this.filterPanelElem.style.display = "none";
+      this.topicTableElem.style.display = "none";
+    };
+    dialog.show();
+  }
+
+  showDeleteDialog()
+  {
+    let name = this.bcfServiceElem.value;
+    if (name)
+    {
+      let dialog = new BIMROCKET.ConfirmDialog("Delete BCF service",
+        "Delete service " + name + "?",
+        () => {
+          const application = this.application;
+          let service = application.services.bcf[name];
+          application.removeService(service);
+          this.updateServices();
+          this.filterPanelElem.style.display = "none";
+          this.topicTableElem.style.display = "none";
+      });
+      dialog.show();
+    }
   }
 };

@@ -35,9 +35,11 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
     this.homeButtonElem = document.createElement("div");
     this.homeButtonElem.className = "image_button home";
+    this.homeButtonElem.setAttribute("role", "button");
 
     this.backButtonElem = document.createElement("div");
     this.backButtonElem.className = "image_button back";
+    this.backButtonElem.setAttribute("role", "button");
 
     this.directoryElem = document.createElement("div");
     this.directoryElem.className = "directory";
@@ -165,7 +167,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   showEditDialog()
   {
-    const service = this.application.services[this.entryName];
+    const service = this.application.services.io[this.entryName];
 
     let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
     let dialog = new BIMROCKET.ServiceDialog("Edit cloud service",
@@ -180,6 +182,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       service.url = url;
       service.username = username;
       service.password = password;
+      this.application.addService(service);
       this.showServices();
     };
     dialog.show();
@@ -193,9 +196,11 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       let dialog = new BIMROCKET.ConfirmDialog("Delete cloud service",
         "Delete service " + name + "?",
         () => {
+          const application = this.application;
+          let service = application.services.io[name];
+          application.removeService(service);
           this.entryName = "";
           this.entryType = null;
-          this.application.removeService(name);
           this.showServices();
         });
       dialog.show();
@@ -257,7 +262,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       const serviceName = parts[0];
       const servicePath = parts[1];
       // call to service
-      const service = application.services[serviceName];
+      const service = application.services.io[serviceName];
       if (service)
       {
         const options = {};
@@ -283,7 +288,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const serviceName = parts[0];
     const servicePath = parts[1];
     // call to service
-    const service = application.services[serviceName];
+    const service = application.services.io[serviceName];
     if (service)
     {
       let object = application.selection.object || application.baseObject;
@@ -307,8 +312,8 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const parts = this.parsePath(path);
     const serviceName = parts[0];
     const servicePath = parts[1];
-    // call to service
-    const service = application.services[serviceName];
+    // call to services
+    const service = application.services.io[serviceName];
     if (service)
     {
       this.showProgressBar();
@@ -330,7 +335,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const serviceName = parts[0];
     const servicePath = parts[1];
     // call to service
-    const service = application.services[serviceName];
+    const service = application.services.io[serviceName];
     if (service)
     {
       this.showProgressBar();
@@ -352,7 +357,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const serviceName = parts[0];
     const servicePath = parts[1];
     // call to service
-    const service = application.services[serviceName];
+    const service = application.services.io[serviceName];
     if (service)
     {
       const options = {};
@@ -380,7 +385,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
         const serviceName = parts[0];
         const servicePath = parts[1];
         // call to service
-        const service = application.services[serviceName];
+        const service = application.services.io[serviceName];
         if (service)
         {
           const options = {};
@@ -517,9 +522,9 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
     this.directoryElem.innerHTML = "/";
     this.entriesElem.innerHTML = "";
-    for (let serviceName in application.services)
+    for (let serviceName in application.services.io)
     {
-      let service = application.services[serviceName];
+      let service = application.services.io[serviceName];
       let entryElem = document.createElement("li");
       entryElem.className = "entry service";
       entryElem.innerHTML = service.description || service.name;
@@ -543,7 +548,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     if (path.lastIndexOf("/") === 0)
     {
       const serviceName = path.substring(1);
-      const service = application.services[serviceName];
+      const service = application.services.io[serviceName];
       this.directoryElem.innerHTML = service.description || service.name;
     }
     else

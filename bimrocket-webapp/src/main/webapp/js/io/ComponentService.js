@@ -1,11 +1,7 @@
 BIMROCKET.ComponentService = class extends BIMROCKET.IOService
 {
-  static type = "ComponentService";
-  
-  constructor(name, description, url, username, password)
-  {
-    super(name, description, url, username, password);
-    this.components = [
+  static className = "ComponentService";
+  static components = [
       ["armari", "Armari"],
       ["cadira", "Cadira"],
       ["camaro", "Crysler Camaro"],
@@ -13,6 +9,10 @@ BIMROCKET.ComponentService = class extends BIMROCKET.IOService
       ["taula", "Taula"],
       ["water", "Water"]
     ];
+  
+  constructor(name, description, url, username, password)
+  {
+    super(name, description, url, username, password);
   }
 
   open(path, options, readyCallback, progressCallback)
@@ -25,9 +25,10 @@ BIMROCKET.ComponentService = class extends BIMROCKET.IOService
     if (path === "/")
     {
       let entries = [];
-      for (let i = 0; i < this.components.length; i++)
+      let components = this.constructor.components;
+      for (let i = 0; i < components.length; i++)
       {
-        let component = this.components[i];
+        let component = components[i];
         metadata = new BIMROCKET.IOMetadata(component[0], component[1], OBJECT);
         entries.push(metadata);
       }

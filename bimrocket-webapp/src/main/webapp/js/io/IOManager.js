@@ -179,7 +179,6 @@ BIMROCKET.IOManager = class
     catch (ex)
     {
       if (onError) onError(ex);
-      throw ex;
     }
   }
 

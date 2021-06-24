@@ -23,7 +23,7 @@ BIMROCKET.CenterSelectionTool = class extends BIMROCKET.Tool
   execute()
   {
     const application = this.application;
-    let objects = application.selection.objects;
+    let objects = application.selection.roots;
     if (objects.length > 0)
     {
       if (this.focusOnSelection)

@@ -20,7 +20,7 @@ BIMROCKET.CloneTool = class extends BIMROCKET.Tool
   execute()
   {  
     const application = this.application;
-    let objects = application.selection.objects;
+    let objects = application.selection.roots;
     let clone = null;
     for (let i = 0; i < objects.length; i++)
     {

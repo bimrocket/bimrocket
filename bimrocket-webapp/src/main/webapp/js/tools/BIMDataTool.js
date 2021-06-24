@@ -19,19 +19,19 @@ BIMROCKET.BIMDataTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    var application = this.application;
-    var object = application.selection.object;
+    const application = this.application;
+    const object = application.selection.object;
     if (object)
     {
       if (object._ifc)
       {
-        var replacer = function(key, value)
+        const replacer = function(key, value)
         {
           return (key === "_helper") ? undefined : value;
         };      
-        var json = JSON.stringify(object._ifc, replacer, 2);
+        const json = JSON.stringify(object._ifc, replacer, 2);
 
-        var dialog = new BIMROCKET.Dialog("BIM data", 500, 500);
+        const dialog = new BIMROCKET.Dialog("BIM data", 500, 500);
         dialog.addCode(json);
         dialog.addButton("accept", "Accept", function() { dialog.hide(); });
         dialog.show();
@@ -39,7 +39,8 @@ BIMROCKET.BIMDataTool = class extends BIMROCKET.Tool
     }
     else
     {
-      var dialog = new BIMROCKET.MessageDialog("BIM data", "No object selected.");
+      let dialog = new BIMROCKET.MessageDialog("BIM data", 
+        "No object selected.");
       dialog.show();
     }
   }

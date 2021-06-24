@@ -23,7 +23,7 @@ BIMROCKET.ClipTool = class extends BIMROCKET.Tool
   execute()
   {
     var application = this.application;
-    var objects = application.selection.objects;
+    var objects = application.selection.roots;
     var operands = [];
     for (var i = 0; i < objects.length && operands.length < 2; i++)
     {

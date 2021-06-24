@@ -1176,7 +1176,7 @@ BIMROCKET.Application = class
 
   cutObjects()
   {
-    let cutObjects = this.selection.objects;
+    let cutObjects = this.selection.roots;
     this._cutObjects = cutObjects;
     if (cutObjects.length > 0)
     {
@@ -1250,7 +1250,7 @@ BIMROCKET.Application = class
   {
     if (objects === null)
     {
-      objects = this.selection.objects;
+      objects = this.selection.roots;
     }
     else if (objects instanceof THREE.Object3D)
     {
@@ -1269,7 +1269,7 @@ BIMROCKET.Application = class
   {
     if (objects === null)
     {
-      objects = this.selection.objects;
+      objects = this.selection.roots;
     }
     else if (objects instanceof THREE.Object3D)
     {

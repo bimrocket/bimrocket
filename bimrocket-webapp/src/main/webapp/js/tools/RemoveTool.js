@@ -20,7 +20,7 @@ BIMROCKET.RemoveTool = class extends BIMROCKET.Tool
   execute()
   {
     const application = this.application;
-    let objects = application.selection.objects;
+    let objects = application.selection.roots;
     for (let i = 0; i < objects.length; i++)
     {
       let object = objects[i];

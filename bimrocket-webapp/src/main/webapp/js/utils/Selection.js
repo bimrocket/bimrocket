@@ -15,20 +15,52 @@ BIMROCKET.Selection = class
     return this._objects.values();
   }
 
+  get object()
+  {
+    // returns the first object in selection
+    let objects = this._objects;
+    return objects.size === 0 ? null : objects.values().next().value;
+  }
+
   get objects()
   {
     return Array.from(this._objects);
   }
 
-  get object()
+  get roots()
   {
-    let objects = this._objects;
-    return objects.size === 0 ? null : objects.values().next().value;
+    // returns the top selected objects
+    let roots = [];
+    let iterator = this._objects.values();
+    let item = iterator.next();
+    while (!item.done)
+    {
+      let object = item.value;
+      if (this.isRoot(object))
+      {
+        roots.push(object);
+      }
+      item = iterator.next();
+    }
+    return roots;
   }
 
   contains(object)
   {
     return this._objects.has(object);
+  }
+  
+  isRoot(object)
+  {
+    // is root if object is selected but no ancestor is selected
+    let root = this._objects.has(object);
+    let parent = object.parent;
+    while (parent && root)
+    {
+      root = !this._objects.has(parent);
+      parent = parent.parent;
+    }
+    return root;
   }
 
   isEmpty()
@@ -89,48 +121,11 @@ BIMROCKET.Selection = class
         this._objects.add(object);
       }
     }
-    this._reduce();
   }
 
   _notifyListeners()
   {
     let selectionEvent = {type : "changed", objects : this.objects};
     this.application.notifyEventListeners("selection", selectionEvent);
-  }
-
-  _reduce()
-  {
-    let objects = this._objects;
-    if (objects.size > 1)
-    {
-      let toRemove = [];
-      let iterator = objects.values();
-      let item = iterator.next();
-      while (!item.done)
-      {
-        let object = item.value;
-        if (this._isContained(object))
-        {
-          toRemove.push(object);
-        }
-        item = iterator.next();
-      }
-      for (let i = 0; i < toRemove.length; i++)
-      {
-        this._objects.delete(toRemove[i]);
-      }
-    }
-  }
-
-  _isContained(object)
-  {
-    let contained = false;
-    let parent = object.parent;
-    while (parent && !contained)
-    {
-      contained = this._objects.has(parent);
-      parent = parent.parent;
-    }
-    return contained;
   }
 };

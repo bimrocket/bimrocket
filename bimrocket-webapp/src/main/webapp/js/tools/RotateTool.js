@@ -61,7 +61,7 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
     event.preventDefault();
     let mousePosition = this.getMousePosition(event);
 
-    this.objects = application.selection.objects;
+    this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {
       this.rotateStart = mousePosition.x;

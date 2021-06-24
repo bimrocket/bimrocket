@@ -130,32 +130,32 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     {
       site = sites[s];
 
-      const siteTreeNode = layoutTree.addNode(site.object.name, () => 
-        this.focusOnObject(site.object, "IfcSite", "front"), "IfcSite");
+      const siteTreeNode = layoutTree.addNode(site.object.name, event => 
+        this.focusOnObject(event, site.object, "IfcSite", "front"), "IfcSite");
 
       for (var b = 0; b < site.buildings.length; b++)
       {
         let building = site.buildings[b];
 
         const buildingTreeNode = siteTreeNode.addNode(building.object.name, 
-        () => this.focusOnObject(building.object, "IfcBuilding", "front"), 
-        "IfcBuilding");
+          event => this.focusOnObject(event, building.object, "IfcBuilding", 
+          "front"), "IfcBuilding");
 
         for (let st = 0; st < building.storeys.length; st++)
         {
           let storey = building.storeys[st];
 
           const storeyTreeNode = buildingTreeNode.addNode(storey.object.name, 
-          () => this.focusOnObject(storey.object, "IfcBuildingStorey", "top"), 
-          "IfcBuildingStorey");
+            event => this.focusOnObject(event, storey.object, 
+            "IfcBuildingStorey", "top"), "IfcBuildingStorey");
 
           for (let sp = 0; sp < storey.spaces.length; sp++)
           {
             let space = storey.spaces[sp];
 
             const spaceTreeNode = storeyTreeNode.addNode(space.object.name, 
-            () => this.focusOnObject(space.object, "IfcSpace", "top"), 
-            "IfcSpace");
+              event => this.focusOnObject(event, space.object, 
+              "IfcSpace", "top"), "IfcSpace");
           }
         }
       }
@@ -263,8 +263,9 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     application.selection.set(application.baseObject);
   }
 
-  focusOnObject(object, ifcClassName, view)
+  focusOnObject(event, object, ifcClassName, view)
   {
+    event.preventDefault();
     const application = this.application;
 
     // search site object

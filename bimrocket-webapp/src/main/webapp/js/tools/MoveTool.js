@@ -62,7 +62,7 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
     
     var application = this.application;
 
-    this.objects = application.selection.objects;
+    this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {      
       let mousePosition = this.getMousePosition(event);

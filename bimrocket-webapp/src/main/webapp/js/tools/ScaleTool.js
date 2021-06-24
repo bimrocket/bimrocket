@@ -61,7 +61,7 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
     event.preventDefault();
     const mousePosition = this.getMousePosition(event);
 
-    this.objects = application.selection.objects;
+    this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {
       this.scaleStart = mousePosition.x;

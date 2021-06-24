@@ -39,9 +39,9 @@
      inkscape:window-height="948"
      id="namedview3005"
      showgrid="true"
-     inkscape:zoom="7.9843747"
-     inkscape:cx="33.980489"
-     inkscape:cy="31.958301"
+     inkscape:zoom="11.291611"
+     inkscape:cx="12.327246"
+     inkscape:cy="32.312546"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
@@ -51,10 +51,7 @@
        id="grid3011"
        empspacing="4" /></sodipodi:namedview><path
      style="fill:none;stroke:#4d4d4d;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-     d="M 18,18 32,6 46,18 V 58 H 18 Z"
+     d="M 14,6 H 50 V 56 L 32,40 14,56 Z"
      id="path816"
      inkscape:connector-curvature="0"
-     sodipodi:nodetypes="cccccc" /><path
-     style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1.51180911;stroke-opacity:1;paint-order:normal"
-     d="M 32.068359 20 A 4 4 0 0 0 31.273438 20.066406 A 4 4 0 0 0 28.058594 24.679688 L 28.095703 24.869141 A 4 4 0 0 0 32.822266 27.914062 A 4 4 0 0 0 35.923828 23.226562 A 4 4 0 0 0 32.068359 20 z M 32.035156 22 A 2 2 0 0 1 33.962891 23.613281 A 2 2 0 0 1 32.410156 25.957031 A 2 2 0 0 1 30.046875 24.435547 L 30.029297 24.339844 A 2 2 0 0 1 31.636719 22.033203 A 2 2 0 0 1 32.035156 22 z "
-     id="path819" /></svg>
+     sodipodi:nodetypes="cccccc" /></svg>

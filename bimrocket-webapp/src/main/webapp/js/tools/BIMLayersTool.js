@@ -101,36 +101,30 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
         {
           let ifcClassName = object.userData.IFC.ifcClassName;
           let type = types[ifcClassName];
-          if (type)
-          {
-            type.objects.push(object);
-          }
-          else
+          if (type === undefined)
           {
             type = {
               name : ifcClassName,
-              objects : [object],
+              objects : new Set(),
               subTypes : {}
             };
             types[ifcClassName] = type;
           }
+          type.objects.add(object);
 
           let typeName = object.userData.IFC_type ?
             object.userData.IFC_type.Name || "Unnamed" : "Others";
 
           let subType = type.subTypes[typeName];
-          if (subType)
-          {
-            subType.objects.push(object);
-          }
-          else
+          if (subType === undefined)
           {
             subType = {
               name : typeName,
-              objects : [object]
+              objects : new Set()
             };
             type.subTypes[typeName] = subType;
           }
+          subType.objects.add(object);
         }
       });
     }
@@ -141,6 +135,7 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
     this.classifications = {};
     let classifs = this.classifications;
 
+    // find classifications
     for (let i = 0; i < baseObjects.length; i++)
     {
       baseObjects[i].traverse(object =>
@@ -159,19 +154,33 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
                   references : {}
                 };
               }
-              let classifData = object.userData[key];
-              let identification = classifData.Identification;
-              let references = classifs[classifName].references;
-              if (references[identification] === undefined)
-              {
-                references[identification] = {
-                  identification : identification,
-                  name : classifData.Name,
-                  objects : []
-                };
-              }
-              references[identification].objects.push(object);
             }
+          }
+        }
+      });
+    }
+
+    for (let i = 0; i < baseObjects.length; i++)
+    {
+      baseObjects[i].traverse(object =>
+      {
+        if (object.userData.IFC && object.type === "Object3D")
+        {
+          for (let classifName in classifs)
+          {
+            let key = "IFC_classification_" + classifName;
+            let classifData = object.userData[key];
+            let identification = classifData ? classifData.Identification : "?";
+            let references = classifs[classifName].references;
+            if (references[identification] === undefined)
+            {
+              references[identification] = {
+                identification : identification,
+                name : classifData ? classifData.Name : "Not classified",
+                objects : new Set()
+              };
+            }
+            references[identification].objects.add(object);
           }
         }
       });
@@ -200,10 +209,10 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
                 groups[groupName] = {
                   ifcClassName: group.ifcClassName,
                   name : groupName,
-                  objects : []
+                  objects : new Set()
                 };
               }
-              groups[groupName].objects.push(object);
+              groups[groupName].objects.add(object);
             }
           }
         }
@@ -222,10 +231,10 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
     {
       let type = this.types[typeNames[i]];
       let objects = type.objects;
-      let label = type.name + " (" + objects.length + ")";
+      let label = type.name + " (" + objects.size + ")";
       let className = typeNames[i];
       let node = this.typesTree.addNode(label, event =>
-        this.application.selectObjects(event, objects), className);
+        this.application.selectObjects(event, Array.from(objects)), className);
 
       let subTypes = type.subTypes;
       let subTypeNames = Object.keys(subTypes);
@@ -237,9 +246,10 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
           let subTypeName = subTypeNames[j];
           let subType = subTypes[subTypeName];
           let subObjects = subType.objects;
-          let subLabel = subTypeName + " (" + subObjects.length + ")";
+          let subLabel = subTypeName + " (" + subObjects.size + ")";
           let subNode = node.addNode(subLabel, event =>
-            this.application.selectObjects(event, subObjects), "IfcType");
+            this.application.selectObjects(event, Array.from(subObjects)), 
+            "IfcType");
         }
       }
     }
@@ -269,9 +279,9 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
         let objects = reference.objects;
         let subLabel = referenceId;
         if (reference.name) subLabel += ": " + reference.name;
-        subLabel += " (" + objects.length + ")";
+        subLabel += " (" + objects.size + ")";
         let subNode = node.addNode(subLabel, event =>
-          this.application.selectObjects(event, objects), 
+          this.application.selectObjects(event, Array.from(objects)), 
           "IfcClassificationReference");
       }
     }
@@ -288,9 +298,9 @@ BIMROCKET.BIMLayersTool = class extends BIMROCKET.Tool
     {
       let group = this.groups[groupNames[i]];
       let objects = group.objects;
-      let label = group.name + " (" + objects.length + ")";
+      let label = group.name + " (" + objects.size + ")";
       let node = this.groupsTree.addNode(label, event =>
-        this.application.selectObjects(event, objects), "IfcGroup");
+        this.application.selectObjects(event, Array.from(objects)), "IfcGroup");
     }
   }
 

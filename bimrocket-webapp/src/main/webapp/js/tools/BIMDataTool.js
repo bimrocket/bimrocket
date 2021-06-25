@@ -33,7 +33,8 @@ BIMROCKET.BIMDataTool = class extends BIMROCKET.Tool
 
         const dialog = new BIMROCKET.Dialog("BIM data", 500, 500);
         dialog.addCode(json);
-        dialog.addButton("accept", "Accept", function() { dialog.hide(); });
+        let button = dialog.addButton("accept", "Accept",() => dialog.hide());
+        dialog.onShow = () => button.focus();
         dialog.show();
       }
     }

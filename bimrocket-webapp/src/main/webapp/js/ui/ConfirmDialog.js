@@ -16,8 +16,15 @@ BIMROCKET.ConfirmDialog = class extends BIMROCKET.Dialog
  
     this.bodyElem.classList.add(className);
     this.addText(message);
-    this.addButton("confirm_accept", acceptButtonText, () => this.onAccept());
-    this.addButton("confirm_cancel", cancelButtonText, () => this.onCancel());
+    this.acceptButton = this.addButton("confirm_accept", acceptButtonText, 
+      () => this.onAccept());
+    this.cancelButton = this.addButton("confirm_cancel", cancelButtonText, 
+      () => this.onCancel());
+  }
+  
+  onShow()
+  {
+    this.cancelButton.focus();
   }
   
   onAccept()

@@ -13,6 +13,7 @@ BIMROCKET.MessageDialog = class extends BIMROCKET.Dialog
  
     this.bodyElem.classList.add(className);
     this.addText(message);
-    this.addButton("confirm_accept", "Accept", () => scope.hide());
+    let button = this.addButton("confirm_accept", "Accept", () => scope.hide());
+    this.onShow = () => button.focus();
   }
 };

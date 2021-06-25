@@ -231,6 +231,63 @@ BIMROCKET.Solid = class extends THREE.Object3D
     }
   }
 
+  getArea()
+  {
+    let area = 0;
+    const geometry = this.geometry;
+    if (geometry)
+    {
+      const triangle = new THREE.Triangle();
+      const matrixWorld = this.matrixWorld;
+
+      for (let f = 0; f < geometry.faces.length; f++)
+      {
+        let face = geometry.faces[f];
+        let vertexCount = face.getVertexCount();
+        for (let n = 2; n < vertexCount; n++)
+        {
+          let vertex0 = face.getVertex(0);
+          let vertex1 = face.getVertex(n - 1);
+          let vertex2 = face.getVertex(n);
+
+          triangle.a.copy(vertex0).applyMatrix4(matrixWorld);
+          triangle.b.copy(vertex1).applyMatrix4(matrixWorld);
+          triangle.c.copy(vertex2).applyMatrix4(matrixWorld);
+          area += triangle.getArea();
+        }
+      }
+    }
+    return area;
+  }
+
+  getVolume()
+  {
+    let volume = 0;
+    const geometry = this.geometry;
+    if (geometry)
+    {
+      const matrixWorld = this.matrixWorld;
+      const vertex0 = new THREE.Vector3();
+      const vertex1 = new THREE.Vector3();
+      const vertex2 = new THREE.Vector3();      
+
+      for (let f = 0; f < geometry.faces.length; f++)
+      {
+        let face = geometry.faces[f];
+        let vertexCount = face.getVertexCount();
+        for (let n = 2; n < vertexCount; n++)
+        {
+          vertex0.copy(face.getVertex(0)).applyMatrix4(matrixWorld);
+          vertex1.copy(face.getVertex(n - 1)).applyMatrix4(matrixWorld);
+          vertex2.copy(face.getVertex(n)).applyMatrix4(matrixWorld);
+
+          volume += vertex0.dot(vertex1.cross(vertex2)) / 6.0;
+        }
+      }
+    }
+    return volume;
+  }
+
   updateGeometry(geometry, debug = false)
   {
     let solidGeometry = new BIMROCKET.SolidGeometry();

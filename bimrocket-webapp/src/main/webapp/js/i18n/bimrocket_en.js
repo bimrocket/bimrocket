@@ -35,6 +35,8 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.measure_distance.label" : "Measure distance",
   "tool.measure_distance.help" : "Measure distance",  
+
+  "tool.measure_selection.label" : "Measure selection",  
   
   "tool.move.label" : "Move",
   "tool.move.help" : "Drag left mouse button to move",

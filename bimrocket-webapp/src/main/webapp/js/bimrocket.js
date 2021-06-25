@@ -154,6 +154,7 @@ BIMROCKET.Application = class
     const clipTool = new BIMROCKET.ClipTool(this);
     const makeSolidTool = new BIMROCKET.MakeSolidTool(this);
     const measureDistanceTool = new BIMROCKET.MeasureDistanceTool(this);
+    const measureSelectionTool = new BIMROCKET.MeasureSelectionTool(this);
     const activateCameraTool = new BIMROCKET.ActivateCameraTool(this);
     const perspectiveTool = new BIMROCKET.CameraProjectionTool(this,
       {"type" : "perspective", label : "tool.perspective.label"});
@@ -231,6 +232,7 @@ BIMROCKET.Application = class
     this.addTool(makeSolidTool);
     this.addTool(sectionTool);
     this.addTool(measureDistanceTool);
+    this.addTool(measureSelectionTool);
     this.addTool(activateCameraTool);
     this.addTool(perspectiveTool);
     this.addTool(orthographicTool);
@@ -356,6 +358,7 @@ BIMROCKET.Application = class
 
     const measureMenu = menuBar.addMenu("Measure");
     measureMenu.addMenuItem(measureDistanceTool);
+    measureMenu.addMenuItem(measureSelectionTool);
 
     const controlMenu = menuBar.addMenu("Control");
     controlMenu.addMenuItem(createControllerTool);

@@ -50,15 +50,14 @@ BIMROCKET.ProgressBar = class
     this._progress = progress;
     if (progress === undefined)
     {
-      this.percentElem.style.display = "none";
       this.progressElem.innerHTML = "";
-      this.progressElem.style.width = "100%";
-      this.progressElem.classList.add("undeterminate");
+      this.element.classList.add("undeterminate");
+      this.percentElem.style.display = "none";
     }
     else
     {
       progress = Math.round(progress);
-      this.progressElem.classList.remove("undeterminate");
+      this.element.classList.remove("undeterminate");
       this.progressElem.style.width = progress + "%";
       this.percentElem.style.display = "block";
       this.percentElem.innerHTML = progress + "%";

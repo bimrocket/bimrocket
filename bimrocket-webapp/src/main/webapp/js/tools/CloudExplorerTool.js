@@ -714,6 +714,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
   showProgressBar()
   {
     this.buttonsPanelElem.style.display = "none";
+    this.application.progressBar.message = "Reading...";
     this.application.progressBar.progress = undefined;
     this.application.progressBar.visible = true;
   }

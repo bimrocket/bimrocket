@@ -16,6 +16,7 @@
   left:0;
   right:0;
   text-align: left;
+  text-shadow: 0px 0px 6px white;
 }
 
 .progress_bar .bar
@@ -33,7 +34,7 @@
   box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.3);
 }
 
-.progress_bar .progress
+.progress_bar .bar .progress
 {
   background-color: #f0a0a0;
   position:absolute;
@@ -43,22 +44,58 @@
   border:none;
 }
 
-.progress_bar .progress.undeterminate
-{
-  background-color: white;
-  background-image: url(images/progressbar.gif);
-  background-size: 136px 100%;
-  background-position:0 0;
-  background-repeat:repeat-x;
-}
-
-.progress_bar .percent
+.progress_bar .bar .percent
 {
   position:absolute;
   height: 16px;
   left:0;
   right:0;
 }
+
+/* undeterminate */
+
+.progress_bar.undeterminate
+{
+  display: inline-block;
+  left: 0;
+  right: 0;
+  top: 46%;
+  text-align: center;
+}
+
+.progress_bar.undeterminate:after {
+  content: " ";
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  margin: 24px;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  border-color: red transparent red transparent;
+  animation: progress_undeterminate 1.2s linear infinite;
+  background: rgb(240, 180, 180);
+}
+
+.progress_bar.undeterminate .message
+{
+  text-align: center;
+}
+
+.progress_bar.undeterminate .bar
+{
+  display: none;
+}
+
+@keyframes progress_undeterminate
+ {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 
 
 

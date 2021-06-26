@@ -59,7 +59,7 @@
   display: inline-block;
   left: 0;
   right: 0;
-  top: 46%;
+  top: 44%;
   text-align: center;
 }
 
@@ -71,9 +71,8 @@
   margin: 24px;
   border-radius: 50%;
   border: 6px solid #fff;
-  border-color: red transparent red transparent;
+  border-color: red rgb(240, 180, 180) red rgb(240, 180, 180);
   animation: progress_undeterminate 1.2s linear infinite;
-  background: rgb(240, 180, 180);
 }
 
 .progress_bar.undeterminate .message

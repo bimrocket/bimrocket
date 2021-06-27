@@ -26,7 +26,7 @@ ul.tree li
   list-style-type: none;
   line-height: 18px;
   background-size: 16px 16px;
-  background-position: 0px 0px;
+  background-position: 1px 1px;
   background-repeat: no-repeat;
 }
 
@@ -42,6 +42,7 @@ ul.tree li > button
   text-align: center;
   margin-left: -11px;
   margin-right: 2px;
+  vertical-align: middle;
   outline: none;
   box-shadow: none;
 }

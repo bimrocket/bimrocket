@@ -29,23 +29,38 @@ BIMROCKET.Panel = class
     this.titleElem.className = "title";
     this.headerElem.appendChild(this.titleElem);
 
-    this.closeButtonElem = document.createElement("div");
+    this.minimizeButtonElem = document.createElement("button");
+    this.minimizeButtonElem.className = "minimize";
+    this.minimizeButtonElem.setAttribute("aria-label", "Minimize");
+    this.minimizeButtonElem.alt = "Minimize";
+    this.minimizeButtonElem.title = "Minimize";
+    this.headerElem.appendChild(this.minimizeButtonElem);
+
+    this.maximizeButtonElem = document.createElement("button");
+    this.maximizeButtonElem.className = "maximize";
+    this.maximizeButtonElem.setAttribute("aria-label", "Maximize");
+    this.maximizeButtonElem.alt = "Maximize";
+    this.maximizeButtonElem.title = "Maximize";
+    this.headerElem.appendChild(this.maximizeButtonElem);
+    
+    this.closeButtonElem = document.createElement("button");
     this.closeButtonElem.className = "close";
-    this.closeButtonElem.setAttribute("role", "button");
-    this.closeButtonElem.setAttribute("aria-label", "close");
+    this.closeButtonElem.setAttribute("aria-label", "Close");
+    this.closeButtonElem.alt = "Close";
+    this.closeButtonElem.title = "Close";
     this.headerElem.appendChild(this.closeButtonElem);
 
-    const scope = this;
+    this.titleElem.addEventListener("click", event => 
+      this.zoom(), false);
 
-    this.titleElem.addEventListener("click", function()
-    {
-      scope.minimized = !scope.minimized;
-    }, false);
+    this.minimizeButtonElem.addEventListener("click", event => 
+      this.minimized = true, false);
 
-    this.closeButtonElem.addEventListener("click", function()
-    {
-      scope.visible = false;
-    }, false);
+    this.maximizeButtonElem.addEventListener("click", event => 
+      this.minimized = false, false);
+
+    this.closeButtonElem.addEventListener("click", event =>
+      this.visible = false, false);
 
     this._position = null;
     this.position = "left";
@@ -139,6 +154,23 @@ BIMROCKET.Panel = class
     }
   }
 
+  zoom()
+  {
+    this.minimized = false;
+    if (this.panelManager)
+    {
+      let position = this.panelManager.isLargeScreen() ? this.position : null;
+      let panels = this.panelManager.getPanels(position, true);
+      for (let panel of panels)
+      {
+        if (panel !== this)
+        {
+          panel.minimized = true;
+        }
+      }
+    }    
+  }
+
   onShow()
   {
   }
@@ -203,7 +235,7 @@ BIMROCKET.PanelManager = class
   getPanels(position, visible)
   {
     let selection = [];
-    for (var i = 0; i < this.panels.length; i++)
+    for (let i = 0; i < this.panels.length; i++)
     {
       let panel = this.panels[i];
       if (position === null || panel.position === position)

@@ -34,9 +34,24 @@ div.panel.show
   display:block;
 }
 
-div.panel.show.minimized > .body
+div.panel.show > .header > button.maximize
 {
-  display:none;
+  display: none;
+}
+
+div.panel.show > .header > button.minimize
+{
+  display: block;
+}
+
+div.panel.show.minimized > .header > button.minimize
+{
+  display: none;
+}
+
+div.panel.show.minimized > .header > button.maximize
+{
+  display: block;
 }
 
 div.panel > .header
@@ -62,11 +77,10 @@ div.panel > .header > .title
   cursor: pointer;
 }
 
-div.panel > .header > div.close
+div.panel > .header > button
 {
   position:absolute;
   top:0;
-  right:0;
   bottom:0;  
   width: 16px;
   height: 16px;
@@ -74,21 +88,41 @@ div.panel > .header > div.close
   padding:0;
   background-image: url(images/close.svg);
   background-repeat: no-repeat;
-  background-size: 9px 9px;
+  background-size: 10px 10px;
   background-position: center center;
   cursor: pointer;
   border-radius: 2px;
   background-color: #f6f6f6;
+  border:none;
+  box-shadow: none;
 }
 
-div.panel > .header > div.close:hover
+div.panel > .header > button.minimize
+{
+  left:0;
+  background-image: url(images/minimize.svg);
+}
+
+div.panel > .header > button.maximize
+{
+  left:0;
+  background-image: url(images/maximize.svg);
+}
+
+div.panel > .header > button.close
+{
+  right:0;
+  background-image: url(images/close.svg);
+}
+
+div.panel > .header > button:hover
 {
   background-color: #ffb0b0; 
 }
 
 div.panel > .header > button:focus
 {
-  border: 1px solid black;
+  border: 1px dotted black;
   outline:none;
 }
 

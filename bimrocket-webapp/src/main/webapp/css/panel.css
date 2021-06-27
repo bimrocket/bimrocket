@@ -64,17 +64,21 @@ div.panel > .header
   background-color: white;
   border-bottom: 1px solid #e0e0e0;
   line-height: 24px;
+  text-align: center;
 }
 
 div.panel > .header > .title
 {
-  position:absolute;
-  top:0;
-  bottom:0;
-  left: 0;
-  right:0;
+  line-height: 24px;
   font-weight: bold;
-  cursor: pointer;
+  text-decoration: none;
+  color:#404040;
+}
+
+div.panel > .header > .title:focus
+{
+  outline:1px dotted black;
+  outline-offset: 2px;
 }
 
 div.panel > .header > button
@@ -122,8 +126,7 @@ div.panel > .header > button:hover
 
 div.panel > .header > button:focus
 {
-  border: 1px dotted black;
-  outline:none;
+  outline:1px dotted black;
 }
 
 div.panel > .body

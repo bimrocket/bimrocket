@@ -25,10 +25,6 @@ BIMROCKET.Panel = class
     this.bodyElem.className = "body";
     this.element.appendChild(this.bodyElem);
 
-    this.titleElem = document.createElement("div");
-    this.titleElem.className = "title";
-    this.headerElem.appendChild(this.titleElem);
-
     this.minimizeButtonElem = document.createElement("button");
     this.minimizeButtonElem.className = "minimize";
     this.minimizeButtonElem.setAttribute("aria-label", "Minimize");
@@ -42,6 +38,11 @@ BIMROCKET.Panel = class
     this.maximizeButtonElem.alt = "Maximize";
     this.maximizeButtonElem.title = "Maximize";
     this.headerElem.appendChild(this.maximizeButtonElem);
+
+    this.titleElem = document.createElement("a");
+    this.titleElem.className = "title";
+    this.titleElem.href = "#";
+    this.headerElem.appendChild(this.titleElem);    
     
     this.closeButtonElem = document.createElement("button");
     this.closeButtonElem.className = "close";
@@ -51,7 +52,7 @@ BIMROCKET.Panel = class
     this.headerElem.appendChild(this.closeButtonElem);
 
     this.titleElem.addEventListener("click", event => 
-      this.zoom(), false);
+      { event.preventDefault(); this.zoom(); }, false);
 
     this.minimizeButtonElem.addEventListener("click", event => 
       this.minimized = true, false);

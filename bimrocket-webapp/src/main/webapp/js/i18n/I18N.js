@@ -2,80 +2,75 @@
  * @author realor
  */
 
-I18N = {
+class I18N
+{
+  static defaultLanguage = null;
+  static userLanguage = null;
+  static translations = {};
 
-  defaultLanguage : null,
-  userLanguage : null,
-  translations : {},
-
-  init : function(path, names, languages)
+  static init(path, names, languages)
   {
-    this.defaultLanguage = languages[0];
-    this.userLanguage = navigator.language.substring(0, 2);
-    if (languages.indexOf(this.userLanguage) === -1) // not supported
+    I18N.defaultLanguage = languages[0];
+    I18N.userLanguage = navigator.language.substring(0, 2);
+    if (languages.indexOf(I18N.userLanguage) === -1) // not supported
     {
-      this.userLanguage = this.defaultLanguage;
+      I18N.userLanguage = I18N.defaultLanguage;
     };
     
-    for (var i = 0; i < names.length; i++)
+    for (let i = 0; i < names.length; i++)
     {
-      var name = names[i];
+      let name = names[i];
       
       /* load default language translations */
-      var linkElem = document.createElement('script');
+      let linkElem = document.createElement('script');
       linkElem.setAttribute("type", "text/javascript");
       linkElem.setAttribute("src", path + "/" + name + "_" + 
-        this.defaultLanguage + ".js");
+        I18N.defaultLanguage + ".js");
       document.getElementsByTagName("head")[0].appendChild(linkElem);
 
       /* load user language translations */
-      if (this.userLanguage !== this.defaultLanguage)
+      if (I18N.userLanguage !== I18N.defaultLanguage)
       {
         linkElem = document.createElement('script');
         linkElem.setAttribute("type", "text/javascript");
         linkElem.setAttribute("src", path + "/" + name + "_" + 
-          this.userLanguage + ".js");
+          I18N.userLanguage + ".js");
         document.getElementsByTagName("head")[0].appendChild(linkElem);
       }
     }
-  },
- 
-  get : function(key)
+  }
+
+  static get(key)
   {
-    var value = this.getForLanguage(key, this.userLanguage);
-    if (value === undefined && this.userLanguage !== this.defaultLanguage)
+    let value = I18N.getForLanguage(key, I18N.userLanguage);
+    if (value === undefined && I18N.userLanguage !== I18N.defaultLanguage)
     {
-      value = this.getForLanguage(key, this.defaultLanguage);
-      if (value === undefined)
-      {
-        value = key;
-      }
+      value = I18N.getForLanguage(key, I18N.defaultLanguage);
     }
-    return value;
-  },
+    return value ? value : key;
+  }
   
-  getForLanguage : function(key, language)
+  static getForLanguage(key, language)
   {
-    var langTable = this.translations[language];
+    let langTable = I18N.translations[language];
     if (langTable) return langTable[key];
     return undefined;
-  },
+  }
 
-  add : function(name, language, table)
+  static add(name, language, table)
   {
-    var langTable = this.translations[language];
+    let langTable = I18N.translations[language];
     if (langTable === undefined)
     {
       langTable = {};
-      this.translations[language] = langTable;
+      I18N.translations[language] = langTable;
     }
-    for (var key in table)
+    for (let key in table)
     {
       langTable[key] = table[key];
     }
     console.info("I18N: " + name + "_" + language + " bundle loaded.");
   }
-};
-
+}
 
 I18N.init('js/i18n', ['bimrocket'], ['en', 'es', 'ca']);

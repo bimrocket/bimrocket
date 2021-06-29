@@ -45,26 +45,42 @@ class Controls
 
   static addTextField(parent, name, label, value, className)
   {
-    const groupElem = Controls.addField(parent, name, label, className);
+    return Controls.addInputField(parent, "text", name, label, value, 
+      className);
+  }
 
-    const inputElem = document.createElement("input");
-    inputElem.id = name;
-    inputElem.name = name;
-    inputElem.type = "text";
-    if (value) inputElem.value = value;
-    groupElem.appendChild(inputElem);
-
-    return inputElem;
+  static addNumberField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "number", name, label, value, 
+      className);
   }
 
   static addPasswordField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "password", name, label, value, 
+      className);    
+  }
+
+  static addDateField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "date", name, label, value, 
+      className);
+  }
+
+  static addColorField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "color", name, label, value, 
+      className);
+  }
+
+  static addInputField(parent, type, name, label, value, className)
   {
     const groupElem = Controls.addField(parent, name, label, className);
 
     const inputElem = document.createElement("input");
     inputElem.id = name;
     inputElem.name = name;
-    inputElem.type = "password";
+    inputElem.type = type || "text";
     if (value) inputElem.value = value;
     groupElem.appendChild(inputElem);
 
@@ -82,20 +98,6 @@ class Controls
     groupElem.appendChild(textAreaElem);
 
     return textAreaElem;
-  }
-
-  static addDateField(parent, name, label, value, className)
-  {
-    const groupElem = Controls.addField(parent, name, label, className);
-
-    const dateElem = document.createElement("input");
-    dateElem.type = "date";
-    dateElem.id = name;
-    dateElem.name = name;
-    if (value) dateElem.value = value;
-    groupElem.appendChild(dateElem);
-
-    return dateElem;
   }
 
   static addSelectField(parent, name, label, options, value, className)

@@ -23,7 +23,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     this.offset = 0;
     this.meshes = [];
 
-    var backFaceStencilMat = new THREE.MeshBasicMaterial();
+    let backFaceStencilMat = new THREE.MeshBasicMaterial();
     backFaceStencilMat.depthWrite = false;
     backFaceStencilMat.depthTest = false;
     backFaceStencilMat.colorWrite = false;
@@ -36,7 +36,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     backFaceStencilMat.clippingPlanes = this.planes;
     this.backFaceStencilMat = backFaceStencilMat;
 
-    var frontFaceStencilMat = new THREE.MeshBasicMaterial();
+    let frontFaceStencilMat = new THREE.MeshBasicMaterial();
     frontFaceStencilMat.depthWrite = false;
     frontFaceStencilMat.depthTest = false;
     frontFaceStencilMat.colorWrite = false;
@@ -49,12 +49,15 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     frontFaceStencilMat.clippingPlanes = this.planes;
     this.frontFaceStencilMat = frontFaceStencilMat;
 
-    var planeStencilMat = new THREE.MeshLambertMaterial();
-    planeStencilMat.color = new THREE.Color(0xffffff);
-    planeStencilMat.emissive = new THREE.Color(0x202020);
+    let sectionColor =
+      window.localStorage.getItem("bimrocket.sectionColor");
+    if (sectionColor === null)
+      sectionColor = "#808080";
+
+    let planeStencilMat = new THREE.MeshLambertMaterial();
+    planeStencilMat.color = new THREE.Color(sectionColor);
+    planeStencilMat.emissive = new THREE.Color(0x404040);
     planeStencilMat.side = THREE.DoubleSide;
-//    planeStencilMat.polygonOffset = true;
-//    planeStencilMat.polygonOffsetFactor = 1;
     planeStencilMat.stencilWrite = true;
     planeStencilMat.flatShading = true;
     planeStencilMat.stencilRef = 0;
@@ -62,9 +65,8 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     planeStencilMat.stencilFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZPass = THREE.ReplaceStencilOp;
-    var loader = new THREE.TextureLoader();
-    loader.load("textures/cement.png", 
-      function(texture) 
+    const loader = new THREE.TextureLoader();
+    loader.load("textures/section.png", texture => 
       {
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -74,63 +76,67 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
       });
     this.planeStencilMat = planeStencilMat;
 
-    var planeGeom = new THREE.PlaneBufferGeometry(100, 100);
-    var planeMesh = new THREE.Mesh(planeGeom, planeStencilMat);
+    let planeGeom = new THREE.PlaneBufferGeometry(100, 100);
+    let planeMesh = new THREE.Mesh(planeGeom, planeStencilMat);
     planeMesh.renderOrder = 1;
-    planeMesh.raycast = function(){};
+    planeMesh.raycast = () => {};
     planeMesh.name = "sectionPlane";
     this.planeMesh = planeMesh;
 
     this._onMouseUp = this.onMouseUp.bind(this);
     this._onMouseWheel = this.onMouseWheel.bind(this);
     this.createPanel();
+    
+    this.sectionColorElem.value = sectionColor;
   }
 
   createPanel()
   {
-    var application = this.application;
+    const application = this.application;
 
     this.panel = application.createPanel(
       "panel_" + this.name, this.label, "left");
     this.panel.preferredHeight = 160;
 
-    var helpElem = document.createElement("div");
+    const helpElem = document.createElement("div");
     helpElem.innerHTML = I18N.get(this.help);
     this.panel.bodyElem.appendChild(helpElem);
 
-    this.offsetElem = document.createElement("div");
-    this.offsetElem.style.textAlign = "center";
-    this.offsetElem.style.marginTop = "20px";
+    this.sectionColorElem = Controls.addColorField(this.panel.bodyElem, 
+      "section_color", "Section color:");
+    this.sectionColorElem.addEventListener("change", event =>
+    {
+      let sectionColor = this.sectionColorElem.value;
+      window.localStorage.setItem("bimrocket.sectionColor", sectionColor);
+      this.planeStencilMat.color = new THREE.Color(sectionColor);
+      application.repaint();
+    }, false);
+
+    this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem, 
+      "section_offset", "Offset:", 0);
+    this.offsetElem = this.offsetInputElem.parentElement;
     this.offsetElem.style.display = "none";
 
-    this.offsetLabelElem = document.createElement("label");
-    this.offsetLabelElem.innerHTML = "Offset:";
-    this.offsetLabelElem.htmlFor = "section_offset";
-    this.offsetLabelElem.style.marginRight = "4px";
-    this.offsetElem.appendChild(this.offsetLabelElem);
-
-    this.offsetInputElem = document.createElement("input");
-    this.offsetInputElem.type = "number";
-    this.offsetInputElem.id = "section_offset";
-    this.offsetInputElem.style.width = "80px";
-    this.offsetInputElem.step = 0.1;
-    this.offsetElem.appendChild(this.offsetInputElem);
-    
-    var scope = this;
-    this.offsetInputElem.addEventListener("change", function(event)
+    this.offsetInputElem.addEventListener("change", event =>
     {
-      scope.offset = parseFloat(scope.offsetInputElem.value);
-      scope.updatePlane();
+      this.offset = parseFloat(this.offsetInputElem.value);
+      this.updatePlane();
       application.repaint();      
     }, false);
 
-    this.panel.bodyElem.appendChild(this.offsetElem);
+    this.cancelButton = Controls.addButton(this.offsetElem, 
+      "cancel_section", "Cancel", event => 
+      {
+        this.disableClipping();
+        this.updateOffsetLabel();
+        this.application.repaint();
+      });      
   }
 
   activate()
   {
     this.panel.visible = true;
-    var container = this.application.container;
+    const container = this.application.container;
     container.addEventListener('mouseup', this._onMouseUp, false);
     container.addEventListener('mousewheel', this._onMouseWheel, false);
     container.addEventListener('DOMMouseScroll', this._onMouseWheel, false);
@@ -139,7 +145,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
   deactivate()
   {
     this.panel.visible = false;
-    var container = this.application.container;
+    const container = this.application.container;
     container.removeEventListener('mouseup', this._onMouseUp, false);
     container.removeEventListener('mousewheel', this._onMouseWheel, false);
     container.removeEventListener('DOMMouseScroll', this._onMouseWheel, false);
@@ -149,22 +155,22 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
   {
     if (!this.isCanvasEvent(event)) return;
 
-    var mousePosition = this.getMousePosition(event);
-    var application = this.application;
-    var scene = application.scene;
+    const mousePosition = this.getMousePosition(event);
+    const application = this.application;
+    const scene = application.scene;
 
-    var intersect = this.intersect(mousePosition, scene, true);
+    const intersect = this.intersect(mousePosition, scene, true);
     if (intersect)
     {
-      var object = intersect.object;
+      const object = intersect.object;
       this.basePoint = intersect.point; // world
-      var v1 = new THREE.Vector3(0, 0, 0); // local
-      var v2 = intersect.face.normal.clone(); // local
+      let v1 = new THREE.Vector3(0, 0, 0); // local
+      let v2 = intersect.face.normal.clone(); // local
 
       v1.applyMatrix4(object.matrixWorld);
       v2.applyMatrix4(object.matrixWorld);
 
-      var normal = new THREE.Vector3().subVectors(v1, v2).normalize();
+      const normal = new THREE.Vector3().subVectors(v1, v2).normalize();
       this.plane.normal = normal;
       this.offset = 0;
       this.updatePlane();
@@ -183,11 +189,11 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
   {
     if (!this.isCanvasEvent(event)) return;
 
-    var application = this.application;
+    const application = this.application;
 
     if (!application.renderer.localClippingEnabled) return;
 
-    var delta = 0;
+    let delta = 0;
     if (event.wheelDelta)
     { // WebKit / Opera / Explorer 9
       delta = event.wheelDelta * 0.0005;
@@ -208,17 +214,15 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
 
   enableClipping()
   {
-    var application = this.application;
+    const application = this.application;
     if (application.renderer.localClippingEnabled) return;
 
-    var scope = this;
-
-    application.baseObject.traverse(function(object)
+    application.baseObject.traverse(object => 
     {
-      var material = object.material;
+      let material = object.material;
       if (material && object.visible)
       {
-        material.clippingPlanes = scope.planes;
+        material.clippingPlanes = this.planes;
 
         if (object instanceof THREE.Mesh)
         {
@@ -227,24 +231,24 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
             let geometry = object.geometry;
             if (geometry.isManifold && geometry.faces.length >= 4)
             {
-              scope.meshes.push(object);
+              this.meshes.push(object);
             }
           }
         }
       }
     });
 
-    for (var i = 0; i < scope.meshes.length; i++)
+    for (let i = 0; i < this.meshes.length; i++)
     {
-      var mesh = scope.meshes[i];
+      let mesh = this.meshes[i];
 
-      var backMesh = new THREE.Mesh(mesh.geometry, scope.backFaceStencilMat);
+      let backMesh = new THREE.Mesh(mesh.geometry, this.backFaceStencilMat);
       backMesh.name = BIMROCKET.HIDDEN_PREFIX + "backMesh";
-      backMesh.raycast = function(){};
+      backMesh.raycast = () => {};
       mesh.add(backMesh);
       backMesh.updateMatrix();
 
-      var frontMesh = new THREE.Mesh(mesh.geometry, scope.frontFaceStencilMat);
+      let frontMesh = new THREE.Mesh(mesh.geometry, this.frontFaceStencilMat);
       frontMesh.name = BIMROCKET.HIDDEN_PREFIX + "frontMesh";
       frontMesh.raycast = function(){};
       mesh.add(frontMesh);
@@ -258,37 +262,37 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
 
   disableClipping()
   {
-    var application = this.application;
+    const application = this.application;
     if (!application.renderer.localClippingEnabled) return;
 
     application.clippingGroup.remove(this.planeMesh);
     application.clippingPlane = null;
 
-    var scope = this;
-
-    for (var i = 0; i < scope.meshes.length; i++)
+    for (let i = 0; i < this.meshes.length; i++)
     {
-      var mesh = scope.meshes[i];
+      const mesh = this.meshes[i];
 
-      var frontMesh = mesh.getObjectByName(BIMROCKET.HIDDEN_PREFIX + "frontMesh");
+      let frontMesh = mesh.getObjectByName(
+        BIMROCKET.HIDDEN_PREFIX + "frontMesh");
       if (frontMesh)
       {
         mesh.remove(frontMesh);
       }
 
-      var backMesh = mesh.getObjectByName(BIMROCKET.HIDDEN_PREFIX + "backMesh");
+      let backMesh = mesh.getObjectByName(
+        BIMROCKET.HIDDEN_PREFIX + "backMesh");
       if (backMesh)
       {
         mesh.remove(backMesh);
       }
     }
 
-    application.baseObject.traverse(function(object)
+    application.baseObject.traverse(object => 
     {
-      var material = object.material;
+      let material = object.material;
       if (material && object.visible)
       {
-        material.clippingPlanes = scope.noPlanes;
+        material.clippingPlanes = this.noPlanes;
       }
     });
 
@@ -300,18 +304,18 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
 
   updatePlane()
   {
-    var planeMesh = this.planeMesh;
-    var normal = this.plane.normal;
+    let planeMesh = this.planeMesh;
+    let normal = this.plane.normal;
 
-    var position = this.basePoint.clone().addScaledVector(normal, this.offset);
+    let position = this.basePoint.clone().addScaledVector(normal, this.offset);
     this.plane.setFromNormalAndCoplanarPoint(normal, position);
 
-    var vz = normal;
-    var vy = BIMROCKET.GeometryUtils.orthogonalVector(vz);
-    var vx = new THREE.Vector3();
+    let vz = normal;
+    let vy = BIMROCKET.GeometryUtils.orthogonalVector(vz);
+    let vx = new THREE.Vector3();
     vx.crossVectors(vy, vz);
 
-    var matrix = new THREE.Matrix4();
+    let matrix = new THREE.Matrix4();
 
     matrix.set(
       vx.x, vy.x, vz.x, position.x,

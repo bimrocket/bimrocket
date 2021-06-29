@@ -372,6 +372,23 @@ div.option_block input.back_color
   padding: 0px;
 }
 
+#panel_section > .body > div
+{
+  margin-top: 10px;
+}
+
+#panel_section #section_color
+{
+  margin-left: 4px;
+  vertical-align: middle;  
+}
+
+#panel_section #section_offset
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
 .controller_list li
 {
   list-style-type: none;

@@ -27,6 +27,7 @@ BIMROCKET.Application = class
     this.tool = null;
     this._backgroundColor1 = null;
     this._backgroundColor2 = null;
+    this._panelOpacity = 0;
 
     /* IO/BCF services */
     this.services = { "io": {}, "bcf" : {}}; // BIMROCKET.Service
@@ -110,9 +111,9 @@ BIMROCKET.Application = class
     /* panels */
     this.panelManager = new BIMROCKET.PanelManager(container);
 
-    var headerElem = document.getElementById("header");
-    var toolBarElem = document.getElementById("toolbar");
-    var progressBarElem = document.getElementById("progress_bar");
+    const headerElem = document.getElementById("header");
+    const toolBarElem = document.getElementById("toolbar");
+    const progressBarElem = document.getElementById("progress_bar");
 
     // general tabbed panel
     this.progressBar = new BIMROCKET.ProgressBar(progressBarElem);
@@ -271,7 +272,6 @@ BIMROCKET.Application = class
     this.addTool(loadControllersTool);
     this.addTool(saveControllersTool);
 
-
     // outliner
     this.outliner = new BIMROCKET.Outliner(this);
     this.outliner.visible = true;
@@ -289,7 +289,6 @@ BIMROCKET.Application = class
     // bcfPanel
     this.bcfPanel = new BIMROCKET.BCFPanel(this);
     this.panelManager.addPanel(this.bcfPanel);
-
 
     // menuBar
     const menuBar = new BIMROCKET.MenuBar(this, headerElem);
@@ -449,9 +448,9 @@ BIMROCKET.Application = class
       }
     });
 
-    var __animationEvent = {delta : 0};
-    var __animationCounter = 0;
-    var animate = function()
+    let __animationEvent = {delta : 0};
+    let __animationCounter = 0;
+    let animate = () =>
     {
       requestAnimationFrame(animate);
 
@@ -525,6 +524,9 @@ BIMROCKET.Application = class
       application.progressBar.visible = true;
       BIMROCKET.IOManager.load(intent); // asynchron load
     }
+
+    let opacityValue = window.localStorage.getItem("bimrocket.panelOpacity");
+    this.panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
   }
 
   initScene(object)
@@ -710,6 +712,22 @@ BIMROCKET.Application = class
     this._backgroundColor2 = color;
     this.updateBackground();
     this.saveBackground();
+  }
+  
+  get panelOpacity()
+  {
+    return this._panelOpacity;
+  }
+  
+  set panelOpacity(opacity)
+  {
+    this._panelOpacity = opacity;
+    window.localStorage.setItem("bimrocket.panelOpacity", String(opacity));
+    let panels = this.panelManager.getPanels();
+    for (let panel of panels)
+    {
+      panel.opacity = opacity;
+    }
   }
   
   get showDeepSelection()

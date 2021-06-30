@@ -65,6 +65,7 @@ BIMROCKET.Panel = class
 
     this._position = null;
     this.position = "left";
+    this.opacity = 0.8;    
   }
 
   get id()
@@ -171,6 +172,21 @@ BIMROCKET.Panel = class
       }
     }    
   }
+  
+  get opacity()
+  {
+    return this._opacity;
+  }
+  
+  set opacity(opacity)
+  {
+    this._opacity = opacity;
+    this.element.style.background = "rgba(255,255,255," + opacity + ")";
+
+    let headerOpacity = Math.min(opacity + 0.2, 1);
+    this.headerElem.style.background = 
+      "rgba(255,255,255," + headerOpacity + ")";
+  }
 
   onShow()
   {
@@ -202,12 +218,10 @@ BIMROCKET.PanelManager = class
     this.resizers.left = new BIMROCKET.PanelResizer(this, "left");
     this.resizers.right = new BIMROCKET.PanelResizer(this, "right");
 
-    const scope = this;
-
-    window.addEventListener('resize', function(event)
+    window.addEventListener('resize', event =>
     {
-      scope.setAnimationEnabled(false);
-      scope.updateLayout();
+      this.setAnimationEnabled(false);
+      this.updateLayout();
     }, false);
   }
 
@@ -233,7 +247,7 @@ BIMROCKET.PanelManager = class
     }
   }
 
-  getPanels(position, visible)
+  getPanels(position = null, visible = null)
   {
     let selection = [];
     for (let i = 0; i < this.panels.length; i++)

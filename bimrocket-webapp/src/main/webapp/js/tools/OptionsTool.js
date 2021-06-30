@@ -155,6 +155,20 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     this.backColorInput2.addEventListener("input", event =>
       application.backgroundColor2 = this.backColorInput2.value, false);
+
+    this.panelOpacityRange = Controls.addInputField(this.panel.bodyElem, 
+      "range", "panelopac_range", "Panel opacity:", null, "option_block stack");
+    this.panelOpacityRange.min = 1;
+    this.panelOpacityRange.max = 100;
+    this.panelOpacityRange.step = 1;
+    this.panelOpacityRange.style.display = "inline-block";
+    this.panelOpacityRange.style.width = "80%";
+    this.panelOpacityRange.style.marginLeft = "auto";
+    this.panelOpacityRange.style.marginRight = "auto";
+
+    this.panelOpacityRange.addEventListener("input", () => 
+      application.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value), 
+      false);
   }
 
   activate()
@@ -232,6 +246,7 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.selPaintModeSelect.value = application.selectionPaintMode;
     this.deepSelCheckBox.checked = application.showDeepSelection;
     this.localAxesCheckBox.checked = application.showLocalAxes;
+    this.panelOpacityRange.value = 100 * application.panelOpacity;
   }
 
   deactivate()

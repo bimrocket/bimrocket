@@ -1,7 +1,6 @@
 div.panel
 {
   text-align: center;
-  background-color: rgba(255,255,255,0.8);
   border: 1px solid #a0a0a0;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -61,7 +60,6 @@ div.panel > .header
   left:0;
   right:0;
   height:24px;
-  background-color: white;
   border-bottom: 1px solid #e0e0e0;
   line-height: 24px;
   text-align: center;

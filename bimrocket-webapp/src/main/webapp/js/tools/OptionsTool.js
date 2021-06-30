@@ -66,13 +66,11 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
 
     frdElem.appendChild(this.frdRange);
 
-    const scope = this;
-
     this.frdRange.addEventListener("input",
-      () => scope.frdValue.innerHTML = scope.frdRange.value, false);
+      () => this.frdValue.innerHTML = this.frdRange.value, false);
 
     this.frdRange.addEventListener("change",
-      () => application.frameRateDivisor = parseInt(scope.frdRange.value), 
+      () => application.frameRateDivisor = parseInt(this.frdRange.value), 
       false);
 
     // Selection Paint mode
@@ -83,36 +81,30 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
        [BIMROCKET.Application.FACES_SELECTION, "Faces"]], null, 
      "option_block inline");
 
-    this.selPaintModeSelect.addEventListener("change", (event) =>
+    this.selPaintModeSelect.addEventListener("change", event =>
     {
-      application.selectionPaintMode = scope.selPaintModeSelect.value;
+      application.selectionPaintMode = this.selPaintModeSelect.value;
       application.updateSelection();
     });
 
-    // Enable/disable deep selection
+    // Enable/disable deep selection visualization
+    
 
-    const deepSelElem = document.createElement("div");
-    deepSelElem.className = "option_block";
-    this.panel.bodyElem.appendChild(deepSelElem);
-
-    const deepSelLabel = document.createElement("label");
-    deepSelLabel.innerHTML = "Deep selection: ";
-    deepSelLabel.htmlFor = "deep_sel";
-    deepSelLabel.style = "vertical-align:middle";
-
-    deepSelElem.appendChild(deepSelLabel);
-
-    this.deepSelCheckBox = document.createElement("input");
-    this.deepSelCheckBox.id = "deep_sel";
-    this.deepSelCheckBox.type = "checkbox";
+    this.deepSelCheckBox = Controls.addInputField(this.panel.bodyElem, 
+      "checkbox", "deep_sel", "Show deep selection:");
     this.deepSelCheckBox.style = "vertical-align:middle";
-    deepSelElem.appendChild(this.deepSelCheckBox);
+    this.deepSelCheckBox.parentElement.className = "option_block";
+    this.deepSelCheckBox.addEventListener("change", event =>
+      application.showDeepSelection = this.deepSelCheckBox.checked);
+    
+    // Enable/disable local axes visualization
 
-    this.deepSelCheckBox.addEventListener("change", (event) =>
-    {
-      application.deepSelection = scope.deepSelCheckBox.checked;
-      application.updateSelection();
-    });
+    this.localAxesCheckBox = Controls.addInputField(this.panel.bodyElem, 
+      "checkbox", "local_axes", "Show local axes:");
+    this.localAxesCheckBox.style = "vertical-align:middle";
+    this.localAxesCheckBox.parentElement.className = "option_block";
+    this.localAxesCheckBox.addEventListener("change", event =>
+      application.showLocalAxes = this.localAxesCheckBox.checked);
     
     // Background color
     
@@ -122,18 +114,18 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
       null, "option_block stack");
     const backColorElem = this.backSelect.parentElement;
 
-    this.backSelect.addEventListener("change", (event) =>
+    this.backSelect.addEventListener("change", event =>
     {
-      if (scope.backSelect.value === "solid")
+      if (this.backSelect.value === "solid")
       {
-        scope.backColorInput2.style.display = "none";
-        application.backgroundColor = scope.backColorInput1.value;
+        this.backColorInput2.style.display = "none";
+        application.backgroundColor = this.backColorInput1.value;
       }
       else
       {
-        scope.backColorInput2.style.display = "";
-        application.backgroundColor1 = scope.backColorInput1.value;
-        application.backgroundColor2 = scope.backColorInput2.value;
+        this.backColorInput2.style.display = "";
+        application.backgroundColor1 = this.backColorInput1.value;
+        application.backgroundColor2 = this.backColorInput2.value;
       }
     }, false);
 
@@ -149,20 +141,20 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.backColorInput2.className = "back_color";
     backColorElem.appendChild(this.backColorInput2);
 
-    this.backColorInput1.addEventListener("input", (event) =>
+    this.backColorInput1.addEventListener("input", event =>
     {
-      if (scope.backSelect.value === "solid")
+      if (this.backSelect.value === "solid")
       {
-        application.backgroundColor = scope.backColorInput1.value;
+        application.backgroundColor = this.backColorInput1.value;
       }
       else
       {
-        application.backgroundColor1 = scope.backColorInput1.value;
+        application.backgroundColor1 = this.backColorInput1.value;
       }
     }, false);
 
-    this.backColorInput2.addEventListener("input", (event) =>
-      application.backgroundColor2 = scope.backColorInput2.value, false);
+    this.backColorInput2.addEventListener("input", event =>
+      application.backgroundColor2 = this.backColorInput2.value, false);
   }
 
   activate()
@@ -237,8 +229,9 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.reportElem.innerHTML = text;
     this.frdValue.innerHTML = this.application.frameRateDivisor;
 
-    this.selPaintModeSelect.value = this.application.selectionPaintMode;
-    this.deepSelCheckBox.checked = this.application.deepSelection;
+    this.selPaintModeSelect.value = application.selectionPaintMode;
+    this.deepSelCheckBox.checked = application.showDeepSelection;
+    this.localAxesCheckBox.checked = application.showLocalAxes;
   }
 
   deactivate()

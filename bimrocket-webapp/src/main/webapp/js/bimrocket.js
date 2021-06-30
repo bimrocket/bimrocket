@@ -34,7 +34,10 @@ BIMROCKET.Application = class
     /* selection */
     this.selection = new BIMROCKET.Selection(this, true);
     this.selectionPaintMode = BIMROCKET.Application.EDGES_SELECTION;
-    this.deepSelection = true;
+    this._showDeepSelection = window.localStorage.getItem(
+      "bimrocket.showDeepSelection") !== "false";
+    this._showLocalAxes = window.localStorage.getItem(
+      "bimrocket.showLocalAxes") !== "false";
 
     this.clock = new THREE.Clock();
 
@@ -708,6 +711,30 @@ BIMROCKET.Application = class
     this.updateBackground();
     this.saveBackground();
   }
+  
+  get showDeepSelection()
+  {
+    return this._showDeepSelection;
+  }
+
+  set showDeepSelection(enabled)
+  {
+    this._showDeepSelection = enabled;
+    window.localStorage.setItem("bimrocket.showDeepSelection", enabled);
+    this.updateSelection();
+  }
+
+  get showLocalAxes()
+  {
+    return this._showLocalAxes;
+  }
+
+  set showLocalAxes(enabled)
+  {
+    this._showLocalAxes = enabled;
+    window.localStorage.setItem("bimrocket.showLocalAxes", enabled);
+    this.updateSelection();
+  }
 
   updateBackground()
   {
@@ -749,7 +776,10 @@ BIMROCKET.Application = class
     this.showSelectionLines();
 
     this.hideAxisLines();
-    this.showAxisLines();
+    if (this.showLocalAxes)
+    {
+      this.showAxisLines();
+    }
   }
 
   hideSelectionLines()
@@ -907,12 +937,12 @@ BIMROCKET.Application = class
   {
     if (object.visible)
     {
-      return this.deepSelection ?
+      return this.showDeepSelection ?
         this.deepSelectionMaterial : this.selectionMaterial;
     }
     else
     {
-      return this.deepSelection ?
+      return this.showDeepSelection ?
         this.invisibleDeepSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }

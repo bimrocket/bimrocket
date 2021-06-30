@@ -10,21 +10,11 @@ BIMROCKET.Dialog = class
   {
     this.curtainElem = document.createElement("div");
     this.curtainElem.className = "dialog_curtain";
-    this.curtainElem.style.position = "absolute";
-    this.curtainElem.style.top = "0";
-    this.curtainElem.style.bottom = "0";
-    this.curtainElem.style.left = "0";
-    this.curtainElem.style.right = "0";
 
     this.dialogElem = document.createElement("div");
     this.dialogElem.className = "dialog";
-    this.dialogElem.style.position = "absolute";
     this.dialogElem.style.width = width + "px";
     this.dialogElem.style.height = height + "px";
-    this.dialogElem.style.left = "50%";
-    this.dialogElem.style.marginLeft = "-" + (width / 2) + "px";
-    this.dialogElem.style.top = "50%";
-    this.dialogElem.style.marginTop = "-" + (height / 2) + "px";
 
     this.headerElem = document.createElement("div");
     this.headerElem.innerHTML = title;

@@ -8,12 +8,24 @@
   -webkit-box-shadow: 2px 2px 30px 0px rgba(50, 50, 50, 0.63);
   -moz-box-shadow: 2px 2px 30px 0px rgba(50, 50, 50, 0.63);
   box-shadow: 2px 2px 30px 0px rgba(50, 50, 50, 0.63);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  max-width: 98%;
+  max-height: 98%;
 }
 
 .dialog_curtain
 {
   z-index: 10000;
   opacity: 0.4;
+  position: absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
   background-color: gray;
     -webkit-box-shadow: 2px 2px 30px 0px rgba(50, 50, 50, 0.63);
   -moz-box-shadow: 2px 2px 30px 0px rgba(50, 50, 50, 0.63);

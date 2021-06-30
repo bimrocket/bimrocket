@@ -41,13 +41,10 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     this.panel.bodyElem.appendChild(this.layoutPanelElem);
     this.panel.bodyElem.classList.add("padding");
 
-    let scope = this;
     this.showAllButton = document.createElement("button");
     this.showAllButton.innerHTML = "Show all";
-    this.showAllButton.addEventListener("click", function() 
-    {
-      scope.showAll();
-    }, false);
+    this.showAllButton.addEventListener("click", 
+      event => this.showAll(), false); 
     this.layoutPanelElem.appendChild(this.showAllButton);
 
     this.layoutTree = new BIMROCKET.Tree(this.layoutPanelElem);
@@ -64,7 +61,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
     const application = this.application;
     const container = application.container;
-    const scope = this;
+
     container.addEventListener('mousedown', this._onMouseDown, false);
     application.addEventListener('animation', this._animate);
 
@@ -76,12 +73,12 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     let storey = null;
     let space = null;
 
-    let getBIMClass = function(object)
+    let getBIMClass = object =>
     {
-      var bimClass = null;
+      let bimClass = null;
       if (object.name.indexOf('.') !== 0)
       {
-        var ifcData = object.userData["IFC"];
+        let ifcData = object.userData["IFC"];
         if (ifcData)
         {
           bimClass = ifcData["ifcClassName"];
@@ -90,9 +87,9 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       return bimClass;
     };
 
-    let exploreObject = function(object)
+    let exploreObject = object =>
     {
-      var bimClass = getBIMClass(object);
+      let bimClass = getBIMClass(object);
       if (bimClass === 'IfcSite')
       {
         site = {object: object, buildings:[], rotation : 0};
@@ -113,10 +110,10 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       {
         storey.spaces.push({object: object});
       }
-      var children = object.children;
-      for (var i = 0; i < children.length; i++)
+      let children = object.children;
+      for (let i = 0; i < children.length; i++)
       {
-        var child = children[i];
+        let child = children[i];
         exploreObject(child);
       }
     };
@@ -133,7 +130,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       const siteTreeNode = layoutTree.addNode(site.object.name, event => 
         this.focusOnObject(event, site.object, "IfcSite", "front"), "IfcSite");
 
-      for (var b = 0; b < site.buildings.length; b++)
+      for (let b = 0; b < site.buildings.length; b++)
       {
         let building = site.buildings[b];
 
@@ -202,6 +199,8 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
   onMouseDown(event)
   {
+    if (!this.isCanvasEvent(event)) return;
+
     event.preventDefault();
 
     const container = this.application.container;
@@ -212,7 +211,9 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
   }
 
   onMouseMove(event)
-  {
+  {    
+    if (!this.isCanvasEvent(event)) return;
+    
     event.preventDefault();
 
     let mousePosition = this.getMousePosition(event);

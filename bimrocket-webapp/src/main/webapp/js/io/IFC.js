@@ -2231,22 +2231,31 @@ BIMROCKET.IFC.helpers.IfcRelDefinesByTypeHelper = class
 
   relate()
   {
-    var rel = this.instance;
-    var schema = this.schema;
+    const rel = this.instance;
+    const schema = this.schema;
 
-    var objects = rel.RelatedObjects;
-    var type = rel.RelatingType;
-    const typeData = { ifcClassName: type.constructor.ifcClassName };
-    for (let key in type)
+    let objects = rel.RelatedObjects;
+    let ifcType = rel.RelatingType;
+    const typeData = { ifcClassName: ifcType.constructor.ifcClassName };
+    
+    for (let key in ifcType)
     {
-      typeData[key] = type[key];
-    };
+      let value = ifcType[key];
+      let valueType = typeof value;
+      if (valueType === "string" 
+          || valueType === "number" 
+          || valueType === "boolean")
+      {
+        typeData[key] = value;
+      }
+    }
+    
     for (let i = 0; i < objects.length; i++)
     {
       if (objects[i].helper.getObject3D)
       {
         let object3D = objects[i].helper.getObject3D();
-        object3D.userData["IFC_type"] = typeData;
+        object3D.userData["IFC_type"] = typeData;        
       }
     }
   }
@@ -2289,9 +2298,17 @@ BIMROCKET.IFC.helpers.IfcRelAssociatesClassificationHelper = class
           let classifData = {};
 
           object3D.userData["IFC_classification_" + classifName] = classifData;
+
           for (let key in ifcClassifRef)
           {
-            classifData[key] = ifcClassifRef[key];
+            let value = ifcClassifRef[key];
+            let valueType = typeof value;
+            if (valueType === "string" 
+                || valueType === "number" 
+                || valueType === "boolean")
+            {
+              classifData[key] = value;
+            }
           };
         }
       }
@@ -2315,17 +2332,26 @@ BIMROCKET.IFC.helpers.IfcRelAssignsToGroupHelper = class
     var ifcObjects = rel.RelatedObjects;
     var ifcObjectsType = rel.RelatedObjectsType;
     var ifcGroup = rel.RelatingGroup;
-    let groupName = ifcGroup.Name || ifcGroup.GlobalId;
     let groupData = { ifcClassName: ifcGroup.constructor.ifcClassName };
+
     for (let key in ifcGroup)
     {
-      groupData[key] = ifcGroup[key];
-    };
+      let value = ifcGroup[key];
+      let valueType = typeof value;
+      if (valueType === "string" 
+          || valueType === "number" 
+          || valueType === "boolean")
+      {
+        groupData[key] = value;
+      }
+    }
+
+    let groupName = ifcGroup.Name || ifcGroup.GlobalId;
     groupName = ifcGroup.constructor.ifcClassName + "_" + groupName;
     
-    for (var i = 0; i < ifcObjects.length; i++)
+    for (let i = 0; i < ifcObjects.length; i++)
     {
-      var ifcObject = ifcObjects[i];
+      let ifcObject = ifcObjects[i];
       if (ifcObject.helper && ifcObject.helper.getObject3D)
       {
         let object3D = ifcObject.helper.getObject3D();

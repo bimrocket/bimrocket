@@ -59,6 +59,8 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     this.panStart = new THREE.Vector2();
     this.panEnd = new THREE.Vector2();
     this.panVector = new THREE.Vector2();
+    
+    this.viewVector = new THREE.Vector3();
 
     this.phiDelta = 0;
     this.thetaDelta = 0;
@@ -200,7 +202,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
 
-    this.updateCamera = false;
+    this.updateCamera = false;    
   }
 
   onScene(event)
@@ -346,9 +348,15 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     if (intersect)
     {
       this.center.copy(intersect.point);
-      camera.parent.worldToLocal(this.center);
-      this.radius = this.center.distanceTo(camera.position);
     }
+    else
+    {
+      // center = 10 units in front of observer
+      this.viewVector.setFromMatrixColumn(camera.matrix, 2);
+      this.center.copy(camera.position).addScaledVector(this.viewVector, -10);
+    }
+    camera.parent.worldToLocal(this.center);
+    this.radius = this.center.distanceTo(camera.position);
   }
 
   onMouseDown(event)

@@ -7,6 +7,25 @@ BIMROCKET.IFC = {
   MIN_CIRCLE_SEGMENTS : 16, // minimum circle segments
   CIRCLE_SEGMENTS_BY_RADIUS : 64, // circle segments by meter of radius
   HALF_SPACE_SIZE : 10000,
+  FACTOR_PREFIX : {
+    ".EXA." : 10e17,
+    ".PETA." : 10e14,
+    ".TERA." : 10e11,
+    ".GIGA." : 10e8,
+    ".MEGA." : 10e5,
+    ".KILO." : 10e2,
+    ".HECTO." : 100,
+    ".DECA." : 10,
+    ".DECI." : 0.1,
+    ".CENTI." : 0.01,
+    ".MILLI." : 0.001,
+    ".MICRO." : 10e-7,
+    ".NANO." : 10e-10,
+    ".PICO." : 10e-13,
+    ".FEMTO." : 10e-16,
+    ".ATTO." : 10e-19
+  },
+  modelFactor : 1.0,
 
   helpers : {},
 
@@ -54,9 +73,11 @@ BIMROCKET.IFC = {
 
   getCircleSegments : function(radius)
   {
+    let meterRadius = radius * BIMROCKET.IFC.modelFactor;
+    
     let segments = Math.max(
       BIMROCKET.IFC.MIN_CIRCLE_SEGMENTS,
-      Math.ceil(BIMROCKET.IFC.CIRCLE_SEGMENTS_BY_RADIUS * radius));
+      Math.ceil(BIMROCKET.IFC.CIRCLE_SEGMENTS_BY_RADIUS * meterRadius));
 
     if (segments % 2 === 1) segments++;
 
@@ -80,13 +101,76 @@ BIMROCKET.IFC = {
     return clonedObject;
   },
 
-  buildModel : function(file, onCompleted, onProgress, onError)
+  buildModel : function(file, onCompleted, onProgress, onError, options)
   {
     const model = new THREE.Group();
 
     console.info(file);
 
     const schema = file.schema;
+
+    /* process project info */
+    const processProjectInfo = function()
+    {
+      BIMROCKET.IFC.modelFactor = 1.0;
+      
+      if (file.entities.IfcProject)
+      {
+        let project = file.entities.IfcProject[0];
+
+        model.name = project.Name || project.LongName || "IFC";
+        model.userData.STEP = this.file;
+        model._ifc = project;
+        model.userData.IFC = {
+          ifcClassName : "IfcProject",
+          GlobalId : project.GlobalId,
+          Name: project.Name,
+          Description : project.Description
+        };
+        let contextUnits = project.UnitsInContext;
+        if (contextUnits)
+        {
+          let units = contextUnits.Units;
+          if (units)
+          {
+            for (let u = 0; u < units.length; u++)
+            {
+              let unit = units[u];
+              if (unit instanceof schema.IfcSIUnit &&
+                  unit.UnitType === '.LENGTHUNIT.')
+              {
+                // unit name = METRE
+                let scale = 1;
+
+                if (unit.Prefix)
+                {
+                  let factor = BIMROCKET.IFC.FACTOR_PREFIX[unit.Prefix] || 1;
+                  BIMROCKET.IFC.modelFactor = factor; // factor respect metre
+                  scale = factor;
+                }
+                let appUnits = options.units || "m";
+                if (appUnits === "cm")
+                {
+                  scale *= 100;
+                }
+                else if (appUnits === "mm")
+                {
+                  scale *= 1000;
+                }
+                else if (appUnits === "in")
+                {
+                  scale *= 39.3701;
+                }
+                model.scale.x = scale;
+                model.scale.y = scale;
+                model.scale.z = scale;
+                model.updateMatrix();
+              }
+            }
+          }
+        }
+      }
+    };
 
     /* applyStyles */
     const applyStyles = function()
@@ -300,48 +384,6 @@ BIMROCKET.IFC = {
       }
     };
 
-    /* process project info */
-    const processProjectInfo = function()
-    {
-      if (file.entities.IfcProject)
-      {
-        let project = file.entities.IfcProject[0];
-
-        model.name = project.Name || project.LongName || "IFC";
-        model.userData.STEP = this.file;
-        model._ifc = project;
-        model.userData.IFC = {
-          ifcClassName : "IfcProject",
-          GlobalId : project.GlobalId,
-          Name: project.Name,
-          Description : project.Description
-        };
-        let contextUnits = project.UnitsInContext;
-        if (contextUnits)
-        {
-          let units = contextUnits.Units;
-          if (units)
-          {
-            for (let u = 0; u < units.length; u++)
-            {
-              let unit = units[u];
-              if (unit instanceof schema.IfcSIUnit &&
-                  unit.UnitType === '.LENGTHUNIT.')
-              {
-                if (unit.Prefix === '.MILLI.')
-                {
-                  model.scale.x = 0.001;
-                  model.scale.y = 0.001;
-                  model.scale.z = 0.001;
-                  model.updateMatrix();
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-
     if (onCompleted)
     {
       // asynchronous operation
@@ -352,20 +394,21 @@ BIMROCKET.IFC = {
       };
 
       executeTasks([
+        { run : processProjectInfo, message : "Processing project info..."},
         { run : applyStyles, message : "Applying styles..."},
         { run : createObject, message : "Creating objects...", iterations : getIterations},
         { run : processRelationships, message : "Processing relationships..."},
         { run : voidObject, message : "Voiding objects...", iterations : getIterations},
         { run : updateVisibility, message : "Updating visibility..."},
         { run : paintObjects, message : "Painting objects..."},
-        { run : groupObjects, message : "Grouping objects..."},
-        { run : processProjectInfo, message : "Processing project info..."}],
+        { run : groupObjects, message : "Grouping objects..."}],
         function() { onCompleted(model); }, onProgress, onError, 100, 10);
     }
     else
     {
       // synchronous operation
 
+      processProjectInfo();
       applyStyles();
       createObjects();
       processRelationships();
@@ -373,7 +416,6 @@ BIMROCKET.IFC = {
       updateVisibility();
       paintObjects();
       groupObjects();
-      processProjectInfo();
     }
     return model;
   }
@@ -451,7 +493,8 @@ BIMROCKET.IFC.STEPLoader = class extends THREE.Loader
     };
     parser.parse(text);
 
-    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress, onError);
+    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress, onError, 
+      this.options);
   }
 };
 

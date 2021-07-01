@@ -39,12 +39,14 @@ BIMROCKET.MeasureSelectionTool = class extends BIMROCKET.Tool
         }
       });
     }
+    const decimals = this.application.decimals;
+    const units = " " + this.application.units;
     const dialog = new BIMROCKET.Dialog("Measure selection", 240, 160);
     dialog.addText("Solids: " + solids, "row");
-    dialog.addText("Area: " + area, "row");
-    dialog.addText("Volume: " + volume, "row");
+    dialog.addText("Area: " + area.toFixed(decimals) + units + "2", "row");
+    dialog.addText("Volume: " + volume.toFixed(decimals) + units +"3", "row");
     let av = volume === 0 ? 0 : area/volume;
-    dialog.addText("Area/Volume: " + av, "row");
+    dialog.addText("Area/Volume: " + av.toFixed(decimals), "row");
     let button = dialog.addButton("accept", "Accept", 
       () => dialog.hide());
     dialog.onShow = () => button.focus();

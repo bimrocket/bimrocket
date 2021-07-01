@@ -349,9 +349,8 @@ div.option_block
 {
   margin-top:6px;
   margin-bottom:2px;
-  border-top: 1px solid #d0d0d0;
+  border-bottom: 1px solid #d0d0d0;
   padding: 6px;
-  padding-bottom: 0;
 }
 
 div.option_block.inline label
@@ -370,6 +369,16 @@ div.option_block input.back_color
   vertical-align: middle;
   margin-left: 4px;
   padding: 0px;
+}
+
+#panel_options #units
+{
+  margin-left:4px;
+}
+
+#panel_options #decimals
+{
+  margin-left:4px;
 }
 
 #panel_section > .body > div

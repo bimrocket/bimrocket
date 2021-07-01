@@ -24,8 +24,9 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.select_parent.label" : "Select parent",
 
+  "tool.export_selection.label" : "Export selection",
+
   "tool.options.label" : "Options",
-  "tool.options.help" : "Setup options",
 
   "tool.print.label" : "Print",
   "tool.print.help" : "Print scene to pdf",
@@ -145,6 +146,8 @@ I18N.add('BIMROCKET', 'en' , {
 
   "tool.statistics.label" : "Statistics",
   "tool.statistics.help" : "Statistics",
+
+  "tool.about.label" : "About",
   
   "inspector.objects_selected" : "objects selected"
 });

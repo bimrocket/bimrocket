@@ -12,6 +12,12 @@ BIMROCKET.Application = class
 {
   static EDGES_SELECTION = "edges";
   static FACES_SELECTION = "faces";
+  static UNITS = [
+    ["m", "meters"], 
+    ["cm", "centimeters"], 
+    ["mm", "millimeters"], 
+    ["in", "inches"]
+  ];
 
   constructor()
   {
@@ -25,9 +31,12 @@ BIMROCKET.Application = class
     this.overlays = null;
     this.tools = {};
     this.tool = null;
+    this._units = null;
+    this._decimals = null;
     this._backgroundColor1 = null;
     this._backgroundColor2 = null;
-    this._panelOpacity = 0;
+    this._panelOpacity = null;
+    this._frameRateDivisor = null;
 
     /* IO/BCF services */
     this.services = { "io": {}, "bcf" : {}}; // BIMROCKET.Service
@@ -35,16 +44,13 @@ BIMROCKET.Application = class
     /* selection */
     this.selection = new BIMROCKET.Selection(this, true);
     this.selectionPaintMode = BIMROCKET.Application.EDGES_SELECTION;
-    this._showDeepSelection = window.localStorage.getItem(
-      "bimrocket.showDeepSelection") !== "false";
-    this._showLocalAxes = window.localStorage.getItem(
-      "bimrocket.showLocalAxes") !== "false";
+    this._showDeepSelection = null;
+    this._showLocalAxes = null;
 
     this.clock = new THREE.Clock();
 
     this.autoRepaint = false;
     this.needsRepaint = true;
-    this.frameRateDivisor = 1;
 
     /* internal properties */
     this._cutObjects = [];
@@ -130,6 +136,7 @@ BIMROCKET.Application = class
     const selectReprTool = new BIMROCKET.SelectByNameTool(this, 
     {propertyName : BIMROCKET.IFC.RepresentationName, 
      label: BIMROCKET.IFC.RepresentationName});    
+    const exportSelectionTool = new BIMROCKET.ExportSelectionTool(this);
     const orbitTool = new BIMROCKET.OrbitTool(this);
     const flyTool = new BIMROCKET.FlyTool(this);
     const topViewTool = new BIMROCKET.ViewTool(this, 
@@ -213,6 +220,7 @@ BIMROCKET.Application = class
     const stopControllersTool = new BIMROCKET.StopControllersTool(this);
     const loadControllersTool = new BIMROCKET.LoadControllersTool(this);
     const saveControllersTool = new BIMROCKET.SaveControllersTool(this);
+    const aboutTool = new BIMROCKET.AboutTool(this);
 
     this.addTool(newSceneTool);
     this.addTool(cloudExplorerTool);
@@ -223,6 +231,7 @@ BIMROCKET.Application = class
     this.addTool(selectTool);
     this.addTool(selectParentTool);
     this.addTool(selectReprTool);
+    this.addTool(exportSelectionTool);
     this.addTool(orbitTool);
     this.addTool(flyTool);
     this.addTool(autoOrbitTool);
@@ -271,6 +280,7 @@ BIMROCKET.Application = class
     this.addTool(createControllerTool);
     this.addTool(loadControllersTool);
     this.addTool(saveControllersTool);
+    this.addTool(aboutTool);
 
     // outliner
     this.outliner = new BIMROCKET.Outliner(this);
@@ -337,6 +347,7 @@ BIMROCKET.Application = class
     selectMenu.addMenuItem(selectTool);
     selectMenu.addMenuItem(selectParentTool);
     selectMenu.addMenuItem(selectReprTool);
+//    selectMenu.addMenuItem(exportSelectionTool);
 
     const designMenu = menuBar.addMenu("Design");
     const addMenu = designMenu.addMenu("Add");
@@ -348,15 +359,14 @@ BIMROCKET.Application = class
     booleanOperationMenu.addMenuItem(unionTool);
     booleanOperationMenu.addMenuItem(intersectionTool);
     booleanOperationMenu.addMenuItem(subtractionTool);
+    const transformMenu = designMenu.addMenu("Transform");
+    transformMenu.addMenuItem(moveTool);
+    transformMenu.addMenuItem(rotateTool);
+    transformMenu.addMenuItem(scaleTool);    
     designMenu.addMenuItem(clipTool);
     designMenu.addMenuItem(makeSolidTool);
     designMenu.addMenuItem(inspectGeometryTool);
     designMenu.addMenuItem(resetMatrixTool);
-
-    const transformMenu = menuBar.addMenu("Transform");
-    transformMenu.addMenuItem(moveTool);
-    transformMenu.addMenuItem(rotateTool);
-    transformMenu.addMenuItem(scaleTool);
 
     const measureMenu = menuBar.addMenu("Measure");
     measureMenu.addMenuItem(measureDistanceTool);
@@ -380,6 +390,9 @@ BIMROCKET.Application = class
     panelsMenu.addMenuItem(inspectorTool);
     panelsMenu.addMenuItem(statisticsTool);
 
+    const helpMenu = menuBar.addMenu("Help");
+    helpMenu.addMenuItem(aboutTool);
+    
     // toolBar
     const toolBar = new BIMROCKET.ToolBar(this, toolBarElem);
     this.toolBar = toolBar;
@@ -517,7 +530,8 @@ BIMROCKET.Application = class
           const messageDialog =
             new BIMROCKET.MessageDialog("ERROR", error, "error");
           messageDialog.show();
-        }
+        },
+        options : { units : application.units }
       };
       application.progressBar.message = "Loading file...";
       application.progressBar.progress = undefined;
@@ -525,8 +539,8 @@ BIMROCKET.Application = class
       BIMROCKET.IOManager.load(intent); // asynchron load
     }
 
-    let opacityValue = window.localStorage.getItem("bimrocket.panelOpacity");
-    this.panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
+    let panelOpacity = this.panelOpacity;
+    this.panelOpacity = panelOpacity; // force update opacity to all panels
   }
 
   initScene(object)
@@ -677,6 +691,37 @@ BIMROCKET.Application = class
     this.needsRepaint = true;
   }
 
+  get units()
+  {
+    if (this._units === null)
+    {
+      this._units = window.localStorage.getItem("bimrocket.units") || "m";
+    }
+    return this._units;
+  }
+
+  set units(units)
+  {
+    this._units = units;
+    window.localStorage.setItem("bimrocket.units", units);
+  }
+
+  get decimals()
+  {
+    if (this._decimals === null)
+    {
+      this._decimals = parseInt(window.localStorage.getItem(
+       "bimrocket.decimals") || "2");
+    }
+    return this._decimals;
+  }
+  
+  set decimals(decimals)
+  {
+    this._decimals = decimals;
+    window.localStorage.setItem("bimrocket.decimals", String(decimals));
+  }
+
   get backgroundColor()
   {
     return this._backgroundColor1;
@@ -716,6 +761,11 @@ BIMROCKET.Application = class
   
   get panelOpacity()
   {
+    if (this._panelOpacity === null)
+    {
+      let opacityValue = window.localStorage.getItem("bimrocket.panelOpacity");
+      this._panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
+    }
     return this._panelOpacity;
   }
   
@@ -729,9 +779,30 @@ BIMROCKET.Application = class
       panel.opacity = opacity;
     }
   }
+
+  get frameRateDivisor()
+  {
+    if (this._frameRateDivisor === null)
+    {
+      let value = window.localStorage.getItem("bimrocket.frameRateDivisor");
+      this._frameRateDivisor = value ? parseInt(value) : 1;
+    }
+    return this._frameRateDivisor;
+  }
   
+  set frameRateDivisor(frd)
+  {
+    this._frameRateDivisor = frd;
+    window.localStorage.setItem("bimrocket.frameRateDivisor", String(frd));
+  }
+    
   get showDeepSelection()
   {
+    if (this._showDeepSelection === null)
+    {
+      this._showDeepSelection = window.localStorage.getItem(
+        "bimrocket.showDeepSelection") !== "false";      
+    }    
     return this._showDeepSelection;
   }
 
@@ -744,6 +815,11 @@ BIMROCKET.Application = class
 
   get showLocalAxes()
   {
+    if (this._showLocalAxes === null)
+    {
+      this._showLocalAxes = window.localStorage.getItem(
+       "bimrocket.showLocalAxes") !== "false";
+    }    
     return this._showLocalAxes;
   }
 

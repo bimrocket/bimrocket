@@ -116,10 +116,7 @@ BIMROCKET.IOManager = class
 
       if (!loader) throw "Unsupported format: " + format;
 
-      if (options)
-      {
-        loader.options = options;
-      }
+      loader.options = options || {};
       if (data)
       {
         this.parseData(loader, url, data, onCompleted, onProgress, onError);

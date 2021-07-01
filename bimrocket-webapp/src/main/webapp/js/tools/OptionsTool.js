@@ -24,12 +24,22 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.panel = application.createPanel(
       "panel_" + this.name, this.label, "left");
 
-    var helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
-    this.panel.bodyElem.appendChild(helpElem);
+    // Units
+    this.unitsSelect = Controls.addSelectField(this.panel.bodyElem, "units", 
+    "Model units:", BIMROCKET.Application.UNITS);
+    this.unitsSelect.parentElement.className = "option_block";
 
-    this.reportElem = document.createElement("div");
-    this.panel.bodyElem.appendChild(this.reportElem);
+    this.unitsSelect.addEventListener("change", event => 
+      application.units = this.unitsSelect.value);
+
+    // Decimals
+    this.decimalsElem = Controls.addNumberField(this.panel.bodyElem, "decimals", 
+    "Decimals to display:");
+    this.decimalsElem.parentElement.className = "option_block";
+    this.decimalsElem.min = 0;
+    this.decimalsElem.max = 15;
+    this.decimalsElem.addEventListener("change", event => 
+      application.decimals = parseInt(this.decimalsElem.value));
 
     // Frame rate divisor
 
@@ -58,7 +68,6 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.frdRange.min = 1;
     this.frdRange.max = 10;
     this.frdRange.step = 1;
-    this.frdRange.value = application.frameRateDivisor;
     this.frdRange.style.display = "inline-block";
     this.frdRange.style.width = "80%";
     this.frdRange.style.marginLeft = "auto";
@@ -191,58 +200,11 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
       this.backColorInput2.style.display = "";
     }
 
-    let report = [];
-    report.push(["BIMROCKET version", BIMROCKET.VERSION]);
-    report.push(["ThreeJS revision", THREE.REVISION]);
-    if (!window.WebGLRenderingContext)
-    {
-      report.push(["WebGL status", "Not supported"]);
-    }
-    else
-    {
-      report.push(["WebGL status", "OK"]);
-      var canvas = document.createElement('canvas');
-      canvas.width = 1;
-      canvas.height = 1;
-      document.body.appendChild(canvas);
-      var gl;
-      gl = canvas.getContext('webgl');
-      if (!gl)
-      {
-       gl = canvas.getContext('experimental-webgl');
-      }
-      document.body.removeChild(canvas);
-      if (gl)
-      {
-        report.push(["GL version", gl.getParameter(gl.VERSION)]);
-        report.push(["GL vendor", gl.getParameter(gl.VENDOR)]);
-        report.push(["GL renderer", gl.getParameter(gl.RENDERER)]);
-        var dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
-        if (dbgRenderInfo !== null)
-        {
-          report.push(["Unmsk. rendered",
-            gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL)]);
-          report.push(["Unmsk. vendor",
-            gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL)]);
-        }
-      }
-      else
-      {
-        report.push(["WebGL status", "ERROR"]);
-      }
-    }
-    let text = '<table style="text-align:left;font-size:10px">';
-    for (let i = 0; i < report.length; i++)
-    {
-      text += '<tr>';
-      text += '<td style="width:40%;vertical-align:top">' +
-        report[i][0] + ':</td><td style="width:60%">' + report[i][1] + '</td>';
-      text += '</tr>';
-    }
-    text += '</table>';
-    this.reportElem.innerHTML = text;
-    this.frdValue.innerHTML = this.application.frameRateDivisor;
-
+    console.info(application.units);
+    this.unitsSelect.value = application.units;
+    this.decimalsElem.value = application.decimals;
+    this.frdValue.innerHTML = application.frameRateDivisor;
+    this.frdRange.value = application.frameRateDivisor;
     this.selPaintModeSelect.value = application.selectionPaintMode;
     this.deepSelCheckBox.checked = application.showDeepSelection;
     this.localAxesCheckBox.checked = application.showLocalAxes;

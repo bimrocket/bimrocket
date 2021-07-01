@@ -91,7 +91,7 @@ BIMROCKET.WebdavService = class extends BIMROCKET.IOService
               new BIMROCKET.IOResult(OK, "", path, metadata, entries, null));
           }
           else
-          {
+          {            
             // read OBJECT
             const intent =
             {

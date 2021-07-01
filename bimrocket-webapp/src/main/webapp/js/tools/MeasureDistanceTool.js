@@ -119,7 +119,9 @@ BIMROCKET.MeasureDistanceTool = class extends BIMROCKET.Tool
     overlays.add(this.lineString);
     application.repaint();
 
-    this.distElem.innerHTML = "Distance: " + this.getLineStringLength();
+    let distance = (this.getLineStringLength()).toFixed(application.decimals);
+
+    this.distElem.innerHTML = "Distance: " + distance + " " + application.units;
   }
 
   getLineStringLength()

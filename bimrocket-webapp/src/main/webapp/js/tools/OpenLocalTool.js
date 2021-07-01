@@ -90,9 +90,10 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
             let messageDialog = 
               new BIMROCKET.MessageDialog("ERROR", error, "error");
             messageDialog.show();
-          }
+          },
+          options : { units : application.units }
         };
-        BIMROCKET.IOManager.load(intent); // asynchron load
+        BIMROCKET.IOManager.load(intent); // async load
       };
       application.progressBar.message = "Loading file...";
       application.progressBar.progress = undefined;

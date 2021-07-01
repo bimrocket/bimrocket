@@ -265,7 +265,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       const service = application.services.io[serviceName];
       if (service)
       {
-        const options = {};
+        const options = { units : application.units };
         this.showProgressBar();
 
         service.open(servicePath, options,

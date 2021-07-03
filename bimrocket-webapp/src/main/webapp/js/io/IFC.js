@@ -74,7 +74,7 @@ BIMROCKET.IFC = {
   getCircleSegments : function(radius)
   {
     let meterRadius = radius * BIMROCKET.IFC.modelFactor;
-    
+
     let segments = Math.max(
       BIMROCKET.IFC.MIN_CIRCLE_SEGMENTS,
       Math.ceil(BIMROCKET.IFC.CIRCLE_SEGMENTS_BY_RADIUS * meterRadius));
@@ -113,7 +113,7 @@ BIMROCKET.IFC = {
     const processProjectInfo = function()
     {
       BIMROCKET.IFC.modelFactor = 1.0;
-      
+
       if (file.entities.IfcProject)
       {
         let project = file.entities.IfcProject[0];
@@ -233,8 +233,8 @@ BIMROCKET.IFC = {
         let productObject3D = product.helper.getObject3D();
         let productRepr =
           productObject3D.getObjectByName(BIMROCKET.IFC.RepresentationName);
-  
-        if (productRepr instanceof BIMROCKET.Solid &&           
+
+        if (productRepr instanceof BIMROCKET.Solid &&
             (productRepr.geometry.faces.length <= 24 ||
              productRepr.userData.IFC.ifcClassName === "IfcExtrudedAreaSolid" ||
              productRepr.userData.IFC.ifcClassName === "IfcBooleanResult" ||
@@ -493,7 +493,7 @@ BIMROCKET.IFC.STEPLoader = class extends THREE.Loader
     };
     parser.parse(text);
 
-    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress, onError, 
+    return new BIMROCKET.IFC.buildModel(file, onCompleted, onProgress, onError,
       this.options);
   }
 };
@@ -1296,9 +1296,12 @@ BIMROCKET.IFC.helpers.IfcProfileDefHelper = class
 BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper = class
   extends BIMROCKET.IFC.helpers.IfcProfileDefHelper
 {
+  static vector = new THREE.Vector3();
+
   constructor(instance, schema)
   {
     super(instance, schema);
+    this.shape = null;
   }
 
   getShape()
@@ -1313,39 +1316,49 @@ BIMROCKET.IFC.helpers.IfcRectangleProfileDefHelper = class
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.shape = null;
   }
 
   getShape()
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
+      this.shape = new THREE.Shape();
 
-      var profMat = profile.Position.helper.getMatrix();
-      var xdim = profile.XDim;
-      var ydim = profile.YDim;
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+      builder.rectangle(profile.XDim, profile.YDim);
+    }
+    return this.shape;
+  }
+};
 
-      var shape = new THREE.Shape();
+BIMROCKET.IFC.helpers.IfcRectangleHollowProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcRectangleProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
 
-      var point = new THREE.Vector3(-0.5 * xdim, -0.5 * ydim, 0);
-      point.applyMatrix4(profMat);
-      shape.moveTo(point.x, point.y);
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
 
-      point = new THREE.Vector3(0.5 * xdim, -0.5 * ydim, 0);
-      point.applyMatrix4(profMat);
-      shape.lineTo(point.x, point.y);
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+      builder.rectangle(profile.XDim, profile.YDim);
 
-      point = new THREE.Vector3(0.5 * xdim, 0.5 * ydim, 0);
-      point.applyMatrix4(profMat);
-      shape.lineTo(point.x, point.y);
-
-      point = new THREE.Vector3(-0.5 * xdim, 0.5 * ydim, 0);
-      point.applyMatrix4(profMat);
-      shape.lineTo(point.x, point.y);
-
-      shape.closePath();
-      this.shape = shape;
+      const hole = new THREE.Path();
+      const thickness = 2 * profile.WallThickness;
+      builder.setup(hole, profMat);
+      builder.rectangle(profile.XDim - thickness, profile.YDim - thickness);
+      this.shape.holes.push(hole);
     }
     return this.shape;
   }
@@ -1357,40 +1370,24 @@ BIMROCKET.IFC.helpers.IfcCircleProfileDefHelper = class
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.shape = null;
   }
 
   getShape()
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
-      var radius = profile.Radius;
-      var profMat = profile.Position.helper.getMatrix();
+      this.shape = new THREE.Shape();
 
+      const profile = this.instance;
+      const radius = profile.Radius;
+      const profMat = profile.Position.helper.getMatrix();
       const segments = BIMROCKET.IFC.getCircleSegments(radius);
-      const shape = new THREE.Shape();
-      this.makeCircularPath(shape, radius, profMat, segments);
 
-      this.shape = shape;
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+      builder.circle(radius, segments);
     }
     return this.shape;
-  }
-
-  makeCircularPath(path, radius, matrix, segments)
-  {
-    const incr = 2 * Math.PI / segments;
-    const point = new THREE.Vector3(radius, 0, 0);
-    point.applyMatrix4(matrix);
-
-    path.moveTo(point.x, point.y);
-    for (let rad = incr; rad < 2 * Math.PI; rad += incr)
-    {
-      point.set(radius * Math.cos(rad), radius * Math.sin(rad), 0);
-      point.applyMatrix4(matrix);
-      path.lineTo(point.x, point.y);
-    }
-    path.closePath();
   }
 };
 
@@ -1400,32 +1397,61 @@ BIMROCKET.IFC.helpers.IfcCircleHollowProfileDefHelper = class
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.shape = null;
   }
 
   getShape()
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
-      var radius = profile.Radius;
-      var thickness = profile.WallThickness;
-      var profMat = profile.Position.helper.getMatrix();
+      this.shape = new THREE.Shape();
 
+      const profile = this.instance;
+      const radius = profile.Radius;
+      const thickness = profile.WallThickness;
+      const profMat = profile.Position.helper.getMatrix();
       const segments = BIMROCKET.IFC.getCircleSegments(radius);
-      const shape = new THREE.Shape();
-      this.makeCircularPath(shape, radius, profMat, segments);
 
-      var path = new THREE.Path();
-      this.makeCircularPath(path, radius - thickness, profMat, segments);
-      shape.holes.push(path);
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+      builder.circle(radius, segments);
 
-      this.shape = shape;
+      const hole = new THREE.Path();
+      builder.setup(hole, profMat);
+      builder.circle(radius - thickness, segments);
+      this.shape.holes.push(hole);
     }
     return this.shape;
   }
 };
 
+BIMROCKET.IFC.helpers.IfcEllipseProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const xradius = profile.SemiAxis1;
+      const yradius = profile.SemiAxis2;
+      const profMat = profile.Position.helper.getMatrix();
+      const maxRadius = Math.max(xradius, yradius);
+      const segments = BIMROCKET.IFC.getCircleSegments(maxRadius);
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+      builder.ellipse(xradius, yradius, segments);
+    }
+    return this.shape;
+  }
+};
 
 BIMROCKET.IFC.helpers.IfcIShapeProfileDefHelper = class
   extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
@@ -1433,44 +1459,226 @@ BIMROCKET.IFC.helpers.IfcIShapeProfileDefHelper = class
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.shape = null;
   }
 
   getShape()
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
+      this.shape = new THREE.Shape();
 
-      var profMat = profile.Position.helper.getMatrix();
-      var xs = 0.5 * profile.OverallWidth;
-      var ys = 0.5 * profile.OverallDepth;
-      var xt = 0.5 * profile.WebThickness;
-      var yt = profile.FlangeThickness;
-      var points = [];
-      points.push(new THREE.Vector3(-xs, ys, 0));
-      points.push(new THREE.Vector3(xs, ys, 0));
-      points.push(new THREE.Vector3(xs, ys - yt, 0));
-      points.push(new THREE.Vector3(xt, ys - yt, 0));
-      points.push(new THREE.Vector3(xt, -ys + yt, 0));
-      points.push(new THREE.Vector3(xs, -ys + yt, 0));
-      points.push(new THREE.Vector3(xs, -ys, 0));
-      points.push(new THREE.Vector3(-xs, -ys, 0));
-      points.push(new THREE.Vector3(-xs, -ys + yt, 0));
-      points.push(new THREE.Vector3(-xt, -ys + yt, 0));
-      points.push(new THREE.Vector3(-xt, ys - yt, 0));
-      points.push(new THREE.Vector3(-xs, ys - yt, 0));
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
 
-      var shape = new THREE.Shape();
-      points[0].applyMatrix4(profMat);
-      shape.moveTo(points[0].x, points[0].y);
-      for (var i = 1; i < points.length; i++)
-      {
-        points[i].applyMatrix4(profMat);
-        shape.lineTo(points[i].x, points[i].y);
-      }
-      shape.closePath();
-      this.shape = shape;
+      const xs = 0.5 * profile.OverallWidth;
+      const ys = 0.5 * profile.OverallDepth;
+      const xt = 0.5 * profile.WebThickness;
+      const yt = profile.FlangeThickness;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(-xs, ys - yt);
+      builder.lineTo(-xt, ys - yt);
+      builder.lineTo(-xt, -ys + yt);
+      builder.lineTo(-xs, -ys + yt);
+      builder.lineTo(-xs, -ys);
+      builder.lineTo(xs, -ys);
+      builder.lineTo(xs, -ys + yt);
+      builder.lineTo(xt, -ys + yt);
+      builder.lineTo(xt, ys - yt);
+      builder.lineTo(xs, ys - yt);
+      builder.lineTo(xs, ys);
+      builder.lineTo(-xs, ys);
+      builder.close();
+    }
+    return this.shape;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcLShapeProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+
+      const xs = 0.5 * profile.Width;
+      const ys = 0.5 * profile.Depth;
+      const t = profile.Thickness;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(-xs + t, -ys + t);
+      builder.lineTo(-xs + t, ys);
+      builder.lineTo(-xs, ys);
+      builder.lineTo(-xs, -ys);
+      builder.lineTo(xs, -ys);
+      builder.lineTo(xs, -ys + t);
+      builder.close();
+    }
+    return this.shape;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcTShapeProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+
+      const xs = 0.5 * profile.FlangeWidth;
+      const ys = 0.5 * profile.Depth;
+      const xt = 0.5 * profile.WebThickness;
+      const yt = profile.FlangeThickness;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(xt, -ys);
+      builder.lineTo(xt, ys - yt);
+      builder.lineTo(xs, ys - yt);
+      builder.lineTo(xs, ys);
+      builder.lineTo(-xs, ys);
+      builder.lineTo(-xs, ys - yt);
+      builder.lineTo(-xt, ys - yt);
+      builder.lineTo(-xt, -ys);
+      builder.close();
+    }
+    return this.shape;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcUShapeProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+
+      const xs = 0.5 * profile.FlangeWidth;
+      const ys = 0.5 * profile.Depth;
+      const xt = profile.WebThickness;
+      const yt = profile.FlangeThickness;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(xs, -ys);
+      builder.lineTo(xs, -ys + yt);
+      builder.lineTo(-xs + xt, -ys + yt);
+      builder.lineTo(-xs + xt, ys - yt);
+      builder.lineTo(xs, ys - yt);
+      builder.lineTo(xs, ys);
+      builder.lineTo(-xs, ys);
+      builder.lineTo(-xs, -ys);
+      builder.close();
+    }
+    return this.shape;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcZShapeProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+
+      const xs = profile.FlangeWidth;
+      const ys = 0.5 * profile.Depth;
+      const xt = 0.5 * profile.WebThickness;
+      const yt = profile.FlangeThickness;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(xt, ys);
+      builder.lineTo(-xs + xt, ys);
+      builder.lineTo(-xs + xt, ys - yt);
+      builder.lineTo(-xt, ys - yt);
+      builder.lineTo(-xt, -ys);
+      builder.lineTo(xs - xt, -ys);
+      builder.lineTo(xs - xt, -ys + yt);
+      builder.lineTo(xt, -ys + yt);
+      builder.close();
+    }
+    return this.shape;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcTrapeziumProfileDefHelper = class
+  extends BIMROCKET.IFC.helpers.IfcParameterizedProfileDefHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getShape()
+  {
+    if (this.shape === null)
+    {
+      this.shape = new THREE.Shape();
+
+      const profile = this.instance;
+      const profMat = profile.Position.helper.getMatrix();
+
+      const xb = 0.5 * profile.BottomXDim;
+      const yd = 0.5 * profile.YDim;
+      const xd = profile.TopXDim;
+      const xo = profile.TopXOffset;
+
+      const builder = BIMROCKET.PathBuilder;
+      builder.setup(this.shape, profMat);
+
+      builder.moveTo(xb, -yd);
+      builder.lineTo(-xb, -yd);
+      builder.lineTo(-xb + xo, yd);
+      builder.lineTo(-xb + xo + xd, yd);
+      builder.close();
     }
     return this.shape;
   }
@@ -1818,7 +2026,7 @@ BIMROCKET.IFC.helpers.IfcConnectedFaceSetHelper = class
         for (let b = 0; b < bounds.length; b++)
         {
           let bound = bounds[b]; // IfcFaceBound
-          let loop = bound.Bound; // IfcLoop: 
+          let loop = bound.Bound; // IfcLoop:
           // (IfcPolyLoop, IfcEdgeLoop, IfcVertexLoop)
           let loopVertices = loop.helper.getPoints();
           let loopOrientation = bound.Orientation;
@@ -1883,7 +2091,7 @@ BIMROCKET.IFC.helpers.IfcPolyLoopHelper = class
     {
       const loop = this.instance;
       const polygon = loop.Polygon;
-      
+
       this.points = [];
       for (let i = 0; i < polygon.length; i++)
       {
@@ -1916,7 +2124,7 @@ BIMROCKET.IFC.helpers.IfcEdgeLoopHelper = class
         let edge = edges[i];
         let point = edge.Orientation === ".T." ?
           edge.EdgeElement.EdgeStart.VertexGeometry.helper.getPoint() :
-          edge.EdgeElement.EdgeEnd.VertexGeometry.helper.getPoint();          
+          edge.EdgeElement.EdgeEnd.VertexGeometry.helper.getPoint();
         this.points.push(point);
       }
     }
@@ -2280,25 +2488,25 @@ BIMROCKET.IFC.helpers.IfcRelDefinesByTypeHelper = class
     let objects = rel.RelatedObjects;
     let ifcType = rel.RelatingType;
     const typeData = { ifcClassName: ifcType.constructor.ifcClassName };
-    
+
     for (let key in ifcType)
     {
       let value = ifcType[key];
       let valueType = typeof value;
-      if (valueType === "string" 
-          || valueType === "number" 
+      if (valueType === "string"
+          || valueType === "number"
           || valueType === "boolean")
       {
         typeData[key] = value;
       }
     }
-    
+
     for (let i = 0; i < objects.length; i++)
     {
       if (objects[i].helper.getObject3D)
       {
         let object3D = objects[i].helper.getObject3D();
-        object3D.userData["IFC_type"] = typeData;        
+        object3D.userData["IFC_type"] = typeData;
       }
     }
   }
@@ -2346,8 +2554,8 @@ BIMROCKET.IFC.helpers.IfcRelAssociatesClassificationHelper = class
           {
             let value = ifcClassifRef[key];
             let valueType = typeof value;
-            if (valueType === "string" 
-                || valueType === "number" 
+            if (valueType === "string"
+                || valueType === "number"
                 || valueType === "boolean")
             {
               classifData[key] = value;
@@ -2381,8 +2589,8 @@ BIMROCKET.IFC.helpers.IfcRelAssignsToGroupHelper = class
     {
       let value = ifcGroup[key];
       let valueType = typeof value;
-      if (valueType === "string" 
-          || valueType === "number" 
+      if (valueType === "string"
+          || valueType === "number"
           || valueType === "boolean")
       {
         groupData[key] = value;
@@ -2391,7 +2599,7 @@ BIMROCKET.IFC.helpers.IfcRelAssignsToGroupHelper = class
 
     let groupName = ifcGroup.Name || ifcGroup.GlobalId;
     groupName = ifcGroup.constructor.ifcClassName + "_" + groupName;
-    
+
     for (let i = 0; i < ifcObjects.length; i++)
     {
       let ifcObject = ifcObjects[i];

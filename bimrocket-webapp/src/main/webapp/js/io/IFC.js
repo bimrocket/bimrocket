@@ -1146,6 +1146,109 @@ BIMROCKET.IFC.helpers.IfcExtrudedAreaSolidHelper = class
   }
 };
 
+BIMROCKET.IFC.helpers.IfcSurfaceCurveSweptAreaSolidHelper = class
+  extends BIMROCKET.IFC.helpers.IfcGeometricRepresentationItemHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getObject3D()
+  {
+    if (this.object3D === null)
+    {
+      const solid = this.instance;
+      const profile = solid.SweptArea; // IfcProfileDef
+      const position = solid.Position; // IfcAxis2Placement3D
+      const matrix = position.helper.getMatrix();
+      const directrix = solid.Directrix; // IfcCurve
+      const startParam = solid.StartParam; // IfcParameterValue : number
+      const endParam = solid.EndParam; // IfcParameterValue : number
+      const surface = solid.ReferenceSurface; // IfcSurface: ignored
+
+      const shape = profile.helper.getShape();
+      const points = directrix.helper.getPoints();
+      if (points === null)
+      {
+        console.warn("Unsupported curve", directrix);
+        return null;
+      }
+
+      try
+      {
+        const geometry = new BIMROCKET.ExtrudeSolidGeometry(shape,
+          { directrix : points });
+
+        this.object3D = new BIMROCKET.Solid(geometry);
+        this.object3D.name = "swept";
+        this.object3D._ifc = solid;
+        if (matrix)
+        {
+          matrix.decompose(this.object3D.position, this.object3D.quaternion,
+            this.object3D.scale);
+          this.object3D.matrix.copy(matrix);
+          this.object3D.matrixWorldNeedsUpdate = true;
+        }
+      }
+      catch (ex)
+      {
+        console.warn(ex);
+      }
+    }
+    return this.object3D;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcSweptDiskSolidHelper = class
+  extends BIMROCKET.IFC.helpers.IfcGeometricRepresentationItemHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getObject3D()
+  {
+    if (this.object3D === null)
+    {
+      const swept = this.instance;
+      const directrix = swept.Directrix; // IfcCurve
+      const radius = swept.Radius;
+      const innerRadius = swept.InnerRadius;
+
+      const segments = BIMROCKET.IFC.getCircleSegments(radius);
+      const builder = BIMROCKET.PathBuilder;
+      const matrix = new THREE.Matrix4();
+      const shape = new THREE.Shape();
+      builder.setup(shape, matrix);
+      builder.circle(radius, segments);
+      if (typeof innerRadius === "number")
+      {
+        const hole = new THREE.Path();
+        builder.setup(hole, matrix);
+        builder.circle(innerRadius, segments);
+        shape.holes.push(hole);
+      }
+
+      try
+      {
+        const geometry = new BIMROCKET.ExtrudeSolidGeometry(shape,
+          { directrix : directrix.helper.getPoints() });
+
+        this.object3D = new BIMROCKET.Solid(geometry);
+        this.object3D.name = "disk";
+        this.object3D._ifc = swept;
+      }
+      catch (ex)
+      {
+        console.warn(ex);
+      }
+    }
+    return this.object3D;
+  }
+};
+
 BIMROCKET.IFC.helpers.IfcManifoldSolidBrepHelper = class
   extends BIMROCKET.IFC.helpers.IfcGeometricRepresentationItemHelper
 {
@@ -1379,7 +1482,7 @@ BIMROCKET.IFC.helpers.IfcCircleProfileDefHelper = class
       this.shape = new THREE.Shape();
 
       const profile = this.instance;
-      const radius = profile.Radius;
+      let radius = profile.Radius;
       const profMat = profile.Position.helper.getMatrix();
       const segments = BIMROCKET.IFC.getCircleSegments(radius);
 
@@ -1697,15 +1800,15 @@ BIMROCKET.IFC.helpers.IfcArbitraryClosedProfileDefHelper = class
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
+      const profile = this.instance;
 
-      var curve = profile.OuterCurve; // IFCCURVE
-      var curvePoints = curve.helper.getPoints();
+      const curve = profile.OuterCurve; // IfcCurve
+      const curvePoints = curve.helper.getPoints();
       if (curvePoints)
       {
         var shape = new THREE.Shape();
         shape.moveTo(curvePoints[0].x, curvePoints[0].y);
-        for (var i = 1; i < curvePoints.length; i++)
+        for (let i = 1; i < curvePoints.length; i++)
         {
           shape.lineTo(curvePoints[i].x, curvePoints[i].y);
         }
@@ -1714,7 +1817,6 @@ BIMROCKET.IFC.helpers.IfcArbitraryClosedProfileDefHelper = class
       }
       else
       {
-        // unsupported curve
         console.warn("Unsupported curve", curve);
       }
     }
@@ -1735,23 +1837,27 @@ BIMROCKET.IFC.helpers.IfcArbitraryProfileDefWithVoidsHelper = class
   {
     if (this.shape === null)
     {
-      var profile = this.instance;
-      var shape = super.getShape();
-      var innerCurves = profile.InnerCurves; // IFCCURVE[]
-      for (var c = 0; c < innerCurves.length; c++)
+      const profile = this.instance;
+      const shape = super.getShape();
+      const innerCurves = profile.InnerCurves; // IFCCURVE[]
+      for (let c = 0; c < innerCurves.length; c++)
       {
-        var innerCurve = innerCurves[c];
-        var curvePoints = innerCurve.helper.getPoints();
+        let innerCurve = innerCurves[c];
+        let curvePoints = innerCurve.helper.getPoints();
         if (curvePoints)
         {
-          var path = new THREE.Path();
+          let path = new THREE.Path();
           path.moveTo(curvePoints[0].x, curvePoints[0].y);
-          for (var i = 1; i < curvePoints.length; i++)
+          for (let i = 1; i < curvePoints.length; i++)
           {
             path.lineTo(curvePoints[i].x, curvePoints[i].y);
           }
           path.closePath();
           shape.holes.push(path);
+        }
+        else
+        {
+          console.warn("Unsupported inner curve", innerCurve);
         }
       }
     }
@@ -1782,20 +1888,19 @@ BIMROCKET.IFC.helpers.IfcPolylineHelper = class
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.points = null;
   }
 
   getPoints()
   {
     if (this.points === null)
     {
-      var polyline = this.instance;
+      const polyline = this.instance;
 
       this.points = [];
-      var points = polyline.Points;
-      for (var i = 0; i < points.length; i++)
+      const points = polyline.Points;
+      for (let i = 0; i < points.length; i++)
       {
-        var point = points[i].helper.getPoint();
+        let point = points[i].helper.getPoint();
         this.points.push(point);
       }
     }
@@ -1813,84 +1918,8 @@ BIMROCKET.IFC.helpers.IfcIndexedPolyCurveHelper = class
 
   getPoints()
   {
-    var polyCurve = this.instance;
+    const polyCurve = this.instance;
     return polyCurve.Points.helper.getPoints();
-  }
-};
-
-BIMROCKET.IFC.helpers.IfcCompositeCurveHelper = class
-  extends BIMROCKET.IFC.helpers.IfcCurveHelper
-{
-  constructor(instance, schema)
-  {
-    super(instance, schema);
-  }
-
-  getPoints()
-  {
-    if (this.points === null)
-    {
-      var points = [];
-      var compositeCurve = this.instance;
-      var schema = this.schema;
-      var segments = compositeCurve.Segments;
-      for (var i = 0; i < segments.length; i++)
-      {
-        var segment = segments[i]; // IfcCompositeCurveSegment
-        var curve = segment.ParentCurve;
-        var curvePoints = null;
-        if (curve instanceof schema.IfcPolyline)
-        {
-          curvePoints = curve.helper.getPoints();
-        }
-        else if (curve instanceof schema.IfcTrimmedCurve)
-        {
-          var basisCurve = curve.BasisCurve;
-          var trim1 = curve.Trim1[0];
-          var trim2 = curve.Trim2[0];
-          if (basisCurve instanceof schema.IfcCircle &&
-              trim1 instanceof schema.IfcParameterValue &&
-              trim2 instanceof schema.IfcParameterValue)
-          {
-            var startAngle = trim1.Value;
-            var endAngle = trim2.Value;
-            var sense = curve.SenseAgreement === ".T.";
-            curvePoints =
-              basisCurve.helper.getTrimmedPoints(startAngle, endAngle, sense);
-          }
-          else
-          {
-            console.info("unsupported trimmed curve segment", curve);
-          }
-        }
-        else
-        {
-          console.info("unsupported curve segment", curve);
-        }
-        if (curvePoints)
-        {
-          if (segment.SameSense === ".T.")
-          {
-            for (var j = 0; j < curvePoints.length; j++)
-            {
-              points.push(curvePoints[j]);
-            }
-          }
-          else
-          {
-            for (var j = curvePoints.length - 1; j >= 0; j--)
-            {
-              points.push(curvePoints[j]);
-            }
-          }
-        }
-      }
-      if (points.length > 0)
-      {
-        this.points = points;
-      }
-    }
-    return this.points;
   }
 };
 
@@ -1906,18 +1935,141 @@ BIMROCKET.IFC.helpers.IfcTrimmedCurveHelper = class
   {
     if (this.points === null)
     {
+      const curve = this.instance;
+      const schema = this.schema;
+
+      const basisCurve = curve.BasisCurve;
+      const trim1 = curve.Trim1[0];
+      const trim2 = curve.Trim2[0];
+      if (basisCurve instanceof schema.IfcConic &&
+          trim1 instanceof schema.IfcParameterValue &&
+          trim2 instanceof schema.IfcParameterValue)
+      {
+        let startAngle = trim1.Value;
+        let endAngle = trim2.Value;
+        let sense = curve.SenseAgreement === ".T.";
+        this.points =
+          basisCurve.helper.getTrimmedPoints(startAngle, endAngle, sense);
+      }
+      else
+      {
+        console.info("unsupported trimmed curve segment", curve);
+      }
     }
     return this.points;
   }
 };
 
-BIMROCKET.IFC.helpers.IfcCircleHelper = class
+BIMROCKET.IFC.helpers.IfcCompositeCurveHelper = class
   extends BIMROCKET.IFC.helpers.IfcCurveHelper
 {
   constructor(instance, schema)
   {
     super(instance, schema);
-    this.getPoints();
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const compositeCurve = this.instance;
+      const schema = this.schema;
+      let points = [];
+      let segments = compositeCurve.Segments;
+      for (let i = 0; i < segments.length; i++)
+      {
+        let segment = segments[i]; // IfcCompositeCurveSegment
+        let curve = segment.ParentCurve;
+        let curvePoints = curve.helper.getPoints();
+        if (curvePoints)
+        {
+          if (segment.SameSense === ".T.")
+          {
+            for (let j = 0; j < curvePoints.length; j++)
+            {
+              points.push(curvePoints[j]);
+            }
+          }
+          else
+          {
+            for (let j = curvePoints.length - 1; j >= 0; j--)
+            {
+              points.push(curvePoints[j]);
+            }
+          }
+        }
+        else
+        {
+          console.info("unsupported curve segment", curve);
+        }
+      }
+      if (points.length > 0)
+      {
+        this.points = points;
+      }
+    }
+    return this.points;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcConicHelper = class
+  extends BIMROCKET.IFC.helpers.IfcCurveHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getTrimmedPoints(param1, param2, sense)
+  {
+    return this.points;
+  }
+
+  generatePoints(startAngle, endAngle, sense, segments, addPoint)
+  {
+    let angle;
+    if (sense) // anti-clockwise
+    {
+      if (endAngle < startAngle) endAngle += 2 * Math.PI;
+      let dif = endAngle - startAngle;
+      let divs = Math.ceil(dif * segments / (2 * Math.PI));
+      let angleStep = dif / divs;
+
+      angle = startAngle;
+      while (divs > 0)
+      {
+        addPoint(angle);
+        angle += angleStep;
+        divs--;
+      }
+      addPoint(endAngle);
+    }
+    else // clockwise
+    {
+      if (endAngle > startAngle) startAngle += 2 * Math.PI;
+
+      let dif = startAngle - endAngle;
+      let divs = Math.ceil(dif * segments / (2 * Math.PI));
+      let angleStep = dif / divs;
+
+      angle = startAngle;
+      while (divs > 0)
+      {
+        addPoint(angle);
+        angle -= angleStep;
+        divs--;
+      }
+      addPoint(endAngle);
+    }
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcCircleHelper = class
+  extends BIMROCKET.IFC.helpers.IfcConicHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
   }
 
   getPoints()
@@ -1925,15 +2077,15 @@ BIMROCKET.IFC.helpers.IfcCircleHelper = class
     if (this.points === null)
     {
       this.points = [];
-      var circle = this.instance;
-      var matrix = circle.Position.helper.getMatrix();
-      var radius = circle.Radius;
-      var segments = BIMROCKET.IFC.getCircleSegments(radius);
-      var angleStep = 2 * Math.PI / segments;
-      for (var i = 0; i < segments; i++)
+      const circle = this.instance;
+      const matrix = circle.Position.helper.getMatrix();
+      const radius = circle.Radius;
+      const segments = BIMROCKET.IFC.getCircleSegments(radius);
+      const angleStep = 2 * Math.PI / segments;
+      for (let i = 0; i < segments; i++)
       {
-        var angle = i * angleStep;
-        var point = new THREE.Vector3();
+        let angle = i * angleStep;
+        let point = new THREE.Vector3();
         point.x = Math.cos(angle) * radius;
         point.y = Math.sin(angle) * radius;
         point.z = 0;
@@ -1946,18 +2098,17 @@ BIMROCKET.IFC.helpers.IfcCircleHelper = class
 
   getTrimmedPoints(param1, param2, sense)
   {
-    var points = [];
-    var circle = this.instance;
-    var matrix = circle.Position.helper.getMatrix();
-    var radius = circle.Radius;
-    var startAngle = THREE.MathUtils.degToRad(param1);
-    var endAngle = THREE.MathUtils.degToRad(param2);
-    var segments = BIMROCKET.IFC.getCircleSegments(radius);
-    var angleStep = 2 * Math.PI / segments;
+    let points = [];
+    const circle = this.instance;
+    const matrix = circle.Position.helper.getMatrix();
+    const radius = circle.Radius;
+    const startAngle = THREE.MathUtils.degToRad(param1);
+    const endAngle = THREE.MathUtils.degToRad(param2);
+    const segments = BIMROCKET.IFC.getCircleSegments(radius);
 
-    var addPoint = function(angle)
+    const addPoint = angle =>
     {
-      var point = new THREE.Vector3();
+      let point = new THREE.Vector3();
       point.x = Math.cos(angle) * radius;
       point.y = Math.sin(angle) * radius;
       point.z = 0;
@@ -1965,27 +2116,70 @@ BIMROCKET.IFC.helpers.IfcCircleHelper = class
       points.push(point);
     };
 
-    var angle;
-    if (sense) // anti-clockwise
+    this.generatePoints(startAngle, endAngle, sense, segments, addPoint);
+
+    return points;
+  }
+};
+
+BIMROCKET.IFC.helpers.IfcEllipseHelper = class
+  extends BIMROCKET.IFC.helpers.IfcConicHelper
+{
+  constructor(instance, schema)
+  {
+    super(instance, schema);
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
     {
-      if (endAngle < startAngle) endAngle += 2 * Math.PI;
-      angle = startAngle;
-      while (angle <= endAngle)
+      this.points = [];
+      const ellipse = this.instance;
+      const matrix = ellipse.Position.helper.getMatrix();
+      const semiAxis1 = ellipse.SemiAxis1;
+      const semiAxis2 = ellipse.SemiAxis2;
+      const maxAxis = Math.max(semiAxis1, semiAxis2);
+      const segments = BIMROCKET.IFC.getCircleSegments(maxAxis);
+      const angleStep = 2 * Math.PI / segments;
+      for (let i = 0; i < segments; i++)
       {
-        addPoint(angle);
-        angle += angleStep;
+        let angle = i * angleStep;
+        let point = new THREE.Vector3();
+        point.x = Math.cos(angle) * semiAxis1;
+        point.y = Math.sin(angle) * semiAxis2;
+        point.z = 0;
+        point.applyMatrix4(matrix);
+        this.points.push(point);
       }
     }
-    else // clockwise
+    return this.points;
+  }
+
+  getTrimmedPoints(param1, param2, sense)
+  {
+    let points = [];
+    const ellipse = this.instance;
+    const matrix = ellipse.Position.helper.getMatrix();
+    const semiAxis1 = ellipse.SemiAxis1;
+    const semiAxis2 = ellipse.SemiAxis2;
+    const maxAxis = Math.max(semiAxis1, semiAxis2);
+    const startAngle = THREE.MathUtils.degToRad(param1);
+    const endAngle = THREE.MathUtils.degToRad(param2);
+    const segments = BIMROCKET.IFC.getCircleSegments(maxAxis);
+
+    const addPoint = angle =>
     {
-      if (endAngle > startAngle) startAngle += 2 * Math.PI;
-      angle = startAngle;
-      while (angle >= endAngle)
-      {
-        addPoint(angle);
-        angle -= angleStep;
-      }
-    }
+      let point = new THREE.Vector3();
+      point.x = Math.cos(angle) * semiAxis1;
+      point.y = Math.sin(angle) * semiAxis2;
+      point.z = 0;
+      point.applyMatrix4(matrix);
+      points.push(point);
+    };
+
+    this.generatePoints(startAngle, endAngle, sense, segments, addPoint);
+
     return points;
   }
 };

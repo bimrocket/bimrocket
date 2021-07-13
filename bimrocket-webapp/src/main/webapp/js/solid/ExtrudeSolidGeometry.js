@@ -9,7 +9,7 @@ BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
     super();
     this.type = "ExtrudeSolidGeometry";
     this.shape = shape;
-    this.settings = settings; // depth
+    this.settings = settings; // depth, directrix: Vector3[]
     this.isManifold = true;
     this.build();
   }
@@ -22,8 +22,10 @@ BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
     const points = this.shape.extractPoints();
     let outerRing = points.shape;
     const innerRings = points.holes;
-    
-    function removeDuplicatedVertex(ring)
+
+    // prepare shape, orient rings and remove duplicated vertices
+
+    const removeDuplicatedVertex = ring =>
     {
       const first = ring[0];
       const last = ring[ring.length - 1];
@@ -31,11 +33,11 @@ BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
       {
         ring.pop();
       }
-    }
-    
+    };
+
     removeDuplicatedVertex(outerRing);
     innerRings.forEach(removeDuplicatedVertex);
-    
+
     if (THREE.ShapeUtils.isClockWise(outerRing))
     {
       outerRing = outerRing.reverse();
@@ -45,85 +47,191 @@ BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
     {
       let innerRing = innerRings[h];
 
-      if (THREE.ShapeUtils.isClockWise(innerRing)) 
+      if (THREE.ShapeUtils.isClockWise(innerRing))
       {
         innerRings[h] = innerRing.reverse();
       }
     }
 
-    const triangles = THREE.ShapeUtils.triangulateShape(outerRing, innerRings);
-    const depth = this.settings.depth;
-    const vertices = this.vertices;
+    const getPlane = (v1, v2, point) =>
+    {
+      let normal = new THREE.Vector3();
+      if (Math.abs(v1.dot(v2)) > 0.9999)
+      {
+        normal = v1;
+      }
+      else
+      {
+        let s = new THREE.Vector3();
+        s.subVectors(v2, v1).normalize();
+        let v = new THREE.Vector3();
+        v.crossVectors(s, v1).normalize();
+        normal.crossVectors(s, v).normalize();
+      }
+      let plane = new THREE.Plane();
+      plane.setFromNormalAndCoplanarPoint(normal, point);
 
-    function addVertices(ring, depth)
+      return plane;
+    };
+
+    // triangulate shape
+
+    const triangles = THREE.ShapeUtils.triangulateShape(outerRing, innerRings);
+    let directrix = this.settings.directrix; // Point3D[]
+    const depth = this.settings.depth || 1.0;
+    if (directrix === undefined)
+    {
+      directrix = [];
+      directrix.push(new THREE.Vector3(0, 0, 0));
+      directrix.push(new THREE.Vector3(0, 0, depth));
+    }
+    else
+    {
+      // remove duplicated vertices
+      let array = [];
+      array.push(directrix[0]);
+      for (let i = 1; i < directrix.length; i++)
+      {
+        if (directrix[i - 1].distanceTo(directrix[i]) > 0.0001)
+        {
+          array.push(directrix[i]);
+        }
+      }
+      if (array.length < 2) return;
+      directrix = array;
+    }
+
+    const p1 = new THREE.Vector3();
+    const p2 = new THREE.Vector3();
+    const p3 = new THREE.Vector3();
+    const vs = new THREE.Vector3();
+    const vx = new THREE.Vector3();
+    const vy = new THREE.Vector3();
+    const vz = new THREE.Vector3();
+    const v1 = new THREE.Vector3();
+    const v2 = new THREE.Vector3();
+    const ray = new THREE.Ray();
+
+    // add fake point to generate last ring
+    let length = directrix.length;
+    vs.subVectors(directrix[length - 1], directrix[length - 2]);
+    let last = new THREE.Vector3();
+    last.copy(directrix[length - 1]).add(vs);
+    directrix.push(last);
+
+    // create matrix from initial segment of directrix
+    p1.copy(directrix[0]);
+    p2.copy(directrix[1]);
+    vz.subVectors(p2, p1);
+    vz.normalize();
+    if (vz.y !== 0) vx.set(-vz.y, vz.x, 0).normalize();
+    else if (vz.x !== 0) vx.set(vz.y, -vz.x, 0).normalize();
+    else vx.set(1, 0, 0);
+    vy.crossVectors(vz, vx);
+    let matrix = new THREE.Matrix4();
+		matrix.set(
+		  vx.x, vy.x, vz.x, p1.x,
+			vx.y, vy.y, vz.y, p1.y,
+			vx.z, vy.z, vz.z, p1.z,
+			0, 0, 0, 1);
+
+    const addVertices = ring =>
     {
       for (let i = 0; i < ring.length; i++)
       {
         let vertex2 = ring[i];
-        let vertex3 = new THREE.Vector3(vertex2.x, vertex2.y, depth);
-        vertices.push(vertex3);
+        let vertex3 = new THREE.Vector3(vertex2.x, vertex2.y, 0);
+        vertex3.applyMatrix4(matrix);
+        this.vertices.push(vertex3);
       }
     };
 
-    // top face
-    addVertices(outerRing, depth);
-    for (let h = 0; h < innerRings.length; h++)
-    {
-      let innerRing = innerRings[h];
-      addVertices(innerRing, depth);
-    }
-    // bottom face
-    addVertices(outerRing, 0);
-    for (let h = 0; h < innerRings.length; h++)
-    {
-      let innerRing = innerRings[h];
-      addVertices(innerRing, 0);
-    }
-    const k = this.vertices.length / 2;
-    const scope = this;
+    // add all ring vertices
 
+    addVertices(outerRing);
+    for (let h = 0; h < innerRings.length; h++)
+    {
+      let innerRing = innerRings[h];
+      addVertices(innerRing);
+    }
+
+    // add bottom face (vertices1)
     for (let t = 0; t < triangles.length; t++)
     {
       let triangle = triangles[t];
       let a = triangle[0];
       let b = triangle[1];
       let c = triangle[2];
-
-      // top triangle
-      scope.addFace(a, b, c);
-
-      // bottom triangle (reverse face)
-      scope.addFace(k + c, k + b, k + a);
+      this.addFace(c, b, a); // reverse face
     }
 
-    function addSideFaces(start, end, reverse)
+    let stepVertexCount = this.vertices.length;
+    let offset1 = 0;
+    let offset2 = stepVertexCount;
+    // create side faces
+    for (let i = 1; i < directrix.length - 1; i++)
     {
-      for (let i = start; i < end; i++)
+      p1.copy(directrix[i - 1]);
+      p2.copy(directrix[i]);
+      p3.copy(directrix[i + 1]);
+
+      v1.subVectors(p2, p1).normalize();
+      v2.subVectors(p3, p2).normalize();
+      let plane = getPlane(v1, v2, p2);
+      for (let i = 0; i < stepVertexCount; i++)
       {
-        let j = i + 1;
-        if (j === end) j = start;
-        if (reverse)
-        {
-          scope.addFace(i, j, k + j, k + i);
-        }
-        else
-        {
-          scope.addFace(j, i, k + i, k + j);
-        }
+        ray.set(this.vertices[offset1 + i], v1);
+        let vertex = new THREE.Vector3();
+        vertex = ray.intersectPlane(plane, vertex);
+        if (vertex === null)
+          throw "Can't extrude this shape for the given directrix";
+        this.vertices.push(vertex);
       }
+
+      // add outer ring side faces
+      for (let i = 0; i < outerRing.length; i++)
+      {
+        let va1 = offset1 + i;
+        let vb1 = offset1 + (i + 1) % outerRing.length;
+
+        let va2 = offset2 + i;
+        let vb2 = offset2 + (i + 1) % outerRing.length;
+
+        this.addFace(va1, vb1, vb2, va2);
+      }
+
+      // add inner rings side faces
+
+      let innerRingOffset = outerRing.length;
+      for (let r = 0; r < innerRings.length; r++)
+      {
+        let innerRing = innerRings[r];
+
+        for (let i = 0; i < innerRing.length; i++)
+        {
+          let va1 = offset1 + innerRingOffset + i;
+          let vb1 = offset1 + innerRingOffset + (i + 1) % innerRing.length;
+
+          let va2 = offset2 + innerRingOffset + i;
+          let vb2 = offset2 + innerRingOffset + (i + 1) % innerRing.length;
+
+          this.addFace(vb1, va1, va2, vb2); // reverse face
+        }
+        innerRingOffset += innerRing.length;
+      }
+
+      offset1 = offset2;
+      offset2 += stepVertexCount;
     }
 
-    // outer side faces
-    addSideFaces(0, outerRing.length, false);
-    let start = outerRing.length;
-    for (let h = 0; h < innerRings.length; h++)
+    // add top face (vertices2)
+    for (let t = 0; t < triangles.length; t++)
     {
-      let innerRing = innerRings[h];
-      let end = start + innerRing.length;
-      addSideFaces(start, end, true);
-      start = end;
-    }    
+      let triangle = triangles[t];
+      let a = triangle[0];
+      let b = triangle[1];
+      let c = triangle[2];
+      this.addFace(offset1 + a, offset1 + b, offset1 + c);
+    }
   }
 };
-
-

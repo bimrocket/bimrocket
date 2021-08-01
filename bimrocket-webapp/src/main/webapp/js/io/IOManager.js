@@ -1,54 +1,15 @@
-BIMROCKET.IOManager = class
+/**
+ * IOManager.js
+ *
+ * @author realor
+ */
+
+import * as THREE from "../lib/three.module.js";
+
+class IOManager
 {
-  static formats = 
-  {
-    "dae" :
-    {
-      description: "Collada (*.dae)",
-      extension: "dae",
-      loaderClass : THREE.ColladaLoader,
-      exporterClass : THREE.ColladaExporter,
-      options : {}
-    },
-    "obj" :
-    {
-      description: "Wavefront object (*.obj)",
-      extension: "obj",
-      loaderClass : THREE.OBJLoader,
-      exporterClass : THREE.OBJExporter, 
-      options : {}
-    },
-    "stl" :
-    {
-      description : "Stereolithography (*.stl)",
-      extension: "stl",
-      loaderClass : THREE.STLLoader,
-      exporterClass : THREE.STLExporter,
-      options : {}
-    },
-    "json" :
-    {
-      description : "GeoJSON (*.json)",
-      extension: "json",
-      loaderClass : BIMROCKET.GeoJSONLoader,
-      options : {}
-    },
-    "gml" :
-    {
-      description : "Geography markup language (*.gml)",
-      extension: "gml",
-      loaderClass : BIMROCKET.GMLLoader,
-      options : {}
-    },
-    "ifc" :
-    {
-      description : "Industry foundation classes STEP (*.ifc)",
-      extension: "ifc",
-      loaderClass: BIMROCKET.IFC.STEPLoader,
-      options : {}
-    }            
-  }
-  
+  static formats = {};
+
   static getFormat(name)
   {
     let format = null;
@@ -67,8 +28,8 @@ BIMROCKET.IOManager = class
   {
     let format = this.getFormat(name);
     let formatInfo = format ?
-      BIMROCKET.IOManager.formats[format] :
-      BIMROCKET.IOManager.formats[name];
+      IOManager.formats[format] :
+      IOManager.formats[name];
     return formatInfo || null;
   }
 
@@ -79,6 +40,7 @@ BIMROCKET.IOManager = class
     if (formatInfo && formatInfo.loaderClass)
     {
       loader = new formatInfo.loaderClass();
+      loader.loadMethod = formatInfo.loadMethod || loader.loadMethod || 0;
     }
     return loader;
   }
@@ -103,7 +65,7 @@ BIMROCKET.IOManager = class
     let onProgress = intent.onProgress; // onProgress({progress: 0..100, message: text})
     let onError = intent.onError; // onError(error)
     let options = intent.options;
-    
+
     try
     {
       if (!format && url)
@@ -111,7 +73,7 @@ BIMROCKET.IOManager = class
         format = this.getFormat(url);
       }
       if (!format) throw "Can't determinate format";
-      
+
       let loader = this.createLoader(format);
 
       if (!loader) throw "Unsupported format: " + format;
@@ -123,10 +85,9 @@ BIMROCKET.IOManager = class
       }
       else
       {
-        let scope = this;
         let request = new XMLHttpRequest();
         let length = 0;
-        request.onreadystatechange = function()
+        request.onreadystatechange = () =>
         {
           if (request.readyState === 4)
           {
@@ -138,7 +99,7 @@ BIMROCKET.IOManager = class
               data = request.responseText;
               try
               {
-                scope.parseData(loader, url, data, 
+                this.parseData(loader, url, data,
                   onCompleted, onProgress, onError);
               }
               catch (exc)
@@ -188,7 +149,7 @@ BIMROCKET.IOManager = class
     let onError = intent.onError;
     let object = intent.object;
     let options = intent.options;
-    
+
     try
     {
       if (!format && name)
@@ -201,30 +162,29 @@ BIMROCKET.IOManager = class
       let exporter = this.createExporter(format);
 
       if (!exporter) throw "Unsupported format: " + format;
-      
+
       if (options)
       {
         exporter.options = options;
       }
-      return this.parseObject(exporter, object, 
+      return this.parseObject(exporter, object,
         onCompleted, onProgress, onError);
     }
     catch (ex)
     {
       if (onError) onError(ex);
-      throw ex;
     }
   }
 
   static parseData(loader, url, data, onCompleted, onProgress, onError)
   {
-    if (loader instanceof THREE.ColladaLoader)
+    if (loader.loadMethod === 1)
     {
       let path = THREE.LoaderUtils.extractUrlBase(url);
       let result = loader.parse(data, path);
       if (onCompleted) onCompleted(result.scene);
     }
-    else if (loader instanceof BIMROCKET.IFC.STEPLoader)
+    else if (loader.loadMethod === 2)
     {
       loader.parse(data, onCompleted, onProgress, onError);
     }
@@ -235,7 +195,7 @@ BIMROCKET.IOManager = class
       if (onCompleted) onCompleted(object);
     }
   }
-  
+
   static parseObject(exporter, object, onCompleted, onProgress, onError)
   {
     let data = "";
@@ -248,13 +208,13 @@ BIMROCKET.IOManager = class
       }
       else if (typeof result.data === "string")
       {
-        data = new Blob([result.data], {type: 'text/plain'});      
+        data = new Blob([result.data], {type: 'text/plain'});
       }
     }
     if (onCompleted) onCompleted(data);
     return data;
   }
-  
+
   static createObject(result)
   {
     if (result instanceof THREE.BufferGeometry)
@@ -271,8 +231,10 @@ BIMROCKET.IOManager = class
       let object = result;
       object.traverse(function(o){ o.updateMatrix(); });
       return object;
-    }    
+    }
   }
-};
+}
+
+export { IOManager };
 
 

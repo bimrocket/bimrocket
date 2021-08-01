@@ -1,10 +1,14 @@
 /* 
  * CenterTool.js
  * 
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.CenterSelectionTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { I18N } from "../i18n/I18N.js";
+
+class CenterSelectionTool extends Tool
 {
   constructor(application, options)
   {
@@ -36,10 +40,12 @@ BIMROCKET.CenterSelectionTool = class extends BIMROCKET.Tool
       const camera = application.camera;
 
       application.scene.updateMatrixWorld(true);
-      BIMROCKET.ObjectUtils.zoomAll(camera, objects, aspect, true);
+      ObjectUtils.zoomAll(camera, objects, aspect, true);
 
       let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);
     }
   }
-};
+}
+
+export { CenterSelectionTool };

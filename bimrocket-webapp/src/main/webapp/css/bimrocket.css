@@ -3,10 +3,7 @@
     Author     : realor
 */
 
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
-
-#container
+.container
 {
   position: absolute;
   top:68px;
@@ -27,7 +24,7 @@
   100% {opacity: 1; }
 }
 
-#load_panel
+.logo_panel
 {
   z-index: 1000;
   background: black;
@@ -36,41 +33,37 @@
   bottom:0;
   left:0;
   right:0;
-}
-
-#load_panel.visible
-{
-  animation: fade_in_logo;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
-}
-
-#load_panel.hidden
-{
-  animation: fade_out_logo;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
-}
-
-#load_message
-{
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
 }
 
-#load_message img
+.logo_panel > img
 {
   width: 400px;
-  max-width: 80%;
+  max-width: 80%;  
+}
+
+.logo_panel.visible
+{
+  animation: fade_in_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.logo_panel.hidden
+{
+  animation: fade_out_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
 }
 
 header
 {
 }
 
-header #logo
+header > a.logo_link
 {
   float:left;
   background-color: #B00000;
@@ -79,9 +72,10 @@ header #logo
   width: 140px;
   padding-top: 0;
   text-align: center;
+  cursor: pointer;
 }
 
-header #logo img
+header > a.logo_link > img
 {
   height: 28px;
 }
@@ -96,7 +90,7 @@ header nav
   background-color: #254441;
 }
 
-#toolbar
+.toolbar
 {
   position:absolute;
   top:28px;

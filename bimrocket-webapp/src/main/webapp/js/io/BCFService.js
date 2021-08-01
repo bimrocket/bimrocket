@@ -1,12 +1,18 @@
 /**
+ * BCFService.js
+ *
  * @author realor
  */
-BIMROCKET.BCFService = class extends BIMROCKET.Service
-{  
+
+import { Service } from "./Service.js";
+import { ServiceManager } from "./ServiceManager.js";
+
+class BCFService extends Service
+{
   static className = "BCFService";
   static type = "bcf";
 
-  constructor(name, description = null, 
+  constructor(name, description = null,
     url = null, username = null, password = null)
   {
     super(name, description, url, username, password);
@@ -24,19 +30,19 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
 
   updateProject(projectId, project, onCompleted, onError)
   {
-    this.invoke("PUT", "projects/" + projectId, project, 
-      onCompleted, onError);    
+    this.invoke("PUT", "projects/" + projectId, project,
+      onCompleted, onError);
   }
 
   getExtensions(projectId, onCompleted, onError)
   {
-    this.invoke("GET", "projects/" + projectId + "/extensions", null, 
+    this.invoke("GET", "projects/" + projectId + "/extensions", null,
       onCompleted, onError);
   }
 
   updateExtensions(projectId, extensions, onCompleted, onError)
   {
-    this.invoke("PUT", "projects/" + projectId + "/extensions", 
+    this.invoke("PUT", "projects/" + projectId + "/extensions",
       extensions, onCompleted, onError);
   }
 
@@ -74,13 +80,13 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
       if (orderBy) query += "$orderBy=" + orderBy;
     }
 
-    this.invoke("GET", "projects/" + projectId + "/topics" + query, 
+    this.invoke("GET", "projects/" + projectId + "/topics" + query,
       null, onCompleted, onError);
   }
 
   getTopic(projectId, topicGuid, onCompleted, onError)
   {
-    this.invoke("GET", "projects/" + projectId + "/topics/" + topicGuid, 
+    this.invoke("GET", "projects/" + projectId + "/topics/" + topicGuid,
       null, onCompleted, onError);
   }
 
@@ -92,50 +98,50 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
 
   updateTopic(projectId, topicGuid, topic, onCompleted, onError)
   {
-    this.invoke("PUT", "projects/" + projectId + "/topics/" + 
+    this.invoke("PUT", "projects/" + projectId + "/topics/" +
       topicGuid, topic, onCompleted, onError);
   }
-  
+
   deleteTopic(projectId, topicGuid, onCompleted, onError)
-  {    
-    this.invoke("DELETE", "projects/" + projectId + "/topics/" + topicGuid, 
+  {
+    this.invoke("DELETE", "projects/" + projectId + "/topics/" + topicGuid,
       null, onCompleted, onError);
   }
-  
+
   getComments(projectId, topicGuid, onCompleted, onError)
-  {    
-    this.invoke("GET", "projects/" + projectId + "/topics/" + 
+  {
+    this.invoke("GET", "projects/" + projectId + "/topics/" +
       topicGuid + "/comments", null, onCompleted, onError);
   }
 
   getComment(projectId, topicGuid, commentGuid, onCompleted, onError)
-  {    
-    this.invoke("GET", "projects/" + projectId + "/topics/" + 
+  {
+    this.invoke("GET", "projects/" + projectId + "/topics/" +
       topicGuid + "/comments/" + commentGuid, null, onCompleted, onError);
   }
-  
+
   createComment(projectId, topicGuid, comment, onCompleted, onError)
   {
     this.invoke("POST",
-      "projects/" + projectId + "/topics/" + topicGuid + 
+      "projects/" + projectId + "/topics/" + topicGuid +
       "/comments", comment, onCompleted, onError);
   }
 
-  updateComment(projectId, topicGuid, commentGuid, comment, 
+  updateComment(projectId, topicGuid, commentGuid, comment,
     onCompleted, onError)
   {
     this.invoke("PUT",
-      "projects/" + projectId + "/topics/" + topicGuid + 
+      "projects/" + projectId + "/topics/" + topicGuid +
       "/comments/" + commentGuid, comment, onCompleted, onError);
   }
-  
+
   deleteComment(projectId, topicGuid, commentGuid, onCompleted, onError)
   {
     this.invoke("DELETE",
-      "projects/" + projectId + "/topics/" + topicGuid + 
+      "projects/" + projectId + "/topics/" + topicGuid +
       "/comments/" + commentGuid, null, onCompleted, onError);
   }
-  
+
   getViewpoints(projectId, topicGuid, onCompleted, onError)
   {
     this.invoke("GET",
@@ -147,24 +153,24 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
   {
     this.invoke("GET",
       "projects/" + projectId +
-      "/topics/" + topicGuid + "/viewpoints/" + viewpointGuid, null, 
+      "/topics/" + topicGuid + "/viewpoints/" + viewpointGuid, null,
       onCompleted, onError);
   }
-  
+
   createViewpoint(projectId, topicGuid, viewpoint, onCompleted, onError)
-  {    
+  {
     this.invoke("POST",
-      "projects/" + projectId + "/topics/" + topicGuid + 
+      "projects/" + projectId + "/topics/" + topicGuid +
       "/viewpoints", viewpoint, onCompleted, onError);
   }
-  
+
   deleteViewpoint(projectId, topicGuid, viewpointGuid, onCompleted, onError)
   {
     this.invoke("DELETE",
       "projects/" + projectId + "/topics/" + topicGuid +
       "/viewpoints/" + viewpointGuid, null, onCompleted, onError);
   }
-  
+
   invoke(method, path, data, onCompleted, onError)
   {
     const request = new XMLHttpRequest();
@@ -175,7 +181,7 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
         onError({code: 0, message: "Connection error"});
       };
     }
-    
+
     if (onCompleted) request.onload = () =>
     {
       if (request.status === 200)
@@ -228,4 +234,8 @@ BIMROCKET.BCFService = class extends BIMROCKET.Service
       request.send();
     }
   }
-};
+}
+
+ServiceManager.addClass(BCFService);
+
+export { BCFService };

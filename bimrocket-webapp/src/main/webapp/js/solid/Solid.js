@@ -1,19 +1,23 @@
 /*
  * Solid.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.Solid = class extends THREE.Object3D
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { BSP } from "./BSP.js";
+import * as THREE from "../lib/three.module.js";
+
+class Solid extends THREE.Object3D
 {
-  static EDGES_NAME = BIMROCKET.HIDDEN_PREFIX + "edges";
-  static FACES_NAME = BIMROCKET.HIDDEN_PREFIX + "faces";
+  static EDGES_NAME = "edges";
+  static FACES_NAME = "faces";
   static FaceMaterial = new THREE.MeshPhongMaterial({
     name: 'SolidFaceMaterial',
     color: 0xc0c0c0,
     side: THREE.FrontSide,
     shininess: 1,
-    flatShading: false}); // CAUTION: flatShading: true => generates artifacts in clipping/stencil
+    flatShading: false});
   static EdgeMaterial = new THREE.LineBasicMaterial({
     name: 'SolidEdgeMaterial',
     color: 0x0,
@@ -26,16 +30,15 @@ BIMROCKET.Solid = class extends THREE.Object3D
 
     this.type = 'Solid';
 
-    this._facesObject = new THREE.Mesh(undefined, BIMROCKET.Solid.FaceMaterial);
-    this._facesObject.name = BIMROCKET.Solid.FACES_NAME;
+    this._facesObject = new THREE.Mesh(undefined, Solid.FaceMaterial);
+    this._facesObject.name = THREE.Object3D.HIDDEN_PREFIX + Solid.FACES_NAME;
     this._facesObject.matrixAutoUpdate = false;
     this._facesObject.visible = true;
     this._facesObject.raycast = function(){};
     this.add(this._facesObject);
 
-    this._edgesObject = new THREE.LineSegments(undefined,
-      BIMROCKET.Solid.EdgeMaterial);
-    this._edgesObject.name = BIMROCKET.Solid.EDGES_NAME;
+    this._edgesObject = new THREE.LineSegments(undefined, Solid.EdgeMaterial);
+    this._edgesObject.name = THREE.Object3D.HIDDEN_PREFIX + Solid.EDGES_NAME;
     this._edgesObject.matrixAutoUpdate = false;
     this._edgesObject.visible = true;
     this._edgesObject.raycast = function(){};
@@ -143,14 +146,14 @@ BIMROCKET.Solid = class extends THREE.Object3D
 
     const createBSP = function(solid)
     {
-      const bsp = new BIMROCKET.BSP();
+      const bsp = new BSP();
       const geometry = solid.geometry;
       const matrixWorld = solid.matrixWorld;
       bsp.fromSolidGeometry(geometry, matrixWorld);
       return bsp;
     };
 
-    if (solids instanceof BIMROCKET.Solid)
+    if (solids instanceof Solid)
     {
       solids = [solids];
     }
@@ -178,7 +181,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
     let solid;
     if (newSolid)
     {
-      solid = new BIMROCKET.Solid();
+      solid = new Solid();
     }
     else
     {
@@ -194,7 +197,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
 
   clone(recursive)
   {
-    let object = new BIMROCKET.Solid();
+    let object = new Solid();
     object.copy(this, false);
     object._facesObject.geometry = this._facesObject.geometry.clone();
     object._edgesObject.geometry = this._edgesObject.geometry.clone();
@@ -269,7 +272,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
       const matrixWorld = this.matrixWorld;
       const vertex0 = new THREE.Vector3();
       const vertex1 = new THREE.Vector3();
-      const vertex2 = new THREE.Vector3();      
+      const vertex2 = new THREE.Vector3();
 
       for (let f = 0; f < geometry.faces.length; f++)
       {
@@ -290,7 +293,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
 
   updateGeometry(geometry, debug = false)
   {
-    let solidGeometry = new BIMROCKET.SolidGeometry();
+    let solidGeometry = new SolidGeometry();
     solidGeometry.copy(geometry);
 
     let edgeMap = solidGeometry.fixEdges(debug);
@@ -301,7 +304,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
     this._edgesObject.geometry = edgesGeometry;
   }
 
-  fixGeometry()
+  fixGeometry(application)
   {
     //this.updateGeometry(this.geometry, true);
     let edgeMap = this.geometry.fixEdges(true);
@@ -365,7 +368,7 @@ BIMROCKET.Solid = class extends THREE.Object3D
 
       const errorMesh = new THREE.Mesh(facesGeometry, errorFaceMaterial);
       errorMesh.name = "ErrorFaces";
-      BIMROCKET.application.addObject(errorMesh, this.parent);
+      application.addObject(errorMesh, this.parent);
     }
 
     if (edgeVertices.length > 0)
@@ -382,7 +385,9 @@ BIMROCKET.Solid = class extends THREE.Object3D
       errorLines.raycast = function(){};
       errorLines.name = "ErrorLines";
 
-      BIMROCKET.application.addObject(errorLines, this.parent);
+      application.addObject(errorLines, this.parent);
     }
   }
-};
+}
+
+export { Solid };

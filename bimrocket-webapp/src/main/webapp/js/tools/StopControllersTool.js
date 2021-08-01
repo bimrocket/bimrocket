@@ -1,10 +1,12 @@
 /*
- * StartControllersTool.js
+ * StopControllersTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.StopControllersTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class StopControllersTool extends Tool
 {
   constructor(application, options)
   {
@@ -20,4 +22,6 @@ BIMROCKET.StopControllersTool = class extends BIMROCKET.Tool
   {
     this.application.stopControllers();
   }
-};
+}
+
+export { StopControllersTool };

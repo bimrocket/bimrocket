@@ -1,7 +1,12 @@
 /**
+ * Panel.js
+ *
  * @author realor
  */
-BIMROCKET.Panel = class
+
+import { I18N } from "../i18n/I18N.js";
+
+class Panel
 {
   static POSITIONS = ["left", "right", "bottom"];
   static HEADER_HEIGHT = 24;
@@ -15,7 +20,7 @@ BIMROCKET.Panel = class
 
     this.element = document.createElement("div");
     this.element.className = "panel";
-    this.element.style.margin = BIMROCKET.Panel.MARGIN + "px";
+    this.element.style.margin = Panel.MARGIN + "px";
 
     this.headerElem = document.createElement("div");
     this.headerElem.className = "header";
@@ -27,37 +32,37 @@ BIMROCKET.Panel = class
 
     this.minimizeButtonElem = document.createElement("button");
     this.minimizeButtonElem.className = "minimize";
-    this.minimizeButtonElem.setAttribute("aria-label", "Minimize");
-    this.minimizeButtonElem.alt = "Minimize";
-    this.minimizeButtonElem.title = "Minimize";
+    I18N.set(this.minimizeButtonElem, "aria-label", "button.minimize");
+    I18N.set(this.minimizeButtonElem, "alt", "button.minimize");
+    I18N.set(this.minimizeButtonElem, "title", "button.minimize");
     this.headerElem.appendChild(this.minimizeButtonElem);
 
     this.maximizeButtonElem = document.createElement("button");
     this.maximizeButtonElem.className = "maximize";
-    this.maximizeButtonElem.setAttribute("aria-label", "Maximize");
-    this.maximizeButtonElem.alt = "Maximize";
-    this.maximizeButtonElem.title = "Maximize";
+    I18N.set(this.maximizeButtonElem, "aria-label", "button.maximize");
+    I18N.set(this.maximizeButtonElem, "alt", "button.maximize");
+    I18N.set(this.maximizeButtonElem, "title", "button.maximize");
     this.headerElem.appendChild(this.maximizeButtonElem);
 
     this.titleElem = document.createElement("a");
     this.titleElem.className = "title";
     this.titleElem.href = "#";
-    this.headerElem.appendChild(this.titleElem);    
-    
+    this.headerElem.appendChild(this.titleElem);
+
     this.closeButtonElem = document.createElement("button");
     this.closeButtonElem.className = "close";
-    this.closeButtonElem.setAttribute("aria-label", "Close");
-    this.closeButtonElem.alt = "Close";
-    this.closeButtonElem.title = "Close";
+    I18N.set(this.closeButtonElem, "aria-label", "button.close");
+    I18N.set(this.closeButtonElem, "alt", "button.close");
+    I18N.set(this.closeButtonElem, "title", "button.close");
     this.headerElem.appendChild(this.closeButtonElem);
 
-    this.titleElem.addEventListener("click", event => 
+    this.titleElem.addEventListener("click", event =>
       { event.preventDefault(); this.zoom(); }, false);
 
-    this.minimizeButtonElem.addEventListener("click", event => 
+    this.minimizeButtonElem.addEventListener("click", event =>
       this.minimized = true, false);
 
-    this.maximizeButtonElem.addEventListener("click", event => 
+    this.maximizeButtonElem.addEventListener("click", event =>
       this.minimized = false, false);
 
     this.closeButtonElem.addEventListener("click", event =>
@@ -65,17 +70,18 @@ BIMROCKET.Panel = class
 
     this._position = null;
     this.position = "left";
-    this.opacity = 0.8;    
+    this.opacity = application.panelOpacity;
   }
 
-  get id()
+  get title()
   {
-    return this.element.id;
+    return this.titleElem.innerHTML;
   }
 
-  set id(id)
+  set title(title)
   {
-    this.element.id = id;
+    this.titleElem.innerHTML = title;
+    I18N.set(this.titleElem, "innerHTML", title);
   }
 
   get position()
@@ -96,16 +102,6 @@ BIMROCKET.Panel = class
       element.classList.add(position);
       if (this.panelManager) this.panelManager.updateLayout();
     }
-  }
-
-  get title()
-  {
-    return this.titleElem.innerHTML;
-  }
-
-  set title(title)
-  {
-    this.titleElem.innerHTML = I18N.get(title);
   }
 
   get visible()
@@ -156,6 +152,24 @@ BIMROCKET.Panel = class
     }
   }
 
+  setTitle(title)
+  {
+    this.title = title;
+    return this;
+  }
+
+  setPosition(position)
+  {
+    this.position = position;
+    return this;
+  }
+
+  setClassName(className)
+  {
+    this.element.classList.add(className);
+    return this;
+  }
+
   zoom()
   {
     this.minimized = false;
@@ -170,21 +184,21 @@ BIMROCKET.Panel = class
           panel.minimized = true;
         }
       }
-    }    
+    }
   }
-  
+
   get opacity()
   {
     return this._opacity;
   }
-  
+
   set opacity(opacity)
   {
     this._opacity = opacity;
     this.element.style.background = "rgba(255,255,255," + opacity + ")";
 
     let headerOpacity = Math.min(opacity + 0.2, 1);
-    this.headerElem.style.background = 
+    this.headerElem.style.background =
       "rgba(255,255,255," + headerOpacity + ")";
   }
 
@@ -203,20 +217,20 @@ BIMROCKET.Panel = class
   onMaximize()
   {
   }
-};
+}
 
-BIMROCKET.PanelManager = class
+class PanelManager
 {
   constructor(container)
   {
     this.container = container || document.body;
     this.margin = 0;
-    this.headerHeight = BIMROCKET.Panel.HEADER_HEIGHT;
+    this.headerHeight = Panel.HEADER_HEIGHT;
     this.panels = [];
 
     this.resizers = {};
-    this.resizers.left = new BIMROCKET.PanelResizer(this, "left");
-    this.resizers.right = new BIMROCKET.PanelResizer(this, "right");
+    this.resizers.left = new PanelResizer(this, "left");
+    this.resizers.right = new PanelResizer(this, "right");
 
     window.addEventListener('resize', event =>
     {
@@ -284,13 +298,13 @@ BIMROCKET.PanelManager = class
   updateLayout()
   {
     const container = this.container;
-    const height = container.clientHeight - BIMROCKET.Panel.MARGIN - 1;
+    const height = container.clientHeight - Panel.MARGIN - 1;
     if (this.isLargeScreen())
     {
       this.resizers.left.enabled = true;
       this.resizers.right.enabled = true;
 
-      let positions = BIMROCKET.Panel.POSITIONS;
+      let positions = Panel.POSITIONS;
       for (var i = 0; i < positions.length; i++)
       {
         let position = positions[i];
@@ -338,7 +352,7 @@ BIMROCKET.PanelManager = class
           fixedHeight += panel.preferredHeight;
         }
       }
-      fixedHeight += BIMROCKET.Panel.MARGIN;
+      fixedHeight += Panel.MARGIN;
     }
 
     let availableHeight = height - fixedHeight;
@@ -355,12 +369,12 @@ BIMROCKET.PanelManager = class
         if (resizer)
         {
           panel.element.style.width =
-            (resizer.width - BIMROCKET.Panel.MARGIN) + "px";
+            (resizer.width - Panel.MARGIN) + "px";
         }
       }
       else
       {
-        panel.element.style.width = "";        
+        panel.element.style.width = "";
       }
       let currentPanelHeight;
       if (panel.minimized)
@@ -376,7 +390,7 @@ BIMROCKET.PanelManager = class
         currentPanelHeight = panel.preferredHeight;
       }
       panel.element.style.height = currentPanelHeight + "px";
-      bottom += currentPanelHeight + BIMROCKET.Panel.MARGIN;
+      bottom += currentPanelHeight + Panel.MARGIN;
     }
     return bottom;
   }
@@ -387,7 +401,7 @@ BIMROCKET.PanelManager = class
   }
 };
 
-BIMROCKET.PanelResizer = class
+class PanelResizer
 {
   constructor(panelManager, side)
   {
@@ -399,7 +413,6 @@ BIMROCKET.PanelResizer = class
     this.element = document.createElement("div");
     const element = this.element;
     const container = panelManager.container;
-    const scope = this;
 
     element.className = "resizer";
     container.appendChild(element);
@@ -407,20 +420,20 @@ BIMROCKET.PanelResizer = class
     this.restoreWidth();
     this.updateBar();
 
-    const move = function(event)
+    const move = event =>
     {
-      scope.width = scope.getCurrentWidth(event);
-      scope.updateBar();
-      scope.panelManager.updateLayout();
+      this.width = this.getCurrentWidth(event);
+      this.updateBar();
+      this.panelManager.updateLayout();
     };
 
-    const reset = function(event)
+    const reset = () =>
     {
       container.removeEventListener("mousemove", move, false);
       container.removeEventListener("mouseup", reset, false);
     };
 
-    element.addEventListener("mousedown", function(event)
+    element.addEventListener("mousedown", () =>
     {
       container.addEventListener("mousemove", move, false);
       container.addEventListener("mouseup", reset, false);
@@ -448,7 +461,7 @@ BIMROCKET.PanelResizer = class
     let value = window.localStorage.getItem("bimrocket.resizer." + this.side);
     this.width = parseInt(value) || 250;
   }
-  
+
   saveWidth()
   {
     window.localStorage.setItem("bimrocket.resizer." + this.side, this.width);
@@ -468,4 +481,6 @@ BIMROCKET.PanelResizer = class
     }
     return curWidth;
   }
-};
+}
+
+export { Panel, PanelManager };

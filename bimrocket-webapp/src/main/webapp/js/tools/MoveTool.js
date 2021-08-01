@@ -1,10 +1,14 @@
-/* 
+/*
  * MoveTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.MoveTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class MoveTool extends Tool
 {
   constructor(application, options)
   {
@@ -25,24 +29,24 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
     this._onMouseUp = this.onMouseUp.bind(this);
     this._onMouseDown = this.onMouseDown.bind(this);
     this._onMouseMove = this.onMouseMove.bind(this);
-    
+    this._onContextMenu = this.onContextMenu.bind(this);
+
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    this.panel.bodyElem.innerHTML = I18N.get(this.help);  
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
-  {  
+  {
     this.panel.visible = true;
-    const container = this.application.container;  
-    container.addEventListener('contextmenu', this.onContextMenu, false);
+    const container = this.application.container;
+    container.addEventListener('contextmenu', this._onContextMenu, false);
     container.addEventListener('mousedown', this._onMouseDown, false);
   }
 
@@ -50,21 +54,21 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('contextmenu', this.onContextMenu, false);
+    container.removeEventListener('contextmenu', this._onContextMenu, false);
     container.removeEventListener('mousedown', this._onMouseDown, false);
   }
 
-  onMouseDown(event) 
+  onMouseDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
-    
-    var application = this.application;
+
+    const application = this.application;
 
     this.objects = application.selection.roots;
     if (this.objects.length > 0)
-    {      
+    {
       let mousePosition = this.getMousePosition(event);
       const scene = application.scene;
       let intersect = this.intersect(mousePosition, scene, true);
@@ -72,7 +76,7 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
       {
         this.initialPoint.copy(intersect.point);
         let object = this.objects[0];
-        
+
         this.initialPosition.copy(object.position);
         const container = this.application.container;
         container.addEventListener('mousemove', this._onMouseMove, false);
@@ -85,14 +89,14 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
     }
   }
 
-  onMouseMove(event) 
+  onMouseMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
-    
+
     event.preventDefault();
-    
+
     const application = this.application;
-    
+
     const mousePosition = this.getMousePosition(event);
     const scene = application.scene;
     let intersect = this.intersect(mousePosition, scene, true);
@@ -114,16 +118,16 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
         object.position.add(this.vector);
         object.updateMatrix();
       }
-      const changeEvent = {type: "nodeChanged", 
+      const changeEvent = {type: "nodeChanged",
         objects: this.objects, source : this};
-      application.notifyEventListeners("scene", changeEvent);  
+      application.notifyEventListeners("scene", changeEvent);
     }
   }
 
   onMouseUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
-    
+
     this.object = null;
 
     var container = this.application.container;
@@ -137,7 +141,7 @@ BIMROCKET.MoveTool = class extends BIMROCKET.Tool
 
     event.preventDefault();
   }
-};
+}
 
-
+export { MoveTool };
 

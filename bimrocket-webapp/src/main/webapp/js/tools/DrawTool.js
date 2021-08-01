@@ -1,10 +1,14 @@
 /*
  * DrawTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.DrawTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class DrawTool extends Tool
 {
   constructor(application, options)
   {
@@ -18,7 +22,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
     this.lastMousePosition = new THREE.Vector2();
     this.startPosition = null;
     this.snapPoint = null;
-    this.brepSelector = new BIMROCKET.BrepSelector();
+    this.brepSelector = new BrepSelector();
     this.needsUpdate = false;
     this.line = null;
     this.point = null;
@@ -44,18 +48,16 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
     this.onIntersectionMaterial = new THREE.PointsMaterial(
        {color: 0x000000, size: 8, sizeAttenuation: false, depthTest: false});
     this.onFaceMaterial = new THREE.PointsMaterial(
-       {color: 0xff0000, size: 8, sizeAttenuation: false, depthTest: false});  
-  
+       {color: 0xff0000, size: 8, sizeAttenuation: false, depthTest: false});
+
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
-    
-    var helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
+    this.panel = this.application.createPanel(this.label, "left");
+
+    const helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(helpElem);
 
     this.posElem = document.createElement("div");
@@ -67,7 +69,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
 
   activate = function()
   {
-    var application = this.application;
+    const application = this.application;
     this.panel.visible = true;
     this._createOverlays();
 
@@ -84,9 +86,9 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
 
   deactivate()
   {
-    var application = this.application;
-    
-    this.panel.visible = false;    
+    const application = this.application;
+
+    this.panel.visible = false;
     this._destroyOverlays();
 
     this.point.visible = false;
@@ -148,7 +150,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
   {
     if (false && this.needsUpdate)
     {
-      var application = this.application;
+      const application = this.application;
       var snapPoints = [];
 
       var container = this.application.container;
@@ -157,7 +159,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
       var pixels = 20.0;
       var snap = pixels / container.clientWidth;
 
-      this.brepSelector.select(application.baseObject, 
+      this.brepSelector.select(application.baseObject,
         application.camera, x, y, snap, snapPoints);
 
       // show point
@@ -169,30 +171,30 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
         this.point.geometry.verticesNeedUpdate = true;
 
         var position = this.snapPoint.position;
-        this.posElem.innerHTML = 
-          position.x + "<br>" + 
-          position.y + "<br>" + 
-          position.z + "<br>" + 
+        this.posElem.innerHTML =
+          position.x + "<br>" +
+          position.y + "<br>" +
+          position.z + "<br>" +
           this.snapPoint.distance;
 
         // update point material
         var snapType = this.snapPoint.type;
         switch (snapType)
         {
-          case BIMROCKET.VertexSnap:
+          case VertexSnap:
             this.point.material = this.onVertexMaterial;
             this.point.visible = true;
             break;
-          case BIMROCKET.LinesIntersectionSnap:
-          case BIMROCKET.FaceLineIntersectionSnap:
+          case LinesIntersectionSnap:
+          case FaceLineIntersectionSnap:
             this.point.material = this.onIntersectionMaterial;
             this.point.visible = true;
             break;
-          case BIMROCKET.FaceSnap:
+          case FaceSnap:
             this.point.material = this.onFaceMaterial;
             this.point.visible = true;
             break;
-          case BIMROCKET.GroundSnap:
+          case GroundSnap:
             this.point.visible = false;
             break;
           default:
@@ -205,11 +207,11 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
         this.posElem.innerHTML = "";
         this.point.visible = false;
         var groundIntersection = this.intersect(this.lastMousePosition,
-          BIMROCKET.ground, false);
+          ground, false);
         if (groundIntersection !== null)
         {
-          this.snapPoint = new BIMROCKET.SnapPoint(
-             null, BIMROCKET.GroundSnap, groundIntersection.point);
+          this.snapPoint = new SnapPoint(
+             null, GroundSnap, groundIntersection.point);
           this.snapPoint.distance = 0;
         }
         else
@@ -253,7 +255,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
   _createOverlays()
   {
     // overlays
-    var application = this.application;
+    const application = this.application;
     var overlays = application.overlays;
 
     var lineGeometry = new THREE.Geometry();
@@ -276,7 +278,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
 
   _destroyOverlays = function()
   {
-    var application = this.application;
+    const application = this.application;
     var overlays = application.overlays;
 
     overlays.remove(this.line);
@@ -291,7 +293,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
     var startLocal = new THREE.Vector3();
     var endLocal = new THREE.Vector3();
 
-    startLocal.copy(this.startPosition);  
+    startLocal.copy(this.startPosition);
     endLocal.copy(endPosition);
     brep.worldToLocal(startLocal);
     brep.worldToLocal(endLocal);
@@ -321,7 +323,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
 
   _remove()
   {
-    var application = this.application;
+    const application = this.application;
     var brep = this._getBrep();
     if (this.snapPoint !== null && this.snapPoint.brep === brep)
     {
@@ -330,7 +332,7 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
         brep.geometry.removeFace(this.snapPoint.face);
         application.updateBrepGeometry(brep.geometry);
         this.startPosition = null;
-        this.needsUpdate = true;      
+        this.needsUpdate = true;
       }
       else if (this.snapPoint.edge)
       {
@@ -450,19 +452,19 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
 
   _createBrep()
   {
-    var application = this.application;
-    var geometry = new BIMROCKET.BrepGeometry();
-    var brep = new BIMROCKET.Brep(geometry, 
-      BIMROCKET.Brep.defaultEdgeMaterial, BIMROCKET.Brep.defaultFaceMaterial);
+    const application = this.application;
+    var geometry = new BrepGeometry();
+    var brep = new Brep(geometry,
+      Brep.defaultEdgeMaterial, Brep.defaultFaceMaterial);
     return brep;
   }
 
   _getBrep()
   {
-    var application = this.application;
+    const application = this.application;
     var brep = null;
     var object = application.selection.object;
-    if (object instanceof BIMROCKET.Brep)
+    if (object instanceof Brep)
     {
       brep = object;
     }
@@ -474,4 +476,6 @@ BIMROCKET.DrawTool = class extends BIMROCKET.Tool
     application.hideSelectionLines();
     return brep;
   }
-};
+}
+
+export { DrawTool };

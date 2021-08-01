@@ -1,12 +1,29 @@
 /**
+ * Controls.js
+ *
  * @author realor
  */
+
+import { I18N } from "../i18n/I18N.js";
+
 class Controls
 {
+  static nextId = 0;
+
   static addText(parent, text, className)
   {
     const textElem = document.createElement("span");
-    textElem.innerHTML = text;
+    I18N.set(textElem, "innerHTML", text);
+    if (className) textElem.className = className;
+
+    parent.appendChild(textElem);
+    return textElem;
+  }
+
+  static addTextWithArgs(parent, text, args = [], className)
+  {
+    const textElem = document.createElement("span");
+    I18N.set(textElem, "innerHTML", text, ...args);
     if (className) textElem.className = className;
 
     parent.appendChild(textElem);
@@ -29,7 +46,7 @@ class Controls
     parent.appendChild(linkElem);
 
     if (className) linkElem.className = className;
-    if (label) linkElem.innerHTML = label;
+    if (label) I18N.set(linkElem, "innerHTML", label);
     if (url) linkElem.href = url;
     if (title)
     {
@@ -45,40 +62,41 @@ class Controls
 
   static addTextField(parent, name, label, value, className)
   {
-    return Controls.addInputField(parent, "text", name, label, value, 
+    return Controls.addInputField(parent, "text", name, label, value,
       className);
   }
 
   static addNumberField(parent, name, label, value, className)
   {
-    return Controls.addInputField(parent, "number", name, label, value, 
+    return Controls.addInputField(parent, "number", name, label, value,
       className);
   }
 
   static addPasswordField(parent, name, label, value, className)
   {
-    return Controls.addInputField(parent, "password", name, label, value, 
-      className);    
+    return Controls.addInputField(parent, "password", name, label, value,
+      className);
   }
 
   static addDateField(parent, name, label, value, className)
   {
-    return Controls.addInputField(parent, "date", name, label, value, 
+    return Controls.addInputField(parent, "date", name, label, value,
       className);
   }
 
   static addColorField(parent, name, label, value, className)
   {
-    return Controls.addInputField(parent, "color", name, label, value, 
+    return Controls.addInputField(parent, "color", name, label, value,
       className);
   }
 
   static addInputField(parent, type, name, label, value, className)
   {
-    const groupElem = Controls.addField(parent, name, label, className);
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
 
     const inputElem = document.createElement("input");
-    inputElem.id = name;
+    inputElem.id = id;
     inputElem.name = name;
     inputElem.type = type || "text";
     if (value) inputElem.value = value;
@@ -89,10 +107,11 @@ class Controls
 
   static addTextAreaField(parent, name, label, value, className)
   {
-    const groupElem = Controls.addField(parent, name, label, className);
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
 
     const textAreaElem = document.createElement("textarea");
-    textAreaElem.id = name;
+    textAreaElem.id = id;
     textAreaElem.name = name;
     if (value) textAreaElem.value = value;
     groupElem.appendChild(textAreaElem);
@@ -102,10 +121,11 @@ class Controls
 
   static addSelectField(parent, name, label, options, value, className)
   {
-    const groupElem = Controls.addField(parent, name, label, className);
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
 
     const selectElem = document.createElement("select");
-    selectElem.id = name;
+    selectElem.id = id;
     selectElem.name = name;
     groupElem.appendChild(selectElem);
 
@@ -133,12 +153,12 @@ class Controls
         if (option instanceof Array)
         {
           optionElem.value = option[0];
-          optionElem.innerHTML = option[1];
+          I18N.set(optionElem, "innerHTML", option[1]);
         }
         else
         {
           optionElem.value = option;
-          optionElem.innerHTML = option;
+          I18N.set(optionElem, "innerHTML", option);
         }
         selectElem.appendChild(optionElem);
       }
@@ -181,7 +201,8 @@ class Controls
 
   static addRadioButtons(parent, name, label, options, value, className)
   {
-    const groupElem = Controls.addField(parent, name, label, className);
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
 
     const hiddenElem = document.createElement("input");
     hiddenElem.type = "hidden";
@@ -192,7 +213,7 @@ class Controls
       let option = options[i];
 
       let radioElem = document.createElement("input");
-      radioElem.id = name + "_" + i;
+      radioElem.id = id + "_" + i;
       radioElem.type = "radio";
       radioElem.name = name;
       radioElem.value = option instanceof Array ? option[0] : option;
@@ -209,7 +230,8 @@ class Controls
       groupElem.appendChild(radioElem);
 
       let labelElem = document.createElement("label");
-      labelElem.innerHTML = option instanceof Array ? option[1] : option;
+      I18N.set(labelElem, "innerHTML",
+        option instanceof Array ? option[1] : option);
       labelElem.htmlFor = radioElem.id;
       groupElem.appendChild(labelElem);
     }
@@ -218,31 +240,30 @@ class Controls
 
   static addButton(parent, name, label, action, className)
   {
-    const scope = this;
     const buttonElem = document.createElement("button");
     buttonElem.name = name;
-    buttonElem.innerHTML = label;
+    I18N.set(buttonElem, "innerHTML", label);
     if (className) buttonElem.className = className;
-    buttonElem.addEventListener("click", function(){action(scope);}, false);
+    buttonElem.addEventListener("click", event => action(event), false);
     parent.appendChild(buttonElem);
 
     return buttonElem;
   }
 
-  static addField(parent, name, label, className)
+  static addField(parent, id, label, className)
   {
     const groupElem = document.createElement("div");
     if (className) groupElem.className = className;
     parent.appendChild(groupElem);
 
     const labelElem = document.createElement("label");
-    labelElem.htmlFor = name;
-    labelElem.innerHTML = label;
+    labelElem.htmlFor = id;
+    I18N.set(labelElem, "innerHTML", label);
     groupElem.appendChild(labelElem);
 
     return groupElem;
   }
-  
+
   static addTable(parent, name, columns, className)
   {
     const tableElem = document.createElement("table");
@@ -258,7 +279,7 @@ class Controls
 
     const footElem = document.createElement("tfoot");
     tableElem.appendChild(footElem);
-    
+
     if (columns)
     {
       const headRowElem = document.createElement("tr");
@@ -268,8 +289,8 @@ class Controls
       {
         const headColElem = document.createElement("th");
         headRowElem.appendChild(headColElem);
-        headColElem.innerHTML = columns[i];
-        headColElem.className = "col_" + i;        
+        I18N.set(headColElem, "innerHTML",  columns[i]);
+        headColElem.className = "col_" + i;
       }
     }
     return tableElem;
@@ -279,16 +300,23 @@ class Controls
   {
     const columns = tableElem.tHead.children[0].children.length;
     const bodyElem = tableElem.tBodies[0];
-    
+
     const rowElem = document.createElement("tr");
     bodyElem.appendChild(rowElem);
-    
+
     for (let i = 0; i < columns; i++)
     {
       let colElem = document.createElement("td");
       rowElem.appendChild(colElem);
-    }    
+    }
     return rowElem;
-  }  
-};
+  }
+
+  static getNextId()
+  {
+    return "f" + this.nextId++;
+  }
+}
+
+export { Controls };
 

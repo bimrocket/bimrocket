@@ -1,25 +1,28 @@
 /*
  * RotationController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.RotationController = class extends BIMROCKET.AnimationController
+import { AnimationController } from "./AnimationController.js";
+import { ControllerManager } from "./ControllerManager.js";
+
+class RotationController extends AnimationController
 {
   static type = "RotationController";
   static description = "Rotates an object.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
-    
+
     let minAngle = object.rotation.z * 180 / Math.PI;
     let maxAngle = minAngle + 90;
 
     this.axis = this.createProperty("string", "Axis (x, y or z)", "z");
-    this.minAngle = this.createProperty("number", "Min. angle (degrees)", 
+    this.minAngle = this.createProperty("number", "Min. angle (degrees)",
       minAngle);
-    this.maxAngle = this.createProperty("number", "Max. angle (degrees)", 
+    this.maxAngle = this.createProperty("number", "Max. angle (degrees)",
       maxAngle);
     this.minValue = this.createProperty("number", "Min. value", 0);
     this.maxValue = this.createProperty("number", "Max. value", 1);
@@ -30,10 +33,10 @@ BIMROCKET.RotationController = class extends BIMROCKET.AnimationController
   {
     let value = this.input.value;
     if (value === null) return;
-    
+
     value = parseFloat(value);
     if (typeof value !== "number") return;
-    
+
     let axis = this.axis.value || "z";
     let minValue = parseFloat(this.minValue.value);
     let maxValue = parseFloat(this.maxValue.value);
@@ -45,7 +48,7 @@ BIMROCKET.RotationController = class extends BIMROCKET.AnimationController
     let targetAngle = minAngle + factor * (maxAngle - minAngle);
     let angle = this.object.rotation[axis];
     let delta = targetAngle - angle;
-    
+
     if (Math.abs(delta) < 0.001)
     {
       this.stopAnimation();
@@ -60,6 +63,8 @@ BIMROCKET.RotationController = class extends BIMROCKET.AnimationController
       this.application.notifyObjectUpdated(this.object);
     }
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.RotationController);
+ControllerManager.addClass(RotationController);
+
+export { RotationController };

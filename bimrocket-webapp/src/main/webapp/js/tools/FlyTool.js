@@ -1,14 +1,18 @@
 /*
  * FlyTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.FlyTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class FlyTool extends Tool
 {
   constructor(application, options)
   {
-    super(application);   
+    super(application);
     this.name = "fly";
     this.label = "tool.fly.label";
     this.help = "tool.fly.help";
@@ -46,20 +50,20 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    var helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
-    this.panel.bodyElem.appendChild(helpElem);  
+    const helpElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(helpElem);
+
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
   {
     this.panel.visible = true;
     this.resetParameters();
-    var application = this.application;
+    const application = this.application;
 
     document.addEventListener('keyup', this._onKeyUp, false);
     document.addEventListener('keydown', this._onKeyDown, false);
@@ -71,8 +75,8 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
   {
     this.panel.visible = false;
     this.stopMovement();
-    var application = this.application;
-    
+    const application = this.application;
+
     document.removeEventListener('keyup', this._onKeyUp, false);
     document.removeEventListener('keydown', this._onKeyDown, false);
     application.removeEventListener('animation', this._animate);
@@ -105,7 +109,7 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
   onKeyDown(event)
   {
     if (event.srcElement.nodeName.toUpperCase() === "INPUT") return;
-    
+
     event.preventDefault();
 
     switch (event.keyCode)
@@ -172,7 +176,7 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
   onKeyUp(event)
   {
     if (event.srcElement.nodeName.toUpperCase() === "INPUT") return;
-    
+
     event.preventDefault();
 
     switch (event.keyCode)
@@ -212,9 +216,9 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
 
   animate(event)
   {
-    var delta = event.delta;
-    var application = this.application;
-    var camera = application.camera;
+    const delta = event.delta;
+    const application = this.application;
+    const camera = application.camera;
 
     this.forwardAccel = this.forwardControl * this.linearAccel;
     if (this.forwardVelocity > 0)
@@ -398,10 +402,9 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
 
   resetParameters()
   {
-    var application = this.application;
-    var container = application.container;
-
-    var camera = application.camera;
+    const application = this.application;
+    const container = application.container;
+    const camera = application.camera;
     if (camera instanceof THREE.PerspectiveCamera)
     {
       camera.aspect = container.clientWidth / container.clientHeight;
@@ -491,5 +494,7 @@ BIMROCKET.FlyTool = class extends BIMROCKET.Tool
     }
     return false;
   }
-};
+}
+
+export { FlyTool };
 

@@ -177,18 +177,18 @@
   animation: none;
 }
 
-.bim_layers_header
+.bim_inventory_header
 {
   text-align: left;
   margin-bottom: 6px;
 }
 
-.bim_layers_header label
+.bim_inventory_header label
 {
   margin-right: 4px;
 }
 
-.bim_layers_tabs
+.bim_inventory_tabs
 {
   text-align: left;
 }
@@ -275,14 +275,14 @@
   background-image: url(images/tools/options.svg);
 }
 
-.tool_button.bim_layers
+.tool_button.bim_inventory
 {
-  background-image: url(images/tools/bim_layers.svg);
+  background-image: url(images/tools/bim_inventory.svg);
 }
 
-.tool_button.measure_distance
+.tool_button.measure_length
 {
-  background-image: url(images/tools/measure_distance.svg);
+  background-image: url(images/tools/measure_length.svg);
 }
 
 .tool_button.print
@@ -297,22 +297,22 @@
 
 .tool_button.show
 {
-  background-image: url(images/tools/show.svg);  
+  background-image: url(images/tools/show.svg);
 }
 
 .tool_button.hide
 {
-  background-image: url(images/tools/hide.svg);  
+  background-image: url(images/tools/hide.svg);
 }
 
 .tool_button.center_selection
 {
-  background-image: url(images/tools/center_selection.svg);  
+  background-image: url(images/tools/center_selection.svg);
 }
 
 .tool_button.focus_selection
 {
-  background-image: url(images/tools/focus_selection.svg);  
+  background-image: url(images/tools/focus_selection.svg);
 }
 
 .tool_button.bim_layout
@@ -322,27 +322,27 @@
 
 .tool_button.new_scene
 {
-  background-image: url(images/tools/new_scene.svg);  
+  background-image: url(images/tools/new_scene.svg);
 }
 
 .tool_button.outliner
 {
-  background-image: url(images/tools/outliner.svg);  
+  background-image: url(images/tools/outliner.svg);
 }
 
 .tool_button.inspector
 {
-  background-image: url(images/tools/inspector.svg);  
+  background-image: url(images/tools/inspector.svg);
 }
 
 .tool_button.statistics
 {
-  background-image: url(images/tools/statistics.svg);  
+  background-image: url(images/tools/statistics.svg);
 }
 
 .tool_button.section
 {
-  background-image: url(images/tools/section.svg);    
+  background-image: url(images/tools/section.svg);
 }
 
 div.option_block
@@ -371,28 +371,18 @@ div.option_block input.back_color
   padding: 0px;
 }
 
-#panel_options #units
-{
-  margin-left:4px;
-}
-
-#panel_options #decimals
-{
-  margin-left:4px;
-}
-
-#panel_section > .body > div
+.panel_section > .body > div
 {
   margin-top: 10px;
 }
 
-#panel_section #section_color
+.panel_section input[name=section_color]
 {
   margin-left: 4px;
-  vertical-align: middle;  
+  vertical-align: middle;
 }
 
-#panel_section #section_offset
+.panel_section input[name=section_offset]
 {
   margin-left: 4px;
   width: 80px;

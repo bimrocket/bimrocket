@@ -1,10 +1,13 @@
-/* 
+/*
  * RotateTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.RotateTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+
+class RotateTool extends Tool
 {
   constructor(application, options)
   {
@@ -23,24 +26,23 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
     this._onMouseUp = this.onMouseUp.bind(this);
     this._onMouseDown = this.onMouseDown.bind(this);
     this._onMouseMove = this.onMouseMove.bind(this);
-    
+    this._onContextMenu = this.onContextMenu.bind(this);
+
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
-
-    this.panel.bodyElem.innerHTML = I18N.get(this.help);  
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
   {
     this.panel.visible = true;
     const container = this.application.container;
-    container.addEventListener('contextmenu', this.onContextMenu, false);
+    container.addEventListener('contextmenu', this._onContextMenu, false);
     container.addEventListener('mousedown', this._onMouseDown, false);
   }
 
@@ -48,16 +50,16 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('contextmenu', this.onContextMenu, false);
+    container.removeEventListener('contextmenu', this._onContextMenu, false);
     container.removeEventListener('mousedown', this._onMouseDown, false);
   }
 
   onMouseDown(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     const application = this.application;
-    
+
     event.preventDefault();
     let mousePosition = this.getMousePosition(event);
 
@@ -71,10 +73,10 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
     }
   }
 
-  onMouseMove(event) 
+  onMouseMove(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     event.preventDefault();
     var mousePosition = this.getMousePosition(event);
 
@@ -88,9 +90,9 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
     }
     this.rotateStart = this.rotateEnd;
 
-    const changeEvent = {type: "nodeChanged", 
+    const changeEvent = {type: "nodeChanged",
       objects: this.objects, source : this};
-    this.application.notifyEventListeners("scene", changeEvent);  
+    this.application.notifyEventListeners("scene", changeEvent);
   }
 
   onMouseUp(event)
@@ -106,8 +108,10 @@ BIMROCKET.RotateTool = class extends BIMROCKET.Tool
 
   onContextMenu(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     event.preventDefault();
   }
-};
+}
+
+export { RotateTool };

@@ -1,14 +1,19 @@
 /*
  * AutoPilotController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { Solid } from "../solid/Solid.js";
+import * as THREE from "../lib/three.module.js";
+
+class AutoPilotController extends Controller
 {
   static type = "AutoPilotController";
   static description = "Pilot an object.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
@@ -55,7 +60,7 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
 
   onStop()
   {
-    var application = this.application;
+    const application = this.application;
     application.removeEventListener("animation", this._animate);
   }
 
@@ -121,7 +126,7 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
         this._sleep = Math.random() * 10;
         this.object.visible = false;
       }
-      var changeEvent = {type : "nodeChanged", objects : [this.object], 
+      var changeEvent = {type : "nodeChanged", objects : [this.object],
         source: this};
       this.application.notifyEventListeners("scene", changeEvent);
     }
@@ -143,8 +148,8 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
       for (var i = 0; i < children.length; i++)
       {
         var vehicle = children[i];
-        if (vehicle !== this.object && vehicle.visible && 
-            vehicle instanceof BIMROCKET.Brep)
+        if (vehicle !== this.object && vehicle.visible &&
+            vehicle instanceof Solid)
         {
           vehiclePosition.set(0, 0, 0);
           vehicle.localToWorld(vehiclePosition);
@@ -155,13 +160,13 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
             var linearDistance = vector.dot(this._directionWorld);
             if (linearDistance > 0) // is not behind
             {
-              var margin = Math.sqrt(vehicleDistance * vehicleDistance - 
+              var margin = Math.sqrt(vehicleDistance * vehicleDistance -
                 linearDistance * linearDistance);
-              if (margin < 2) // car width 
+              if (margin < 2) // car width
               {
                 closestVehicle = vehicle;
                 minDistance = vehicleDistance;
-                if (vehicle.controllers && vehicle.controllers[0] && 
+                if (vehicle.controllers && vehicle.controllers[0] &&
                   vehicle.controllers[0]._velocity)
                 {
                   velocity = vehicle.controllers[0]._velocity;
@@ -225,9 +230,11 @@ BIMROCKET.AutoPilotController = class extends BIMROCKET.Controller
     }
     return {distance: minDistance, velocity: 0, object: closestLight};
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.AutoPilotController);
+ControllerManager.addClass(AutoPilotController);
+
+export { AutoPilotController };
 
 
 

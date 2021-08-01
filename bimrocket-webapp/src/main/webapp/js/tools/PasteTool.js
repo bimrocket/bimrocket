@@ -1,10 +1,12 @@
 /*
  * PasteTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.PasteTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class PasteTool extends Tool
 {
   constructor(application, options)
   {
@@ -21,4 +23,6 @@ BIMROCKET.PasteTool = class extends BIMROCKET.Tool
   {
     this.application.pasteObjects();
   }
-};
+}
+
+export { PasteTool };

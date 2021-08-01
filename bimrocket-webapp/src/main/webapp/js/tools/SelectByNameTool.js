@@ -1,10 +1,12 @@
 /*
  * SelectByNameTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SelectByNameTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class SelectByNameTool extends Tool
 {
   constructor(application, options)
   {
@@ -38,4 +40,6 @@ BIMROCKET.SelectByNameTool = class extends BIMROCKET.Tool
     }
     return null;
   }
-};
+}
+
+export { SelectByNameTool };

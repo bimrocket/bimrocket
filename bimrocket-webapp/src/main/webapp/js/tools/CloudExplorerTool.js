@@ -1,10 +1,22 @@
 /*
  * CloudExplorerTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Dialog } from "../ui/Dialog.js";
+import { ServiceDialog } from "../ui/ServiceDialog.js";
+import { SaveDialog } from "../ui/SaveDialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+import { ConfirmDialog } from "../ui/ConfirmDialog.js";
+import { Toast } from "../ui/Toast.js";
+import { ServiceManager } from "../io/ServiceManager.js";
+import { IOService, IOMetadata, IOResult } from "../io/IOService.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { I18N } from "../i18n/I18N.js";
+
+class CloudExplorerTool extends Tool
 {
   constructor(application, options)
   {
@@ -24,8 +36,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
 
     this.serviceElem = document.createElement("div");
     this.serviceElem.className = "service_panel";
@@ -36,10 +47,14 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     this.homeButtonElem = document.createElement("div");
     this.homeButtonElem.className = "image_button home";
     this.homeButtonElem.setAttribute("role", "button");
+    I18N.set(this.homeButtonElem, "title", "button.home");
+    I18N.set(this.homeButtonElem, "alt", "button.home");
 
     this.backButtonElem = document.createElement("div");
     this.backButtonElem.className = "image_button back";
     this.backButtonElem.setAttribute("role", "button");
+    I18N.set(this.backButtonElem, "title", "button.back");
+    I18N.set(this.backButtonElem, "alt", "button.back");
 
     this.directoryElem = document.createElement("div");
     this.directoryElem.className = "directory";
@@ -70,58 +85,58 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     this.backButtonElem.addEventListener('click', event => this.goBack());
 
     this.openButtonElem = document.createElement("button");
-    this.openButtonElem.innerHTML = "Open";
+    I18N.set(this.openButtonElem, "innerHTML", "button.open");
     this.openButtonElem.addEventListener('click', event => this.openEntry());
     this.buttonsPanelElem.appendChild(this.openButtonElem);
 
     this.saveButtonElem = document.createElement("button");
-    this.saveButtonElem.innerHTML = "Save";
+    I18N.set(this.saveButtonElem, "innerHTML", "button.save");
     this.saveButtonElem.addEventListener('click', event =>
       this.showSaveDialog());
     this.saveButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.saveButtonElem);
 
     this.addButtonElem = document.createElement("button");
-    this.addButtonElem.innerHTML = "Add";
+    I18N.set(this.addButtonElem, "innerHTML", "button.add");
     this.addButtonElem.addEventListener('click', event =>
       this.showAddDialog());
     this.addButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.addButtonElem);
 
     this.editButtonElem = document.createElement("button");
-    this.editButtonElem.innerHTML = "Edit";
+    I18N.set(this.editButtonElem, "innerHTML","button.edit");
     this.editButtonElem.addEventListener('click', event =>
       this.showEditDialog());
     this.editButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.editButtonElem);
 
     this.deleteButtonElem = document.createElement("button");
-    this.deleteButtonElem.innerHTML = "Delete";
+    I18N.set(this.deleteButtonElem, "innerHTML", "button.delete");
     this.deleteButtonElem.addEventListener('click', event =>
       this.showDeleteDialog());
     this.deleteButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.deleteButtonElem);
 
     this.folderButtonElem = document.createElement("button");
-    this.folderButtonElem.innerHTML = "Folder";
+    I18N.set(this.folderButtonElem, "innerHTML", "button.folder");
     this.folderButtonElem.addEventListener('click', event =>
       this.showFolderDialog());
     this.folderButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.folderButtonElem);
 
     this.uploadButtonElem = document.createElement("button");
-    this.uploadButtonElem.innerHTML = "Upload";
+    I18N.set(this.uploadButtonElem, "innerHTML", "button.upload");
     this.uploadButtonElem.addEventListener('click', event =>
       this.showUploadDialog());
     this.uploadButtonElem.style.display = "none";
     this.buttonsPanelElem.appendChild(this.uploadButtonElem);
 
     this.downloadButtonElem = document.createElement("button");
-    this.downloadButtonElem.innerHTML = "Download";
+    I18N.set(this.downloadButtonElem, "innerHTML", "button.download");
     this.downloadButtonElem.addEventListener('click', event =>
       this.download(this.basePath + "/" + this.entryName));
     this.downloadButtonElem.style.display = "none";
-    this.buttonsPanelElem.appendChild(this.downloadButtonElem);    
+    this.buttonsPanelElem.appendChild(this.downloadButtonElem);
   }
 
   activate()
@@ -137,11 +152,12 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   showSaveDialog()
   {
-    let dialog = new BIMROCKET.SaveDialog("Save to cloud", this.entryName);
+    let dialog = new SaveDialog("title.save_to_cloud", this.entryName);
+    dialog.setI18N(this.application.i18n);
     dialog.onSave = (name, format, onlySelection) =>
     {
       this.entryName = name;
-      this.entryType = BIMROCKET.IOMetadata.OBJECT;
+      this.entryType = IOMetadata.OBJECT;
       this.savePath(this.basePath + "/" + name);
     };
     dialog.show();
@@ -149,11 +165,13 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   showAddDialog()
   {
-    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
-    let dialog = new BIMROCKET.ServiceDialog("Add cloud service", serviceTypes);
+    const serviceTypes = ServiceManager.getClassesForType("io");
+    let dialog = new ServiceDialog("title.add_cloud_service", serviceTypes);
+    dialog.setI18N(this.application.i18n);
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
-      const service = new BIMROCKET[serviceType];
+      const serviceClass = ServiceManager.classes[serviceType];
+      const service = new serviceClass;
       service.name = name;
       service.description = description;
       service.url = url;
@@ -169,10 +187,11 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
   {
     const service = this.application.services.io[this.entryName];
 
-    let serviceTypes = BIMROCKET.IOService.SERVICE_TYPES;
-    let dialog = new BIMROCKET.ServiceDialog("Edit cloud service",
+    const serviceTypes = ServiceManager.getClassesForType("io");
+    let dialog = new ServiceDialog("title.edit_cloud_service",
       serviceTypes, service.constructor.type, service.name, service.description,
       service.url, service.username, service.password);
+    dialog.setI18N(this.application.i18n);
     dialog.serviceTypeSelect.disabled = true;
     dialog.nameElem.readOnly = true;
     dialog.onSave = (serviceType, name, description, url, username, password) =>
@@ -190,37 +209,44 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   showDeleteDialog()
   {
+    const application = this.application;
     let name = this.entryName;
     if (this.basePath === "")
     {
-      let dialog = new BIMROCKET.ConfirmDialog("Delete cloud service",
-        "Delete service " + name + "?",
-        () => {
-          const application = this.application;
+      ConfirmDialog.create("title.delete_cloud_service",
+        "question.delete_service", name)
+        .setAction(() =>
+        {
           let service = application.services.io[name];
           application.removeService(service);
           this.entryName = "";
           this.entryType = null;
           this.showServices();
-        });
-      dialog.show();
+        })
+        .setAcceptLabel("button.delete")
+        .setI18N(application.i18n).show();
     }
     else
     {
-      let dialog = new BIMROCKET.ConfirmDialog("Delete from cloud",
-        "Delete " + name + "?",
-        () => this.deletePath(this.basePath + "/" + name));
-      dialog.show();
+      let question = this.entryType === IOMetadata.OBJECT ?
+        "question.delete_file" : "question.delete_folder";
+
+      ConfirmDialog.create("title.delete_from_cloud", question, name)
+        .setAction(() => this.deletePath(this.basePath + "/" + name))
+        .setAcceptLabel("button.delete")
+        .setI18N(application.i18n).show();
     }
   }
 
   showFolderDialog()
   {
-    let dialog = new BIMROCKET.Dialog("Create folder in cloud service",
-      250, 130);
-    let elem = dialog.addTextField("folder_name", "Folder name");
-    dialog.addButton("folder_accept", "Create", () => dialog.onAccept());
-    dialog.addButton("folder_cancel", "Cancel", () => dialog.onCancel());
+    const application = this.application;
+    const dialog = new Dialog("title.create_folder_in_cloud");
+    dialog.setSize(250, 130);
+    dialog.setI18N(application.i18n);
+    let elem = dialog.addTextField("folder_name", "label.folder_name");
+    dialog.addButton("folder_accept", "button.create", () => dialog.onAccept());
+    dialog.addButton("folder_cancel", "button.cancel", () => dialog.onCancel());
 
     dialog.onAccept = () =>
     {
@@ -237,14 +263,14 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     };
     dialog.show();
   }
-  
+
   showUploadDialog()
   {
     let inputFile = document.createElement("input");
 
     inputFile.type = "file";
 
-    inputFile.addEventListener("change", 
+    inputFile.addEventListener("change",
       event => this.upload(inputFile.files));
     inputFile.click();
   }
@@ -274,9 +300,9 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       }
       else
       {
-        const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-          "Invalid service: " + serviceName, "error");
-        messageDialog.show();
+        MessageDialog.create("ERROR", "message.invalid_service", serviceName)
+          .setClassName("error")
+          .setI18N(application.i18n).show();
       }
     }
   }
@@ -300,9 +326,9 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     }
     else
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        "Invalid service: " + serviceName, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", "message.invalid_service", serviceName)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
   }
 
@@ -322,9 +348,9 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     }
     else
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        "Invalid service: " + serviceName, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", "message.invalid_service", serviceName)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
   }
 
@@ -344,9 +370,9 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     }
     else
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        "Invalid service: " + serviceName, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", "message.invalid_service", serviceName)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
   }
 
@@ -377,7 +403,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       const application = this.application;
       let file = files[0];
       let reader = new FileReader();
-      reader.onload = event => 
+      reader.onload = event =>
       {
         const data = event.target.result;
         const path = this.basePath + "/" + file.name;
@@ -391,17 +417,17 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
           const options = {};
           this.showProgressBar();
           service.upload(data, servicePath, options, result =>
-            { 
+            {
               this.entryName = file.name;
-              this.entryType = BIMROCKET.IOMetadata.OBJECT;
+              this.entryType = IOMetadata.OBJECT;
               this.handleSaveResult(path, result);
             });
         }
         else
         {
-          const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-            "Invalid service: " + serviceName, "error");
-          messageDialog.show();
+          MessageDialog.create("ERROR", "message.invalid_service", serviceName)
+            .setClassName("error")
+            .setI18N(application.i18n).show();
         }
       };
       reader.readAsText(file);
@@ -411,16 +437,18 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
   handleOpenResult(path, result)
   {
     this.showButtonsPanel();
-    if (result.status === BIMROCKET.IOResult.ERROR)
+    if (result.status === IOResult.ERROR)
     {
-      const messageDialog =
-        new BIMROCKET.MessageDialog("ERROR", result.message, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
     }
     else
     {
       if (result.entries)
       {
+        this.entryName = "";
+        this.entryType = null;
         this.showDirectory(path, result);
       }
       else
@@ -432,16 +460,18 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   handleSaveResult(path, result)
   {
+    const application = this.application;
     this.showButtonsPanel();
-    if (result.status === BIMROCKET.IOResult.ERROR)
+    if (result.status === IOResult.ERROR)
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        result.message, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
     else
     {
-      BIMROCKET.Toast.show("File saved.");
+      Toast.create("message.file_saved")
+        .setI18N(application.i18n).show();
 
       // reload basePath
       this.openPath(this.basePath);
@@ -450,22 +480,24 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   handleDeleteResult(path, result)
   {
+    const application = this.application;
     this.showButtonsPanel();
-    if (result.status === BIMROCKET.IOResult.ERROR)
+    if (result.status === IOResult.ERROR)
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        result.message, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error").setI18N(application.i18n).show();
     }
     else
     {
-      if (this.entryType === BIMROCKET.IOMetadata.COLLECTION)
+      if (this.entryType === IOMetadata.COLLECTION)
       {
-        BIMROCKET.Toast.show("Folder deleted.");
+        Toast.create("message.folder_deleted")
+          .setI18N(application.i18n).show();
       }
       else
       {
-        BIMROCKET.Toast.show("File deleted.");        
+        Toast.create("message.file_deleted")
+          .setI18N(application.i18n).show();
       }
 
       this.entryName = "";
@@ -478,16 +510,18 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   handleMakeFolderResult(path, result)
   {
+    const application = this.application;
     this.showButtonsPanel();
-    if (result.status === BIMROCKET.IOResult.ERROR)
+    if (result.status === IOResult.ERROR)
     {
-      const messageDialog = new BIMROCKET.MessageDialog("ERROR",
-        result.message, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
     else
     {
-      BIMROCKET.Toast.show("Folder created.");
+      Toast.create("message.folder_created")
+        .setI18N(application.i18n).show();
 
       this.entryName = "";
       this.entryType = null;
@@ -496,7 +530,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       this.openPath(this.basePath);
     }
   }
-  
+
   handleDownloadResult(data)
   {
     if (this.downloadUrl)
@@ -518,7 +552,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const application = this.application;
 
     this.basePath = "";
-    const COLLECTION = BIMROCKET.IOMetadata.COLLECTION;
+    const COLLECTION = IOMetadata.COLLECTION;
 
     this.directoryElem.innerHTML = "/";
     this.entriesElem.innerHTML = "";
@@ -543,7 +577,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     const application = this.application;
 
     this.basePath = path;
-    const OBJECT = BIMROCKET.IOMetadata.OBJECT;
+    const OBJECT = IOMetadata.OBJECT;
 
     if (path.lastIndexOf("/") === 0)
     {
@@ -648,19 +682,13 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   openEntry()
   {
-    const entryName = this.entryName;
-    if (this.entryType === BIMROCKET.IOMetadata.COLLECTION)
-    {
-      this.entryName = "";
-      this.entryType = null;
-    }
-    this.openPath(this.basePath + "/" + entryName);
+    this.openPath(this.basePath + "/" + this.entryName);
   }
 
   updateButtons()
   {
     const entryType = this.entryType;
-    
+
     if (this.basePath === "") // service list
     {
       this.addButtonElem.style.display = "inline";
@@ -681,8 +709,8 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
       this.editButtonElem.style.display = "none";
       this.openButtonElem.style.display = entryType ? "inline" : "none";
       this.deleteButtonElem.style.display = entryType ? "inline" : "none";
-      this.downloadButtonElem.style.display = 
-        entryType === BIMROCKET.IOMetadata.OBJECT ? "inline" : "none";
+      this.downloadButtonElem.style.display =
+        entryType === IOMetadata.OBJECT ? "inline" : "none";
     }
   }
 
@@ -698,7 +726,7 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     let camera = application.camera;
 
     object.updateMatrixWorld(true);
-    BIMROCKET.ObjectUtils.zoomAll(camera, object, aspect);
+    ObjectUtils.zoomAll(camera, object, aspect);
 
     let changeEvent = {type: "nodeChanged", objects: [camera],
       source : this};
@@ -730,8 +758,8 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
 
   entryComparator(a, b)
   {
-    const COLLECTION = BIMROCKET.IOMetadata.COLLECTION;
-    const OBJECT = BIMROCKET.IOMetadata.OBJECT;
+    const COLLECTION = IOMetadata.COLLECTION;
+    const OBJECT = IOMetadata.OBJECT;
 
     if (a.type === COLLECTION && b.type === OBJECT) return -1;
     if (a.type === OBJECT && b.type === COLLECTION) return 1;
@@ -739,4 +767,6 @@ BIMROCKET.CloudExplorerTool = class extends BIMROCKET.Tool
     if (a.name > b.name) return 1;
     return 0;
   }
-};
+}
+
+export { CloudExplorerTool };

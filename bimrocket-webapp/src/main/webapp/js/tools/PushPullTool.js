@@ -1,10 +1,13 @@
-/* 
+/*
  * PushPullTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.PushPullTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+
+class PushPullTool extends Tool
 {
   constructor(application, options)
   {
@@ -21,11 +24,9 @@ BIMROCKET.PushPullTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
-    
-    var helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
+    this.panel = this.application.createPanel(this.label, "left");
+
+    const helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(helpElem);
 
     this.posElem = document.createElement("div");
@@ -33,25 +34,26 @@ BIMROCKET.PushPullTool = class extends BIMROCKET.Tool
     this.posElem.style.padding = "50px";
 
     this.panel.bodyElem.appendChild(this.posElem);
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
   {
     this.panel.visible = true;
 
-    var application = this.application;
-    var container = application.container;
-    
+    const application = this.application;
+    const container = application.container;
+
     container.addEventListener('mouseup', this._onMouseUp, false);
     application.repaint();
   }
-  
+
   deactivate()
   {
     this.panel.visible = false;
-    
-    var application = this.application;
-    var container = application.container;
+
+    const application = this.application;
+    const container = application.container;
 
     container.removeEventListener('mouseup', this._onMouseUp, false);
   }
@@ -59,4 +61,6 @@ BIMROCKET.PushPullTool = class extends BIMROCKET.Tool
   onMouseUp(event)
   {
   }
-};
+}
+
+export { PushPullTool };

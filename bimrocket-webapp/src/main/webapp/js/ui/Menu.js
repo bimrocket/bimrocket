@@ -1,92 +1,87 @@
 /**
+ * Menu.js
+ *
  * @author realor
  */
-BIMROCKET.AbstractMenuItem = class
+
+import { I18N } from "../i18n/I18N.js";
+
+class AbstractMenuItem
 {
-  constructor(label)
+  constructor(menuBar, label)
   {
     this.label = label;
-    this.menuBar = null;
+    this.menuBar = menuBar;
     this.parentMenu = null;
 
     this.itemElement = document.createElement("li");
     this.anchorElement = document.createElement("a");
     this.anchorElement.href = "#";
-    this.anchorElement.innerHTML = I18N.get(label);
+    I18N.set(this.anchorElement, "innerHTML", label || "menuitem");
     this.itemElement.appendChild(this.anchorElement);
 
-    var menuItem = this;
-
-    this.anchorElement.addEventListener("mouseenter", function()
-    {
-      menuItem.anchorElement.focus();
-    });
+    this.anchorElement.addEventListener("mouseenter",
+      () => this.anchorElement.focus());
   }
-};
+}
 
-BIMROCKET.MenuItem = class extends BIMROCKET.AbstractMenuItem
+class MenuItem extends AbstractMenuItem
 {
-  constructor(tool)
+  constructor(menuBar, tool)
   {
-    super(tool.label);
+    super(menuBar, tool.label);
 
-    var menuItem = this;
-    var scope = this;
-
-    this.anchorElement.addEventListener("click", function(event)
+    this.anchorElement.addEventListener("click", () =>
     {
-      if (menuItem.menuBar.isVertical())
+      if (this.menuBar.isVertical())
       {
-        menuItem.menuBar.hide();
+        this.menuBar.hide();
       }
       else
       {
-        menuItem.menuBar.focusMenuItem(null);
+        this.menuBar.focusMenuItem(null);
       }
-      scope.menuBar.application.useTool(tool);
+      this.menuBar.application.useTool(tool);
     });
 
-    this.anchorElement.addEventListener("focusin", function()
+    this.anchorElement.addEventListener("focusin", () =>
     {
-      menuItem.menuBar.focusMenuItem(menuItem);
+      this.menuBar.focusMenuItem(this);
     });
   }
-};
+}
 
-BIMROCKET.Menu = class extends BIMROCKET.AbstractMenuItem
+class Menu extends AbstractMenuItem
 {
-  constructor(label)
+  constructor(menuBar, label)
   {
-    super(label);
+    super(menuBar, label);
     this.menuItems = []; // child menuItems
 
     this.listElement = document.createElement("ul");
     this.itemElement.appendChild(this.listElement);
     this.anchorElement.className = "menu";
 
-    var menu = this;
-
-    this.anchorElement.addEventListener("click", function(event)
+    this.anchorElement.addEventListener("click", event =>
     {
       event.preventDefault();
-      if (menu.isVisible())
+      if (this.isVisible())
       {
-        menu.hide();
+        this.hide();
       }
       else
       {
-        menu.menuBar.armed = true;
-        menu.drop();
+        this.menuBar.armed = true;
+        this.drop();
       }
     });
 
-    this.anchorElement.addEventListener("focusin", function()
+    this.anchorElement.addEventListener("focusin", () =>
     {
-      var menuBar = menu.menuBar;
-      menuBar.focusMenuItem(menu);
+      menuBar.focusMenuItem(this);
       if (menuBar.armed && !menuBar.isVertical())
       {
-        menu.drop();
+        this.drop();
       }
     });
   }
@@ -106,10 +101,9 @@ BIMROCKET.Menu = class extends BIMROCKET.AbstractMenuItem
     this.itemElement.className = "hide";
     if (recursive)
     {
-      for (var i = 0; i < this.menuItems.length; i++)
+      for (let menuItem of this.menuItems)
       {
-        var menuItem = this.menuItems[i];
-        if (menuItem instanceof BIMROCKET.Menu)
+        if (menuItem instanceof Menu)
         {
           menuItem.hide(recursive);
         }
@@ -119,28 +113,38 @@ BIMROCKET.Menu = class extends BIMROCKET.AbstractMenuItem
 
   addMenuItem(tool)
   {
-    var menuItem = new BIMROCKET.MenuItem(tool);
-    menuItem.menuBar = this.menuBar;
+    let menuItem = new MenuItem(this.menuBar, tool);
     menuItem.parentMenu = this;
     this.menuItems.push(menuItem);
     this.listElement.appendChild(menuItem.itemElement);
     return menuItem;
   }
 
-  addMenu(label)
+  addMenu(label, index)
   {
-    var menu = new BIMROCKET.Menu(label);
-    menu.menuBar = this.menuBar;
+    let menu = new Menu(this.menuBar, label);
     menu.parentMenu = this;
-    this.menuItems.push(menu);
-    this.listElement.appendChild(menu.itemElement);
+
+    const children = this.listElement.children;
+    if (typeof index === "number" && index < children.length)
+    {
+      if (index < 0) index = 0;
+      let oldElem = children[index];
+      this.listElement.insertBefore(menu.itemElement, oldElem);
+      this.menuItems.splice(index, 0, menu);
+    }
+    else
+    {
+      this.menuItems.push(menu);
+      this.listElement.appendChild(menu.itemElement);
+    }
     return menu;
   }
 };
 
 /*** MenuBar ***/
 
-BIMROCKET.MenuBar = class
+class MenuBar
 {
   constructor(application, element)
   {
@@ -155,12 +159,12 @@ BIMROCKET.MenuBar = class
     this.listElement = document.createElement("ul");
     this.navElement.appendChild(this.listElement);
 
-    var menuBar = this;
+    const menuBar = this;
     this.dropButtonElement = document.createElement("a");
     this.dropButtonElement.innerHTML = "MENU";
     this.dropButtonElement.className = "menu_button";
     this.dropButtonElement.setAttribute("role", "button");
-    this.dropButtonElement.setAttribute("aria-pressed", "false");    
+    this.dropButtonElement.setAttribute("aria-pressed", "false");
     this.dropButtonElement.addEventListener("click", function()
     {
       if (menuBar.isVisible())
@@ -176,46 +180,52 @@ BIMROCKET.MenuBar = class
     });
     element.appendChild(this.dropButtonElement);
 
-    const scope = this;
-    
-    document.body.addEventListener("click", function(event)
+    document.body.addEventListener("click", event =>
     {
-      if (scope.armed) 
+      if (this.armed)
       {
         // click outside menu ?
-        var element = event.srcElement;
-        while (element !== null && element !== scope.navElement)
+        let element = event.srcElement;
+        while (element !== null && element !== this.navElement)
         {
           element = element.parentElement;
         }
         if (element === null)
         {
           event.preventDefault();
-          scope.focusMenuItem(null);
+          this.focusMenuItem(null);
         }
       }
     }, true);
-    
-    window.addEventListener('resize', function()
-    {
-      scope.hideAllMenus();
-    }, false);
 
-    window.addEventListener('keyup', function(event)
+    window.addEventListener('resize', () => this.hideAllMenus(), false);
+
+    window.addEventListener('keyup', event =>
     {
-      if (scope.armed && event.keyCode === 27)
+      if (this.armed && event.keyCode === 27)
       {
-        scope.hideAllMenus();
+        this.hideAllMenus();
       }
     }, false);
   }
 
-  addMenu(label)
+  addMenu(label, index)
   {
-    const menu = new BIMROCKET.Menu(label);
-    menu.menuBar = this;
-    this.menus.push(menu);
-    this.listElement.appendChild(menu.itemElement);
+    const menu = new Menu(this, label);
+
+    const children = this.listElement.children;
+    if (typeof index === "number" && index < children.length)
+    {
+      if (index < 0) index = 0;
+      let oldElem = children[index];
+      this.listElement.insertBefore(menu.itemElement, oldElem);
+      this.menus.splice(index, 0, menu);
+    }
+    else
+    {
+      this.listElement.appendChild(menu.itemElement);
+      this.menus.push(menu);
+    }
     return menu;
   }
 
@@ -238,13 +248,13 @@ BIMROCKET.MenuBar = class
   {
     return document.body.clientWidth < 768;
   }
-  
+
   focusMenuItem(menuItem)
   {
     if (!this.isVertical())
     {
       let menu;
-      
+
       if (this.menuItem) // have previous menuItem
       {
         menu = this.menuItem.parentMenu;
@@ -253,12 +263,12 @@ BIMROCKET.MenuBar = class
           for (var i = 0; i < menu.menuItems.length; i++)
           {
             var sibling = menu.menuItems[i];
-            if (sibling instanceof BIMROCKET.Menu)
+            if (sibling instanceof Menu)
             {
               sibling.hide(); // hide sibling menu
             }
           }
-        
+
           do
           {
             menu.hide(); // hide parent menus
@@ -287,7 +297,7 @@ BIMROCKET.MenuBar = class
       this.armed = false;
     }
   }
-  
+
   hideAllMenus()
   {
     for (var i = 0; i < this.menus.length; i++)
@@ -296,7 +306,8 @@ BIMROCKET.MenuBar = class
       menu.hide(true);
     }
     this.menuItem = false;
-    this.armed = false;    
+    this.armed = false;
   }
-};
+}
 
+export { MenuBar, Menu, MenuItem };

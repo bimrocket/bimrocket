@@ -1,10 +1,14 @@
 /*
  * BSP.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.BSP = class
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import * as THREE from "../lib/three.module.js";
+
+class BSP
 {
   constructor()
   {
@@ -22,7 +26,7 @@ BIMROCKET.BSP = class
     {
       let face = faces[f];
       let vertexCount = face.getVertexCount();
-      let polygon = new BIMROCKET.Polygon();
+      let polygon = new Polygon();
       for (let n = 0; n < vertexCount; n++)
       {
         let vertex = face.getVertex(n).clone();
@@ -40,7 +44,7 @@ BIMROCKET.BSP = class
   toSolidGeometry()
   {
     let polygons = this.getPolygons();
-    let geometry = new BIMROCKET.SolidGeometry();
+    let geometry = new SolidGeometry();
     for (let i = 0; i < polygons.length; i++)
     {
       let polygon = polygons[i];
@@ -85,13 +89,13 @@ BIMROCKET.BSP = class
 
       if (result.frontPolygon)
       {
-        if (this.frontBSP === null) this.frontBSP = new BIMROCKET.BSP();
+        if (this.frontBSP === null) this.frontBSP = new BSP();
         this.frontBSP.addPolygon(result.frontPolygon);
       }
 
       if (result.backPolygon)
       {
-        if (this.backBSP === null) this.backBSP = new BIMROCKET.BSP();
+        if (this.backBSP === null) this.backBSP = new BSP();
         this.backBSP.addPolygon(result.backPolygon);
       }
       
@@ -366,8 +370,8 @@ BIMROCKET.BSP = class
     }
     else
     {
-      let frontPolygon = new BIMROCKET.Polygon();
-      let backPolygon = new BIMROCKET.Polygon();
+      let frontPolygon = new Polygon();
+      let backPolygon = new Polygon();
 
       for (let i = 0; i < polygon.vertices.length; i++)
       {
@@ -386,7 +390,7 @@ BIMROCKET.BSP = class
         }
         if (pi !== pj && pi + pj === 0)
         {
-          let vij = BIMROCKET.GeometryUtils.intersectLinePlane(vi, vj, plane);
+          let vij = GeometryUtils.intersectLinePlane(vi, vj, plane);
           frontPolygon.addVertex(vij);
           backPolygon.addVertex(vij);
         }
@@ -425,7 +429,7 @@ BIMROCKET.BSP = class
   }
 };
 
-BIMROCKET.Polygon = class
+class Polygon
 {
   constructor()
   {
@@ -440,7 +444,7 @@ BIMROCKET.Polygon = class
   
   updateNormal()
   {
-    this.normal = BIMROCKET.GeometryUtils.calculateNormal(this.vertices);
+    this.normal = GeometryUtils.calculateNormal(this.vertices);
   }
   
   flip()
@@ -449,5 +453,7 @@ BIMROCKET.Polygon = class
     this.vertices = this.vertices.reverse();
   }
 };
+
+export { BSP };
 
 

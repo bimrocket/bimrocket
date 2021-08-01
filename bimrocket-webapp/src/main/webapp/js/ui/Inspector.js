@@ -1,13 +1,25 @@
 /**
+ * Inspector.js
+ *
  * @author realor
  */
-BIMROCKET.Inspector = class extends BIMROCKET.Panel
-{  
+
+import { Panel } from "./Panel.js";
+import { Tree } from "./Tree.js";
+import { Dialog } from "./Dialog.js";
+import { Application } from "./Application.js";
+import { Expression } from "../utils/Expression.js";
+import { Solid } from "../solid/Solid.js";
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class Inspector extends Panel
+{
   constructor(application)
   {
     super(application);
     this.id = "inspector";
-    this.title = "Inspector";
     this.position = "right";
 
     this.object = null;
@@ -19,20 +31,20 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     this.controllersSectionName = "Controllers";
 
     this.renderers = [
-      new BIMROCKET.StringRenderer(this),
-      new BIMROCKET.NumberRenderer(this),
-      new BIMROCKET.BooleanRenderer(this),
-      new BIMROCKET.VectorRenderer(this),
-      new BIMROCKET.EulerRenderer(this),
-      new BIMROCKET.ExpressionRenderer(this),
-      new BIMROCKET.MaterialRenderer(this)];
+      new StringRenderer(this),
+      new NumberRenderer(this),
+      new BooleanRenderer(this),
+      new VectorRenderer(this),
+      new EulerRenderer(this),
+      new ExpressionRenderer(this),
+      new MaterialRenderer(this)];
     this.editors = [
-      new BIMROCKET.StringEditor(this),
-      new BIMROCKET.NumberEditor(this),
-      new BIMROCKET.BooleanEditor(this),
-      new BIMROCKET.VectorEditor(this),
-      new BIMROCKET.EulerEditor(this),
-      new BIMROCKET.ExpressionEditor(this)];
+      new StringEditor(this),
+      new NumberEditor(this),
+      new BooleanEditor(this),
+      new VectorEditor(this),
+      new EulerEditor(this),
+      new ExpressionEditor(this)];
     this.edition =
     {
       object : null,
@@ -42,17 +54,15 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       propElem : null
     };
 
-    const scope = this;
-
     application.addEventListener("selection", event =>
     {
       if (event.objects.length <= 1)
       {
-        scope.showProperties(event.objects[0]);
+        this.showProperties(event.objects[0]);
       }
       else
       {
-        scope.showSelectedObjects(event.objects);
+        this.showSelectedObjects(event.objects);
       }
     });
 
@@ -60,12 +70,13 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     {
       if (event.type === "nodeChanged" &&
         application.selection.size === 1 &&
-        event.objects.includes(application.selection.object) && 
+        event.objects.includes(application.selection.object) &&
         event.source !== this)
       {
-        scope.showProperties(application.selection.object);
+        this.showProperties(application.selection.object);
       }
     });
+    this.title = "tool.inspector.label";
   }
 
   showProperties(object)
@@ -74,7 +85,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     {
       this.stopEdition();
     }
-    
+
     this.object = object;
     this.bodyElem.innerHTML = "";
 
@@ -96,8 +107,8 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
         {
           if (this.isReadOnlyProperty(propertyName))
           {
-            this.createReadOnlyProperty(propertyName, object[propertyName], 
-              objListElem);            
+            this.createReadOnlyProperty(propertyName, object[propertyName],
+              objListElem);
           }
           else
           {
@@ -105,7 +116,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
           }
         }
       }
-      if (object instanceof BIMROCKET.Solid)
+      if (object instanceof Solid)
       {
         this.createWriteableProperty(object, "edgesVisible", objListElem);
         this.createWriteableProperty(object, "facesVisible", objListElem);
@@ -114,36 +125,36 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       var material = object.material;
       if (material)
       {
-        this.createReadOnlyProperty("material", material, objListElem);        
+        this.createReadOnlyProperty("material", material, objListElem);
       }
-      
+
       var geometry = object.geometry;
       if (geometry)
       {
         if (this.state[this.geometrySectionName] === undefined)
         {
           this.state[this.geometrySectionName] = "expanded";
-        }        
-        var geomListElem = this.createSection(this.geometrySectionName, 
+        }
+        var geomListElem = this.createSection(this.geometrySectionName,
           topListElem);
 
         this.createReadOnlyProperty("uuid", geometry.uuid, geomListElem);
         this.createReadOnlyProperty("type", geometry.type, geomListElem);
 
-        if (geometry instanceof BIMROCKET.SolidGeometry)
+        if (geometry instanceof SolidGeometry)
         {
-          this.createReadOnlyProperty("vertices", 
+          this.createReadOnlyProperty("vertices",
             geometry.vertices.length, geomListElem);
-          this.createReadOnlyProperty("faces", 
+          this.createReadOnlyProperty("faces",
             geometry.faces.length, geomListElem);
-          this.createReadOnlyProperty("isManifold", 
+          this.createReadOnlyProperty("isManifold",
             geometry.isManifold, geomListElem);
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {
           for (var name in geometry.attributes)
           {
-            this.createReadOnlyProperty(name, 
+            this.createReadOnlyProperty(name,
               geometry.attributes[name].array.length, geomListElem);
           }
         }
@@ -154,8 +165,8 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       {
         this.state[this.propertiesSectionName] = "expanded";
       }
-      
-      let propListElem = this.createSection(this.propertiesSectionName, 
+
+      let propListElem = this.createSection(this.propertiesSectionName,
         topListElem, [this.createAddPropertyAction(object, userData)]);
 
       for (let propertyName in userData)
@@ -169,27 +180,27 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
           {
             this.state[dictName] = "expanded";
           }
-          
+
           let dictListElem = this.createSection(dictName, propListElem,
             [this.createAddPropertyAction(object, dictionary)]);
           for (let dictPropertyName in dictionary)
           {
-            this.createWriteableProperty(dictionary, 
+            this.createWriteableProperty(dictionary,
               dictPropertyName, dictListElem);
           }
         }
         else
         {
-          this.createWriteableProperty(userData, propertyName, propListElem);          
+          this.createWriteableProperty(userData, propertyName, propListElem);
         }
       }
-      
+
       let controllers = object.controllers;
       if (this.state[this.controllersSectionName] === undefined)
       {
         this.state[this.controllersSectionName] = "expanded";
       }
-      let controllersListElem = 
+      let controllersListElem =
         this.createSection(this.controllersSectionName, topListElem);
       if (controllers)
       {
@@ -197,7 +208,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
         {
           let controller = controllers[i];
           let name = controller.constructor.type;
-          if (controller.name) name += ":" + controller.name;          
+          if (controller.name) name += ":" + controller.name;
           if (this.state[name] === undefined)
           {
             this.state[name] = 'expanded';
@@ -205,13 +216,13 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
           let controlListElem = this.createSection(name, controllersListElem,
             [this.createRemoveControllerAction(controller)]);
           this.createWriteableProperty(controller, "name", controlListElem);
-          
+
           for (let propertyName in controller)
           {
             let property = controller[propertyName];
-            if (property instanceof BIMROCKET.Expression)
+            if (property instanceof Expression)
             {
-              this.createProperty(property.label, property, controller, 
+              this.createProperty(property.label, property, controller,
                 propertyName, controlListElem);
             }
           }
@@ -219,10 +230,10 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       }
     }
   }
-  
+
   getObjectClass(object)
   {
-    if (object.type === "Object3D" && 
+    if (object.type === "Object3D" &&
        object.userData.IFC && object.userData.IFC.ifcClassName)
     {
       return object.userData.IFC.ifcClassName;
@@ -230,36 +241,34 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     else
     {
       return object.type;
-    }    
+    }
   }
 
   showSelectedObjects(objects)
   {
     this.bodyElem.innerHTML = "";
-    
-    var infoElem = document.createElement("div");
+
+    const infoElem = document.createElement("div");
     infoElem.className = "inspector_info";
-    infoElem.innerHTML = objects.length + " " + 
-      I18N.get("inspector.objects_selected") + ":";
+    I18N.set(infoElem, "innerHTML", "message.objects_selected", objects.length);
+    this.application.i18n.update(infoElem);
     this.bodyElem.appendChild(infoElem);
-    
-    const selectionTree = new BIMROCKET.Tree(this.bodyElem);
+
+    const selectionTree = new Tree(this.bodyElem);
 
     for (let i = 0; i < objects.length; i++)
     {
       let object = objects[i];
       let label = object.name || object.id;
       let className = this.getObjectClass(object);
-      selectionTree.addNode(label, 
+      selectionTree.addNode(label,
         event => this.application.selectObjects(event, [object]), className);
     }
   }
 
   createSection(name, parentElem, actions = null)
   {
-    let scope = this;
-    
-    let labelListener = function(event)
+    let labelListener = event =>
     {
       let labelElem = event.srcElement || event.target;
       labelElem.className = (labelElem.className === 'expand') ?
@@ -268,9 +277,9 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       listElem.className = (listElem.className === 'expanded') ?
         'collapsed' : 'expanded';
       let sectionName = labelElem.id.substring(8);
-      scope.state[sectionName] = listElem.className;
+      this.state[sectionName] = listElem.className;
     };
-    
+
     let sectionElem = document.createElement("li");
     sectionElem.className = 'section';
     parentElem.appendChild(sectionElem);
@@ -294,10 +303,10 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
         actionElem.title = action.label;
         actionElem.setAttribute("role", "button");
         actionElem.addEventListener("click", action.listener);
-        sectionElem.appendChild(actionElem); 
+        sectionElem.appendChild(actionElem);
       }
     }
-    
+
     let listElem = document.createElement("ul");
     listElem.className = this.state[name];
     sectionElem.appendChild(listElem);
@@ -307,12 +316,12 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
 
   createReadOnlyProperty(propertyLabel, propertyValue, parentElem)
   {
-    this.createProperty(propertyLabel, propertyValue, null, null, parentElem);  
+    this.createProperty(propertyLabel, propertyValue, null, null, parentElem);
   }
 
   createWriteableProperty(object, propertyName, parentElem)
   {
-    this.createProperty(null, null, object, propertyName, parentElem);  
+    this.createProperty(null, null, object, propertyName, parentElem);
   };
 
   createProperty(propertyLabel, propertyValue, object, propertyName, parentElem)
@@ -341,45 +350,46 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
 
       this.createValueElem(propertyValue, renderer, editor,
         object, propertyName, propElem);
-    
+
       if (editor)
       {
-        labelElem.addEventListener("click", event => 
+        labelElem.addEventListener("click", event =>
           this.startEdition(object, propertyName, renderer, editor, propElem),
-          false);    
+          false);
         propElem.className += " editable";
-      }    
+      }
     }
   }
 
-  createValueElem(propertyValue, renderer, editor, object, 
+  createValueElem(propertyValue, renderer, editor, object,
     propertyName, propElem)
   {
-    let scope = this;
     let valueElem = renderer.render(propertyValue, propElem);
     if (editor)
     {
-      valueElem.addEventListener("click", () => 
+      valueElem.addEventListener("click", () =>
         this.startEdition(object, propertyName, renderer, editor, propElem),
         false);
     }
   }
-    
+
   createAddPropertyAction(object, dictionary)
   {
-    const scope = this;
-    
-    const listener = function()
-    {
-      let dialog = new BIMROCKET.Dialog("Object properties", 240, 210);
-      let nameElem = dialog.addTextField("propertyName", "Property name:", 
-        "");
-      let typeElem = dialog.addSelectField("propertyType", "Property type:", 
-        ["string", "number", "boolean", "object"]);
-      let valueElem = dialog.addTextField("propertyValue", "Value:", 
-        "");
+    const application = this.application;
 
-      dialog.addButton("accept", "Accept", () => 
+    const listener = () =>
+    {
+      const dialog = new Dialog("title.object_properties");
+      dialog.setSize(240, 210);
+      dialog.setI18N(application.i18n);
+      let nameElem = dialog.addTextField("propertyName",
+        "label.property_name", "");
+      let typeElem = dialog.addSelectField("propertyType",
+        "label.property_type", ["string", "number", "boolean", "object"]);
+      let valueElem = dialog.addTextField("propertyValue",
+       "label.property_value", "");
+
+      dialog.addButton("accept", "button.accept", () =>
       {
         dialog.hide();
         let propertyName = nameElem.value;
@@ -400,25 +410,23 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
             dictionary[propertyName] = {};
             break;
         }
-        scope.showProperties(object);
+        this.showProperties(object);
       });
-      dialog.addButton("cancel", "Cancel", () => dialog.hide());
+      dialog.addButton("cancel", "button.cancel", () => dialog.hide());
       dialog.show();
       nameElem.focus();
-    }; 
-    
+    };
+
     return {
-      className: "add_button", 
-      label: "Add property", 
+      className: "add_button",
+      label: "Add property",
       listener : listener
     };
   }
 
   createRemoveControllerAction(controller)
   {
-    const scope = this;
-    
-    const listener = function()
+    const listener = () =>
     {
       controller.stop();
       let object = controller.object;
@@ -426,13 +434,13 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       if (index !== -1)
       {
         object.controllers.splice(index, 1);
-        scope.showProperties(object);
+        this.showProperties(object);
       }
     };
-    
+
     return {
-      className: "remove_button", 
-      label: "Remove controller", 
+      className: "remove_button",
+      label: "Remove controller",
       listener : listener
     };
   }
@@ -462,7 +470,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     let object = this.edition.object;
     let propertyName = this.edition.propertyName;
     let oldValue = object[propertyName];
-    
+
     if (oldValue !== null && typeof oldValue === "object")
     {
       if (typeof oldValue.copy === "function")
@@ -475,7 +483,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
       }
       else
       {
-        object[propertyName] = value;     
+        object[propertyName] = value;
       }
     }
     else
@@ -484,7 +492,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
     }
     this.stopEdition();
 
-    let changeEvent = {type: "nodeChanged", objects: [this.object], 
+    let changeEvent = {type: "nodeChanged", objects: [this.object],
       source : this};
     this.application.notifyEventListeners("scene", changeEvent);
   }
@@ -556,7 +564,7 @@ BIMROCKET.Inspector = class extends BIMROCKET.Panel
 
 /* PropertyRenderers */
 
-BIMROCKET.PropertyRenderer = class
+class PropertyRenderer
 {
   constructor(inspector)
   {
@@ -577,9 +585,9 @@ BIMROCKET.PropertyRenderer = class
   {
     return null;
   }
-};
+}
 
-BIMROCKET.StringRenderer = class extends BIMROCKET.PropertyRenderer
+class StringRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -604,9 +612,9 @@ BIMROCKET.StringRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
-BIMROCKET.NumberRenderer = class extends BIMROCKET.PropertyRenderer
+class NumberRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -631,9 +639,9 @@ BIMROCKET.NumberRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
-BIMROCKET.BooleanRenderer = class extends BIMROCKET.PropertyRenderer
+class BooleanRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -658,13 +666,13 @@ BIMROCKET.BooleanRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
-BIMROCKET.VectorRenderer = class extends BIMROCKET.PropertyRenderer
+class VectorRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
-    super(inspector);  
+    super(inspector);
   }
 
   isSupported(value)
@@ -681,10 +689,10 @@ BIMROCKET.VectorRenderer = class extends BIMROCKET.PropertyRenderer
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-    let round = function(value) 
-    { 
+    let round = function(value)
+    {
       var precision = 1000;
-      return Math.round(precision * value) / precision; 
+      return Math.round(precision * value) / precision;
     };
     let out = '(' + round(vector.x) + ', ' +
       round(vector.y) + ', ' +
@@ -693,9 +701,9 @@ BIMROCKET.VectorRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
-BIMROCKET.EulerRenderer = class extends BIMROCKET.PropertyRenderer
+class EulerRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -716,11 +724,11 @@ BIMROCKET.EulerRenderer = class extends BIMROCKET.PropertyRenderer
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-    let angle = function(value) 
-    { 
+    let angle = function(value)
+    {
       var precision = 1000;
-      return Math.round(precision * 
-        THREE.MathUtils.radToDeg(value)) / precision; 
+      return Math.round(precision *
+        THREE.MathUtils.radToDeg(value)) / precision;
     };
     let out = '(' + angle(euler.x) + 'º, ' +
       angle(euler.y) + 'º, ' +
@@ -729,9 +737,9 @@ BIMROCKET.EulerRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
-BIMROCKET.ExpressionRenderer = class extends BIMROCKET.PropertyRenderer
+class ExpressionRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -740,7 +748,7 @@ BIMROCKET.ExpressionRenderer = class extends BIMROCKET.PropertyRenderer
 
   isSupported(value)
   {
-    return value instanceof BIMROCKET.Expression;
+    return value instanceof Expression;
   }
 
   getClassName(property)
@@ -765,7 +773,7 @@ BIMROCKET.ExpressionRenderer = class extends BIMROCKET.PropertyRenderer
   }
 };
 
-BIMROCKET.MaterialRenderer = class extends BIMROCKET.PropertyRenderer
+class MaterialRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -798,7 +806,7 @@ BIMROCKET.MaterialRenderer = class extends BIMROCKET.PropertyRenderer
       let colorElem = document.createElement("span");
       colorElem.className = "color";
       let color = material.color;
-      let rgb = "rgb(" + Math.round(255 * color.r) + 
+      let rgb = "rgb(" + Math.round(255 * color.r) +
         "," + Math.round(255 * color.g) + "," + Math.round(255 * color.b) + ")";
       colorElem.style.backgroundColor = rgb;
       colorElem.alt = rgb;
@@ -808,11 +816,11 @@ BIMROCKET.MaterialRenderer = class extends BIMROCKET.PropertyRenderer
     propElem.appendChild(valueElem);
     return valueElem;
   }
-};
+}
 
 /* PropertyEditors */
 
-BIMROCKET.PropertyEditor = class
+class PropertyEditor
 {
   constructor(inspector)
   {
@@ -828,9 +836,9 @@ BIMROCKET.PropertyEditor = class
   {
     return null;
   }
-};
+}
 
-BIMROCKET.StringEditor = class extends BIMROCKET.PropertyEditor
+class StringEditor extends PropertyEditor
 {
   constructor(inspector)
   {
@@ -847,27 +855,26 @@ BIMROCKET.StringEditor = class extends BIMROCKET.PropertyEditor
     let valueElem = document.createElement("input");
     valueElem.className = "value";
     valueElem.value = text;
-    let scope = this;
-    valueElem.addEventListener("keyup", function(event)
+    valueElem.addEventListener("keyup", event =>
     {
       if (event.keyCode === 13)
       {
-        scope.inspector.endEdition(valueElem.value);
+        this.inspector.endEdition(valueElem.value);
       }
       else if (event.keyCode === 27)
       {
-        scope.inspector.stopEdition();
+        this.inspector.stopEdition();
       }
     }, false);
     propElem.appendChild(valueElem);
     valueElem.focus();
     return valueElem;
   }
-};
+}
 
-BIMROCKET.NumberEditor = class extends BIMROCKET.PropertyEditor
+class NumberEditor extends PropertyEditor
 {
-  constructor(inspector)  
+  constructor(inspector)
   {
     super(inspector);
   }
@@ -883,29 +890,28 @@ BIMROCKET.NumberEditor = class extends BIMROCKET.PropertyEditor
     valueElem.className = "value";
     valueElem.value = "" + number;
     valueElem.type = "number";
-    let scope = this;
-    valueElem.addEventListener("keyup", function(event)
+    valueElem.addEventListener("keyup", event =>
     {
       if (event.keyCode === 13)
       {
         number = parseFloat(valueElem.value);
         if (!isNaN(number))
         {
-          scope.inspector.endEdition(number);
+          this.inspector.endEdition(number);
         }
       }
       else if (event.keyCode === 27)
       {
-        scope.inspector.stopEdition();
+        this.inspector.stopEdition();
       }
     }, false);
     propElem.appendChild(valueElem);
     valueElem.focus();
     return valueElem;
   }
-};
+}
 
-BIMROCKET.BooleanEditor = class extends BIMROCKET.PropertyEditor
+class BooleanEditor extends PropertyEditor
 {
   constructor(inspector)
   {
@@ -925,13 +931,13 @@ BIMROCKET.BooleanEditor = class extends BIMROCKET.PropertyEditor
     let checked = value;
     this.inspector.endEdition(!checked);
   }
-};
+}
 
-BIMROCKET.DimensionEditor = class extends BIMROCKET.PropertyEditor
+class DimensionEditor extends PropertyEditor
 {
   constructor(inspector)
   {
-    super(inspector);  
+    super(inspector);
   }
 
   formatValue(value)
@@ -947,9 +953,8 @@ BIMROCKET.DimensionEditor = class extends BIMROCKET.PropertyEditor
   edit(vector, propElem)
   {
     let dimId = "dim_edit_";
-    let scope = this;
-        
-    let parseDimension = function(dim)
+
+    const parseDimension = dim =>
     {
       let valueElem = document.getElementById(dimId + dim);
       let value = valueElem.value;
@@ -957,15 +962,15 @@ BIMROCKET.DimensionEditor = class extends BIMROCKET.PropertyEditor
       return isNaN(num) ? vector[dim] : num;
     };
 
-    var endEdition = function()
+    const endEdition = () =>
     {
       let x = parseDimension("x");
       let y = parseDimension("y");
       let z = parseDimension("z");
-      scope.inspector.endEdition(scope.createInstance(x, y, z));
+      this.inspector.endEdition(this.createInstance(x, y, z));
     };
 
-    var keyListener = function(event)
+    const keyListener = event =>
     {
       if (event.keyCode === 13)
       {
@@ -973,29 +978,29 @@ BIMROCKET.DimensionEditor = class extends BIMROCKET.PropertyEditor
       }
       else if (event.keyCode === 27)
       {
-        scope.inspector.stopEdition();
-      }      
+        this.inspector.stopEdition();
+      }
     };
 
-    var createDimensionEditor = function(vector, dim)
+    const createDimensionEditor = (vector, dim) =>
     {
       let itemElem = document.createElement("li");
-      
+
       let labelElem = document.createElement("label");
       labelElem.innerHTML = dim + ":";
       labelElem.htmlFor = dimId + dim;
-      
+
       let valueElem = document.createElement("input");
       valueElem.id = dimId + dim;
       valueElem.type = "number";
       valueElem.className = "value";
-      valueElem.value = scope.formatValue(vector[dim]);
-      
+      valueElem.value = this.formatValue(vector[dim]);
+
       valueElem.addEventListener("keyup", keyListener, false);
-      
+
       itemElem.appendChild(labelElem);
       itemElem.appendChild(valueElem);
-      
+
       return itemElem;
     };
 
@@ -1005,76 +1010,76 @@ BIMROCKET.DimensionEditor = class extends BIMROCKET.PropertyEditor
     listElem.appendChild(createDimensionEditor(vector, "y"));
     listElem.appendChild(createDimensionEditor(vector, "z"));
     propElem.appendChild(listElem);
-    
+
     document.getElementById(dimId + "x").focus();
-    
+
     return listElem;
   }
-};
+}
 
-BIMROCKET.VectorEditor = class extends BIMROCKET.DimensionEditor
-{
-  constructor(inspector)
-  {
-    super(inspector);  
-  }
-  
-  isSupported(value)
-  {
-    return value instanceof THREE.Vector3;
-  }
-  
-  createInstance(x, y, z)
-  {
-    return new THREE.Vector3(x, y, z);
-  }
-};
-
-BIMROCKET.EulerEditor = class extends BIMROCKET.DimensionEditor
-{
-  constructor(inspector)
-  {
-    super(inspector);  
-  }
-  
-  isSupported(value)
-  {
-    return value instanceof THREE.Euler;
-  }
-  
-  formatValue(value)
-  {
-    const precision = 10000000;
-    return Math.round(precision * THREE.MathUtils.radToDeg(value)) / precision;
-  }
-  
-  createInstance(x, y, z)
-  {
-    let xrad = THREE.MathUtils.degToRad(x);
-    let yrad = THREE.MathUtils.degToRad(y);
-    let zrad = THREE.MathUtils.degToRad(z);
-    
-    return new THREE.Euler(xrad, yrad, zrad, "XYZ");
-  }
-};
-
-BIMROCKET.ExpressionEditor = class extends BIMROCKET.PropertyEditor
+class VectorEditor extends DimensionEditor
 {
   constructor(inspector)
   {
     super(inspector);
   }
-  
+
   isSupported(value)
   {
-    return value instanceof BIMROCKET.Expression;
+    return value instanceof THREE.Vector3;
   }
-  
+
+  createInstance(x, y, z)
+  {
+    return new THREE.Vector3(x, y, z);
+  }
+}
+
+class EulerEditor extends DimensionEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Euler;
+  }
+
+  formatValue(value)
+  {
+    const precision = 10000000;
+    return Math.round(precision * THREE.MathUtils.radToDeg(value)) / precision;
+  }
+
+  createInstance(x, y, z)
+  {
+    let xrad = THREE.MathUtils.degToRad(x);
+    let yrad = THREE.MathUtils.degToRad(y);
+    let zrad = THREE.MathUtils.degToRad(z);
+
+    return new THREE.Euler(xrad, yrad, zrad, "XYZ");
+  }
+}
+
+class ExpressionEditor extends PropertyEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof Expression;
+  }
+
   edit(property, propElem) // returns elem
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
-    
+
     if (property.definition)
     {
       valueElem.value = "${" + property.definition + "}";
@@ -1083,8 +1088,7 @@ BIMROCKET.ExpressionEditor = class extends BIMROCKET.PropertyEditor
     {
       valueElem.value = property.value;
     }
-    let scope = this;
-    valueElem.addEventListener("keyup", function(event)
+    valueElem.addEventListener("keyup", event =>
     {
       if (event.keyCode === 13)
       {
@@ -1092,7 +1096,7 @@ BIMROCKET.ExpressionEditor = class extends BIMROCKET.PropertyEditor
         if (expr.match(/\${.*}/))
         {
           property.definition = expr.substring(2, expr.length - 1);
-          scope.inspector.endEdition(property);
+          this.inspector.endEdition(property);
         }
         else
         {
@@ -1102,11 +1106,13 @@ BIMROCKET.ExpressionEditor = class extends BIMROCKET.PropertyEditor
       }
       else if (event.keyCode === 27)
       {
-        scope.inspector.stopEdition();
+        this.inspector.stopEdition();
       }
     }, false);
     propElem.appendChild(valueElem);
     valueElem.focus();
     return valueElem;
   }
-};
+}
+
+export { Inspector };

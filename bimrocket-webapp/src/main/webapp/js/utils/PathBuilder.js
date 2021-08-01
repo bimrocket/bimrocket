@@ -1,4 +1,12 @@
-BIMROCKET.PathBuilder = class
+/**
+ * PathBuilder.js
+ * 
+ * @author realor
+ */
+
+import * as THREE from "../lib/three.module.js";
+
+class PathBuilder
 {
   static vector = new THREE.Vector3();
   static path = null;
@@ -66,5 +74,7 @@ BIMROCKET.PathBuilder = class
     }
     this.close();
   }
-};
+}
+
+export { PathBuilder };
 

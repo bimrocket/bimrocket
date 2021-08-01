@@ -1,10 +1,12 @@
 /*
  * Controller.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.Controller = class
+import { Expression } from "../utils/Expression.js";
+
+class Controller
 {
   static type = "Controller";
   static description = "Abstract controller.";
@@ -55,7 +57,9 @@ BIMROCKET.Controller = class
   
   createProperty(type, label, value, definition)
   {
-    return new BIMROCKET.Expression(this.application, this.object, 
+    return new Expression(this.application, this.object, 
       type, label, value, definition);
   }
-};
+}
+
+export { Controller };

@@ -1,13 +1,15 @@
 /*
  * NewSceneTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.NewSceneTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class NewSceneTool extends Tool
 {
   constructor(application, options)
-  {    
+  {
     super(application);
     this.name = "new_scene";
     this.label = "tool.new_scene.label";
@@ -19,9 +21,12 @@ BIMROCKET.NewSceneTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    var application = this.application;
+    const application = this.application;
 
     application.initScene();
-    application.useTool("cloud_explorer");
+    application.useTool(null);
   }
-};
+}
+
+export { NewSceneTool };
+

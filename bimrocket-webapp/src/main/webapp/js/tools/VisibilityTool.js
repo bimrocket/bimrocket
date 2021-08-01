@@ -1,10 +1,12 @@
 /*
  * VisibilityTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.VisibilityTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class VisibilityTool extends Tool
 {
   constructor(application, options)
   {
@@ -23,4 +25,6 @@ BIMROCKET.VisibilityTool = class extends BIMROCKET.Tool
   {
     this.application.updateVisibility(null, this.visible);
   }
-};
+}
+
+export { VisibilityTool };

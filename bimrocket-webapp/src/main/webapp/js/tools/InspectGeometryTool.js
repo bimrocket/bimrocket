@@ -1,10 +1,15 @@
 /*
  * InspectGeometryTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.InspectGeometryTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import { Dialog } from "../ui/Dialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+
+class InspectGeometryTool extends Tool
 {
   constructor(application, options)
   {
@@ -18,9 +23,9 @@ BIMROCKET.InspectGeometryTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    let application = this.application;
+    const application = this.application;
     let object = application.selection.object;
-    if (object instanceof BIMROCKET.Solid)
+    if (object instanceof Solid)
     {
       if (object.geometry)
       {
@@ -32,27 +37,32 @@ BIMROCKET.InspectGeometryTool = class extends BIMROCKET.Tool
           let face = faces[f];
           let indices = face.indices;
           data.push("face " + f);
-          data.push("normal " + 
+          data.push("normal " +
             face.normal.x + ", " + face.normal.y + ", " + face.normal.z);
           for (let n = 0; n < face.indices.length; n++)
           {
             let index = indices[n];
             let vertex = vertices[index];
-            data.push("vertex " + n + " (" + index + ") = " + 
+            data.push("vertex " + n + " (" + index + ") = " +
               vertex.x + ", " + vertex.y + " " + vertex.z);
           }
         }
-        let dialog = new BIMROCKET.Dialog("Geometry inspector", 600, 500);
-        dialog.addCode(data.join("\n"));
-        dialog.addButton("accept", "Accept", function() { dialog.hide(); });
+        const dialog = new Dialog(this.label);
+        dialog.setSize(600, 500);
+        dialog.setI18N(application.i18n);
+        let json = data.join("\n");
+        dialog.addCode(json);
+        dialog.addButton("accept", "button.accept", () => dialog.hide());
         dialog.show();
       }
     }
     else
     {
-      let dialog = new BIMROCKET.MessageDialog("Geometry inspector", 
-        "No object selected.");
-      dialog.show();
+      MessageDialog.create(this.label, "message.no_solid_selected")
+        .setClassName("info")
+        .setI18N(application.i18n).show();
     }
   }
-};
+}
+
+export { InspectGeometryTool };

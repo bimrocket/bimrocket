@@ -1,10 +1,12 @@
 /* 
  * CloneTool.js
  * 
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.CloneTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class CloneTool extends Tool
 {
   constructor(application, options)
   {    
@@ -27,4 +29,7 @@ BIMROCKET.CloneTool = class extends BIMROCKET.Tool
       clone = application.cloneObject(objects[i]);
     }    
   }
-};
+}
+
+export { CloneTool };
+

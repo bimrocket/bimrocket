@@ -1,10 +1,14 @@
-/* 
+/*
  * AutoOrbitTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class AutoOrbitTool extends Tool
 {
   constructor(application, options)
   {
@@ -35,7 +39,7 @@ BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
 
   activate()
   {
-    var application = this.application;
+    const application = this.application;
     var camera = application.camera;
     var container = applicatoion.container;
     camera.aspect = container.clientWidth / container.clientHeight;
@@ -57,23 +61,23 @@ BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
 
     application.addEventListener('animation', this._animate);
   }
-  
+
   deactivate()
   {
-    var application = this.application;  
-    application.removeEventListener('animation', this._animate);  
+    const application = this.application;
+    application.removeEventListener('animation', this._animate);
   }
 
   animate(event)
   {
-    var application = this.application;
+    const application = this.application;
     var camera = application.camera;
 
-    var delta = event.delta;  
+    var delta = event.delta;
     this.time += delta;
-  
+
     this.theta += delta * 0.2;
-    this.phi = -0.15 + 0.5 * Math.PI + 0.3 * 
+    this.phi = -0.15 + 0.5 * Math.PI + 0.3 *
       Math.sin(0.05 * Math.cos(0.01 * this.time) * this.time);
 
     // restrict radius
@@ -81,7 +85,7 @@ BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
     else if (this.radius > this.maxDistance) this.radius = this.maxDistance;
 
     // restrict phi to be between desired limits
-    this.phi = Math.max(this.minPolarAngle, 
+    this.phi = Math.max(this.minPolarAngle,
       Math.min(this.maxPolarAngle, this.phi));
 
     this.vector.x = Math.sin(this.phi) * Math.sin(this.theta);
@@ -94,11 +98,13 @@ BIMROCKET.AutoOrbitTool = class extends BIMROCKET.Tool
     this.vector.setLength(this.radius);
     this.position.add(this.vector);
     camera.position.copy(this.position);
-    camera.updateMatrix(); 
+    camera.updateMatrix();
     camera.lookAt(this.center);
-    camera.updateMatrix(); 
+    camera.updateMatrix();
 
     const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
   }
-};
+}
+
+export { AutoOrbitTool };

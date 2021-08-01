@@ -1,14 +1,18 @@
 /*
  * ProximityController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ProximityController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import * as THREE from "../lib/three.module.js";
+
+class ProximityController extends Controller
 {
   static type = "ProximityController";
   static description = "Detects proximity to objects.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
@@ -19,12 +23,12 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
     this._vector1 = new THREE.Vector3();
-    this._vector2 = new THREE.Vector3();    
+    this._vector2 = new THREE.Vector3();
   }
 
   onStart()
   {
-    var application = this.application;  
+    const application = this.application;
     this._objects = application.scene.getObjectByName(this.objects.value);
     console.info("OBJECTS:" + this._objects);
     application.addEventListener("scene", this._onNodeChanged);
@@ -32,7 +36,7 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
 
   onStop()
   {
-    var application = this.application;
+    const application = this.application;
     application.removeEventListener("scene", this._onNodeChanged);
   }
 
@@ -67,7 +71,7 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
       else // camera
       {
         var camera = this.application.camera;
-        if (event.objects.includes(camera) || 
+        if (event.objects.includes(camera) ||
             event.objects.includes(this.object))
         {
           let range = parseFloat(this.distance.value || 1);
@@ -77,7 +81,7 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
           {
             this.output.value = newValue;
           }
-        }      
+        }
       }
     }
   }
@@ -94,6 +98,8 @@ BIMROCKET.ProximityController = class extends BIMROCKET.Controller
 
     return distance < range;
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.ProximityController);
+ControllerManager.addClass(ProximityController);
+
+export { ProximityController };

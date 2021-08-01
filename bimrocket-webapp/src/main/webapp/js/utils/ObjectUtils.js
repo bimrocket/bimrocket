@@ -1,10 +1,14 @@
-/*
+/**
  * ObjectUtils.js
  *
  * @author: realor
  */
 
-BIMROCKET.ObjectUtils = class
+import * as THREE from "../lib/three.module.js";
+import { Solid } from "../solid/Solid.js";
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+
+class ObjectUtils
 {
   static dispose(root, geometries = true, materials = true)
   {
@@ -44,7 +48,7 @@ BIMROCKET.ObjectUtils = class
       object.visible = visible;
       set.add(object);
 
-      if (!(object instanceof BIMROCKET.Solid))
+      if (!(object instanceof Solid))
       {
         const children = object.children;
         for (let i = 0; i < children.length; i++)
@@ -81,7 +85,7 @@ BIMROCKET.ObjectUtils = class
     
     function traverse(object)
     {
-      if (object instanceof BIMROCKET.Solid)
+      if (object instanceof Solid)
       {
         object.edgesVisible = edgesVisible;
         object.facesVisible = facesVisible;
@@ -111,7 +115,7 @@ BIMROCKET.ObjectUtils = class
       objects = [objects];
     }
     
-    let box = BIMROCKET.ObjectUtils.getBoundingBoxFromView(
+    let box = ObjectUtils.getBoundingBoxFromView(
       objects, camera.matrixWorld, invisible); // box in camera CS
     
     if (box.isEmpty()) return;
@@ -204,7 +208,7 @@ BIMROCKET.ObjectUtils = class
              object instanceof THREE.Points))
         {
           var geometry = object.geometry;
-          if (geometry instanceof BIMROCKET.SolidGeometry)
+          if (geometry instanceof SolidGeometry)
           {
             let vertices = geometry.vertices;
             for (let j = 0; j < vertices.length; j++)
@@ -376,4 +380,6 @@ BIMROCKET.ObjectUtils = class
     }    
     return object === parent;
   }
-};
+}
+
+export { ObjectUtils };

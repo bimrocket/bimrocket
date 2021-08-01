@@ -1,10 +1,14 @@
 /*
  * MakeSolidTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.MakeSolidTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import * as THREE from "../lib/three.module.js";
+
+class MakeSolidTool extends Tool
 {
   constructor(application, options)
   {
@@ -19,23 +23,26 @@ BIMROCKET.MakeSolidTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    var application = this.application;
-    var object = application.selection.object;
+    const application = this.application;
+    const object = application.selection.object;
     if (object instanceof THREE.Mesh)
     {
-      var solid = new BIMROCKET.Solid(object.geometry);
+      let solid = new Solid(object.geometry);
       object.matrix.decompose(solid.position, solid.rotation, solid.scale);
       solid.updateMatrix();
-      var parent = object.parent;      
+      let parent = object.parent;
       application.removeObject(object);
       application.addObject(solid, parent, false);
       application.selection.set(solid);
     }
-    else if (object instanceof BIMROCKET.Solid)
+    else if (object instanceof Solid)
     {
       application.selection.clear();
-      object.updateGeometry(object.geometry, true, true, true, true);      
+      object.updateGeometry(object.geometry, true, true, true, true);
       application.selection.set(object);
     }
   }
-};
+}
+
+export { MakeSolidTool };
+

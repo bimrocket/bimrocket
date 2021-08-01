@@ -1,10 +1,12 @@
-/* 
+/*
  * ScaleTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
 
-BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
+class ScaleTool extends Tool
 {
   constructor(application, options)
   {
@@ -23,24 +25,23 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
     this._onMouseUp = this.onMouseUp.bind(this);
     this._onMouseDown = this.onMouseDown.bind(this);
     this._onMouseMove = this.onMouseMove.bind(this);
-    
+    this._onContextMenu = this.onContextMenu.bind(this);
+
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
-
-    this.panel.bodyElem.innerHTML = I18N.get(this.help);  
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
   {
     this.panel.visible = true;
-    const container = this.application.container;  
-    container.addEventListener('contextmenu', this.onContextMenu, false);
+    const container = this.application.container;
+    container.addEventListener('contextmenu', this._onContextMenu, false);
     container.addEventListener('mousedown', this._onMouseDown, false);
   }
 
@@ -48,16 +49,16 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('contextmenu', this.onContextMenu, false);
+    container.removeEventListener('contextmenu', this._onContextMenu, false);
     container.removeEventListener('mousedown', this._onMouseDown, false);
   }
 
   onMouseDown(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     const application = this.application;
-    
+
     event.preventDefault();
     const mousePosition = this.getMousePosition(event);
 
@@ -73,19 +74,19 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
 
   onMouseMove(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     event.preventDefault();
     const mousePosition = this.getMousePosition(event);
 
     this.scaleEnd = mousePosition.x;
     let delta = this.scaleEnd - this.scaleStart;
     let factor = 1 + delta * 0.01;
-    
+
     for (let i = 0; i < this.objects.length; i++)
     {
       let object = this.objects[i];
-    
+
       object.scale.x *= factor;
       object.scale.y *= factor;
       object.scale.z *= factor;
@@ -93,15 +94,15 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
     }
     this.scaleStart = this.scaleEnd;
 
-    const changeEvent = {type: "nodeChanged", 
+    const changeEvent = {type: "nodeChanged",
       objects: this.objects, source : this};
-    this.application.notifyEventListeners("scene", changeEvent);  
+    this.application.notifyEventListeners("scene", changeEvent);
   }
 
-  onMouseUp(event) 
+  onMouseUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
-    
+
     this.object = null;
 
     var container = this.application.container;
@@ -111,8 +112,10 @@ BIMROCKET.ScaleTool = class extends BIMROCKET.Tool
 
   onContextMenu(event)
   {
-    if (!this.isCanvasEvent(event)) return;    
-    
+    if (!this.isCanvasEvent(event)) return;
+
     event.preventDefault();
   }
-};
+}
+
+export { ScaleTool };

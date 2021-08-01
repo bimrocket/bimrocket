@@ -1,15 +1,19 @@
 /*
  * LoadController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.LoadController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { ColladaLoader } from "../io/ColladaLoader.js";
+
+class LoadController extends Controller
 {
   static type = "LoadController";
   static description = "Loads a model into scene.";
-  
-  constructor(application, object, name) 
+
+  constructor(application, object, name)
   {
     super(application, object, name);
 
@@ -18,10 +22,10 @@ BIMROCKET.LoadController = class extends BIMROCKET.Controller
     this.offsetY = this.createProperty("number", "Offset y expression");
     this.offsetZ = this.createProperty("number", "Offset z expression");
     this.rotationZ = this.createProperty("number", "Rotation in z-axis expression");
-  
+
     this._onLoad = this.onLoad.bind(this);
     this._onProgress = this.onProgress.bind(this);
-    this._onError = this.onError.bind(this);    
+    this._onError = this.onError.bind(this);
   }
 
   onStart()
@@ -49,12 +53,17 @@ BIMROCKET.LoadController = class extends BIMROCKET.Controller
 
   loadModel()
   {
-    var url = this.url.value;
-    var loader = new BIMROCKET.Collada.Loader(); 
+    const url = this.url.value;
+    if (url)
+    {
+      const loader = new ColladaLoader();
 
-    console.info("Loading model from " + url);
-    loader.load(url, this._onLoad, this._onProgress, this._onError);
+      console.info("Loading model from " + url);
+      loader.load(url, this._onLoad, this._onProgress, this._onError);
+    }
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.LoadController);
+ControllerManager.addClass(LoadController);
+
+export { LoadController };

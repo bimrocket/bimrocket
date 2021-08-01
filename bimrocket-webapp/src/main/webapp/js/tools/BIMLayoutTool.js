@@ -1,17 +1,23 @@
 /*
  * BIMLayoutTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Tree } from "../ui/Tree.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { Controls } from "../ui/Controls.js";
+import * as THREE from "../lib/three.module.js";
+
+class BIMLayoutTool extends Tool
 {
   constructor(application, options)
   {
     super(application);
     this.name = "bim_layout";
-    this.label = "tool.bim_layout.label";
-    this.help = "tool.bim_layout.help";
+    this.label = "bim|tool.bim_layout.label";
+    this.help = "bim|tool.bim_layout.help";
     this.className = "bim_layout";
     this.setOptions(options);
 
@@ -33,27 +39,23 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
 
     this.layoutPanelElem = document.createElement("div");
     this.layoutPanelElem.className = "bim_layout_panel";
     this.panel.bodyElem.appendChild(this.layoutPanelElem);
     this.panel.bodyElem.classList.add("padding");
 
-    this.showAllButton = document.createElement("button");
-    this.showAllButton.innerHTML = "Show all";
-    this.showAllButton.addEventListener("click", 
-      event => this.showAll(), false); 
-    this.layoutPanelElem.appendChild(this.showAllButton);
+    this.showAllButton = Controls.addButton(this.layoutPanelElem,
+      "show_all", "bim|button.show_all", () => this.showAll());
 
-    this.layoutTree = new BIMROCKET.Tree(this.layoutPanelElem);
+    this.layoutTree = new Tree(this.layoutPanelElem);
   }
 
   activate()
   {
-    this.panel.visible = true;  
-    
+    this.panel.visible = true;
+
     if (this.selectedObject !== this.application.selection.object)
     {
       this.selectedObject = null;
@@ -127,31 +129,31 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     {
       site = sites[s];
 
-      const siteTreeNode = layoutTree.addNode(site.object.name, event => 
+      const siteTreeNode = layoutTree.addNode(site.object.name, event =>
         this.focusOnObject(event, site.object, "IfcSite", "front"), "IfcSite");
 
       for (let b = 0; b < site.buildings.length; b++)
       {
         let building = site.buildings[b];
 
-        const buildingTreeNode = siteTreeNode.addNode(building.object.name, 
-          event => this.focusOnObject(event, building.object, "IfcBuilding", 
+        const buildingTreeNode = siteTreeNode.addNode(building.object.name,
+          event => this.focusOnObject(event, building.object, "IfcBuilding",
           "front"), "IfcBuilding");
 
         for (let st = 0; st < building.storeys.length; st++)
         {
           let storey = building.storeys[st];
 
-          const storeyTreeNode = buildingTreeNode.addNode(storey.object.name, 
-            event => this.focusOnObject(event, storey.object, 
+          const storeyTreeNode = buildingTreeNode.addNode(storey.object.name,
+            event => this.focusOnObject(event, storey.object,
             "IfcBuildingStorey", "top"), "IfcBuildingStorey");
 
           for (let sp = 0; sp < storey.spaces.length; sp++)
           {
             let space = storey.spaces[sp];
 
-            const spaceTreeNode = storeyTreeNode.addNode(space.object.name, 
-              event => this.focusOnObject(event, space.object, 
+            const spaceTreeNode = storeyTreeNode.addNode(space.object.name,
+              event => this.focusOnObject(event, space.object,
               "IfcSpace", "top"), "IfcSpace");
           }
         }
@@ -189,7 +191,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       camera.updateMatrix();
 
       application.scene.updateMatrixWorld(true);
-      BIMROCKET.ObjectUtils.zoomAll(camera, this.selectedObject, aspect, true);
+      ObjectUtils.zoomAll(camera, this.selectedObject, aspect, true);
       let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
       application.notifyEventListeners("scene", changeEvent);
 
@@ -211,9 +213,9 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
   }
 
   onMouseMove(event)
-  {    
+  {
     if (!this.isCanvasEvent(event)) return;
-    
+
     event.preventDefault();
 
     let mousePosition = this.getMousePosition(event);
@@ -238,10 +240,10 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
 
   showAll()
   {
-    let application = this.application;
+    const application = this.application;
     application.baseObject.traverse(function(obj)
     {
-      let ifcData = obj.userData.IFC; 
+      let ifcData = obj.userData.IFC;
       if (ifcData)
       {
         let ifcClassName = ifcData.ifcClassName;
@@ -251,7 +253,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
           if (!obj.visible)
           {
             obj.visible = true;
-            const sceneEvent = {type: "nodeChanged", objects: [obj], 
+            const sceneEvent = {type: "nodeChanged", objects: [obj],
               source : this};
             application.notifyEventListeners("scene", sceneEvent);
           }
@@ -273,23 +275,23 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
     let siteObject = object;
     while (siteObject)
     {
-      if (siteObject.userData.IFC && 
+      if (siteObject.userData.IFC &&
           siteObject.userData.IFC.ifcClassName === "IfcSite") break;
-      else siteObject = siteObject.parent;    
+      else siteObject = siteObject.parent;
     }
 
     // search object of ifcClassName class
     let parentObject = object;
     while (parentObject)
     {
-      if (parentObject.userData.IFC && 
+      if (parentObject.userData.IFC &&
           parentObject.userData.IFC.ifcClassName === ifcClassName) break;
-      else parentObject = parentObject.parent;    
+      else parentObject = parentObject.parent;
     }
 
     application.baseObject.traverse(function(obj)
     {
-      let ifcData = obj.userData.IFC; 
+      let ifcData = obj.userData.IFC;
       if (ifcData)
       {
         let ifcClassName = ifcData.ifcClassName;
@@ -298,12 +300,12 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
         {
           let oldVisibility = obj.visible;
           obj.visible = obj === object ||
-            BIMROCKET.ObjectUtils.isObjectDescendantOf(obj, parentObject) || 
-            BIMROCKET.ObjectUtils.isObjectDescendantOf(object, obj);
+            ObjectUtils.isObjectDescendantOf(obj, parentObject) ||
+            ObjectUtils.isObjectDescendantOf(object, obj);
 
           if (oldVisibility !== obj.visible)
           {
-            let sceneEvent = {type: "nodeChanged", objects: [obj], 
+            let sceneEvent = {type: "nodeChanged", objects: [obj],
               source : this};
             application.notifyEventListeners("scene", sceneEvent);
           }
@@ -318,7 +320,7 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
       euler.setFromRotationMatrix(siteObject.matrixWorld);
       angle = THREE.Math.radToDeg(euler.z);
     }
-    
+
     if (view === 'top')
     {
       this.pointCamera(0, angle);
@@ -334,7 +336,9 @@ BIMROCKET.BIMLayoutTool = class extends BIMROCKET.Tool
   pointCamera(phiDeg, tethaDeg)
   {
     this.phi = THREE.Math.degToRad(phiDeg);
-    this.theta = THREE.Math.degToRad(tethaDeg);    
+    this.theta = THREE.Math.degToRad(tethaDeg);
     this.updateCamera = true;
   }
-};
+}
+
+export { BIMLayoutTool };

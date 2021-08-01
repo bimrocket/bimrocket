@@ -1,8 +1,10 @@
 /*
  * Tree.js
  *
+ * @author realor
  */
-BIMROCKET.Tree = class
+
+class Tree
 {
   constructor(element)
   {
@@ -14,7 +16,7 @@ BIMROCKET.Tree = class
 
   addNode(label, action, className)
   {
-    const treeNode = new BIMROCKET.TreeNode(null, label, action, className);
+    const treeNode = new TreeNode(null, label, action, className);
     this.roots.push(treeNode);
     this.rootsElem.appendChild(treeNode.itemElem);
 
@@ -28,7 +30,7 @@ BIMROCKET.Tree = class
   }
 };
 
-BIMROCKET.TreeNode = class
+class TreeNode
 {
   constructor(parentTreeNode, label, action, className)
   {
@@ -59,7 +61,7 @@ BIMROCKET.TreeNode = class
       this.itemElem.appendChild(this.childrenElem);
     }
 
-    const treeNode = new BIMROCKET.TreeNode(this, label, action, className);
+    const treeNode = new TreeNode(this, label, action, className);
     this.childrenElem.appendChild(treeNode.itemElem);
     this.children.push(treeNode);
 
@@ -137,7 +139,7 @@ BIMROCKET.TreeNode = class
     this.childrenElem.innerHTML = "";
     this.children = [];
   }
-};
+}
 
-
+export { Tree };
 

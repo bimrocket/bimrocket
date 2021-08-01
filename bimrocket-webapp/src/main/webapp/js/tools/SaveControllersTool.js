@@ -1,10 +1,15 @@
 /*
  * SaveControllersTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SaveControllersTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+import { Expression } from "../utils/Expression.js";
+import { I18N } from "../i18n/I18N.js";
+
+class SaveControllersTool extends Tool
 {
   constructor(application, options)
   {
@@ -22,18 +27,15 @@ BIMROCKET.SaveControllersTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
-    
+    this.panel = this.application.createPanel(this.label, "left");
+
     this.filenameElem = document.createElement("input");
     this.filenameElem.type = "text";
     this.filenameElem.value = "scene.ctl";
-    this.filenameElem.id = this.name + "_" + this.id + "_filename";
     this.panel.bodyElem.appendChild(this.filenameElem);
 
     this.saveButton = document.createElement("button");
-    this.saveButton.innerHTML = "Save";
-    this.saveButton.id = this.name + "_" + this.id + "_save";
+    I18N.set(this.saveButton, "innerHTML", "button.save");
     this.panel.bodyElem.appendChild(this.saveButton);
 
     this.saveButton.addEventListener("click", this._onClickSave, false);
@@ -54,7 +56,7 @@ BIMROCKET.SaveControllersTool = class extends BIMROCKET.Tool
     if (this.url)
     {
       window.URL.revokeObjectURL(this.url);
-    }  
+    }
     try
     {
       let data = this.saveControllers();
@@ -71,23 +73,24 @@ BIMROCKET.SaveControllersTool = class extends BIMROCKET.Tool
     }
     catch (ex)
     {
-      let messageDialog = new BIMROCKET.MessageDialog("ERROR", ex, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", ex)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
     }
   }
-  
+
   saveControllers()
   {
     let scene = this.application.scene;
     let data = [];
-    
+
     scene.traverse(function(object)
     {
       if (object.controllers)
       {
         let objectData = { name : object.name, controllers : [] };
         data.push(objectData);
-        
+
         for (let i = 0; i < object.controllers.length; i++)
         {
           let controller = object.controllers[i];
@@ -99,20 +102,22 @@ BIMROCKET.SaveControllersTool = class extends BIMROCKET.Tool
           for (let propertyName in controller)
           {
             let property = controller[propertyName];
-            if (property instanceof BIMROCKET.Expression)
+            if (property instanceof Expression)
             {
               controllerData.properties.push({
                 name : propertyName,
-                value : property.value, 
-                definition : property.definition 
+                value : property.value,
+                definition : property.definition
               });
             }
-          }          
+          }
         }
       }
     });
-    
-    return new Blob([JSON.stringify(data, null, 2)], 
-      {type: 'application/json'});
+
+    return new Blob([JSON.stringify(data, null, 2)],
+      { type: 'application/json' });
   }
-};
+}
+
+export { SaveControllersTool };

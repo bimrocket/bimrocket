@@ -1,7 +1,10 @@
 /**
+ * ProgressBar.js
+ *
  * @author realor
  */
-BIMROCKET.ProgressBar = class
+
+class ProgressBar
 {
   constructor(element)
   {
@@ -24,27 +27,27 @@ BIMROCKET.ProgressBar = class
     this.barElem.appendChild(this.percentElem);
     this.percentElem.className = "percent";
 
-    this._visible = false;
     this._progress = undefined;
     this._message = null;
+    this.visible = false;
   }
 
   get visible()
   {
     return this._visible;
   }
-  
+
   set visible(value)
   {
     this._visible = value;
     this.element.style.display = value ? "block" : "none";
   }
-  
+
   get progress()
   {
     return this._progress;
   }
-  
+
   set progress(progress)
   {
     this._progress = progress;
@@ -68,11 +71,13 @@ BIMROCKET.ProgressBar = class
   {
     return this._message;
   }
-  
+
   set message(message)
   {
     this._message = message;
     this.messageElem.innerHTML = message ? message : "";
   }
-};
+}
+
+export { ProgressBar };
 

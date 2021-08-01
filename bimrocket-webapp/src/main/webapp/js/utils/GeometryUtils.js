@@ -1,4 +1,12 @@
-BIMROCKET.GeometryUtils = class
+/**
+ * GeometryUtils.js
+ * 
+ * @author realor
+ */
+
+import * as THREE from "../lib/three.module.js";
+
+class GeometryUtils
 {
   static PRECISION = 0.00001;
   static _vector1 = new THREE.Vector3;
@@ -10,8 +18,8 @@ BIMROCKET.GeometryUtils = class
 
   static pointOnLine(point, line)
   {
-    var v1 = BIMROCKET.GeometryUtils._vector1;
-    var v2 = BIMROCKET.GeometryUtils._vector2;
+    var v1 = GeometryUtils._vector1;
+    var v2 = GeometryUtils._vector2;
     v1.copy(point).sub(line.start);
     v2.copy(line.end).sub(line.start);
     var v1LengthSq = v1.lengthSq();
@@ -24,7 +32,7 @@ BIMROCKET.GeometryUtils = class
       if (projection >= 0 && projection <= v2Length)
       {
         var distance = Math.sqrt(v1LengthSq - projection * projection);
-        return distance < BIMROCKET.GeometryUtils.PRECISION;
+        return distance < GeometryUtils.PRECISION;
       }
     }
     return false;
@@ -32,10 +40,10 @@ BIMROCKET.GeometryUtils = class
 
   static linesIntersect(line1, line2, position)
   {
-    const vector1 = BIMROCKET.GeometryUtils._vector3;
-    const vector2 = BIMROCKET.GeometryUtils._vector4;
-    const normal = BIMROCKET.GeometryUtils._vector5;
-    const plane = BIMROCKET.GeometryUtils._plane1;
+    const vector1 = GeometryUtils._vector3;
+    const vector2 = GeometryUtils._vector4;
+    const normal = GeometryUtils._vector5;
+    const plane = GeometryUtils._plane1;
 
     vector1.subVectors(line1.end, line1.start).normalize();
     vector2.subVectors(line2.end, line2.start).normalize();
@@ -94,11 +102,11 @@ BIMROCKET.GeometryUtils = class
   /* triangulate a 3D face */
   static triangulateFace(vertices, holes)
   {
-    const vx = BIMROCKET.GeometryUtils._vector1;
-    const vy = BIMROCKET.GeometryUtils._vector2;
-    const vz = BIMROCKET.GeometryUtils._vector3;
+    const vx = GeometryUtils._vector1;
+    const vy = GeometryUtils._vector2;
+    const vz = GeometryUtils._vector3;
 
-    BIMROCKET.GeometryUtils.calculateNormal(vertices, null, vz);
+    GeometryUtils.calculateNormal(vertices, null, vz);
     var v0 = vertices[0];
     var v1 = vertices[1];
     vx.subVectors(v1, v0).normalize();
@@ -202,4 +210,6 @@ BIMROCKET.GeometryUtils = class
       }
     }
   }
-};
+}
+
+export { GeometryUtils };

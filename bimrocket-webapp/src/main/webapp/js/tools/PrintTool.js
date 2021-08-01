@@ -1,10 +1,16 @@
 /*
  * PrintTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.PrintTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class PrintTool extends Tool
 {
   constructor(application, options)
   {
@@ -19,33 +25,30 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
+    this.panel.preferredHeight = 120;
 
-    var scope = this;
-
-    var scalePanel = document.createElement("div");
+    const scalePanel = document.createElement("div");
     this.panel.bodyElem.appendChild(scalePanel);
 
-    var scaleLabel = document.createElement("label");
+    const scaleLabel = document.createElement("label");
     scaleLabel.innerHTML = "Scale = 1 : ";
     scalePanel.appendChild(scaleLabel);
 
     this.scaleInput = document.createElement("input");
     this.scaleInput.type = "text";
     this.scaleInput.value = "10";
-    this.scaleInput.style.background = "gray";
     this.scaleInput.style.width = "60px";
     scalePanel.appendChild(this.scaleInput);
 
-    var printButton = document.createElement("button");
+    const printButton = document.createElement("button");
     printButton.innerHTML = "Generate PDF";
     this.panel.bodyElem.appendChild(printButton);
     printButton.addEventListener('click',
-      function() {scope.drawScene();}, false);
+      () => this.drawScene(), false);
 
     this.openLink = document.createElement("a");
-    this.openLink.innerHTML = "Open";
+    I18N.set(this.openLink, "innerHTML", "button.open");
     this.openLink.target = "_blank";
     this.openLink.style.display = "none";
     this.panel.bodyElem.appendChild(this.openLink);
@@ -63,7 +66,7 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
 
   drawScene()
   {
-    var application = this.application;
+    const application = this.application;
     var request = new XMLHttpRequest();
     var url = location.protocol + "//" + location.host +
       "/bimrocket-server/api/print/sample.pdf";
@@ -82,15 +85,14 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
 
     var data = this.drawObject(application.baseObject, matrix);
 
-    var scope = this;
     request.open("POST", url, true);
-    request.onreadystatechange = function()
+    request.onreadystatechange = () =>
     {
       if (request.readyState === 4)
       {
         if (request.status === 0 || request.status === 200)
         {
-          scope.openLink.click();
+          this.openLink.click();
         }
       }
     };
@@ -101,7 +103,7 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
   drawObject(object, matrix)
   {
     var data = "";
-    if (object instanceof BIMROCKET.Solid)
+    if (object instanceof Solid)
     {
       try
       {
@@ -109,7 +111,7 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
         {
           var edgesGeometry = object.edgesGeometry;
           var vertices =
-            BIMROCKET.GeometryUtils.getBufferGeometryVertices(edgesGeometry);
+            GeometryUtils.getBufferGeometryVertices(edgesGeometry);
 
           var p1 = new THREE.Vector3();
           var p2 = new THREE.Vector3();
@@ -140,9 +142,8 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
       var geometry = object.geometry;
       if (geometry instanceof THREE.BufferGeometry)
       {
-        const vertices =
-          BIMROCKET.GeometryUtils.getBufferGeometryVertices(geometry);
- 
+        const vertices = GeometryUtils.getBufferGeometryVertices(geometry);
+
         const p1 = new THREE.Vector3();
         const p2 = new THREE.Vector3();
         const p3 = new THREE.Vector3();
@@ -164,8 +165,8 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
           data += "lineto " + p1.x + " " + p1.y + "\n";
           data += "stroke\n";
         };
- 
-        BIMROCKET.GeometryUtils.getBufferGeometryFaces(geometry, printFace); 
+
+        GeometryUtils.getBufferGeometryFaces(geometry, printFace);
       }
     }
     var children = object.children;
@@ -174,7 +175,7 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
       var child = children[j];
       if (child.visible)
       {
-        if (object instanceof BIMROCKET.Solid)
+        if (object instanceof Solid)
         {
           // skip
         }
@@ -186,4 +187,6 @@ BIMROCKET.PrintTool = class extends BIMROCKET.Tool
     }
     return data;
   }
-};
+}
+
+export { PrintTool };

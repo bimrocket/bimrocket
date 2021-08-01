@@ -1,10 +1,14 @@
 /*
  * LightController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.LightController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import * as THREE from "../lib/three.module.js";
+
+class LightController extends Controller
 {
   static type = "LightController";
   static description = "Lights and object.";
@@ -20,7 +24,7 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
     this.offsetX = this.createProperty("number", "Offset X", 0);
     this.offsetY = this.createProperty("number", "Offset Y", 0);
     this.offsetZ = this.createProperty("number", "Offset Z", 0);
-    
+
     this._onNodeChanged = this.onNodeChanged.bind(this);
   }
 
@@ -39,8 +43,8 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && 
-        (this.input.isBoundTo(event.objects) || 
+    if (event.type === "nodeChanged" &&
+        (this.input.isBoundTo(event.objects) ||
          event.objects.includes(this.object)))
     {
       this.update(false);
@@ -56,7 +60,7 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
     let offsetX = this.offsetX.value;
     let offsetY = this.offsetY.value;
     let offsetZ = this.offsetZ.value;
-    
+
     let factor;
     if (value <= minValue)
     {
@@ -70,10 +74,10 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
     {
       factor = (value - minValue) / (maxValue - minValue); // [0..1]
     }
-    
+
     let intensity = factor * this.intensity.value;
     if (force ||
-         this.light.intensity !== intensity || 
+         this.light.intensity !== intensity ||
          this.light.distance !== distance ||
          this.light.position.x !== offsetX ||
          this.light.position.y !== offsetY ||
@@ -82,29 +86,31 @@ BIMROCKET.LightController = class extends BIMROCKET.Controller
       this.light.intensity = intensity;
       this.light.distance = distance;
       this.light.position.set(offsetX, offsetY, offsetZ);
-      this.light.updateMatrix();      
+      this.light.updateMatrix();
       this.application.notifyObjectUpdated(this.object);
     }
   }
-  
+
   createLight()
   {
     this.light = new THREE.PointLight(0xFFFFFF);
-    this.light.name = "light"; //BIMROCKET.HIDDEN_PREFIX + "light";
+    this.light.name = "light";
     this.object.add(this.light);
     var addEvent = {type : "added", object : this.light, parent: this.object,
       source : this};
     this.application.notifyEventListeners("scene", addEvent);
   }
-  
+
   destroyLight()
   {
     this.object.remove(this.light);
-    var removeEvent = {type : "removed", object : this.light, 
+    var removeEvent = {type : "removed", object : this.light,
       parent: this.object, source : this};
     this.application.notifyEventListeners("scene", removeEvent);
     this.light = null;
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.LightController);
+ControllerManager.addClass(LightController);
+
+export { LightController };

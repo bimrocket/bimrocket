@@ -1,14 +1,16 @@
 /*
  * AnimationController.js
  *
- * @autor: realor
+ * @author: realor
  */
+import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
-BIMROCKET.AnimationController = class extends BIMROCKET.Controller
+class AnimationController extends Controller
 {
   static type = "AnimationController";
   static description = "Animates an object.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
@@ -17,19 +19,19 @@ BIMROCKET.AnimationController = class extends BIMROCKET.Controller
 
     this._animating = false;
     this._animate = this.animate.bind(this);
-    this._onNodeChanged = this.onNodeChanged.bind(this); 
+    this._onNodeChanged = this.onNodeChanged.bind(this);
   }
 
   onStart()
   {
-    let application = this.application;
+    const application = this.application;
     application.addEventListener("scene", this._onNodeChanged);
     this.startAnimation();
   }
 
   onStop()
   {
-    let application = this.application;
+    const application = this.application;
     application.removeEventListener("scene", this._onNodeChanged);
     this.stopAnimation();
   }
@@ -40,9 +42,9 @@ BIMROCKET.AnimationController = class extends BIMROCKET.Controller
     {
       this._animating = true;
       this.application.addEventListener("animation", this._animate);
-    }  
+    }
   }
-  
+
   stopAnimation()
   {
     if (this._animating)
@@ -64,3 +66,5 @@ BIMROCKET.AnimationController = class extends BIMROCKET.Controller
     }
   }
 };
+
+export { AnimationController };

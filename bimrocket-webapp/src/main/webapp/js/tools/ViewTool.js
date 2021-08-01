@@ -1,10 +1,14 @@
 /*
  * ViewTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ViewTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import * as THREE from "../lib/three.module.js";
+
+class ViewTool extends Tool
 {
   constructor(application, options)
   {
@@ -32,12 +36,11 @@ BIMROCKET.ViewTool = class extends BIMROCKET.Tool
     camera.updateMatrix();
 
     application.scene.updateMatrixWorld(true);
-    BIMROCKET.ObjectUtils.zoomAll(camera, application.baseObject, aspect);
+    ObjectUtils.zoomAll(camera, application.baseObject, aspect);
 
     const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
   }
-};
+}
 
-
-
+export { ViewTool };

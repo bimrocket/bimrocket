@@ -1,12 +1,16 @@
 /*
  * Brain4itWatchController.js
  *
- * @autor: realor
+ * @author: realor
  */
+
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { Brain4it } from "../lib/Brain4it.js"
 
 Brain4it.monitors = {};
 
-BIMROCKET.Brain4itWatchController = class extends BIMROCKET.Controller
+class Brain4itWatchController extends Controller
 {
   static type = "Brain4itWatchController";
   static description = "Watches for expression changes.";
@@ -91,6 +95,8 @@ BIMROCKET.Brain4itWatchController = class extends BIMROCKET.Controller
       this._functionKey = null;
     }
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.Brain4itWatchController);
+ControllerManager.addClass(Brain4itWatchController);
+
+export { Brain4itWatchController };

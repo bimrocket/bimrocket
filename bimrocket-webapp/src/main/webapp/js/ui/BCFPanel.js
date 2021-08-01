@@ -1,7 +1,20 @@
 /**
+ * BCFPanel.js
+ *
  * @author realor
  */
-BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
+
+import { Panel } from "./Panel.js";
+import { Controls } from "./Controls.js";
+import { ServiceDialog } from "./ServiceDialog.js";
+import { MessageDialog } from "./MessageDialog.js";
+import { ConfirmDialog } from "./ConfirmDialog.js";
+import { TabbedPane } from "./TabbedPane.js";
+import { Toast } from "./Toast.js";
+import { BCFService } from "../io/BCFService.js";
+import * as THREE from "../lib/three.module.js";
+
+class BCFPanel extends Panel
 {
   constructor(application)
   {
@@ -9,7 +22,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.id = "bcf_panel";
     this.title = "BCF";
     this.position = "left";
-    
+
     this.service = null;
 
     this.topics = null;
@@ -32,9 +45,9 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.connPanelElem.className = "bcf_body";
     this.searchPanelElem.appendChild(this.connPanelElem);
 
-    this.bcfServiceElem = Controls.addSelectField(this.connPanelElem, 
-      "bcfService", "BCF service:", []);
-    this.bcfServiceElem.addEventListener("change", 
+    this.bcfServiceElem = Controls.addSelectField(this.connPanelElem,
+      "bcfService", "bim|label.bcf_service", []);
+    this.bcfServiceElem.addEventListener("change",
       event => {
         let name = this.bcfServiceElem.value;
         this.service = this.application.services.bcf[name];
@@ -47,13 +60,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.connButtonsElem.className = "bcf_buttons";
 
     this.connectButton = Controls.addButton(this.connButtonsElem,
-      "bcfConnect", "Connect", () => this.refreshProjects());
+      "bcfConnect", "button.connect", () => this.refreshProjects());
     this.addServiceButton = Controls.addButton(this.connButtonsElem,
-      "bcfAdd", "Add", () => this.showAddDialog());
+      "bcfAdd", "button.add", () => this.showAddDialog());
     this.editServiceButton = Controls.addButton(this.connButtonsElem,
-      "bcfEdit", "Edit", () => this.showEditDialog());
+      "bcfEdit", "button.edit", () => this.showEditDialog());
     this.deleteServiceButton = Controls.addButton(this.connButtonsElem,
-      "bcfDelete", "Delete", () => this.showDeleteDialog());
+      "bcfDelete", "button.delete", () => this.showDeleteDialog());
 
     // filter panel
 
@@ -63,38 +76,39 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.searchPanelElem.appendChild(this.filterPanelElem);
 
     this.projectElem = Controls.addSelectField(this.filterPanelElem,
-      "bcfProject", "Project:");
+      "bcfProject", "bim|label.project");
     this.projectElem.addEventListener("change", () => this.changeProject());
 
     this.statusFilterElem = Controls.addSelectField(this.filterPanelElem,
-      "bcfStatusFilter", "Status:");
+      "bcfStatusFilter", "bim|label.status");
 
     this.priorityFilterElem = Controls.addSelectField(this.filterPanelElem,
-      "bcfPriorityFilter", "Priority:");
+      "bcfPriorityFilter", "bim|label.priority");
 
     this.assignedToFilterElem = Controls.addSelectField(this.filterPanelElem,
-      "bcfAssignedToFilter", "Assigned to:");
+      "bcfAssignedToFilter", "bim|label.assigned_to");
 
     this.filterButtonsElem = document.createElement("div");
     this.filterButtonsElem.className = "bcf_buttons";
     this.filterPanelElem.appendChild(this.filterButtonsElem);
 
     this.searchTopicsButton = Controls.addButton(this.filterButtonsElem,
-      "searchTopics", "Search", () => this.searchTopics());
+      "searchTopics", "button.search", () => this.searchTopics());
     this.searchTopicsButton.disabled = true;
 
     this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
-      "setupProject", "Setup", () => this.showProjectSetup());
+      "setupProject", "button.setup", () => this.showProjectSetup());
     this.setupProjectButton.disabled = true;
 
     this.searchNewTopicButton = Controls.addButton(this.filterButtonsElem,
-      "searchNewTopic", "New", () => this.showTopic());
+      "searchNewTopic", "button.create", () => this.showTopic());
     this.searchNewTopicButton.disabled = true;
 
     // topic table
 
     this.topicTableElem = Controls.addTable(this.searchPanelElem,
-      "topicTable", ["Idx", "Topic", "Status"], "bcf_topic_table");
+      "topicTable", ["bim|col.index", "bim|col.topic", "bim|col.status"],
+      "bcf_topic_table");
     this.topicTableElem.style.display = "none";
     this.searchPanelElem.appendChild(this.topicTableElem);
 
@@ -115,7 +129,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.detailBodyElem.appendChild(this.detailHeaderElem);
 
     this.backButton = Controls.addButton(this.detailHeaderElem,
-      "backTopics", "Back", () => this.showTopicList());
+      "backTopics", "button.back", () => this.showTopicList());
 
     this.topicNavElem = document.createElement("span");
     this.detailHeaderElem.appendChild(this.topicNavElem);
@@ -130,88 +144,89 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       "nextTopic", ">", () => this.showNextTopic());
 
     this.detailNewTopicButton = Controls.addButton(this.detailHeaderElem,
-      "detailNewTopic", "New", () => this.showTopic());
+      "detailNewTopic", "button.create", () => this.showTopic());
 
     this.topicIndexElem = Controls.addTextField(this.detailBodyElem,
-      "topic_index", "Index:");
+      "topic_index", "bim|label.index");
      this.topicIndexElem.setAttribute("readonly", true);
 
     this.titleElem = Controls.addTextField(this.detailBodyElem,
-      "topic_title", "Title:");
+      "topic_title", "bim|label.title");
 
     this.topicTypeElem = Controls.addSelectField(this.detailBodyElem,
-      "topic_type", "Type:");
+      "topic_type", "bim|label.type");
 
     this.priorityElem = Controls.addSelectField(this.detailBodyElem,
-      "topic_priority", "Priority:");
+      "topic_priority", "bim|label.priority");
 
     this.topicStatusElem = Controls.addSelectField(this.detailBodyElem,
-      "topic_status", "Status:");
+      "topic_status", "bim|label.status");
 
     this.stageElem = Controls.addSelectField(this.detailBodyElem,
-      "topic_stage", "Stage:");
+      "topic_stage", "bim|label.stage");
 
     this.assignedToElem = Controls.addSelectField(this.detailBodyElem,
-      "topic_assigned_to", "Assigned to:");
+      "topic_assigned_to", "bim|label.assigned_to");
 
     this.dueDateElem = Controls.addDateField(this.detailBodyElem,
-      "due_date", "Due date:");
+      "due_date", "bim|label.due_date");
 
     this.descriptionElem = Controls.addTextAreaField(this.detailBodyElem,
-      "description", "Description:", null, "bcf_description");
+      "description", "bim|label.description", null, "bcf_description");
 
     this.detailButtonsElem = document.createElement("div");
     this.detailButtonsElem.className = "bcf_buttons";
     this.detailBodyElem.appendChild(this.detailButtonsElem);
 
     this.saveTopicButton = Controls.addButton(this.detailButtonsElem,
-      "saveTopic", "Save", () => this.saveTopic());
+      "saveTopic", "button.save", () => this.saveTopic());
 
     this.deleteTopicButton = Controls.addButton(this.detailButtonsElem,
-      "deleteTopic", "Delete", () => {
-      const dialog = new BIMROCKET.ConfirmDialog("Delete topic",
-      "Really want to delete this topic?",
-      () => this.deleteTopic(),
-      "Delete", "Cancel");
-      dialog.show();
-    });
+      "deleteTopic", "button.delete", () =>
+      {
+        ConfirmDialog.create("bim|title.delete_topic",
+          "bim|question.delete_topic")
+          .setAction(() => this.deleteTopic())
+          .setAcceptLabel("button.delete")
+          .setI18N(application.i18n).show();
+      });
 
-    this.tabbedPane = new BIMROCKET.TabbedPane(this.detailPanelElem);
+    this.tabbedPane = new TabbedPane(this.detailPanelElem);
     this.tabbedPane.paneElem.classList.add("bcf_tabs");
 
     /* comment panel */
 
     this.commentsPanelElem =
-      this.tabbedPane.addTab("comments", "Comments");
+      this.tabbedPane.addTab("comments", "bim|tab.comments");
 
     this.commentListElem = document.createElement("ul");
     this.commentListElem.classList = "bcf_list";
     this.commentsPanelElem.appendChild(this.commentListElem);
 
     this.commentElem = Controls.addTextAreaField(this.commentsPanelElem,
-      "comment", "Comment:");
+      "comment", "bim|label.comment");
     this.saveCommentButton = Controls.addButton(this.commentsPanelElem,
-      "saveComment", "Save", () => this.saveComment());
+      "saveComment", "button.save", () => this.saveComment());
 
     /* viewpoints panel */
 
     this.viewpointsPanelElem =
-      this.tabbedPane.addTab("viewpoints", "Viewpoints");
+      this.tabbedPane.addTab("viewpoints", "bim|tab.viewpoints");
 
     this.viewpointListElem = document.createElement("ul");
     this.viewpointListElem.classList = "bcf_list";
     this.viewpointsPanelElem.appendChild(this.viewpointListElem);
 
     this.createViewpointButton = Controls.addButton(this.viewpointsPanelElem,
-      "createViewpoint", "Create", () => this.createViewpoint());
+      "createViewpoint", "button.create", () => this.createViewpoint());
 
     /* links panel */
 
-    this.linksPanelElem = this.tabbedPane.addTab("links", "Links");
+    this.linksPanelElem = this.tabbedPane.addTab("links", "bim|tab.links");
 
     /* audit panel */
 
-    this.auditPanelElem = this.tabbedPane.addTab("audit", "Audit");
+    this.auditPanelElem = this.tabbedPane.addTab("audit", "bim|tab.audit");
     this.auditPanelElem.classList.add("bcf_body");
 
     this.guidElem = Controls.addTextField(this.auditPanelElem,
@@ -219,19 +234,19 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
      this.guidElem.setAttribute("readonly", true);
 
     this.creationDateElem = Controls.addTextField(this.auditPanelElem,
-      "topic_creation_date", "Creation date:");
+      "topic_creation_date", "bim|label.creation_date");
      this.creationDateElem.setAttribute("readonly", true);
 
     this.creationAuthorElem = Controls.addTextField(this.auditPanelElem,
-      "topic_creation_author", "Creation author:");
+      "topic_creation_author", "bim|label.creation_author");
      this.creationAuthorElem.setAttribute("readonly", true);
 
     this.modifyDateElem = Controls.addTextField(this.auditPanelElem,
-      "topic_modify_date", "Modify date:");
+      "topic_modify_date", "bim|label.modify_date");
      this.modifyDateElem.setAttribute("readonly", true);
 
     this.modifyAuthorElem = Controls.addTextField(this.auditPanelElem,
-      "topic_modify_author", "Modify author:");
+      "topic_modify_author", "bim|label.modify_author");
      this.modifyAuthorElem.setAttribute("readonly", true);
 
     // setup panel
@@ -247,20 +262,20 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.setupPanelElem.appendChild(this.setupBodyElem);
 
     this.backSetupButton = Controls.addButton(this.setupBodyElem,
-      "backSetup", "Back", () => this.showTopicList());
+      "backSetup", "button.back", () => this.showTopicList());
 
     this.projectNameElem = Controls.addTextField(this.setupBodyElem,
-      "project_name", "Project name:");
+      "project_name", "bim|label.project_name");
 
     this.saveProjectButtonsElem = document.createElement("div");
     this.saveProjectButtonsElem.className = "bcf_buttons";
     this.setupBodyElem.appendChild(this.saveProjectButtonsElem);
 
     this.saveProjectNameButton = Controls.addButton(this.saveProjectButtonsElem,
-      "saveProjectName", "Save", () => this.saveProjectName());
+      "saveProjectName", "button.save", () => this.saveProjectName());
 
     this.extensionsElem = Controls.addTextAreaField(this.setupBodyElem,
-      "extensions_json", "Project extensions:");
+      "extensions_json", "bim|label.project_extensions");
     this.extensionsElem.setAttribute("spellcheck", "false");
 
     this.saveExtensionsButtonsElem = document.createElement("div");
@@ -268,7 +283,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.setupBodyElem.appendChild(this.saveExtensionsButtonsElem);
 
     this.saveExtensionsButton = Controls.addButton(
-      this.saveExtensionsButtonsElem, "saveExtensions", "Save", 
+      this.saveExtensionsButtonsElem, "saveExtensions", "button.save",
       () => this.saveProjectExtensions());
   }
 
@@ -403,15 +418,16 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       "priority" : this.priorityFilterElem.value,
       "assignedTo" : this.assignedToFilterElem.value
     };
-    this.service.getTopics(projectId, filter, topics => 
+    this.service.getTopics(projectId, filter, topics =>
     {
-      this.topics = topics; 
-      this.populateTopicTable(); 
-    }, this.onError);
+      this.topics = topics;
+      this.populateTopicTable();
+    }, error => this.onError(error));
   }
 
   saveTopic()
   {
+    const application = this.application;
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     let topic = {
@@ -424,40 +440,44 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       "description" : this.descriptionElem.value,
       "due_date" : this.addTime(this.dueDateElem.value)
     };
-    
-    const onCompleted = topic => 
+
+    const onCompleted = topic =>
     {
-      this.showTopic(topic); 
-      this.topics = null;       
-      BIMROCKET.Toast.show("Topic saved.");
+      this.showTopic(topic);
+      this.topics = null;
+      Toast.create("bim|message.topic_saved")
+        .setI18N(application.i18n).show();
     };
-    
+
     if (topicGuid) // update
     {
-      this.service.updateTopic(projectId, topicGuid, topic, 
-        onCompleted, this.onError);
+      this.service.updateTopic(projectId, topicGuid, topic,
+        onCompleted, error => this.onError(error));
     }
     else // creation
     {
-      this.service.createTopic(projectId, topic, onCompleted, this.onError); 
+      this.service.createTopic(projectId, topic, onCompleted,
+        error => this.onError(error));
     }
   }
 
   deleteTopic()
   {
+    const application = this.application;
     const onCompleted = () =>
     {
       this.showTopic();
       this.topics = null; // force topic list refresh
-      BIMROCKET.Toast.show("Topic deleted.");
+      Toast.create("bim|message.topic_deleted")
+        .setI18N(application.i18n).show();
     };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     if (topicGuid)
     {
-      this.service.deleteTopic(projectId, topicGuid, onCompleted, 
-        this.onError);
+      this.service.deleteTopic(projectId, topicGuid, onCompleted,
+        error => this.onError(error));
     }
   }
 
@@ -476,53 +496,58 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.getComments(projectId, topicGuid, onCompleted, this.onError);
+    this.service.getComments(projectId, topicGuid, onCompleted,
+      error => this.onError(error));
   }
 
   saveComment()
   {
+    const application = this.application;
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
-    let comment = 
+    let comment =
     {
       "comment" : this.commentElem.value
     };
 
-    const onCompleted = comment => 
+    const onCompleted = comment =>
     {
       this.commentElem.value = null;
       console.info(comment);
       this.commentGuid = null;
       this.loadComments(true);
-      BIMROCKET.Toast.show("Comment saved.");
+      Toast.create("bim|message.comment_saved")
+        .setI18N(application.i18n).show();
     };
 
     if (this.commentGuid) // update
     {
-      this.service.updateComment(projectId, topicGuid, this.commentGuid, 
-        comment, onCompleted, this.onError);
+      this.service.updateComment(projectId, topicGuid, this.commentGuid,
+        comment, onCompleted, error => this.onError(error));
     }
     else // creation
     {
-      this.service.createComment(projectId, topicGuid, comment, 
-        onCompleted, this.onError);
+      this.service.createComment(projectId, topicGuid, comment,
+        onCompleted, error => this.onError(error));
     }
   }
 
   deleteComment(comment)
   {
+    const application = this.application;
     const onCompleted = () =>
     {
       this.loadComments();
-      BIMROCKET.Toast.show("Comment deleted.");
+      Toast.create("bim|message.comment_deleted")
+        .setI18N(application.i18n).show();
     };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     if (topicGuid)
     {
-      this.service.deleteComment(projectId, topicGuid, comment.guid, 
-        onCompleted, this.onError);
+      this.service.deleteComment(projectId, topicGuid, comment.guid,
+        onCompleted, error => this.onError(error));
     }
   }
 
@@ -548,14 +573,15 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.getViewpoints(projectId, topicGuid, onCompleted, 
-      this.onError);
+    this.service.getViewpoints(projectId, topicGuid, onCompleted,
+      error => this.onError(error));
   }
 
   createViewpoint()
   {
+    const application = this.application;
     const viewpoint = {};
-    const camera = this.application.camera;
+    const camera = application.camera;
     const matrix = camera.matrixWorld;
     const xAxis = new THREE.Vector3();
     const yAxis = new THREE.Vector3();
@@ -594,22 +620,25 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     {
       console.info(viewpoint);
       this.loadViewpoints();
-      BIMROCKET.Toast.show("Viewpoint saved.");
+      Toast.create("bim|message.viewpoint_saved")
+        .setI18N(application.i18n).show();
     };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.createViewpoint(projectId, topicGuid, viewpoint, 
-      onCompleted, this.onError);
+    this.service.createViewpoint(projectId, topicGuid, viewpoint,
+      onCompleted, error => this.onError(error));
   }
 
   deleteViewpoint(viewpoint)
   {
+    const application = this.application;
     const onCompleted = () =>
     {
       this.loadViewpoints();
-      BIMROCKET.Toast.show("Viewpoint deleted.");
+      Toast.create("bim|message.viewpoint_deleted")
+        .setI18N(application.i18n).show();
     };
 
     let projectId = this.getProjectId();
@@ -618,7 +647,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     if (topicGuid)
     {
       this.service.deleteViewpoint(projectId, topicGuid, viewpoint.guid,
-        onCompleted, this.onError);
+        onCompleted, error => this.onError(error));
     }
   }
 
@@ -634,9 +663,10 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       this.populateExtensions();
     };
 
-    this.service.getExtensions(projectId, onCompleted, this.onError);
+    this.service.getExtensions(projectId, onCompleted,
+      error => this.onError(error));
   }
-  
+
   refreshProjects()
   {
     const projects = [];
@@ -645,7 +675,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     {
       this.filterPanelElem.style.display = "";
       this.topicTableElem.style.display = "";
-      
+
       console.info(serverProjects);
 
       const projectIdSet = new Set();
@@ -661,7 +691,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       const scene = this.application.scene;
       scene.traverse(object =>
       {
-        if (object._ifc instanceof BIMROCKET.IFC4.IfcProject)
+        if (object._ifc && object._ifc.constructor.name === "IfcProject")
         {
           let projectId = object._ifc.GlobalId;
           let projectName = object._ifc.Name || object._ifc.LongName;
@@ -684,36 +714,39 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       this.updateExtensions();
     };
 
-    this.service.getProjects(onCompleted, this.onError);
+    this.service.getProjects(onCompleted, error => this.onError(error));
   }
-  
+
   saveProjectName()
   {
+    const application = this.application;
     const projectName = this.projectNameElem.value;
     const index = this.projectElem.selectedIndex;
     const options = this.projectElem.options;
     const oldProjectName = options[index].label;
-            
+
     if (projectName !== oldProjectName)
     {
       const onCompleted = project =>
       {
         console.info(project);
         options[index].label = project.name;
-        BIMROCKET.Toast.show("Project saved.");
+        Toast.create("bim|message.project_saved")
+          .setI18N(application.i18n).show();
       };
-      
+
       const projectId = this.getProjectId();
       const project = {
         "name" : projectName
       };
-      this.service.updateProject(projectId, project, onCompleted, 
-        this.onError);
+      this.service.updateProject(projectId, project, onCompleted,
+        error => this.onError(error));
     }
   }
-  
+
   saveProjectExtensions()
   {
+    const application  = this.application;
     const extensionsText = this.extensionsElem.value;
     const oldExtensionsText = JSON.stringify(this.extensions, null, 2);
 
@@ -724,16 +757,17 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
         this.extensions = extensions;
         console.info(extensions);
         this.populateExtensions();
-        BIMROCKET.Toast.show("Project extensions saved.");
+        Toast.create("bim|message.project_extensions_saved")
+          .setI18N(application.i18n).show();
       };
-      
+
       try
       {
         let extensions = JSON.parse(extensionsText);
-      
+
         const projectId = this.getProjectId();
-        this.service.updateExtensions(projectId, extensions, onCompleted, 
-          this.onError);
+        this.service.updateExtensions(projectId, extensions, onCompleted,
+          error => this.onError(error));
       }
       catch (ex)
       {
@@ -793,13 +827,13 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
     application.activateCamera(camera);
   }
-  
+
   showProjectSetup()
   {
     this.searchPanelElem.style.display = "none";
     this.detailPanelElem.style.display = "none";
     this.setupPanelElem.style.display = "";
-    
+
     const index = this.projectElem.selectedIndex;
     const options = this.projectElem.options;
     this.projectNameElem.value = options[index].label;
@@ -827,9 +861,8 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     const comments = this.comments;
     const commentsElem = this.commentListElem;
     commentsElem.innerHTML = "";
-    for (let i = 0; i < comments.length; i++)
+    for (let comment of comments)
     {
-      let comment = comments[i];
       let itemListElem = document.createElement("li");
 
       let itemListHeaderElem = document.createElement("div");
@@ -843,20 +876,21 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
       authorDate += ":";
 
       Controls.addText(itemListHeaderElem, authorDate, "bcf_comment_author");
-      Controls.addButton(itemListHeaderElem, "updateComment", "Edit",
+      Controls.addButton(itemListHeaderElem, "updateComment", "button.edit",
          () => this.editComment(comment),
         "bcf_edit_comment");
-      Controls.addButton(itemListHeaderElem, "deleteComment", "Delete",
-         () => {
-           const dialog = new BIMROCKET.ConfirmDialog("Delete comment",
-           "Really want to delete this comment?",
-           () => this.deleteComment(comment),
-           "Delete", "Cancel");
-           dialog.show();
-         },
-        "bcf_delete_comment");
+      Controls.addButton(itemListHeaderElem, "deleteComment", "button.delete",
+         () =>
+         {
+           ConfirmDialog.create("bim|title.delete_comment",
+             "bim|question.delete_comment")
+             .setAction(() => this.deleteComment(comment))
+             .setAcceptLabel("button.delete")
+             .setI18N(this.application.i18n).show();
+         }, "bcf_delete_comment");
 
       Controls.addText(itemListElem, comment.comment, "bcf_comment_text");
+      this.application.i18n.updateTree(itemListElem);
       commentsElem.appendChild(itemListElem);
     }
   }
@@ -866,32 +900,33 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     const viewpoints = this.viewpoints;
     const viewpointsElem = this.viewpointListElem;
     viewpointsElem.innerHTML = "";
-    for (let i = 0; i < viewpoints.length; i++)
+    for (let viewpoint of viewpoints)
     {
-      let viewpoint = viewpoints[i];
       let itemListElem = document.createElement("li");
-      let label = "Viewpoint " + (viewpoint.index || "");
+      let vpType = "";
       if (viewpoint.perspective_camera)
       {
-        label += " (P)";
+        vpType = " (P)";
       }
       else if (viewpoint.orthogonal_camera)
       {
-        label += " (O)";
+        vpType += " (O)";
       }
-      Controls.addText(itemListElem, label, "bcf_viewpoint_text");
-      Controls.addButton(itemListElem, "showViewpoint", "View",
+      Controls.addTextWithArgs(itemListElem, "bim|message.viewpoint",
+        [(viewpoint.index || ""), vpType], "bcf_viewpoint_text");
+      Controls.addButton(itemListElem, "showViewpoint", "button.view",
         () => this.showViewpoint(viewpoint), "bcf_show_viewpoint");
 
-      Controls.addButton(itemListElem, "deleteViewpoint", "Delete",
-        () => {
-          const dialog = new BIMROCKET.ConfirmDialog("Delete viewpoint",
-          "Really want to delete this viewpoint?",
-          () => this.deleteViewpoint(viewpoint),
-          "Delete", "Cancel");
-          dialog.show();
+      Controls.addButton(itemListElem, "deleteViewpoint", "button.delete",
+        () =>
+        {
+          ConfirmDialog.create("bim|title.delete_viewpoint",
+            "bim|question.delete_viewpoint")
+            .setAction(() => this.deleteViewpoint(viewpoint))
+            .setAcceptLabel("button.delete")
+            .setI18N(this.application.i18n).show();
         }, "bcf_delete_viewpoint");
-
+      this.application.i18n.updateTree(itemListElem);
       viewpointsElem.appendChild(itemListElem);
     }
   }
@@ -911,7 +946,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     Controls.setSelectOptions(this.priorityElem, ext.priority);
     Controls.setSelectOptions(this.topicStatusElem, ext.topic_status);
     Controls.setSelectOptions(this.stageElem, ext.stage);
-    Controls.setSelectOptions(this.assignedToElem, ext.user_id_type);    
+    Controls.setSelectOptions(this.assignedToElem, ext.user_id_type);
   }
 
   getProjectId()
@@ -951,19 +986,20 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     const index = dateString.indexOf("T");
     return dateString.substring(0, index);
   }
-  
+
   onError(error)
   {
     let message = error.message;
-    const dialog = new BIMROCKET.MessageDialog("ERROR", message, "error");
-    dialog.show();    
+    MessageDialog.create("ERROR", message)
+      .setClassName("error")
+      .setI18N(this.application.i18n).show();
   }
 
   onShow()
   {
     this.updateServices();
   }
-  
+
   updateServices()
   {
     const application = this.application;
@@ -973,7 +1009,7 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     for (let name in services)
     {
       let service = services[name];
-      options.push([service.name, service.description || service.name]);      
+      options.push([service.name, service.description || service.name]);
     }
     Controls.setSelectOptions(this.bcfServiceElem, options);
 
@@ -990,17 +1026,18 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
     this.connectButton.style.display = service ? "" : "none";
     this.addServiceButton.style.display = "";
     this.editServiceButton.style.display = service ? "" : "none";
-    this.deleteServiceButton.style.display = service ? "" : "none";    
+    this.deleteServiceButton.style.display = service ? "" : "none";
   }
 
   showAddDialog()
   {
     let serviceTypes = ["BCF"];
-    let dialog = new BIMROCKET.ServiceDialog("Add BCF service", serviceTypes);
+    let dialog = new ServiceDialog("Add BCF service", serviceTypes);
     dialog.serviceTypeSelect.disabled = true;
+    dialog.setI18N(this.application.i18n);
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
-      const service = new BIMROCKET.BCFService();
+      const service = new BCFService();
       service.name = name;
       service.description = description;
       service.url = url;
@@ -1019,13 +1056,14 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
   showEditDialog()
   {
     if (this.service === null) return;
-    
-    const service = this.service;    
+
+    const service = this.service;
     let serviceTypes = ["BCF"];
-    let dialog = new BIMROCKET.ServiceDialog("Edit BCF service",
+    let dialog = new ServiceDialog("Edit BCF service",
       serviceTypes, service.constructor.type, service.name, service.description,
       service.url, service.username, service.password);
     dialog.serviceTypeSelect.disabled = true;
+    dialog.setI18N(this.application.i18n);
     dialog.nameElem.readOnly = true;
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
@@ -1044,20 +1082,24 @@ BIMROCKET.BCFPanel = class extends BIMROCKET.Panel
 
   showDeleteDialog()
   {
+    const application = this.application;
     let name = this.bcfServiceElem.value;
     if (name)
     {
-      let dialog = new BIMROCKET.ConfirmDialog("Delete BCF service",
-        "Delete service " + name + "?",
-        () => {
-          const application = this.application;
+      ConfirmDialog.create("bim|title.delete_bcf_service",
+        "bim|question.delete_bcf_service", name)
+        .setAction(() =>
+        {
           let service = application.services.bcf[name];
           application.removeService(service);
           this.updateServices();
           this.filterPanelElem.style.display = "none";
           this.topicTableElem.style.display = "none";
-      });
-      dialog.show();
+        })
+       .setAcceptLabel("button.delete")
+       .setI18N(application.i18n).show();
     }
   }
-};
+}
+
+export { BCFPanel };

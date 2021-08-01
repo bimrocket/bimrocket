@@ -1,10 +1,15 @@
 /*
  * ColorController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ColorController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { Solid } from "../solid/Solid.js";
+import * as THREE from "../lib/three.module.js";
+
+class ColorController extends Controller
 {
   static type = "ColorController";
   static description = "Colorize an object.";
@@ -18,12 +23,12 @@ BIMROCKET.ColorController = class extends BIMROCKET.Controller
     this.minValue = this.createProperty("number", "Min. value", 0);
     this.maxValue = this.createProperty("number", "Max. value", 1);
     this.emissive = this.createProperty("number", "Emissive", 0);
-    
+
     this.material = new THREE.MeshPhongMaterial({
       color: 0xFFFF00, emissive: 0xFFFFFF, emissiveIntensity : 0.0,
       side: THREE.DoubleSide});
 
-    this.materialMap = new Map();    
+    this.materialMap = new Map();
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
   }
@@ -57,7 +62,7 @@ BIMROCKET.ColorController = class extends BIMROCKET.Controller
     let maxValue = this.maxValue.value;
     let minColor = this.minColor.value;
     let maxColor = this.maxColor.value;
-    
+
     let factor;
     if (value <= minValue)
     {
@@ -75,7 +80,7 @@ BIMROCKET.ColorController = class extends BIMROCKET.Controller
       color = this.parseColor(minColor);
       color.lerp(this.parseColor(maxColor), factor);
     }
-    
+
     if (force || this.material.color.getHex() !== color.getHex())
     {
       this.material.color = color;
@@ -90,29 +95,29 @@ BIMROCKET.ColorController = class extends BIMROCKET.Controller
     color.set(colorString);
     return color;
   }
-  
+
   replaceMaterial()
   {
     let material = this.material;
     let materialMap = this.materialMap;
-    
+
     this.object.traverse(function(object)
     {
-      if (object instanceof BIMROCKET.Solid)
+      if (object instanceof Solid)
       {
         materialMap[object] = object.material;
         object.material = material;
       }
     });
   }
-  
+
   restoreMaterial()
   {
     let materialMap = this.materialMap;
-    
+
     this.object.traverse(function(object)
     {
-      if (object instanceof BIMROCKET.Solid)
+      if (object instanceof Solid)
       {
         let oldMaterial = materialMap[object];
         if (oldMaterial)
@@ -123,6 +128,8 @@ BIMROCKET.ColorController = class extends BIMROCKET.Controller
     });
     materialMap.clear();
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.ColorController);
+ControllerManager.addClass(ColorController);
+
+export { ColorController };

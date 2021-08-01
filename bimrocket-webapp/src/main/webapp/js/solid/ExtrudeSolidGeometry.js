@@ -1,8 +1,13 @@
 /*
  * ExtrudeSolidGeometry.js
+ *
+ * @author realor
  */
 
-BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import * as THREE from "../lib/three.module.js";
+
+class ExtrudeSolidGeometry extends SolidGeometry
 {
   constructor(shape, settings)
   {
@@ -235,3 +240,5 @@ BIMROCKET.ExtrudeSolidGeometry = class extends BIMROCKET.SolidGeometry
     }
   }
 };
+
+export { ExtrudeSolidGeometry };

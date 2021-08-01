@@ -1,23 +1,27 @@
-/*
+/**
  * Dialog.js
  *
- * author: realor
+ * @author: realor
  */
 
-BIMROCKET.Dialog = class
+import { Controls } from "./Controls.js";
+import { I18N } from "../i18n/I18N.js";
+
+class Dialog
 {
-  constructor(title, width, height)
+  constructor(title)
   {
+    this.title = title;
+    this.i18n = null;
+
     this.curtainElem = document.createElement("div");
     this.curtainElem.className = "dialog_curtain";
 
     this.dialogElem = document.createElement("div");
     this.dialogElem.className = "dialog";
-    this.dialogElem.style.width = width + "px";
-    this.dialogElem.style.height = height + "px";
 
     this.headerElem = document.createElement("div");
-    this.headerElem.innerHTML = title;
+    I18N.set(this.headerElem, "innerHTML", title);
     this.headerElem.className = "header";
     this.dialogElem.appendChild(this.headerElem);
 
@@ -28,11 +32,65 @@ BIMROCKET.Dialog = class
     this.footerElem = document.createElement("div");
     this.footerElem.className = "footer";
     this.dialogElem.appendChild(this.footerElem);
+
+    this.setSize(300, 200);
+  }
+
+  setSize(width, height)
+  {
+    this.dialogElem.style.width = width + "px";
+    this.dialogElem.style.height = height + "px";
+    return this;
+  }
+
+  setI18N(i18n)
+  {
+    this.i18n = i18n;
+    return this;
+  }
+
+  setClassName(className)
+  {
+    this.bodyElem.classList.add(className);
+    return this;
+  }
+
+  show(parentNode)
+  {
+    if (!this.dialogElem.parentNode)
+    {
+      if (this.i18n)
+      {
+        this.i18n.updateTree(this.dialogElem);
+      }
+      parentNode = parentNode || document.body;
+      parentNode.appendChild(this.curtainElem);
+      parentNode.appendChild(this.dialogElem);
+      if (this.onShow) this.onShow();
+    }
+    return this;
+  }
+
+  hide()
+  {
+    const parentNode = this.dialogElem.parentNode;
+    if (parentNode)
+    {
+      parentNode.removeChild(this.dialogElem);
+      parentNode.removeChild(this.curtainElem);
+      if (this.onHide) this.onHide();
+    }
+    return this;
   }
 
   addText(text, className)
   {
     return Controls.addText(this.bodyElem, text, className);
+  }
+
+  addTextWithArgs(text, args, className)
+  {
+    return Controls.addTextWithArgs(this.bodyElem, text, args, className);
   }
 
   addCode(text, className)
@@ -42,25 +100,31 @@ BIMROCKET.Dialog = class
 
   addTextField(name, label, value, className)
   {
-    return Controls.addTextField(this.bodyElem, name, label, value, 
+    return Controls.addTextField(this.bodyElem, name, label, value,
+      className || "text_field");
+  }
+
+  addTextAreaField(name, label, value, className)
+  {
+    return Controls.addTextAreaField(this.bodyElem, name, label, value,
       className || "text_field");
   }
 
   addPasswordField(name, label, value, className)
   {
-    return Controls.addPasswordField(this.bodyElem, name, label, value, 
+    return Controls.addPasswordField(this.bodyElem, name, label, value,
       className || "text_field");
   }
 
   addSelectField(name, label, options, value, className)
   {
-    return Controls.addSelectField(this.bodyElem, name, label, 
+    return Controls.addSelectField(this.bodyElem, name, label,
       options, value, className || "select_field");
   }
 
   addRadioButtons(name, options, value, className)
   {
-    return Controls.addRadioButtons(this.bodyElem, name, options, 
+    return Controls.addRadioButtons(this.bodyElem, name, options,
       value, className || "radio_buttons");
   }
 
@@ -68,26 +132,6 @@ BIMROCKET.Dialog = class
   {
     return Controls.addButton(this.footerElem, name, label, action);
   }
+}
 
-  show(parentNode)
-  {
-    if (!this.dialogElem.parentNode)
-    {
-      parentNode = parentNode || document.body;
-      parentNode.appendChild(this.curtainElem);
-      parentNode.appendChild(this.dialogElem);
-      if (this.onShow) this.onShow();
-    }
-  }
-
-  hide()
-  {
-    var parentNode = this.dialogElem.parentNode;
-    if (parentNode)
-    {
-      parentNode.removeChild(this.dialogElem);
-      parentNode.removeChild(this.curtainElem);
-      if (this.onHide) this.onHide();
-    }
-  }
-};
+export { Dialog };

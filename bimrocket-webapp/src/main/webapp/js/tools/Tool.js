@@ -1,10 +1,13 @@
-/* 
+/*
  * Tool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.Tool = class
+import * as THREE from "../lib/three.module.js";
+import { I18N } from "../i18n/I18N.js";
+
+class Tool
 {
   constructor(application)
   {
@@ -15,22 +18,22 @@ BIMROCKET.Tool = class
     this.className = "command";
     this.immediate = false;
   }
-  
+
   activate()
   {
     console.info("activate " + this.id);
   }
-  
+
   deactivate()
-  {    
+  {
     console.info("deactivate " + this.id);
   }
-      
+
   execute()
   {
     console.info("execute " + this.id);
   }
-      
+
   setOptions(options)
   {
     if (options)
@@ -41,19 +44,19 @@ BIMROCKET.Tool = class
       }
     }
   }
-  
+
   intersect(mousePosition, baseObject, recursive)
   {
-    var application = this.application;
-    var camera = application.camera;
-    var container = application.container;
-    var raycaster = new THREE.Raycaster();
+    const application = this.application;
+    const camera = application.camera;
+    const container = application.container;
+    const raycaster = new THREE.Raycaster();
 
-    var mousecc = new THREE.Vector2();
+    let mousecc = new THREE.Vector2();
     mousecc.x = (mousePosition.x / container.clientWidth) * 2 - 1;
     mousecc.y = -(mousePosition.y / container.clientHeight) * 2 + 1;
 
-    var ray, origin, vector;
+    let ray, origin, vector;
     if (camera instanceof THREE.OrthographicCamera)
     {
       vector = new THREE.Vector3(mousecc.x, mousecc.y, 0); // NDC
@@ -61,7 +64,7 @@ BIMROCKET.Tool = class
 
       origin = new THREE.Vector3();
       camera.localToWorld(origin); // world
-      var viewVector = new THREE.Vector3(0, 0, -1);
+      let viewVector = new THREE.Vector3(0, 0, -1);
       camera.localToWorld(viewVector); // world
       ray = viewVector.sub(origin);
       origin = vector;
@@ -80,13 +83,13 @@ BIMROCKET.Tool = class
     raycaster.set(origin, ray.normalize());
     raycaster.far = Math.Infinity;
 
-    var intersects = raycaster.intersectObjects([baseObject], recursive);
-    var i = 0;
-    var firstIntersect = null;
+    let intersects = raycaster.intersectObjects([baseObject], recursive);
+    let i = 0;
+    let firstIntersect = null;
     while (i < intersects.length && firstIntersect === null)
     {
-      var intersect = intersects[i];
-      var object = intersect.object;
+      let intersect = intersects[i];
+      let object = intersect.object;
       if (application.clippingPlane === null ||
           application.clippingPlane.distanceToPoint(intersect.point) > 0)
       {
@@ -96,29 +99,31 @@ BIMROCKET.Tool = class
     }
     return firstIntersect;
   }
-  
+
   isPathVisible(object)
   {
-    while (object !== null && object.visible) 
+    while (object !== null && object.visible)
     {
       object = object.parent;
     }
     return object === null;
   }
-  
+
   getMousePosition(event)
   {
     var x = event.offsetX || event.layerX;
     var y = event.offsetY || event.layerY;
     return new THREE.Vector2(x, y);
   }
-  
+
   isCanvasEvent(event)
   {
     if (this.application.menuBar.armed) return false;
-    
-    var target = event.target || event.srcElement;
+
+    const target = event.target || event.srcElement;
     return target.nodeName.toLowerCase() === "canvas";
-  }  
-};
+  }
+}
+
+export { Tool };
 

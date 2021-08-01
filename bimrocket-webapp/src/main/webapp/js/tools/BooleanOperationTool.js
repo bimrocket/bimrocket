@@ -1,10 +1,15 @@
 /*
  * BooleanOperationTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class BooleanOperationTool extends Tool
 {
   constructor(application, options)
   {
@@ -25,7 +30,7 @@ BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    var application = this.application;
+    const application = this.application;
     var objects = application.selection.roots;
     var operands = [];
     for (var i = 0; i < objects.length; i++)
@@ -33,26 +38,26 @@ BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
       var object = objects[i];
       if (object instanceof THREE.Mesh)
       {
-        var solid = new BIMROCKET.Solid(object2.geometry.clone());
+        var solid = new Solid(object.geometry.clone());
         object.matrixWorld.decompose(
           solid.position, solid.rotation, solid.scale);
         solid.updateMatrix();
         solid.updateMatrixWorld();
         operands.push(solid);
       }
-      else if (object instanceof BIMROCKET.Solid)
+      else if (object instanceof Solid)
       {
-        operands.push(object);        
+        operands.push(object);
       }
     }
     if (operands.length > 1)
     {
       let solid = operands.shift();
-      
-      let result = solid.booleanOperation(this.operation, 
+
+      let result = solid.booleanOperation(this.operation,
         operands, this.keepOperands);
       result.updateMatrix();
-      
+
       if (this.keepOperands)
       {
         if (this.keepParent)
@@ -61,7 +66,7 @@ BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
         }
         else
         {
-          application.addObject(result, application.baseObject, true);      
+          application.addObject(result, application.baseObject, true);
         }
         application.updateVisibility(solid, false);
         application.updateVisibility(operands, false);
@@ -71,10 +76,12 @@ BIMROCKET.BooleanOperationTool = class extends BIMROCKET.Tool
         // remove operands
         for (let i = 0; i < operands.length; i++)
         {
-          application.removeObject(operands[i]);          
+          application.removeObject(operands[i]);
         }
       }
       application.selection.set(result);
     }
   }
-};
+}
+
+export { BooleanOperationTool };

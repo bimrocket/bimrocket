@@ -1,10 +1,12 @@
 /*
  * CutTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.CutTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class CutTool extends Tool
 {
   constructor(application, options)
   {    
@@ -21,4 +23,6 @@ BIMROCKET.CutTool = class extends BIMROCKET.Tool
   {
     this.application.cutObjects();
   }
-};
+}
+
+export { CutTool };

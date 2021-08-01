@@ -1,19 +1,27 @@
 /**
  * MessageDialog.js
- * 
+ *
  * @author realor
  */
 
-BIMROCKET.MessageDialog = class extends BIMROCKET.Dialog
+import { Dialog } from "./Dialog.js";
+
+class MessageDialog extends Dialog
 {
-  constructor(title, message, className)
+  constructor(title, message, ...args)
   {
-    super(title, 300, 200);
-    let scope = this;
- 
-    this.bodyElem.classList.add(className);
-    this.addText(message);
-    let button = this.addButton("confirm_accept", "Accept", () => scope.hide());
+    super(title);
+
+    this.addTextWithArgs(message, args);
+    let button = this.addButton("confirm_accept", "button.accept",
+      () => this.hide());
     this.onShow = () => button.focus();
   }
-};
+
+  static create(title, message, ...args)
+  {
+    return new MessageDialog(title, message, ...args);
+  }
+}
+
+export { MessageDialog };

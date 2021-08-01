@@ -1,10 +1,14 @@
-/* 
+/*
  * MeasureSelectionTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.MeasureSelectionTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import { Dialog } from "../ui/Dialog.js";
+
+class MeasureSelectionTool extends Tool
 {
   constructor(application, options)
   {
@@ -13,7 +17,7 @@ BIMROCKET.MeasureSelectionTool = class extends BIMROCKET.Tool
     this.label = "tool.measure_selection.label";
     this.className = "measure_selection";
     this.setOptions(options);
-    
+
     this.immediate = true;
   }
 
@@ -23,12 +27,13 @@ BIMROCKET.MeasureSelectionTool = class extends BIMROCKET.Tool
     let volume = 0;
     let solids = 0;
 
-    const roots = this.application.selection.roots;
+    const application = this.application;
+    const roots = application.selection.roots;
     for (let object of roots)
     {
-      object.traverse(obj => 
+      object.traverse(obj =>
       {
-        if (obj instanceof BIMROCKET.Solid)
+        if (obj instanceof Solid)
         {
           if (obj.visible)
           {
@@ -39,17 +44,24 @@ BIMROCKET.MeasureSelectionTool = class extends BIMROCKET.Tool
         }
       });
     }
-    const decimals = this.application.decimals;
-    const units = " " + this.application.units;
-    const dialog = new BIMROCKET.Dialog("Measure selection", 240, 160);
-    dialog.addText("Solids: " + solids, "row");
-    dialog.addText("Area: " + area.toFixed(decimals) + units + "2", "row");
-    dialog.addText("Volume: " + volume.toFixed(decimals) + units +"3", "row");
+    const decimals = application.decimals;
+    const units = " " + application.units;
+    const dialog = new Dialog(this.label);
+    dialog.setSize(240, 160);
+    dialog.setI18N(application.i18n);
+    dialog.addTextWithArgs("message.solids_count", [solids], "row");
+    dialog.addTextWithArgs("message.solids_area",
+      [area.toFixed(decimals), units], "row");
+    dialog.addTextWithArgs("message.solids_volume",
+      [volume.toFixed(decimals), units], "row");
     let av = volume === 0 ? 0 : area/volume;
-    dialog.addText("Area/Volume: " + av.toFixed(decimals), "row");
-    let button = dialog.addButton("accept", "Accept", 
+    dialog.addTextWithArgs("message.solids_area_volume",
+      [av.toFixed(decimals)], "row");
+    let button = dialog.addButton("accept", "button.accept",
       () => dialog.hide());
     dialog.onShow = () => button.focus();
     dialog.show();
   }
-};
+}
+
+export { MeasureSelectionTool };

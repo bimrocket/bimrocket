@@ -1,38 +1,41 @@
 /**
+ * Outliner.js
+ *
  * @author realor
  */
-BIMROCKET.Outliner = class extends BIMROCKET.Panel
+
+import { Panel } from "./Panel.js";
+import * as THREE from "../lib/three.module.js";
+
+class Outliner extends Panel
 {
   constructor(application)
   {
     super(application);
     this.id = "outliner";
-    this.title = "Outliner";
     this.position = "right";
 
     this.selectedLabels = [];
     this.lastSelectedLabel = null;
     this.activeCameraLabel = null;
     this.cutLabels = [];
-    
-    const scope = this;
 
-    application.addEventListener("selection", function(event)
+    application.addEventListener("selection", event =>
     {
-      scope.updateSelection();
+      this.updateSelection();
     });
 
-    application.addEventListener("scene", function(event)
+    application.addEventListener("scene", event =>
     {
       if (event.type === "cut")
       {
-        for (let i = 0; i < scope.cutLabels.length; i++)
+        for (let i = 0; i < this.cutLabels.length; i++)
         {
-          let labelElem = scope.cutLabels[i];
+          let labelElem = this.cutLabels[i];
           labelElem._cut = false;
-          scope.updateLabelStyle(labelElem);
+          this.updateLabelStyle(labelElem);
         }
-        scope.cutLabels = [];
+        this.cutLabels = [];
         let objects = event.objects;
         for (let i = 0; i < objects.length; i++)
         {
@@ -40,8 +43,8 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
           let labelId = "ol-lab-" + object.id;
           let labelElem = document.getElementById(labelId);
           labelElem._cut = true;
-          scope.updateLabelStyle(labelElem);
-          scope.cutLabels.push(labelElem);
+          this.updateLabelStyle(labelElem);
+          this.cutLabels.push(labelElem);
         }
       }
       else if (event.type === "added")
@@ -50,14 +53,14 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
         let parentListElem = document.getElementById(parentListId);
         if (parentListElem)
         {
-          scope.populateList(event.object, parentListElem);
+          this.populateList(event.object, parentListElem);
         }
         else
         {
           let parentItemId = "ol-li-" + event.parent.id;
           let parentItemElem = document.getElementById(parentItemId);
           parentItemElem.innerHTML = "";
-          scope.populateItem(event.parent, parentItemElem);
+          this.populateItem(event.parent, parentItemElem);
         }
       }
       else if (event.type === "removed")
@@ -67,7 +70,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
         if (itemElem)
         {
           itemElem.parentNode.removeChild(itemElem);
-          if (scope.childCount(event.parent) === 0)
+          if (this.childCount(event.parent) === 0)
           {
             let buttonElemId = "ol-but-" + event.parent.id;
             let buttonElem = document.getElementById(buttonElemId);
@@ -86,15 +89,15 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       }
       else if (event.type === "pasted")
       {
-        for (let i = 0; i < scope.cutLabels.length; i++)
+        for (let i = 0; i < this.cutLabels.length; i++)
         {
-          let labelElem = scope.cutLabels[i];
+          let labelElem = this.cutLabels[i];
           labelElem._cut = false;
-          scope.updateLabelStyle(labelElem);
+          this.updateLabelStyle(labelElem);
         }
         if (event.objects.length > 0)
         {
-          scope.expandObject(event.objects[0]);
+          this.expandObject(event.objects[0]);
         }
       }
       else if (event.type === "nodeChanged")
@@ -105,7 +108,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
           let labelElem = document.getElementById(labelId);
           if (labelElem !== null)
           {
-            scope.updateLabel(labelElem, object);
+            this.updateLabel(labelElem, object);
           }
         }
       }
@@ -113,23 +116,24 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       {
         var labelId = "ol-lab-" + event.object.id;
         var labelElem = document.getElementById(labelId);
-        if (labelElem !== scope.activeCameraLabel)
+        if (labelElem !== this.activeCameraLabel)
         {
-          if (scope.activeCameraLabel !== null)
+          if (this.activeCameraLabel !== null)
           {
-            scope.activeCameraLabel._activeCamera = false;
-            scope.updateLabelStyle(scope.activeCameraLabel);
+            this.activeCameraLabel._activeCamera = false;
+            this.updateLabelStyle(this.activeCameraLabel);
           }
           labelElem._activeCamera = true;
-          scope.updateLabelStyle(labelElem);
-          scope.activeCameraLabel = labelElem;
+          this.updateLabelStyle(labelElem);
+          this.activeCameraLabel = labelElem;
         }
       }
       else if (event.type === "structureChanged")
       {
-        scope.update();
+        this.update();
       }
     });
+    this.title = "tool.outliner.label";
 
     if (application.scene) this.update();
   }
@@ -142,10 +146,10 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     this.bodyElem.appendChild(listElem);
     this.populateList(this.application.scene, listElem);
   }
-  
+
   getObjectClass(object)
   {
-    if (object.type === "Object3D" && 
+    if (object.type === "Object3D" &&
        object.userData.IFC && object.userData.IFC.ifcClassName)
     {
       return object.userData.IFC.ifcClassName;
@@ -153,7 +157,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     else
     {
       return object.type;
-    }    
+    }
   }
 
   populateList(object, parentListElem)
@@ -161,7 +165,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     let name = object.name;
     if (name === null || name === undefined || name === '')
       name = "object-" + object.id;
-    if (name.indexOf(BIMROCKET.HIDDEN_PREFIX) !== 0) // not hidden object
+    if (name.indexOf(THREE.Object3D.HIDDEN_PREFIX) !== 0) // not hidden object
     {
       // li
       let itemElem = document.createElement("li");
@@ -174,32 +178,30 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
 
   populateItem(object, itemElem)
   {
-    const scope = this;
-
     const buttonListener = function(event)
     {
       let buttonElem = event.srcElement || event.target;
-      buttonElem.className = (buttonElem.className === "expand") ? 
+      buttonElem.className = (buttonElem.className === "expand") ?
         "collapse" : "expand";
       let id = buttonElem.id.substring(7);
       let elem = document.getElementById("ol-ul-" + id);
       if (elem)
       {
-        elem.className = (elem.className === "expanded") ? 
+        elem.className = (elem.className === "expanded") ?
           "collapsed" : "expanded";
       }
     };
 
-    const labelListener = function(event)
+    const labelListener = event =>
     {
       var labelElem = event.srcElement || event.target;
       var objectIdString = labelElem.id.substring(7);
       var objectId = parseInt(objectIdString, 10);
       if (isNaN(objectId)) objectId = objectIdString;
-      scope.lastSelectedLabel = labelElem;
-      scope.selectObjectById(objectId, event);
-    };    
-    
+      this.lastSelectedLabel = labelElem;
+      this.selectObjectById(objectId, event);
+    };
+
     let hasChildren = this.childCount(object) > 0;
     // expand/collapse button
     if (hasChildren)
@@ -281,7 +283,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       }
     }
   }
-  
+
   expandObject(object)
   {
     var curr = object.parent;
@@ -295,7 +297,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       curr = curr.parent;
     }
   }
-    
+
   selectObjectById(objectId, event)
   {
     const application = this.application;
@@ -312,7 +314,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       this.updateSelection();
     }
   }
-    
+
   childCount(object)
   {
     var count = 0;
@@ -320,12 +322,12 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     for (var i = 0; i < children.length; i++)
     {
       var child = children[i];
-      if (child.name === null || 
-          child.name.indexOf(BIMROCKET.HIDDEN_PREFIX) !== 0) count++;
+      if (child.name === null ||
+          child.name.indexOf(THREE.Object3D.HIDDEN_PREFIX) !== 0) count++;
     }
     return count;
   }
-  
+
   updateLabel(labelElem, object)
   {
     var objectName = object.name;
@@ -340,7 +342,7 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
       labelElem._activeCamera = true;
       this.activeCameraLabel = labelElem;
     }
-    this.updateLabelStyle(labelElem);    
+    this.updateLabelStyle(labelElem);
   }
 
   updateLabelStyle(labelElem)
@@ -368,4 +370,6 @@ BIMROCKET.Outliner = class extends BIMROCKET.Panel
     }
     labelElem.className = classNames.join(" ");
   }
-};
+}
+
+export { Outliner };

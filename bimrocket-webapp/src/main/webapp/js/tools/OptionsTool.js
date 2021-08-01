@@ -1,10 +1,15 @@
 /*
  * OptionsTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Application } from "../ui/Application.js";
+import { Controls } from "../ui/Controls.js";
+import { I18N } from "../i18n/I18N.js";
+
+class OptionsTool extends Tool
 {
   constructor(application, options)
   {
@@ -21,24 +26,36 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
   {
     const application = this.application;
 
-    this.panel = application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = application.createPanel(this.label, "left", "panel_options");
+
+    // Language
+    const i18n = this.application.i18n;
+    this.languageSelect = Controls.addSelectField(this.panel.bodyElem,
+      "language", "label.language");
+    this.languageSelect.parentElement.className = "option_block inline";
+    this.languageSelect.addEventListener("change", () =>
+    {
+      let userLanguage = this.languageSelect.value;
+      i18n.userLanguages = userLanguage;
+      i18n.updateTree(this.application.element);
+      window.localStorage.setItem("bimrocket.language", userLanguage);
+    });
 
     // Units
-    this.unitsSelect = Controls.addSelectField(this.panel.bodyElem, "units", 
-    "Model units:", BIMROCKET.Application.UNITS);
-    this.unitsSelect.parentElement.className = "option_block";
+    this.unitsSelect = Controls.addSelectField(this.panel.bodyElem, "units",
+    "label.units", Application.UNITS);
+    this.unitsSelect.parentElement.className = "option_block inline";
 
-    this.unitsSelect.addEventListener("change", event => 
+    this.unitsSelect.addEventListener("change", () =>
       application.units = this.unitsSelect.value);
 
     // Decimals
-    this.decimalsElem = Controls.addNumberField(this.panel.bodyElem, "decimals", 
-    "Decimals to display:");
-    this.decimalsElem.parentElement.className = "option_block";
+    this.decimalsElem = Controls.addNumberField(this.panel.bodyElem, "decimals",
+    "label.decimals");
+    this.decimalsElem.parentElement.className = "option_block inline";
     this.decimalsElem.min = 0;
     this.decimalsElem.max = 15;
-    this.decimalsElem.addEventListener("change", event => 
+    this.decimalsElem.addEventListener("change", () =>
       application.decimals = parseInt(this.decimalsElem.value));
 
     // Frame rate divisor
@@ -51,7 +68,7 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     frdElem.appendChild(frdValueDiv);
 
     const frdLabel = document.createElement("label");
-    frdLabel.innerHTML = "Frame rate divisor:";
+    I18N.set(frdLabel, "innerHTML", "label.fr_divisor");
     frdLabel.htmlFor = "frd_range";
     frdValueDiv.appendChild(frdLabel);
 
@@ -79,15 +96,15 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
       () => this.frdValue.innerHTML = this.frdRange.value, false);
 
     this.frdRange.addEventListener("change",
-      () => application.frameRateDivisor = parseInt(this.frdRange.value), 
+      () => application.frameRateDivisor = parseInt(this.frdRange.value),
       false);
 
     // Selection Paint mode
 
-    this.selPaintModeSelect = Controls.addSelectField(this.panel.bodyElem, 
-      "selpaint_mode", "Selection paint mode:", 
-      [[BIMROCKET.Application.EDGES_SELECTION, "Edges"], 
-       [BIMROCKET.Application.FACES_SELECTION, "Faces"]], null, 
+    this.selPaintModeSelect = Controls.addSelectField(this.panel.bodyElem,
+      "selpaint_mode", "label.sel_paint_mode",
+      [[Application.EDGES_SELECTION, "option.edges"],
+       [Application.FACES_SELECTION, "option.faces"]], null,
      "option_block inline");
 
     this.selPaintModeSelect.addEventListener("change", event =>
@@ -97,29 +114,28 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     });
 
     // Enable/disable deep selection visualization
-    
 
-    this.deepSelCheckBox = Controls.addInputField(this.panel.bodyElem, 
-      "checkbox", "deep_sel", "Show deep selection:");
+    this.deepSelCheckBox = Controls.addInputField(this.panel.bodyElem,
+      "checkbox", "deep_sel", "label.show_deep_sel");
     this.deepSelCheckBox.style = "vertical-align:middle";
     this.deepSelCheckBox.parentElement.className = "option_block";
     this.deepSelCheckBox.addEventListener("change", event =>
       application.showDeepSelection = this.deepSelCheckBox.checked);
-    
+
     // Enable/disable local axes visualization
 
-    this.localAxesCheckBox = Controls.addInputField(this.panel.bodyElem, 
-      "checkbox", "local_axes", "Show local axes:");
+    this.localAxesCheckBox = Controls.addInputField(this.panel.bodyElem,
+      "checkbox", "local_axes", "label.show_local_axes");
     this.localAxesCheckBox.style = "vertical-align:middle";
     this.localAxesCheckBox.parentElement.className = "option_block";
     this.localAxesCheckBox.addEventListener("change", event =>
       application.showLocalAxes = this.localAxesCheckBox.checked);
-    
+
     // Background color
-    
-    this.backSelect = Controls.addSelectField(this.panel.bodyElem, 
-      "backcolor_sel", "Background color:", 
-      [["solid", "Solid"], ["gradient", "Gradient"]], 
+
+    this.backSelect = Controls.addSelectField(this.panel.bodyElem,
+      "backcolor_sel", "label.background_color",
+      [["solid", "option.solid"], ["gradient", "option.gradient"]],
       null, "option_block stack");
     const backColorElem = this.backSelect.parentElement;
 
@@ -165,8 +181,9 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.backColorInput2.addEventListener("input", event =>
       application.backgroundColor2 = this.backColorInput2.value, false);
 
-    this.panelOpacityRange = Controls.addInputField(this.panel.bodyElem, 
-      "range", "panelopac_range", "Panel opacity:", null, "option_block stack");
+    this.panelOpacityRange = Controls.addInputField(this.panel.bodyElem,
+      "range", "panelopac_range", "label.panel_opacity",
+      null, "option_block stack");
     this.panelOpacityRange.min = 1;
     this.panelOpacityRange.max = 100;
     this.panelOpacityRange.step = 1;
@@ -175,8 +192,8 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
     this.panelOpacityRange.style.marginLeft = "auto";
     this.panelOpacityRange.style.marginRight = "auto";
 
-    this.panelOpacityRange.addEventListener("input", () => 
-      application.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value), 
+    this.panelOpacityRange.addEventListener("input", () =>
+      application.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value),
       false);
   }
 
@@ -200,7 +217,13 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
       this.backColorInput2.style.display = "";
     }
 
-    console.info(application.units);
+    const i18n = application.i18n;
+    let supportedLanguages = Array.from(i18n.supportedLanguages);
+    let userLanguage = i18n.requestedLanguages[0];
+    let intl = new Intl.DisplayNames([userLanguage], { type: "language" });
+    supportedLanguages = supportedLanguages.map(lang => [lang, intl.of(lang)]);
+    Controls.setSelectOptions(this.languageSelect, supportedLanguages);
+    this.languageSelect.value = userLanguage;
     this.unitsSelect.value = application.units;
     this.decimalsElem.value = application.decimals;
     this.frdValue.innerHTML = application.frameRateDivisor;
@@ -215,4 +238,6 @@ BIMROCKET.OptionsTool = class extends BIMROCKET.Tool
   {
     this.panel.visible = false;
   }
-};
+}
+
+export { OptionsTool };

@@ -1,27 +1,30 @@
 /*
  * SolidGeometry.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
+import * as THREE from "../lib/three.module.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+
+class SolidGeometry extends THREE.BufferGeometry
 {
   static INDEXED_TRIANGLES = 0;
   static TRIANGLE_SOUP = 1;
-  
+
   constructor()
   {
     super();
     this.type = "SolidGeometry";
     this.vertices = []; // THREE.Vector3
-    this.faces = []; // BIMROCKET.Face
+    this.faces = []; // Face
     this.isManifold = false;
-    this.generationMode = this.constructor.TRIANGLE_SOUP;
+    this.generationMode = SolidGeometry.TRIANGLE_SOUP;
   }
 
   addFace(...vertices)
   {
-    let face = new BIMROCKET.Face(this);
+    let face = new Face(this);
     for (let i = 0; i < vertices.length; i++)
     {
       let vertex = vertices[i];
@@ -217,7 +220,7 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
                 edgeMap.removeEdge(v1, v2);
                 edgeMap.addEdge(v1, v3, face);
                 edgeMap.addEdge(v3, v2, face);
-                
+
                 return;
               }
             }
@@ -251,17 +254,17 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
     let vertices = this.vertices;
     let faces = this.faces;
 
-    let edgeMap = new BIMROCKET.EdgeMap(this);
+    let edgeMap = new EdgeMap(this);
     if (debug) console.info("edgeMap", edgeMap);
 
     if (edgeMap.badEdgeCount > 0)
     {
       let badEdgeCount1 = edgeMap.badEdgeCount;
-      let vectorMap = new BIMROCKET.VectorMap(edgeMap, vectorPrecision);
+      let vectorMap = new VectorMap(edgeMap, vectorPrecision);
       if (debug) console.info("vectorMap", vectorMap);
 
       this.faces = breakFaces(edgeMap, vectorMap,
-        vertices, faces, distanceToEdge);      
+        vertices, faces, distanceToEdge);
 
       let badEdgeCount2 = edgeMap.badEdgeCount;
 
@@ -277,7 +280,7 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
 
         let badEdgeCount3 = edgeMap.badEdgeCount;
 
-        console.info(">>> " + badEdgeCount1, badEdgeCount2, badEdgeCount3); 
+        console.info(">>> " + badEdgeCount1, badEdgeCount2, badEdgeCount3);
       }
     }
 
@@ -297,7 +300,7 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
 
   copy(geometry)
   {
-    if (geometry instanceof BIMROCKET.SolidGeometry)
+    if (geometry instanceof SolidGeometry)
     {
       this.vertices = [];
       for (let v = 0; v < geometry.vertices.length; v++)
@@ -308,7 +311,7 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
       for (let f = 0; f < geometry.faces.length; f++)
       {
         let face = geometry.faces[f];
-        let newFace = new BIMROCKET.Face(this);
+        let newFace = new Face(this);
         newFace.indices = face.indices.slice();
         newFace.normal = face.normal ? face.normal.clone() : null;
         this.faces.push(newFace);
@@ -317,31 +320,31 @@ BIMROCKET.SolidGeometry = class extends THREE.BufferGeometry
     }
     else if (geometry instanceof THREE.BufferGeometry)
     {
-      this.vertices =
-        BIMROCKET.GeometryUtils.getBufferGeometryVertices(geometry);
+      this.vertices = GeometryUtils.getBufferGeometryVertices(geometry);
 
-      const scope = this;
-      const addFace = function(va, vb, vc)
+      const addFace = (va, vb, vc) =>
       {
-        scope.addFace(va, vb, vc);
+        this.addFace(va, vb, vc);
       };
 
-      BIMROCKET.GeometryUtils.getBufferGeometryFaces(geometry, addFace);
+      GeometryUtils.getBufferGeometryFaces(geometry, addFace);
       this.isManifold = false;
     }
   }
 
   clone()
   {
-    var geometry = new BIMROCKET.SolidGeometry();
+    var geometry = new SolidGeometry();
     geometry.copy(this);
     geometry.update();
 
     return geometry;
   }
-};
+}
 
-BIMROCKET.Face = class
+/* Face */
+
+class Face
 {
   constructor(geometry) // SolidGeometry
   {
@@ -410,9 +413,11 @@ BIMROCKET.Face = class
       this.normal = normal;
     }
   }
-};
+}
 
-BIMROCKET.EdgeMap = class
+/* EdgeMap */
+
+class EdgeMap
 {
   constructor(geometry) // SolidGeometry
   {
@@ -542,9 +547,11 @@ BIMROCKET.EdgeMap = class
 
     return edgesGeometry;
   }
-};
+}
 
-BIMROCKET.VectorMap = class
+/* VectorMap */
+
+class VectorMap
 {
   constructor(edgeMap, vectorPrecision = 3)
   {
@@ -632,6 +639,7 @@ BIMROCKET.VectorMap = class
     }
     return x + "," + y + "," + z;
   }
-};
+}
 
+export { SolidGeometry, Face, EdgeMap, VectorMap };
 

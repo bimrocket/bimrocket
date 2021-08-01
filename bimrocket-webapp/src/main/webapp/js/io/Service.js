@@ -1,11 +1,14 @@
 /**
+ * Service.js
+ *
  * @author realor
  */
-BIMROCKET.Service = class
+
+class Service
 {
   static type = "Service";
-  
-  constructor(name, description = null, 
+
+  constructor(name, description = null,
     url = null, username = null, password = null)
   {
     this.name = name;
@@ -19,9 +22,11 @@ BIMROCKET.Service = class
   {
     return this;
   }
-  
+
   setParameters(parameters)
   {
     Object.assign(this, parameters);
   }
-};
+}
+
+export { Service };

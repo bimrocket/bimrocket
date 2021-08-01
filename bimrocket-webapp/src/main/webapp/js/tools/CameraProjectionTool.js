@@ -1,10 +1,13 @@
 /*
  * CameraProjectionTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.CameraProjectionTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+
+class CameraProjectionTool extends Tool
 {
   constructor(application, options)
   {
@@ -29,6 +32,8 @@ BIMROCKET.CameraProjectionTool = class extends BIMROCKET.Tool
       application.activateCamera(application.perspectiveCamera);      
     }
   }
-};
+}
+
+export { CameraProjectionTool };
 
 

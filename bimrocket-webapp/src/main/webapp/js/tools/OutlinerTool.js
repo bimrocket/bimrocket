@@ -1,10 +1,13 @@
 /*
  * OutlinerTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.OutlinerTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Outliner } from "../ui/Outliner.js";
+
+class OutlinerTool extends Tool
 {
   constructor(application, options)
   {
@@ -15,10 +18,16 @@ BIMROCKET.OutlinerTool = class extends BIMROCKET.Tool
     this.className = "outliner";
     this.immediate = true;
     this.setOptions(options);
+
+    this.panel = new Outliner(this.application);
+    application.panelManager.addPanel(this.panel);
+    this.panel.visible = true;
   }
 
   execute()
   {
-    this.application.outliner.visible = true;
+    this.panel.visible = true;
   }
-};
+}
+
+export { OutlinerTool };

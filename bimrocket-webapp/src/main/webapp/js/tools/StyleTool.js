@@ -1,10 +1,12 @@
 /*
  * StyleTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.StyleTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class StyleTool extends Tool
 {
   constructor(application, options)
   {
@@ -24,4 +26,6 @@ BIMROCKET.StyleTool = class extends BIMROCKET.Tool
   {
     this.application.updateStyle(null, this.edgesVisible, this.facesVisible);
   }
-};
+}
+
+export { StyleTool };

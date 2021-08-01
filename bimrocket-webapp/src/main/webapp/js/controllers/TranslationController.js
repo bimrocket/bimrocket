@@ -1,25 +1,28 @@
 /*
  * TranslationController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.TranslationController = class extends BIMROCKET.AnimationController
+import { AnimationController } from "./AnimationController.js";
+import { ControllerManager } from "./ControllerManager.js";
+
+class TranslationController extends AnimationController
 {
   static type = "TranslationController";
   static description = "Translates an object.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
-    
+
     let minPosition = object.position.x;
     let maxPosition = object.position.x + 1;
 
     this.axis = this.createProperty("string", "Axis (x, y or z)", "x");
-    this.minPosition = this.createProperty("number", "Min. position", 
+    this.minPosition = this.createProperty("number", "Min. position",
       minPosition);
-    this.maxPosition = this.createProperty("number", "Max. position", 
+    this.maxPosition = this.createProperty("number", "Max. position",
       maxPosition);
     this.minValue = this.createProperty("number", "Min. value", 0);
     this.maxValue = this.createProperty("number", "Max. value", 1);
@@ -30,10 +33,10 @@ BIMROCKET.TranslationController = class extends BIMROCKET.AnimationController
   {
     let value = this.input.value;
     if (value === null) return;
-    
+
     value = parseFloat(value);
     if (typeof value !== "number") return;
-    
+
     let axis = this.axis.value || "x";
     let minValue = parseFloat(this.minValue.value);
     let maxValue = parseFloat(this.maxValue.value);
@@ -56,9 +59,11 @@ BIMROCKET.TranslationController = class extends BIMROCKET.AnimationController
       else if (speed < -maxSpeed) speed = -maxSpeed;
       this.object.position[axis] += speed * event.delta;
       this.object.updateMatrix();
-      this.application.notifyObjectUpdated(this.object);    
+      this.application.notifyObjectUpdated(this.object);
     }
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.TranslationController);
+ControllerManager.addClass(TranslationController);
+
+export { TranslationController };

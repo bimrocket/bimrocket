@@ -3,7 +3,10 @@
  *
  * @author realor
  */
-BIMROCKET.Expression = class
+
+import { Application } from "../ui/Application.js";
+
+class Expression
 {
   constructor(application, owner, type, label, value, definition)
   {
@@ -150,4 +153,6 @@ BIMROCKET.Expression = class
       }
     }
   }
-};
+}
+
+export { Expression };

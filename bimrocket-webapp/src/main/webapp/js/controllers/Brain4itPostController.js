@@ -1,14 +1,18 @@
 /*
  * Brain4itPostController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.Brain4itPostController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { Brain4it } from "../lib/Brain4it.js"
+
+class Brain4itPostController extends Controller
 {
   static type = "Brain4itPostController";
   static description = "Posts a value to Brain4it.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
@@ -20,7 +24,7 @@ BIMROCKET.Brain4itPostController = class extends BIMROCKET.Controller
     this.input = this.createProperty("number", "Input value");
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
-    this.value = null;    
+    this.value = null;
   }
 
   onStart()
@@ -61,6 +65,8 @@ BIMROCKET.Brain4itPostController = class extends BIMROCKET.Controller
     let client = new Brain4it.Client(url, module + "/" + func);
     client.send(value);
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.Brain4itPostController);
+ControllerManager.addClass(Brain4itPostController);
+
+export { Brain4itPostController };

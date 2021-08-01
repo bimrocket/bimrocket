@@ -1,10 +1,15 @@
-/* 
+/*
  * AboutTool.js
- * 
- * @autor: realor
+ *
+ * @author: realor
  */
 
-BIMROCKET.AboutTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Dialog } from "../ui/Dialog.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class AboutTool extends Tool
 {
   constructor(application, options)
   {
@@ -13,14 +18,17 @@ BIMROCKET.AboutTool = class extends BIMROCKET.Tool
     this.label = "tool.about.label";
     this.className = "about";
     this.setOptions(options);
-    
+
     this.immediate = true;
   }
 
   execute()
   {
+    const application = this.application;
+    const appName = application.constructor.NAME;
+    const appVersion = application.constructor.VERSION;
     let report = [];
-    report.push(["BIMROCKET version", BIMROCKET.VERSION]);
+    report.push([appName + " version", appVersion]);
     report.push(["ThreeJS revision", THREE.REVISION]);
     if (!window.WebGLRenderingContext)
     {
@@ -29,11 +37,11 @@ BIMROCKET.AboutTool = class extends BIMROCKET.Tool
     else
     {
       report.push(["WebGL status", "OK"]);
-      var canvas = document.createElement('canvas');
+      let canvas = document.createElement('canvas');
       canvas.width = 1;
       canvas.height = 1;
       document.body.appendChild(canvas);
-      var gl;
+      let gl;
       gl = canvas.getContext('webgl');
       if (!gl)
       {
@@ -67,14 +75,18 @@ BIMROCKET.AboutTool = class extends BIMROCKET.Tool
         report[i][0] + ':</td><td style="width:60%">' + report[i][1] + '</td>';
       text += '</tr>';
     }
-    text += '</table>';   
-    
-    const dialog = new BIMROCKET.Dialog("About", 340, 300);
+    text += '</table>';
+
+    const dialog = new Dialog(this.label);
+    dialog.setSize(340, 300);
+    dialog.setI18N(application.i18n);
     dialog.bodyElem.innerHTML = text;
-    
-    let button = dialog.addButton("accept", "Accept", 
+
+    let button = dialog.addButton("accept", "button.accept",
       () => dialog.hide());
     dialog.onShow = () => button.focus();
     dialog.show();
   }
-};
+}
+
+export { AboutTool };

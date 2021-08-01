@@ -1,11 +1,16 @@
-BIMROCKET.IOService = class extends BIMROCKET.Service
+/**
+ * IOService.js
+ *
+ * @author realor
+ */
+
+import { Service } from "./Service.js";
+
+class IOService extends Service
 {
   static type = "io";
-  static SERVICE_TYPES =
-    [["WebdavService", "Webdav service"], 
-     ["ComponentService", "Component service"]];
-  
-  constructor(name, description = null, 
+
+  constructor(name, description = null,
     url = null, username = null, password = null)
   {
     super(name, description, url, username, password);
@@ -13,46 +18,40 @@ BIMROCKET.IOService = class extends BIMROCKET.Service
 
   open(path, options, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
 
   save(object, path, options, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
 
   download(path, options, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
 
   upload(data, path, options, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
-  
+
   remove(path, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
 
   makeCollection(path, readyCallback, progressCallback)
   {
-    readyCallback(new BIMROCKET.IOResult(BIMROCKET.IOResult.ERROR,
-      "Not implemented."));
+    readyCallback(new IOResult(IOResult.ERROR, "Not implemented."));
   }
-};
+}
 
-BIMROCKET.IOResult = class
+class IOResult
 {
   static OK = 0;
   static ERROR = 1;
-  
+
   constructor(status, message, path, metadata, entries, object, data)
   {
     this.status = status;
@@ -63,9 +62,9 @@ BIMROCKET.IOResult = class
     this.object = object; // Object3D
     this.data = data; // object data
   }
-};
+}
 
-BIMROCKET.IOMetadata = class
+class IOMetadata
 {
   static COLLECTION = 1;
   static OBJECT = 2;
@@ -77,4 +76,6 @@ BIMROCKET.IOMetadata = class
     this.type = type;
     this.size = size;
   }
-};
+}
+
+export {IOService, IOResult, IOMetadata };

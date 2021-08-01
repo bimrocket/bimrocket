@@ -1,10 +1,12 @@
-
 /**
-* @author realor
-*/
-BIMROCKET.STEP = {};
+ * STEP.js
+ *
+ * @author realor
+ */
 
-BIMROCKET.STEP.File = class
+const HEADER_SCHEMA = {};
+
+class STEPFile
 {
   name = null;
   description = null;
@@ -14,18 +16,18 @@ BIMROCKET.STEP.File = class
   references = [];
 };
 
-BIMROCKET.STEP.Parser = class
+class STEPParser
 {
   schema = null; // classes map
   getSchemaTypes = null; // called to get schema types
   onEntityCreated = null; // called each time an entity is created
-    
+
   decodeSTEPString(str)
   {
     return str.replace(/\\X2\\[\dA-F]{4}\\X0\\|\\X\\[\dA-F]{2}/gi,
       function (match)
       {
-        var code = match.length === 12 ? 
+        var code = match.length === 12 ?
           match.substring(4, 8) : match.substring(3, 5);
         return String.fromCharCode(parseInt(code, 16));
       });
@@ -34,8 +36,7 @@ BIMROCKET.STEP.Parser = class
   parse(text)
   {
     const t0 = Date.now();
-    const file = new BIMROCKET.STEP.File();
-    const STEP = BIMROCKET.STEP.schema;
+    const file = new STEPFile();
     let tags = file.tags;
     let references = file.references;
     let lineCount = 0;
@@ -97,8 +98,8 @@ BIMROCKET.STEP.Parser = class
         else if (ch === '(')
         {
           let typeName = token.length > 0 ? token.toUpperCase() : "Array";
-          let schema = tag ? this.schema : STEP;
-          let newBuilder = new BIMROCKET.STEP.Builder(typeName, schema);
+          let schema = tag ? this.schema : HEADER_SCHEMA;
+          let newBuilder = new STEPBuilder(typeName, schema);
 
           if (builder) // previous builder
           {
@@ -112,7 +113,7 @@ BIMROCKET.STEP.Parser = class
         {
           if (builder === null)
           {
-            console.warn("Parsing error: " + stepString);
+            console.warn("Parse error in line " + (lineCount + 1));
             return null;
           }
 
@@ -130,7 +131,7 @@ BIMROCKET.STEP.Parser = class
             {
               if (builder.instance)
               {
-                references.push(new BIMROCKET.STEP.Reference(builder, token));
+                references.push(new STEPReference(builder, token));
               }
               builder.add(null);
             }
@@ -150,7 +151,6 @@ BIMROCKET.STEP.Parser = class
         }
         else if (ch === ';')
         {
-          lineCount++;
           if (tag)
           {
             if (builder && builder.instance)
@@ -167,32 +167,40 @@ BIMROCKET.STEP.Parser = class
             if (builder)
             {
               let instance = builder.instance;
-              if (instance instanceof STEP.FILE_SCHEMA)
+              if (instance instanceof FILE_SCHEMA)
               {
                 file.schema = instance;
                 let schemaName = file.schema.Schemas[0];
-                if (file.getSchemaTypes)
+                if (this.getSchemaTypes)
                 {
                   this.schema = this.getSchemaTypes(schemaName);
                 }
               }
-              else if (instance instanceof STEP.FILE_NAME)
+              else if (instance instanceof FILE_NAME)
               {
                 file.name = instance;
               }
-              else if (instance instanceof STEP.FILE_DESCRIPTION)
+              else if (instance instanceof FILE_DESCRIPTION)
               {
                 file.description = instance;
-              }              
+              }
             }
           }
           token = "";
           tag = null;
           builder = null;
         }
-        else if (ch === '\n' || ch === '\r' || ch === '\t')
+        else if (ch === '\t')
         {
           // ignore
+        }
+        else if (ch === '\n')
+        {
+          if (i === 0 || (i > 0 && text[i - 1] !== '\r')) lineCount++;
+        }
+        else if (ch === '\r')
+        {
+          if (i === 0 || (i > 0 && text[i - 1] !== '\n')) lineCount++;
         }
         else if (ch === '=')
         {
@@ -222,7 +230,7 @@ BIMROCKET.STEP.Parser = class
       let referencedInstance = tags[reference.tag] || null;
       if (reference.property)
       {
-        instance[reference.property] = referencedInstance;      
+        instance[reference.property] = referencedInstance;
       }
       else // Array
       {
@@ -231,14 +239,14 @@ BIMROCKET.STEP.Parser = class
       }
     }
     const t1 = Date.now();
-    console.info("STEP File parsed in " + (t1 - t0) + " millis.");        
-    console.info("File contains " + lineCount + " lines.");    
+    console.info("STEP File parsed in " + (t1 - t0) + " millis.");
+    console.info("File contains " + lineCount + " lines.");
 
     return file;
   }
 };
 
-BIMROCKET.STEP.Builder = class
+class STEPBuilder
 {
   constructor(typeName, schema)
   {
@@ -249,7 +257,7 @@ BIMROCKET.STEP.Builder = class
     }
     else
     {
-      let cls = schema ? schema[typeName] : BIMROCKET.STEP.schema[typeName];
+      let cls = schema ? schema[typeName] : HEADER_SCHEMA[typeName];
       if (cls)
       {
         this.instance = new cls();
@@ -259,7 +267,7 @@ BIMROCKET.STEP.Builder = class
       {
         this.instance = null;
         console.warn("Unsupported entity " + typeName);
-      }          
+      }
     }
   }
 
@@ -278,32 +286,27 @@ BIMROCKET.STEP.Builder = class
   }
 };
 
-BIMROCKET.STEP.Reference = class
+class STEPReference
 {
   constructor(builder, tag)
   {
     this.instance = builder.instance;
     this.index = builder.index;
     this.tag = tag; // #<number>
-    this.property = builder.properties ? 
+    this.property = builder.properties ?
       builder.properties[builder.index] : null;
   }
 };
 
-(function() {
-let STEP = BIMROCKET.STEP.schema = {};
+/* STEP header elements */
 
-STEP.BASE = class
-{
-};
-
-STEP.FILE_DESCRIPTION = class extends STEP.BASE
+class FILE_DESCRIPTION
 {
   Description = null;
   ImplementationLevel = null;
 };
 
-STEP.FILE_NAME = class extends STEP.BASE
+class FILE_NAME
 {
   Name = null;
   TimeStamp = null;
@@ -314,10 +317,13 @@ STEP.FILE_NAME = class extends STEP.BASE
   Other = null;
 };
 
-STEP.FILE_SCHEMA = class extends STEP.BASE
+class FILE_SCHEMA
 {
   Schemas = null;
 };
 
-})();
+HEADER_SCHEMA.FILE_DESCRIPTION = FILE_DESCRIPTION;
+HEADER_SCHEMA.FILE_NAME = FILE_NAME;
+HEADER_SCHEMA.FILE_SCHEMA = FILE_SCHEMA;
 
+export { STEPParser, STEPFile };

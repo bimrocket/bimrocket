@@ -1,10 +1,15 @@
 /*
  * WFSController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.WFSController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+import { ControllerManager } from "./ControllerManager.js";
+import { GMLLoader } from "../io/gis/GMLLoader.js";
+import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
+
+class WFSController extends Controller
 {
   static type = "WFSController";
   static description = "Loads geometry from a Web Feature Service.";
@@ -64,11 +69,11 @@ BIMROCKET.WFSController = class extends BIMROCKET.Controller
     var loader;
     if (format === "GML")
     {
-      loader = new BIMROCKET.GMLLoader();    
+      loader = new GMLLoader();
     }
     else
     {
-      loader = new BIMROCKET.GeoJSONLoader();
+      loader = new GeoJSONLoader();
     }
     url += "&service=wfs&version=2.0.0&request=GetFeature&outputFormat=" +
       loader.mimeType + "&typeName=" + layer;
@@ -98,6 +103,8 @@ BIMROCKET.WFSController = class extends BIMROCKET.Controller
 
     loader.load(url, this._onLoad, this._onProgress, this._onError);
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.WFSController);
+ControllerManager.addClass(WFSController);
+
+export { WFSController };

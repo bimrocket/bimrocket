@@ -1,10 +1,12 @@
 /*
  * RemoveTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.RemoveTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class RemoveTool extends Tool
 {
   constructor(application, options)
   {
@@ -30,4 +32,6 @@ BIMROCKET.RemoveTool = class extends BIMROCKET.Tool
       }
     }
   }
-};
+}
+
+export { RemoveTool };

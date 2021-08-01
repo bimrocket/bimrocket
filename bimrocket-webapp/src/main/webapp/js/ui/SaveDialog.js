@@ -1,49 +1,54 @@
 /*
  * SaveDialog.js
  *
- * author: realor
+ * @author: realor
  */
 
-BIMROCKET.SaveDialog = class extends BIMROCKET.Dialog
+import { Dialog } from "./Dialog.js";
+import { IOManager } from "../io/IOManager.js";
+
+class SaveDialog extends Dialog
 {
   static DEFAULT_EXPORT_FORMAT = "dae";
-  
+
   constructor(title, name)
   {
-    super(title, 240, 200);
+    super(title);
+
+    this.setSize(240, 200);
 
     if (name === "")
     {
       name = "scene";
-    }    
-    this.nameElem = this.addTextField("saveEntryName", "Name:", name);
+    }
+    this.nameElem = this.addTextField("saveEntryName", "label.name", name);
 
-    this.addButton("save", "Save", () => 
+    this.addButton("save", "button.save", () =>
     {
       this.hide();
       this.setExtension(this.formatSelect.value);
       this.onSave(this.nameElem.value, this.formatSelect.value, false);
     });
     let options = [];
-    for (let formatName in BIMROCKET.IOManager.formats)
+    for (let formatName in IOManager.formats)
     {
-      let format = BIMROCKET.IOManager.formats[formatName];
+      let format = IOManager.formats[formatName];
       if (format.exporterClass)
       {
         options.push([formatName, format.description]);
       }
     }
-    let formatInfo = BIMROCKET.IOManager.getFormatInfo(name);
+    let formatInfo = IOManager.getFormatInfo(name);
     let format = formatInfo && formatInfo.exporterClass ?
-      formatInfo.extension : BIMROCKET.SaveDialog.DEFAULT_EXPORT_FORMAT;
+      formatInfo.extension : SaveDialog.DEFAULT_EXPORT_FORMAT;
     this.setExtension(format);
 
-    this.formatSelect = this.addSelectField("saveFormat", "Format:", 
+    this.formatSelect = this.addSelectField("saveFormat", "label.format",
       options, format);
-    this.formatSelect.addEventListener("change", 
+    this.formatSelect.addEventListener("change",
       event => this.setExtension(this.formatSelect.value));
-        
-    this.cancelButton = this.addButton("cancel", "Cancel", 
+
+    this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());
   }
 
@@ -51,17 +56,17 @@ BIMROCKET.SaveDialog = class extends BIMROCKET.Dialog
   {
     this.nameElem.focus();
   }
-  
+
   onSave(name, format, onlySelection)
   {
     console.info("save " + name + " " + format + " " + onlySelection);
   }
-  
+
   onCancel()
   {
     this.hide();
   }
-  
+
   setExtension(extension)
   {
     let name = this.nameElem.value;
@@ -76,4 +81,6 @@ BIMROCKET.SaveDialog = class extends BIMROCKET.Dialog
     }
     this.nameElem.value = name;
   }
-};
+}
+
+export { SaveDialog };

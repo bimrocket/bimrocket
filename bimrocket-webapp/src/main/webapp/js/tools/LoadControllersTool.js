@@ -1,10 +1,14 @@
 /*
  * LoadControllersTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.LoadControllersTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { ControllerManager } from "../controllers/ControllerManager.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+
+class LoadControllersTool extends Tool
 {
   constructor(application, options)
   {
@@ -15,7 +19,7 @@ BIMROCKET.LoadControllersTool = class extends BIMROCKET.Tool
     this.setOptions(options);
 
     this._onChange = this.onChange.bind(this);
-    this._onFocus = this.onFocus.bind(this);  
+    this._onFocus = this.onFocus.bind(this);
   }
 
   activate()
@@ -44,31 +48,30 @@ BIMROCKET.LoadControllersTool = class extends BIMROCKET.Tool
 
   onChange(event)
   {
-    const scope = this;
     let files = this.inputFile.files;
     if (files.length > 0)
     {
       let file = files[0];
       let reader = new FileReader();
       const application = this.application;
-      reader.onload = function(evt)
+      reader.onload = evt =>
       {
         let data = evt.target.result;
-        scope.loadControllers(data);
+        this.loadControllers(data);
       };
       reader.readAsText(file);
     }
   }
-  
+
   onFocus(event)
   {
     this.application.useTool(null);
   }
-  
+
   loadControllers(text)
   {
-    let application = this.application;
-    let scene = application.scene;
+    const application = this.application;
+    const scene = application.scene;
     let data = JSON.parse(text);
     let count = 0;
     for (let i = 0; i < data.length; i++)
@@ -83,9 +86,9 @@ BIMROCKET.LoadControllersTool = class extends BIMROCKET.Tool
         {
           count++;
           let controllerData = controllersData[c];
-          let controllerClass = BIMROCKET[controllerData.type];
+          let controllerClass = ControllerManager.classes[controllerData.type];
           let controllerName = controllerData.name;
-          let controller = application.createController(controllerClass, 
+          let controller = application.createController(controllerClass,
             object, controllerName);
           for (let k = 0; k < controllerData.properties.length; k++)
           {
@@ -102,8 +105,10 @@ BIMROCKET.LoadControllersTool = class extends BIMROCKET.Tool
         console.warn("Object not found", name);
       }
     }
-    let dialog = new BIMROCKET.MessageDialog("Controllers", 
-      count  + " controllers loaded.", "message");
-    dialog.show();
+    MessageDialog.create(this.label, "message.controllers_loaded", count)
+      .setClassName("info")
+      .setI18N(application.i18n).show();
   }
-};
+}
+
+export { LoadControllersTool };

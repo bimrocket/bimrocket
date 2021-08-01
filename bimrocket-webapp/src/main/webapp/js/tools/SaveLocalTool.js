@@ -1,10 +1,15 @@
 /*
  * SaveLocalTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { SaveDialog } from "../ui/SaveDialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+import { IOManager } from "../io/IOManager.js";
+
+class SaveLocalTool extends Tool
 {
   constructor(application, options)
   {
@@ -19,34 +24,36 @@ BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
 
   activate()
   {
-    let dialog = new BIMROCKET.SaveDialog("Save to local disk", "scene.stl");
-    dialog.onSave = (name, format, onlySelection) => 
+    let dialog = new SaveDialog(this.label, "scene.stl");
+    dialog.setI18N(this.application.i18n);
+    dialog.onSave = (name, format, onlySelection) =>
     {
       this.onSave(name, format, onlySelection);
     };
     dialog.onCancel = () => { dialog.hide(); this.application.useTool(null); };
     dialog.show();
   }
-  
+
   deactivate()
-  {    
+  {
   }
 
   onSave(name, format, onlySelection)
   {
+    const application = this.application;
     if (this.url)
     {
       window.URL.revokeObjectURL(this.url);
     }
     let intent =
     {
-      object : this.application.selection.object,
+      object : application.selection.object,
       name : name || "scene.stl"
     };
 
     try
     {
-      let data = BIMROCKET.IOManager.export(intent);
+      let data = IOManager.export(intent);
       this.url = window.URL.createObjectURL(data);
 
       let linkElem = document.createElement("a");
@@ -58,10 +65,13 @@ BIMROCKET.SaveLocalTool = class extends BIMROCKET.Tool
     }
     catch (ex)
     {
-      let messageDialog = new BIMROCKET.MessageDialog("ERROR", ex, "error");
-      messageDialog.show();
+      MessageDialog.create("ERROR", ex)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
     }
     this.application.useTool(null);
   }
-};
+}
+
+export { SaveLocalTool };
 

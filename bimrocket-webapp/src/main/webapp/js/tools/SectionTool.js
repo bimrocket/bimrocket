@@ -1,10 +1,17 @@
 /*
  * SectionTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SectionTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { Controls } from "../ui/Controls.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class SectionTool extends Tool
 {
   constructor(application, options)
   {
@@ -66,13 +73,13 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     planeStencilMat.stencilZFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZPass = THREE.ReplaceStencilOp;
     const loader = new THREE.TextureLoader();
-    loader.load("textures/section.png", texture => 
+    loader.load("textures/section.png", texture =>
       {
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set(200, 200);
         planeStencilMat.map = texture;
-        planeStencilMat.needsUpdate = true; 
+        planeStencilMat.needsUpdate = true;
       });
     this.planeStencilMat = planeStencilMat;
 
@@ -86,7 +93,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     this._onMouseUp = this.onMouseUp.bind(this);
     this._onMouseWheel = this.onMouseWheel.bind(this);
     this.createPanel();
-    
+
     this.sectionColorElem.value = sectionColor;
   }
 
@@ -94,16 +101,14 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
   {
     const application = this.application;
 
-    this.panel = application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = application.createPanel(this.label, "left", "panel_section");
     this.panel.preferredHeight = 160;
 
     const helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
     this.panel.bodyElem.appendChild(helpElem);
 
-    this.sectionColorElem = Controls.addColorField(this.panel.bodyElem, 
-      "section_color", "Section color:");
+    this.sectionColorElem = Controls.addColorField(this.panel.bodyElem,
+      "section_color", "label.section_color");
     this.sectionColorElem.addEventListener("change", event =>
     {
       let sectionColor = this.sectionColorElem.value;
@@ -112,7 +117,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
       application.repaint();
     }, false);
 
-    this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem, 
+    this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
       "section_offset", "Offset:", 0);
     this.offsetElem = this.offsetInputElem.parentElement;
     this.offsetElem.style.display = "none";
@@ -121,16 +126,17 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     {
       this.offset = parseFloat(this.offsetInputElem.value);
       this.updatePlane();
-      application.repaint();      
+      application.repaint();
     }, false);
 
-    this.cancelButton = Controls.addButton(this.offsetElem, 
-      "cancel_section", "Cancel", event => 
+    this.cancelButton = Controls.addButton(this.offsetElem,
+      "cancel_section", "button.cancel", event =>
       {
         this.disableClipping();
         this.updateOffsetLabel();
         this.application.repaint();
-      });      
+      });
+    I18N.set(helpElem, "innerHTML", this.help);
   }
 
   activate()
@@ -217,7 +223,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     const application = this.application;
     if (application.renderer.localClippingEnabled) return;
 
-    application.baseObject.traverse(object => 
+    application.baseObject.traverse(object =>
     {
       let material = object.material;
       if (material && object.visible)
@@ -226,7 +232,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
 
         if (object instanceof THREE.Mesh)
         {
-          if (object.geometry instanceof BIMROCKET.SolidGeometry)
+          if (object.geometry instanceof SolidGeometry)
           {
             let geometry = object.geometry;
             if (geometry.isManifold && geometry.faces.length >= 4)
@@ -243,13 +249,13 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
       let mesh = this.meshes[i];
 
       let backMesh = new THREE.Mesh(mesh.geometry, this.backFaceStencilMat);
-      backMesh.name = BIMROCKET.HIDDEN_PREFIX + "backMesh";
+      backMesh.name = THREE.Object3D.HIDDEN_PREFIX + "backMesh";
       backMesh.raycast = () => {};
       mesh.add(backMesh);
       backMesh.updateMatrix();
 
       let frontMesh = new THREE.Mesh(mesh.geometry, this.frontFaceStencilMat);
-      frontMesh.name = BIMROCKET.HIDDEN_PREFIX + "frontMesh";
+      frontMesh.name = THREE.Object3D.HIDDEN_PREFIX + "frontMesh";
       frontMesh.raycast = function(){};
       mesh.add(frontMesh);
       frontMesh.updateMatrix();
@@ -273,21 +279,21 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
       const mesh = this.meshes[i];
 
       let frontMesh = mesh.getObjectByName(
-        BIMROCKET.HIDDEN_PREFIX + "frontMesh");
+        THREE.Object3D.HIDDEN_PREFIX + "frontMesh");
       if (frontMesh)
       {
         mesh.remove(frontMesh);
       }
 
       let backMesh = mesh.getObjectByName(
-        BIMROCKET.HIDDEN_PREFIX + "backMesh");
+        THREE.Object3D.HIDDEN_PREFIX + "backMesh");
       if (backMesh)
       {
         mesh.remove(backMesh);
       }
     }
 
-    application.baseObject.traverse(object => 
+    application.baseObject.traverse(object =>
     {
       let material = object.material;
       if (material && object.visible)
@@ -311,7 +317,7 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
     this.plane.setFromNormalAndCoplanarPoint(normal, position);
 
     let vz = normal;
-    let vy = BIMROCKET.GeometryUtils.orthogonalVector(vz);
+    let vy = GeometryUtils.orthogonalVector(vz);
     let vx = new THREE.Vector3();
     vx.crossVectors(vy, vz);
 
@@ -340,4 +346,6 @@ BIMROCKET.SectionTool = class extends BIMROCKET.Tool
       this.offsetElem.style.display = "none";
     }
   }
-};
+}
+
+export { SectionTool };

@@ -1,10 +1,12 @@
 /*
  * ResetMatrixTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ResetMatrixTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class ResetMatrixTool extends Tool
 {
   constructor(application, options)
   {
@@ -18,7 +20,7 @@ BIMROCKET.ResetMatrixTool = class extends BIMROCKET.Tool
 
   execute()
   {
-    let application = this.application;
+    const application = this.application;
     let object = application.selection.object;
     if (object.geometry)
     {
@@ -33,4 +35,6 @@ BIMROCKET.ResetMatrixTool = class extends BIMROCKET.Tool
       application.updateSelection();
     }
   }
-};
+}
+
+export { ResetMatrixTool };

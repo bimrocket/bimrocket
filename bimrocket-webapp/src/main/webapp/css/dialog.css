@@ -116,7 +116,7 @@
 
 .dialog .body .list_field select
 {
-  -webkit-appearance:none;  
+  -webkit-appearance:none;
   -moz-appearance: none;
   font-size: 14px;
   padding: 2px 4px 2px 4px;
@@ -135,7 +135,7 @@
 .dialog .body div input,
 .dialog .body div select
 {
-  margin-top:2px;  
+  margin-top:2px;
 }
 
 .dialog .body pre
@@ -173,7 +173,7 @@
 }
 
 .dialog .body.confirm,
-.dialog .body.message,
+.dialog .body.info,
 .dialog .body.error
 {
   text-align: center;

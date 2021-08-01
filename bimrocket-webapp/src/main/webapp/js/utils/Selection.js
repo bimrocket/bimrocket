@@ -1,7 +1,13 @@
-/*
+/**
  * Selection.js
+ *
+ * @author realor
  */
-BIMROCKET.Selection = class
+
+import { Application } from "../ui/Application.js";
+import * as THREE from "../lib/three.module.js";
+
+class Selection
 {
   constructor(application, notify = false)
   {
@@ -49,7 +55,7 @@ BIMROCKET.Selection = class
   {
     return this._objects.has(object);
   }
-  
+
   isRoot(object)
   {
     // is root if object is selected but no ancestor is selected
@@ -90,9 +96,8 @@ BIMROCKET.Selection = class
   {
     let size = this._objects.size;
 
-    for (let i = 0; i < objects.length; i++)
+    for (let object of objects)
     {
-      let object = objects[i];
       this._objects.delete(object);
     }
 
@@ -128,4 +133,6 @@ BIMROCKET.Selection = class
     let selectionEvent = {type : "changed", objects : this.objects};
     this.application.notifyEventListeners("selection", selectionEvent);
   }
-};
+}
+
+export { Selection };

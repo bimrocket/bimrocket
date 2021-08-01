@@ -1,40 +1,45 @@
 /*
  * ServiceDialog.js
  *
- * author: realor
+ * @author: realor
  */
 
-BIMROCKET.ServiceDialog = class extends BIMROCKET.Dialog
+import { Dialog } from "./Dialog.js";
+
+class ServiceDialog extends Dialog
 {
-  constructor(title, serviceTypeOptions, serviceType, 
+  constructor(title, serviceTypeOptions, serviceType,
     name, description, url, username, password)
   {
-    super(title, 260, 330);
+    super(title);
 
-    this.serviceTypeSelect = this.addSelectField("svcType", "Service type:", 
-      serviceTypeOptions, serviceType);
-    this.nameElem = this.addTextField("svcName", "Service name:", name);
+    this.setSize(260, 330);
+
+    this.serviceTypeSelect = this.addSelectField("svcType",
+      "label.service_type", serviceTypeOptions, serviceType);
+    this.nameElem = this.addTextField("svcName", "label.service_name", name);
     this.nameElem.spellcheck = false;
-    this.descriptionElem = this.addTextField("svcDesc", "Description:", 
+    this.descriptionElem = this.addTextField("svcDesc", "label.service_desc",
       description);
-    this.urlElem = this.addTextField("svcUrl", "URL:", url);
+    this.urlElem = this.addTextField("svcUrl", "label.service_url", url);
     this.urlElem.spellcheck = false;
-    this.usernameElem = this.addTextField("svcUsername", "Username:", username);
-    this.passwordElem = this.addPasswordField("svcPassword", "Password:", 
-      password);
+    this.usernameElem = this.addTextField("svcUsername",
+      "label.service_user", username);
+    this.passwordElem = this.addPasswordField("svcPassword",
+      "label.service_pass", password);
 
-    this.addButton("save", "Save", () => 
+    this.addButton("save", "button.save", () =>
     {
       this.hide();
       this.onSave(this.serviceTypeSelect.value,
         this.nameElem.value,
         this.descriptionElem.value,
         this.urlElem.value,
-        this.usernameElem.value, 
+        this.usernameElem.value,
         this.passwordElem.value);
     });
-        
-    this.cancelButton = this.addButton("cancel", "Cancel", 
+
+    this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());
   }
 
@@ -42,13 +47,15 @@ BIMROCKET.ServiceDialog = class extends BIMROCKET.Dialog
   {
     this.serviceTypeSelect.focus();
   }
-  
+
   onSave(serviceType, name, description, url, username, password)
   {
   }
-  
+
   onCancel()
   {
     this.hide();
-  }  
-};
+  }
+}
+
+export { ServiceDialog };

@@ -1,35 +1,38 @@
 /*
  * PushButtonController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.PushButtonController = class extends BIMROCKET.PanelController 
+import { PanelController } from "./PanelController.js";
+import { ControllerManager } from "./ControllerManager.js";
+
+class PushButtonController extends PanelController
 {
   static type = "PushButtonController";
   static description = "Shows a push button.";
-  
+
   constructor(application, object, name)
   {
     super(application, object, name);
-  
+
     this.output = this.createProperty("number", "Output value");
     this.valueUp = this.createProperty("number", "Value up", 0);
     this.valueDown = this.createProperty("number", "Value down", 1);
     this.label = this.createProperty("string", "Label", "PUSH");
-    this.buttonClass = this.createProperty("string", "Button class", 
+    this.buttonClass = this.createProperty("string", "Button class",
       "rounded_button");
 
     this._onMouseDown = this.onMouseDown.bind(this);
     this._onMouseUp = this.onMouseUp.bind(this);
-    
+
     this.createPanel();
   }
 
   createPanel()
   {
     super.createPanel("left", 150);
-    
+
     let buttonElem = document.createElement("div");
     this.buttonElem = buttonElem;
 
@@ -37,14 +40,14 @@ BIMROCKET.PushButtonController = class extends BIMROCKET.PanelController
     buttonElem.addEventListener('mouseup', this._onMouseUp, false);
 
     this.panel.bodyElem.appendChild(buttonElem);
-    
+
     this.update();
   }
-  
+
   onNodeChanged(event)
   {
     this.panel.visible = this.application.selection.contains(this.object);
-    
+
     if (event.type === "nodeChanged" && event.objects.includes(this.object))
     {
       this.update();
@@ -62,13 +65,15 @@ BIMROCKET.PushButtonController = class extends BIMROCKET.PanelController
     var buttonElem = event.target || event.srcElement;
     this.output.value = this.valueUp.value;
   }
-  
+
   update()
   {
     this.panel.title = this.title.value || "";
     this.buttonElem.innerHTML = this.label.value || 'PUSH';
     this.buttonElem.className = this.buttonClass.value || "rounded_button";
   }
-};
+}
 
-BIMROCKET.controllers.push(BIMROCKET.PushButtonController);
+ControllerManager.addClass(PushButtonController);
+
+export { PushButtonController };

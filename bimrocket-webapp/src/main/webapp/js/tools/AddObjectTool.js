@@ -1,10 +1,16 @@
 /*
  * AddObjectTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.AddObjectTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Solid } from "../solid/Solid.js";
+import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class AddObjectTool extends Tool
 {
   constructor(application, options)
   {
@@ -34,7 +40,7 @@ BIMROCKET.AddObjectTool = class extends BIMROCKET.Tool
       switch (objectType)
       {
         case "box":
-          geometry = new BIMROCKET.SolidGeometry();
+          geometry = new SolidGeometry();
           let vertices = geometry.vertices;
           vertices.push(new THREE.Vector3(-0.5, -0.5, -0.5));
           vertices.push(new THREE.Vector3(0.5, -0.5, -0.5));
@@ -89,14 +95,16 @@ BIMROCKET.AddObjectTool = class extends BIMROCKET.Tool
           hole.lineTo(-size / 4 + 0.5, size / 4);
           hole.closePath();
           shape.holes.push(hole);
-          geometry = new BIMROCKET.ExtrudeSolidGeometry(shape, { depth: size });
+          geometry = new ExtrudeSolidGeometry(shape, { depth: size });
           break;          
       }
-      object = new BIMROCKET.Solid(geometry);
+      object = new Solid(geometry);
     }
     this.counter++;
     object.name = objectType + "_" + this.counter;
 
     this.application.addObject(object, null, true);
   }
-};
+}
+
+export { AddObjectTool };

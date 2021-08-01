@@ -1,10 +1,14 @@
 /*
  * OrbitTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class OrbitTool extends Tool
 {
   constructor(application, options)
   {
@@ -59,7 +63,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     this.panStart = new THREE.Vector2();
     this.panEnd = new THREE.Vector2();
     this.panVector = new THREE.Vector2();
-    
+
     this.viewVector = new THREE.Vector3();
 
     this.phiDelta = 0;
@@ -78,26 +82,25 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
-    
+
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    this.panel.bodyElem.innerHTML = I18N.get(this.help);
+    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
   }
 
   activate()
   {
     this.panel.visible = true;
     this.resetParameters();
-    
-    var application = this.application;
-    var container = application.container;
+
+    const application = this.application;
+    const container = application.container;
 
     container.addEventListener('contextmenu', this._onContextMenu, false);
     container.addEventListener('mousedown', this._onMouseDown, false);
@@ -110,10 +113,10 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
   deactivate()
   {
     this.panel.visible = false;
-    
-    var application = this.application;
-    var container = application.container;
-    
+
+    const application = this.application;
+    const container = application.container;
+
     container.removeEventListener('contextmenu', this._onContextMenu, false);
     container.removeEventListener('mousedown', this._onMouseDown, false);
     container.removeEventListener('mousewheel', this._onMouseWheel, false);
@@ -124,8 +127,8 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
 
   animate(event)
   {
-    var application = this.application;
-    
+    const application = this.application;
+
     if (!this.updateCamera && !application.needsRepaint) return;
 
     var camera = application.camera;
@@ -164,7 +167,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
       }
     }
     // restrict phi to be between desired limits
-    this.phi = Math.max(this.minPolarAngle, 
+    this.phi = Math.max(this.minPolarAngle,
       Math.min(this.maxPolarAngle, this.phi));
 
     // restrict phi to be between EPS and PI-EPS
@@ -202,7 +205,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
 
-    this.updateCamera = false;    
+    this.updateCamera = false;
   }
 
   onScene(event)
@@ -212,14 +215,14 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     if (event.source !== this)
     {
       const camera = application.camera;
-      
+
       if (event.type === "nodeChanged" && event.objects.includes(camera))
       {
         this.resetParameters();
       }
       else if (event.type === "cameraActivated")
       {
-        this.resetParameters();        
+        this.resetParameters();
       }
     }
   }
@@ -230,7 +233,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
 
     camera.updateMatrix();
     var matrix = camera.matrix;
-    var me = matrix.elements;  
+    var me = matrix.elements;
     var vz = new THREE.Vector3();
     vz.x = me[8];
     vz.y = me[9];
@@ -336,12 +339,12 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
 
   updateCenter()
   {
-    var application = this.application;
-    var container = application.container;
-    var camera = application.camera;
-    var scene = application.scene;
+    const application = this.application;
+    const container = application.container;
+    const camera = application.camera;
+    const scene = application.scene;
 
-    var centerPosition = new THREE.Vector2();
+    let centerPosition = new THREE.Vector2();
     centerPosition.x = container.clientWidth / 2;
     centerPosition.y = container.clientHeight / 2;
     var intersect = this.intersect(centerPosition, scene, true);
@@ -393,7 +396,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
-    
+
     var mousePosition = this.getMousePosition(event);
     if (this.state === this.STATE.ROTATE)
     {
@@ -491,7 +494,7 @@ BIMROCKET.OrbitTool = class extends BIMROCKET.Tool
 
     event.preventDefault();
   }
-};
+}
 
-
+export { OrbitTool };
 

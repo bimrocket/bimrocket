@@ -1,10 +1,12 @@
 /*
  * StartControllersTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.StartControllersTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class StartControllersTool extends Tool
 {
   constructor(application, options)
   {
@@ -20,4 +22,6 @@ BIMROCKET.StartControllersTool = class extends BIMROCKET.Tool
   {
     this.application.startControllers();
   }
-};
+}
+
+export { StartControllersTool };

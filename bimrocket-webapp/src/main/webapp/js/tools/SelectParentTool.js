@@ -1,10 +1,12 @@
 /*
  * SelectParentTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SelectParentTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+
+class SelectParentTool extends Tool
 {
   constructor(application, options)
   {
@@ -25,4 +27,6 @@ BIMROCKET.SelectParentTool = class extends BIMROCKET.Tool
     
     selection.set(...objects);
   }  
-};
+}
+
+export { SelectParentTool };

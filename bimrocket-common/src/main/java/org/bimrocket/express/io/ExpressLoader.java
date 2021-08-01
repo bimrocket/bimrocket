@@ -1,31 +1,31 @@
 /*
  * BIMROCKET
- *  
+ *
  * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
- *  
- * This program is licensed and may be used, modified and redistributed under 
- * the terms of the European Public License (EUPL), either version 1.1 or (at 
- * your option) any later version as soon as they are approved by the European 
+ *
+ * This program is licensed and may be used, modified and redistributed under
+ * the terms of the European Public License (EUPL), either version 1.1 or (at
+ * your option) any later version as soon as they are approved by the European
  * Commission.
- *  
- * Alternatively, you may redistribute and/or modify this program under the 
- * terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either  version 3 of the License, or (at your option) 
- * any later version. 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *    
- * See the licenses for the specific language governing permissions, limitations 
+ *
+ * Alternatively, you may redistribute and/or modify this program under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either  version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the licenses for the specific language governing permissions, limitations
  * and more details.
- *    
- * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along 
- * with this program; if not, you may find them at: 
- *    
+ *
+ * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along
+ * with this program; if not, you may find them at:
+ *
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * http://www.gnu.org/licenses/ 
- * and 
+ * http://www.gnu.org/licenses/
+ * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
@@ -52,17 +52,17 @@ public class ExpressLoader
   public static final String SCHEMA_PREFIX = "schema:";
   private ExpressSchema schema;
   private ExpressLexer lexer;
-  
+
   public ExpressLoader()
   {
   }
-  
+
   public ExpressSchema load(String schemaFileName) throws IOException
   {
     if (schemaFileName.startsWith(SCHEMA_PREFIX))
     {
       schemaFileName = schemaFileName.substring(SCHEMA_PREFIX.length());
-      String resource = "/org/ifcserver/schema/" + schemaFileName + ".exp";
+      String resource = "/org/bimrocket/ifc/schema/" + schemaFileName + ".exp";
       InputStreamReader reader = new InputStreamReader(
         ExpressLexer.class.getResourceAsStream(resource));
       return load(reader);
@@ -84,7 +84,7 @@ public class ExpressLoader
     schema = new ExpressSchema();
     lexer = new ExpressLexer(reader);
     try
-    { 
+    {
       ExpressToken token;
       if (skipUntil(KEYWORD, "SCHEMA"))
       {
@@ -95,7 +95,7 @@ public class ExpressLoader
         }
       }
       token = lexer.readToken();
-      
+
       while (!token.isEOF())
       {
         if (token.isKeyword("ENTITY"))
@@ -450,28 +450,28 @@ public class ExpressLoader
       {
         System.out.print("-" + attribute.getName());
         if (attribute.isOptional()) System.out.print(" OPTIONAL");
-        if (attribute.getType() != null) 
+        if (attribute.getType() != null)
           System.out.print(" " + attribute.getType());
         System.out.println();
       }
       System.out.println();
     }
 
-    List<ExpressDefinedType> definedTypes = 
+    List<ExpressDefinedType> definedTypes =
       schema.getNamedTypes(ExpressDefinedType.class);
     for (ExpressDefinedType definedType : definedTypes)
     {
       System.out.println(definedType);
     }
 
-    List<ExpressSelect> selectTypes = 
+    List<ExpressSelect> selectTypes =
       schema.getNamedTypes(ExpressSelect.class);
     for (ExpressSelect selectType : selectTypes)
     {
       System.out.println(selectType);
     }
 
-    List<ExpressEnumeration> enumTypes = 
+    List<ExpressEnumeration> enumTypes =
       schema.getNamedTypes(ExpressEnumeration.class);
     for (ExpressEnumeration enumType : enumTypes)
     {

@@ -1,10 +1,13 @@
 /*
  * StatisticsTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.StatisticsTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { Statistics } from "../ui/Statistics.js";
+
+class StatisticsTool extends Tool
 {
   constructor(application, options)
   {
@@ -15,10 +18,15 @@ BIMROCKET.StatisticsTool = class extends BIMROCKET.Tool
     this.className = "statistics";
     this.immediate = true;
     this.setOptions(options);
+
+    this.panel = new Statistics(this.application);
+    application.panelManager.addPanel(this.panel);
   }
 
   execute()
   {
-    this.application.statistics.visible = true;
+    this.panel.visible = true;
   }
-};
+}
+
+export { StatisticsTool };

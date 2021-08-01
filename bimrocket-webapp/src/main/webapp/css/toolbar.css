@@ -1,5 +1,5 @@
 /* toolbar */
-#toolbar
+.toolbar
 {
   box-shadow: 0px 5px 3px -3px rgba(50, 50, 50, 0.3);
   z-index:1;

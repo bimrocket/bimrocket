@@ -1,10 +1,13 @@
 /*
  * SelectTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.SelectTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+
+class SelectTool extends Tool
 {
   constructor(application, options)
   {
@@ -21,12 +24,10 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(
-      "panel_" + this.name, this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
-    
-    var helpElem = document.createElement("div");
-    helpElem.innerHTML = I18N.get(this.help);
+
+    const helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(helpElem);
 
     this.posElem = document.createElement("div");
@@ -37,6 +38,8 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
     this.controllersElem = document.createElement("div");
     this.controllersElem.className = "controllers";
     this.panel.bodyElem.appendChild(this.controllersElem);
+
+    I18N.set(helpElem, "innerHTML", this.help);
   }
 
   activate()
@@ -82,7 +85,7 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
       if (parent && parent.userData.selection.group)
       {
         object = parent;
-      }      
+      }
       application.selectObjects(event, [object]);
     }
     else
@@ -90,4 +93,6 @@ BIMROCKET.SelectTool = class extends BIMROCKET.Tool
       selection.clear();
     }
   }
-};
+}
+
+export { SelectTool };

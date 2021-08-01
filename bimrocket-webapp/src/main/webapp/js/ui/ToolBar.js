@@ -1,36 +1,45 @@
 /**
+ * ToolBar.js
+ *
  * @author realor
  */
-BIMROCKET.ToolBar = class
+
+import { I18N } from "../i18n/I18N.js";
+
+class ToolBar
 {
   constructor(application, element)
   {
     this.application = application;
-    var scope = this;
+    this.buttons = [];
 
     this.buttonsElem = document.createElement("div");
     this.buttonsElem.id = "tool_buttons";
     element.appendChild(this.buttonsElem);
 
-    var toolListener = function(event)
+    const toolListener = event =>
     {
-      var type = event.type;
-      var tool = event.tool;
+      const type = event.type;
+      const tool = event.tool;
 
       if (type === "activated")
       {
-        var buttonElem = document.getElementById("tb_" + tool.name);
-        if (buttonElem)
+        for (let button of this.buttons)
         {
-          buttonElem.className = "tool_button selected " + tool.className;
+          if (button.tool === tool)
+          {
+            button.buttonElem.classList.add("selected");
+          }
         }
       }
       else if (type === "deactivated")
       {
-        var buttonElem = document.getElementById("tb_" + tool.name);
-        if (buttonElem)
+        for (let button of this.buttons)
         {
-          buttonElem.className = "tool_button " + tool.className;
+          if (button.tool === tool)
+          {
+            button.buttonElem.classList.remove("selected");
+          }
         }
       }
     };
@@ -39,46 +48,41 @@ BIMROCKET.ToolBar = class
 
   addToolButton(tool, index)
   {
-    var buttonElem = this.createToolButton(tool);
-    if (buttonElem !== null)
-    {
-      var buttonsElem = this.buttonsElem;
-      if (index !== undefined)
-      {
-        var children = buttonsElem.children;
-        if (children.length <= index)
-        {
-          buttonsElem.appendChild(buttonElem);
-        }
-        else
-        {
-          var oldElem = children[index];
-          buttonsElem.insertBefore(buttonElem, oldElem);
-          buttonsElem.removeChild(oldElem);
-        }
-      }
-      else
-      {
-        buttonsElem.appendChild(buttonElem);
-      }
-    }
-  }
+    let button = new ToolButton(this, tool);
+    let buttonElem = button.buttonElem;
 
-  createToolButton(tool)
-  {
-    var application = this.application;
-    var buttonElem = null;
-    var buttonId = "tb_" + tool.name;
-    if (!document.getElementById(buttonId))
+    const buttonsElem = this.buttonsElem;
+    const children = buttonsElem.children;
+    if (typeof index === "number" && index < children.length)
     {
-      buttonElem = document.createElement("button");
-      buttonElem.id = buttonId;
-      buttonElem.className = "tool_button " + tool.className;
-      buttonElem.title = I18N.get(tool.label);
-      buttonElem.addEventListener('click',
-        function(event) {application.useTool(tool);}, false);
+      if (index < 0) index = 0;
+      let oldElem = children[index];
+      buttonsElem.insertBefore(buttonElem, oldElem);
+      this.buttons.splice(index, 0, button);
     }
-    return buttonElem;
+    else
+    {
+      buttonsElem.appendChild(buttonElem);
+      this.buttons.push(button);
+    }
   }
-};
+}
+
+class ToolButton
+{
+  constructor(toolBar, tool)
+  {
+    this.toolBar = toolBar;
+    this.tool = tool;
+    this.buttonElem = document.createElement("button");
+    let buttonElem = this.buttonElem;
+    I18N.set(buttonElem, "title", tool.label);
+    I18N.set(buttonElem, "alt", tool.label);
+    buttonElem.className = "tool_button " + tool.className;
+    buttonElem.addEventListener('click',
+      () => this.toolBar.application.useTool(tool), false);
+  }
+}
+
+export { ToolBar };
 

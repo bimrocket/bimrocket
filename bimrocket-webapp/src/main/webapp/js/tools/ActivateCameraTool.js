@@ -1,10 +1,14 @@
 /*
  * ActivateCameraTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ActivateCameraTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { I18N } from "../i18n/I18N.js";
+import * as THREE from "../lib/three.module.js";
+
+class ActivateCameraTool extends Tool
 {
   constructor(application, options)
   {
@@ -26,4 +30,6 @@ BIMROCKET.ActivateCameraTool = class extends BIMROCKET.Tool
       application.activateCamera(object);
     }
   }
-};
+}
+
+export { ActivateCameraTool };

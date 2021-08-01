@@ -1,10 +1,12 @@
 /*
  * PanelController.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.PanelController = class extends BIMROCKET.Controller
+import { Controller } from "./Controller.js";
+
+class PanelController extends Controller
 {
   static type = "PanellController";
   static description = "Shows a panel.";
@@ -13,14 +15,14 @@ BIMROCKET.PanelController = class extends BIMROCKET.Controller
   {
     super(application, object, name);
     this.title = this.createProperty("string", "Title", "");
-    
+
     this._onNodeChanged = this.onNodeChanged.bind(this);
-    this._onSelection = this.onSelection.bind(this);    
+    this._onSelection = this.onSelection.bind(this);
   }
 
   onStart()
   {
-    let application = this.application;
+    const application = this.application;
     application.addEventListener("scene", this._onNodeChanged);
     application.addEventListener("selection", this._onSelection);
     this.update();
@@ -28,7 +30,7 @@ BIMROCKET.PanelController = class extends BIMROCKET.Controller
 
   onStop()
   {
-    let application = this.application;
+    const application = this.application;
     application.removeEventListener("scene", this._onNodeChanged);
     application.removeEventListener("selection", this._onSelection);
     this.panel.visible = false;
@@ -36,16 +38,15 @@ BIMROCKET.PanelController = class extends BIMROCKET.Controller
 
   createPanel(position = "left", height = 100)
   {
-    this.panel =  this.application.createPanel(
-      "panel_" + this.object.id + "_" + this.name, this.name, position);
+    this.panel =  this.application.createPanel(this.name, position);
     this.panel.preferredHeight = height;
     this.panel.bodyElem.classList.add("center");
   }
-  
+
   onNodeChanged(event)
   {
   }
-  
+
   onSelection(event)
   {
     this.panel.visible = this.application.selection.contains(this.object);
@@ -58,4 +59,6 @@ BIMROCKET.PanelController = class extends BIMROCKET.Controller
   update()
   {
   }
-};
+}
+
+export { PanelController };

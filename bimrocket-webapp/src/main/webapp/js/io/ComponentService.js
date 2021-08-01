@@ -1,6 +1,16 @@
-BIMROCKET.ComponentService = class extends BIMROCKET.IOService
+/**
+ * ComponentService.js
+ *
+ * @author realor
+ */
+
+import { IOService, IOMetadata, IOResult } from "./IOService.js";
+import { ServiceManager } from "./ServiceManager.js";
+import { ColladaLoader } from "./ColladaLoader.js";
+import * as THREE from "../lib/three.module.js";
+
+class ComponentService extends IOService
 {
-  static className = "ComponentService";
   static components = [
       ["armari", "Armari"],
       ["cadira", "Cadira"],
@@ -9,7 +19,7 @@ BIMROCKET.ComponentService = class extends BIMROCKET.IOService
       ["taula", "Taula"],
       ["water", "Water"]
     ];
-  
+
   constructor(name, description, url, username, password)
   {
     super(name, description, url, username, password);
@@ -17,9 +27,9 @@ BIMROCKET.ComponentService = class extends BIMROCKET.IOService
 
   open(path, options, readyCallback, progressCallback)
   {
-    const OK = BIMROCKET.IOResult.OK;
-    const COLLECTION = BIMROCKET.IOMetadata.COLLECTION;
-    const OBJECT = BIMROCKET.IOMetadata.OBJECT;
+    const OK = IOResult.OK;
+    const COLLECTION = IOMetadata.COLLECTION;
+    const OBJECT = IOMetadata.OBJECT;
     let metadata;
 
     if (path === "/")
@@ -29,30 +39,34 @@ BIMROCKET.ComponentService = class extends BIMROCKET.IOService
       for (let i = 0; i < components.length; i++)
       {
         let component = components[i];
-        metadata = new BIMROCKET.IOMetadata(component[0], component[1], OBJECT);
+        metadata = new IOMetadata(component[0], component[1], OBJECT);
         entries.push(metadata);
       }
-      metadata = new BIMROCKET.IOMetadata("Components", "Components", COLLECTION);
-      readyCallback(new BIMROCKET.IOResult(OK, "", path, metadata, entries));
+      metadata = new IOMetadata("Components", "Components", COLLECTION);
+      readyCallback(new IOResult(OK, "", path, metadata, entries));
     }
     else
     {
-      const loader = new THREE.ColladaLoader();
+      const loader = new ColladaLoader();
       const url = this.url + path + ".dae";
       console.info("Loading url", url);
-      loader.load(url, collada => 
+      loader.load(url, collada =>
       {
         let object = collada.scene;
         let name = path.substring(1);
         object.name = name;
-        metadata = new BIMROCKET.IOMetadata(name, name, OBJECT);
-        readyCallback(new BIMROCKET.IOResult(OK, "", path, metadata, null, object));
+        metadata = new IOMetadata(name, name, OBJECT);
+        readyCallback(new IOResult(OK, "", path, metadata, null, object));
       },
-      data => 
+      data =>
       {
         let progress = 100 * data.loaded / data.total;
         progressCallback({progress : progress, message : "Loading..."});
       });
     }
   }
-};
+}
+
+ServiceManager.addClass(ComponentService);
+
+export { ComponentService };

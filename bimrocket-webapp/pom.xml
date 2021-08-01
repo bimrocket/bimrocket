@@ -19,7 +19,7 @@
     <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-    
+
   <dependencies>
     <dependency>
       <groupId>jakarta.platform</groupId>
@@ -42,7 +42,7 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>ifc_classes_generation</id>
+            <id>ifc4_classes_generation</id>
             <phase>install</phase>
             <goals>
               <goal>java</goal>
@@ -51,10 +51,23 @@
               <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
               <arguments>
                 <argument>schema:IFC4</argument>
-                <argument>${basedir}/src/main/webapp/js/io/IFC4.js</argument>
-                <argument>-p:BIMROCKET</argument>
+                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC4.js</argument>
                 <argument>-v:IFC4</argument>
-                <argument>-b:BIMROCKET.IFC.createBaseEntity</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ifc2x3_classes_generation</id>
+            <phase>install</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
+              <arguments>
+                <argument>schema:IFC2x3</argument>
+                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC2x3.js</argument>
+                <argument>-v:IFC2x3</argument>
               </arguments>
             </configuration>
           </execution>

@@ -1,10 +1,13 @@
 /*
  * ZoomAllTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+
+class ZoomAllTool extends Tool
 {
   constructor(application, options)
   {
@@ -25,9 +28,13 @@ BIMROCKET.ZoomAllTool = class extends BIMROCKET.Tool
     const camera = application.camera;
 
     application.scene.updateMatrixWorld(true);
-    BIMROCKET.ObjectUtils.zoomAll(camera, application.baseObject, aspect);
+    ObjectUtils.zoomAll(camera, application.baseObject, aspect);
 
     const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
   }
-};
+}
+
+export { ZoomAllTool };
+
+

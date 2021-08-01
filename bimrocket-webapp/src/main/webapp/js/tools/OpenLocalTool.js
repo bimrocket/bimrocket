@@ -1,10 +1,15 @@
 /*
  * OpenLocalTool.js
  *
- * @autor: realor
+ * @author: realor
  */
 
-BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
+import { Tool } from "./Tool.js";
+import { IOManager } from "../io/IOManager.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+
+class OpenLocalTool extends Tool
 {
   constructor(application, options)
   {
@@ -52,7 +57,7 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
       let reader = new FileReader();
       const application = this.application;
       const t0 = Date.now();
-      reader.onload = function(evt)
+      reader.onload = evt =>
       {
         const t1 = Date.now();
         console.info("File read as text in " + (t1 - t0) + " millis.");
@@ -62,12 +67,12 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
         {
           url : "file://" + file.name,
           data : data,
-          onProgress : function(data)
+          onProgress : data =>
           {
             application.progressBar.progress = data.progress;
             application.progressBar.message = data.message;
           },
-          onCompleted : function(object)
+          onCompleted : object =>
           {
             object.updateMatrix();
 
@@ -77,23 +82,23 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
             let camera = application.camera;
 
             object.updateMatrixWorld(true);
-            BIMROCKET.ObjectUtils.zoomAll(camera, object, aspect);
+            ObjectUtils.zoomAll(camera, object, aspect);
 
-            let changeEvent = {type: "nodeChanged", objects: [camera], 
+            let changeEvent = {type: "nodeChanged", objects: [camera],
               source : this};
             application.notifyEventListeners("scene", changeEvent);
             application.progressBar.visible = false;
           },
-          onError : function(error)
+          onError : error =>
           {
             application.progressBar.visible = false;
-            let messageDialog = 
-              new BIMROCKET.MessageDialog("ERROR", error, "error");
-            messageDialog.show();
+            MessageDialog.create("ERROR", error)
+              .setClassName("error")
+              .setI18N(application.i18n).show();
           },
           options : { units : application.units }
         };
-        BIMROCKET.IOManager.load(intent); // async load
+        IOManager.load(intent); // async load
       };
       application.progressBar.message = "Loading file...";
       application.progressBar.progress = undefined;
@@ -101,9 +106,11 @@ BIMROCKET.OpenLocalTool = class extends BIMROCKET.Tool
       reader.readAsText(file);
     }
   }
-  
+
   onFocus(event)
   {
     this.application.useTool(null);
   }
-};
+}
+
+export { OpenLocalTool };

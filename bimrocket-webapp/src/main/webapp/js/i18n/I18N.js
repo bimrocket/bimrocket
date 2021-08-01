@@ -1,76 +1,145 @@
 /**
+ * Localizer.js
+ *
  * @author realor
  */
 
+import { Bundle } from "./Bundle.js";
+import { BundleManager } from "./BundleManager.js";
+
 class I18N
 {
-  static defaultLanguage = null;
-  static userLanguage = null;
-  static translations = {};
+  static SEPARATOR = "|";
 
-  static init(path, names, languages)
+  _userLanguages = [];
+  _requestedLanguages = null;
+  _supportedLanguages = new Set();
+  defaultBundle = BundleManager.getBundle("base");
+
+  constructor()
   {
-    I18N.defaultLanguage = languages[0];
-    I18N.userLanguage = navigator.language.substring(0, 2);
-    if (languages.indexOf(I18N.userLanguage) === -1) // not supported
-    {
-      I18N.userLanguage = I18N.defaultLanguage;
-    };
-    
-    for (let i = 0; i < names.length; i++)
-    {
-      let name = names[i];
-      
-      /* load default language translations */
-      let linkElem = document.createElement('script');
-      linkElem.setAttribute("type", "text/javascript");
-      linkElem.setAttribute("src", path + "/" + name + "_" + 
-        I18N.defaultLanguage + ".js");
-      document.getElementsByTagName("head")[0].appendChild(linkElem);
+  }
 
-      /* load user language translations */
-      if (I18N.userLanguage !== I18N.defaultLanguage)
+  static set(element, property, key, ...args)
+  {
+    if (element.i18n === undefined)
+    {
+      element.i18n = {};
+    }
+    element.i18n[property] =
+    {
+      "key" : key,
+      "args" : args
+    };
+    element[property] = key;
+  }
+
+  addSupportedLanguages(...languages)
+  {
+    for (let language of languages)
+    {
+      this._supportedLanguages.add(language);
+    }
+    this._requestedLanguages = null;
+  }
+
+  get supportedLanguages()
+  {
+    return Array.from(this._supportedLanguages);
+  }
+
+  get userLanguages()
+  {
+    return this._userLanguages;
+  }
+
+  set userLanguages(languages)
+  {
+    if (typeof languages === "string")
+    {
+      this._userLanguages = [languages];
+      this._requestedLanguages = null;
+    }
+    else if (languages instanceof Array)
+    {
+      this._userLanguages = languages;
+      this._requestedLanguages = null;
+    }
+  }
+
+  get requestedLanguages()
+  {
+    if (this._requestedLanguages === null)
+    {
+      let set = new Set();
+      this.userLanguages.forEach(language =>
       {
-        linkElem = document.createElement('script');
-        linkElem.setAttribute("type", "text/javascript");
-        linkElem.setAttribute("src", path + "/" + name + "_" + 
-          I18N.userLanguage + ".js");
-        document.getElementsByTagName("head")[0].appendChild(linkElem);
+        if (this._supportedLanguages.has(language))
+        {
+          set.add(language);
+        }
+        let parts = language.split("-");
+        if (parts.length > 1)
+        {
+          if (this._supportedLanguages.has(parts[0]))
+          {
+            set.add(parts[0]);
+          }
+        }
+      });
+      set.add(""); // default language
+      this._requestedLanguages = Array.from(set);
+    }
+    return this._requestedLanguages;
+  }
+
+  get(key, ...args)
+  {
+    let bundle = null;
+    let index = key.indexOf(I18N.SEPARATOR);
+    if (index === -1)
+    {
+      bundle = this.defaultBundle;
+    }
+    else
+    {
+      bundle = BundleManager.getBundle(key.substring(0, index));
+      key = key.substring(index + 1);
+    }
+    return bundle ? bundle.get(this.requestedLanguages, key, ...args) : key;
+  }
+
+  updateTree(rootElement)
+  {
+    const promises = [];
+    const bundles = BundleManager.getBundles();
+    bundles.forEach(bundle =>
+    {
+      let promise = bundle.load(this.requestedLanguages);
+      promises.push(promise);
+    });
+
+    Promise.allSettled(promises).finally(() =>
+    {
+      const elements = rootElement.getElementsByTagName("*");
+      for (let element of elements)
+      {
+        this.update(element);
+      }
+    });
+  }
+
+  update(element)
+  {
+    if (element.i18n)
+    {
+      for (let property in element.i18n)
+      {
+        let def = element.i18n[property];
+        element[property] = this.get(def.key, ...def.args);
       }
     }
   }
-
-  static get(key)
-  {
-    let value = I18N.getForLanguage(key, I18N.userLanguage);
-    if (value === undefined && I18N.userLanguage !== I18N.defaultLanguage)
-    {
-      value = I18N.getForLanguage(key, I18N.defaultLanguage);
-    }
-    return value ? value : key;
-  }
-  
-  static getForLanguage(key, language)
-  {
-    let langTable = I18N.translations[language];
-    if (langTable) return langTable[key];
-    return undefined;
-  }
-
-  static add(name, language, table)
-  {
-    let langTable = I18N.translations[language];
-    if (langTable === undefined)
-    {
-      langTable = {};
-      I18N.translations[language] = langTable;
-    }
-    for (let key in table)
-    {
-      langTable[key] = table[key];
-    }
-    console.info("I18N: " + name + "_" + language + " bundle loaded.");
-  }
 }
 
-I18N.init('js/i18n', ['bimrocket'], ['en', 'es', 'ca']);
+export { I18N };

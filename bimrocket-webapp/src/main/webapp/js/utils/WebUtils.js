@@ -6,11 +6,6 @@
 
 class WebUtils
 {
-  static importModule(path)
-  {
-    return import(path);
-  }
-
   static getQueryParams()
   {
     var queryString = {};

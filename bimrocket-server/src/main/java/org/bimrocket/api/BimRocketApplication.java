@@ -54,7 +54,7 @@ public class BimRocketApplication extends ResourceConfig
 
   @Inject
   ServletContext context;
-  
+
   @PostConstruct
   public void init()
   {
@@ -63,7 +63,7 @@ public class BimRocketApplication extends ResourceConfig
     register(AuthenticationFilter.class);
     initBeans();
   }
-  
+
   @PreDestroy
   public void destroy()
   {
@@ -80,7 +80,7 @@ public class BimRocketApplication extends ResourceConfig
       }
     }
   }
-  
+
   protected void initBeans()
   {
     String value = context.getInitParameter("bimrocket.beans");
@@ -100,13 +100,13 @@ public class BimRocketApplication extends ResourceConfig
       }
     }
   }
-  
+
   protected Object createBean(String beanName)
   {
     try
     {
       LOGGER.log(Level.INFO, "Creating bean [{0}]", beanName);
-      String beanClassName = context.getInitParameter(beanName + ".class");      
+      String beanClassName = context.getInitParameter(beanName + ".class");
       Class<?> beanClass = Class.forName(beanClassName);
       BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
       Object bean = beanClass.getDeclaredConstructor().newInstance();
@@ -118,7 +118,10 @@ public class BimRocketApplication extends ResourceConfig
           String propertyName = property.getName();
           String attributeName = beanName + "." + propertyName;
           String value = context.getInitParameter(attributeName);
-          BeanUtils.setProperty(bean, property.getName(), value);
+          if (value != null)
+          {
+            BeanUtils.setProperty(bean, property.getName(), value);
+          }
         }
       }
       return bean;
@@ -130,7 +133,7 @@ public class BimRocketApplication extends ResourceConfig
   }
 
   public class CloseableList extends ArrayList<AutoCloseable>
-  {    
-    private static final long serialVersionUID = 19693L; 
+  {
+    private static final long serialVersionUID = 19693L;
   }
 }

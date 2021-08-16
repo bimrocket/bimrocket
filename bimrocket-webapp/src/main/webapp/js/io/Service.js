@@ -6,8 +6,6 @@
 
 class Service
 {
-  static type = "Service";
-
   constructor(name, description = null,
     url = null, username = null, password = null)
   {

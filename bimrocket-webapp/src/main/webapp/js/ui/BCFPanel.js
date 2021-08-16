@@ -11,6 +11,7 @@ import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
+import { ServiceManager } from "../io/ServiceManager.js";
 import { BCFService } from "../io/BCFService.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -22,6 +23,7 @@ class BCFPanel extends Panel
     this.id = "bcf_panel";
     this.title = "BCF";
     this.position = "left";
+    this.group = "bcf"; // service group
 
     this.service = null;
 
@@ -50,7 +52,7 @@ class BCFPanel extends Panel
     this.bcfServiceElem.addEventListener("change",
       event => {
         let name = this.bcfServiceElem.value;
-        this.service = this.application.services.bcf[name];
+        this.service = this.application.services[this.group][name];
         this.filterPanelElem.style.display = "none";
         this.topicTableElem.style.display = "none";
       });
@@ -1003,7 +1005,7 @@ class BCFPanel extends Panel
   updateServices()
   {
     const application = this.application;
-    const services = application.services.bcf;
+    const services = application.services[this.group];
     let options = [];
 
     for (let name in services)
@@ -1016,7 +1018,7 @@ class BCFPanel extends Panel
     if (options.length > 0)
     {
       let name = this.bcfServiceElem.value;
-      this.service = application.services.bcf[name];
+      this.service = application.services[this.group][name];
     }
     else
     {
@@ -1031,19 +1033,19 @@ class BCFPanel extends Panel
 
   showAddDialog()
   {
-    let serviceTypes = ["BCF"];
+    let serviceTypes = ServiceManager.getTypesOf(BCFService);
     let dialog = new ServiceDialog("Add BCF service", serviceTypes);
     dialog.serviceTypeSelect.disabled = true;
     dialog.setI18N(this.application.i18n);
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
-      const service = new BCFService();
+      const service = new ServiceManager.classes[serviceType];
       service.name = name;
       service.description = description;
       service.url = url;
       service.username = username;
       service.password = password;
-      this.application.addService(service);
+      this.application.addService(service, this.group);
       this.updateServices();
       this.service = service;
       this.bcfServiceElem.value = name;
@@ -1058,7 +1060,7 @@ class BCFPanel extends Panel
     if (this.service === null) return;
 
     const service = this.service;
-    let serviceTypes = ["BCF"];
+    let serviceTypes = ServiceManager.getTypesOf(BCFService);
     let dialog = new ServiceDialog("Edit BCF service",
       serviceTypes, service.constructor.type, service.name, service.description,
       service.url, service.username, service.password);
@@ -1067,12 +1069,11 @@ class BCFPanel extends Panel
     dialog.nameElem.readOnly = true;
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
-      service.serviceType = serviceType;
       service.description = description;
       service.url = url;
       service.username = username;
       service.password = password;
-      this.application.addService(service);
+      this.application.addService(service, this.group);
       this.updateServices();
       this.filterPanelElem.style.display = "none";
       this.topicTableElem.style.display = "none";
@@ -1090,8 +1091,8 @@ class BCFPanel extends Panel
         "bim|question.delete_bcf_service", name)
         .setAction(() =>
         {
-          let service = application.services.bcf[name];
-          application.removeService(service);
+          let service = application.services[this.group][name];
+          application.removeService(service, this.group);
           this.updateServices();
           this.filterPanelElem.style.display = "none";
           this.topicTableElem.style.display = "none";

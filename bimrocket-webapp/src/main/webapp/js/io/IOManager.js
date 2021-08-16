@@ -91,7 +91,7 @@ class IOManager
         {
           if (request.readyState === 4)
           {
-            onProgress({progress : 100, message : ""});
+            if (onProgress) onProgress({progress : 100, message : ""});
 
             if (request.status === 0 ||
               request.status === 200 || request.status === 207)

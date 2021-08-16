@@ -14,7 +14,7 @@ class IFCSTEPLoader extends IFCLoader
     super(manager);
   }
 
-  loadFile(file, text)
+  parseFile(file, text)
   {
     let parser = new STEPParser();
     parser.schema = IFC_SCHEMAS.IFC4; // default schema

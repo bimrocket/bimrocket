@@ -29,6 +29,11 @@ export const translations =
   "button.view" : "View",
   "button.reset" : "Reset",
   "button.undo" : "Undo",
+  "button.redo" : "Redo",
+  "button.run" : "Run",
+  "button.yes" : "Yes",
+  "button.no" : "No",
+  "button.discard" : "Discard",
 
   "units.m" : "meters",
   "units.cm" : "centimeters",
@@ -103,6 +108,10 @@ export const translations =
   "tool.make_solid.label" : "Make solid",
 
   "tool.clip.label" : "Clip",
+
+  "tool.script.label" : "Scripts",
+  "tool.script.editor" : "Script editor",
+  "tool.script.name" : "Script:",
 
   "tool.orbit.label" : "Orbit",
   "tool.orbit.help" : "Drag left mouse button: rotate, Drag right mouse button: pan, Mouse wheel: zoom.",
@@ -227,6 +236,7 @@ export const translations =
   "title.object_properties" : "Object properties",
   "title.delete_cloud_service" : "Delete cloud service",
   "title.delete_from_cloud" : "Delete from cloud",
+  "title.unsaved_changes" : "Unsaved changes",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,
@@ -244,8 +254,8 @@ export const translations =
   "message.file_deleted" : "File deleted.",
   "message.folder_deleted" : "Folder deleted.",
 
+  "question.discard_changes" : "Discard unsaved changes?",
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,
   "question.delete_file" : name => `Do you want to delete the ${name} file?`
-
 };

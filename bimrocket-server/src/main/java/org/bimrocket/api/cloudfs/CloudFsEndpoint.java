@@ -78,6 +78,7 @@ public class CloudFsEndpoint
 {
   public static final String BASE_PROPERTY = "cloudfs.baseProperty";
   public static final String BASE_DIRECTORY = "cloudfs.baseDirectory";
+  public static final String DIRECTORIES = "cloudfs.directories";
   public static final String ACL_FILENAME = "acl.properties";
 
   @Inject
@@ -88,7 +89,7 @@ public class CloudFsEndpoint
 
   @Context
   ServletContext servletContext;
-  
+
   @OPTIONS
   @PermitAll
   public Response options()
@@ -105,9 +106,9 @@ public class CloudFsEndpoint
   public Response propfind(@HeaderParam("depth") String depth)
   {
     File file = getBaseDir();
-    return sendFileProperties(file, "/", depth);
+    return sendFileProperties(file, "", depth);
   }
-  
+
   @PROPFIND
   @Path("/{path:.*}")
   @PermitAll
@@ -115,16 +116,16 @@ public class CloudFsEndpoint
   public Response propfind(@PathParam("path") List<PathSegment> path,
     @HeaderParam("depth") String depth)
   {
-    String uri = getPathUri(path);   
+    String uri = getPathUri(path);
     File file = new File(getBaseDir(), uri);
-    
+
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
-    
+
     if (!isValidFile(file))
       return Response.status(405, "Not allowed").build();
 
-    return sendFileProperties(file, uri, depth);    
+    return sendFileProperties(file, uri, depth);
   }
 
   @MKCOL
@@ -149,20 +150,20 @@ public class CloudFsEndpoint
   {
     String uri = getPathUri(path);
     File file = new File(getBaseDir(), uri);
-    
+
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
-    
+
     if (!isValidFile(file))
       return Response.status(405, "Not allowed").build();
-    
+
     if (file.isFile())
     {
-      return sendFileData(file, false);        
+      return sendFileData(file, false);
     }
     else
     {
-      return Response.ok().build();                
+      return Response.ok().build();
     }
   }
 
@@ -171,9 +172,9 @@ public class CloudFsEndpoint
   public Response get()
   {
     File file = getBaseDir();
-    return sendFileProperties(file, "/", "1");
+    return sendFileProperties(file, "", "1");
   }
-  
+
   @GET
   @Path("/{path:.*}")
   @PermitAll
@@ -181,10 +182,10 @@ public class CloudFsEndpoint
   {
     String uri = getPathUri(path);
     File file = new File(getBaseDir(), uri);
-    
+
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
-    
+
     if (!isValidFile(file))
       return Response.status(405, "Not allowed").build();
 
@@ -200,12 +201,12 @@ public class CloudFsEndpoint
 
   @PUT
   @Path("/{path:.*}")
-  public Response put(@PathParam("path") List<PathSegment> path, 
+  public Response put(@PathParam("path") List<PathSegment> path,
     InputStream input)
   {
     String uri = getPathUri(path);
     File file = new File(getBaseDir(), uri);
-    
+
     if (!isValidFile(file) || file.isDirectory())
       return Response.status(405, "Not allowed").build();
 
@@ -217,7 +218,7 @@ public class CloudFsEndpoint
     }
     catch (IOException ex)
     {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build(); 
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -234,9 +235,9 @@ public class CloudFsEndpoint
     if (!isValidFile(file) || !file.delete())
       return Response.status(405, "Not allowed").build();
 
-    return Response.ok().build();    
+    return Response.ok().build();
   }
-  
+
   /* private methods */
 
   private String getPathUri(List<PathSegment> path)
@@ -252,8 +253,8 @@ public class CloudFsEndpoint
         buffer.append(iter.next());
       }
     }
-    return buffer.toString();    
-  }  
+    return buffer.toString();
+  }
 
   private File getBaseDir()
   {
@@ -264,9 +265,19 @@ public class CloudFsEndpoint
     if (!baseDir.exists())
     {
       baseDir.mkdirs();
+      String directories = servletContext.getInitParameter(DIRECTORIES);
+      if (directories != null)
+      {
+        String[] dirArray = directories.split(",");
+        for (String dirName : dirArray)
+        {
+          File dir = new File(baseDir, dirName);
+          dir.mkdir();
+        }
+      }
     }
     return baseDir;
-  }  
+  }
 
   private boolean isValidFile(File file)
   {
@@ -277,7 +288,7 @@ public class CloudFsEndpoint
   {
     String contentType = getContentType(file);
     long contentLength = file.length();
-    
+
     if (content)
     {
       StreamingOutput stream = (OutputStream output) ->
@@ -300,19 +311,19 @@ public class CloudFsEndpoint
         .build();
     }
   }
-  
+
   private Response sendFileProperties(File file, String uri, String depth)
   {
     StreamingOutput output = (OutputStream out) ->
     {
-      try (PrintWriter writer = 
+      try (PrintWriter writer =
            new PrintWriter(new OutputStreamWriter(out, "UTF-8")))
       {
         writer.write("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
         writer.write("<D:multistatus xmlns:D=\"DAV:\">");
 
-        writeProperties(file, servletContext.getContextPath() + 
-          "/api/cloudfs/" + uri, 
+        writeProperties(file, servletContext.getContextPath() +
+          "/api/cloudfs/" + uri,
           depth == null ? "infinity" : depth, writer);
         writer.write("</D:multistatus>");
         writer.flush();
@@ -321,7 +332,7 @@ public class CloudFsEndpoint
     return Response.ok(output).header("Content-Type", TEXT_XML)
       .status(207).build();
   }
-  
+
   private void writeProperties(File file, String uri, String depth,
      PrintWriter writer) throws IOException
   {
@@ -344,20 +355,20 @@ public class CloudFsEndpoint
       }
       else
       {
-        writer.write("<D:getcontentlength>"+ file.length() + 
-          "</D:getcontentlength>");        
+        writer.write("<D:getcontentlength>"+ file.length() +
+          "</D:getcontentlength>");
         writer.write("<D:resourcetype/>");
       }
       writer.write("<D:source></D:source>");
-      writer.write("<D:supportedlock>" + 
-        "<D:lockentry>" + 
-        "<D:lockscope><D:exclusive/></D:lockscope>" +
-        "<D:locktype><D:write/></D:locktype>" + 
-        "</D:lockentry>" + 
+      writer.write("<D:supportedlock>" +
         "<D:lockentry>" +
-        "<D:lockscope><D:shared/></D:lockscope>" + 
-        "<D:locktype><D:write/></D:locktype>" + 
-        "</D:lockentry>" + 
+        "<D:lockscope><D:exclusive/></D:lockscope>" +
+        "<D:locktype><D:write/></D:locktype>" +
+        "</D:lockentry>" +
+        "<D:lockentry>" +
+        "<D:lockscope><D:shared/></D:lockscope>" +
+        "<D:locktype><D:write/></D:locktype>" +
+        "</D:lockentry>" +
         "</D:supportedlock>");
       writer.write("</D:prop>");
       writer.write("<D:status>HTTP/1.1 200 OK</D:status>");
@@ -407,5 +418,5 @@ public class CloudFsEndpoint
     if (extension.equals("ifcxml")) return "application/xml";
 
     return "application/octet-stream";
-  }  
+  }
 }

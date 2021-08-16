@@ -19,7 +19,7 @@ import { WebUtils } from "../utils/WebUtils.js";
 import { ModuleLoader } from "../utils/ModuleLoader.js";
 import { WEBGL } from "../utils/WebGL.js";
 import { Inspector } from "../ui/Inspector.js";
-import { FakeRenderer } from "../ui/FakeRenderer.js";
+import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -57,7 +57,7 @@ class Application
     this._panelOpacity = null;
     this._frameRateDivisor = null;
 
-    /* IO/BCF services */
+    /* services */
     this.services = {}; // Service instances
 
     /* selection */
@@ -839,47 +839,51 @@ class Application
     }
   }
 
-  addService(service, save = true)
+  addService(service, group, save = true)
   {
-    let type = service.constructor.type;
-    if (this.services[type] === undefined)
+    if (group === undefined)
     {
-      this.services[type] = {};
+      console.warn("group is mandatory.");
+      return;
     }
-    this.services[type][service.name] = service;
-    if (save) this.saveServices();
+
+    if (this.services[group] === undefined)
+    {
+      this.services[group] = {};
+    }
+    this.services[group][service.name] = service;
+    if (save) this.saveServices(group);
   }
 
-  removeService(service, save = true)
+  removeService(service, group, save = true)
   {
-    let type = service.constructor.type;
-    delete this.services[type][service.name];
-    if (save) this.saveServices();
+    if (this.services[group])
+    {
+      delete this.services[group][service.name];
+      if (save) this.saveServices(group);
+    }
   }
 
-  saveServices()
+  saveServices(group)
   {
     let data = [];
-    for (let type in this.services)
+    let serviceGroup = this.services[group];
+    for (let name in serviceGroup)
     {
-      let serviceByType = this.services[type];
-      for (let name in serviceByType)
-      {
-        let service = serviceByType[name];
-        data.push({
+      let service = serviceGroup[name];
+      data.push({
           className : service.constructor.name,
           parameters: service.getParameters()
-        });
-      }
+      });
     }
     let json = JSON.stringify(data);
-    window.localStorage.setItem("bimrocket.services", json);
-    console.info("save services: ", data);
+    window.localStorage.setItem("bimrocket.services." + group, json);
+    console.info("save services." + group + ": ", data);
   }
 
-  restoreServices()
+  restoreServices(group)
   {
-    let json = window.localStorage.getItem("bimrocket.services");
+    let json = window.localStorage.getItem("bimrocket.services." + group);
     if (json)
     {
       let array = JSON.parse(json);
@@ -893,9 +897,9 @@ class Application
         {
           let service = new serviceClass();
           service.setParameters(parameters);
-          this.addService(service, false);
+          this.addService(service, group, false);
         }
-        else console.warn("Service " + className + " not found.");
+        else console.warn("Service " + className + " not restored.");
       }
     }
   }
@@ -1285,8 +1289,6 @@ class Application
       }
       else
       {
-        this.restoreServices();
-
         setTimeout(() => this.hideLogo(), 1000);
       };
     };

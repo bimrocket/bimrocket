@@ -29,6 +29,11 @@ export const translations =
   "button.view" : "Ver",
   "button.reset" : "Iniciar",
   "button.undo" : "Deshacer",
+  "button.redo" : "Rehacer",
+  "button.run" : "Ejecutar",
+  "button.yes" : "Si",
+  "button.no" : "No",
+  "button.discard" : "Descartar",
 
   "units.m" : "metros",
   "units.cm" : "centímetros",
@@ -103,6 +108,10 @@ export const translations =
   "tool.make_solid.label" : "Crear sólido",
 
   "tool.clip.label" : "Recortar",
+
+  "tool.script.label" : "Programas",
+  "tool.script.editor" : "Editor de código",
+  "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbitar",
   "tool.orbit.help" : "Botón izquierdo: rotar, botón derecho: desplazar, rueda ratón: zoom.",
@@ -227,6 +236,7 @@ export const translations =
   "title.object_properties" : "Propiedades de objeto",
   "title.delete_cloud_service" : "Borrar servicio de nube",
   "title.delete_from_cloud" : "Borrar de la nube",
+  "title.unsaved_changes" : "Cambios no guardados",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,
@@ -244,6 +254,7 @@ export const translations =
   "message.file_deleted" : "Fichero borrado.",
   "message.folder_deleted" : "Carpeta borrada.",
 
+  "question.discard_changes" : "Descartar los cambios no guardados?",
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
   "question.delete_file" : name => `Quieres borrar el fichero ${name}?`

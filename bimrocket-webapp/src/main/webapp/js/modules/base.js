@@ -48,6 +48,7 @@ import { StartControllersTool } from "../tools/StartControllersTool.js";
 import { StopControllersTool } from "../tools/StopControllersTool.js";
 import { LoadControllersTool } from "../tools/LoadControllersTool.js";
 import { SaveControllersTool } from "../tools/SaveControllersTool.js";
+import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
 
@@ -75,7 +76,6 @@ import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
 
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
-import { ComponentService } from "../io/ComponentService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
 
 
@@ -135,56 +135,61 @@ export function load(application)
   const printTool = new PrintTool(application);
   const selectTool = new SelectTool(application);
   const selectParentTool = new SelectParentTool(application);
-//    const selectReprTool = new SelectByNameTool(application,
-//    {propertyName : IFC.RepresentationName,
-//     label: IFC.RepresentationName});
   const selectReprTool = new SelectByNameTool(application,
-  {propertyName : "IfcRepresentation",
-   label: "IfcRepresentation"});
-
+  { name : "IfcRepresentation", label: "IfcRepresentation",
+    propertyName : "IfcRepresentation" });
   const exportSelectionTool = new ExportSelectionTool(application);
   const orbitTool = new OrbitTool(application);
   const flyTool = new FlyTool(application);
   const topViewTool = new ViewTool(application,
-    {label: "tool.view.top", x : 0, y : 0, z : 0});
+    { name : "top", label : "tool.view.top", x : 0, y : 0, z : 0 });
   const frontViewTool = new ViewTool(application,
-    {label: "tool.view.front", x : 90, y : 0, z : 0});
+    { name : "front", label : "tool.view.front", x : 90, y : 0, z : 0 });
   const backViewTool = new ViewTool(application,
-    {label: "tool.view.back", x : -90, y : 0, z : 180});
+    { name : "back", label : "tool.view.back", x : -90, y : 0, z : 180 });
   const leftViewTool = new ViewTool(application,
-    {label: "tool.view.left", x : 90, y : 90, z : 0});
+    { name : "left", label : "tool.view.left", x : 90, y : 90, z : 0 });
   const rightViewTool = new ViewTool(application,
-    {label: "tool.view.right", x : -90, y : -90, z : 180});
+    { name : "right", label : "tool.view.right", x : -90, y : -90, z : 180 });
   const autoOrbitTool = new AutoOrbitTool(application);
   const sectionTool = new SectionTool(application);
   const inspectGeometryTool = new InspectGeometryTool(application);
   const resetMatrixTool = new ResetMatrixTool(application);
+  const scriptTool = new ScriptTool(application);
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
   const scaleTool = new ScaleTool(application);
   const unionTool = new BooleanOperationTool(application,
-    {"operation": "union", label : "tool.union.label"});
+    { name : "union", label : "tool.union.label", operation : "union" });
   const intersectionTool = new BooleanOperationTool(application,
-    {"operation": "intersect", label : "tool.intersection.label"});
+    { name : "intersection", label : "tool.intersection.label",
+      operation : "intersect" });
   const subtractionTool = new BooleanOperationTool(application,
-    {"operation": "subtract", label : "tool.subtraction.label"});
+    { name : "subtraction", label : "tool.subtraction.label",
+      operation : "subtract" });
   const clipTool = new ClipTool(application);
   const makeSolidTool = new MakeSolidTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
   const activateCameraTool = new ActivateCameraTool(application);
   const perspectiveTool = new CameraProjectionTool(application,
-    {"type" : "perspective", label : "tool.perspective.label"});
+    { name : "perspective", label : "tool.perspective.label",
+      type : "perspective" });
   const orthographicTool = new CameraProjectionTool(application,
-    {"type" : "orthographic", label : "tool.orthographic.label"});
-  const addGroupTool = new AddObjectTool(application,
-    {objectType: "group", label : "tool.add_group.label"});
+    { name : "orthographic", label : "tool.orthographic.label",
+      type : "orthographic" });
   const addBoxTool = new AddObjectTool(application,
-    {"objectType": "box", label : "tool.add_box.label"});
+    { name : "add_box", label : "tool.add_box.label",
+      objectType : "box" });
   const addCylinderTool = new AddObjectTool(application,
-    {"objectType": "cylinder", label : "tool.add_cylinder.label"});
+    { name : "add_cylinder", label : "tool.add_cylinder.label",
+      objectType : "cylinder" });
   const addSphereTool = new AddObjectTool(application,
-    {"objectType": "sphere", label : "tool.add_sphere.label"});
+    { name : "add_sphere", label : "tool.add_sphere.label",
+      objectType : "sphere" });
+  const addGroupTool = new AddObjectTool(application,
+    { name : "add_group", label : "tool.add_group.label",
+      objectType : "group" });
   const removeTool = new RemoveTool(application);
   const cloneTool = new CloneTool(application);
   const cutTool = new CutTool(application);
@@ -192,27 +197,27 @@ export function load(application)
   const zoomAllTool = new ZoomAllTool(application);
   const centerSelectionTool = new CenterSelectionTool(application);
   const focusSelectionTool = new CenterSelectionTool(application,
-    {name : "focus_selection", label : "tool.focus_selection.label",
-     focusOnSelection : true, className : "focus_selection"});
+    { name : "focus_selection", label : "tool.focus_selection.label",
+      focusOnSelection : true, className : "focus_selection" });
 
   const showTool = new VisibilityTool(application,
-    {name : "show", label : "tool.show.label", className : "show",
-     visible : true });
+    { name : "show", label : "tool.show.label", className : "show",
+      visible : true });
   const hideTool = new VisibilityTool(application,
-    {name : "hide", label : "tool.hide.label", className : "hide",
+    { name : "hide", label : "tool.hide.label", className : "hide",
       visible : false });
   const facesStyleTool = new StyleTool(application,
-    {name : "faces_style", label : "tool.faces_style.label",
-     edgesVisible : false, facesVisible : true});
+    { name : "faces_style", label : "tool.faces_style.label",
+      edgesVisible : false, facesVisible : true });
   const edgesStyleTool = new StyleTool(application,
-    {name : "edges_style", label : "tool.edges_style.label",
-     edgesVisible : true, facesVisible : false});
+    { name : "edges_style", label : "tool.edges_style.label",
+      edgesVisible : true, facesVisible : false });
   const facesEdgesStyleTool = new StyleTool(application,
-    {name : "faces_edges_style", label : "tool.faces_edges_style.label",
-     edgesVisible : true, facesVisible : true});
+    { name : "faces_edges_style", label : "tool.faces_edges_style.label",
+     edgesVisible : true, facesVisible : true });
   const hiddenStyleTool = new StyleTool(application,
-    {name : "hidden_style", label : "tool.hidden_style.label",
-     edgesVisible : false, facesVisible : false});
+    { name : "hidden_style", label : "tool.hidden_style.label",
+      edgesVisible : false, facesVisible : false });
 
   const outlinerTool = new OutlinerTool(application);
   const inspectorTool = new InspectorTool(application);
@@ -224,7 +229,7 @@ export function load(application)
   const saveControllersTool = new SaveControllersTool(application);
   const aboutTool = new AboutTool(application);
   const githubTool = new OpenLinkTool(application,
-  { label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
+  { name : "gihub", label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
     target : "_blank"});
 
   application.addTool(newSceneTool);
@@ -260,6 +265,7 @@ export function load(application)
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
   application.addTool(addSphereTool);
+  application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(cloneTool);
   application.addTool(cutTool);
@@ -350,6 +356,7 @@ export function load(application)
   designMenu.addMenuItem(makeSolidTool);
   designMenu.addMenuItem(inspectGeometryTool);
   designMenu.addMenuItem(resetMatrixTool);
+  designMenu.addMenuItem(scriptTool);
 
   const measureMenu = menuBar.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
@@ -389,17 +396,29 @@ export function load(application)
   toolBar.addToolButton(centerSelectionTool);
   toolBar.addToolButton(focusSelectionTool);
   toolBar.addToolButton(sectionTool);
+  toolBar.addToolButton(scriptTool);
   toolBar.addToolButton(measureLengthTool);
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);
   toolBar.addToolButton(scaleTool);
 
+  // restore services
+  application.restoreServices("model");
+  application.restoreServices("script");
+
   // create default services
-  if (application.services.io === undefined)
+  if (application.services.model === undefined)
   {
-    const cloudfs = new WebdavService("cloudfs",
-      "Repository", "/bimrocket-server/api/cloudfs");
-    application.addService(cloudfs, false);
+    const cloudfs = new WebdavService("models",
+      "Repository", "/bimrocket-server/api/cloudfs/models");
+    application.addService(cloudfs, "model", false);
+  }
+
+  if (application.services.script === undefined)
+  {
+    const cloudfs = new WebdavService("scripts",
+      "Scripts", "/bimrocket-server/api/cloudfs/scripts");
+    application.addService(cloudfs, "script", false);
   }
 
   // register bundles and locales

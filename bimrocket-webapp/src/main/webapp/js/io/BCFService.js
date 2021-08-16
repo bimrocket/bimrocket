@@ -9,9 +9,6 @@ import { ServiceManager } from "./ServiceManager.js";
 
 class BCFService extends Service
 {
-  static className = "BCFService";
-  static type = "bcf";
-
   constructor(name, description = null,
     url = null, username = null, password = null)
   {

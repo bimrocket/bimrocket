@@ -10,6 +10,15 @@ import { SolidGeometry } from "../solid/SolidGeometry.js";
 
 class ObjectUtils
 {
+  static find(root, condition)
+  {
+    const selection = [];
+
+    root.traverse(object => { if (condition(object)) selection.push(object); });
+
+    return selection;
+  }
+
   static dispose(root, geometries = true, materials = true)
   {
     root.traverse(function(object)
@@ -22,7 +31,7 @@ class ObjectUtils
           geometry.dispose();
         }
       }
-      
+
       if (materials && object.material)
       {
         var material = object.material;
@@ -37,12 +46,12 @@ class ObjectUtils
   static updateVisibility(objects, visible)
   {
     const set = new Set();
-    
+
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
-    
+
     function traverse(object)
     {
       object.visible = visible;
@@ -57,23 +66,23 @@ class ObjectUtils
         }
       }
     }
-    
+
     for (let i = 0; i < objects.length; i++)
     {
       let object = objects[i];
-      
+
       traverse(object);
 
       if (visible && !set.has(object.parent))
       {
         // make ancestors visible
-        object.traverseAncestors(ancestor => 
+        object.traverseAncestors(ancestor =>
         { ancestor.visible = true; set.add(ancestor); });
       }
     }
     return set;
   }
-  
+
   static updateStyle(objects, edgesVisible, facesVisible)
   {
     const set = new Set();
@@ -82,7 +91,7 @@ class ObjectUtils
     {
       objects = [objects];
     }
-    
+
     function traverse(object)
     {
       if (object instanceof Solid)
@@ -92,32 +101,32 @@ class ObjectUtils
         set.add(object);
       }
       else
-      {        
+      {
         const children = object.children;
         for (let i = 0; i < children.length; i++)
         {
           traverse(children[i]);
         }
-      }       
+      }
     }
-    
-    for (let i = 0; i < objects.length; i++)
+
+    for (let object of objects)
     {
-      traverse(objects[i]);
+      traverse(object);
     }
     return set;
   }
-  
+
   static zoomAll(camera, objects, aspect, invisible)
   {
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
-    
+
     let box = ObjectUtils.getBoundingBoxFromView(
       objects, camera.matrixWorld, invisible); // box in camera CS
-    
+
     if (box.isEmpty()) return;
 
     let center = new THREE.Vector3();
@@ -134,12 +143,12 @@ class ObjectUtils
 
       let ymax = camera.near * Math.tan(THREE.Math.degToRad(camera.fov * 0.5));
   		let xmax = ymax * camera.aspect;
-      
+
       let yoffset = boxHeight * camera.near / (2 * ymax);
       let xoffset = boxWidth * camera.near / (2 * xmax);
-      
+
       let offset = Math.max(xoffset, yoffset) + 0.5 * boxDepth;
-      
+
       let v = new THREE.Vector3();
       v.x = matrix.elements[8];
       v.y = matrix.elements[9];
@@ -216,7 +225,7 @@ class ObjectUtils
               vertex.copy(vertices[j]);
               vertex.applyMatrix4(object.matrixWorld); // world CS
               vertex.applyMatrix4(inverseMatrix); // view CS
-              box.expandByPoint(vertex);            
+              box.expandByPoint(vertex);
             }
           }
           else if (geometry instanceof THREE.BufferGeometry)
@@ -276,12 +285,12 @@ class ObjectUtils
         }
       }
     };
-    
+
     extendBox(object, box, new THREE.Matrix4());
 
     return box;
   }
-  
+
   static getBoxGeometry(box)
   {
     var size = new THREE.Vector3();
@@ -334,7 +343,7 @@ class ObjectUtils
     points.push(b3);
     points.push(t3);
 
-    return new THREE.BufferGeometry().setFromPoints(points);    
+    return new THREE.BufferGeometry().setFromPoints(points);
   }
 
   static findCameras(object, array)
@@ -370,14 +379,14 @@ class ObjectUtils
     });
     return array;
   }
-  
+
   static isObjectDescendantOf(object, parent)
   {
     object = object.parent;
     while (object !== null && object !== parent)
     {
       object = object.parent;
-    }    
+    }
     return object === parent;
   }
 }

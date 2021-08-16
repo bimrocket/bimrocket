@@ -26,47 +26,48 @@
   height:22px;
 }
 
-.service_panel .header .image_button.home
+.service_panel > .header > .image_button
 {
   position:absolute;
+  top:0;
+  bottom:0;
+  width: 20px;
+  height: 20px;
+  margin: 0px;
+  padding:0;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: center center;
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #f6f6f6;
+  border:none;
+  box-shadow: none;
+}
+
+.service_panel > .header > .image_button.home
+{
   left:0;
-  top:0;
-  bottom:0;
-  width:20px;
   background-image: url(images/home.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
 }
 
-.service_panel .header .image_button.back
+.service_panel > .header > .image_button.back
 {
-  position:absolute;
   left:24px;
-  top:0;
-  bottom:0;
-  width:20px;
   background-image: url(images/back.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
 }
 
-.service_panel .header .image_button.home:hover
+.service_panel >.header > .image_button:hover
 {
-  cursor:pointer;
-  background-color: #ffa0a0;
-  border-radius: 2px;
+  background-color: #ffb0b0;
 }
 
-.service_panel .header .image_button.back:hover
+.service_panel >.header > .image_button:focus
 {
-  cursor:pointer;
-  background-color: #ffa0a0;
-  border-radius: 2px;
+  outline:1px dotted black;
 }
 
-.service_panel .header .directory
+.service_panel > .header > .directory
 {
   position:absolute;
   left:48px;
@@ -84,7 +85,7 @@
   overflow:hidden;
 }
 
-.service_panel .path_entries
+.service_panel > .path_entries
 {
   padding-left: 0;
   position: absolute;
@@ -102,7 +103,7 @@
   border:1px solid #c0c0c0;
 }
 
-.service_panel .footer
+.service_panel > .footer
 {
   position:absolute;
   bottom:0;
@@ -111,7 +112,7 @@
   height:50px;
 }
 
-.service_panel .footer .buttons_panel
+.service_panel > .footer > .buttons_panel
 {
   position:absolute;
   top:0;
@@ -125,43 +126,24 @@
 {
   list-style-type: none;
   text-align: left;
+}
+
+.service_panel .entry > a
+{
+  display:block;
+  text-decoration: none;
+  color: #404040;
   cursor:pointer;
   padding: 2px;
+  padding-left: 20px;
   font-size:13px;
   background-position: 2px center;
   background-repeat: no-repeat;
-  padding-left: 20px;
-}
-
-.service_panel .entry.service
-{
-  color: #404040;
-  font-weight:bold;
-  background-image: url(images/service.svg);
-  background-position: 2px center;
-  background-repeat: no-repeat;
   background-size: 16px 16px;
+  border: 1px solid transparent;
 }
 
-.service_panel .entry.collection
-{
-  color: #404040;
-  background-image: url(images/collection.svg);
-  background-position: 2px center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
-}
-
-.service_panel .entry.object
-{
-  color: #606060;
-  background-image: url(images/object.svg);
-  background-position: 2px center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
-}
-
-.service_panel .entry:hover
+.service_panel .entry > a:hover
 {
   color:black;
   animation: item_hover 1s;
@@ -169,8 +151,31 @@
   color: black;
 }
 
-.service_panel .entry.selected,
-.service_panel .entry.selected:hover
+.service_panel .entry > a:focus
+{
+  border: 1px dotted black;
+  outline:none;
+}
+
+.service_panel .entry.service > a
+{
+  font-weight:bold;
+  background-image: url(images/service.svg);
+}
+
+.service_panel .entry.collection > a
+{
+  background-image: url(images/collection.svg);
+}
+
+.service_panel .entry.file > a
+{
+  color: #606060;
+  background-image: url(images/file.svg);
+}
+
+.service_panel .entry.selected > a,
+.service_panel .entry.selected > a:hover
 {
   color:black;
   background-color:#F0A0A0;
@@ -278,6 +283,11 @@
 .tool_button.bim_inventory
 {
   background-image: url(images/tools/bim_inventory.svg);
+}
+
+.tool_button.script
+{
+  background-image: url(images/tools/script.svg);
 }
 
 .tool_button.measure_length
@@ -388,6 +398,20 @@ div.option_block input.back_color
   width: 80px;
 }
 
+.script_box
+{
+}
+
+.script_box textarea
+{
+  font-family: monospace;
+  font-size: 14px;
+  color: #404040;
+  box-sizing:border-box;
+  width: 100%;
+  height: 300px;
+}
+
 .controller_list li
 {
   list-style-type: none;
@@ -416,4 +440,37 @@ div.option_block input.back_color
 {
   color: #806060;
   margin-right: 4px;
+}
+
+.dialog .body div.script_name
+{
+  position:absolute;
+  left: 4px;
+  right: 4px;
+  top: 0px;
+  height: 24px;
+}
+
+.dialog .body div.script_name > label
+{
+  display: inline-block;
+  width: 80px;
+}
+
+.dialog .body div.script_name > input[type=text]
+{
+  display: inline-block;
+  width: calc(100% - 80px);
+}
+
+div.script_code
+{
+  position: absolute;
+  top: 30px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid gray;
+  overflow: auto;
+  font-size: 14px;
 }

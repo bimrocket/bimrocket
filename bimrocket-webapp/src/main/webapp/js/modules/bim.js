@@ -49,12 +49,15 @@ export function load(application)
   toolBar.addToolButton(bimLayoutTool);
   toolBar.addToolButton(bimInventoryTool);
 
+  // restore services
+  application.restoreServices("bcf");
+
   // create default services
   if (application.services.bcf === undefined)
   {
     const bcf = new BCFService("bcf",
       application.constructor.NAME + " BCF", "/bimrocket-server/api");
-    application.addService(bcf, false);
+    application.addService(bcf, "bcf", false);
   }
 
   // load bundles

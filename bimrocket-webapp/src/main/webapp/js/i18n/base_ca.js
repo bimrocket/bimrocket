@@ -28,7 +28,12 @@ export const translations =
   "button.home" : "Inici",
   "button.view" : "Veure",
   "button.reset" : "Inicia",
-  "button.undo" : "Desfer",
+  "button.undo" : "Desfés",
+  "button.redo" : "Refés",
+  "button.run" : "Executa",
+  "button.yes" : "Si",
+  "button.no" : "No",
+  "button.discard" : "Descarta",
 
   "units.m" : "metres",
   "units.cm" : "centímetres",
@@ -103,6 +108,10 @@ export const translations =
   "tool.make_solid.label" : "Crea sòlid",
 
   "tool.clip.label" : "Retalla",
+
+  "tool.script.label" : "Programes",
+  "tool.script.editor" : "Editor de codi",
+  "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbita",
   "tool.orbit.help" : "Botó esquerre: rota, botó dret: desplaça, rota ratólí: zoom.",
@@ -227,6 +236,7 @@ export const translations =
   "title.object_properties" : "Propietats d'objecte",
   "title.delete_cloud_service" : "Esborra servei de núvol",
   "title.delete_from_cloud" : "Esborra del núvol",
+  "title.unsaved_changes" : "Canvis no desats",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,
@@ -244,6 +254,7 @@ export const translations =
   "message.file_deleted" : "Fitxer esborrat.",
   "message.folder_deleted" : "Carpeta esborrada.",
 
+  "question.discard_changes" : "Vols descartar els canvis no desats?",
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,
   "question.delete_folder" : name => `Vols esborrar la carpeta ${name}?`,
   "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`

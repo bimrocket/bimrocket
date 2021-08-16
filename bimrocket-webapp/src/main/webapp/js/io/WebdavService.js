@@ -4,30 +4,24 @@
  * @author: realor
  */
 
-import { IOService, IOMetadata, IOResult } from "./IOService.js";
+import { FileService, Metadata, Result } from "./FileService.js";
 import { ServiceManager } from "./ServiceManager.js";
-import { IOManager } from "./IOManager.js";
 
-class WebdavService extends IOService
+class WebdavService extends FileService
 {
   constructor(name, description, url, username, password)
   {
     super(name, description, url, username, password);
   }
 
-  open(path, options, readyCallback, progressCallback)
+  open(path, readyCallback, progressCallback)
   {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
-    const COLLECTION = IOMetadata.COLLECTION;
-    const OBJECT = IOMetadata.OBJECT;
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
+    const COLLECTION = Metadata.COLLECTION;
+    const FILE = Metadata.FILE;
 
-    if (this.url && this.url.endsWith("/"))
-    {
-      this.url = this.url.substring(0, this.url.length - 1);
-    }
-
-    let url = this.url + path;
+    let url = this.getUrl(path);
 
     let baseUri = url;
     let index = baseUri.indexOf("://");
@@ -47,12 +41,11 @@ class WebdavService extends IOService
 
     // **** HTTP PROPFIND REQUEST ****
 
-    const request = new XMLHttpRequest();
-    let metadata;
-    request.onerror = error =>
+    let request = new XMLHttpRequest();
+    request.onerror = () =>
     {
       // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
+      readyCallback(new Result(ERROR, "Connection error"));
     };
     request.onload = () =>
     {
@@ -64,7 +57,7 @@ class WebdavService extends IOService
           let xml = request.responseXML;
           let multiNode = xml.childNodes[0];
           let responseNodes = multiNode.childNodes;
-          metadata = new IOMetadata();
+          let metadata = new Metadata();
           let entries = [];
           for (let i = 0; i < responseNodes.length; i++)
           {
@@ -83,12 +76,12 @@ class WebdavService extends IOService
                 let index = hrefValue.lastIndexOf("/");
                 metadata.name = hrefValue.substring(index + 1);
                 metadata.description = metadata.name;
-                metadata.type = isCollectionNode ? COLLECTION : OBJECT;
+                metadata.type = isCollectionNode ? COLLECTION : FILE;
               }
               else
               {
-                let entry = new IOMetadata(fileName, fileName,
-                  isCollectionNode ? COLLECTION : OBJECT);
+                let entry = new Metadata(fileName, fileName,
+                  isCollectionNode ? COLLECTION : FILE);
                 entries.push(entry);
               }
             }
@@ -96,32 +89,45 @@ class WebdavService extends IOService
           if (metadata.type === COLLECTION)
           {
             readyCallback(
-              new IOResult(OK, "", path, metadata, entries, null));
+              new Result(OK, "", path, metadata, entries, null));
           }
-          else
+          else // download file
           {
-            // read OBJECT
-            const intent =
+            let request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.onload = () =>
             {
-              url : url,
-              onCompleted : function(object)
+              if (request.status === 200)
               {
-                readyCallback(new IOResult(OK, "", path,
-                  metadata, null, object));
-              },
-              onProgress : progressCallback,
-              onError : function(message)
-              {
-                readyCallback(new IOResult(ERROR, message));
-              },
-              options : options
+                progressCallback({progress : 100,
+                  message : "Download completed."});
+                setTimeout(() => readyCallback(
+                  new Result(OK, "", path, metadata, null, request.response))
+                  , 100);
+              }
             };
-            IOManager.load(intent);
+            request.onerror = error =>
+            {
+              readyCallback(new Result(ERROR, error));
+            };
+            if (progressCallback)
+            {
+              request.onprogress = event =>
+              {
+                let progress = Math.round(
+                  100 * event.loaded / event.total);
+                let message = "Downloading file...";
+                progressCallback({progress : progress, message : message});
+              };
+            }
+            this.setCredentials(request);
+            request.send();
+
           }
         }
         catch (ex)
         {
-          readyCallback(new IOResult(ERROR, ex));
+          readyCallback(new Result(ERROR, ex));
         }
       }
       else
@@ -132,11 +138,11 @@ class WebdavService extends IOService
             request.responseXML.querySelector("error message");
           if (node)
           {
-            readyCallback(new IOResult(ERROR, node.textContent));
+            readyCallback(new Result(ERROR, node.textContent));
             return;
           }
         }
-        readyCallback(new IOResult(ERROR, "Error " + request.status));
+        readyCallback(new Result(ERROR, "Error " + request.status));
       }
     };
     request.open("PROPFIND", url, true);
@@ -145,106 +151,28 @@ class WebdavService extends IOService
     request.send();
   }
 
-  download(path, options, readyCallback, progressCallback)
+  save(data, path, readyCallback, progressCallback)
   {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
-    const OBJECT = IOMetadata.OBJECT;
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
 
-    if (this.url && this.url.endsWith("/"))
-    {
-      this.url = this.url.substring(0, this.url.length - 1);
-    }
-
-    let url = this.url + path;
-
+    const url = this.getUrl(path);
     const request = new XMLHttpRequest();
-    let metadata;
     request.onerror = error =>
     {
       // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
+      readyCallback(new Result(ERROR, "Connection error"));
     };
     request.onload = () =>
     {
       if (request.status === 200)
       {
-        const index = path.lastIndexOf("/");
-        let name = index !== -1 ? path.substring(index + 1) : path;
-        readyCallback(new IOResult(OK, "", path,
-          new IOMetadata(name, null, OBJECT, 0),
-          null, null, request.response));
-      }
-    };
-    request.open("GET", url, true);
-    this.setCredentials(request);
-    request.send();
-  }
-
-  save(object, path, options, readyCallback, progressCallback)
-  {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
-
-    const url = this.url + path;
-    const request = new XMLHttpRequest();
-    request.onerror = error =>
-    {
-      // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
-    };
-    request.onload = () =>
-    {
-      if (request.status === 200)
-      {
-        readyCallback(new IOResult(OK));
+        readyCallback(new Result(OK));
       }
       else
       {
-        readyCallback(new IOResult(ERROR,
+        readyCallback(new Result(ERROR,
           "Save failed (error " + request.status + ")."));
-      }
-    };
-    const intent =
-    {
-      name : path,
-      object : object,
-      onCompleted : data =>
-      {
-        request.open("PUT", url, true);
-        this.setCredentials(request);
-        request.send(data);
-      },
-      onProgress : progressCallback,
-      onError : message =>
-        readyCallback(new IOResult(ERROR, message)),
-      options : options
-    };
-    IOManager.export(intent);
-  }
-
-  upload(data, path, options, readyCallback, progressCallback)
-  {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
-
-    const url = this.url + path;
-    const request = new XMLHttpRequest();
-    request.onerror = error =>
-    {
-      // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
-    };
-    request.onload = () =>
-    {
-      if (request.status === 200)
-      {
-        readyCallback(new IOResult(OK));
-      }
-      else
-      {
-        readyCallback(new IOResult(ERROR,
-          "Upload failed (error " + request.status + ")."));
       }
     };
     request.open("PUT", url, true);
@@ -254,25 +182,25 @@ class WebdavService extends IOService
 
   remove(path, readyCallback, progressCallback)
   {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
 
-    const url = this.url + path;
+    const url = this.getUrl(path);
     const request = new XMLHttpRequest();
     request.onerror = error =>
     {
       // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
+      readyCallback(new Result(ERROR, "Connection error"));
     };
     request.onload = () =>
     {
       if (request.status === 200)
       {
-        readyCallback(new IOResult(OK));
+        readyCallback(new Result(OK));
       }
       else
       {
-        readyCallback(new IOResult(ERROR,
+        readyCallback(new Result(ERROR,
           "Delete failed (error " + request.status + ")."));
       }
     };
@@ -283,25 +211,25 @@ class WebdavService extends IOService
 
   makeCollection(path, readyCallback, progressCallback)
   {
-    const OK = IOResult.OK;
-    const ERROR = IOResult.ERROR;
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
 
-    const url = this.url + path;
+    const url = this.getUrl(path);
     const request = new XMLHttpRequest();
     request.onerror = error =>
     {
       // ERROR
-      readyCallback(new IOResult(ERROR, "Connection error"));
+      readyCallback(new Result(ERROR, "Connection error"));
     };
     request.onload = () =>
     {
       if (request.status === 200 || request.status === 201)
       {
-        readyCallback(new IOResult(OK));
+        readyCallback(new Result(OK));
       }
       else
       {
-        readyCallback(new IOResult(ERROR,
+        readyCallback(new Result(ERROR,
           "Collection creation failed (error " + request.status + ")."));
       }
     };
@@ -317,6 +245,22 @@ class WebdavService extends IOService
       const userPass = this.username + ":" + this.password;
       request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
     }
+  }
+
+  getUrl(path)
+  {
+    let url = this.url || "";
+
+    if (url && url.endsWith("/"))
+    {
+      url = url.substring(0, url.length - 1);
+    }
+
+    if (path && !path.startsWith("/"))
+    {
+      path = "/" + path;
+    }
+    return url + path;
   }
 }
 

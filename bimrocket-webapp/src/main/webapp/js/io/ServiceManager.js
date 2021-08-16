@@ -15,18 +15,19 @@ class ServiceManager
     this.classes[serviceClass.name] = serviceClass;
   }
 
-  static getClassesForType(type)
+  /* returns an array with the names of the services of the given class */
+  static getTypesOf(serviceClass)
   {
-    let typeClasses = [];
+    let types = [];
     for (let className in this.classes)
     {
       let cls = this.classes[className];
-      if (cls.type === type)
+      if (cls.prototype instanceof serviceClass || cls === serviceClass)
       {
-        typeClasses.push(className);
+        types.push(className);
       }
     }
-    return typeClasses;
+    return types;
   }
 }
 

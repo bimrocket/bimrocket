@@ -12,6 +12,11 @@ class MessageDialog extends Dialog
   {
     super(title);
 
+    if (typeof message !== "string")
+    {
+      message = String(message);
+    }
+
     this.addTextWithArgs(message, args);
     let button = this.addButton("confirm_accept", "button.accept",
       () => this.hide());

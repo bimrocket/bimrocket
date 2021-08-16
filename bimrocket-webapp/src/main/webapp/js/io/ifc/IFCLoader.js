@@ -34,7 +34,9 @@ class IFCLoader extends THREE.Loader
   {
     let file = new IFCFile();
 
-    this.loadFile(file, text);
+    console.info("parsing file...");
+
+    this.parseFile(file, text);
 
     console.info(file);
 
@@ -42,7 +44,7 @@ class IFCLoader extends THREE.Loader
       this.options);
   }
 
-  loadFile(file, text)
+  parseFile(file, text)
   {
     throw "Not implemented";
   }

@@ -250,6 +250,20 @@ class Controls
     return buttonElem;
   }
 
+  static addImageButton(parent, name, label, action, className)
+  {
+    const buttonElem = document.createElement("button");
+    buttonElem.name = name;
+    I18N.set(buttonElem, "title", label);
+    I18N.set(buttonElem, "alt", label);
+
+    if (className) buttonElem.className = className;
+    buttonElem.addEventListener("click", event => action(event), false);
+    parent.appendChild(buttonElem);
+
+    return buttonElem;
+  }
+
   static addField(parent, id, label, className)
   {
     const groupElem = document.createElement("div");

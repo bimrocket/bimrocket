@@ -60,6 +60,7 @@ public class BimRocketApplication extends ResourceConfig
   {
     LOGGER.log(Level.INFO, "BimRocket INIT");
     packages("org.bimrocket.api");
+    register(CORSFilter.class);
     register(AuthenticationFilter.class);
     initBeans();
   }

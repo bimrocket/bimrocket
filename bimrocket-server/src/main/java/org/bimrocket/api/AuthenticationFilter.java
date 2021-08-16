@@ -67,6 +67,8 @@ public class AuthenticationFilter implements ContainerRequestFilter
   @Override
   public void filter(ContainerRequestContext context) throws IOException
   {
+    if ("OPTIONS".equals(context.getMethod())) return;
+
     UserStore userStore =
       (UserStore)application.getProperties().get("userStore");
     if (userStore == null) return;
@@ -108,14 +110,13 @@ public class AuthenticationFilter implements ContainerRequestFilter
     if (!isValidResource(userRoles))
     {
       context.abortWith(getErrorResponse(403, "Access denied"));
-      return;
     }
   }
 
   private boolean isValidResource(Set<String> userRoles)
   {
     Method method = resourceInfo.getResourceMethod();
-    
+
     if (method.isAnnotationPresent(PermitAll.class)) return true;
 
     RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
@@ -128,14 +129,14 @@ public class AuthenticationFilter implements ContainerRequestFilter
       }
       return false;
     }
-    
+
     return !userRoles.isEmpty();
   }
-  
+
   private Response getErrorResponse(int statusCode, String message)
   {
     Method method = resourceInfo.getResourceMethod();
-    
+
     Produces produces = method.getAnnotation(Produces.class);
     if (produces != null)
     {

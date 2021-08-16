@@ -59,7 +59,6 @@ public class LdapUserStore implements UserStore
     Collections.synchronizedMap(new HashMap<>());
   private long credentialsCacheLastUpdate = 0;
   private long roleCacheLastUpdate = 0;
-  private final Set<String> userRoles = new HashSet<>();
 
   private String ldapUrl;
   private String domain;
@@ -70,7 +69,6 @@ public class LdapUserStore implements UserStore
 
   public LdapUserStore()
   {
-    userRoles.add("BASIC");
   }
 
   public String getLdapUrl()
@@ -162,7 +160,10 @@ public class LdapUserStore implements UserStore
   {
     if (StringUtils.isBlank(username)) return Collections.emptySet();
 
-    if (StringUtils.isBlank(adminUsername)) return userRoles;
+    if (StringUtils.isBlank(adminUsername))
+    {
+      return Collections.singleton(username.trim());
+    }
 
     // refresh cache
     long now = System.currentTimeMillis();
@@ -176,7 +177,7 @@ public class LdapUserStore implements UserStore
     if (roles == null)
     {
       roles = getUserGroups(username);
-      roles.addAll(userRoles);
+      roles.add(username.trim());
       roleCache.put(username, roles);
     }
     return roles;

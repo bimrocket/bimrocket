@@ -101,19 +101,9 @@ class ScriptTool extends Tool
 
     dialog.bodyElem.appendChild(editorElem);
 
-    const { EditorView, keymap } = CM["@codemirror/view"];
-    const { highlightSpecialChars, highlightActiveLine } = CM["@codemirror/view"];
+    const { basicSetup, EditorView } = CM["@codemirror/basic-setup"];
     const { javascript, javascriptLanguage } = CM["@codemirror/lang-javascript"];
-    const { Extension, EditorState } = CM["@codemirror/state"];
-    const { history, historyKeymap } = CM["@codemirror/history"];
-    const { indentOnInput } = CM["@codemirror/language"];
-    const { defaultKeymap } = CM["@codemirror/commands"];
-    const { bracketMatching } = CM["@codemirror/matchbrackets"];
-    const { closeBrackets, closeBracketsKeymap } = CM["@codemirror/closebrackets"];
-    const { searchKeymap, highlightSelectionMatches } = CM["@codemirror/search"];
-    const { autocompletion, completionKeymap } = CM["@codemirror/autocomplete"];
-    const { commentKeymap } = CM["@codemirror/comment"];
-    const { defaultHighlightStyle } = CM["@codemirror/highlight"];
+    const { EditorState } = CM["@codemirror/state"];
 
     let theme = EditorView.theme({
       "&.cm-focused .cm-cursor" : {
@@ -140,8 +130,11 @@ class ScriptTool extends Tool
       "& .ͼb" : {
         "color" : "#008000"
       },
+      "& .cm-wrap" : {
+        "height" : "100%"
+      },
       "& .cm-scroller" : {
-        "lineHeight" : "1"
+        "overflow" : "auto"
       }
     });
 
@@ -165,7 +158,7 @@ class ScriptTool extends Tool
     dialog.addButton("run", "button.run", () =>
     {
       endEdition();
-      this.run(dialog.scriptCode);
+      this.run(dialog.scriptName, dialog.scriptCode);
     });
 
     const saveButton = dialog.addButton("save", "button.save", () =>
@@ -204,27 +197,7 @@ class ScriptTool extends Tool
       let editorState = EditorState.create(
       {
         doc: code,
-        extensions: [
-          javascript(),
-          highlightSpecialChars(),
-          history(),
-          indentOnInput(),
-          defaultHighlightStyle,
-          bracketMatching(),
-          closeBrackets(),
-          autocompletion(),
-          highlightActiveLine(),
-          highlightSelectionMatches(),
-          theme,
-          keymap.of([
-            ...closeBracketsKeymap,
-            ...defaultKeymap,
-            ...searchKeymap,
-            ...historyKeymap,
-            ...commentKeymap,
-            ...completionKeymap
-          ])
-        ]
+          extensions : [basicSetup, javascript(), theme]
       });
 
       editorView.setState(editorState);
@@ -250,7 +223,7 @@ class ScriptTool extends Tool
     this.panel.visible = false;
   }
 
-  run(code)
+  run(name, code)
   {
     this.addGlobals();
     try
@@ -259,7 +232,7 @@ class ScriptTool extends Tool
       const result = fn();
       if (typeof result !== "undefined")
       {
-        MessageDialog.create(this.label, result)
+        MessageDialog.create(name || "", result)
           .setClassName("info")
           .setI18N(this.application.i18n).show();
       }

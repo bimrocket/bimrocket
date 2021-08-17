@@ -65,7 +65,6 @@ header
 
 header > a.logo_link
 {
-  float:left;
   background-color: #B00000;
   height: 28px;
   display: inline-block;

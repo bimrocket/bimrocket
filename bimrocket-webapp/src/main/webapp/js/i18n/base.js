@@ -248,6 +248,7 @@ export const translations =
   "message.objects_selected" : count => `${count} objects selected:`,
   "message.no_solid_selected" : "No solid selected.",
   "message.controllers_loaded" : count => `${count} controllers loaded.`,
+  "message.select_directory" : "Select directory to save file.",
 
   "message.file_saved" : "File saved.",
   "message.folder_created" : "Folder created.",

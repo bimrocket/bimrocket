@@ -248,6 +248,7 @@ export const translations =
   "message.objects_selected" : count => `${count} objetos seleccionados:`,
   "message.no_solid_selected" : "Ningún sólido seleccionado.",
   "message.controllers_loaded" : count => `${count} controladores cargados.`,
+  "message.select_directory" : "Selecciona el directorio donde guardar el fichero.",
 
   "message.file_saved" : "Fichero guardado.",
   "message.folder_created" : "Carpeta creada.",

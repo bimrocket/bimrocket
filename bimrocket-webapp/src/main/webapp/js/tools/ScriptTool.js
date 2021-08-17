@@ -29,7 +29,8 @@ class ScriptTool extends Tool
     GeometryUtils : GeometryUtils,
     Solid : Solid,
     SolidGeometry : SolidGeometry,
-    ExtrudeSolidGeometry : ExtrudeSolidGeometry
+    ExtrudeSolidGeometry : ExtrudeSolidGeometry,
+    Toast : Toast
   };
 
   constructor(application, options)
@@ -94,7 +95,7 @@ class ScriptTool extends Tool
 
     const nameField = dialog.addTextField("name", "tool.script.name", "",
       "script_name");
-
+    
     const editorElem = document.createElement("div");
     editorElem.className = "script_code";
 
@@ -152,14 +153,11 @@ class ScriptTool extends Tool
     const endEdition = () =>
     {
       dialog.scriptName = nameField.value;
-      if (editorView.state.doc.text)
+      let code = editorView.state.doc.toString();
+      if (code !== dialog.scriptCode)
       {
-        let code = editorView.state.doc.text.join("\n");
-        if (code !== dialog.scriptCode)
-        {
-          dialog.scriptCode = code;
-          this.saved = false;
-        }
+        dialog.scriptCode = code;
+        this.saved = false;
       }
       dialog.hide();
     };
@@ -170,7 +168,7 @@ class ScriptTool extends Tool
       this.run(dialog.scriptCode);
     });
 
-    dialog.addButton("save", "button.save", () =>
+    const saveButton = dialog.addButton("save", "button.save", () =>
     {
       endEdition();
       this.save(dialog.scriptName, dialog.scriptCode);
@@ -181,8 +179,14 @@ class ScriptTool extends Tool
       endEdition();
     });
 
+    nameField.addEventListener("input", () => 
+    {
+      saveButton.disabled = nameField.value.trim().length === 0;
+    });
+
     dialog.onShow = () =>
     {
+      saveButton.disabled = nameField.value.trim().length === 0;
       if (dialog.scriptName === "")
       {
         nameField.focus();
@@ -282,36 +286,17 @@ class ScriptTool extends Tool
 
     if (panel.service)
     {
-      panel.service.save(code, path,
-        result => this.handleSaveResult(path, result));
+      panel.service.save(code, path, result => 
+      {
+        panel.handleSaveResult(path, result);
+        this.saved = result.status !== Result.ERROR;
+      });
     }
     else
     {
-      MessageDialog.create("ERROR", "Select a directory to save first.")
-        .setI18N(this.application.i18n).show();
-    }
-  }
-
-  handleSaveResult(path, result)
-  {
-    const application = this.application;
-    const panel = this.panel;
-
-    panel.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      MessageDialog.create("ERROR", result.message)
+      MessageDialog.create("ERROR", "message.select_directory")
         .setClassName("error")
-        .setI18N(application.i18n).show();
-    }
-    else
-    {
-      Toast.create("message.file_saved")
-        .setI18N(application.i18n).show();
-
-      // reload basePath
-      panel.openPath(panel.basePath);
-      this.saved = true;
+        .setI18N(this.application.i18n).show();
     }
   }
 

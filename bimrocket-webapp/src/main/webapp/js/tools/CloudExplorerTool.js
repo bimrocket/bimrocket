@@ -126,7 +126,7 @@ class CloudExplorerTool extends Tool
       onCompleted : data =>
       {
         panel.service.save(data, path,
-          result => this.handleSaveResult(path, result));
+          result => panel.handleSaveResult(path, result));
       },
       onProgress : data => panel.setProgress(data.progress, data.message),
       onError : message =>
@@ -138,28 +138,6 @@ class CloudExplorerTool extends Tool
     };
     panel.showProgressBar();
     IOManager.export(intent);
-  }
-
-  handleSaveResult(path, result)
-  {
-    const application = this.application;
-    const panel = this.panel;
-
-    panel.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      MessageDialog.create("ERROR", result.message)
-        .setClassName("error")
-        .setI18N(application.i18n).show();
-    }
-    else
-    {
-      Toast.create("message.file_saved")
-        .setI18N(application.i18n).show();
-
-      // reload basePath
-      panel.openPath(panel.basePath);
-    }
   }
 }
 

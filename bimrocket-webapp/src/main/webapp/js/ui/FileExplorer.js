@@ -254,11 +254,11 @@ class FileExplorer extends Panel
         const path = this.basePath + "/" + file.name;
         this.showProgressBar();
         this.service.save(data, path, result =>
-          {
-            this.entryName = file.name;
-            this.entryType = Metadata.FILE;
-            this.handleSaveResult(path, result);
-          });
+        {
+          this.entryName = file.name;
+          this.entryType = Metadata.FILE;
+          this.handleSaveResult(path, result);
+        });
       };
       reader.readAsText(file);
     }
@@ -286,6 +286,27 @@ class FileExplorer extends Panel
       {
         this.openFile(this.service.url + path, result.data);
       }
+    }
+  }
+
+  handleSaveResult(path, result)
+  {
+    const application = this.application;
+
+    this.showButtonsPanel();
+    if (result.status === Result.ERROR)
+    {
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
+    }
+    else
+    {
+      Toast.create("message.file_saved")
+        .setI18N(application.i18n).show();
+
+      // reload current directoty
+      this.openPath(this.basePath);
     }
   }
 

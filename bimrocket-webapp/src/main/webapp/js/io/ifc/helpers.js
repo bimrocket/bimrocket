@@ -456,7 +456,7 @@ export class IfcPolygonalFaceSetHelper
         for (let i = 0; i < coordIndex.length; i++)
         {
           let vertexIndex = coordIndex[i] - 1;
-          faceVertices.push(vertices[vertexIndex]);
+          faceVertices.push(geometry.vertices[vertexIndex]);
           faceIndices.push(vertexIndex);
         }
 
@@ -470,7 +470,7 @@ export class IfcPolygonalFaceSetHelper
             for (let hv = 0; hv < hole.length; hv++)
             {
               let vertexIndex = hole[hv] - 1;
-              holeVertices.push(vertices[vertexIndex]);
+              holeVertices.push(geometry.vertices[vertexIndex]);
               faceIndices.push(vertexIndex);
             }
             faceHoles.push(holeVertices);

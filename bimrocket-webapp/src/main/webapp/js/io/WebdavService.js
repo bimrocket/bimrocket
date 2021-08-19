@@ -142,7 +142,7 @@ class WebdavService extends FileService
             return;
           }
         }
-        readyCallback(new Result(ERROR, "Error " + request.status));
+        readyCallback(this.createError("Can't open", request.status));
       }
     };
     request.open("PROPFIND", url, true);
@@ -171,8 +171,7 @@ class WebdavService extends FileService
       }
       else
       {
-        readyCallback(new Result(ERROR,
-          "Save failed (error " + request.status + ")."));
+        readyCallback(this.createError("Save failed", request.status));
       }
     };
     request.open("PUT", url, true);
@@ -200,8 +199,7 @@ class WebdavService extends FileService
       }
       else
       {
-        readyCallback(new Result(ERROR,
-          "Delete failed (error " + request.status + ")."));
+        readyCallback(this.createError("Delete failed", request.status));
       }
     };
     request.open("DELETE", url, true);
@@ -229,8 +227,8 @@ class WebdavService extends FileService
       }
       else
       {
-        readyCallback(new Result(ERROR,
-          "Collection creation failed (error " + request.status + ")."));
+        readyCallback(this.createError(
+          "Folder creation failed", request.status));
       }
     };
     request.open("MKCOL", url, true);
@@ -245,6 +243,28 @@ class WebdavService extends FileService
       const userPass = this.username + ":" + this.password;
       request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
     }
+  }
+
+  createError(message, status)
+  {
+    let error = null;
+    switch (status)
+    {
+      case 403:
+        error =  "Access forbidden";
+        break;
+      case 404:
+        error = "Not found";
+        break;
+      case 405:
+        error = "Not allowed";
+        break;
+      case 500:
+        error = "Internal server error";
+        break;
+    }
+    if (error) message = message + ": " + error + " (HTTP " + status + ").";
+    return new Result(Result.ERROR, message);
   }
 
   getUrl(path)

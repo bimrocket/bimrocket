@@ -28,7 +28,7 @@
  * and 
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.cloudfs;
+package org.bimrocket.api.cloudfs.methods;
 
 import jakarta.ws.rs.HttpMethod;
 
@@ -48,9 +48,9 @@ import java.lang.annotation.Target;
   ElementType.METHOD
 })
 @Retention(value = RetentionPolicy.RUNTIME)
-@HttpMethod(value = "PROPFIND")
+@HttpMethod(value = "MKCOL")
 @Documented
-public @interface PROPFIND
+public @interface MKCOL
 {
 }
 

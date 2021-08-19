@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.security;
+package org.bimrocket.api.cloudfs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,37 +39,51 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.collections.map.LRUMap;
 
 /**
  *
  * @author realor
  */
-public class FileACLStore implements ACLStore
+public class ACL
 {
-  private ResourceMap acl;
-  private String filename;
+  public static String READ_ACTION = "READ";
+  public static String WRITE_ACTION = "WRITE";
+  private static final String ACL_FILENAME = ".acl";
+  private static final int MAX_SIZE = 10;
+
+  private static final LRUMap cache = new LRUMap(MAX_SIZE);
+
+  private final File directory;
+  private final File aclFile;
+  private FileMap acl;
   private long lastLoad;
 
-  public String getFilename()
+  ACL(File directory)
   {
-    return filename;
+    this.directory = directory;
+    this.aclFile = new File(directory, ACL_FILENAME);
   }
 
-  public void setFilename(String filename)
+  public File getDirectory()
   {
-    this.filename = filename;
+    return directory;
   }
 
-  @Override
-  public synchronized void grant(String resource, String action, String role)
+  public File getACLFile()
+  {
+    return aclFile;
+  }
+
+  public synchronized void grant(String filename, String action, String role)
     throws IOException
   {
     prepare();
-    ActionMap actionMap = acl.get(resource);
+    ActionMap actionMap = acl.get(filename);
     if (actionMap == null)
     {
       actionMap = new ActionMap();
-      acl.put(resource, actionMap);
+      acl.put(filename, actionMap);
     }
     Set<String> roles = actionMap.get(action);
     if (roles == null)
@@ -80,12 +94,11 @@ public class FileACLStore implements ACLStore
     roles.add(role);
   }
 
-  @Override
-  public synchronized void revoke(String resource, String action, String role)
+  public synchronized void revoke(String filename, String action, String role)
     throws IOException
   {
     prepare();
-    ActionMap actionMap = acl.get(resource);
+    ActionMap actionMap = acl.get(filename);
     if (actionMap != null)
     {
       Set<String> roles = actionMap.get(action);
@@ -97,38 +110,44 @@ public class FileACLStore implements ACLStore
           actionMap.remove(action);
           if (actionMap.isEmpty())
           {
-            acl.remove(resource);
+            acl.remove(filename);
           }
         }
       }
     }
   }
 
-  @Override
-  public synchronized void revokeAll(String resource) throws IOException
+  public synchronized void revokeAll(String filename) throws IOException
   {
     prepare();
-    acl.remove(resource);
+    acl.remove(filename);
   }
 
-  @Override
-  public synchronized Set<String> getRoles(String resource, String action)
+  public synchronized Set<String> getRoles(String filename, String action)
     throws IOException
   {
     prepare();
-    ActionMap actionMap = acl.get(resource);
+    ActionMap actionMap = acl.get(filename);
     if (actionMap == null) return Collections.emptySet();
     Set<String> roles = actionMap.get(action);
     return roles == null ? Collections.emptySet() : roles;
   }
 
+  /* private methods */
+
   private void prepare() throws IOException
   {
-    File file = getFile();
-    if (file.lastModified() != lastLoad)
+    if (aclFile.exists())
     {
-      load();
-      lastLoad = file.lastModified();
+      if (acl == null || aclFile.lastModified() != lastLoad)
+      {
+        load();
+        lastLoad = aclFile.lastModified();
+      }
+    }
+    else
+    {
+      acl = new FileMap();
     }
   }
 
@@ -137,10 +156,9 @@ public class FileACLStore implements ACLStore
     ObjectMapper mapper = new ObjectMapper();
     try
     {
-      File file = getFile();
-      JsonNode node = mapper.readTree(file);
-      acl = mapper.convertValue(node, new TypeReference<ResourceMap>(){});
-      if (acl == null) acl = new ResourceMap();
+      JsonNode node = mapper.readTree(aclFile);
+      acl = mapper.convertValue(node, new TypeReference<FileMap>(){});
+      if (acl == null) acl = new FileMap();
     }
     catch (IllegalArgumentException ex)
     {
@@ -152,20 +170,13 @@ public class FileACLStore implements ACLStore
   {
     if (acl != null)
     {
+      if (!aclFile.exists())
+      {
+        aclFile.getParentFile().mkdirs();
+      }
       ObjectMapper mapper = new ObjectMapper();
-      File file = getFile();
-      mapper.writeValue(file, acl);
+      mapper.writeValue(aclFile, acl);
     }
-  }
-
-  private File getFile() throws IOException
-  {
-    File file = new File(filename);
-    if (!file.exists())
-    {
-      file.createNewFile();
-    }
-    return file;
   }
 
   public static class ActionMap extends HashMap<String, Set<String>>
@@ -173,24 +184,20 @@ public class FileACLStore implements ACLStore
     private static final long serialVersionUID = 1L;
   }
 
-  public static class ResourceMap extends HashMap<String, ActionMap>
+  public static class FileMap extends HashMap<String, ActionMap>
   {
     private static final long serialVersionUID = 1L;
   }
 
-  public static void main(String[] args) throws IOException
+  public static synchronized ACL getInstance(String path)
   {
-    FileACLStore store = new FileACLStore();
-    store.setFilename("C:/Users/realor/test.txt");
-
-    store.grant("/test/alfa1.ifc", READ_ACTION, "EMPLEAT");
-    store.grant("/test/alfa2.ifc", READ_ACTION, "realor");
-    store.grant("/test/alfa3.ifc", WRITE_ACTION, "INFORMATICA");
-    store.grant("/test/alfa3.ifc", WRITE_ACTION, "UIB");
-    store.grant("/test/alfa3.ifc", WRITE_ACTION, "ALCALDIA");
-    store.revokeAll("/test/alfa3.ifc");
-
-    store.save();
+    ACL acl = (ACL)cache.get(path);
+    if (acl == null)
+    {
+      acl = new ACL(new File(path));
+      cache.put(path, acl);
+    }
+    return acl;
   }
 }
 

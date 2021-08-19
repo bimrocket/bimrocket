@@ -30,6 +30,8 @@
  */
 package org.bimrocket.api.cloudfs;
 
+import org.bimrocket.api.cloudfs.methods.PROPFIND;
+import org.bimrocket.api.cloudfs.methods.MKCOL;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -48,7 +50,6 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +66,13 @@ import org.apache.commons.io.IOUtils;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.FileSystem;
+import java.util.Collections;
+import java.util.Set;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
+import static jakarta.ws.rs.core.Response.Status.CREATED;
+import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
+import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 
 /**
@@ -79,7 +86,6 @@ public class CloudFsEndpoint
   public static final String BASE_PROPERTY = "cloudfs.baseProperty";
   public static final String BASE_DIRECTORY = "cloudfs.baseDirectory";
   public static final String DIRECTORIES = "cloudfs.directories";
-  public static final String ACL_FILENAME = "acl.properties";
 
   @Inject
   Application application;
@@ -123,7 +129,10 @@ public class CloudFsEndpoint
       return Response.status(NOT_FOUND).build();
 
     if (!isValidFile(file))
-      return Response.status(405, "Not allowed").build();
+      return Response.status(METHOD_NOT_ALLOWED).build();
+
+    if (!isAccessPermitted(file, ACL.READ_ACTION))
+      return Response.status(FORBIDDEN).build();
 
     return sendFileProperties(file, uri, depth);
   }
@@ -133,14 +142,17 @@ public class CloudFsEndpoint
   public Response mkcol(@PathParam("path") List<PathSegment> path)
   {
     String uri = getPathUri(path);
-    File file = new File(getBaseDir(), uri);
+    File dir = new File(getBaseDir(), uri);
 
-    if (!isValidFile(file) || file.exists())
-      return Response.status(405, "Not allowed").build();
+    if (!isValidFile(dir) || dir.exists())
+      return Response.status(METHOD_NOT_ALLOWED).build();
 
-    file.mkdirs();
+    if (!isAccessPermitted(dir.getParentFile(), ACL.WRITE_ACTION))
+      return Response.status(FORBIDDEN).build();
 
-    return Response.status(Status.CREATED).build();
+    dir.mkdirs();
+
+    return Response.status(CREATED).build();
   }
 
   @HEAD
@@ -155,7 +167,10 @@ public class CloudFsEndpoint
       return Response.status(NOT_FOUND).build();
 
     if (!isValidFile(file))
-      return Response.status(405, "Not allowed").build();
+      return Response.status(METHOD_NOT_ALLOWED).build();
+
+    if (!isAccessPermitted(file, ACL.READ_ACTION))
+      return Response.status(FORBIDDEN).build();
 
     if (file.isFile())
     {
@@ -187,7 +202,10 @@ public class CloudFsEndpoint
       return Response.status(NOT_FOUND).build();
 
     if (!isValidFile(file))
-      return Response.status(405, "Not allowed").build();
+      return Response.status(METHOD_NOT_ALLOWED).build();
+
+    if (!isAccessPermitted(file, ACL.READ_ACTION))
+      return Response.status(FORBIDDEN).build();
 
     if (file.isFile())
     {
@@ -208,7 +226,10 @@ public class CloudFsEndpoint
     File file = new File(getBaseDir(), uri);
 
     if (!isValidFile(file) || file.isDirectory())
-      return Response.status(405, "Not allowed").build();
+      return Response.status(METHOD_NOT_ALLOWED).build();
+
+    if (!isAccessPermitted(file, ACL.WRITE_ACTION))
+      return Response.status(FORBIDDEN).build();
 
     file.getParentFile().mkdirs();
     try (FileOutputStream output = new FileOutputStream(file))
@@ -218,7 +239,7 @@ public class CloudFsEndpoint
     }
     catch (IOException ex)
     {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return Response.status(INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -232,8 +253,14 @@ public class CloudFsEndpoint
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
 
-    if (!isValidFile(file) || !file.delete())
-      return Response.status(405, "Not allowed").build();
+    if (!isValidFile(file))
+      return Response.status(METHOD_NOT_ALLOWED).build();
+
+    if (!isAccessPermitted(file, ACL.WRITE_ACTION))
+      return Response.status(FORBIDDEN).build();
+
+    if (!file.delete())
+      return Response.status(METHOD_NOT_ALLOWED).build();
 
     return Response.ok().build();
   }
@@ -389,6 +416,40 @@ public class CloudFsEndpoint
         }
       }
     }
+  }
+
+  private boolean isAccessPermitted(File file, String action)
+  {
+    try
+    {
+      File baseDir = getBaseDir();
+      String filename = file.getName();
+      File dir = file.getParentFile();
+      Set<String> fileRoles = Collections.emptySet();
+      while (dir != null)
+      {
+        ACL acl = ACL.getInstance(dir.getAbsolutePath());
+        fileRoles = acl.getRoles(filename, action);
+        if (!fileRoles.isEmpty() || dir.equals(baseDir)) break;
+
+        filename = dir.getName();
+        dir = dir.getParentFile();
+      }
+      Set<String> userRoles = getUserRoles();
+      return fileRoles.isEmpty() || !Collections.disjoint(fileRoles, userRoles);
+    }
+    catch (IOException ex)
+    {
+      // ignore
+    }
+    return false;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Set<String> getUserRoles()
+  {
+    Object value = context.getProperty("userRoles");
+    return value == null ? Collections.emptySet() : (Set<String>)value;
   }
 
   private String getContentType(File file)

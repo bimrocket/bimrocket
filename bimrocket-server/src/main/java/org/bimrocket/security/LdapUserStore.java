@@ -134,7 +134,9 @@ public class LdapUserStore implements UserStore
   @Override
   public boolean validateCredential(String username, String password)
   {
-    if (StringUtils.isBlank(username)) return true;
+    if (StringUtils.isBlank(username)) return false;
+
+    if (ANONYMOUS_USER.equals(username)) return true;
 
     // refresh cache
     long now = System.currentTimeMillis();
@@ -160,11 +162,6 @@ public class LdapUserStore implements UserStore
   {
     if (StringUtils.isBlank(username)) return Collections.emptySet();
 
-    if (StringUtils.isBlank(adminUsername))
-    {
-      return Collections.singleton(username.trim());
-    }
-
     // refresh cache
     long now = System.currentTimeMillis();
     if (now - roleCacheLastUpdate > updateTime * 1000)
@@ -176,8 +173,16 @@ public class LdapUserStore implements UserStore
     Set<String> roles = roleCache.get(username);
     if (roles == null)
     {
-      roles = getUserGroups(username);
-      roles.add(username.trim());
+      if (StringUtils.isBlank(adminUsername))
+      {
+        roles = new HashSet<>();
+      }
+      else
+      {
+        roles = getUserGroups(username); // get roles from LDAP
+      }
+      roles.add(username.trim()); // nominal role
+      roles.add(EVERYONE_ROLE); // everyone role
       roleCache.put(username, roles);
     }
     return roles;

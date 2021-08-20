@@ -31,6 +31,7 @@
 package org.bimrocket.security;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,13 +48,17 @@ public class InMemoryUserStore implements UserStore
   @Override
   public boolean validateCredential(String username, String password)
   {
-    return true;
+    return !StringUtils.isBlank(username);
   }
 
   @Override
   public Set<String> getRoles(String username)
   {
-    return StringUtils.isBlank(username) ? Collections.emptySet() :
-      Collections.singleton(username.trim());
+    if (StringUtils.isBlank(username)) return Collections.emptySet();
+
+    Set<String> roles = new HashSet<>();
+    roles.add(username.trim()); // nominal role
+    roles.add(EVERYONE_ROLE); // everyone role
+    return roles;
   }
 }

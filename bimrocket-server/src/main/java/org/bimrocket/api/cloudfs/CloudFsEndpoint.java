@@ -131,7 +131,7 @@ public class CloudFsEndpoint
     if (!isValidFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(file, ACL.READ_ACTION))
+    if (!isAccessAllowed(file, ACL.READ_ACTION))
       return Response.status(FORBIDDEN).build();
 
     return sendFileProperties(file, uri, depth);
@@ -147,7 +147,7 @@ public class CloudFsEndpoint
     if (!isValidFile(dir) || dir.exists())
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(dir.getParentFile(), ACL.WRITE_ACTION))
+    if (!isAccessAllowed(dir.getParentFile(), ACL.WRITE_ACTION))
       return Response.status(FORBIDDEN).build();
 
     dir.mkdirs();
@@ -169,7 +169,7 @@ public class CloudFsEndpoint
     if (!isValidFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(file, ACL.READ_ACTION))
+    if (!isAccessAllowed(file, ACL.READ_ACTION))
       return Response.status(FORBIDDEN).build();
 
     if (file.isFile())
@@ -204,7 +204,7 @@ public class CloudFsEndpoint
     if (!isValidFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(file, ACL.READ_ACTION))
+    if (!isAccessAllowed(file, ACL.READ_ACTION))
       return Response.status(FORBIDDEN).build();
 
     if (file.isFile())
@@ -228,7 +228,7 @@ public class CloudFsEndpoint
     if (!isValidFile(file) || file.isDirectory())
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(file, ACL.WRITE_ACTION))
+    if (!isAccessAllowed(file, ACL.WRITE_ACTION))
       return Response.status(FORBIDDEN).build();
 
     file.getParentFile().mkdirs();
@@ -256,7 +256,7 @@ public class CloudFsEndpoint
     if (!isValidFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
-    if (!isAccessPermitted(file, ACL.WRITE_ACTION))
+    if (!isAccessAllowed(file, ACL.WRITE_ACTION))
       return Response.status(FORBIDDEN).build();
 
     if (!file.delete())
@@ -418,7 +418,7 @@ public class CloudFsEndpoint
     }
   }
 
-  private boolean isAccessPermitted(File file, String action)
+  private boolean isAccessAllowed(File file, String action)
   {
     try
     {

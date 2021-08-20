@@ -38,7 +38,11 @@ import java.util.Set;
  */
 public interface UserStore
 {
+  public static final String ANONYMOUS_USER = "anonymous";
+  public static final String EVERYONE_ROLE = "EVERYONE";
+
   public boolean validateCredential(String username, String password);
 
+  // all users have their nominal role and the EVERYONE role
   public Set<String> getRoles(String username);
 }

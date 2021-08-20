@@ -50,6 +50,7 @@ import java.util.Set;
 import org.bimrocket.security.UserStore;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
+import static org.bimrocket.security.UserStore.ANONYMOUS_USER;
 
 /**
  *
@@ -73,47 +74,43 @@ public class AuthenticationFilter implements ContainerRequestFilter
       (UserStore)application.getProperties().get("userStore");
     if (userStore == null) return;
 
-    String username = null;
-    String password = null;
+    String username = ANONYMOUS_USER;
 
     List<String> authos = context.getHeaders().get("Authorization");
     if (authos != null && !authos.isEmpty())
     {
       String autho = authos.get(0);
       String[] authoParts = autho.split(" ");
+
+      // basic authentication
       if (authoParts.length == 2 && authoParts[0].equalsIgnoreCase("basic"))
       {
         String userPassword = authoParts[1].trim();
         String decoded = new String(Base64.getDecoder().decode(userPassword));
         String[] userPasswordParts = decoded.split(":");
         username = userPasswordParts[0];
-        password = userPasswordParts.length > 1 ? userPasswordParts[1] : null;
+        String password = userPasswordParts.length > 1 ?
+          userPasswordParts[1] : null;
+        if (!userStore.validateCredential(username, password))
+        {
+          context.abortWith(getErrorResponse(401, "Invalid credentials"));
+          return;
+        }
       }
     }
+
+    context.setProperty("username", username);
 
     Set<String> userRoles = userStore.getRoles(username);
+    context.setProperty("userRoles", userRoles);
 
-    if (username != null)
-    {
-      if (userStore.validateCredential(username, password))
-      {
-        context.setProperty("username", username);
-        context.setProperty("userRoles", userRoles);
-      }
-      else
-      {
-        context.abortWith(getErrorResponse(401, "Invalid credentials"));
-        return;
-      }
-    }
-
-    if (!isValidResource(userRoles))
+    if (!isAccessAllowed(username, userRoles))
     {
       context.abortWith(getErrorResponse(403, "Access denied"));
     }
   }
 
-  private boolean isValidResource(Set<String> userRoles)
+  private boolean isAccessAllowed(String username, Set<String> userRoles)
   {
     Method method = resourceInfo.getResourceMethod();
 
@@ -130,7 +127,8 @@ public class AuthenticationFilter implements ContainerRequestFilter
       return false;
     }
 
-    return !userRoles.isEmpty();
+    // only authenticated users can access methods with no roles defined
+    return !ANONYMOUS_USER.equals(username);
   }
 
   private Response getErrorResponse(int statusCode, String message)

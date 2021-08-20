@@ -101,13 +101,27 @@ public class ACL
     ActionMap actionMap = acl.get(filename);
     if (actionMap != null)
     {
-      Set<String> roles = actionMap.get(action);
-      if (roles != null)
+      if (action == null)
       {
-        roles.remove(role);
-        if (roles.isEmpty())
+        acl.remove(filename);
+      }
+      else
+      {
+        Set<String> roles = actionMap.get(action);
+        if (roles != null)
         {
-          actionMap.remove(action);
+          if (role == null)
+          {
+            actionMap.remove(action);
+          }
+          else
+          {
+            roles.remove(role);
+            if (roles.isEmpty())
+            {
+              actionMap.remove(action);
+            }
+          }
           if (actionMap.isEmpty())
           {
             acl.remove(filename);
@@ -117,10 +131,15 @@ public class ACL
     }
   }
 
-  public synchronized void revokeAll(String filename) throws IOException
+  public synchronized void revoke(String filename, String action)
+    throws IOException
   {
-    prepare();
-    acl.remove(filename);
+    revoke(filename, action, null);
+  }
+
+  public synchronized void revoke(String filename) throws IOException
+  {
+    revoke(filename, null, null);
   }
 
   public synchronized Set<String> getRoles(String filename, String action)

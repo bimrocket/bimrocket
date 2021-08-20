@@ -56,7 +56,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.ws.rs.core.Response;
+import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
+import jakarta.ws.rs.core.StreamingOutput;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Base64;
+import org.apache.commons.io.IOUtils;
 import org.bimrocket.api.ApiError;
+import static org.bimrocket.api.bcf.BcfSnapshot.PNG_TYPE;
 import org.bimrocket.dao.Dao;
 import org.bimrocket.dao.DaoConnectionFactory;
 import org.bimrocket.dao.DaoConnection;
@@ -71,9 +80,9 @@ import org.bimrocket.odata.SimpleODataParser;
 public class BcfEndpoint
 {
   private static final String PROJECT_TEMPLATE = "project_template";
-  
+
   private static final Map<String, String> topicFieldMap = new HashMap<>();
-  
+
   static
   {
     topicFieldMap.put("topic_status", "topicStatus");
@@ -105,7 +114,7 @@ public class BcfEndpoint
   }
 
   /* Projects */
-  
+
   @GET
   @Path("/projects")
   @Produces(APPLICATION_JSON)
@@ -263,7 +272,7 @@ public class BcfEndpoint
   {
     try (DaoConnection conn = getDaoConnection())
     {
-      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);      
+      Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       SimpleODataParser parser = new SimpleODataParser(topicFieldMap);
       Map<String, Object> filter = parser.parseFilter(odataFilter);
       filter.put("projectId", projectId);
@@ -278,6 +287,7 @@ public class BcfEndpoint
 
   @GET
   @Path("/projects/{projectId}/topics/{topicId}")
+  @Produces(APPLICATION_JSON)
   public BcfTopic getTopic(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -596,6 +606,7 @@ public class BcfEndpoint
   @DELETE
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}")
   @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
   public Response deleteViewpoint(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -606,6 +617,42 @@ public class BcfEndpoint
       Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       dao.delete(viewpointId);
       return Response.ok().build();
+    }
+    catch (Exception ex)
+    {
+      throw ApiError.exception(ex);
+    }
+  }
+
+  @GET
+  @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}/snapshot")
+  @PermitAll
+  @Produces(APPLICATION_JSON)
+  public Response getViewpointSnapshot(
+    @PathParam("projectId") String projectId,
+    @PathParam("topicId") String topicId,
+    @PathParam("viewpointId") String viewpointId)
+  {
+    try (DaoConnection conn = getDaoConnection())
+    {
+      Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
+      BcfViewpoint viewpoint = dao.select(viewpointId);
+      if (viewpoint == null)
+        return ApiError.response(404, "Viewpoint not found");
+
+      BcfSnapshot snapshot = viewpoint.getSnapshot();
+      if (snapshot == null)
+        return ApiError.response(404, "Snapshot not found");
+
+      String type = snapshot.getSnapshotType();
+      String contentType = PNG_TYPE.equals(type) ? "image/png" : "image/jpg";
+      String data = snapshot.getSnapshotData();
+      byte[] bytes = Base64.getDecoder().decode(data);
+
+      return Response.ok(bytes)
+        .header("Content-Type", contentType)
+        .header("Content-Length", bytes.length)
+        .build();
     }
     catch (Exception ex)
     {

@@ -34,7 +34,7 @@ export const translations =
   "label.project" : "Projecte:",
   "label.status" : "Estat:",
   "label.priority" : "Prioritat:",
-  "label.assigned_to" : "Assignat a:",
+  "label.assigned_to" : "Assignada a:",
   "label.index" : "Índex:",
   "label.title" : "Títol:",
   "label.type" : "Tipus:",
@@ -48,6 +48,7 @@ export const translations =
   "label.project_name" : "Nom del projecte:",
   "label.project_extensions" : "Extensions del projecte:",
   "label.comment" : "Comentari:",
+  "label.zoom_image" : "Amplia imatge",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
@@ -57,6 +58,7 @@ export const translations =
   "title.delete_comment" : "Esborra comentari",
   "title.delete_viewpoint" : "Esborra punt de vista",
   "title.delete_bcf_service" : "Esborra servei BCF",
+  "title.viewpoint" : "Vista de la incidència",
 
   "message.no_bim_object_selected" : "Cap objecte BIM seleccionat.",
 

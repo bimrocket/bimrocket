@@ -132,7 +132,12 @@ class Application
     if (WEBGL.isWebGLAvailable())
     {
       // WebGL renderer
-      this.renderer = new THREE.WebGLRenderer({antialias: true, alpha:true});
+      this.renderer = new THREE.WebGLRenderer(
+       {
+         antialias: true,
+         alpha:true,
+         preserveDrawingBuffer: true
+       });
     }
     else
     {

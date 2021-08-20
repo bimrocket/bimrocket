@@ -9,6 +9,7 @@ import { Controls } from "./Controls.js";
 import { ServiceDialog } from "./ServiceDialog.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { Dialog } from "./Dialog.js";
 import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
@@ -196,7 +197,19 @@ class BCFPanel extends Panel
     this.tabbedPane = new TabbedPane(this.detailPanelElem);
     this.tabbedPane.paneElem.classList.add("bcf_tabs");
 
-    /* comment panel */
+    /* viewpoints panel */
+
+    this.viewpointsPanelElem =
+      this.tabbedPane.addTab("viewpoints", "bim|tab.viewpoints");
+
+    this.viewpointListElem = document.createElement("ul");
+    this.viewpointListElem.classList = "bcf_list";
+    this.viewpointsPanelElem.appendChild(this.viewpointListElem);
+
+    this.createViewpointButton = Controls.addButton(this.viewpointsPanelElem,
+      "createViewpoint", "button.create", () => this.createViewpoint());
+
+    /* comments panel */
 
     this.commentsPanelElem =
       this.tabbedPane.addTab("comments", "bim|tab.comments");
@@ -209,18 +222,6 @@ class BCFPanel extends Panel
       "comment", "bim|label.comment");
     this.saveCommentButton = Controls.addButton(this.commentsPanelElem,
       "saveComment", "button.save", () => this.saveComment());
-
-    /* viewpoints panel */
-
-    this.viewpointsPanelElem =
-      this.tabbedPane.addTab("viewpoints", "bim|tab.viewpoints");
-
-    this.viewpointListElem = document.createElement("ul");
-    this.viewpointListElem.classList = "bcf_list";
-    this.viewpointsPanelElem.appendChild(this.viewpointListElem);
-
-    this.createViewpointButton = Controls.addButton(this.viewpointsPanelElem,
-      "createViewpoint", "button.create", () => this.createViewpoint());
 
     /* links panel */
 
@@ -595,7 +596,8 @@ class BCFPanel extends Panel
 
     if (camera instanceof THREE.PerspectiveCamera)
     {
-      viewpoint.perspective_camera = {
+      viewpoint.perspective_camera =
+      {
         "camera_view_point" :
         {"x": position.x, "y" : position.y, "z" : position.z},
         "camera_direction" :
@@ -607,7 +609,8 @@ class BCFPanel extends Panel
     }
     else if (camera instanceof THREE.OrthographicCamera)
     {
-      viewpoint.orthogonal_camera = {
+      viewpoint.orthogonal_camera =
+      {
         "camera_view_point" :
         {"x": position.x, "y" : position.y, "z" : position.z},
         "camera_direction" :
@@ -628,6 +631,22 @@ class BCFPanel extends Panel
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
+
+    const canvas = this.application.renderer.domElement;
+    const imageSource = canvas.toDataURL("image/png");
+
+    let image = imageSource;
+    const index = image.indexOf(",");
+    if (index !== -1)
+    {
+      image = image.substring(index + 1);
+    }
+
+    viewpoint.snapshot =
+    {
+      snapshot_type : "png",
+      snapshot_data : image
+    };
 
     this.service.createViewpoint(projectId, topicGuid, viewpoint,
       onCompleted, error => this.onError(error));
@@ -899,6 +918,9 @@ class BCFPanel extends Panel
 
   populateViewpointList()
   {
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+
     const viewpoints = this.viewpoints;
     const viewpointsElem = this.viewpointListElem;
     viewpointsElem.innerHTML = "";
@@ -929,8 +951,78 @@ class BCFPanel extends Panel
             .setI18N(this.application.i18n).show();
         }, "bcf_delete_viewpoint");
       this.application.i18n.updateTree(itemListElem);
+
+      if (viewpoint.snapshot)
+      {
+        let type = viewpoint.snapshot.snapshot_type;
+        let data = viewpoint.snapshot.snapshot_data;
+
+        let source;
+        if (data)
+        {
+          source = type === "png" ?
+            "data:image/png;base64," + data : "data:image/jpeg;base64," + data;
+        }
+        else
+        {
+          source = this.service.url + "/bcf/2.1/projects/" + projectId +
+          "/topics/" + topicGuid +
+          "/viewpoints/" + viewpoint.guid + "/snapshot";
+        }
+
+        let linkElem = Controls.addLink(itemListElem, null, "#",
+          "bim|label.zoom_image", "viewpoint_snapshot",
+          () => this.zoomSnapshot(source));
+
+        let imageElem = document.createElement("img");
+        imageElem.className = "viewpoint_snapshot";
+        imageElem.src = source;
+        linkElem.appendChild(imageElem);
+      }
       viewpointsElem.appendChild(itemListElem);
     }
+  }
+
+  zoomSnapshot(source)
+  {
+    const dialog = new Dialog("bim|title.viewpoint");
+    dialog.setI18N(this.application.i18n);
+    dialog.setClassName("viewpoint_dialog");
+
+    let imageElem = document.createElement("img");
+    imageElem.className = "snapshot_zoom";
+    imageElem.src = source;
+    imageElem.onload = () =>
+    {
+      const container = this.application.container;
+
+      let imageWidth = imageElem.width;
+      let imageHeight = imageElem.height;
+
+      let imageAspectRatio = imageWidth / imageHeight;
+      let screenAspectRatio = container.clientWidth / container.clientHeight;
+
+      if (imageAspectRatio > screenAspectRatio)
+      {
+        let width = container.clientWidth;
+        dialog.setSize(width, width / imageAspectRatio + 100);
+      }
+      else
+      {
+        let height = container.clientHeight;
+        dialog.setSize((height - 100) * imageAspectRatio, height);
+      }
+
+      let acceptButton = dialog.addButton("accept", "button.close", () =>
+      {
+        dialog.hide();
+      });
+
+      dialog.onShow = () => acceptButton.focus();
+
+      dialog.show();
+    };
+    dialog.bodyElem.appendChild(imageElem);
   }
 
   populateExtensions()

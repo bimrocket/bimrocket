@@ -28,73 +28,41 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.api.bcf;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class BcfSnapshot
 {
-  @JsonProperty("code")
-  private int code;
+  public static final String JPG_TYPE = "jpg";
+  public static final String PNG_TYPE = "png";
 
-  @JsonProperty("message")
-  private String message;
+  @JsonProperty("snapshot_type")
+  private String snapshotType;
+  @JsonProperty("snapshot_data")
+  private String snapshotData; // base64 image
 
-  public int getCode()
+  public String getSnapshotType()
   {
-    return code;
+    return snapshotType;
   }
 
-  public void setCode(int code)
+  public void setSnapshotType(String snapshotType)
   {
-    this.code = code;
+    this.snapshotType = snapshotType;
   }
 
-  public String getMessage()
+  public String getSnapshotData()
   {
-    return message;
+    return snapshotData;
   }
 
-  public void setMessage(String message)
+  public void setSnapshotData(String snapshotData)
   {
-    this.message = message;
-  }
-
-  public static Response response(int status, String message)
-  {
-    ApiError error = new ApiError();
-    error.code = status;
-    error.message = message;
-    Response response = Response.status(status).entity(error).build();
-    return response;
-  }
-
-  public static Response response(Exception ex)
-  {
-    ApiError error = new ApiError();
-    error.code = 500;
-    error.message = ex.getMessage();
-    if (error.message == null)
-    {
-      error.message = ex.toString();
-    }
-    Response response = Response.serverError().entity(error).build();
-    return response;
-  }
-
-  public static WebApplicationException exception(int status, String message)
-  {
-    return new WebApplicationException(response(status, message));
-  }
-
-  public static WebApplicationException exception(Exception ex)
-  {
-    return new WebApplicationException(response(ex));
+    this.snapshotData = snapshotData;
   }
 }

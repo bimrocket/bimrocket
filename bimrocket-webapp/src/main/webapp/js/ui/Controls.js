@@ -50,8 +50,8 @@ class Controls
     if (url) linkElem.href = url;
     if (title)
     {
-      linkElem.title = title;
-      linkElem.alt = title;
+      I18N.set(linkElem, "title", title);
+      I18N.set(linkElem, "alt", title);
     }
     if (action)
     {

@@ -88,7 +88,7 @@ table.bcf_topic_table > tbody > tr:hover
 
 .bcf_body > div.bcf_description
 {
-  display: block;  
+  display: block;
 }
 
 .bcf_body > div.bcf_description textarea
@@ -116,7 +116,7 @@ table.bcf_topic_table > tbody > tr:hover
 
 .bcf_project_setup
 {
-  padding: 4px;  
+  padding: 4px;
 }
 
 .bcf_project_setup > div
@@ -153,7 +153,7 @@ table.bcf_topic_table > tbody > tr:hover
 
 .bcf_tabs .tab_panel
 {
-  padding: 4px;  
+  padding: 4px;
 }
 
 .bcf_tabs .tab_panel label
@@ -162,7 +162,7 @@ table.bcf_topic_table > tbody > tr:hover
   display: block;
   box-sizing: border-box;
   width:100%;
-  margin-top: 4px;  
+  margin-top: 4px;
 }
 
 .bcf_tabs .tab_panel textarea
@@ -184,7 +184,7 @@ ul.bcf_list
 
 ul.bcf_list li
 {
-  margin-bottom: 4px;  
+  margin-bottom: 4px;
 }
 
 .bcf_tabs li .bcf_comment_author
@@ -195,4 +195,34 @@ ul.bcf_list li
 .bcf_tabs li .bcf_comment_text
 {
   display:block;
+}
+
+.bcf_tabs .viewpoint_snapshot img
+{
+  width: 100%;
+  display: block;
+  border: 1px solid #b0b0b0;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
+}
+
+.bcf_tabs .viewpoint_snapshot:focus img
+{
+  border: 1px dotted #404040;
+}
+
+.viewpoint_dialog
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewpoint_dialog .snapshot_zoom
+{
+  width: 100%;
+  display: block;
+  border: 1px solid #b0b0b0;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
 }

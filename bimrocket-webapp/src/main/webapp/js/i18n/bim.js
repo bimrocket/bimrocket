@@ -48,6 +48,7 @@ export const translations =
   "label.project_name" : "Project name:",
   "label.project_extensions" : "Project extensions:",
   "label.comment" : "Comment:",
+  "label.zoom_image" : "Zoom image",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -57,6 +58,7 @@ export const translations =
   "title.delete_comment" : "Delete comment",
   "title.delete_viewpoint" : "Delete viewpoint",
   "title.delete_bcf_service" : "Delete BCF service",
+  "title.viewpoint" : "Topic viewpoint",
 
   "message.no_bim_object_selected" : "No BIM object selected.",
 

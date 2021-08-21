@@ -34,7 +34,7 @@ export const translations =
   "label.project" : "Proyecto:",
   "label.status" : "Estado:",
   "label.priority" : "Prioridad:",
-  "label.assigned_to" : "Asignado a:",
+  "label.assigned_to" : "Asignada a:",
   "label.index" : "Índice:",
   "label.title" : "Título:",
   "label.type" : "Tipo:",

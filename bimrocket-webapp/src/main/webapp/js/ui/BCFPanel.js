@@ -168,6 +168,10 @@ class BCFPanel extends Panel
     this.stageElem = Controls.addSelectField(this.detailBodyElem,
       "topic_stage", "bim|label.stage");
 
+    this.createdByElem = Controls.addTextField(this.detailBodyElem,
+      "topic_created_by", "bim|label.creation_author");
+     this.createdByElem.setAttribute("readonly", true);
+
     this.assignedToElem = Controls.addSelectField(this.detailBodyElem,
       "topic_assigned_to", "bim|label.assigned_to");
 
@@ -336,6 +340,7 @@ class BCFPanel extends Panel
       this.descriptionElem.value = topic.description;
       this.dueDateElem.value = this.removeTime(topic.due_date);
       this.creationDateElem.value = this.formatDate(topic.creation_date);
+      this.createdByElem.value = topic.creation_author;
       this.creationAuthorElem.value = topic.creation_author;
       this.modifyDateElem.value = this.formatDate(topic.modify_date);
       this.modifyAuthorElem.value = topic.modify_author;
@@ -354,6 +359,7 @@ class BCFPanel extends Panel
       this.descriptionElem.value = null;
       this.dueDateElem.value = null;
       this.creationDateElem.value = null;
+      this.createdByElem.value = null;
       this.creationAuthorElem.value = null;
       this.modifyDateElem.value = null;
       this.modifyAuthorElem.value = null;

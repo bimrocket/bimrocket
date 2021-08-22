@@ -393,10 +393,20 @@ class FlyTool extends Tool
 
   onScene(event)
   {
-    if ((event.type === "nodeChanged" || event.type === "cameraActivated") &&
-      event.objects.includes(this.application.camera) && event.source !== this)
+    const application = this.application;
+
+    if (event.source !== this)
     {
-      this.resetParameters();
+      const camera = application.camera;
+
+      if (event.type === "nodeChanged" && event.objects.includes(camera))
+      {
+        this.resetParameters();
+      }
+      else if (event.type === "cameraActivated")
+      {
+        this.resetParameters();
+      }
     }
   }
 

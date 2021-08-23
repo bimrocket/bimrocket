@@ -167,7 +167,6 @@ class SolidGeometry extends THREE.BufferGeometry
     const vectorPrecision = 3;
     const distanceToEdge = 0.000001;
     const vector = new THREE.Vector3();
-    const geometry = this;
 
     let isPointOnLine = function(pointA, pointB, pointToCheck, distance)
     {

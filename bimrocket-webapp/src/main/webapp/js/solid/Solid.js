@@ -4,7 +4,7 @@
  * @author: realor
  */
 
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { SolidGeometry, EdgeMap } from "../solid/SolidGeometry.js";
 import { BSP } from "./BSP.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -199,8 +199,9 @@ class Solid extends THREE.Object3D
   {
     let object = new Solid();
     object.copy(this, false);
-    object._facesObject.geometry = this._facesObject.geometry.clone();
-    object._edgesObject.geometry = this._edgesObject.geometry.clone();
+    object._facesObject.geometry = this._facesObject.geometry;
+    object._edgesObject.geometry = this._edgesObject.geometry;
+
     object._facesObject.material = this._facesObject.material;
     object._edgesObject.material = this._edgesObject.material;
     object.facesVisible = this.facesVisible;
@@ -291,12 +292,29 @@ class Solid extends THREE.Object3D
     return volume;
   }
 
-  updateGeometry(geometry, debug = false)
+  updateGeometry(geometry, fix = true, debug = false)
   {
-    let solidGeometry = new SolidGeometry();
-    solidGeometry.copy(geometry);
+    let solidGeometry;
+    if (geometry instanceof SolidGeometry)
+    {
+      solidGeometry = geometry;
+    }
+    else
+    {
+      let solidGeometry = new SolidGeometry();
+      solidGeometry.copy(geometry);
+    }
 
-    let edgeMap = solidGeometry.fixEdges(debug);
+    let edgeMap;
+    if (fix)
+    {
+      edgeMap = solidGeometry.fixEdges(debug);
+    }
+    else
+    {
+      edgeMap = new EdgeMap(solidGeometry);
+    }
+
     solidGeometry.update();
     this._facesObject.geometry = solidGeometry;
 
@@ -306,7 +324,6 @@ class Solid extends THREE.Object3D
 
   fixGeometry(application)
   {
-    //this.updateGeometry(this.geometry, true);
     let edgeMap = this.geometry.fixEdges(true);
     let vertices = this.geometry.vertices;
 

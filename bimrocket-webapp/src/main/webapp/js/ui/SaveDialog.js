@@ -9,7 +9,7 @@ import { IOManager } from "../io/IOManager.js";
 
 class SaveDialog extends Dialog
 {
-  static DEFAULT_EXPORT_FORMAT = "dae";
+  static DEFAULT_EXPORT_FORMAT = "brf";
 
   constructor(title, name)
   {

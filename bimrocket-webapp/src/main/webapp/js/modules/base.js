@@ -65,6 +65,8 @@ import { ToggleButtonController } from "../controllers/ToggleButtonController.js
 import { TranslationController } from "../controllers/TranslationController.js";
 import { WFSController } from "../controllers/WFSController.js";
 
+import { BRFLoader } from "../io/BRFLoader.js";
+import { BRFExporter } from "../io/BRFExporter.js";
 import { ColladaLoader } from "../io/ColladaLoader.js";
 import { ColladaExporter } from "../io/ColladaExporter.js";
 import { OBJLoader } from "../io/OBJLoader.js";
@@ -82,6 +84,15 @@ import { BundleManager } from "../i18n/BundleManager.js";
 export function load(application)
 {
   // register formats
+  IOManager.formats["brf"] =
+  {
+    description : "BIMROCKET (*.brf)",
+    extension: "brf",
+    loaderClass : BRFLoader,
+    exporterClass : BRFExporter,
+    options : {}
+  };
+
   IOManager.formats["dae"] =
   {
     description: "Collada (*.dae)",

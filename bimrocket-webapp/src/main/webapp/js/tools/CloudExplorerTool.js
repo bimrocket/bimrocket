@@ -132,7 +132,9 @@ class CloudExplorerTool extends Tool
       onError : message =>
       {
         panel.showButtonsPanel();
-        MessageDialog.create("ERROR", message).setI18N(application.i18N).show();
+        MessageDialog.create("ERROR", message)
+          .setClassName("error")
+          .setI18N(application.i18n).show();
       },
       options : { units : this.application.units }
     };

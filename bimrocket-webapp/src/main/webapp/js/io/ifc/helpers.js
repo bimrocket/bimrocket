@@ -2516,18 +2516,42 @@ export class IfcStyledItemHelper extends IfcHelper
     }
     if (style instanceof schema.IfcSurfaceStyle)
     {
-      var name = style.Name;
-      var side = style.Side;
-      style = style.Styles[0];
-      if (style instanceof schema.IfcSurfaceStyleShading)
+      const material = style.helper.getMaterial();
+      if (item.helper && material)
       {
-        var color = style.SurfaceColour;
-        var transparency = style.Transparency;
-        var red = color.Red;
-        var green = color.Green;
-        var blue = color.Blue;
+        item.helper.material = material;
+      }
+    }
+  }
+};
 
-        var material = new THREE.MeshPhongMaterial({
+export class IfcSurfaceStyleHelper extends IfcHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+    this.material = null;
+  }
+
+  getMaterial()
+  {
+    if (this.material === null)
+    {
+      const style = this.instance;
+      const schema = this.instance.constructor.schema;
+
+      const name = style.Name;
+      const side = style.Side;
+      const styleItem = style.Styles[0]; // consider only first style item
+      if (styleItem instanceof schema.IfcSurfaceStyleShading)
+      {
+        const color = styleItem.SurfaceColour;
+        const transparency = styleItem.Transparency;
+        const red = color.Red;
+        const green = color.Green;
+        const blue = color.Blue;
+
+        this.material = new THREE.MeshPhongMaterial({
           name : name,
           color: new THREE.Color(red, green, blue),
           flatShading: false,
@@ -2535,14 +2559,11 @@ export class IfcStyledItemHelper extends IfcHelper
           transparent: transparency > 0,
           side: side === '.BOTH.' ? THREE.DoubleSide : THREE.FrontSide
         });
-        if (item.helper)
-        {
-          item.helper.material = material;
-        }
       }
     }
+    return this.material;
   }
-};
+}
 
 export class IfcPropertySetHelper extends IfcHelper
 {

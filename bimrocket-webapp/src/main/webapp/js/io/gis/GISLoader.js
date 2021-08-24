@@ -4,8 +4,9 @@
  * @author realor
  */
 
-import { SolidGeometry } from "../../solid/SolidGeometry.js";
 import { Solid } from "../../solid/Solid.js";
+import { SolidGeometry } from "../../solid/SolidGeometry.js";
+import { ExtrudeSolidGeometry } from "../../solid/ExtrudeSolidGeometry.js";
 import { ColladaLoader } from "../ColladaLoader.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -134,9 +135,11 @@ class GISLoader extends THREE.Loader
 
   createPoint(name, coordinates, properties, parent)
   {
-    let modelURL = this.evalExpression(this.options.model, coordinates, properties);
+    let modelURL = this.evalExpression(this.options.model, coordinates, 
+      properties);
     let offset = this.getOffset(coordinates, properties);
-    let rotationZ = this.evalExpression(this.options.rotationZ, coordinates, properties) || 0;
+    let rotationZ = this.evalExpression(this.options.rotationZ, 
+      coordinates, properties) || 0;
 
     if (modelURL) // deferred point creation
     {
@@ -153,7 +156,8 @@ class GISLoader extends THREE.Loader
 
         object.position.x = coordinates[0] + offset.x;
         object.position.y = coordinates[1] + offset.y;
-        object.position.z = coordinates[2] + offset.z;
+        let z = coordinates.length === 3 ? coordinates[2] + offset.z : offset.z;
+        object.position.z = z;
         object.rotation.z = rotationZ * Math.PI / 180;
 
         this.setObjectProperties(object, name, properties);
@@ -171,7 +175,8 @@ class GISLoader extends THREE.Loader
 
       object.position.x = coordinates[0] + offset.x;
       object.position.y = coordinates[1] + offset.y;
-      object.position.z = coordinates[2] + offset.z;
+      let z = coordinates.length === 3 ? coordinates[2] + offset.z : offset.z;
+      object.position.z = z;
 
       this.setObjectProperties(object, name, properties);
       parent.add(object);
@@ -183,8 +188,8 @@ class GISLoader extends THREE.Loader
     let group = new THREE.Group();
     for (var i = 0; i < coordinates.length; i++)
     {
-      var polygonCoords = coordinates[i];
-      this.createPoint(name + "_" + i, polygonCoords, null, group);
+      var pointCoords = coordinates[i];
+      this.createPoint(name + "_" + i, pointCoords, null, group);
     }
     this.setObjectProperties(group, name, properties);
     parent.add(group);
@@ -195,20 +200,22 @@ class GISLoader extends THREE.Loader
     let offset = this.getOffset(coordinates, properties);
     let diameter = this.evalExpression(this.options.diameter, coordinates, properties) || 0.25;
 
+    let vertices = [];
+    for (var i = 0; i < coordinates.length; i++)
+    {
+      let point = coordinates[i];
+      let z = point.length === 3 ? point[2] + offset.z : offset.z;
+      let v = new THREE.Vector3(
+        point[0] + offset.x,
+        point[1] + offset.y,
+        z);
+      vertices.push(v);
+    }
+    
     let line = null;
     if (diameter === 0)
     {
       let geometry = new THREE.BufferGeometry();
-      let vertices = [];
-      for (var i = 0; i < coordinates.length; i++)
-      {
-        let point = coordinates[i];
-        let v = new THREE.Vector3(
-          point[0] + offset.x,
-          point[1] + offset.y,
-          point[2] + offset.z);
-        vertices.push(v);
-      }
       geometry.setFromPoints(vertices);
       let material = this.getLineMaterial(coordinates, properties);
       line = new THREE.Line(geometry, material);
@@ -219,7 +226,7 @@ class GISLoader extends THREE.Loader
       material.side = THREE.DoubleSide;
       try
       {
-        line = this.createTube(coordinates, diameter, 16, offset, material);
+        line = this.createTube(vertices, diameter, 16, offset, material);
       }
       catch (ex)
       {
@@ -248,11 +255,11 @@ class GISLoader extends THREE.Loader
   createPolygon(name, coordinates, properties, parent)
   {
     let offset = this.getOffset(coordinates, properties);
-    let extrusion = this.evalExpression(this.options.extrusion, coordinates, properties) || 0;
+    let extrusion = this.evalExpression(
+      this.options.extrusion, coordinates, properties) || 0;
 
     let extrudeSettings = {
-     amount : extrusion,
-     bevelEnabled	: false
+      depth : extrusion
     };
     let pts = [];
 
@@ -279,26 +286,14 @@ class GISLoader extends THREE.Loader
       holes.push(new THREE.Shape(pts));
     }
 
-    let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    let geometry = new ExtrudeSolidGeometry(shape, extrudeSettings);
     let material = this.getMeshMaterial(coordinates, properties);
 
-    let mesh = new THREE.Mesh(geometry, material);
-    mesh.position.z = offset.z;
-    this.setObjectProperties(mesh, name, properties);
+    let solid = new Solid(geometry, material);
+    solid.position.z = offset.z;
+    this.setObjectProperties(solid, name, properties);
 
-    if (this.options.edges)
-    {
-      let group = new THREE.Group();
-      group.add(mesh);
-      group.add(new THREE.LineSegments(
-        new THREE.EdgesGeometry(mesh.geometry),
-        new THREE.LineBasicMaterial({color: this.selectionMaterial.color})));
-      parent.add(group);
-    }
-    else
-    {
-      parent.add(mesh);
-    }
+    parent.add(solid);
   }
 
   createMultiPolygon(name, coordinates, properties, parent)
@@ -391,126 +386,27 @@ class GISLoader extends THREE.Loader
     return result;
   }
 
-  createTube(coordinates, diameter, sides, offset, material)
+  createTube(vertices, diameter = 0.25, sides = 8, offset, material)
   {
-    let getPlane = function(v1, v2, point)
-    {
-      let normal = new THREE.Vector3();
-      if (Math.abs(v1.dot(v2)) > 0.9999)
-      {
-        normal = v1;
-      }
-      else
-      {
-        let s = new THREE.Vector3();
-        s.subVectors(v2, v1).normalize();
-        let v = new THREE.Vector3();
-        v.crossVectors(s, v1).normalize();
-        normal.crossVectors(s, v).normalize();
-      }
-      let plane = new THREE.Plane();
-      plane.setFromNormalAndCoplanarPoint(normal, point);
-      return plane;
+    let extrudeSettings = {
+     directrix : vertices
     };
-
-    if (sides < 3) sides = 3;
-
-    const matrix = new THREE.Matrix4();
-    const p1 = new THREE.Vector3();
-    const p2 = new THREE.Vector3();
-    const p3 = new THREE.Vector3();
-    const vs = new THREE.Vector3();
-    const v1 = new THREE.Vector3();
-    const v2 = new THREE.Vector3();
-    const vx = new THREE.Vector3();
-    const vy = new THREE.Vector3();
-    const vz = new THREE.Vector3();
-    const ray = new THREE.Ray();
-    const vertices = [];
-    const faces = [];
-    const ring = [];
-    const points = [];
-    let point;
-    for (let i = 0; i < coordinates.length; i++)
+    
+    const circle = [];
+    const angle = 2 * Math.PI / sides;
+    for (let i = 0; i < sides; i++)
     {
-      point = new THREE.Vector3();
-      let icoords = coordinates[i];
-      point.x = icoords[0] + offset.x;
-      point.y = icoords[1] + offset.y;
-      point.z = icoords[2] + offset.z;
-      points.push(point);
+      let x = Math.cos(angle * i) * diameter;
+      let y = Math.sin(angle * i) * diameter;
+      circle.push(new THREE.Vector2(x, y));
     }
-    // add fake point to generate last ring
-    let length = points.length;
-    vs.subVectors(points[length - 1], points[length - 2]);
-    point = new THREE.Vector3();
-    point.copy(points[length - 1]).add(vs);
-    points.push(point);
+    let shape = new THREE.Shape(circle);
+    let geometry = new ExtrudeSolidGeometry(shape, extrudeSettings);
 
-    p1.copy(points[0]);
-    p2.copy(points[1]);
-    vs.subVectors(p2, p1);
-    vy.copy(vs).normalize();
-    if (vy.y !== 0) vx.set(-vy.y, vy.x, 0);
-    else if (vy.x !== 0) vx.set(vy.y, -vy.x, 0);
-    else vx.set(1, 0, 0);
-    vz.crossVectors(vx, vy);
-		matrix.set(
-		  vx.x, vy.x, vz.x, p1.x,
-			vx.y, vy.y, vz.y, p1.y,
-			vx.z, vy.z, vz.z, p1.z,
-			0, 0, 0, 1);
-
-    // initial ring
-    for (let s = 0; s < sides; s++)
-    {
-      let angle = s * (2 * Math.PI / sides);
-      let x = Math.cos(angle) * diameter;
-      let y = Math.sin(angle) * diameter;
-      let vertex = new THREE.Vector3(x, 0, y);
-      vertex.applyMatrix4(matrix);
-      vertices.push(vertex);
-      let ringVertex = new THREE.Vector3();
-      ringVertex.copy(vertex);
-      ring.push(ringVertex);
-    }
-
-    let geometry = new SolidGeometry();
-    geometry.vertices = vertices;
-
-    // internal vertices
-    for (let i = 1; i < points.length - 1; i++)
-    {
-      p1.copy(points[i - 1]);
-      p2.copy(points[i]);
-      p3.copy(points[i + 1]);
-
-      v1.subVectors(p2, p1).normalize();
-      v2.subVectors(p3, p2).normalize();
-      let plane = getPlane(v1, v2, p2);
-      for (let s = 0; s < sides; s++)
-      {
-        ray.set(ring[s], v1);
-        let vertex = ray.intersectPlane(plane);
-        if (!vertex) throw "Can't create tube for this LineString";
-        vertices.push(vertex);
-        ring[s].copy(vertex);
-      }
-      for (let s = 0; s < sides; s++)
-      {
-        let base = (i - 1) * sides;
-        let a = base + s;
-        let b = base + ((s + 1) % sides);
-        let c = base + s + sides;
-        let d = base + ((s + 1) % sides) + sides;
-
-        geometry.addFace(vertices[a], vertices[d], vertices[d]);
-        geometry.addFace(vertices[a], vertices[c], vertices[b]);
-      }
-    }
-    geometry.update();
-
-    return new Solid(geometry, material);
+    let solid = new Solid(geometry, material);
+    solid.position.z = offset.z;
+    
+    return solid;
   }
 };
 

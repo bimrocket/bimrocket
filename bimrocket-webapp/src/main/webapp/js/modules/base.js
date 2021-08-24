@@ -73,13 +73,10 @@ import { OBJLoader } from "../io/OBJLoader.js";
 import { OBJExporter } from "../io/OBJExporter.js";
 import { STLLoader } from "../io/STLLoader.js";
 import { STLExporter } from "../io/STLExporter.js";
-import { GMLLoader } from "../io/gis/GMLLoader.js";
-import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
 
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
-
 
 export function load(application)
 {
@@ -118,22 +115,6 @@ export function load(application)
     extension: "stl",
     loaderClass : STLLoader,
     exporterClass : STLExporter,
-    options : {}
-  };
-
-  IOManager.formats["geojson"] =
-  {
-    description : "GeoJSON (*.json)",
-    extension: "json",
-    loaderClass : GeoJSONLoader,
-    options : {}
-  };
-
-  IOManager.formats["gml"] =
-  {
-    description : "Geography markup language (*.gml)",
-    extension: "gml",
-    loaderClass : GMLLoader,
     options : {}
   };
 

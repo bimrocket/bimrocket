@@ -130,7 +130,7 @@ export class IfcRepresentationHelper extends IfcHelper
       for (var i = 0; i < representation.Items.length; i++)
       {
         var item = representation.Items[i];
-        if (item)
+        if (item && item.helper.getObject3D)
         {
           var itemObject3D = item.helper.getObject3D();
           if (itemObject3D)
@@ -2518,6 +2518,7 @@ export class IfcPresentationLayerAssignmentHelper extends IfcHelper
         {
           if (item.helper.getObject3D)
           {
+            try {
             let object = item.helper.getObject3D();
             if (object)
             {
@@ -2528,6 +2529,7 @@ export class IfcPresentationLayerAssignmentHelper extends IfcHelper
                 Identifier : identifier
               };
             }
+            } catch (ex) { console.info(ex); console.info(item.helper); }
           }
         }
       }

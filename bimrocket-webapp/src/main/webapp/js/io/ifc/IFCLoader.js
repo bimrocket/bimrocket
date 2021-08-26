@@ -171,9 +171,12 @@ class IFCLoader extends THREE.Loader
     const processLayerAssignments = () =>
     {
       let assignments = file.entities.IfcPresentationLayerAssignment;
-      for (let assignment of assignments)
+      if (assignments)
       {
-        assignment.helper.assign();
+        for (let assignment of assignments)
+        {
+          assignment.helper.assign();
+        }
       }
       model.updateMatrixWorld();
     };
@@ -358,7 +361,7 @@ class IFCLoader extends THREE.Loader
         { run : updateVisibility, message : "Updating visibility..."},
         { run : paintObjects, message : "Painting objects..."},
         { run : groupObjects, message : "Grouping objects..."}],
-        () => onCompleted(model), onProgress, onError, 100, 10);
+        () => onCompleted(model), onProgress, error => { console.info(error); onError(error); }, 100, 10);
     }
     else
     {

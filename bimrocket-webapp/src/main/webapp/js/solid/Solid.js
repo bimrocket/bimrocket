@@ -301,7 +301,7 @@ class Solid extends THREE.Object3D
     }
     else
     {
-      let solidGeometry = new SolidGeometry();
+      solidGeometry = new SolidGeometry();
       solidGeometry.copy(geometry);
     }
 

@@ -5,7 +5,7 @@
  */
 
 import { GeometryUtils } from "../utils/GeometryUtils.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import * as THREE from "../lib/three.module.js";
 
 class BSP
@@ -76,7 +76,7 @@ class BSP
 //      this.plane = new THREE.Plane();
 //      this.plane.setFromCoplanarPoints(vertex0, vertex1, vertex2);
 //      this.coplanarPolygons.push(polygon);
-      
+
       let vertex0 = polygon.vertices[0];
       if (polygon.normal === null) polygon.updateNormal();
       this.plane = new THREE.Plane();
@@ -98,7 +98,7 @@ class BSP
         if (this.backBSP === null) this.backBSP = new BSP();
         this.backBSP.addPolygon(result.backPolygon);
       }
-      
+
       if (result.coplanarFrontPolygon)
       {
         this.coplanarPolygons.push(result.coplanarFrontPolygon);
@@ -126,14 +126,14 @@ class BSP
    * @param bsp the clipping bsp
    * @returns this bsp clipped by the given bsp
    */
-  clip(bsp) 
+  clip(bsp)
   {
     let insidePolygons = [];
     let outsidePolygons = [];
 
-    bsp.classifyPolygons(this.coplanarPolygons, 
+    bsp.classifyPolygons(this.coplanarPolygons,
       insidePolygons, outsidePolygons);
-    
+
     this.coplanarPolygons = outsidePolygons; // take only outside polygons
 
     if (this.frontBSP)
@@ -143,7 +143,7 @@ class BSP
     if (this.backBSP)
     {
       this.backBSP.clip(bsp);
-    }    
+    }
     return this;
   };
 
@@ -159,7 +159,7 @@ class BSP
     }
 
     this.plane.negate();
-    
+
     if (this.frontBSP)
     {
       this.frontBSP.invert();
@@ -176,7 +176,7 @@ class BSP
 
     return this;
   }
-  
+
   /**
    * Performs a union between this bsp and the given bsp
    * @param bsp the other bsp
@@ -185,19 +185,19 @@ class BSP
   union(bsp)
   {
     // union = a | b
-    
+
     let a = this;
     let b = bsp;
-    
+
     // mutual clip
     a.clip(b);
     b.clip(a);
-    
+
     // remove from b coplanar polygons
     b.invert().clip(a).invert();
-    
+
     a.addPolygons(b.getPolygons());
-    
+
     return a;
   }
 
@@ -209,7 +209,7 @@ class BSP
   intersect(bsp)
   {
     // intersection = a & b = ~(~(a & b)) = ~(~a | ~b)
-    
+
     let a = this;
     let b = bsp;
 
@@ -218,20 +218,20 @@ class BSP
 
     a.clip(b);
     b.clip(a);
-    
+
     b.invert().clip(a).invert();
 
     a.addPolygons(b.getPolygons()).invert();
 
 //    Alternative method:
-//    
+//
 //    a.invert();
 //    b.clip(a);
 //    b.invert();
 //
 //    a.clip(b);
 //    b.clip(a);
-//    
+//
 //    a.addPolygons(b.getPolygons()).invert();
 
     return a;
@@ -248,16 +248,16 @@ class BSP
 
     let a = this;
     let b = bsp;
-    
+
     a.invert();
-            
+
     // mutual clip
     a.clip(b);
     b.clip(a);
-            
+
     // remove from b coplanar polygons
     b.invert().clip(a).invert();
-    
+
     a.addPolygons(b.getPolygons()).invert();
 
     return a;
@@ -268,13 +268,13 @@ class BSP
     if (this.plane === null) return;
 
     let result = this.splitPolygon(polygon);
-    
+
     let frontPolygon = result.frontPolygon || result.coplanarFrontPolygon;
     let backPolygon = result.backPolygon || result.coplanarBackPolygon;
-    
+
     let localInsidePolygons = [];
     let localOutsidePolygons = [];
-    
+
     if (frontPolygon)
     {
       if (this.frontBSP)
@@ -300,7 +300,7 @@ class BSP
         localInsidePolygons.push(backPolygon);
       }
     }
-    
+
     if (localInsidePolygons.length > 0 && localOutsidePolygons.length > 0)
     {
       insidePolygons.push(...localInsidePolygons);
@@ -308,11 +308,11 @@ class BSP
     }
     else if (localInsidePolygons.length > 0)
     {
-      insidePolygons.push(polygon);      
+      insidePolygons.push(polygon);
     }
     else if (localOutsidePolygons.length > 0)
     {
-      outsidePolygons.push(polygon);      
+      outsidePolygons.push(polygon);
     }
   }
 
@@ -328,12 +328,12 @@ class BSP
   splitPolygon(polygon, epsilon = 0.00001)
   {
     let result = {
-      frontPolygon : null, 
+      frontPolygon : null,
       backPolygon : null,
       coplanarFrontPolygon : null,
       coplanarBackPolygon : null
     };
-    
+
     let plane = this.plane;
     let frontCount = 0;
     let backCount = 0;
@@ -357,7 +357,7 @@ class BSP
       }
       else
       {
-        result.coplanarBackPolygon = polygon;        
+        result.coplanarBackPolygon = polygon;
       }
     }
     else if (frontCount > 0 && backCount === 0)
@@ -436,17 +436,17 @@ class Polygon
     this.vertices = [];
     this.normal = null;
   }
-  
+
   addVertex(vertex)
   {
     this.vertices.push(vertex);
   }
-  
+
   updateNormal()
   {
     this.normal = GeometryUtils.calculateNormal(this.vertices);
   }
-  
+
   flip()
   {
     this.normal.negate();

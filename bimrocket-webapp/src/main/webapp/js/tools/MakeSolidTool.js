@@ -5,7 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
-import { Solid } from "../solid/Solid.js";
+import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
 class MakeSolidTool extends Tool

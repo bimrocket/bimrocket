@@ -5,7 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";

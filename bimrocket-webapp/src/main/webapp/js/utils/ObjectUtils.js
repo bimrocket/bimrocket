@@ -5,8 +5,8 @@
  */
 
 import * as THREE from "../lib/three.module.js";
-import { Solid } from "../solid/Solid.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 
 class ObjectUtils
 {

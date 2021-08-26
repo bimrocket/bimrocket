@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import { Solid } from "../../solid/Solid.js";
+import { Solid } from "../../core/Solid.js";
 import * as THREE from "../../lib/three.module.js";
 
 class IFC

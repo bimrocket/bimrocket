@@ -5,9 +5,9 @@
  */
 
 import { IFC } from "./IFC.js";
-import { Solid } from "../../solid/Solid.js";
-import { SolidGeometry } from "../../solid/SolidGeometry.js";
-import { ExtrudeSolidGeometry } from "../../solid/ExtrudeSolidGeometry.js";
+import { Solid } from "../../core/Solid.js";
+import { SolidGeometry } from "../../core/SolidGeometry.js";
+import { ExtrudeSolidGeometry } from "../../core/ExtrudeSolidGeometry.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { PathBuilder } from "../../utils/PathBuilder.js";
 import * as THREE from "../../lib/three.module.js";

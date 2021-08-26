@@ -4,9 +4,9 @@
  * @author realor
  */
 
-import { Solid } from "../../solid/Solid.js";
-import { SolidGeometry } from "../../solid/SolidGeometry.js";
-import { ExtrudeSolidGeometry } from "../../solid/ExtrudeSolidGeometry.js";
+import { Solid } from "../../core/Solid.js";
+import { SolidGeometry } from "../../core/SolidGeometry.js";
+import { ExtrudeSolidGeometry } from "../../core/ExtrudeSolidGeometry.js";
 import { ColladaLoader } from "../ColladaLoader.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -135,10 +135,10 @@ class GISLoader extends THREE.Loader
 
   createPoint(name, coordinates, properties, parent)
   {
-    let modelURL = this.evalExpression(this.options.model, coordinates, 
+    let modelURL = this.evalExpression(this.options.model, coordinates,
       properties);
     let offset = this.getOffset(coordinates, properties);
-    let rotationZ = this.evalExpression(this.options.rotationZ, 
+    let rotationZ = this.evalExpression(this.options.rotationZ,
       coordinates, properties) || 0;
 
     if (modelURL) // deferred point creation
@@ -211,7 +211,7 @@ class GISLoader extends THREE.Loader
         z);
       vertices.push(v);
     }
-    
+
     let line = null;
     if (diameter === 0)
     {
@@ -391,7 +391,7 @@ class GISLoader extends THREE.Loader
     let extrudeSettings = {
      directrix : vertices
     };
-    
+
     const circle = [];
     const angle = 2 * Math.PI / sides;
     for (let i = 0; i < sides; i++)
@@ -405,7 +405,7 @@ class GISLoader extends THREE.Loader
 
     let solid = new Solid(geometry, material);
     solid.position.z = offset.z;
-    
+
     return solid;
   }
 };

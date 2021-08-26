@@ -9,8 +9,8 @@ import { Tree } from "./Tree.js";
 import { Dialog } from "./Dialog.js";
 import { Application } from "./Application.js";
 import { Expression } from "../utils/Expression.js";
-import { Solid } from "../solid/Solid.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 

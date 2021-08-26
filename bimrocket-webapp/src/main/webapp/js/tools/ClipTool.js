@@ -6,8 +6,8 @@
 
 import * as THREE from "../lib/three.module.js";
 import { Tool } from "./Tool.js";
-import { Solid } from "../solid/Solid.js";
-import { BSP } from "../solid/BSP.js";
+import { Solid } from "../core/Solid.js";
+import { BSP } from "../core/BSP.js";
 
 class ClipTool extends Tool
 {

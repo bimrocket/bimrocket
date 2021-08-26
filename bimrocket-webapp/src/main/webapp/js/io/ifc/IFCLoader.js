@@ -6,7 +6,7 @@
 
 import { IFC } from "./IFC.js";
 import { IFCFile } from "./IFCFile.js";
-import { Solid } from "../../solid/Solid.js";
+import { Solid } from "../../core/Solid.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { schema as IFC2X3 } from "./schemas/IFC2x3.js";

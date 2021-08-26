@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import * as THREE from "../lib/three.module.js";
 
 class ExtrudeSolidGeometry extends SolidGeometry

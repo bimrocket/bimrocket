@@ -4,7 +4,7 @@
  * @author: realor
  */
 
-import { SolidGeometry, EdgeMap } from "../solid/SolidGeometry.js";
+import { SolidGeometry, EdgeMap } from "./SolidGeometry.js";
 import { BSP } from "./BSP.js";
 import * as THREE from "../lib/three.module.js";
 

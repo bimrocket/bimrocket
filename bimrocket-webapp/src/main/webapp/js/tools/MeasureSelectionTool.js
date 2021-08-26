@@ -5,7 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
-import { Solid } from "../solid/Solid.js";
+import { Solid } from "../core/Solid.js";
 import { Dialog } from "../ui/Dialog.js";
 
 class MeasureSelectionTool extends Tool

@@ -5,8 +5,8 @@
  */
 
 import { Tool } from "./Tool.js";
-import { Solid } from "../solid/Solid.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -27,7 +27,7 @@ class AddObjectTool extends Tool
   execute()
   {
     var objectType = this.objectType || "group";
-    
+
     var object;
     if (objectType === "group")
     {
@@ -46,7 +46,7 @@ class AddObjectTool extends Tool
           vertices.push(new THREE.Vector3(0.5, -0.5, -0.5));
           vertices.push(new THREE.Vector3(0.5, 0.5, -0.5));
           vertices.push(new THREE.Vector3(-0.5, 0.5, -0.5));
-          
+
           vertices.push(new THREE.Vector3(-0.5, -0.5, 0.5));
           vertices.push(new THREE.Vector3(0.5, -0.5, 0.5));
           vertices.push(new THREE.Vector3(0.5, 0.5, 0.5));
@@ -56,7 +56,7 @@ class AddObjectTool extends Tool
           geometry.addFace(4, 5, 6, 7);
           geometry.addFace(0, 1, 5, 4);
           geometry.addFace(1, 2, 6, 5);
-          geometry.addFace(2, 3, 7, 6);          
+          geometry.addFace(2, 3, 7, 6);
           geometry.addFace(3, 0, 4, 7);
           break;
         case "cylinder":
@@ -65,7 +65,7 @@ class AddObjectTool extends Tool
           var matrix = new THREE.Matrix4().makeRotationX(rad);
           geometry.applyMatrix4(matrix);
           break;
-          break;        
+          break;
         case "sphere":
           geometry = new THREE.SphereGeometry(0.5, 24, 24);
           var rad = THREE.MathUtils.degToRad(90);
@@ -96,7 +96,7 @@ class AddObjectTool extends Tool
           hole.closePath();
           shape.holes.push(hole);
           geometry = new ExtrudeSolidGeometry(shape, { depth: size });
-          break;          
+          break;
       }
       object = new Solid(geometry);
     }

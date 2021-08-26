@@ -12,9 +12,9 @@ import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { ConfirmDialog } from "../ui/ConfirmDialog.js";
 import { Toast } from "../ui/Toast.js";
-import { Solid } from "../solid/Solid.js";
-import { SolidGeometry } from "../solid/SolidGeometry.js";
-import { ExtrudeSolidGeometry } from "../solid/ExtrudeSolidGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
+import { ExtrudeSolidGeometry } from "../core/ExtrudeSolidGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
 import "../lib/codemirror.js";
 import { I18N } from "../i18n/I18N.js";
@@ -95,7 +95,7 @@ class ScriptTool extends Tool
 
     const nameField = dialog.addTextField("name", "tool.script.name", "",
       "script_name");
-    
+
     const editorElem = document.createElement("div");
     editorElem.className = "script_code";
 
@@ -172,7 +172,7 @@ class ScriptTool extends Tool
       endEdition();
     });
 
-    nameField.addEventListener("input", () => 
+    nameField.addEventListener("input", () =>
     {
       saveButton.disabled = nameField.value.trim().length === 0;
     });
@@ -259,7 +259,7 @@ class ScriptTool extends Tool
 
     if (panel.service)
     {
-      panel.service.save(code, path, result => 
+      panel.service.save(code, path, result =>
       {
         panel.handleSaveResult(path, result);
         this.saved = result.status !== Result.ERROR;

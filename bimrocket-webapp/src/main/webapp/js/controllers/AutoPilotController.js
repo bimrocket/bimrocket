@@ -6,7 +6,7 @@
 
 import { Controller } from "./Controller.js";
 import { ControllerManager } from "./ControllerManager.js";
-import { Solid } from "../solid/Solid.js";
+import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
 class AutoPilotController extends Controller

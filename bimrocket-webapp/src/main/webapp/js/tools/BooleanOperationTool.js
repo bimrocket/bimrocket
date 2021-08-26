@@ -5,7 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
-import { Solid } from "../solid/Solid.js";
+import { Solid } from "../core/Solid.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 

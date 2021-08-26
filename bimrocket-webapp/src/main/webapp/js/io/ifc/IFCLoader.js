@@ -160,10 +160,20 @@ class IFCLoader extends THREE.Loader
     const processRelationships = () =>
     {
       let relationships = file.relationships;
-      for (var i = 0; i < relationships.length; i++)
+      for (let relationship of relationships)
       {
-        var relationship = relationships[i];
         relationship.helper.relate();
+      }
+      model.updateMatrixWorld();
+    };
+
+    /* process layer assigments */
+    const processLayerAssignments = () =>
+    {
+      let assignments = file.entities.IfcPresentationLayerAssignment;
+      for (let assignment of assignments)
+      {
+        assignment.helper.assign();
       }
       model.updateMatrixWorld();
     };
@@ -343,6 +353,7 @@ class IFCLoader extends THREE.Loader
         { run : applyStyles, message : "Applying styles..."},
         { run : createObject, message : "Creating objects...", iterations : getIterations},
         { run : processRelationships, message : "Processing relationships..."},
+        { run : processLayerAssignments, message : "Processing layers..."},
         { run : voidObject, message : "Voiding objects...", iterations : getIterations},
         { run : updateVisibility, message : "Updating visibility..."},
         { run : paintObjects, message : "Painting objects..."},
@@ -356,6 +367,7 @@ class IFCLoader extends THREE.Loader
       applyStyles();
       createObjects();
       processRelationships();
+      processLayerAssignments();
       voidObjects();
       updateVisibility();
       paintObjects();

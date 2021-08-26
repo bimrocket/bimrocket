@@ -2492,6 +2492,49 @@ export class IfcDirectionHelper extends IfcHelper
   }
 };
 
+export class IfcPresentationLayerAssignmentHelper extends IfcHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+  }
+
+  assign()
+  {
+    const assignment = this.instance;
+    const schema = this.instance.constructor.schema;
+
+    const layerName = assignment.Name;
+    const layerDescription = assignment.Description;
+    const assignedItems = assignment.AssignedItems;
+    const identifier = assignment.Identifier;
+
+    for (let assignedItem of assignedItems)
+    {
+      if (assignedItem instanceof schema.IfcShapeRepresentation)
+      {
+        let items = assignedItem.Items;
+        for (let item of items)
+        {
+          if (item.helper.getObject3D)
+          {
+            let object = item.helper.getObject3D();
+            if (object)
+            {
+              object.userData.IFC_layer =
+              {
+                Name : layerName,
+                Description : layerDescription,
+                Identifier : identifier
+              };
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 export class IfcStyledItemHelper extends IfcHelper
 {
   constructor(instance)

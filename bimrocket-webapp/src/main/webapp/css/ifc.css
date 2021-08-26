@@ -165,4 +165,9 @@ ul.tree li.IfcWindow
   background-image: url(images/ifc/IfcWindow.svg);
 }
 
+ul.tree li.IfcLayer
+{
+  background-image: url(images/ifc/IfcLayer.svg);
+}
+
 

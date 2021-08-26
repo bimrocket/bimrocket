@@ -24,6 +24,7 @@ class BIMInventoryTool extends Tool
     this.types = {};
     this.classifications = {};
     this.groups = {};
+    this.layers = {};
     this.createPanel();
   }
 
@@ -52,6 +53,10 @@ class BIMInventoryTool extends Tool
     this.groupsPanelElem =
       this.tabbedPane.addTab("ifc_groups", "bim|tab.groups");
     this.groupsTree = new Tree(this.groupsPanelElem);
+
+    this.layersPanelElem =
+      this.tabbedPane.addTab("ifc_layers", "bim|tab.layers");
+    this.layersTree = new Tree(this.layersPanelElem);
   }
 
   activate()
@@ -65,6 +70,7 @@ class BIMInventoryTool extends Tool
       this.typesTree.clear();
       this.classifTree.clear();
       this.groupsTree.clear();
+      this.layersTree.clear();
     }
   }
 
@@ -91,6 +97,10 @@ class BIMInventoryTool extends Tool
     // groups
     this.findGroups(baseObjects);
     this.showGroups();
+
+    // layers
+    this.findLayers(baseObjects);
+    this.showLayers();
   }
 
   findTypes(baseObjects)
@@ -98,9 +108,9 @@ class BIMInventoryTool extends Tool
     this.types = {};
     let types = this.types;
 
-    for (let i = 0; i < baseObjects.length; i++)
+    for (let baseObject of baseObjects)
     {
-      baseObjects[i].traverse(object =>
+      baseObject.traverse(object =>
       {
         if (object.userData.IFC && object.userData.IFC.ifcClassName &&
             object.type === "Object3D")
@@ -142,9 +152,9 @@ class BIMInventoryTool extends Tool
     let classifs = this.classifications;
 
     // find classifications
-    for (let i = 0; i < baseObjects.length; i++)
+    for (let baseObject of baseObjects)
     {
-      baseObjects[i].traverse(object =>
+      baseObject.traverse(object =>
       {
         if (object.userData.IFC && object.type === "Object3D")
         {
@@ -166,9 +176,9 @@ class BIMInventoryTool extends Tool
       });
     }
 
-    for (let i = 0; i < baseObjects.length; i++)
+    for (let baseObject of baseObjects)
     {
-      baseObjects[i].traverse(object =>
+      baseObject.traverse(object =>
       {
         if (object.userData.IFC && object.type === "Object3D")
         {
@@ -176,7 +186,8 @@ class BIMInventoryTool extends Tool
           {
             let key = "IFC_classification_" + classifName;
             let classifData = object.userData[key];
-            let identification = classifData ? classifData.Identification : "?";
+            let identification = classifData ?
+              classifData.Identification || classifData.ItemReference : "?";
             let references = classifs[classifName].references;
             if (references[identification] === undefined)
             {
@@ -198,9 +209,9 @@ class BIMInventoryTool extends Tool
     this.groups = {};
     let groups = this.groups;
 
-    for (let i = 0; i < baseObjects.length; i++)
+    for (let baseObject of baseObjects)
     {
-      baseObjects[i].traverse(object =>
+      baseObject.traverse(object =>
       {
         if (object.userData.IFC && object.type === "Object3D")
         {
@@ -226,6 +237,30 @@ class BIMInventoryTool extends Tool
     }
   }
 
+  findLayers(baseObjects)
+  {
+    this.layers = {};
+    let layers = this.layers;
+
+    for (let baseObject of baseObjects)
+    {
+      baseObject.traverse(object =>
+      {
+        if (object.userData.IFC_layer)
+        {
+          let layerName = object.userData.IFC_layer.Name;
+          let layer = layers[layerName];
+          if (typeof layer === "undefined")
+          {
+            layer = { name : layerName, objects : [] };
+            layers[layerName] = layer;
+          }
+          layer.objects.push(object);
+        }
+      });
+    }
+  }
+
   showTypes()
   {
     let typeNames = Object.keys(this.types);
@@ -233,12 +268,12 @@ class BIMInventoryTool extends Tool
 
     this.typesTree.clear();
 
-    for (let i = 0; i < typeNames.length; i++)
+    for (let typeName of typeNames)
     {
-      let type = this.types[typeNames[i]];
+      let type = this.types[typeName];
       let objects = type.objects;
       let label = type.name + " (" + objects.length + ")";
-      let className = typeNames[i];
+      let className = typeName;
       let node = this.typesTree.addNode(label, event =>
         this.application.selectObjects(event, objects), className);
 
@@ -247,13 +282,12 @@ class BIMInventoryTool extends Tool
       subTypeNames.sort();
       if (subTypeNames.length !== 1 || subTypeNames[0] !== "Others")
       {
-        for (let j = 0; j < subTypeNames.length; j++)
+        for (let subTypeName of subTypeNames)
         {
-          let subTypeName = subTypeNames[j];
           let subType = subTypes[subTypeName];
           let subObjects = subType.objects;
           let subLabel = subTypeName + " (" + subObjects.length + ")";
-          let subNode = node.addNode(subLabel, event =>
+          node.addNode(subLabel, event =>
             this.application.selectObjects(event, subObjects),
             "IfcType");
         }
@@ -268,9 +302,9 @@ class BIMInventoryTool extends Tool
 
     this.classifTree.clear();
 
-    for (let i = 0; i < classifNames.length; i++)
+    for (let classifName of classifNames)
     {
-      let classif = this.classifications[classifNames[i]];
+      let classif = this.classifications[classifName];
       let label = classif.name;
       let node = this.classifTree.addNode(label, null, "IfcClassification");
       if (classifNames.length === 1) node.expand();
@@ -278,15 +312,14 @@ class BIMInventoryTool extends Tool
       let references = classif.references;
       let referenceIds = Object.keys(references);
       referenceIds.sort();
-      for (let j = 0; j < referenceIds.length; j++)
+      for (let referenceId of referenceIds)
       {
-        let referenceId = referenceIds[j];
         let reference = references[referenceId];
         let objects = reference.objects;
         let subLabel = referenceId;
         if (reference.name) subLabel += ": " + reference.name;
         subLabel += " (" + objects.length + ")";
-        let subNode = node.addNode(subLabel, event =>
+        node.addNode(subLabel, event =>
           this.application.selectObjects(event, objects),
           "IfcClassificationReference");
       }
@@ -300,13 +333,30 @@ class BIMInventoryTool extends Tool
 
     this.groupsTree.clear();
 
-    for (let i = 0; i < groupNames.length; i++)
+    for (let groupName of groupNames)
     {
-      let group = this.groups[groupNames[i]];
+      let group = this.groups[groupName];
       let objects = group.objects;
       let label = group.name + " (" + objects.length + ")";
-      let node = this.groupsTree.addNode(label, event =>
+      this.groupsTree.addNode(label, event =>
         this.application.selectObjects(event, objects), "IfcGroup");
+    }
+  }
+
+  showLayers()
+  {
+    let layerNames = Object.keys(this.layers);
+    layerNames.sort();
+
+    this.layersTree.clear();
+
+    for (let layerName of layerNames)
+    {
+      let layer = this.layers[layerName];
+      let objects = layer.objects;
+      let label = layer.name + " (" + objects.length + ")";
+      this.layersTree.addNode(label, event =>
+        this.application.selectObjects(event, objects), "IfcLayer");
     }
   }
 

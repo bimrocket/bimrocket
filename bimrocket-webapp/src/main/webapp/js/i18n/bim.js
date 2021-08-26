@@ -29,6 +29,7 @@ export const translations =
   "tab.types" : "Types",
   "tab.classifications" : "Classifications",
   "tab.groups" : "Groups",
+  "tab.layers" : "Layers",
 
   "label.bcf_service" : "BCF service:",
   "label.project" : "Project:",

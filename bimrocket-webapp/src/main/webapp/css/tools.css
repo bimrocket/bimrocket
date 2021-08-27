@@ -474,3 +474,105 @@ div.script_code
   overflow: auto;
   font-size: 14px;
 }
+
+.fly_panel
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fly_panel .buttons
+{
+  position: relative;
+  --button_size: 16px;
+  --button_margin: 4px;
+  --cell_size: calc(var(--button_size) + 2 * var(--button_margin));
+  width: calc( 9 * var(--cell_size));
+  height: calc( 3 * var(--cell_size));
+  background-image: url(images/tools/fly_template.svg);
+  background-repeat: no-repeat;
+  background-size: calc( 9 * var(--cell_size)) calc( 3 * var(--cell_size));
+}
+
+.fly_panel button
+{
+  position: absolute;
+  width: var(--button_size);
+  height: var(--button_size);
+  border: 1px solid black;
+  border-radius: 4px;
+  font-size: 9px;
+  background-color: white;
+  color: black;
+  margin:0;
+  padding: 0;
+  line-height: var(--button_size);
+}
+
+.fly_panel button:active,
+.fly_panel button.pressed
+{
+  background-color: #606060;  
+  color: white;
+}
+
+.fly_panel button.forward
+{
+  left: calc(7 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.backward
+{
+  left: calc(7 * var(--cell_size) + var(--button_margin));
+  top : calc(2 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.rotateLeft
+{
+  left: calc(6 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.rotateRight
+{
+  left: calc(8 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.ascend
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.descend
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(2 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.moveLeft
+{
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.moveRight
+{
+  left: calc(2 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.lookUp
+{
+  left: calc(4 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.lookDown
+{
+  left: calc(4 * var(--cell_size) + var(--button_margin));
+  top : calc(2 * var(--cell_size) + var(--button_margin));
+}

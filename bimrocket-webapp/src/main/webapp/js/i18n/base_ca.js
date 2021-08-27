@@ -120,8 +120,16 @@ export const translations =
   "tool.auto_orbit.help" : "Auto orbita",
 
   "tool.fly.label" : "Vola",
-  "tool.fly.help" : "Cursor amunt: avança, Cursor avall: enrere, Cursor esq.: rota esq., Cursor dret: rota dreta, " +
-    "Z: mou esq., X: mou dreta, R: mou amunt, F: mou avall, E: mira avall, D: mira amunt",
+  "tool.fly.forward" : "Avança",
+  "tool.fly.backward" : "Retrocedeix",
+  "tool.fly.rotateLeft" : "Gira a l'esquerra",
+  "tool.fly.rotateRight" : "Gira a la dreta",
+  "tool.fly.ascend" : "Ascendeix",
+  "tool.fly.descend" : "Descendeix",
+  "tool.fly.moveLeft" : "Mou a l'esquerra",
+  "tool.fly.moveRight" : "Mou a la dreta",
+  "tool.fly.lookUp" : "Mira cap amunt",
+  "tool.fly.lookDown" : "Mira cap avall",
 
   "tool.view.label" : "Veure",
 

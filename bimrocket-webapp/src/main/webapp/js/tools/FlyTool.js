@@ -10,6 +10,73 @@ import * as THREE from "../lib/three.module.js";
 
 class FlyTool extends Tool
 {
+  static ACTIONS = [
+    {
+      name : "forward",
+      keys : [38], // cursor down
+      control: "forwardControl",
+      value : 1,
+      symbol : "\u2b9d"
+    },
+    {
+      name : "backward",
+      keys: [40], // cursor up
+      control: "forwardControl",
+      value : -1,
+      symbol : "\u2b9f"
+    },
+    {
+      name : "rotateLeft",
+      keys: [37], // cursor left
+      control : "yawControl",
+      value : -1,
+      symbol : "\u2b9c"
+    },
+    {
+      name : "rotateRight",
+      keys: [39], // cursor right
+      control : "yawControl",
+      value : 1,
+      symbol : "\u2b9e"
+    },
+    {
+      name : "ascend",
+      keys : [87, 33], // W & page up
+      control : "elevationControl",
+      value : 1
+    },
+    {
+      name : "descend",
+      keys : [83, 34], // S & page down
+      control : "elevationControl",
+      value : -1
+    },
+    {
+      name : "lookUp",
+      keys : [82, 36], // R & home
+      control : "pitchControl",
+      value : 1
+    },
+    {
+      name : "lookDown",
+      keys : [70, 35], // F & end
+      control : "pitchControl",
+      value : -1
+    },
+    {
+      name : "moveLeft",
+      keys : [65, 45], // A & NP 0
+      control : "lateralControl",
+      value : -1
+    },
+    {
+      name : "moveRight",
+      keys : [68, 46], // A & NP 0
+      control : "lateralControl",
+      value : 1
+    }
+  ]
+
   constructor(application, options)
   {
     super(application);
@@ -46,6 +113,7 @@ class FlyTool extends Tool
 
     this.EPS = 0.00001;
     this.createPanel();
+    this.createKeyMap();
   }
 
   createPanel()
@@ -53,10 +121,41 @@ class FlyTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    const helpElem = document.createElement("div");
-    this.panel.bodyElem.appendChild(helpElem);
+    this.panel.bodyElem.classList.add("fly_panel");
 
-    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
+    const buttonsPanel = document.createElement("div");
+    buttonsPanel.className = "buttons";
+    this.panel.bodyElem.appendChild(buttonsPanel);
+
+    this.buttons = {};
+
+    for (let action of FlyTool.ACTIONS)
+    {
+      const button = document.createElement("button");
+      button.name = action.name;
+      button.innerHTML = action.symbol || String.fromCharCode(action.keys[0]);
+      button.className = action.name;
+      I18N.set(button, "title", "tool.fly." + action.name);
+      I18N.set(button, "alt", "tool.fly." + action.name);
+      button.addEventListener("mousedown",
+        () => this[action.control] = action.value);
+      button.addEventListener("mouseup",
+        () => this[action.control] = 0);
+      buttonsPanel.appendChild(button);
+      this.buttons[action.name] = button;
+    }
+  }
+
+  createKeyMap()
+  {
+    this.keyMap = new Map();
+    for (let action of FlyTool.ACTIONS)
+    {
+      for (let key of action.keys)
+      {
+        this.keyMap[key] = action;
+      }
+    }
   }
 
   activate()
@@ -112,64 +211,11 @@ class FlyTool extends Tool
 
     event.preventDefault();
 
-    switch (event.keyCode)
+    let action = this.keyMap[event.keyCode];
+    if (action)
     {
-      case 38: /* cursor up */
-        this.forwardControl = 1;
-        break;
-      case 40: /* cursor down */
-        this.forwardControl = -1;
-        break;
-
-      case 90: /* Z */
-      case 45: /* NP 0 */
-        this.lateralControl = -1;
-        break;
-      case 88: /* X */
-      case 46: /* NP . */
-        this.lateralControl = 1;
-        break;
-
-      case 82: /* R */
-      case 33: /* Page up */
-        this.elevationControl = 1;
-        break;
-      case 70: /* F */
-      case 34: /* Page down */
-        this.elevationControl = -1;
-        break;
-
-      case 37: /* cursor left */
-        this.yawControl = -1;
-        break;
-      case 39: /* cursor right */
-        this.yawControl = 1;
-        break;
-
-      case 69: /* E */
-      case 36: /* Home */
-        this.pitchControl = 1;
-        break;
-      case 68: /* D */
-      case 35: /* End */
-        this.pitchControl = -1;
-        break;
-      case 107: /* + */
-        this.linearVelocity *= 2;
-        this.angularVelocity *= 2;
-        this.linearAccel *= 2;
-        this.angularAccel *= 2;
-        this.linearDecel *= 2;
-        this.angularDecel *= 2;
-        break;
-      case 109: /* - */
-        this.linearVelocity *= 0.5;
-        this.angularVelocity *= 0.5;
-        this.linearAccel *= 0.5;
-        this.angularAccel *= 0.5;
-        this.linearDecel *= 0.5;
-        this.angularDecel *= 0.5;
-        break;
+      this[action.control] = action.value;
+      this.buttons[action.name].classList.add("pressed");
     }
   }
 
@@ -179,38 +225,11 @@ class FlyTool extends Tool
 
     event.preventDefault();
 
-    switch (event.keyCode)
+    let action = this.keyMap[event.keyCode];
+    if (action)
     {
-      case 38: /* cursor up */
-      case 40: /* cursor down */
-        this.forwardControl = 0;
-        break;
-
-      case 90: /* Z */
-      case 88: /* X */
-      case 45: /* NP 0 */
-      case 46: /* NP . */
-        this.lateralControl = 0;
-        break;
-
-      case 82: /* R */
-      case 70: /* F */
-      case 33: /* Page up */
-      case 34: /* Page down */
-        this.elevationControl = 0;
-        break;
-
-      case 37: /* cursor left */
-      case 39: /* cursor right */
-        this.yawControl = 0;
-        break;
-
-      case 69: /* E */
-      case 68: /* D */
-      case 35: /* End */
-      case 36: /* Home */
-        this.pitchControl = 0;
-        break;
+      this[action.control] = 0;
+      this.buttons[action.name].classList.remove("pressed");
     }
   }
 

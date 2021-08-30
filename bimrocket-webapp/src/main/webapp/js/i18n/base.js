@@ -130,7 +130,10 @@ export const translations =
   "tool.fly.moveRight" : "Move right",
   "tool.fly.lookUp" : "Look up",
   "tool.fly.lookDown" : "Look down",
- 
+  "tool.fly.options" : "Fly options",
+  "tool.fly.detect_collision" : "Detect collision",
+  "tool.fly.stick_control" : "Stick control",
+
   "tool.view.label" : "View",
 
   "tool.section.label" : "Section",

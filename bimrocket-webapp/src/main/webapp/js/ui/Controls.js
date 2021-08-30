@@ -90,6 +90,21 @@ class Controls
       className);
   }
 
+  static addCheckBoxField(parent, name, label, checked, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    inputElem.type = "checkbox";
+    inputElem.checked = Boolean(checked);
+    groupElem.appendChild(inputElem);
+
+    return inputElem;
+  }
+
   static addInputField(parent, type, name, label, value, className)
   {
     const id = this.getNextId();

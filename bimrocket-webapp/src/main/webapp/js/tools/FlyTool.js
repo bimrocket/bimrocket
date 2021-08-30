@@ -5,75 +5,105 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Dialog } from "../ui/Dialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
 class FlyTool extends Tool
 {
+  static SUBPANELS = [
+    {
+      name : "leftWheel",
+      xControl : "lateralControl",
+      yControl : "elevationControl"
+    },
+    {
+      name : "pitchPanel"
+    },
+    {
+      name: "rightWheel",
+      xControl : "yawControl",
+      yControl : "forwardControl"
+    }
+  ];
+
   static ACTIONS = [
     {
-      name : "forward",
-      keys : [38], // cursor down
-      control: "forwardControl",
-      value : 1,
-      symbol : "\u2b9d"
-    },
-    {
-      name : "backward",
-      keys: [40], // cursor up
-      control: "forwardControl",
-      value : -1,
-      symbol : "\u2b9f"
-    },
-    {
-      name : "rotateLeft",
-      keys: [37], // cursor left
-      control : "yawControl",
-      value : -1,
-      symbol : "\u2b9c"
-    },
-    {
-      name : "rotateRight",
-      keys: [39], // cursor right
-      control : "yawControl",
-      value : 1,
-      symbol : "\u2b9e"
-    },
-    {
       name : "ascend",
+      subpanel : "leftWheel",
       keys : [87, 33], // W & page up
       control : "elevationControl",
       value : 1
     },
     {
       name : "descend",
+      subpanel : "leftWheel",
       keys : [83, 34], // S & page down
       control : "elevationControl",
       value : -1
     },
     {
-      name : "lookUp",
-      keys : [82, 36], // R & home
-      control : "pitchControl",
-      value : 1
-    },
-    {
-      name : "lookDown",
-      keys : [70, 35], // F & end
-      control : "pitchControl",
-      value : -1
-    },
-    {
       name : "moveLeft",
+      subpanel : "leftWheel",
       keys : [65, 45], // A & NP 0
       control : "lateralControl",
       value : -1
     },
     {
       name : "moveRight",
+      subpanel : "leftWheel",
       keys : [68, 46], // A & NP 0
       control : "lateralControl",
       value : 1
+    },
+    {
+      name : "lookUp",
+      subpanel : "pitchPanel",
+      keys : [82, 36], // R & home
+      control : "pitchControl",
+      value : 1
+    },
+    {
+      name : "lookDown",
+      subpanel : "pitchPanel",
+      keys : [70, 35], // F & end
+      control : "pitchControl",
+      value : -1
+    },
+    {
+      name : "forward",
+      subpanel : "rightWheel",
+      keys : [38], // cursor down
+      control: "forwardControl",
+      value : 1,
+      text : "" // use background image
+    },
+    {
+      name : "backward",
+      subpanel : "rightWheel",
+      keys: [40], // cursor up
+      control: "forwardControl",
+      value : -1,
+      text : ""
+    },
+    {
+      name : "rotateLeft",
+      subpanel : "rightWheel",
+      keys: [37], // cursor left
+      control : "yawControl",
+      value : -1,
+      text : ""
+    },
+    {
+      name : "rotateRight",
+      subpanel : "rightWheel",
+      keys: [39], // cursor right
+      control : "yawControl",
+      value : 1,
+      text : ""
+    },
+    {
+      name : "options"
     }
   ]
 
@@ -108,8 +138,13 @@ class FlyTool extends Tool
 
     this._onKeyUp = this.onKeyUp.bind(this);
     this._onKeyDown = this.onKeyDown.bind(this);
+    this._onWheelDown = this.onWheelDown.bind(this);
+    this._onWheelUp = this.onWheelUp.bind(this);
+    this._onWheelMove = this.onWheelMove.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
+
+    this.mode = "buttons";
 
     this.EPS = 0.00001;
     this.createPanel();
@@ -123,9 +158,28 @@ class FlyTool extends Tool
 
     this.panel.bodyElem.classList.add("fly_panel");
 
-    const buttonsPanel = document.createElement("div");
-    buttonsPanel.className = "buttons";
-    this.panel.bodyElem.appendChild(buttonsPanel);
+    const keypad = document.createElement("div");
+    keypad.className = "keypad";
+    this.panel.bodyElem.appendChild(keypad);
+
+    this.subpanels = {};
+
+    for (let subpanelName in FlyTool.SUBPANELS)
+    {
+      let subpanel = FlyTool.SUBPANELS[subpanelName];
+      subpanel.active = false;
+      let subpanelElem = document.createElement("div");
+      subpanelElem.className = subpanel.name;
+      keypad.appendChild(subpanelElem);
+      if (subpanel.xControl)
+      {
+        const stick = document.createElement("div");
+        stick.className = "stick";
+        subpanel.stick = stick;
+        subpanelElem.appendChild(stick);
+      }
+      this.subpanels[subpanel.name] = subpanelElem;
+    }
 
     this.buttons = {};
 
@@ -133,15 +187,44 @@ class FlyTool extends Tool
     {
       const button = document.createElement("button");
       button.name = action.name;
-      button.innerHTML = action.symbol || String.fromCharCode(action.keys[0]);
+      let text = action.text;
+      if (text === undefined)
+      {
+        if (action.keys)
+        {
+          text = String.fromCharCode(action.keys[0]);
+        }
+        else
+        {
+          text = "";
+        }
+      }
+      button.innerHTML = text;
       button.className = action.name;
       I18N.set(button, "title", "tool.fly." + action.name);
       I18N.set(button, "alt", "tool.fly." + action.name);
-      button.addEventListener("mousedown",
-        () => this[action.control] = action.value);
-      button.addEventListener("mouseup",
-        () => this[action.control] = 0);
-      buttonsPanel.appendChild(button);
+      if (action.control)
+      {
+        let onPressed = () => this[action.control] = action.value;
+        let onReleased = () => this[action.control] = 0;
+        button.addEventListener("mousedown", onPressed);
+        button.addEventListener("mouseup", onReleased);
+        button.addEventListener("mouseout", onReleased);
+        button.addEventListener("touchstart", onPressed);
+        button.addEventListener("touchend", onReleased);
+      }
+      else
+      {
+        button.addEventListener("click", () => this.onButtonClick(action));
+      }
+      if (action.subpanel)
+      {
+        this.subpanels[action.subpanel].appendChild(button);
+      }
+      else
+      {
+        keypad.appendChild(button);
+      }
       this.buttons[action.name] = button;
     }
   }
@@ -151,9 +234,12 @@ class FlyTool extends Tool
     this.keyMap = new Map();
     for (let action of FlyTool.ACTIONS)
     {
-      for (let key of action.keys)
+      if (action.keys)
       {
-        this.keyMap[key] = action;
+        for (let key of action.keys)
+        {
+          this.keyMap[key] = action;
+        }
       }
     }
   }
@@ -205,6 +291,46 @@ class FlyTool extends Tool
     this.pitchVelocity = 0;
   }
 
+  switchMode()
+  {
+    if (this.mode === "buttons")
+    {
+      this.mode = "stick";
+      this.panel.bodyElem.classList.add("stick");
+      for (let subpanel of FlyTool.SUBPANELS)
+      {
+        if (subpanel.xControl)
+        {
+          let subpanelElem = this.subpanels[subpanel.name];
+          subpanelElem.addEventListener("mousedown", this._onWheelDown);
+          subpanelElem.addEventListener("touchstart", this._onWheelDown);
+        }
+      }
+      document.addEventListener("mouseup", this._onWheelUp);
+      document.addEventListener("touchend", this._onWheelUp);
+      document.addEventListener("mousemove", this._onWheelMove);
+      document.addEventListener("touchmove", this._onWheelMove);
+    }
+    else // mode === "stick"
+    {
+      this.mode = "buttons";
+      this.panel.bodyElem.classList.remove("stick");
+      for (let subpanel of FlyTool.SUBPANELS)
+      {
+        if (subpanel.xControl)
+        {
+          let subpanelElem = this.subpanels[subpanel.name];
+          subpanelElem.removeEventListener("mousedown", this._onWheelDown);
+          subpanelElem.removeEventListener("touchstart", this._onWheelDown);
+        }
+      }
+      document.removeEventListener("mouseup", this._onWheelUp);
+      document.removeEventListener("touchend", this._onWheelUp);
+      document.removeEventListener("mousemove", this._onWheelMove);
+      document.removeEventListener("touchmove", this._onWheelMove);
+    }
+  }
+
   onKeyDown(event)
   {
     if (event.srcElement.nodeName.toUpperCase() === "INPUT") return;
@@ -215,7 +341,9 @@ class FlyTool extends Tool
     if (action)
     {
       this[action.control] = action.value;
-      this.buttons[action.name].classList.add("pressed");
+      let button = this.buttons[action.name];
+      button.classList.add("pressed");
+      button.focus();
     }
   }
 
@@ -229,8 +357,168 @@ class FlyTool extends Tool
     if (action)
     {
       this[action.control] = 0;
-      this.buttons[action.name].classList.remove("pressed");
+      let button = this.buttons[action.name];
+      button.classList.remove("pressed");
     }
+  }
+
+  onButtonClick(action)
+  {
+    const dialog = new Dialog("tool.fly.options");
+    dialog.setSize(200, 140);
+    dialog.addButton("close", "button.close", () =>
+    {
+      dialog.hide();
+    });
+    const stickControl = dialog.addCheckBoxField("stick",
+      "tool.fly.stick_control", this.mode === "stick");
+
+    const detectCollision = dialog.addCheckBoxField("collision",
+      "tool.fly.detect_collision", this.detectCollision);
+
+    stickControl.addEventListener("change",
+      () => this.switchMode());
+
+    detectCollision.addEventListener("change",
+      () => this.detectCollision = !this.detectCollision);
+
+    dialog.setI18N(this.application.i18n);
+    dialog.show();
+  }
+
+  onWheelDown(event)
+  {
+    let positions = this.getEventPositions(event);
+    for (let position of positions)
+    {
+      const subpanel = this.findSubpanel(position.x, position.y, false);
+      if (subpanel)
+      {
+        subpanel.active = true;
+        const control = this.updateStickPosition(
+          position.x, position.y, subpanel);
+        this[subpanel.xControl] = control.x;
+        this[subpanel.yControl] = control.y;
+      }
+    }
+  }
+
+  onWheelUp(event)
+  {
+    let positions = this.getEventPositions(event);
+    for (let position of positions)
+    {
+      const subpanel = this.findSubpanel(position.x, position.y, true);
+      if (subpanel)
+      {
+        subpanel.active = false;
+        const stick = subpanel.stick;
+        stick.style.left = "";
+        stick.style.top = "";
+        this[subpanel.xControl] = 0;
+        this[subpanel.yControl] = 0;
+      }
+    }
+  }
+
+  onWheelMove(event)
+  {
+    let positions = this.getEventPositions(event);
+    for (let position of positions)
+    {
+      const subpanel = this.findSubpanel(position.x, position.y, true);
+      if (subpanel)
+      {
+        const control = this.updateStickPosition(
+          position.x, position.y, subpanel);
+        this[subpanel.xControl] = control.x;
+        this[subpanel.yControl] = control.y;
+      }
+    }
+  }
+
+  updateStickPosition(clientX, clientY, subpanel)
+  {
+    const stick = subpanel.stick;
+    const size = stick.offsetWidth;
+    const subpanelElem = this.subpanels[subpanel.name];
+    const rect = subpanelElem.getBoundingClientRect();
+
+    let layerX = clientX - rect.left;
+    let layerY = clientY - rect.top;
+
+    let x = 2 * (layerX / rect.width) - 1;
+    let y = -2 * (layerY / rect.height) + 1;
+
+    let radius = (rect.width - size) / rect.width;
+
+    if (Math.sqrt(x * x + y * y) > radius)
+    {
+      let angle = Math.atan2(y, x);
+      x = radius * Math.cos(angle);
+      y = radius * Math.sin(angle);
+      layerX = (x + 1) * 0.5 * rect.width;
+      layerY = (1 - y) * 0.5 * rect.height;
+    }
+
+    subpanel.stick.style.left = -1 + (layerX - 0.5 * size) + "px";
+    subpanel.stick.style.top = -1 + (layerY - 0.5 * size) + "px";
+
+    x = x.toFixed(2);
+    y = y.toFixed(2);
+
+    return {x, y};
+  }
+
+  findSubpanel(clientX, clientY, active = false)
+  {
+    let minDist = 0;
+    let closest = null;
+    for (let subpanel of FlyTool.SUBPANELS)
+    {
+      if (subpanel.stick && subpanel.active === active)
+      {
+        let stick = subpanel.stick;
+        let rect = stick.getBoundingClientRect();
+        let layerX = clientX - rect.left;
+        let layerY = clientY - rect.top;
+
+        let dist = Math.sqrt(layerX * layerX + layerY * layerY);
+        if (closest === null)
+        {
+          closest = subpanel;
+          minDist = dist;
+        }
+        else
+        {
+          if (dist < minDist)
+          {
+            minDist = dist;
+            closest = subpanel;
+          }
+        }
+      }
+    }
+    return closest;
+  }
+
+  getEventPositions(event)
+  {
+    const positions = [];
+
+    if (event instanceof MouseEvent)
+    {
+      positions.push({ x : event.clientX, y : event.clientY });
+    }
+    else if (event instanceof TouchEvent)
+    {
+      let touches = event.changedTouches;
+      for (let touch of touches)
+      {
+        positions.push({ x : touch.clientX, y : touch.clientY });
+      }
+    }
+    return positions;
   }
 
   animate(event)
@@ -345,7 +633,7 @@ class FlyTool extends Tool
       }
     }
 
-    var residualMove = 0.00001;
+    const residualMove = 0.00001;
 
     if (this.updateCamera ||
         Math.abs(this.yawVelocity) > residualMove ||
@@ -370,16 +658,16 @@ class FlyTool extends Tool
         this.pitchAccel = 0;
       }
 
-      var sinYaw = Math.sin(this.yaw);
-      var cosYaw = Math.cos(this.yaw);
-      var sinPitch = Math.sin(this.pitch);
-      var cosPitch = Math.cos(this.pitch);
+      const sinYaw = Math.sin(this.yaw);
+      const cosYaw = Math.cos(this.yaw);
+      const sinPitch = Math.sin(this.pitch);
+      const cosPitch = Math.cos(this.pitch);
 
-      var position = camera.position;
+      const position = camera.position;
       this.position.copy(position);
 
-      var me = camera.matrixWorld.elements;
-      var scale = this.vector.set(me[8], me[9], me[10]).length();
+      const me = camera.matrixWorld.elements;
+      const scale = this.vector.set(me[8], me[9], me[10]).length();
 
       position.x += this.forwardVelocity * sinYaw * delta / scale;
       position.y += this.forwardVelocity * cosYaw * delta / scale;
@@ -391,7 +679,7 @@ class FlyTool extends Tool
       {
         if (this.collide(this.position, position))
         {
-          this.stop();
+          this.stopMovement();
         }
       }
 
@@ -403,7 +691,8 @@ class FlyTool extends Tool
       camera.lookAt(this.target);
       camera.updateMatrix();
 
-      var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
+      const changeEvent = {type: "nodeChanged", objects: [camera],
+        source : this};
       application.notifyEventListeners("scene", changeEvent);
 
       this.updateCamera = false;
@@ -441,9 +730,9 @@ class FlyTool extends Tool
     }
 
     camera.updateMatrix();
-    var matrix = camera.matrix;
-    var me = matrix.elements;
-    var vz = new THREE.Vector3();
+    const matrix = camera.matrix;
+    const me = matrix.elements;
+    const vz = new THREE.Vector3();
     vz.x = me[8];
     vz.y = me[9];
     vz.z = me[10];
@@ -456,7 +745,7 @@ class FlyTool extends Tool
     }
     else
     {
-      var vx = new THREE.Vector3();
+      const vx = new THREE.Vector3();
       vx.x = me[0];
       vx.y = me[1];
       vx.z = me[2];
@@ -466,44 +755,21 @@ class FlyTool extends Tool
     this.updateCamera = true;
   }
 
-  stop()
-  {
-    this.forwardControl = 0;
-    this.forwardAccel = 0;
-    this.forwardVelocity = 0;
-
-    this.lateralControl = 0;
-    this.lateralAccel = 0;
-    this.lateralVelocity = 0;
-
-    this.elevationControl = 0;
-    this.elevationAccel = 0;
-    this.elevationVelocity = 0;
-
-    this.yawControl = 0;
-    this.yawAccel = 0;
-    this.yawVelocity = 0;
-
-    this.pitchControl = 0;
-    this.pitchAccel = 0;
-    this.pitchVelocity = 0;
-  }
-
   collide(oldPosition, newPosition)
   {
-    var scene = this.application.scene;
-    var vector = new THREE.Vector3();
+    const scene = this.application.scene;
+    const vector = new THREE.Vector3();
     vector.copy(newPosition);
     vector.sub(oldPosition);
-    var vectorLength = vector.length();
+    const vectorLength = vector.length();
     this.raycaster.set(oldPosition, vector.divideScalar(vectorLength));
-    var margin = 0.3;
+    const margin = 0.3;
     this.raycaster.far = vectorLength + margin;
-    var intersects = this.raycaster.intersectObjects(scene.children, true);
-    var i = 0;
-    var found = false;
-    var object = null;
-    var intersect = null;
+    const intersects = this.raycaster.intersectObjects(scene.children, true);
+    let i = 0;
+    let found = false;
+    let object = null;
+    let intersect = null;
     while (i < intersects.length && !found)
     {
       intersect = intersects[i];
@@ -513,8 +779,8 @@ class FlyTool extends Tool
     }
     if (found)
     {
-      var distance = intersect.distance;
-      var stopDistance = distance - margin;
+      let distance = intersect.distance;
+      let stopDistance = distance - margin;
       vector.multiplyScalar(stopDistance);
       newPosition.x = oldPosition.x + vector.x;
       newPosition.y = oldPosition.y + vector.y;

@@ -482,17 +482,49 @@ div.script_code
   align-items: center;
 }
 
-.fly_panel .buttons
+.fly_panel .keypad
 {
   position: relative;
   --button_size: 16px;
   --button_margin: 4px;
   --cell_size: calc(var(--button_size) + 2 * var(--button_margin));
-  width: calc( 9 * var(--cell_size));
+  --side_margin: 10px;
+
+  width: 100%;
   height: calc( 3 * var(--cell_size));
-  background-image: url(images/tools/fly_template.svg);
-  background-repeat: no-repeat;
-  background-size: calc( 9 * var(--cell_size)) calc( 3 * var(--cell_size));
+}
+
+.fly_panel .keypad .leftWheel
+{
+  position: absolute;
+  left: var(--side_margin);
+  top: 0;
+  width: calc(3 * var(--cell_size));
+  height: calc(3 * var(--cell_size));
+  border: 1px solid black;
+  border-radius: calc(3 * var(--cell_size));
+}
+
+.fly_panel .keypad .pitchPanel
+{
+  left: calc(50% - var(--cell_size) / 2);
+  top: var(--cell_size);
+  position: absolute;
+  width: calc(1 * var(--cell_size));
+  height: calc(2 * var(--cell_size));
+  border: 1px solid black;
+  border-radius: calc(var(--cell_size));
+}
+
+.fly_panel .keypad .rightWheel
+{
+  right: var(--side_margin);
+  top: 0;
+  position: absolute;
+  width: calc(3 * var(--cell_size));
+  height: calc(3 * var(--cell_size));
+  border: 1px solid black;
+  border-radius: calc(3 * var(--cell_size));
 }
 
 .fly_panel button
@@ -500,45 +532,90 @@ div.script_code
   position: absolute;
   width: var(--button_size);
   height: var(--button_size);
-  border: 1px solid black;
-  border-radius: 4px;
+  border: 1px solid #808080;
+  border-radius: var(--button_size);
   font-size: 9px;
   background-color: white;
   color: black;
   margin:0;
   padding: 0;
-  line-height: var(--button_size);
+  background-repeat: no-repeat;
+  background-size: 80% 80%;
+  background-position: center center;
+}
+
+.fly_panel .keypad .stick
+{
+  --stick_size: 24px;
+  width: var(--stick_size);
+  height: var(--stick_size);
+  border-radius: var(--stick_size);
+  position: absolute;
+  background-color: #e0e0e0;
+  background-size: 80% 80%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border : 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.fly_panel .keypad .leftWheel .stick
+{
+  top: calc(50% - 0.5 * var(--stick_size));
+  left: calc(50% - 0.5 * var(--stick_size));
+  background-image: url(images/tools/fly_drone_front.svg);
+}
+
+.fly_panel .keypad .rightWheel .stick
+{
+  top: calc(50% - 0.5 * var(--stick_size));
+  left: calc(50% - 0.5 * var(--stick_size));
+  background-image: url(images/tools/fly_drone_top.svg);
+}
+
+.fly_panel.stick .leftWheel button,
+.fly_panel.stick .rightWheel button
+{
+  display: none;
+}
+
+.fly_panel.stick .stick
+{
+  border-color : #404040;
 }
 
 .fly_panel button:active,
 .fly_panel button.pressed
 {
-  background-color: #606060;  
-  color: white;
+  background-color: #FF8080;
 }
 
 .fly_panel button.forward
 {
-  left: calc(7 * var(--cell_size) + var(--button_margin));
+  left: calc(1 * var(--cell_size) + var(--button_margin));
   top : calc(0 * var(--cell_size) + var(--button_margin));
+  background-image: url(images/tools/fly_forward.svg);
 }
 
 .fly_panel button.backward
 {
-  left: calc(7 * var(--cell_size) + var(--button_margin));
+  left: calc(1 * var(--cell_size) + var(--button_margin));
   top : calc(2 * var(--cell_size) + var(--button_margin));
+  background-image: url(images/tools/fly_backward.svg);
 }
 
 .fly_panel button.rotateLeft
 {
-  left: calc(6 * var(--cell_size) + var(--button_margin));
+  left: calc(0 * var(--cell_size) + var(--button_margin));
   top : calc(1 * var(--cell_size) + var(--button_margin));
+  background-image: url(images/tools/fly_left.svg);
 }
 
 .fly_panel button.rotateRight
 {
-  left: calc(8 * var(--cell_size) + var(--button_margin));
+  left: calc(2 * var(--cell_size) + var(--button_margin));
   top : calc(1 * var(--cell_size) + var(--button_margin));
+  background-image: url(images/tools/fly_right.svg);
 }
 
 .fly_panel button.ascend
@@ -567,12 +644,23 @@ div.script_code
 
 .fly_panel button.lookUp
 {
-  left: calc(4 * var(--cell_size) + var(--button_margin));
+  left: calc(0 * var(--cell_size) + var(--button_margin));
   top : calc(0 * var(--cell_size) + var(--button_margin));
 }
 
 .fly_panel button.lookDown
 {
-  left: calc(4 * var(--cell_size) + var(--button_margin));
-  top : calc(2 * var(--cell_size) + var(--button_margin));
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly_panel button.options
+{
+  --options_button_size : 20px;
+  left: calc(50% - var(--options_button_size) / 2 + 1px);
+  top: 0;
+  width: var(--options_button_size);
+  height: var(--options_button_size);
+  background-image: url(images/tools/fly_options.svg);
+  border: none;
 }

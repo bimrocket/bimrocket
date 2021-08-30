@@ -122,6 +122,12 @@ class Dialog
       options, value, className || "select_field");
   }
 
+  addCheckBoxField(name, label, checked, className)
+  {
+    return Controls.addCheckBoxField(this.bodyElem, name, label, checked,
+      className || "checkbox_field");
+  }
+
   addRadioButtons(name, options, value, className)
   {
     return Controls.addRadioButtons(this.bodyElem, name, options,

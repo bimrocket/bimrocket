@@ -235,8 +235,8 @@ class IFCLoader extends THREE.Loader
       }
     };
 
-    /* update visibility */
-    const updateVisibility = function()
+    /* setup objects */
+    const setupObjects = function()
     {
       model.traverse(function(object)
       {
@@ -257,6 +257,10 @@ class IFCLoader extends THREE.Loader
             ifcClassName === "IfcBuildingStorey")
           {
             object.userData.selection.type = "box";
+          }
+          else if (ifcClassName === "IfcDoor")
+          {
+            object.userData.collision = { enabled : false };
           }
         }
       });
@@ -358,7 +362,7 @@ class IFCLoader extends THREE.Loader
         { run : processRelationships, message : "Processing relationships..."},
         { run : processLayerAssignments, message : "Processing layers..."},
         { run : voidObject, message : "Voiding objects...", iterations : getIterations},
-        { run : updateVisibility, message : "Updating visibility..."},
+        { run : setupObjects, message : "Setting object properties..."},
         { run : paintObjects, message : "Painting objects..."},
         { run : groupObjects, message : "Grouping objects..."}],
         () => onCompleted(model), onProgress, error => { console.info(error); onError(error); }, 100, 10);
@@ -372,7 +376,7 @@ class IFCLoader extends THREE.Loader
       processRelationships();
       processLayerAssignments();
       voidObjects();
-      updateVisibility();
+      setupObjects();
       paintObjects();
       groupObjects();
     }

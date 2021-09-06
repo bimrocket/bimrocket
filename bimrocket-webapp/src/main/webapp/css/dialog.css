@@ -138,6 +138,7 @@
   display: block;
 }
 
+.dialog .body .checkbox_field label,
 .dialog .body .checkbox_field input
 {
   vertical-align: middle;

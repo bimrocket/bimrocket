@@ -128,13 +128,18 @@ class FlyTool extends Tool
 
     this.stopMovement();
 
+    // fly options
+    this.mode = "buttons";
     this.detectCollision = false;
+    this.groundDistanceControlEnabled = false;
+    this.groundDistance = 1.7;
 
     // internals
     this.position = new THREE.Vector3(0, 0, 0);
     this.target = new THREE.Vector3(0, 0, 0);
     this.vector = new THREE.Vector3(0, 0, 0);
     this.raycaster = new THREE.Raycaster();
+    this.auxVector = new THREE.Vector3(0, 0, 0);
 
     this._onKeyUp = this.onKeyUp.bind(this);
     this._onKeyDown = this.onKeyDown.bind(this);
@@ -143,8 +148,6 @@ class FlyTool extends Tool
     this._onWheelMove = this.onWheelMove.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
-
-    this.mode = "buttons";
 
     this.EPS = 0.00001;
     this.createPanel();
@@ -164,21 +167,29 @@ class FlyTool extends Tool
 
     this.subpanels = {};
 
-    for (let subpanelName in FlyTool.SUBPANELS)
+    for (let subpanelDef of FlyTool.SUBPANELS)
     {
-      let subpanel = FlyTool.SUBPANELS[subpanelName];
-      subpanel.active = false;
       let subpanelElem = document.createElement("div");
-      subpanelElem.className = subpanel.name;
+      subpanelElem.className = subpanelDef.name;
       keypad.appendChild(subpanelElem);
-      if (subpanel.xControl)
+
+      const subpanel = {
+        name : subpanelDef.name,
+        active : false,
+        element : subpanelElem
+      };
+
+      this.subpanels[subpanel.name] = subpanel;
+
+      if (subpanelDef.xControl && subpanelDef.yControl)
       {
-        const stick = document.createElement("div");
-        stick.className = "stick";
-        subpanel.stick = stick;
-        subpanelElem.appendChild(stick);
+        const stickElem = document.createElement("div");
+        stickElem.className = "stick";
+        subpanelElem.appendChild(stickElem);
+        subpanel.stickElement = stickElem;
+        subpanel.xControl = subpanelDef.xControl;
+        subpanel.yControl = subpanelDef.yControl;
       }
-      this.subpanels[subpanel.name] = subpanelElem;
     }
 
     this.buttons = {};
@@ -219,7 +230,7 @@ class FlyTool extends Tool
       }
       if (action.subpanel)
       {
-        this.subpanels[action.subpanel].appendChild(button);
+        this.subpanels[action.subpanel].element.appendChild(button);
       }
       else
       {
@@ -297,11 +308,12 @@ class FlyTool extends Tool
     {
       this.mode = "stick";
       this.panel.bodyElem.classList.add("stick");
-      for (let subpanel of FlyTool.SUBPANELS)
+      for (let subpanelName in this.subpanels)
       {
-        if (subpanel.xControl)
+        let subpanel = this.subpanels[subpanelName];
+        if (subpanel.stickElement)
         {
-          let subpanelElem = this.subpanels[subpanel.name];
+          let subpanelElem = subpanel.element;
           subpanelElem.addEventListener("mousedown", this._onWheelDown);
           subpanelElem.addEventListener("touchstart", this._onWheelDown);
         }
@@ -315,11 +327,12 @@ class FlyTool extends Tool
     {
       this.mode = "buttons";
       this.panel.bodyElem.classList.remove("stick");
-      for (let subpanel of FlyTool.SUBPANELS)
+      for (let subpanelName in this.subpanels)
       {
-        if (subpanel.xControl)
+        let subpanel = this.subpanels[subpanelName];
+        if (subpanel.stickElement)
         {
-          let subpanelElem = this.subpanels[subpanel.name];
+          let subpanelElem = subpanel.element;
           subpanelElem.removeEventListener("mousedown", this._onWheelDown);
           subpanelElem.removeEventListener("touchstart", this._onWheelDown);
         }
@@ -364,26 +377,65 @@ class FlyTool extends Tool
 
   onButtonClick(action)
   {
-    const dialog = new Dialog("tool.fly.options");
-    dialog.setSize(200, 140);
-    dialog.addButton("close", "button.close", () =>
+    if (action.name === "options")
     {
-      dialog.hide();
-    });
-    const stickControl = dialog.addCheckBoxField("stick",
-      "tool.fly.stick_control", this.mode === "stick");
+      const minHeight = 0.5;
+      const maxHeight = 10;
 
-    const detectCollision = dialog.addCheckBoxField("collision",
-      "tool.fly.detect_collision", this.detectCollision);
+      const dialog = new Dialog("tool.fly.options");
+      dialog.setClassName("fly_options");
+      dialog.setSize(240, 180);
+      dialog.addButton("close", "button.close", () =>
+      {
+        dialog.hide();
+      });
+      const stickControlElem = dialog.addCheckBoxField("stick",
+        "tool.fly.stick_control", this.mode === "stick");
 
-    stickControl.addEventListener("change",
-      () => this.switchMode());
+      const detectCollisionElem = dialog.addCheckBoxField("collision",
+        "tool.fly.detect_collision", this.detectCollision);
 
-    detectCollision.addEventListener("change",
-      () => this.detectCollision = !this.detectCollision);
+      const groundDistanceControlElem = dialog.addCheckBoxField(
+        "ground_control", "tool.fly.ground_distance_control",
+        this.groundDistanceControlEnabled);
 
-    dialog.setI18N(this.application.i18n);
-    dialog.show();
+      const groundDistanceElem = dialog.addNumberField("ground",
+        "tool.fly.ground_distance", this.groundDistance, "ground");
+
+      stickControlElem.addEventListener("change",
+        () => this.switchMode());
+
+      detectCollisionElem.addEventListener("change",
+        () => this.detectCollision = !this.detectCollision);
+
+      groundDistanceControlElem.addEventListener("change", () =>
+      {
+        this.groundDistanceControlEnabled = !this.groundDistanceControlEnabled;
+        groundDistanceElem.disabled = !this.groundDistanceControlEnabled;
+      });
+
+      groundDistanceElem.min = minHeight;
+      groundDistanceElem.max = maxHeight;
+      groundDistanceElem.step = "0.01";
+
+      groundDistanceElem.addEventListener("change", () =>
+      {
+        let distance = groundDistanceElem.value;
+        distance = Math.max(distance, minHeight);
+        distance = Math.min(distance, maxHeight);
+        this.groundDistance = distance;
+        groundDistanceElem.value = distance;
+      });
+
+      const unitsText = document.createElement("span");
+      unitsText.innerHTML = this.application.units;
+      groundDistanceElem.parentElement.appendChild(unitsText);
+
+      groundDistanceElem.disabled = !this.groundDistanceControlEnabled;
+
+      dialog.setI18N(this.application.i18n);
+      dialog.show();
+    }
   }
 
   onWheelDown(event)
@@ -412,9 +464,9 @@ class FlyTool extends Tool
       if (subpanel)
       {
         subpanel.active = false;
-        const stick = subpanel.stick;
-        stick.style.left = "";
-        stick.style.top = "";
+        const stickElem = subpanel.stickElement;
+        stickElem.style.left = "";
+        stickElem.style.top = "";
         this[subpanel.xControl] = 0;
         this[subpanel.yControl] = 0;
       }
@@ -439,9 +491,9 @@ class FlyTool extends Tool
 
   updateStickPosition(clientX, clientY, subpanel)
   {
-    const stick = subpanel.stick;
-    const size = stick.offsetWidth;
-    const subpanelElem = this.subpanels[subpanel.name];
+    const stickElem = subpanel.stickElement;
+    const size = stickElem.offsetWidth;
+    const subpanelElem = subpanel.element;
     const rect = subpanelElem.getBoundingClientRect();
 
     let layerX = clientX - rect.left;
@@ -461,8 +513,8 @@ class FlyTool extends Tool
       layerY = (1 - y) * 0.5 * rect.height;
     }
 
-    subpanel.stick.style.left = -1 + (layerX - 0.5 * size) + "px";
-    subpanel.stick.style.top = -1 + (layerY - 0.5 * size) + "px";
+    stickElem.style.left = -1 + (layerX - 0.5 * size) + "px";
+    stickElem.style.top = -1 + (layerY - 0.5 * size) + "px";
 
     x = x.toFixed(2);
     y = y.toFixed(2);
@@ -474,12 +526,13 @@ class FlyTool extends Tool
   {
     let minDist = 0;
     let closest = null;
-    for (let subpanel of FlyTool.SUBPANELS)
+    for (let subpanelName in this.subpanels)
     {
-      if (subpanel.stick && subpanel.active === active)
+      let subpanel = this.subpanels[subpanelName];
+      if (subpanel.stickElement && subpanel.active === active)
       {
-        let stick = subpanel.stick;
-        let rect = stick.getBoundingClientRect();
+        let stickElem = subpanel.stickElement;
+        let rect = stickElem.getBoundingClientRect();
         let layerX = clientX - rect.left;
         let layerY = clientY - rect.top;
 
@@ -547,7 +600,16 @@ class FlyTool extends Tool
       this.lateralAccel += this.linearDecel;
     }
 
-    this.elevationAccel = this.elevationControl * this.linearAccel;
+    let groundDistanceControl = 0;
+    if (this.elevationControl === 0 && this.groundDistanceControlEnabled)
+    {
+      groundDistanceControl = this.groundDistanceControl();
+      this.elevationAccel = groundDistanceControl * this.linearAccel;
+    }
+    else
+    {
+      this.elevationAccel = this.elevationControl * this.linearAccel;
+    }
     if (this.elevationVelocity > 0)
     {
       this.elevationAccel -= this.linearDecel;
@@ -603,7 +665,7 @@ class FlyTool extends Tool
       }
     }
 
-    if (this.elevationControl === 0)
+    if (this.elevationControl === 0 && groundDistanceControl === 0)
     {
       if (this.elevationAccel > 0 && this.elevationVelocity > 0 ||
           this.elevationAccel < 0 && this.elevationVelocity < 0)
@@ -757,14 +819,70 @@ class FlyTool extends Tool
 
   collide(oldPosition, newPosition)
   {
-    const scene = this.application.scene;
-    const vector = new THREE.Vector3();
+    const vector = this.auxVector;
     vector.copy(newPosition);
     vector.sub(oldPosition);
-    const vectorLength = vector.length();
-    this.raycaster.set(oldPosition, vector.divideScalar(vectorLength));
     const margin = 0.3;
-    this.raycaster.far = vectorLength + margin;
+    const vectorLength = vector.length() + margin;
+    vector.normalize();
+    const distance = this.measureDistance(oldPosition, vector, vectorLength);
+    if (distance !== undefined)
+    {
+      let stopDistance = distance - margin;
+      vector.multiplyScalar(stopDistance);
+      newPosition.x = oldPosition.x + vector.x;
+      newPosition.y = oldPosition.y + vector.y;
+      newPosition.z = oldPosition.z + vector.z;
+      return true;
+    }
+    return false;
+  }
+
+  groundDistanceControl()
+  {
+    const position = this.position;
+    const groundVector = this.auxVector;
+    const groundDistance = this.groundDistance;
+    const margin = 0.01;
+    const maxHeight = 100;
+
+    groundVector.set(0, 0, -1);
+    const currentGroundDistance =
+      this.measureDistance(position, groundVector, maxHeight);
+    if (currentGroundDistance !== undefined)
+    {
+      const targetDistance = currentGroundDistance - groundDistance;
+      if (targetDistance > margin)
+      {
+        if (this.elevationVelocity < 0)
+        {
+          const stopDistance =
+            Math.abs(this.elevationVelocity * this.elevationVelocity /
+            (2 * this.linearAccel));
+          if (stopDistance + margin > targetDistance) return 1;
+        }
+        return -1;
+      }
+      else if (targetDistance < -margin)
+      {
+        if (this.elevationVelocity > 0)
+        {
+          const stopDistance =
+            Math.abs(this.elevationVelocity * this.elevationVelocity /
+            (2 * this.linearAccel));
+          if (stopDistance + margin > -targetDistance) return -1;
+        }
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  measureDistance(origin, unitVector, length)
+  {
+    const scene = this.application.scene;
+    this.raycaster.set(origin, unitVector);
+    this.raycaster.far = length;
     const intersects = this.raycaster.intersectObjects(scene.children, true);
     let i = 0;
     let found = false;
@@ -774,20 +892,26 @@ class FlyTool extends Tool
     {
       intersect = intersects[i];
       object = intersect.object;
-      if (object.visible) found = true;
+      if (this.isCollidable(object))
+      {
+        found = true;
+      }
       else i++;
     }
-    if (found)
+    return found ? intersect.distance : undefined;
+  }
+
+  isCollidable(object)
+  {
+    let collidable = true;
+    while (object && collidable)
     {
-      let distance = intersect.distance;
-      let stopDistance = distance - margin;
-      vector.multiplyScalar(stopDistance);
-      newPosition.x = oldPosition.x + vector.x;
-      newPosition.y = oldPosition.y + vector.y;
-      newPosition.z = oldPosition.z + vector.z;
-      return true;
+      collidable = object.visible &&
+        (object.userData.collision === undefined ||
+        object.userData.collision.enabled);
+      object = object.parent;
     }
-    return false;
+    return collidable;
   }
 }
 

@@ -133,6 +133,8 @@ export const translations =
   "tool.fly.options" : "Opcions de vol",
   "tool.fly.detect_collision" : "Detecta col·lisió",
   "tool.fly.stick_control" : "Control per stick",
+  "tool.fly.ground_distance_control" : "Control de distància al terra",
+  "tool.fly.ground_distance" : "Distància al terra:",
 
   "tool.view.label" : "Veure",
 
@@ -214,8 +216,8 @@ export const translations =
   "label.decimals" : "Decimals a mostrar:",
   "label.fr_divisor" : "Divisor de FPS:",
   "label.sel_paint_mode" : "Pintat de selecció:",
-  "label.show_deep_sel" : "Mostra selecció profunda:",
-  "label.show_local_axes" : "Mostra eixos locals:",
+  "label.show_deep_sel" : "Mostra selecció profunda",
+  "label.show_local_axes" : "Mostra eixos locals",
   "label.background_color" : "Color de fons:",
   "label.panel_opacity" : "Opacitat de panells:",
 

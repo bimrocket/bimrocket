@@ -95,12 +95,14 @@ class Controls
     const id = this.getNextId();
     const groupElem = Controls.addField(parent, id, label, className);
 
+    const labelElem = groupElem.childNodes[0];
+
     const inputElem = document.createElement("input");
     inputElem.id = id;
     inputElem.name = name;
     inputElem.type = "checkbox";
     inputElem.checked = Boolean(checked);
-    groupElem.appendChild(inputElem);
+    groupElem.insertBefore(inputElem, labelElem);
 
     return inputElem;
   }

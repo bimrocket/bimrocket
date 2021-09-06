@@ -115,19 +115,15 @@ class OptionsTool extends Tool
 
     // Enable/disable deep selection visualization
 
-    this.deepSelCheckBox = Controls.addInputField(this.panel.bodyElem,
-      "checkbox", "deep_sel", "label.show_deep_sel");
-    this.deepSelCheckBox.style = "vertical-align:middle";
-    this.deepSelCheckBox.parentElement.className = "option_block";
+    this.deepSelCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+      "deep_sel", "label.show_deep_sel", false, "option_block");
     this.deepSelCheckBox.addEventListener("change", event =>
       application.showDeepSelection = this.deepSelCheckBox.checked);
 
     // Enable/disable local axes visualization
 
-    this.localAxesCheckBox = Controls.addInputField(this.panel.bodyElem,
-      "checkbox", "local_axes", "label.show_local_axes");
-    this.localAxesCheckBox.style = "vertical-align:middle";
-    this.localAxesCheckBox.parentElement.className = "option_block";
+    this.localAxesCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+      "local_axes", "label.show_local_axes", false, "option_block");
     this.localAxesCheckBox.addEventListener("change", event =>
       application.showLocalAxes = this.localAxesCheckBox.checked);
 

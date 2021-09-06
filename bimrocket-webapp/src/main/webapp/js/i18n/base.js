@@ -133,6 +133,8 @@ export const translations =
   "tool.fly.options" : "Fly options",
   "tool.fly.detect_collision" : "Detect collision",
   "tool.fly.stick_control" : "Stick control",
+  "tool.fly.ground_distance_control" : "Ground distance control",
+  "tool.fly.ground_distance" : "Ground distance:",
 
   "tool.view.label" : "View",
 
@@ -214,8 +216,8 @@ export const translations =
   "label.decimals" : "Decimals to display:",
   "label.fr_divisor" : "Frame rate divisor:",
   "label.sel_paint_mode" : "Selection paint mode:",
-  "label.show_deep_sel" : "Show deep selection:",
-  "label.show_local_axes" : "Show local axes:",
+  "label.show_deep_sel" : "Show deep selection",
+  "label.show_local_axes" : "Show local axes",
   "label.background_color" : "Background color:",
   "label.panel_opacity" : "Panel opacity:",
 

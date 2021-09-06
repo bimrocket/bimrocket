@@ -236,15 +236,16 @@ class Application
     {
       requestAnimationFrame(animate);
 
+      __animationEvent.delta = this.clock.getDelta();
+      if (this._eventListeners.animation.length > 0)
+      {
+        this.notifyEventListeners('animation', __animationEvent);
+      }
+
       __animationCounter++;
       if (__animationCounter >= this.frameRateDivisor)
       {
         __animationCounter = 0;
-        __animationEvent.delta = this.clock.getDelta();
-        if (this._eventListeners.animation.length > 0)
-        {
-          this.notifyEventListeners('animation', __animationEvent);
-        }
 
         if (this.autoRepaint || this.needsRepaint)
         {

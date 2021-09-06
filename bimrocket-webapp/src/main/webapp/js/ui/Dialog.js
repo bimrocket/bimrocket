@@ -104,6 +104,12 @@ class Dialog
       className || "text_field");
   }
 
+  addNumberField(name, label, value, className)
+  {
+    return Controls.addNumberField(this.bodyElem, name, label, value,
+      className || "text_field");
+  }
+
   addTextAreaField(name, label, value, className)
   {
     return Controls.addTextAreaField(this.bodyElem, name, label, value,

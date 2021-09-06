@@ -363,6 +363,12 @@ div.option_block
   padding: 6px;
 }
 
+div.option_block label,
+div.option_block input[type=checkbox]
+{
+  vertical-align: middle;
+}
+
 div.option_block.inline label
 {
   margin-right: 4px;
@@ -379,6 +385,11 @@ div.option_block input.back_color
   vertical-align: middle;
   margin-left: 4px;
   padding: 0px;
+}
+
+div.option_block input[name=decimals]
+{
+  width: 60px;
 }
 
 .panel_section > .body > div
@@ -663,4 +674,11 @@ div.script_code
   height: var(--options_button_size);
   background-image: url(images/tools/fly_options.svg);
   border: none;
+}
+
+.fly_options input[name=ground]
+{
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 60px;
 }

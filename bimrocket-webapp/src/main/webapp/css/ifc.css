@@ -10,6 +10,11 @@ ul.tree li.IfcBuilding
   background-image: url(images/ifc/IfcBuilding.svg);
 }
 
+ul.tree li.IfcBuildingElementPart
+{
+  background-image: url(images/ifc/IfcBuildingElementPart.svg);
+}
+
 ul.tree li.IfcBuildingStorey
 {
   background-image: url(images/ifc/IfcBuildingStorey.svg);

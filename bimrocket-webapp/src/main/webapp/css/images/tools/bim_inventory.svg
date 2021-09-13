@@ -16,8 +16,8 @@
    viewBox="0 0 64 64"
    enable-background="new 0 0 64 64"
    xml:space="preserve"
-   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
-   sodipodi:docname="bim_layers.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="bim_inventory.svg"
    inkscape:export-filename="/Users/realor/NetBeansProjects/smartcity/threecad/web/css/images/tools/bim_scheme.png"
    inkscape:export-xdpi="45"
    inkscape:export-ydpi="45"><metadata
@@ -38,8 +38,8 @@
    id="namedview11"
    showgrid="true"
    inkscape:zoom="11.291612"
-   inkscape:cx="31.184916"
-   inkscape:cy="18.913452"
+   inkscape:cx="14.358266"
+   inkscape:cy="32.729017"
    inkscape:window-x="0"
    inkscape:window-y="27"
    inkscape:window-maximized="1"
@@ -48,7 +48,8 @@
    inkscape:document-rotation="0"
    inkscape:snap-bbox="true"><inkscape:grid
      type="xygrid"
-     id="grid2985" /></sodipodi:namedview><g
+     id="grid2985"
+     empspacing="4" /></sodipodi:namedview><g
    aria-label="BIM"
    id="text4139"
    style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"><path

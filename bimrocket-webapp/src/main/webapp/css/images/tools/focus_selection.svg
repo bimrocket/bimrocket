@@ -12,7 +12,7 @@
    width="32"
    id="svg4834"
    version="1.1"
-   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    sodipodi:docname="focus_selection.svg"
    inkscape:export-filename="/Users/realor/NetBeansProjects/smartcity/threecad/web/css/images/tools/focus.png"
    inkscape:export-xdpi="90"
@@ -25,7 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -45,7 +45,7 @@
      id="namedview4840"
      showgrid="true"
      inkscape:zoom="16.550718"
-     inkscape:cx="17.497666"
+     inkscape:cx="5.8969608"
      inkscape:cy="10.992609"
      inkscape:current-layer="svg4834"
      inkscape:snap-bbox="true"
@@ -57,7 +57,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid4846"
-       originx="0" />
+       originx="0"
+       empspacing="4" />
   </sodipodi:namedview>
   <path
      d="m 0,-16 48,0 0,48 -48,0 z"

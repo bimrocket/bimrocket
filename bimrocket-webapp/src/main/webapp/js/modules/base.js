@@ -21,6 +21,7 @@ import { AutoOrbitTool } from "../tools/AutoOrbitTool.js";
 import { SectionTool } from "../tools/SectionTool.js";
 import { InspectGeometryTool } from "../tools/InspectGeometryTool.js";
 import { ResetMatrixTool } from "../tools/ResetMatrixTool.js";
+import { RebuildTool } from "../tools/RebuildTool.js";
 import { MoveTool } from "../tools/MoveTool.js";
 import { RotateTool } from "../tools/RotateTool.js";
 import { ScaleTool } from "../tools/ScaleTool.js";
@@ -51,7 +52,7 @@ import { SaveControllersTool } from "../tools/SaveControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
-
+import { BooleanOperation } from "../core/builders/BooleanOperation.js";
 import { Brain4itPostController } from "../controllers/Brain4itPostController.js";
 import { Brain4itWatchController } from "../controllers/Brain4itWatchController.js";
 import { ColorController } from "../controllers/ColorController.js";
@@ -64,7 +65,6 @@ import { RotationController } from "../controllers/RotationController.js";
 import { ToggleButtonController } from "../controllers/ToggleButtonController.js";
 import { TranslationController } from "../controllers/TranslationController.js";
 import { WFSController } from "../controllers/WFSController.js";
-
 import { BRFLoader } from "../io/BRFLoader.js";
 import { BRFExporter } from "../io/BRFExporter.js";
 import { ColladaLoader } from "../io/ColladaLoader.js";
@@ -73,7 +73,6 @@ import { OBJLoader } from "../io/OBJLoader.js";
 import { OBJExporter } from "../io/OBJExporter.js";
 import { STLLoader } from "../io/STLLoader.js";
 import { STLExporter } from "../io/STLExporter.js";
-
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
@@ -148,17 +147,19 @@ export function load(application)
   const inspectGeometryTool = new InspectGeometryTool(application);
   const resetMatrixTool = new ResetMatrixTool(application);
   const scriptTool = new ScriptTool(application);
+  const rebuildTool = new RebuildTool(application);
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
   const scaleTool = new ScaleTool(application);
   const unionTool = new BooleanOperationTool(application,
-    { name : "union", label : "tool.union.label", operation : "union" });
+    { name : "union", label : "tool.union.label",
+      operation : BooleanOperation.UNION });
   const intersectionTool = new BooleanOperationTool(application,
     { name : "intersection", label : "tool.intersection.label",
-      operation : "intersect" });
+      operation : BooleanOperation.INTERSECT });
   const subtractionTool = new BooleanOperationTool(application,
     { name : "subtraction", label : "tool.subtraction.label",
-      operation : "subtract" });
+      operation : BooleanOperation.SUBTRACT });
   const clipTool = new ClipTool(application);
   const makeSolidTool = new MakeSolidTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
@@ -184,6 +185,8 @@ export function load(application)
       objectType : "group" });
   const removeTool = new RemoveTool(application);
   const cloneTool = new CloneTool(application);
+  const clonerTool = new CloneTool(application,
+    { name : "cloner", label : "tool.cloner.label", dynamic : true });
   const cutTool = new CutTool(application);
   const pasteTool = new PasteTool(application);
   const zoomAllTool = new ZoomAllTool(application);
@@ -237,6 +240,7 @@ export function load(application)
   application.addTool(orbitTool);
   application.addTool(flyTool);
   application.addTool(autoOrbitTool);
+  application.addTool(rebuildTool);
   application.addTool(moveTool);
   application.addTool(rotateTool);
   application.addTool(scaleTool);
@@ -260,6 +264,7 @@ export function load(application)
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(cloneTool);
+  application.addTool(clonerTool);
   application.addTool(cutTool);
   application.addTool(pasteTool);
   application.addTool(zoomAllTool);
@@ -336,6 +341,7 @@ export function load(application)
   addMenu.addMenuItem(addCylinderTool);
   addMenu.addMenuItem(addSphereTool);
   addMenu.addMenuItem(addGroupTool);
+  addMenu.addMenuItem(clonerTool);
   const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
@@ -348,6 +354,7 @@ export function load(application)
   designMenu.addMenuItem(makeSolidTool);
   designMenu.addMenuItem(inspectGeometryTool);
   designMenu.addMenuItem(resetMatrixTool);
+  designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
 
   const measureMenu = menuBar.addMenu("menu.measure");
@@ -390,6 +397,7 @@ export function load(application)
   toolBar.addToolButton(sectionTool);
   toolBar.addToolButton(scriptTool);
   toolBar.addToolButton(measureLengthTool);
+  toolBar.addToolButton(rebuildTool);
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);
   toolBar.addToolButton(scaleTool);

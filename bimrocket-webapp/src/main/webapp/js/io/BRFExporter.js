@@ -75,17 +75,14 @@ class BRFExporter
       entry.userData = object.userData;
     }
 
-    let exportChildren = true;
-
     if (object instanceof Solid)
     {
       let geometry = object.geometry;
       this.exportGeometry(geometry, model);
       entry.geometry = String(geometry.id);
-
       entry.edgesVisible = object.edgesVisible;
       entry.facesVisible = object.facesVisible;
-      exportChildren = false;
+      entry.operation = object.operation;
     }
     else if (object instanceof THREE.Mesh)
     {
@@ -101,7 +98,14 @@ class BRFExporter
       entry.material = String(material.id);
     }
 
-    if (exportChildren)
+    if (object instanceof Solid)
+    {
+      for (let i = 2; i < object.children.length; i++)
+      {
+        this.export(object.children[i], model);
+      }
+    }
+    else
     {
       for (let child of object.children)
       {

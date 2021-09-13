@@ -44,7 +44,7 @@ class SolidGeometry extends THREE.BufferGeometry
     }
   }
 
-  update()
+  updateBuffers()
   {
     if (this.generationMode === this.constructor.INDEXED_TRIANGLES)
     {
@@ -335,7 +335,7 @@ class SolidGeometry extends THREE.BufferGeometry
   {
     var geometry = new SolidGeometry();
     geometry.copy(this);
-    geometry.update();
+    geometry.updateBuffers();
 
     return geometry;
   }

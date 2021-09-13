@@ -10,6 +10,7 @@ import { MenuBar } from "../ui/Menu.js";
 import { ToolBar } from "../ui/ToolBar.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { Solid } from "../core/Solid.js";
+import { ObjectBuilder } from "../core/ObjectBuilder.js";
 import { SolidGeometry, EdgeMap } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IOManager } from "../io/IOManager.js";
@@ -18,6 +19,7 @@ import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { ModuleLoader } from "../utils/ModuleLoader.js";
 import { WEBGL } from "../utils/WebGL.js";
+import { LineDashedShaderMaterial } from "../core/materials/LineDashedShaderMaterial.js";
 import { Inspector } from "../ui/Inspector.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { I18N } from "../i18n/I18N.js";
@@ -166,27 +168,30 @@ class Application
 
     /* selection materials */
 
-    this.selectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, linewidth: 1.5, depthTest: true, depthWrite: true,
-       polygonOffset: true, polygonOffsetFactor: 2});
-    this.deepSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, linewidth: 1, depthTest: false, depthWrite: false});
+    const selectionColor = new THREE.Color(0, 0, 1);
 
-    this.invisibleSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, opacity: 0.1, transparent: true,
-       linewidth: 1.5, depthTest: true, depthWrite: true,
+    this.selectionMaterial = new THREE.LineBasicMaterial(
+      {color: selectionColor, linewidth: 1.5,
+       depthTest: true, depthWrite: true,
        polygonOffset: true, polygonOffsetFactor: 2});
-    this.invisibleDeepSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, opacity: 0.1, transparent : true,
-       linewidth: 1, depthTest: false, depthWrite: false});
+
+    this.deepSelectionMaterial = new THREE.LineBasicMaterial(
+      {color: selectionColor, linewidth: 1,
+       depthTest: false, depthWrite: false});
 
     this.boxSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, linewidth: 1.5, depthTest: true, depthWrite: true,
+      {color: selectionColor, linewidth: 1.5,
+       depthTest: true, depthWrite: true,
        polygonOffset: true, polygonOffsetFactor: 2});
-    this.boxInvisibleSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, opacity: 0.1, transparent : true,
-       linewidth: 1.5, depthTest: true, depthWrite: true,
-       polygonOffset: true, polygonOffsetFactor: 2});
+
+    this.invisibleSelectionMaterial = new LineDashedShaderMaterial(
+      {color: selectionColor, dashSize: 4, gapSize: 4,
+       depthTest: true, depthWrite: true});
+
+    this.deepInvisibleSelectionMaterial = new LineDashedShaderMaterial(
+      {color: selectionColor, dashSize: 4, gapSize: 4,
+       depthTest: false, depthWrite: false});
+
 
     // listeners
     window.addEventListener("resize", this.onResize.bind(this), false);
@@ -204,6 +209,7 @@ class Application
           let updateSelection = false;
           for (let object of event.objects)
           {
+            object.needsRebuild = true;
             if (object instanceof THREE.Camera &&
                 event.source instanceof Inspector)
             {
@@ -217,6 +223,10 @@ class Application
             }
           }
           if (updateSelection) this.updateSelection();
+        }
+        else if (event.type === "removed")
+        {
+          event.parent.needsRebuild = true;
         }
         this.repaint();
       }
@@ -750,7 +760,7 @@ class Application
           let geometry = ObjectUtils.getBoxGeometry(box);
 
           let lines = new THREE.LineSegments(geometry, object.visible ?
-            this.boxSelectionMaterial : this.boxInvisibleSelectionMaterial);
+            this.boxSelectionMaterial : material);
           lines.raycast = function(){};
 
           object.updateMatrixWorld();
@@ -773,7 +783,7 @@ class Application
     else
     {
       return this.showDeepSelection ?
-        this.invisibleDeepSelectionMaterial : this.invisibleSelectionMaterial;
+        this.deepInvisibleSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }
 
@@ -1020,7 +1030,7 @@ class Application
     }
   }
 
-  cloneObject(object)
+  cloneObject(object, dynamic = false)
   {
     if (object === undefined)
     {
@@ -1028,8 +1038,18 @@ class Application
     }
     if (object && object !== this.baseObject)
     {
-      let clone = object.clone(undefined, true);
-      clone.name = clone.name + "_clone";
+      let clone;
+      if (dynamic)
+      {
+        // TODO: change to Clone builder
+        clone = object.clone(true);
+        clone.name = clone.name + "_clone";
+      }
+      else
+      {
+        clone = object.clone(true);
+        clone.name = clone.name + "_clone";
+      }
       this.addObject(clone, object.parent);
     }
   }
@@ -1065,9 +1085,8 @@ class Application
         }
         if (object === this.baseObject) // paste only under baseObject
         {
-          for (let i = 0; i < cutObjects.length; i++)
+          for (let cutObject of cutObjects)
           {
-            let cutObject = cutObjects[i];
             let removeEvent = {type : "removed", object : cutObject,
               parent : cutObject.parent, source : this};
             let addEvent = {type : "added", object : cutObject,
@@ -1215,6 +1234,12 @@ class Application
     this.notifyEventListeners("scene", sceneEvent);
 
     return controller;
+  }
+
+  rebuild()
+  {
+    ObjectBuilder.markAndBuild(this.baseObject);
+    this.notifyObjectUpdated(this.baseObject);
   }
 
   startControllers(object)

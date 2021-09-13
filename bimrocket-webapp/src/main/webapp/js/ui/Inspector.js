@@ -25,7 +25,7 @@ class Inspector extends Panel
     this.object = null;
     this.state = {};
     this.objectSectionName = 'Object';
-    this.layerSectionName = 'Layer';
+    this.builderSectionName = 'Builder';
     this.geometrySectionName = 'Geometry';
     this.propertiesSectionName = "Properties";
     this.controllersSectionName = "Controllers";
@@ -91,7 +91,7 @@ class Inspector extends Panel
 
     if (object)
     {
-      var topListElem = document.createElement("ul");
+      let topListElem = document.createElement("ul");
       topListElem.className = "inspector";
       this.bodyElem.appendChild(topListElem);
 
@@ -99,7 +99,8 @@ class Inspector extends Panel
       {
         this.state[this.objectSectionName] = "expanded";
       }
-      var objListElem = this.createSection(this.objectSectionName, topListElem);
+      // object
+      let objListElem = this.createSection(this.objectSectionName, topListElem);
       this.createReadOnlyProperty("id", object.id, objListElem);
       for (var propertyName in object)
       {
@@ -122,20 +123,49 @@ class Inspector extends Panel
         this.createWriteableProperty(object, "facesVisible", objListElem);
       }
 
-      var material = object.material;
+      let material = object.material;
       if (material)
       {
         this.createReadOnlyProperty("material", material, objListElem);
       }
 
-      var geometry = object.geometry;
+      // builder
+      let builder = object.builder;
+      if (builder)
+      {
+        if (this.state[this.builderSectionName] === undefined)
+        {
+          this.state[this.builderSectionName] = "expanded";
+        }
+        let builderListElem = this.createSection(this.builderSectionName,
+          topListElem);
+
+        this.createReadOnlyProperty("type", builder.constructor.name,
+          builderListElem);
+
+        for (let propertyName in builder)
+        {
+          let propertyValue = builder[propertyName];
+          if (this.isSupportedProperty(propertyName))
+          {
+            if (propertyValue !== null)
+            {
+              this.createWriteableProperty(builder, propertyName,
+                builderListElem);
+            }
+          }
+        }
+      }
+
+      // geometry
+      let geometry = object.geometry;
       if (geometry)
       {
         if (this.state[this.geometrySectionName] === undefined)
         {
           this.state[this.geometrySectionName] = "expanded";
         }
-        var geomListElem = this.createSection(this.geometrySectionName,
+        let geomListElem = this.createSection(this.geometrySectionName,
           topListElem);
 
         this.createReadOnlyProperty("uuid", geometry.uuid, geomListElem);
@@ -152,7 +182,7 @@ class Inspector extends Panel
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {
-          for (var name in geometry.attributes)
+          for (let name in geometry.attributes)
           {
             this.createReadOnlyProperty(name,
               geometry.attributes[name].array.length, geomListElem);
@@ -160,7 +190,8 @@ class Inspector extends Panel
         }
       }
 
-      var userData = object.userData;
+      // userData
+      let userData = object.userData;
       if (this.state[this.propertiesSectionName] === undefined)
       {
         this.state[this.propertiesSectionName] = "expanded";
@@ -195,6 +226,7 @@ class Inspector extends Panel
         }
       }
 
+      // controllers
       let controllers = object.controllers;
       if (this.state[this.controllersSectionName] === undefined)
       {

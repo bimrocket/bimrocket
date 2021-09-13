@@ -7,6 +7,9 @@
 import { IFC } from "./IFC.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
+import { ObjectBuilder } from "../../core/ObjectBuilder.js";
+import { IFCVoider } from "./IFCVoider.js";
+import { BooleanOperation } from "../../core/builders/BooleanOperation.js";
 import { ExtrudeSolidGeometry } from "../../core/ExtrudeSolidGeometry.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { PathBuilder } from "../../utils/PathBuilder.js";
@@ -26,7 +29,6 @@ export class IfcProductHelper extends IfcHelper
   {
     super(instance);
     this.object3D = null;
-    this.openings = [];
   }
 
   getObject3D()
@@ -56,23 +58,70 @@ export class IfcProductHelper extends IfcHelper
       };
       object3D._ifc = product;
 
-      var objectPlacement = product.ObjectPlacement;
+      let objectPlacement = product.ObjectPlacement;
       if (objectPlacement instanceof schema.IfcLocalPlacement)
       {
-        var matrix = objectPlacement.helper.getMatrix();
+        let matrix = objectPlacement.helper.getMatrix();
         matrix.decompose(object3D.position,
           object3D.quaternion, object3D.scale);
         object3D.matrix.copy(matrix);
         object3D.matrixWorldNeedsUpdate = true;
       }
 
-      var productRepr = product.Representation;
+      let productRepr = product.Representation;
       if (productRepr instanceof schema.IfcProductRepresentation)
       {
-        var reprObject3D = productRepr.helper.getObject3D("Body");
+        let reprObject3D = productRepr.helper.getObject3D("Body");
         if (reprObject3D)
         {
-          object3D.add(reprObject3D);
+          reprObject3D.name =  IFC.RepresentationName;
+
+          let ifcClassName = null;
+          if (reprObject3D.userData.IFC)
+          {
+            ifcClassName = reprObject3D.userData.IFC.ifcClassName;
+          }
+
+          if (product instanceof schema.IfcElement
+              && !(product instanceof schema.IfcOpeningElement)
+              && (ifcClassName === "IfcExtrudedAreaSolid"
+                  || ifcClassName === "IfcBooleanResult"
+                  || ifcClassName === "IfcBooleanClippingResult"))
+          {
+            // set IFCVoider no representation
+            if (reprObject3D instanceof Solid)
+            {
+              let voider = new Solid(reprObject3D.geometry);
+              voider.name = IFC.RepresentationName;
+              voider.material = reprObject3D.material;
+              voider.userData = reprObject3D.userData;
+              voider.position.copy(reprObject3D.position);
+              voider.rotation.copy(reprObject3D.rotation);
+              voider.scale.copy(reprObject3D.scale);
+              voider.updateMatrix();
+              voider.builder = new IFCVoider();
+              voider.add(reprObject3D);
+              reprObject3D.name = "Unvoided";
+              reprObject3D.visible = false;
+              reprObject3D.facesVisible = false;
+              reprObject3D.edgesVisible = false;
+              reprObject3D.position.set(0, 0, 0);
+              reprObject3D.rotation.set(0, 0, 0);
+              reprObject3D.scale.set(1, 1, 1);
+              reprObject3D.updateMatrix();
+              object3D.add(voider);
+            }
+            else if (reprObject3D instanceof THREE.Group)
+            {
+              reprObject3D.builder = new IFCVoider();
+              object3D.add(reprObject3D);
+            }
+            else throw "Unexpected representacion object";
+          }
+          else
+          {
+            object3D.add(reprObject3D);
+          }
         }
       }
       this.object3D = object3D;
@@ -155,7 +204,6 @@ export class IfcRepresentationHelper extends IfcHelper
       {
         this.object3D = group;
       }
-      this.object3D.name = IFC.RepresentationName;
       this.object3D._ifc = representation;
     }
     return this.object3D;
@@ -338,42 +386,39 @@ export class IfcBooleanResultHelper extends IfcGeometricRepresentationItemHelper
         firstObject.material = firstOperand.helper.material;
       }
 
-//      var object3D = new THREE.Group();
-//
-//      var op1 = firstObject.clone();
-//      op1.visible = false;
-//      op1.name = "first";
-//      object3D.add(op1);
-//
-//      var op2 = secondObject.clone();
-//      op2.visible = false;
-//      op2.name = "second";
-//      object3D.add(op2);
-//
-//      this.object3D = object3D;
-
       if (firstObject instanceof Solid && secondObject instanceof Solid)
       {
-        var oper = "subtract";
+        let oper = "subtract";
         switch (operator)
         {
           case ".UNION.":
-            oper = "union";
+            oper = BooleanOperation.UNION;
             break;
           case ".INTERSECTION.":
-            oper = "intersect";
+            oper = BooleanOperation.INTERSECT;
             break;
           case ".DIFFERENCE." :
-            oper = "subtract";
+            oper = BooleanOperation.SUBTRACT;
             break;
           default:
             console.warn("Invalid operator: " + operator.constant);
         }
-        var object3D = firstObject.clone();
-        object3D.booleanOperation(oper, [secondObject]);
+        let object3D = new Solid();
+        object3D.name = oper;
+        object3D.builder = new BooleanOperation(oper);
+        firstObject.visible = false;
+        firstObject.facesVisible = false;
+        firstObject.edgesVisible = false;
+        secondObject.visible = false;
+        secondObject.facesVisible = false;
+        secondObject.edgesVisible = false;
+        object3D.attach(firstObject);
+        object3D.attach(secondObject);
+        ObjectBuilder.build(object3D);
         if (object3D.isValid())
         {
           this.object3D = object3D;
+          this.object3D.material = firstObject.material;
           this.object3D._ifc = result;
         }
         else
@@ -2312,10 +2357,6 @@ export class IfcRelVoidsElementHelper extends IfcRelationshipHelper
             object3D.attach(openingObject3D);
           }
         }
-      }
-      if (element.helper.openings)
-      {
-        element.helper.openings.push(opening);
       }
     }
   }

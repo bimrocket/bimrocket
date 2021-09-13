@@ -285,6 +285,11 @@
   background-image: url(images/tools/bim_inventory.svg);
 }
 
+.tool_button.rebuild
+{
+  background-image: url(images/tools/rebuild.svg);
+}
+
 .tool_button.script
 {
   background-image: url(images/tools/script.svg);

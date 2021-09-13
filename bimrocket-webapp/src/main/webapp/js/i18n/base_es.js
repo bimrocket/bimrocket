@@ -90,6 +90,8 @@ export const translations =
 
   "tool.measure_selection.label" : "Medir selección",
 
+  "tool.rebuild.label" : "Reconstruir",
+
   "tool.move.label" : "Mover",
   "tool.move.help" : "Arrastar con botón izquierdo del ratón para mover",
 
@@ -157,6 +159,8 @@ export const translations =
   "tool.remove.label" : "Borrar",
 
   "tool.clone.label" : "Clonar",
+
+  "tool.cloner.label" : "Clonador",
 
   "tool.cut.label" : "Cortar",
 

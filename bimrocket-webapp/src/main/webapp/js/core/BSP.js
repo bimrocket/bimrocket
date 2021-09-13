@@ -20,7 +20,6 @@ class BSP
 
   fromSolidGeometry(geometry, matrix)
   {
-    let vertices = geometry.vertices;
     let faces = geometry.faces;
     for (let f = 0; f < faces.length; f++)
     {
@@ -70,13 +69,6 @@ class BSP
   {
     if (this.plane === null)
     {
-//      let vertex0 = polygon.vertices[0];
-//      let vertex1 = polygon.vertices[1];
-//      let vertex2 = polygon.vertices[2];
-//      this.plane = new THREE.Plane();
-//      this.plane.setFromCoplanarPoints(vertex0, vertex1, vertex2);
-//      this.coplanarPolygons.push(polygon);
-
       let vertex0 = polygon.vertices[0];
       if (polygon.normal === null) polygon.updateNormal();
       this.plane = new THREE.Plane();

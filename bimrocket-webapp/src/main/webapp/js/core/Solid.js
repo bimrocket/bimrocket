@@ -44,6 +44,8 @@ class Solid extends THREE.Object3D
     this._edgesObject.raycast = function(){};
     this.add(this._edgesObject);
 
+    this.builder = null;
+
     if (geometry)
     {
       this.geometry = geometry;
@@ -206,6 +208,7 @@ class Solid extends THREE.Object3D
     object._edgesObject.material = this._edgesObject.material;
     object.facesVisible = this.facesVisible;
     object.edgesVisible = this.edgesVisible;
+    object.operator = this.operator;
     object.updateMatrix();
 
     if (recursive === true)
@@ -294,6 +297,9 @@ class Solid extends THREE.Object3D
 
   updateGeometry(geometry, fix = true, debug = false)
   {
+    this._facesObject.geometry.dispose();
+    this._edgesObject.geometry.dispose();
+
     let solidGeometry;
     if (geometry instanceof SolidGeometry)
     {
@@ -315,7 +321,7 @@ class Solid extends THREE.Object3D
       edgeMap = new EdgeMap(solidGeometry);
     }
 
-    solidGeometry.update();
+    solidGeometry.updateBuffers();
     this._facesObject.geometry = solidGeometry;
 
     let edgesGeometry = edgeMap.getEdgesGeometry(5); // 5 degres;

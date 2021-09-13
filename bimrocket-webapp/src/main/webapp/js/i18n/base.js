@@ -90,6 +90,8 @@ export const translations =
 
   "tool.measure_selection.label" : "Measure selection",
 
+  "tool.rebuild.label" : "Rebuild",
+
   "tool.move.label" : "Move",
   "tool.move.help" : "Drag left mouse button to move",
 
@@ -157,6 +159,8 @@ export const translations =
   "tool.remove.label" : "Remove",
 
   "tool.clone.label" : "Clone",
+
+  "tool.cloner.label" : "Cloner",
 
   "tool.cut.label" : "Cut",
 

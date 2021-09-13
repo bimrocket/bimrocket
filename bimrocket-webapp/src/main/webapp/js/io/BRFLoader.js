@@ -182,6 +182,7 @@ class BRFLoader extends THREE.Loader
       object = new Solid();
       object.edgesVisible = entry.edgesVisible;
       object.facesVisible = entry.facesVisible;
+      object.operation = entry.operation;
     }
     else if (entry.type === "Mesh")
     {

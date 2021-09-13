@@ -6,7 +6,9 @@
 
 import { IFC } from "./IFC.js";
 import { IFCFile } from "./IFCFile.js";
+import { IFCVoider } from "./IFCVoider.js";
 import { Solid } from "../../core/Solid.js";
+import { ObjectBuilder } from "../../core/ObjectBuilder.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { schema as IFC2X3 } from "./schemas/IFC2x3.js";
@@ -185,43 +187,15 @@ class IFCLoader extends THREE.Loader
     const voidObject = index =>
     {
       let product = file.products[index];
-      let openings = product.helper.openings;
-      if (openings.length > 0)
+      let productObject3D = product.helper.getObject3D();
+      if (productObject3D)
       {
-        let productObject3D = product.helper.getObject3D();
         let productRepr =
           productObject3D.getObjectByName(IFC.RepresentationName);
 
-        if (productRepr instanceof Solid &&
-            (productRepr.geometry.faces.length <= 24 ||
-             productRepr.userData.IFC.ifcClassName === "IfcExtrudedAreaSolid" ||
-             productRepr.userData.IFC.ifcClassName === "IfcBooleanResult" ||
-             productRepr.userData.IFC.ifcClassName === "IfcBooleanClippingResult"))
+        if (productRepr && productRepr.builder instanceof IFCVoider)
         {
-          let parts = [];
-          for (var op = 0; op < openings.length; op++)
-          {
-            let opening = openings[op];
-            let openingObject3D = opening.helper.getObject3D();
-            let openingRepr = openingObject3D.getObjectByName(
-              IFC.RepresentationName);
-            if (openingRepr instanceof Solid)
-            {
-              parts.push(openingRepr);
-            }
-            else if (openingRepr instanceof THREE.Group)
-            {
-              for (let i = 0; i < openingRepr.children.length; i++)
-              {
-                let child = openingRepr.children[i];
-                if (child instanceof Solid)
-                {
-                  parts.push(child);
-                }
-              }
-            }
-          }
-          productRepr.subtract(parts);
+          ObjectBuilder.build(productRepr);
         }
       }
     };

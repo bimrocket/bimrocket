@@ -117,7 +117,7 @@ class ObjectUtils
     return set;
   }
 
-  static zoomAll(camera, objects, aspect, invisible)
+  static zoomAll(camera, objects, aspect, all)
   {
     if (objects instanceof THREE.Object3D)
     {
@@ -125,7 +125,7 @@ class ObjectUtils
     }
 
     let box = ObjectUtils.getBoundingBoxFromView(
-      objects, camera.matrixWorld, invisible); // box in camera CS
+      objects, camera.matrixWorld, all); // box in camera CS
 
     if (box.isEmpty()) return;
 
@@ -199,94 +199,109 @@ class ObjectUtils
     }
   }
 
-  static getBoundingBoxFromView(objects, viewMatrixWorld, invisible)
+  static getBoundingBoxFromView(objects, viewMatrixWorld, all = false)
   {
     const box = new THREE.Box3(); // empty box
     const vertex = new THREE.Vector3();
     const inverseMatrix = new THREE.Matrix4();
     inverseMatrix.copy(viewMatrixWorld).invert();
 
-    for (let i = 0; i < objects.length; i++)
+    function extendBox(object)
     {
-      let object = objects[i];
-      object.traverse(function(object)
+      let geometry = object.geometry;
+      
+      if (geometry)
       {
-        if ((object.visible || invisible) &&
-            (object instanceof THREE.Mesh ||
-             object instanceof THREE.Line ||
-             object instanceof THREE.Points))
+        if (geometry instanceof SolidGeometry)
         {
-          var geometry = object.geometry;
-          if (geometry instanceof SolidGeometry)
+          let vertices = geometry.vertices;
+          for (let j = 0; j < vertices.length; j++)
           {
-            let vertices = geometry.vertices;
-            for (let j = 0; j < vertices.length; j++)
+            vertex.copy(vertices[j]);
+            vertex.applyMatrix4(object.matrixWorld); // world CS
+            vertex.applyMatrix4(inverseMatrix); // view CS
+            box.expandByPoint(vertex);
+          }
+        }
+        else if (geometry instanceof THREE.BufferGeometry)
+        {
+          let positions = geometry.attributes.position.array;
+          if (positions)
+          {
+            for (let j = 0; j < positions.length; j += 3)
             {
-              vertex.copy(vertices[j]);
+              vertex.set(positions[j], positions[j + 1], positions[j + 2]);
               vertex.applyMatrix4(object.matrixWorld); // world CS
               vertex.applyMatrix4(inverseMatrix); // view CS
               box.expandByPoint(vertex);
             }
           }
-          else if (geometry instanceof THREE.BufferGeometry)
-          {
-            let positions = geometry.attributes.position.array;
-            if (positions)
-            {
-              for (let j = 0; j < positions.length; j += 3)
-              {
-                vertex.set(positions[j], positions[j + 1], positions[j + 2]);
-                vertex.applyMatrix4(object.matrixWorld); // world CS
-                vertex.applyMatrix4(inverseMatrix); // view CS
-                box.expandByPoint(vertex);
-              }
-            }
-          }
         }
-      });
-    }
-    return box;
-  }
+      }
+    };
 
-  static getLocalBoundingBox(object, all)
-  {
-    var box = new THREE.Box3(); // empty box
-    var objectBox = new THREE.Box3();
-
-    var extendBox = function(object, box, toBaseMatrix)
+    function traverse(object)
     {
       if (object.visible || all)
       {
-        if (object instanceof THREE.Mesh ||
-            object instanceof THREE.Line ||
-            object instanceof THREE.PointCloud)
+        extendBox(object);
+
+        if (!(object instanceof Solid))
         {
-          if (object.geometry.boundingBox === null)
+          for (let child of object.children)
           {
-            object.geometry.computeBoundingBox();
-          }
-          if (!object.geometry.boundingBox.isEmpty())
-          {
-            objectBox.copy(object.geometry.boundingBox);
-            objectBox.applyMatrix4(toBaseMatrix);
-            box.union(objectBox);
-          }
-        }
-        else
-        {
-          var children = object.children;
-          for (var i = 0; i < children.length; i++)
-          {
-            var child = children[i];
-            var matrix = new THREE.Matrix4();
-            matrix.copy(toBaseMatrix).multiply(child.matrix);
-            extendBox(child, box, matrix);
+            traverse(child);
           }
         }
       }
     };
 
-    extendBox(object, box, new THREE.Matrix4());
+    for (let object of objects)
+    {
+      traverse(object);
+    }
+    return box;
+  }
+
+  static getLocalBoundingBox(object, all = false)
+  {
+    const box = new THREE.Box3(); // empty box
+    const objectBox = new THREE.Box3();
+
+    function extendBox(object, toBaseMatrix)
+    {
+      if (object.visible || all)
+      {
+        let geometry = object.geometry;
+
+        if (geometry)
+        {
+          if (geometry.boundingBox === null)
+          {
+            geometry.computeBoundingBox();
+          }
+          if (!geometry.boundingBox.isEmpty())
+          {
+            objectBox.copy(geometry.boundingBox);
+            objectBox.applyMatrix4(toBaseMatrix);
+            box.union(objectBox);
+          }
+        }
+
+        if (!(object instanceof Solid))
+        {
+          const children = object.children;
+          for (let child of children)
+          {
+            const matrix = new THREE.Matrix4();
+            matrix.copy(toBaseMatrix).multiply(child.matrix);
+            extendBox(child, matrix);
+          }
+        }
+      }
+    };
+
+    extendBox(object, new THREE.Matrix4());
 
     return box;
   }

@@ -12,7 +12,7 @@
    viewBox="0 0 32 32"
    width="32px"
    id="svg4214"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
    sodipodi:docname="hide.svg"
    inkscape:export-filename="/Users/realor/NetBeansProjects/smartcity/threecad/web/css/images/tools/hide.png"
    inkscape:export-xdpi="90"
@@ -25,6 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -37,21 +38,23 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="640"
-     inkscape:window-height="480"
+     inkscape:window-width="1460"
+     inkscape:window-height="740"
      id="namedview4225"
      showgrid="true"
      showguides="false"
      inkscape:zoom="15.4375"
      inkscape:cx="15.643725"
      inkscape:cy="16"
-     inkscape:current-layer="svg4214">
+     inkscape:current-layer="svg4214"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
-       id="grid4769" />
+       id="grid4769"
+       empspacing="4" />
   </sodipodi:namedview>
-  <title
-     id="title4216" />
   <desc
      id="desc4218" />
   <defs

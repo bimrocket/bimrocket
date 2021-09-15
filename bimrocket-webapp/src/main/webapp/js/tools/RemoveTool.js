@@ -1,7 +1,7 @@
 /*
  * RemoveTool.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Tool } from "./Tool.js";

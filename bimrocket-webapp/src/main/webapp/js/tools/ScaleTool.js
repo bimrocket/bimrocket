@@ -1,7 +1,7 @@
 /*
  * ScaleTool.js
  *
- * @author: realor
+ * @author realor
  */
 import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";

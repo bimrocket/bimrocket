@@ -1,7 +1,7 @@
 /*
  * Controller.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Expression } from "../utils/Expression.js";
@@ -54,10 +54,10 @@ class Controller
   onStop()
   {
   }
-  
+
   createProperty(type, label, value, definition)
   {
-    return new Expression(this.application, this.object, 
+    return new Expression(this.application, this.object,
       type, label, value, definition);
   }
 }

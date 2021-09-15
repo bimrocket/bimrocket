@@ -1,7 +1,7 @@
 /**
  * Dialog.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Controls } from "./Controls.js";

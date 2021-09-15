@@ -1,7 +1,7 @@
 /*
  * PanelController.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Controller } from "./Controller.js";

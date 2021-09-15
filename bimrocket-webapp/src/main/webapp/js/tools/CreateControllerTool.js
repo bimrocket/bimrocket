@@ -1,7 +1,7 @@
 /*
  * CreateControllerTool.js
  *
- * @author: realor
+ * @author realor
  */
 import { Tool } from "./Tool.js";
 import { ControllerManager } from "../controllers/ControllerManager.js";

@@ -1,7 +1,7 @@
 /*
  * TranslationController.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { AnimationController } from "./AnimationController.js";

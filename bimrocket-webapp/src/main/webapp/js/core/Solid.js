@@ -1,7 +1,7 @@
 /*
  * Solid.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { SolidGeometry, EdgeMap } from "./SolidGeometry.js";

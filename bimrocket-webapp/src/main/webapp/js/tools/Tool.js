@@ -1,7 +1,7 @@
 /*
  * Tool.js
  *
- * @author: realor
+ * @author realor
  */
 
 import * as THREE from "../lib/three.module.js";

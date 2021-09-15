@@ -1,7 +1,7 @@
 /*
  * AnimationController.js
  *
- * @author: realor
+ * @author realor
  */
 import { ControllerManager } from "./ControllerManager.js";
 import { Controller } from "./Controller.js";

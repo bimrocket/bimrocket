@@ -1,7 +1,7 @@
 /*
  * PushButtonController.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { PanelController } from "./PanelController.js";

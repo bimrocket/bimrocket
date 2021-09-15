@@ -1,7 +1,7 @@
 /*
  * BooleanOperation.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { ObjectBuilder } from "../ObjectBuilder.js";

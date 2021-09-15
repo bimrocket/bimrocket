@@ -1,7 +1,7 @@
 /*
  * WebdavService.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { FileService, Metadata, Result } from "./FileService.js";

@@ -1,7 +1,7 @@
 /*
  * BSP.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { GeometryUtils } from "../utils/GeometryUtils.js";

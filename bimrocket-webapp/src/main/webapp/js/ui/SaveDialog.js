@@ -1,7 +1,7 @@
 /*
  * SaveDialog.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Dialog } from "./Dialog.js";

@@ -1,7 +1,7 @@
 /*
  * ObjectBuilder.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Solid } from "./Solid.js";

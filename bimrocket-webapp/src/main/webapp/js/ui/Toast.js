@@ -1,7 +1,7 @@
 /**
  * Toast.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { I18N } from "../i18n/I18N.js";

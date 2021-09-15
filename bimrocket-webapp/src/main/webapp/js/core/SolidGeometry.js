@@ -1,7 +1,7 @@
 /*
  * SolidGeometry.js
  *
- * @author: realor
+ * @author realor
  */
 
 import * as THREE from "../lib/three.module.js";
@@ -66,9 +66,8 @@ class SolidGeometry extends THREE.BufferGeometry
     }
     else // TRIANGLE_SOUP
     {
-      var vertices = this.vertices;
-      var triangles = [];
-      var normals = [];
+      let triangles = [];
+      let normals = [];
 
       for (let f = 0; f < this.faces.length; f++)
       {

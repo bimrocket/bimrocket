@@ -1,7 +1,7 @@
 /*
  * SelectByNameTool.js
  *
- * @author: realor
+ * @author realor
  */
 
 import { Tool } from "./Tool.js";

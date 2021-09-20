@@ -128,17 +128,20 @@ class BIMInventoryTool extends Tool
           }
           type.objects.push(object);
 
+          let typeId = object.userData.IFC_type ?
+            object.userData.IFC_type.GlobalId : "?";
           let typeName = object.userData.IFC_type ?
             object.userData.IFC_type.Name || "Unnamed" : "Others";
 
-          let subType = type.subTypes[typeName];
+          let subType = type.subTypes[typeId];
           if (subType === undefined)
           {
             subType = {
+              typeId : typeId,
               name : typeName,
               objects : []
             };
-            type.subTypes[typeName] = subType;
+            type.subTypes[typeId] = subType;
           }
           subType.objects.push(object);
         }
@@ -277,16 +280,23 @@ class BIMInventoryTool extends Tool
       let node = this.typesTree.addNode(label, event =>
         this.application.selectObjects(event, objects), className);
 
-      let subTypes = type.subTypes;
-      let subTypeNames = Object.keys(subTypes);
-      subTypeNames.sort();
-      if (subTypeNames.length !== 1 || subTypeNames[0] !== "Others")
+      let subTypes = [];
+      for (let typeId in type.subTypes)
       {
-        for (let subTypeName of subTypeNames)
+        subTypes.push(type.subTypes[typeId]);
+      }
+      subTypes.sort((typeA, typeB) =>
+      {
+        if (typeA.name < typeB.name) return -1;
+        if (typeA.name > typeB.name) return 1;
+        return 0;
+      });
+      if (subTypes.length > 1 || subTypes[0].name !== "Others")
+      {
+        for (let subType of subTypes)
         {
-          let subType = subTypes[subTypeName];
           let subObjects = subType.objects;
-          let subLabel = subTypeName + " (" + subObjects.length + ")";
+          let subLabel = subType.name + " (" + subObjects.length + ")";
           node.addNode(subLabel, event =>
             this.application.selectObjects(event, subObjects),
             "IfcType");

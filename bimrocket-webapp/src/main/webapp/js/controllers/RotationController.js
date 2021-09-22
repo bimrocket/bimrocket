@@ -60,7 +60,7 @@ class RotationController extends AnimationController
       else if (speed < -maxSpeed) speed = -maxSpeed;
       this.object.rotation[axis] += speed * event.delta;
       this.object.updateMatrix();
-      this.application.notifyObjectUpdated(this.object);
+      this.application.notifyObjectsChanged(this.object);
     }
   }
 }

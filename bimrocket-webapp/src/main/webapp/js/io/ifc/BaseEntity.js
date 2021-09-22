@@ -4,7 +4,8 @@
  * @author realor
  */
 
-import * as helpers from "./helpers.js";
+const IFC_SCHEMAS = {};
+const IFC_HELPERS = {};
 
 class BaseEntity
 {
@@ -15,7 +16,7 @@ class BaseEntity
       let ifcClass = this.constructor;
       while (ifcClass)
       {
-        let helperClass = helpers[ifcClass.name + "Helper"];
+        let helperClass = IFC_HELPERS[ifcClass.name + "Helper"];
         if (helperClass)
         {
           this._helper = new helperClass(this);
@@ -33,10 +34,9 @@ class BaseEntity
   {
     let names = Object.getOwnPropertyNames(this);
     let json = { "ifcClassName" : this.constructor.name };
-    for (let i = 0; i < names.length; i++)
+    for (let name of names)
     {
-      let name = names[i];
-      if (name  !== "_helper")
+      if (name !== "_helper" && name !== "_loader")
       {
         json[name] = this[name];
       }
@@ -45,14 +45,29 @@ class BaseEntity
   }
 }
 
-function registerIfcClass(ifcClass, schema)
+function registerIfcClass(ifcClass)
 {
+  const schemaName = ifcClass.schemaName;
+
+  let schema = IFC_SCHEMAS[schemaName];
+  if (schema === undefined)
+  {
+    schema = {};
+    IFC_SCHEMAS[schemaName] = schema;
+  }
+  ifcClass.schema = schema;
+
   const ifcClassName = ifcClass.name;
   schema[ifcClassName] = ifcClass;
   schema[ifcClassName.toUpperCase()] = ifcClass;
 }
 
-export { BaseEntity, registerIfcClass };
+function registerIfcHelperClass(ifcHelperClass)
+{
+  IFC_HELPERS[ifcHelperClass.name] = ifcHelperClass;
+}
 
+export { IFC_SCHEMAS, IFC_HELPERS,
+  BaseEntity, registerIfcClass, registerIfcHelperClass };
 
 

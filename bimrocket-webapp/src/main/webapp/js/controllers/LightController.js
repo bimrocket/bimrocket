@@ -87,7 +87,7 @@ class LightController extends Controller
       this.light.distance = distance;
       this.light.position.set(offsetX, offsetY, offsetZ);
       this.light.updateMatrix();
-      this.application.notifyObjectUpdated(this.object);
+      this.application.notifyObjectsChange(this.object);
     }
   }
 

@@ -59,7 +59,7 @@ class TranslationController extends AnimationController
       else if (speed < -maxSpeed) speed = -maxSpeed;
       this.object.position[axis] += speed * event.delta;
       this.object.updateMatrix();
-      this.application.notifyObjectUpdated(this.object);
+      this.application.notifyObjectsChanged(this.object);
     }
   }
 }

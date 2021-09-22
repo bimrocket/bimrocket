@@ -44,7 +44,7 @@ class ColorController extends Controller
   {
     this.restoreMaterial();
     this.application.removeEventListener("scene", this._onNodeChanged);
-    this.application.notifyObjectUpdated(this.object);
+    this.application.notifyObjectsChanged(this.object);
   }
 
   onNodeChanged(event)
@@ -85,7 +85,7 @@ class ColorController extends Controller
     {
       this.material.color = color;
       this.material.emissiveIntensity = factor * this.emissive.value;
-      this.application.notifyObjectUpdated(this.object);
+      this.application.notifyObjectsChanged(this.object);
     }
   }
 

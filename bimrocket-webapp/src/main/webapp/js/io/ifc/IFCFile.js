@@ -4,13 +4,13 @@
  * @author realor
  */
 
-import { schema } from "./schemas/IFC4.js";
+import { IFC_SCHEMAS } from "./BaseEntity.js";
 
 class IFCFile
 {
   constructor()
   {
-    this.schema = schema;
+    this.schema = IFC_SCHEMAS.IFC4;
     this.entities = {};
     this.products = [];
     this.typeProducts = [];

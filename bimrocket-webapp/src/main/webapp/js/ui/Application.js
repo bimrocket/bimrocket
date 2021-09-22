@@ -10,6 +10,8 @@ import { MenuBar } from "../ui/Menu.js";
 import { ToolBar } from "../ui/ToolBar.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cloner } from "../core/builders/Cloner.js";
 import { ObjectBuilder } from "../core/ObjectBuilder.js";
 import { SolidGeometry, EdgeMap } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
@@ -419,9 +421,9 @@ class Application
 
       ObjectUtils.zoomAll(camera, this.baseObject, aspect);
     }
-    let changeEvent = {type : "structureChanged",
-      object : this.scene, parent : null, source : this};
-    this.notifyEventListeners("scene", changeEvent);
+    let sceneEvent = {type : "structureChanged",
+      objects : [this.scene], source : this};
+    this.notifyEventListeners("scene", sceneEvent);
 
     this.selection.set(object || this.baseObject);
   }
@@ -735,6 +737,18 @@ class Application
       lines.updateMatrix();
       linesGroup.add(lines);
     }
+    else if (object instanceof Profile)
+    {
+      object.updateMatrixWorld();
+
+      let lines = new THREE.LineSegments(object.geometry, material);
+      lines.raycast = function(){};
+      lines.name = "Lines";
+      object.matrixWorld.decompose(
+        lines.position, lines.rotation, lines.scale);
+      lines.updateMatrix();
+      linesGroup.add(lines);
+    }
     else if (object instanceof THREE.Group || object instanceof THREE.Object3D)
     {
       object.updateMatrixWorld();
@@ -1041,14 +1055,15 @@ class Application
       let clone;
       if (dynamic)
       {
-        // TODO: change to Clone builder
-        clone = object.clone(true);
-        clone.name = clone.name + "_clone";
+        clone = new THREE.Object3D();
+        clone.name = object.name + "_cloner";
+        clone.builder = new Cloner(object);
+        ObjectBuilder.build(clone);
       }
       else
       {
         clone = object.clone(true);
-        clone.name = clone.name + "_clone";
+        clone.name = object.name + "_clone";
       }
       this.addObject(clone, object.parent);
     }
@@ -1106,10 +1121,14 @@ class Application
     }
   }
 
-  notifyObjectUpdated(object)
+  notifyObjectsChanged(objects, type = "nodeChanged")
   {
-    let sceneEvent = {type: "nodeChanged", objects: [object],
-      source : this};
+    if (objects instanceof THREE.Object3D)
+    {
+      objects = [objects];
+    }
+
+    let sceneEvent = {type: type, objects: objects, source : this};
     this.notifyEventListeners("scene", sceneEvent);
   }
 
@@ -1238,8 +1257,21 @@ class Application
 
   rebuild()
   {
-    ObjectBuilder.markAndBuild(this.baseObject);
-    this.notifyObjectUpdated(this.baseObject);
+    const baseObject = this.baseObject;
+
+    baseObject.traverse(child => child.needsMarking = true);
+    ObjectBuilder.mark(baseObject);
+
+    const objectsToRebuild = [];
+    baseObject.traverse(child =>
+    { if (child.needsRebuild) objectsToRebuild.push(child); });
+
+    console.info(objectsToRebuild);
+
+    ObjectBuilder.build(baseObject);
+
+    this.notifyObjectsChanged(objectsToRebuild);
+    this.updateSelection();
   }
 
   startControllers(object)

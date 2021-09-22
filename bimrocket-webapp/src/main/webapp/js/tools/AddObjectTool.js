@@ -6,7 +6,11 @@
 
 import { Tool } from "./Tool.js";
 import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { ObjectBuilder } from "../core/ObjectBuilder.js";
+import { Extruder } from "../core/builders/Extruder.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -32,10 +36,11 @@ class AddObjectTool extends Tool
     if (objectType === "group")
     {
       object = new THREE.Group();
-      object.name = "Group";
     }
     else
     {
+      object = new Solid();
+
       var geometry;
       switch (objectType)
       {
@@ -58,21 +63,23 @@ class AddObjectTool extends Tool
           geometry.addFace(1, 2, 6, 5);
           geometry.addFace(2, 3, 7, 6);
           geometry.addFace(3, 0, 4, 7);
+          object.updateGeometry(geometry);
           break;
         case "cylinder":
           geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
           var rad = THREE.MathUtils.degToRad(90);
           var matrix = new THREE.Matrix4().makeRotationX(rad);
           geometry.applyMatrix4(matrix);
-          break;
+          object.updateGeometry(geometry);
           break;
         case "sphere":
           geometry = new THREE.SphereGeometry(0.5, 24, 24);
           var rad = THREE.MathUtils.degToRad(90);
           var matrix = new THREE.Matrix4().makeRotationX(rad);
           geometry.applyMatrix4(matrix);
+          object.updateGeometry(geometry);
           break;
-        case "shape":
+        default:
           var shape = new THREE.Shape();
           let size = 0.5;
           shape.moveTo(-size, -size);
@@ -95,10 +102,12 @@ class AddObjectTool extends Tool
           hole.lineTo(-size / 4 + 0.5, size / 4);
           hole.closePath();
           shape.holes.push(hole);
-          geometry = new ExtrudeSolidGeometry(shape, { depth: size });
-          break;
+
+          let profile = new Profile(new ProfileGeometry(shape));
+          object.add(profile);
+          object.builder = new Extruder(this.height);
+          ObjectBuilder.build(object);
       }
-      object = new Solid(geometry);
     }
     this.counter++;
     object.name = objectType + "_" + this.counter;

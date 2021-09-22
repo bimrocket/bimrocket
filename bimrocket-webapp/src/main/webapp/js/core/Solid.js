@@ -208,7 +208,7 @@ class Solid extends THREE.Object3D
     object._edgesObject.material = this._edgesObject.material;
     object.facesVisible = this.facesVisible;
     object.edgesVisible = this.edgesVisible;
-    object.operator = this.operator;
+    object.builder = this.builder;
     object.updateMatrix();
 
     if (recursive === true)

@@ -1,5 +1,5 @@
 /*
- * BooleanOperation.js
+ * BooleanOperator.js
  *
  * @author realor
  */
@@ -10,7 +10,7 @@ import { Solid } from "../Solid.js";
 import { BSP } from "../BSP.js";
 import * as THREE from "../../lib/three.module.js";
 
-class BooleanOperation extends ObjectBuilder
+class BooleanOperator extends ObjectBuilder
 {
   static UNION = "union";
   static INTERSECT = "intersect";
@@ -19,7 +19,7 @@ class BooleanOperation extends ObjectBuilder
   constructor(operation)
   {
     super();
-    this.operation = operation || BooleanOperation.SUBTRACT;
+    this.operation = operation || BooleanOperator.SUBTRACT;
   }
 
   performBuild(solid)
@@ -35,7 +35,7 @@ class BooleanOperation extends ObjectBuilder
         solids.push(child);
       }
     }
-    if (solids.length === 0) return false;
+    if (solids.length === 0) return;
 
     const createBSP = function(solid)
     {
@@ -53,11 +53,11 @@ class BooleanOperation extends ObjectBuilder
         let otherBSP = createBSP(solid);
         switch (this.operation)
         {
-          case BooleanOperation.UNION:
+          case BooleanOperator.UNION:
             resultBSP = resultBSP.union(otherBSP); break;
-          case BooleanOperation.INTERSECT:
+          case BooleanOperator.INTERSECT:
             resultBSP = resultBSP.intersect(otherBSP); break;
-          case BooleanOperation.SUBTRACT:
+          case BooleanOperator.SUBTRACT:
             resultBSP = resultBSP.subtract(otherBSP); break;
         }
       }
@@ -65,10 +65,8 @@ class BooleanOperation extends ObjectBuilder
     let geometry = resultBSP.toSolidGeometry();
 
     solid.updateGeometry(geometry);
-
-    return true;
   }
 }
 
-export { BooleanOperation };
+export { BooleanOperator };
 

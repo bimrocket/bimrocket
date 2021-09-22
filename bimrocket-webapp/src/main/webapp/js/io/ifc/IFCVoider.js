@@ -92,7 +92,11 @@ class IFCVoider extends ObjectBuilder
         }
       }
     }
-    if (openingReprs.length === 0) return false;
+    if (openingReprs.length === 0)
+    {
+      productRepr.updateGeometry(unvoidedRepr.geometry, false);
+      return;
+    }
 
     const createBSP = function(solid)
     {
@@ -117,8 +121,6 @@ class IFCVoider extends ObjectBuilder
     geometry.applyMatrix4(inverseMatrixWorld);
 
     productRepr.updateGeometry(geometry);
-
-    return true;
   }
 };
 

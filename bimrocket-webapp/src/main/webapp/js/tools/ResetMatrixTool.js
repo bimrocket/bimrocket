@@ -30,8 +30,8 @@ class ResetMatrixTool extends Tool
         object.position, object.quaternion, object.scale);
       object.updateMatrixWorld();
       object.updateGeometry(object.geometry);
-      
-      application.notifyObjectUpdated(object);
+
+      application.notifyObjectsChanged(object);
       application.updateSelection();
     }
   }

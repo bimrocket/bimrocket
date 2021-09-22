@@ -67,7 +67,7 @@ ul.outliner .active_camera
 
 ul.outliner .hidden
 {
-  color:#C0C0C0;  
+  color:#C0C0C0;
 }
 
 ul.outliner .selected.hidden
@@ -124,14 +124,19 @@ ul.tree li
   background-image: url(images/outliner/default.svg);
 }
 
+ul.tree li.Group
+{
+  background-image: url(images/outliner/group.svg)
+}
+
 ul.tree li.Solid
 {
   background-image: url(images/outliner/solid.svg)
 }
 
-ul.tree li.Group
+ul.tree li.Profile
 {
-  background-image: url(images/outliner/group.svg)
+  background-image: url(images/outliner/profile.svg)
 }
 
 ul.tree li.AmbientLight,
@@ -147,5 +152,5 @@ ul.tree li.SpotLight
 ul.tree li.PerspectiveCamera,
 ul.tree li.OrthographicCamera
 {
-  background-image: url(images/outliner/camera.svg);  
+  background-image: url(images/outliner/camera.svg);
 }

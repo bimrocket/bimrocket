@@ -70,13 +70,6 @@ class ObjectBuilder
     const builder = object.builder || ObjectBuilder.DEFAULT_INSTANCE;
     builder.performBuild(object);
   }
-
-  static markAndBuild(object)
-  {
-    object.traverse(child => child.needsMarking = true);
-    ObjectBuilder.mark(object);
-    ObjectBuilder.build(object);
-  }
 }
 
 export { ObjectBuilder };

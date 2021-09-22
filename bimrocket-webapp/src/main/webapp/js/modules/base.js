@@ -52,7 +52,7 @@ import { SaveControllersTool } from "../tools/SaveControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
-import { BooleanOperation } from "../core/builders/BooleanOperation.js";
+import { BooleanOperator } from "../core/builders/BooleanOperator.js";
 import { Brain4itPostController } from "../controllers/Brain4itPostController.js";
 import { Brain4itWatchController } from "../controllers/Brain4itWatchController.js";
 import { ColorController } from "../controllers/ColorController.js";
@@ -153,13 +153,13 @@ export function load(application)
   const scaleTool = new ScaleTool(application);
   const unionTool = new BooleanOperationTool(application,
     { name : "union", label : "tool.union.label",
-      operation : BooleanOperation.UNION });
+      operation : BooleanOperator.UNION });
   const intersectionTool = new BooleanOperationTool(application,
     { name : "intersection", label : "tool.intersection.label",
-      operation : BooleanOperation.INTERSECT });
+      operation : BooleanOperator.INTERSECT });
   const subtractionTool = new BooleanOperationTool(application,
     { name : "subtraction", label : "tool.subtraction.label",
-      operation : BooleanOperation.SUBTRACT });
+      operation : BooleanOperator.SUBTRACT });
   const clipTool = new ClipTool(application);
   const makeSolidTool = new MakeSolidTool(application);
   const measureLengthTool = new MeasureLengthTool(application);

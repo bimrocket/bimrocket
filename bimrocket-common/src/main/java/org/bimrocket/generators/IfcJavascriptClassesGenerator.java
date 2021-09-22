@@ -51,7 +51,7 @@ import org.bimrocket.express.io.ExpressLoader;
 public class IfcJavascriptClassesGenerator
 {
   private PrintWriter writer;
-  private String schemaVersion = "IFC2x3";
+  private String schemaVersion = "IFC2X3";
   private final HashSet<String> generatedClasses = new HashSet<>();
 
   public String getSchemaVersion()
@@ -112,13 +112,11 @@ public class IfcJavascriptClassesGenerator
     writer.println("import { BaseEntity, registerIfcClass } " +
       "from \"../BaseEntity.js\";");
     writer.println();
-    writer.println("export const schema = {};");
-    writer.println();
 
     writer.println("class SchemaBase extends BaseEntity");
     writer.println("{");
     writer.println("  static schemaName = \"" + schemaVersion + "\";");
-    writer.println("  static schema = schema;");
+    writer.println("  static schema = null;");
     writer.println("};");
     writer.println();
   }
@@ -155,7 +153,7 @@ public class IfcJavascriptClassesGenerator
       }
     }
     writer.println("};");
-    writer.println("registerIfcClass(" + entity.getName() + ", schema);");
+    writer.println("registerIfcClass(" + entity.getName() + ");");
     writer.println();
     generatedClasses.add(entity.getName());
   }
@@ -164,11 +162,11 @@ public class IfcJavascriptClassesGenerator
   {
     ExpressType definition = type.getDefinition();
 
-    writer.println("class " + type.getName());
+    writer.println("class " + type.getName() + " extends SchemaBase");
     writer.println("{");
     writer.println("  Value = null; // " + definition);
     writer.println("};");
-    writer.println("registerIfcClass(" + type.getName() + ", schema);");
+    writer.println("registerIfcClass(" + type.getName() + ");");
     writer.println();
   }
 

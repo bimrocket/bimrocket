@@ -32,7 +32,7 @@ class Extruder extends ObjectBuilder
   performBuild(solid)
   {
     let profile = this.findClosedProfile(solid);
-    if (profile === undefined) return;
+    if (profile === undefined) return true;
 
     const shape = profile.geometry.path;
 
@@ -283,6 +283,8 @@ class Extruder extends ObjectBuilder
     }
 
     solid.updateGeometry(geometry, true);
+
+    return true;
   }
 
   findClosedProfile(solid)

@@ -16,10 +16,9 @@ class Cloner extends ObjectBuilder
     this.objectToClone = objectToClone;
   }
 
-  performMarking(object)
+  traverseDependencies(object, action)
   {
-    ObjectBuilder.mark(this.objectToClone);
-    object.needsRebuild = this.objectToClone.needsRebuild;
+    action(this.objectToClone);
   }
 
   performBuild(object)
@@ -38,6 +37,8 @@ class Cloner extends ObjectBuilder
     };
     object.clear();
     object.add(clone(this.objectToClone));
+
+    return true;
   }
 };
 

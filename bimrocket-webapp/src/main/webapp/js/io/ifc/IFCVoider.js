@@ -17,14 +17,13 @@ class IFCVoider extends ObjectBuilder
     super();
   }
 
-  performMarking(productRepr)
+  traverseDependencies(productRepr, action)
   {
     if (productRepr.children.length < 3) return;
 
     const unvoidedRepr = productRepr.children[2];
-    ObjectBuilder.mark(unvoidedRepr);
+    action(unvoidedRepr);
 
-    let childrenNeedRebuild = false;
     let productObject3D = productRepr.parent;
     if (productObject3D.userData.IFC &&
         productObject3D.userData.IFC.ifcClassName === "IfcBuildingElementPart")
@@ -36,29 +35,17 @@ class IFCVoider extends ObjectBuilder
     {
       if (child !== productRepr)
       {
-        ObjectBuilder.mark(child);
-        if (child.needsRebuild)
-        {
-          childrenNeedRebuild = true;
-        }
+        action(child);
       }
-    }
-    if (childrenNeedRebuild
-        || unvoidedRepr.needsRebuild
-        || productObject3D.needsRebuild)
-    {
-      productRepr.needsRebuild = true;
     }
   }
 
   performBuild(productRepr)
   {
-    if (productRepr.children.length < 3) return;
+    if (productRepr.children.length < 3) return true;
 
     const unvoidedRepr = productRepr.children[2];
-    if (!unvoidedRepr instanceof Solid) return;
-
-    ObjectBuilder.build(unvoidedRepr);
+    if (!unvoidedRepr instanceof Solid) return true;
 
     const openingReprs = [];
 
@@ -74,7 +61,6 @@ class IFCVoider extends ObjectBuilder
       let userData = child.userData;
       if (userData.IFC && userData.IFC.ifcClassName === "IfcOpeningElement")
       {
-        ObjectBuilder.build(child);
         let openingRepr = child.getObjectByName(IFC.RepresentationName);
         if (openingRepr instanceof Solid)
         {
@@ -95,7 +81,7 @@ class IFCVoider extends ObjectBuilder
     if (openingReprs.length === 0)
     {
       productRepr.updateGeometry(unvoidedRepr.geometry, false);
-      return;
+      return true;
     }
 
     const createBSP = function(solid)
@@ -121,6 +107,8 @@ class IFCVoider extends ObjectBuilder
     geometry.applyMatrix4(inverseMatrixWorld);
 
     productRepr.updateGeometry(geometry);
+
+    return true;
   }
 };
 

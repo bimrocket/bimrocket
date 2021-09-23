@@ -31,11 +31,10 @@ class BooleanOperator extends ObjectBuilder
       let child = solid.children[i];
       if (child instanceof Solid)
       {
-        ObjectBuilder.build(child);
         solids.push(child);
       }
     }
-    if (solids.length === 0) return;
+    if (solids.length === 0) return true;
 
     const createBSP = function(solid)
     {
@@ -65,6 +64,8 @@ class BooleanOperator extends ObjectBuilder
     let geometry = resultBSP.toSolidGeometry();
 
     solid.updateGeometry(geometry);
+
+    return true;
   }
 }
 

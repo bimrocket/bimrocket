@@ -211,7 +211,7 @@ class Application
           let updateSelection = false;
           for (let object of event.objects)
           {
-            object.needsRebuild = true;
+            if (event.source !== ObjectBuilder) object.needsRebuild = true;
             if (object instanceof THREE.Camera &&
                 event.source instanceof Inspector)
             {
@@ -1259,18 +1259,14 @@ class Application
   {
     const baseObject = this.baseObject;
 
-    baseObject.traverse(child => child.needsMarking = true);
-    ObjectBuilder.mark(baseObject);
+    const built = [];
+    ObjectBuilder.markAndBuild(baseObject, built);
+    console.info(built);
 
-    const objectsToRebuild = [];
-    baseObject.traverse(child =>
-    { if (child.needsRebuild) objectsToRebuild.push(child); });
+    let sceneEvent = {type: "nodeChange", objects: built,
+      source : ObjectBuilder};
+    this.notifyEventListeners("scene", sceneEvent);
 
-    console.info(objectsToRebuild);
-
-    ObjectBuilder.build(baseObject);
-
-    this.notifyObjectsChanged(objectsToRebuild);
     this.updateSelection();
   }
 

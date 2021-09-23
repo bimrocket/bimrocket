@@ -15,38 +15,32 @@ class ObjectBuilder
   {
   }
 
-  /* virtual method call by static mark method */
-  performMarking(object)
+
+  /*
+   * Calls action(dep) for each object dependency
+   *
+   * Default implementation traverses object children
+   */
+  traverseDependencies(object, action)
   {
     const children = object.children;
     let i = object instanceof Solid ? 2 : 0;
-    let childrenNeedRebuild = false;
     while (i < children.length)
     {
       let child = children[i];
-      ObjectBuilder.mark(child);
-      if (child.needsRebuild)
-      {
-        childrenNeedRebuild = true;
-      }
+      action(child);
       i++;
-    }
-    if (childrenNeedRebuild)
-    {
-      object.needsRebuild = true;
     }
   }
 
-  /* virtual method call by static build method */
+  /*
+   * Builds object assuming its dependencies have already been built
+   *
+   * returns true if object has actually changed
+   */
   performBuild(object)
   {
-    const children = object.children;
-    let i = object instanceof Solid ? 2 : 0;
-    while (i < children.length)
-    {
-      ObjectBuilder.build(children[i]);
-      i++;
-    }
+    return false;
   }
 
   /* static methods */
@@ -58,17 +52,38 @@ class ObjectBuilder
     object.needsMarking = false;
 
     let builder = object.builder || ObjectBuilder.DEFAULT_INSTANCE;
-    builder.performMarking(object);
+    builder.traverseDependencies(object, dep =>
+    {
+      ObjectBuilder.mark(dep);
+      object.needsRebuild = object.needsRebuild || dep.needsRebuild;
+    });
   }
 
-  static build(object)
+  static build(object, built)
   {
     if (object.needsRebuild === false) return;
 
     object.needsRebuild = false;
 
     const builder = object.builder || ObjectBuilder.DEFAULT_INSTANCE;
-    builder.performBuild(object);
+    builder.traverseDependencies(object, dep =>
+    {
+      ObjectBuilder.build(dep, built);
+    });
+
+    if (builder.performBuild(object))
+    {
+      if (built) built.push(object);
+    }
+  }
+
+  static markAndBuild(object, built)
+  {
+    object.needsMarking = true;
+    object.traverse(child => child.needsMarking = true);
+
+    ObjectBuilder.mark(object);
+    ObjectBuilder.build(object, built);
   }
 }
 

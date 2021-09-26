@@ -21,6 +21,8 @@ class IFCVoider extends ObjectBuilder
   {
     if (productRepr.children.length < 3) return;
 
+    action(productRepr.parent);
+
     const unvoidedRepr = productRepr.children[2];
     action(unvoidedRepr);
 

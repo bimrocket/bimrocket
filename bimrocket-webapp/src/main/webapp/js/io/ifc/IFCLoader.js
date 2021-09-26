@@ -766,7 +766,8 @@ class IfcGeometricRepresentationItemHelper extends IfcHelper
 
   getObject3D()
   {
-    console.warn("Unsupported item", this);
+    let ifcClassName = this.instance.constructor.name;
+    console.warn("Unsupported item: " + ifcClassName, this);
     return null;
   }
 };

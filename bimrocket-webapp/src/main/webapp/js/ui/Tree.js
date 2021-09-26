@@ -14,13 +14,18 @@ class Tree
     this.roots = [];
   }
 
-  addNode(label, action, className)
+  addNode(object, action, className)
   {
-    const treeNode = new TreeNode(null, label, action, className);
+    const treeNode = new TreeNode(this, null, object, action, className);
     this.roots.push(treeNode);
     this.rootsElem.appendChild(treeNode.itemElem);
 
     return treeNode;
+  }
+
+  getNodeLabel(value)
+  {
+    return value;
   }
 
   clear()
@@ -32,22 +37,28 @@ class Tree
 
 class TreeNode
 {
-  constructor(parentTreeNode, label, action, className)
+  constructor(tree, parentTreeNode, value, action, className)
   {
-    this.parentTreeNode = parentTreeNode;
+    this.tree = tree;
+    this.parent = parentTreeNode;
+    this._value = value;
     this.children = [];
     this.itemElem = document.createElement("li");
-    if (className) this.itemElem.className = className;
     this.linkElem = document.createElement("a");
     this.linkElem.href = "#";
-    this.linkElem.innerHTML = label;
-    if (action) this.linkElem.addEventListener("click", action);
     this.itemElem.appendChild(this.linkElem);
+    this.updateLabel();
+
+    if (action)
+    {
+      this.linkElem.addEventListener("click", action);
+    }
     this.childrenElem = null;
     this.buttonElem = null;
+    if (className) this.itemElem.className = className;
   }
 
-  addNode(label, action, className)
+  addNode(value, action, className)
   {
     if (this.childrenElem === null)
     {
@@ -60,22 +71,69 @@ class TreeNode
       this.childrenElem = document.createElement("ul");
       this.itemElem.appendChild(this.childrenElem);
     }
+    else
+    {
+      this.buttonElem.style.display = "";
+    }
 
-    const treeNode = new TreeNode(this, label, action, className);
+    const treeNode = new TreeNode(this.tree, this, value, action, className);
     this.childrenElem.appendChild(treeNode.itemElem);
     this.children.push(treeNode);
 
     return treeNode;
   }
 
-  set label(label)
+  remove()
   {
-    this.linkElem.innerHTML = label;
+    if (this.parent)
+    {
+      let index = this.parent.children.indexOf(this);
+      if (index > -1)
+      {
+        this.parent.children.splice(index, 1);
+        this.parent.childrenElem.removeChild(this.itemElem);
+
+        if (this.parent.children.length === 0)
+        {
+          this.parent.buttonElem.style.display = "none";
+        }
+      }
+    }
+    else // remove from tree.roots
+    {
+      let index = this.tree.roots.indexOf(this);
+      if (index > -1)
+      {
+        this.tree.roots.splice(index, 1);
+        this.tree.rootsElem.removeChild(this.itemElem);
+      }
+    }
   }
 
-  get label()
+  set value(value)
   {
-    return this.linkElem.innerHTML;
+    this._value = value;
+    this.updateLabel();
+  }
+
+  get value()
+  {
+    return this._value;
+  }
+
+  addClass(className)
+  {
+    this.linkElem.classList.add(className);
+  }
+
+  removeClass(className)
+  {
+    this.linkElem.classList.remove(className);
+  }
+
+  updateLabel()
+  {
+    this.linkElem.innerHTML = this.tree.getNodeLabel(this._value);
   }
 
   isExpanded()
@@ -131,6 +189,20 @@ class TreeNode
           this.children[i].collapse(levels);
         }
       }
+    }
+  }
+
+  expandAncestors(makeVisible = false)
+  {
+    let curr = this.parent;
+    while (curr)
+    {
+      curr.expand();
+      curr = curr.parent;
+    }
+    if (makeVisible)
+    {
+      this.linkElem.scrollIntoView({block: "center", inline: "nearest"});
     }
   }
 

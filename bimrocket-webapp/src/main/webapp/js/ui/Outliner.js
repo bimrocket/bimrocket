@@ -5,6 +5,7 @@
  */
 
 import { Panel } from "./Panel.js";
+import { Tree } from "./Tree.js";
 import * as THREE from "../lib/three.module.js";
 
 class Outliner extends Panel
@@ -14,143 +15,191 @@ class Outliner extends Panel
     super(application);
     this.id = "outliner";
     this.position = "right";
+    this.title = "tool.outliner.label";
 
-    this.selectedLabels = [];
-    this.lastSelectedLabel = null;
-    this.activeCameraLabel = null;
-    this.cutLabels = [];
+    this.tree = new Tree(this.bodyElem);
+    this.tree.rootsElem.className = "tree outliner";
 
-    application.addEventListener("selection", event =>
+    this.map = new Map();
+    this.autoScroll = true;
+
+    this.tree.getNodeLabel = object =>
+    {
+      let objectLabel = object.name;
+      if (objectLabel === null || objectLabel.trim().length === 0)
+      {
+        objectLabel = object.id;
+      }
+      return objectLabel;
+    };
+
+    application.addEventListener("selection", () =>
     {
       this.updateSelection();
     });
 
     application.addEventListener("scene", event =>
     {
-      if (event.type === "cut")
+      if (event.type === "added")
       {
-        for (let i = 0; i < this.cutLabels.length; i++)
+        let object = event.object;
+        let parentTreeNode = this.map.get(event.parent);
+        if (parentTreeNode)
         {
-          let labelElem = this.cutLabels[i];
-          labelElem._cut = false;
-          this.updateLabelStyle(labelElem);
-        }
-        this.cutLabels = [];
-        let objects = event.objects;
-        for (let i = 0; i < objects.length; i++)
-        {
-          let object = objects[i];
-          let labelId = "ol-lab-" + object.id;
-          let labelElem = document.getElementById(labelId);
-          labelElem._cut = true;
-          this.updateLabelStyle(labelElem);
-          this.cutLabels.push(labelElem);
-        }
-      }
-      else if (event.type === "added")
-      {
-        let parentListId = "ol-ul-" + event.parent.id;
-        let parentListElem = document.getElementById(parentListId);
-        if (parentListElem)
-        {
-          this.populateList(event.object, parentListElem);
-        }
-        else
-        {
-          let parentItemId = "ol-li-" + event.parent.id;
-          let parentItemElem = document.getElementById(parentItemId);
-          parentItemElem.innerHTML = "";
-          this.populateItem(event.parent, parentItemElem);
+          let treeNode = this.populateObject(object, parentTreeNode);
+          this.createMap(treeNode);
         }
       }
       else if (event.type === "removed")
       {
-        let itemId = "ol-li-" + event.object.id;
-        let itemElem = document.getElementById(itemId);
-        if (itemElem)
+        let object = event.object;
+        let treeNode = this.map.get(object);
+        if (treeNode)
         {
-          itemElem.parentNode.removeChild(itemElem);
-          if (this.childCount(event.parent) === 0)
-          {
-            let buttonElemId = "ol-but-" + event.parent.id;
-            let buttonElem = document.getElementById(buttonElemId);
-            if (buttonElem)
-            {
-              buttonElem.parentNode.removeChild(buttonElem);
-            }
-            let parentListId = "ol-ul-" + event.parent.id;
-            let parentListElem = document.getElementById(parentListId);
-            if (parentListElem)
-            {
-              parentListElem.parentNode.removeChild(parentListElem);
-            }
-          }
-        }
-      }
-      else if (event.type === "pasted")
-      {
-        for (let i = 0; i < this.cutLabels.length; i++)
-        {
-          let labelElem = this.cutLabels[i];
-          labelElem._cut = false;
-          this.updateLabelStyle(labelElem);
-        }
-        if (event.objects.length > 0)
-        {
-          this.expandObject(event.objects[0]);
+          this.destroyMap(treeNode);
+          treeNode.remove();
         }
       }
       else if (event.type === "nodeChanged")
       {
         for (let object of event.objects)
         {
-          let labelId = "ol-lab-" + object.id;
-          let labelElem = document.getElementById(labelId);
-          if (labelElem !== null)
+          let treeNode = this.map.get(object);
+          if (treeNode)
           {
-            this.updateLabel(labelElem, object);
+            treeNode.updateLabel();
+            this.updateNodeStyle(treeNode);
           }
-        }
-      }
-      else  if (event.type === "cameraActivated")
-      {
-        var labelId = "ol-lab-" + event.object.id;
-        var labelElem = document.getElementById(labelId);
-        if (labelElem !== this.activeCameraLabel)
-        {
-          if (this.activeCameraLabel !== null)
-          {
-            this.activeCameraLabel._activeCamera = false;
-            this.updateLabelStyle(this.activeCameraLabel);
-          }
-          labelElem._activeCamera = true;
-          this.updateLabelStyle(labelElem);
-          this.activeCameraLabel = labelElem;
         }
       }
       else if (event.type === "structureChanged")
       {
-        this.update();
+        let objects = this.getRootObjects(event.objects);
+        if (objects.length === 1 && objects[0] === this.application.scene)
+        {
+          // update all tree
+          this.update();
+        }
+        else
+        {
+          for (let object of objects)
+          {
+            let treeNode = this.map.get(object);
+            if (treeNode)
+            {
+              this.destroyMap(treeNode);
+              treeNode.updateLabel();
+              treeNode.clear();
+              this.populateChildren(treeNode);
+              this.createMap(treeNode);
+            }
+          }
+        }
+        this.updateSelection();
+      }
+      else  if (event.type === "cameraActivated")
+      {
+        this.clearNodeStyle("active_camera");
+        let camera = event.object;
+        let treeNode = this.map.get(camera);
+        if (treeNode) treeNode.addClass("active_camera");
+      }
+      else if (event.type === "cut")
+      {
+        this.clearNodeStyle("cut");
+        for (let object of event.objects)
+        {
+          let treeNode = this.map.get(object);
+          if (treeNode) treeNode.addClass("cut");
+        }
+      }
+      else if (event.type === "pasted")
+      {
+        this.clearNodeStyle("cut");
+        for (let object of event.objects)
+        {
+          let treeNode = this.map.get(object);
+          if (treeNode) treeNode.expandAncestors(false);
+        }
       }
     });
-    this.title = "tool.outliner.label";
 
     if (application.scene) this.update();
   }
 
   update()
   {
-    this.bodyElem.innerHTML = "";
-    let listElem = document.createElement("ul");
-    listElem.className = "tree outliner";
-    this.bodyElem.appendChild(listElem);
-    this.populateList(this.application.scene, listElem);
+    this.tree.clear();
+    this.map.clear();
+    let treeNode = this.populateObject(this.application.scene);
+    this.createMap(treeNode);
   }
 
-  getObjectClass(object)
+  updateSelection()
+  {
+    // clear previous selectes nodes
+    this.clearNodeStyle("selected");
+
+    // mark new selection
+    const selection = this.application.selection;
+    const objects = selection.objects;
+    const lastObject = objects.at(-1);
+    for (let object of objects)
+    {
+      let treeNode = this.map.get(object);
+      if (treeNode)
+      {
+        treeNode.addClass("selected");
+        let makeVisible = object === lastObject && this.autoScroll;
+        treeNode.expandAncestors(makeVisible);
+      }
+    }
+    this.bodyElem.scrollLeft = 0;
+    this.autoScroll = true;
+  }
+
+  populateObject(object, parentTreeNode)
+  {
+    const objectClass = this.getNodeClass(object);
+
+    let onClick = event =>
+    {
+      this.autoScroll = false;
+      this.application.selectObjects(event, [object]);
+    };
+
+    let treeNode;
+    if (parentTreeNode)
+    {
+      treeNode = parentTreeNode.addNode(object, onClick, objectClass);
+    }
+    else
+    {
+      treeNode = this.tree.addNode(object, onClick, objectClass);
+    }
+    this.updateNodeStyle(treeNode);
+    this.populateChildren(treeNode);
+
+    return treeNode;
+  }
+
+  populateChildren(treeNode)
+  {
+    let object = treeNode.value;
+    for (let child of object.children)
+    {
+      let name = child.name || "";
+      if (!name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+      {
+        this.populateObject(child, treeNode);
+      }
+    }
+  }
+
+  getNodeClass(object)
   {
     if (object.type === "Object3D" &&
-       object.userData.IFC && object.userData.IFC.ifcClassName)
+      object.userData.IFC && object.userData.IFC.ifcClassName)
     {
       return object.userData.IFC.ifcClassName;
     }
@@ -160,215 +209,67 @@ class Outliner extends Panel
     }
   }
 
-  populateList(object, parentListElem)
+  updateNodeStyle(treeNode)
   {
-    let name = object.name;
-    if (name === null || name === undefined || name === '')
-      name = "object-" + object.id;
-    if (name.indexOf(THREE.Object3D.HIDDEN_PREFIX) !== 0) // not hidden object
+    const object = treeNode.value;
+    const classList = treeNode.linkElem.classList;
+    if (object.visible)
     {
-      // li
-      let itemElem = document.createElement("li");
-      itemElem.id = "ol-li-" + object.id;
-      itemElem.className = this.getObjectClass(object);
-      parentListElem.appendChild(itemElem);
-      this.populateItem(object, itemElem);
-    }
-  }
-
-  populateItem(object, itemElem)
-  {
-    const buttonListener = function(event)
-    {
-      let buttonElem = event.srcElement || event.target;
-      buttonElem.className = (buttonElem.className === "expand") ?
-        "collapse" : "expand";
-      let id = buttonElem.id.substring(7);
-      let elem = document.getElementById("ol-ul-" + id);
-      if (elem)
-      {
-        elem.className = (elem.className === "expanded") ?
-          "collapsed" : "expanded";
-      }
-    };
-
-    const labelListener = event =>
-    {
-      var labelElem = event.srcElement || event.target;
-      var objectIdString = labelElem.id.substring(7);
-      var objectId = parseInt(objectIdString, 10);
-      if (isNaN(objectId)) objectId = objectIdString;
-      this.lastSelectedLabel = labelElem;
-      this.selectObjectById(objectId, event);
-    };
-
-    let hasChildren = this.childCount(object) > 0;
-    // expand/collapse button
-    if (hasChildren)
-    {
-      var buttonId = "ol-but-" + object.id;
-      var buttonElem = document.createElement("button");
-      buttonElem.id = buttonId;
-      buttonElem.className = "expand";
-      buttonElem.addEventListener("click", buttonListener);
-      itemElem.appendChild(buttonElem);
-    }
-
-    // label
-    let labelElem = document.createElement("a");
-    labelElem.href = "#";
-    let labelId = "ol-lab-" + object.id;
-    labelElem.id = labelId;
-    labelElem._selected = false;
-    labelElem._cut = false;
-    this.updateLabel(labelElem, object);
-    labelElem.addEventListener("click", labelListener);
-    itemElem.appendChild(labelElem);
-
-    // children
-    if (hasChildren)
-    {
-      // ul
-      let listId = "ol-ul-" + object.id;
-      let listElem = document.createElement("ul");
-      listElem.id = listId;
-      listElem.className = "collapsed";
-      itemElem.appendChild(listElem);
-
-      for (let i = 0; i < object.children.length; i++)
-      {
-        let child = object.children[i];
-        this.populateList(child, listElem);
-      }
-    }
-  }
-
-  updateSelection()
-  {
-    // clear selection
-    for (let i = 0; i < this.selectedLabels.length; i++)
-    {
-      let labelElem = this.selectedLabels[i];
-      labelElem._selected = false;
-      this.updateLabelStyle(labelElem);
-    }
-    // show new selection
-    let selection = this.application.selection;
-    let objects = selection.objects;
-    this.selectedLabels = [];
-    for (let i = 0; i < objects.length; i++)
-    {
-      let object = objects[i];
-      let labelId = "ol-lab-" + object.id;
-      let selectedLabel = document.getElementById(labelId);
-      if (selectedLabel)
-      {
-        this.selectedLabels.push(selectedLabel);
-        selectedLabel._selected = true;
-        this.updateLabelStyle(selectedLabel);
-      }
-    }
-    // scroll and expand last selected object
-    if (this.selectedLabels.length > 0)
-    {
-      let object = objects[objects.length - 1];
-      let selectedLabel = this.selectedLabels[this.selectedLabels.length - 1];
-      this.expandObject(object);
-
-      if (selectedLabel !== this.lastSelectedLabel)
-      {
-        selectedLabel.scrollIntoView(false);
-        this.bodyElem.scrollLeft = 0;
-        this.lastSelectedLabel = selectedLabel;
-      }
-    }
-  }
-
-  expandObject(object)
-  {
-    var curr = object.parent;
-    while (curr)
-    {
-      var id = curr.id;
-      var childrenElem = document.getElementById("ol-ul-" + id);
-      var buttonElem = document.getElementById("ol-but-" + id);
-      childrenElem.className = "expanded";
-      buttonElem.className = "collapse";
-      curr = curr.parent;
-    }
-  }
-
-  selectObjectById(objectId, event)
-  {
-    const application = this.application;
-    const selection = application.selection;
-    let object = application.scene.getObjectById(objectId, true);
-    if (object)
-    {
-      application.selectObjects(event, [object]);
-      this.updateSelection();
+      classList.remove("hidden");
     }
     else
     {
-      selection.clear();
-      this.updateSelection();
+      classList.add("hidden");
     }
   }
 
-  childCount(object)
+  clearNodeStyle(className)
   {
-    var count = 0;
-    var children = object.children;
-    for (var i = 0; i < children.length; i++)
+    let nodes = this.tree.rootsElem.getElementsByClassName(className);
+    nodes = [...nodes];
+    for (let node of nodes)
     {
-      var child = children[i];
-      if (child.name === null ||
-          child.name.indexOf(THREE.Object3D.HIDDEN_PREFIX) !== 0) count++;
+      node.classList.remove(className);
     }
-    return count;
   }
 
-  updateLabel(labelElem, object)
+  getRootObjects(objects)
   {
-    var objectName = object.name;
-    if (objectName === null || object.name.trim().length === 0)
+    const set = new Set();
+    for (let object of objects)
     {
-      objectName = object.id;
+      set.add(object);
     }
-    labelElem.innerHTML = objectName;
-    labelElem._visible = object.visible;
-    if (object === this.application.camera)
+
+    const roots = [];
+    for (let object of set)
     {
-      labelElem._activeCamera = true;
-      this.activeCameraLabel = labelElem;
+      let ancestor = object.parent;
+      while (ancestor && !set.has(ancestor))
+      {
+        ancestor = ancestor.parent;
+      }
+      if (ancestor === null) roots.push(object);
     }
-    this.updateLabelStyle(labelElem);
+    return roots;
   }
 
-  updateLabelStyle(labelElem)
+  createMap(treeNode)
   {
-    var classNames = [];
-    if (labelElem._typeClass)
+    this.map.set(treeNode.value, treeNode);
+    for (let childTreeNode of treeNode.children)
     {
-      classNames.push(labelElem._typeClass);
+      this.createMap(childTreeNode);
     }
-    if (labelElem._selected)
+  }
+
+  destroyMap(treeNode)
+  {
+    this.map.delete(treeNode.value);
+    for (let childTreeNode of treeNode.children)
     {
-      classNames.push("selected");
+      this.destroyMap(childTreeNode);
     }
-    if (labelElem._activeCamera)
-    {
-      classNames.push("active_camera");
-    }
-    if (labelElem._cut)
-    {
-      classNames.push("cut");
-    }
-    if (!labelElem._visible)
-    {
-      classNames.push("hidden");
-    }
-    labelElem.className = classNames.join(" ");
   }
 }
 

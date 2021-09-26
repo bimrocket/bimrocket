@@ -1261,9 +1261,9 @@ class Application
 
     const built = [];
     ObjectBuilder.markAndBuild(baseObject, built);
-    console.info(built);
+    console.info("REBUILD", built);
 
-    let sceneEvent = {type: "nodeChange", objects: built,
+    let sceneEvent = {type: "structureChanged", objects: built,
       source : ObjectBuilder};
     this.notifyEventListeners("scene", sceneEvent);
 

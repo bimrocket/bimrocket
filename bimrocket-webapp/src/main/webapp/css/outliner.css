@@ -75,12 +75,12 @@ ul.outliner .selected.hidden
   color:#707070;
 }
 
-ul.outliner .collapsed
+ul.outliner ul.collapsed
 {
   display:none;
 }
 
-ul.outliner .expanded
+ul.outliner ul.expanded
 {
   visibility:visible;
 }

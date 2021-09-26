@@ -14,6 +14,7 @@ class Cloner extends ObjectBuilder
   {
     super();
     this.objectToClone = objectToClone;
+    this.cloneVisible = true;
   }
 
   traverseDependencies(object, action)
@@ -26,6 +27,7 @@ class Cloner extends ObjectBuilder
     const clone = object =>
     {
       let clonedObject = object.clone(false);
+      if (this.cloneVisible) clonedObject.visible = true;
       if (!(clonedObject instanceof Solid))
       {
         for (let child of object.children)
@@ -37,6 +39,7 @@ class Cloner extends ObjectBuilder
     };
     object.clear();
     object.add(clone(this.objectToClone));
+    object.updateMatrix();
 
     return true;
   }

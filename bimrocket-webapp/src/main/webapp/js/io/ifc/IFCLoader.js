@@ -168,6 +168,10 @@ class IFCLoader extends THREE.Loader
         object3D.matrixWorldNeedsUpdate = true;
         model.add(object3D);
       }
+      else
+      {
+        model.add(object3D);
+      }
     };
 
     const createObjects = () =>

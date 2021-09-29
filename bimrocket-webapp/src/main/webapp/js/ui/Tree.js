@@ -208,7 +208,10 @@ class TreeNode
 
   clear()
   {
-    this.childrenElem.innerHTML = "";
+    if (this.childrenElem)
+    {
+      this.childrenElem.innerHTML = "";
+    }
     this.children = [];
   }
 }

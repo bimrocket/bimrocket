@@ -4,9 +4,14 @@
  * @author realor
  */
 
+import { ObjectBuilder } from "../../core/ObjectBuilder.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
-import { ExtrudeSolidGeometry } from "../../core/ExtrudeSolidGeometry.js";
+import { Profile } from "../../core/Profile.js";
+import { ProfileGeometry } from "../../core/ProfileGeometry.js";
+import { Cord } from "../../core/Cord.js";
+import { CordGeometry } from "../../core/CordGeometry.js";
+import { Extruder } from "../../core/builders/Extruder.js";
 import { ColladaLoader } from "../ColladaLoader.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -256,11 +261,8 @@ class GISLoader extends THREE.Loader
   {
     let offset = this.getOffset(coordinates, properties);
     let extrusion = this.evalExpression(
-      this.options.extrusion, coordinates, properties) || 0;
+      this.options.extrusion, coordinates, properties) || 1;
 
-    let extrudeSettings = {
-      depth : extrusion
-    };
     let pts = [];
 
     let outerRing = coordinates[0];
@@ -286,10 +288,13 @@ class GISLoader extends THREE.Loader
       holes.push(new THREE.Shape(pts));
     }
 
-    let geometry = new ExtrudeSolidGeometry(shape, extrudeSettings);
-    let material = this.getMeshMaterial(coordinates, properties);
+    let solid = new Solid();
+    solid.material = this.getMeshMaterial(coordinates, properties);
+    let profile = new Profile(new ProfileGeometry(shape));
+    solid.add(profile);
+    solid.builder = new Extruder(extrusion);
+    ObjectBuilder.build(solid);
 
-    let solid = new Solid(geometry, material);
     solid.position.z = offset.z;
     this.setObjectProperties(solid, name, properties);
 
@@ -388,10 +393,6 @@ class GISLoader extends THREE.Loader
 
   createTube(vertices, diameter = 0.25, sides = 8, offset, material)
   {
-    let extrudeSettings = {
-     directrix : vertices
-    };
-
     const circle = [];
     const angle = 2 * Math.PI / sides;
     for (let i = 0; i < sides; i++)
@@ -400,11 +401,19 @@ class GISLoader extends THREE.Loader
       let y = Math.sin(angle * i) * diameter;
       circle.push(new THREE.Vector2(x, y));
     }
-    let shape = new THREE.Shape(circle);
-    let geometry = new ExtrudeSolidGeometry(shape, extrudeSettings);
-
-    let solid = new Solid(geometry, material);
+    let solid = new Solid();
     solid.position.z = offset.z;
+    solid.material = material;
+
+    let shape = new THREE.Shape(circle);
+    let profile = new Profile(new ProfileGeometry(shape));
+    solid.add(profile);
+
+    let cord = new Cord(new CordGeometry(vertices));
+    solid.add(cord);
+
+    solid.builder = new Extruder();
+    ObjectBuilder.build(solid);
 
     return solid;
   }

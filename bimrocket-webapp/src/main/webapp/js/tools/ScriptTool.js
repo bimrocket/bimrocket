@@ -14,7 +14,10 @@ import { ConfirmDialog } from "../ui/ConfirmDialog.js";
 import { Toast } from "../ui/Toast.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
-import { ExtrudeSolidGeometry } from "../core/ExtrudeSolidGeometry.js";
+import { Cord } from "../core/Cord.js";
+import { CordGeometry } from "../core/CordGeometry.js";
+import { Profile } from "../core/Profile.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
 import "../lib/codemirror.js";
 import { I18N } from "../i18n/I18N.js";
@@ -24,13 +27,16 @@ class ScriptTool extends Tool
 {
   static GLOBALS =
   {
-    THREE : THREE,
-    ObjectUtils : ObjectUtils,
-    GeometryUtils : GeometryUtils,
-    Solid : Solid,
-    SolidGeometry : SolidGeometry,
-    ExtrudeSolidGeometry : ExtrudeSolidGeometry,
-    Toast : Toast
+    THREE,
+    ObjectUtils,
+    GeometryUtils,
+    Solid,
+    SolidGeometry,
+    Cord,
+    CordGeometry,
+    Profile,
+    ProfileGeometry,
+    Toast
   };
 
   constructor(application, options)

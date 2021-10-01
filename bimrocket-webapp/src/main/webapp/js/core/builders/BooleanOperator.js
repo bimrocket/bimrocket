@@ -31,6 +31,9 @@ class BooleanOperator extends ObjectBuilder
       let child = solid.children[i];
       if (child instanceof Solid)
       {
+        child.visible = false;
+        child.edgesVisible = false;
+        child.facesVisible = false;
         solids.push(child);
       }
     }

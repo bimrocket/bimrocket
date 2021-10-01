@@ -64,6 +64,9 @@ class BooleanOperationTool extends Tool
         application.notifyEventListeners("scene", removeEvent);
       }
 
+      result.builder = new BooleanOperator(this.operation);
+      ObjectBuilder.build(result);
+
       if (this.keepParent)
       {
         application.addObject(result, parent, true);
@@ -72,10 +75,6 @@ class BooleanOperationTool extends Tool
       {
         application.addObject(result, application.baseObject, true);
       }
-      application.updateVisibility(operands, false);
-
-      result.builder = new BooleanOperator(this.operation);
-      ObjectBuilder.build(result);
 
       application.selection.set(result);
     }

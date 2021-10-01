@@ -7,6 +7,7 @@
 import { ObjectBuilder } from "../ObjectBuilder.js";
 import { Solid } from "../Solid.js";
 import { Profile } from "../Profile.js";
+import { Cord } from "../Cord.js";
 import { SolidGeometry } from "../SolidGeometry.js";
 import { ProfileGeometry } from "../ProfileGeometry.js";
 import * as THREE from "../../lib/three.module.js";
@@ -31,8 +32,11 @@ class Extruder extends ObjectBuilder
 
   performBuild(solid)
   {
+    const direction = this.direction;
+
     let profile = this.findClosedProfile(solid);
     if (profile === undefined) return true;
+    profile.visible = false;
 
     const shape = profile.geometry.path;
 
@@ -70,36 +74,44 @@ class Extruder extends ObjectBuilder
       }
     }
 
-    let haveDirectrix = false; // TODO: find directrix as child node
+    let cordPoints;
+    let extrudeVector = null;
 
-    let directrix;
-
-    const direction = this.direction;
-    const extrudeVector = new THREE.Vector3();
-    extrudeVector.copy(direction).normalize();
-    extrudeVector.multiplyScalar(this.depth * Math.sign(direction.z));
-
-    if (haveDirectrix)
+    let cord = this.findCord(solid);
+    if (cord && cord.geometry)
     {
-//      // remove duplicated vertices
-//      let array = [];
-//      array.push(directrix[0]);
-//      for (let i = 1; i < directrix.length; i++)
-//      {
-//        if (directrix[i - 1].distanceTo(directrix[i]) > 0.0001)
-//        {
-//          array.push(directrix[i]);
-//        }
-//      }
-//      if (array.length < 2) return;
-//      directrix = array;
+      cord.visible = false;
+      cordPoints = cord.geometry.points;
+
+      //remove duplicated vertices
+      const array = [];
+      array.push(cordPoints[0]);
+      for (let i = 1; i < cordPoints.length; i++)
+      {
+        if (cordPoints[i - 1].distanceTo(cordPoints[i]) > 0.0001)
+        {
+          array.push(cordPoints[i].clone());
+        }
+      }
+      if (array.length < 2) return;
+      cordPoints = array;
+
+      for (let point of cordPoints)
+      {
+        point.applyMatrix4(cord.matrix);
+      }
     }
     else
     {
-      // create directrix from direction
-      directrix = []; // Point3D[]
-      directrix.push(new THREE.Vector3(0, 0, 0));
-      directrix.push(new THREE.Vector3(0, 0, extrudeVector.z));
+      // extrude in direction vector
+      extrudeVector = new THREE.Vector3();
+      extrudeVector.copy(direction).normalize();
+      extrudeVector.multiplyScalar(this.depth * Math.sign(direction.z));
+
+      // create cordPoints from direction
+      cordPoints = []; // Point3D[]
+      cordPoints.push(new THREE.Vector3(0, 0, 0));
+      cordPoints.push(new THREE.Vector3(0, 0, extrudeVector.z));
     }
 
     // triangulate shape
@@ -117,15 +129,15 @@ class Extruder extends ObjectBuilder
     const ray = new THREE.Ray();
 
     // add fake point to generate last ring
-    let length = directrix.length;
-    vs.subVectors(directrix[length - 1], directrix[length - 2]);
+    let length = cordPoints.length;
+    vs.subVectors(cordPoints[length - 1], cordPoints[length - 2]);
     let last = new THREE.Vector3();
-    last.copy(directrix[length - 1]).add(vs);
-    directrix.push(last);
+    last.copy(cordPoints[length - 1]).add(vs);
+    cordPoints.push(last);
 
-    // create matrix from initial segment of directrix
-    p1.copy(directrix[0]);
-    p2.copy(directrix[1]);
+    // create matrix from initial segment of cordPoints
+    p1.copy(cordPoints[0]);
+    p2.copy(cordPoints[1]);
     vz.subVectors(p2, p1);
     vz.normalize();
     if (vz.y !== 0) vx.set(-vz.y, vz.x, 0).normalize();
@@ -197,11 +209,11 @@ class Extruder extends ObjectBuilder
     let offset1 = 0;
     let offset2 = stepVertexCount;
     // create side faces
-    for (let i = 1; i < directrix.length - 1; i++)
+    for (let i = 1; i < cordPoints.length - 1; i++)
     {
-      p1.copy(directrix[i - 1]);
-      p2.copy(directrix[i]);
-      p3.copy(directrix[i + 1]);
+      p1.copy(cordPoints[i - 1]);
+      p2.copy(cordPoints[i]);
+      p3.copy(cordPoints[i + 1]);
 
       v1.subVectors(p2, p1).normalize();
       v2.subVectors(p3, p2).normalize();
@@ -262,7 +274,7 @@ class Extruder extends ObjectBuilder
       geometry.addFace(offset1 + a, offset1 + b, offset1 + c);
     }
 
-    if (!haveDirectrix)
+    if (extrudeVector)
     {
       /* shear */
       const a = extrudeVector.x / extrudeVector.z;
@@ -294,6 +306,19 @@ class Extruder extends ObjectBuilder
       if (child instanceof Profile)
       {
         if (child.geometry && child.geometry.isClosed())
+          return child;
+      }
+    }
+    return undefined;
+  }
+
+  findCord(solid)
+  {
+    for (let child of solid.children)
+    {
+      if (child instanceof Cord)
+      {
+        if (child.geometry)
           return child;
       }
     }

@@ -8,12 +8,14 @@ import * as THREE from "../lib/three.module.js";
 
 class ProfileGeometry extends THREE.BufferGeometry
 {
-  constructor(path)
+  /* a ProfileGeometry is an BufferGeometry that holds a 2D path */
+
+  constructor(path, divisions = 24)
   {
     super();
-    this.path = path; // Path or Shape
+    this.path = path; // THREE.Path or THREE.Shape
     this.type = "ProfileGeometry";
-    this.divisions = 12;
+    this.divisions = divisions;
     this.updateBuffers();
   }
 

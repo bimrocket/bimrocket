@@ -4,9 +4,11 @@
  * @author realor
  */
 
-import * as THREE from "../lib/three.module.js";
+import { Cord } from "../core/Cord.js";
+import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class ObjectUtils
 {
@@ -209,7 +211,7 @@ class ObjectUtils
     function extendBox(object)
     {
       let geometry = object.geometry;
-      
+
       if (geometry)
       {
         if (geometry instanceof SolidGeometry)
@@ -225,9 +227,10 @@ class ObjectUtils
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {
-          let positions = geometry.attributes.position.array;
-          if (positions)
+          let position = geometry.attributes.position;
+          if (position)
           {
+            const positions = position.array;
             for (let j = 0; j < positions.length; j += 3)
             {
               vertex.set(positions[j], positions[j + 1], positions[j + 2]);
@@ -246,7 +249,9 @@ class ObjectUtils
       {
         extendBox(object);
 
-        if (!(object instanceof Solid))
+        if (!(object instanceof Solid
+             || object instanceof Cord
+             || object instanceof Profile))
         {
           for (let child of object.children)
           {

@@ -1,19 +1,19 @@
 /**
- * Profile.js
+ * Cord.js
  *
  * @author realor
  */
 
 import * as THREE from "../lib/three.module.js";
 
-class Profile extends THREE.LineSegments
+class Cord extends THREE.LineSegments
 {
-  /* a Profile is an Object3D that represents the outline of a 2D path */
+  /* a Cord is an Object3D that represents a 3D curve */
 
-  constructor(profileGeometry, material)
+  constructor(cordGeometry, material)
   {
-    super(profileGeometry, material);
-    this.type = "Profile";
+    super(cordGeometry, material);
+    this.type = "Cord";
 
     this.builder = null;
   }
@@ -30,6 +30,6 @@ class Profile extends THREE.LineSegments
   }
 }
 
-export { Profile };
+export { Cord };
 
 

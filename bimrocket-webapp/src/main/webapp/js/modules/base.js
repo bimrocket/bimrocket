@@ -180,6 +180,9 @@ export function load(application)
   const addSphereTool = new AddObjectTool(application,
     { name : "add_sphere", label : "tool.add_sphere.label",
       objectType : "sphere" });
+  const addSpringTool = new AddObjectTool(application,
+    { name : "add_spring", label : "tool.add_spring.label",
+      objectType : "spring" });
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "group" });
@@ -261,6 +264,7 @@ export function load(application)
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
   application.addTool(addSphereTool);
+  application.addTool(addSpringTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(cloneTool);
@@ -340,6 +344,7 @@ export function load(application)
   addMenu.addMenuItem(addBoxTool);
   addMenu.addMenuItem(addCylinderTool);
   addMenu.addMenuItem(addSphereTool);
+  addMenu.addMenuItem(addSpringTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
   const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");

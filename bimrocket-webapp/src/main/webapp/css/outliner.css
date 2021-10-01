@@ -139,6 +139,11 @@ ul.tree li.Profile
   background-image: url(images/outliner/profile.svg)
 }
 
+ul.tree li.Cord
+{
+  background-image: url(images/outliner/cord.svg)
+}
+
 ul.tree li.AmbientLight,
 ul.tree li.DirectionalLight,
 ul.tree li.PointLight,

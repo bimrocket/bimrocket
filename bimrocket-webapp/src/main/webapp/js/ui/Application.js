@@ -9,8 +9,9 @@ import { ProgressBar } from "../ui/ProgressBar.js";
 import { MenuBar } from "../ui/Menu.js";
 import { ToolBar } from "../ui/ToolBar.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
-import { Solid } from "../core/Solid.js";
+import { Cord } from "../core/Cord.js";
 import { Profile } from "../core/Profile.js";
+import { Solid } from "../core/Solid.js";
 import { Cloner } from "../core/builders/Cloner.js";
 import { ObjectBuilder } from "../core/ObjectBuilder.js";
 import { SolidGeometry, EdgeMap } from "../core/SolidGeometry.js";
@@ -737,6 +738,18 @@ class Application
       lines.updateMatrix();
       linesGroup.add(lines);
     }
+    else if (object instanceof Cord)
+    {
+      object.updateMatrixWorld();
+
+      let lines = new THREE.LineSegments(object.geometry, material);
+      lines.raycast = function(){};
+      lines.name = "Lines";
+      object.matrixWorld.decompose(
+        lines.position, lines.rotation, lines.scale);
+      lines.updateMatrix();
+      linesGroup.add(lines);
+    }
     else if (object instanceof Profile)
     {
       object.updateMatrixWorld();
@@ -999,7 +1012,10 @@ class Application
     if (!(parent instanceof THREE.Object3D))
     {
       parent = this.selection.object || this.baseObject;
-      while (parent instanceof THREE.Mesh || parent instanceof Solid)
+      while (parent instanceof THREE.Mesh
+             || parent instanceof Solid
+             || parent instanceof Cord
+             || parent instanceof Profile)
       {
         parent = parent.parent;
       }

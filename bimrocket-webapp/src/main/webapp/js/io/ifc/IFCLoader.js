@@ -6,6 +6,8 @@
 
 import { IFC } from "./IFC.js";
 import { IFCFile } from "./IFCFile.js";
+import { Cord } from "../../core/Cord.js";
+import { CordGeometry } from "../../core/CordGeometry.js";
 import { Profile } from "../../core/Profile.js";
 import { ProfileGeometry } from "../../core/ProfileGeometry.js";
 import { Solid } from "../../core/Solid.js";
@@ -15,7 +17,6 @@ import { Cloner } from "../../core/builders/Cloner.js";
 import { Extruder } from "../../core/builders/Extruder.js";
 import { BooleanOperator } from "../../core/builders/BooleanOperator.js";
 import { IFCVoider } from "./IFCVoider.js";
-import { ExtrudeSolidGeometry } from "../../core/ExtrudeSolidGeometry.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { PathBuilder } from "../../utils/PathBuilder.js";
 import { WebUtils } from "../../utils/WebUtils.js";
@@ -881,9 +882,6 @@ class IfcPolygonalBoundedHalfSpaceHelper
         const polygonSolid = new Solid();
         polygonSolid.add(polygonProfile);
         polygonSolid.builder = extruder;
-        polygonSolid.visible = false;
-        polygonSolid.edgesVisible = false;
-        polygonSolid.facesVisible = false;
 
         let matrix = base.helper.getMatrix();
         matrix.decompose(polygonSolid.position, polygonSolid.rotation,
@@ -906,9 +904,6 @@ class IfcPolygonalBoundedHalfSpaceHelper
         let planeSolid = new Solid();
         planeSolid.add(planeProfile);
         planeSolid.builder = extruder;
-        planeSolid.visible = false;
-        planeSolid.edgesVisible = false;
-        planeSolid.facesVisible = false;
 
         matrix = plane.helper.getMatrix();
         if (!flag)
@@ -1196,8 +1191,8 @@ class IfcSurfaceCurveSweptAreaSolidHelper
       const surface = solid.ReferenceSurface; // IfcSurface: ignored
 
       const shape = profile.helper.getShape();
-      const points = directrix.helper.getPoints();
-      if (points === null)
+      const cordPoints = directrix.helper.getPoints();
+      if (cordPoints === null)
       {
         console.warn("Unsupported curve", directrix);
         return null;
@@ -1205,19 +1200,28 @@ class IfcSurfaceCurveSweptAreaSolidHelper
 
       try
       {
-        const geometry = new ExtrudeSolidGeometry(shape,
-          { directrix : points });
-
-        this.object3D = new Solid(geometry);
-        this.object3D.name = "swept";
-        this.object3D._ifc = solid;
-        if (matrix)
-        {
-          matrix.decompose(this.object3D.position, this.object3D.quaternion,
-            this.object3D.scale);
-          this.object3D.matrix.copy(matrix);
-          this.object3D.matrixWorldNeedsUpdate = true;
-        }
+//        this.object3D = new Solid();
+//        const object3D = this.object3D;
+//
+//        object3D.name = "swept";
+//        object3D._ifc = solid;
+//        object3D.builder = new Extruder();
+//
+//        const profile = new Profile(new ProfileGeometry(shape));
+//        object3D.add(profile);
+//
+//        const cord = new Cord(new CordGeometry(cordPoints));
+//        object3D.add(cord);
+//
+//        ObjectBuilder.build(object3D);
+//
+//        if (matrix)
+//        {
+//          matrix.decompose(this.object3D.position, this.object3D.quaternion,
+//            this.object3D.scale);
+//          this.object3D.matrix.copy(matrix);
+//          this.object3D.matrixWorldNeedsUpdate = true;
+//        }
       }
       catch (ex)
       {
@@ -1262,12 +1266,21 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
 
       try
       {
-        const geometry = new ExtrudeSolidGeometry(shape,
-          { directrix : directrix.helper.getPoints() });
+        this.object3D = new Solid();
+        const object3D = this.object3D;
 
-        this.object3D = new Solid(geometry);
-        this.object3D.name = "disk";
-        this.object3D._ifc = swept;
+        object3D.name = "disk";
+        object3D._ifc = swept;
+        object3D.builder = new Extruder();
+
+        const profile = new Profile(new ProfileGeometry(shape));
+        object3D.add(profile);
+
+        const cordPoints = directrix.helper.getPoints();
+        const cord = new Cord(new CordGeometry(cordPoints));
+        object3D.add(cord);
+
+        ObjectBuilder.build(object3D);
       }
       catch (ex)
       {

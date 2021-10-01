@@ -5,11 +5,14 @@
  */
 
 import { Tool } from "./Tool.js";
-import { Solid } from "../core/Solid.js";
+import { Cord } from "../core/Cord.js";
+import { CordGeometry } from "../core/CordGeometry.js";
 import { Profile } from "../core/Profile.js";
-import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ObjectBuilder } from "../core/ObjectBuilder.js";
+import { SpringBuilder } from "../core/builders/SpringBuilder.js";
 import { Extruder } from "../core/builders/Extruder.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
@@ -30,9 +33,9 @@ class AddObjectTool extends Tool
 
   execute()
   {
-    var objectType = this.objectType || "group";
+    const objectType = this.objectType || "group";
 
-    var object;
+    let object;
     if (objectType === "group")
     {
       object = new THREE.Group();
@@ -41,7 +44,7 @@ class AddObjectTool extends Tool
     {
       object = new Solid();
 
-      var geometry;
+      let geometry, shape, size, profile;
       switch (objectType)
       {
         case "box":
@@ -79,16 +82,35 @@ class AddObjectTool extends Tool
           geometry.applyMatrix4(matrix);
           object.updateGeometry(geometry);
           break;
+        case "spring":
+          let cord = new Cord();
+          cord.builder = new SpringBuilder();
+          ObjectBuilder.build(cord);
+          object.add(cord);
+          shape = new THREE.Shape();
+          const radius = 0.2;
+          const incr = 2 * Math.PI / 16;
+          shape.moveTo(radius, 0);
+          for (let rad = incr; rad < 2 * Math.PI; rad += incr)
+          {
+            shape.lineTo(radius * Math.cos(rad), radius * Math.sin(rad));
+          }
+          shape.closePath();
+          profile = new Profile(new ProfileGeometry(shape));
+          object.add(profile);
+          object.builder = new Extruder();
+          ObjectBuilder.build(object);
+          break;
         default:
-          var shape = new THREE.Shape();
-          let size = 0.5;
+          shape = new THREE.Shape();
+          size = 0.5;
           shape.moveTo(-size, -size);
           shape.lineTo(size, -size);
           shape.lineTo(2 * size, 0);
           shape.lineTo(size, size);
           shape.lineTo(-size, size);
           shape.closePath();
-          var hole = new THREE.Path();
+          let hole = new THREE.Path();
           hole.moveTo(-size / 2, -size / 2);
           hole.lineTo(size / 2, -size / 2);
           hole.lineTo(size / 2, size / 2);
@@ -103,7 +125,7 @@ class AddObjectTool extends Tool
           hole.closePath();
           shape.holes.push(hole);
 
-          let profile = new Profile(new ProfileGeometry(shape));
+          profile = new Profile(new ProfileGeometry(shape));
           object.add(profile);
           object.builder = new Extruder(this.height);
           ObjectBuilder.build(object);

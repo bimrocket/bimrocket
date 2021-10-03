@@ -28,6 +28,17 @@ class Cord extends THREE.LineSegments
     if (this.geometry) this.geometry.dispose();
     this.geometry = geometry;
   }
+
+	copy(source)
+  {
+		super.copy(source);
+
+		this.material = source.material;
+		this.geometry = source.geometry;
+    this.builder = source.builder;
+
+		return this;
+	}
 }
 
 export { Cord };

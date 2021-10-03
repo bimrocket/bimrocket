@@ -197,29 +197,30 @@ class Solid extends THREE.Object3D
     return solid;
   }
 
-  clone(recursive)
+  copy(source, recursive = true)
   {
-    let object = new Solid();
-    object.copy(this, false);
-    object._facesObject.geometry = this._facesObject.geometry;
-    object._edgesObject.geometry = this._edgesObject.geometry;
+    super.copy(source, false);
 
-    object._facesObject.material = this._facesObject.material;
-    object._edgesObject.material = this._edgesObject.material;
-    object.facesVisible = this.facesVisible;
-    object.edgesVisible = this.edgesVisible;
-    object.builder = this.builder;
-    object.updateMatrix();
+    // TODO: dispose geometries & materials?
+    this._facesObject.geometry = source._facesObject.geometry;
+    this._edgesObject.geometry = source._edgesObject.geometry;
+
+    this._facesObject.material = source._facesObject.material;
+    this._edgesObject.material = source._edgesObject.material;
+    this.facesVisible = source.facesVisible;
+    this.edgesVisible = source.edgesVisible;
+    this.builder = source.builder;
+    this.updateMatrix();
 
     if (recursive === true)
     {
-      for (let i = 2; i < this.children.length; i++)
+      for (let i = 2; i < source.children.length; i++)
       {
-        var child = this.children[i];
-        object.add(child.clone());
+        let child = source.children[i];
+        this.add(child.clone());
       }
     }
-    return object;
+    return this;
   }
 
   raycast(raycaster, intersects)

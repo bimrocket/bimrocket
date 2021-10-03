@@ -27,7 +27,7 @@ class ProfileGeometry extends THREE.BufferGeometry
   updateBuffers()
   {
     const path = this.path;
-    let closed = path instanceof THREE.Shape;
+    const closed = path instanceof THREE.Shape;
 
     const points = path.getPoints(this.divisions);
     const pointsHoles = closed ? path.getPointsHoles(this.divisions) : [];

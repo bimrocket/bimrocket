@@ -24,7 +24,7 @@ class STLExporter {
 
 		scene.traverse( function ( object ) {
 
-			if ( object.isMesh ) {
+			if ( object.isMesh && object.visible) {
 
 				const geometry = object.geometry;
 

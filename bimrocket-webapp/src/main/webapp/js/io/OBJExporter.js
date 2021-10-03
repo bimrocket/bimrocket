@@ -280,24 +280,26 @@ class OBJExporter {
 
 		object.traverse( function ( child ) {
 
-			if ( child.isMesh === true ) {
+      if ( child.visible ) {
 
-				parseMesh( child );
+        if ( child.isMesh === true ) {
 
-			}
+          parseMesh( child );
 
-			if ( child.isLine === true ) {
+        }
 
-				parseLine( child );
+        if ( child.isLine === true ) {
 
-			}
+          parseLine( child );
 
-			if ( child.isPoints === true ) {
+        }
 
-				parsePoints( child );
+        if ( child.isPoints === true ) {
 
-			}
+          parsePoints( child );
 
+        }
+      }
 		} );
 
 		return output;

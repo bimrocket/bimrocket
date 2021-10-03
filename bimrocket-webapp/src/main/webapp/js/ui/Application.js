@@ -1051,6 +1051,7 @@ class Application
       if (parent)
       {
         parent.remove(object);
+        ObjectUtils.dispose(object);
       }
       let removeEvent = {type : "removed", object : object, parent : parent,
         source : this};

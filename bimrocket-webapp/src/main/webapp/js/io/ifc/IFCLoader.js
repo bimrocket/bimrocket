@@ -16,9 +16,19 @@ import { ObjectBuilder } from "../../core/ObjectBuilder.js";
 import { Cloner } from "../../core/builders/Cloner.js";
 import { Extruder } from "../../core/builders/Extruder.js";
 import { BooleanOperator } from "../../core/builders/BooleanOperator.js";
+import { RectangleBuilder } from "../../core/builders/RectangleBuilder.js";
+import { RectangleHollowBuilder } from "../../core/builders/RectangleHollowBuilder.js";
+import { CircleBuilder } from "../../core/builders/CircleBuilder.js";
+import { CircleHollowBuilder } from "../../core/builders/CircleHollowBuilder.js";
+import { EllipseBuilder } from "../../core/builders/EllipseBuilder.js";
+import { IProfileBuilder } from "../../core/builders/IProfileBuilder.js";
+import { LProfileBuilder } from "../../core/builders/LProfileBuilder.js";
+import { TProfileBuilder } from "../../core/builders/TProfileBuilder.js";
+import { UProfileBuilder } from "../../core/builders/UProfileBuilder.js";
+import { ZProfileBuilder } from "../../core/builders/ZProfileBuilder.js";
+import { TrapeziumBuilder } from "../../core/builders/TrapeziumBuilder.js";
 import { IFCVoider } from "./IFCVoider.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
-import { PathBuilder } from "../../utils/PathBuilder.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
 import { registerIfcHelperClass } from "./BaseEntity.js";
@@ -1131,7 +1141,6 @@ class IfcExtrudedAreaSolidHelper extends IfcGeometricRepresentationItemHelper
       const solid = this.instance;
       const schema = this.instance.constructor.schema;
 
-      let geometry;
       const profileDef = solid.SweptArea;
       const matrix = solid.Position.helper.getMatrix();
       const direction = solid.ExtrudedDirection.helper.getDirection();
@@ -1139,26 +1148,27 @@ class IfcExtrudedAreaSolidHelper extends IfcGeometricRepresentationItemHelper
 
       if (profileDef instanceof schema.IfcProfileDef)
       {
-        const shape = profileDef.helper.getShape();
-        if (shape)
+        let profile = profileDef.helper.getProfile();
+        if (profile)
         {
-          let profile = new Profile(new ProfileGeometry(shape));
-          profile.visible = false;
+          if (profile.parent)
+          {
+            profile = profile.clone();
+          }
+
           profile._ifc = profileDef;
-          let object3D = new Solid();
-          object3D.add(profile);
-          object3D.builder = new Extruder(depth, direction);
-          ObjectBuilder.build(object3D);
-          object3D._ifc = solid;
+          let solid = new Solid();
+          solid.add(profile);
+          solid.builder = new Extruder(depth, direction);
+          ObjectBuilder.build(solid);
+          solid._ifc = solid;
 
           if (matrix)
           {
-            matrix.decompose(object3D.position, object3D.quaternion,
-              object3D.scale);
-            object3D.matrix.copy(matrix);
-            object3D.matrixWorldNeedsUpdate = true;
+            matrix.decompose(solid.position, solid.quaternion, solid.scale);
+            solid.updateMatrix();
           }
-          this.object3D = object3D;
+          this.object3D = solid;
         }
         else console.warn("Unsupported profile", profileDef);
       }
@@ -1181,51 +1191,55 @@ class IfcSurfaceCurveSweptAreaSolidHelper
   {
     if (this.object3D === null)
     {
-      const solid = this.instance;
-      const profile = solid.SweptArea; // IfcProfileDef
-      const position = solid.Position; // IfcAxis2Placement3D
+      const swept = this.instance;
+      const profileDef = swept.SweptArea; // IfcProfileDef
+      const position = swept.Position; // IfcAxis2Placement3D
       const matrix = position.helper.getMatrix();
-      const directrix = solid.Directrix; // IfcCurve
-      const startParam = solid.StartParam; // IfcParameterValue : number
-      const endParam = solid.EndParam; // IfcParameterValue : number
-      const surface = solid.ReferenceSurface; // IfcSurface: ignored
+      const directrix = swept.Directrix; // IfcCurve
+      const startParam = swept.StartParam; // IfcParameterValue : number
+      const endParam = swept.EndParam; // IfcParameterValue : number
+      const surface = swept.ReferenceSurface; // IfcSurface: ignored
 
-      const shape = profile.helper.getShape();
       const cordPoints = directrix.helper.getPoints();
-      if (cordPoints === null)
+      if (cordPoints)
+      {
+        const profile = profileDef.helper.getProfile();
+        if (profile)
+        {
+          try
+          {
+            const solid = new Solid();
+
+            solid.name = "swept";
+            solid._ifc = swept;
+            solid.builder = new Extruder();
+            solid.add(profile);
+
+            const cord = new Cord(new CordGeometry(cordPoints));
+            solid.add(cord);
+
+            ObjectBuilder.build(solid);
+
+            if (matrix)
+            {
+              matrix.decompose(solid.position, solid.quaternion, solid.scale);
+              solid.updateMatrix();
+            }
+            this.object3D = solid;
+          }
+          catch (ex)
+          {
+            console.warn(ex);
+          }
+        }
+        else
+        {
+          console.warn("Unsupported profile", profileDef);
+        }
+      }
+      else
       {
         console.warn("Unsupported curve", directrix);
-        return null;
-      }
-
-      try
-      {
-//        this.object3D = new Solid();
-//        const object3D = this.object3D;
-//
-//        object3D.name = "swept";
-//        object3D._ifc = solid;
-//        object3D.builder = new Extruder();
-//
-//        const profile = new Profile(new ProfileGeometry(shape));
-//        object3D.add(profile);
-//
-//        const cord = new Cord(new CordGeometry(cordPoints));
-//        object3D.add(cord);
-//
-//        ObjectBuilder.build(object3D);
-//
-//        if (matrix)
-//        {
-//          matrix.decompose(this.object3D.position, this.object3D.quaternion,
-//            this.object3D.scale);
-//          this.object3D.matrix.copy(matrix);
-//          this.object3D.matrixWorldNeedsUpdate = true;
-//        }
-      }
-      catch (ex)
-      {
-        console.warn(ex);
       }
     }
     return this.object3D;
@@ -1249,20 +1263,7 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
       const directrix = swept.Directrix; // IfcCurve
       const radius = swept.Radius;
       const innerRadius = swept.InnerRadius;
-
       const segments = swept._loader.getCircleSegments(radius);
-      const builder = PathBuilder;
-      const matrix = new THREE.Matrix4();
-      const shape = new THREE.Shape();
-      builder.setup(shape, matrix);
-      builder.circle(radius, segments);
-      if (typeof innerRadius === "number")
-      {
-        const hole = new THREE.Path();
-        builder.setup(hole, matrix);
-        builder.circle(innerRadius, segments);
-        shape.holes.push(hole);
-      }
 
       try
       {
@@ -1273,7 +1274,17 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
         object3D._ifc = swept;
         object3D.builder = new Extruder();
 
-        const profile = new Profile(new ProfileGeometry(shape));
+        const profile = new Profile();
+
+        if (typeof innerRadius === "number")
+        {
+          profile.builder = new CircleHollowBuilder(radius,
+            radius - innerRadius, segments);
+        }
+        else
+        {
+          profile.builder = new CircleBuilder(radius, segments);
+        }
         object3D.add(profile);
 
         const cordPoints = directrix.helper.getPoints();
@@ -1473,12 +1484,12 @@ class IfcProfileDefHelper extends IfcHelper
   constructor(instance)
   {
     super(instance);
-    this.shape = null;
+    this.profile = null;
   }
 
-  getShape()
+  getProfile()
   {
-    return this.shape;
+    return this.profile;
   }
 };
 registerIfcHelperClass(IfcProfileDefHelper);
@@ -1486,17 +1497,43 @@ registerIfcHelperClass(IfcProfileDefHelper);
 
 class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
 {
-  static vector = new THREE.Vector3();
-
   constructor(instance)
   {
     super(instance);
-    this.shape = null;
   }
 
-  getShape()
+  getProfile()
   {
-    return this.shape;
+    if (this.profile === null)
+    {
+      const builder = this.getProfileBuilder();
+      if (builder)
+      {
+        const profileDef = this.instance;
+
+        const profile = new Profile();
+
+        let name = builder.constructor.name;
+        let index = name.indexOf("Builder");
+        if (index !== -1) name = name.substring(0, index);
+        profile.name = name;
+        profile.builder = builder;
+
+        ObjectBuilder.build(profile);
+
+        const profMat = profileDef.Position.helper.getMatrix();
+        profMat.decompose(profile.position, profile.quaternion, profile.scale);
+        profile.updateMatrix();
+
+        this.profile = profile;
+      }
+    }
+    return this.profile;
+  }
+
+  getProfileBuilder()
+  {
+    return null;
   }
 };
 registerIfcHelperClass(IfcParameterizedProfileDefHelper);
@@ -1509,19 +1546,11 @@ class IfcRectangleProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-      builder.rectangle(profile.XDim, profile.YDim);
-    }
-    return this.shape;
+    return new RectangleBuilder(profileDef.XDim, profileDef.YDim);
   }
 };
 registerIfcHelperClass(IfcRectangleProfileDefHelper);
@@ -1534,25 +1563,12 @@ class IfcRectangleHollowProfileDefHelper extends IfcRectangleProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-      builder.rectangle(profile.XDim, profile.YDim);
-
-      const hole = new THREE.Path();
-      const thickness = 2 * profile.WallThickness;
-      builder.setup(hole, profMat);
-      builder.rectangle(profile.XDim - thickness, profile.YDim - thickness);
-      this.shape.holes.push(hole);
-    }
-    return this.shape;
+    return new RectangleHollowBuilder(
+      profileDef.XDim, profileDef.YDim, profileDef.WallThickness);
   }
 };
 registerIfcHelperClass(IfcRectangleHollowProfileDefHelper);
@@ -1565,22 +1581,13 @@ class IfcCircleProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const radius = profileDef.Radius;
+    const segments = profileDef._loader.getCircleSegments(radius);
 
-      const profile = this.instance;
-      let radius = profile.Radius;
-      const profMat = profile.Position.helper.getMatrix();
-      const segments = profile._loader.getCircleSegments(radius);
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-      builder.circle(radius, segments);
-    }
-    return this.shape;
+    return new CircleBuilder(radius, segments);
   }
 };
 registerIfcHelperClass(IfcCircleProfileDefHelper);
@@ -1593,28 +1600,14 @@ class IfcCircleHollowProfileDefHelper extends IfcCircleProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const radius = profileDef.Radius;
+    const thickness = profileDef.WallThickness;
+    const segments = profileDef._loader.getCircleSegments(radius);
 
-      const profile = this.instance;
-      const radius = profile.Radius;
-      const thickness = profile.WallThickness;
-      const profMat = profile.Position.helper.getMatrix();
-      const segments = profile._loader.getCircleSegments(radius);
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-      builder.circle(radius, segments);
-
-      const hole = new THREE.Path();
-      builder.setup(hole, profMat);
-      builder.circle(radius - thickness, segments);
-      this.shape.holes.push(hole);
-    }
-    return this.shape;
+    return new CircleHollowBuilder(radius, thickness, segments);
   }
 };
 registerIfcHelperClass(IfcCircleHollowProfileDefHelper);
@@ -1627,24 +1620,15 @@ class IfcEllipseProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const xradius = profileDef.SemiAxis1;
+    const yradius = profileDef.SemiAxis2;
+    const maxRadius = Math.max(xradius, yradius);
+    const segments = profileDef._loader.getCircleSegments(maxRadius);
 
-      const profile = this.instance;
-      const xradius = profile.SemiAxis1;
-      const yradius = profile.SemiAxis2;
-      const profMat = profile.Position.helper.getMatrix();
-      const maxRadius = Math.max(xradius, yradius);
-      const segments = profile._loader.getCircleSegments(maxRadius);
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-      builder.ellipse(xradius, yradius, segments);
-    }
-    return this.shape;
+    return new EllipseBuilder(xradius, yradius, segments);
   }
 };
 registerIfcHelperClass(IfcEllipseProfileDefHelper);
@@ -1657,38 +1641,15 @@ class IfcIShapeProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const width = profileDef.OverallWidth;
+    const height = profileDef.OverallDepth;
+    const webThickness = profileDef.WebThickness;
+    const flangeThickness = profileDef.FlangeThickness;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xs = 0.5 * profile.OverallWidth;
-      const ys = 0.5 * profile.OverallDepth;
-      const xt = 0.5 * profile.WebThickness;
-      const yt = profile.FlangeThickness;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(-xs, ys - yt);
-      builder.lineTo(-xt, ys - yt);
-      builder.lineTo(-xt, -ys + yt);
-      builder.lineTo(-xs, -ys + yt);
-      builder.lineTo(-xs, -ys);
-      builder.lineTo(xs, -ys);
-      builder.lineTo(xs, -ys + yt);
-      builder.lineTo(xt, -ys + yt);
-      builder.lineTo(xt, ys - yt);
-      builder.lineTo(xs, ys - yt);
-      builder.lineTo(xs, ys);
-      builder.lineTo(-xs, ys);
-      builder.close();
-    }
-    return this.shape;
+    return new IProfileBuilder(width, height, webThickness, flangeThickness);
   }
 };
 registerIfcHelperClass(IfcIShapeProfileDefHelper);
@@ -1701,31 +1662,14 @@ class IfcLShapeProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const width = profileDef.Width;
+    const height = profileDef.Depth;
+    const thickness = profileDef.Thickness;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xs = 0.5 * profile.Width;
-      const ys = 0.5 * profile.Depth;
-      const t = profile.Thickness;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(-xs + t, -ys + t);
-      builder.lineTo(-xs + t, ys);
-      builder.lineTo(-xs, ys);
-      builder.lineTo(-xs, -ys);
-      builder.lineTo(xs, -ys);
-      builder.lineTo(xs, -ys + t);
-      builder.close();
-    }
-    return this.shape;
+    return new LProfileBuilder(width, height, thickness);
   }
 };
 registerIfcHelperClass(IfcLShapeProfileDefHelper);
@@ -1738,34 +1682,16 @@ class IfcTShapeProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const flangeWidth = profileDef.FlangeWidth;
+    const height = profileDef.Depth;
+    const webThickness = profileDef.WebThickness;
+    const flangeThickness = profileDef.FlangeThickness;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xs = 0.5 * profile.FlangeWidth;
-      const ys = 0.5 * profile.Depth;
-      const xt = 0.5 * profile.WebThickness;
-      const yt = profile.FlangeThickness;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(xt, -ys);
-      builder.lineTo(xt, ys - yt);
-      builder.lineTo(xs, ys - yt);
-      builder.lineTo(xs, ys);
-      builder.lineTo(-xs, ys);
-      builder.lineTo(-xs, ys - yt);
-      builder.lineTo(-xt, ys - yt);
-      builder.lineTo(-xt, -ys);
-      builder.close();
-    }
-    return this.shape;
+    return new TProfileBuilder(flangeWidth, height,
+      webThickness, flangeThickness);
   }
 };
 registerIfcHelperClass(IfcTShapeProfileDefHelper);
@@ -1778,34 +1704,16 @@ class IfcUShapeProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const flangeWidth = profileDef.FlangeWidth;
+    const height = profileDef.Depth;
+    const webThickness = profileDef.WebThickness;
+    const flangeThickness = profileDef.FlangeThickness;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xs = 0.5 * profile.FlangeWidth;
-      const ys = 0.5 * profile.Depth;
-      const xt = profile.WebThickness;
-      const yt = profile.FlangeThickness;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(xs, -ys);
-      builder.lineTo(xs, -ys + yt);
-      builder.lineTo(-xs + xt, -ys + yt);
-      builder.lineTo(-xs + xt, ys - yt);
-      builder.lineTo(xs, ys - yt);
-      builder.lineTo(xs, ys);
-      builder.lineTo(-xs, ys);
-      builder.lineTo(-xs, -ys);
-      builder.close();
-    }
-    return this.shape;
+    return new UProfileBuilder(flangeWidth, height,
+      webThickness, flangeThickness);
   }
 };
 registerIfcHelperClass(IfcUShapeProfileDefHelper);
@@ -1818,34 +1726,16 @@ class IfcZShapeProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const flangeWidth = profileDef.FlangeWidth;
+    const height = profileDef.Depth;
+    const webThickness = profileDef.WebThickness;
+    const flangeThickness = profileDef.FlangeThickness;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xs = profile.FlangeWidth;
-      const ys = 0.5 * profile.Depth;
-      const xt = 0.5 * profile.WebThickness;
-      const yt = profile.FlangeThickness;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(xt, ys);
-      builder.lineTo(-xs + xt, ys);
-      builder.lineTo(-xs + xt, ys - yt);
-      builder.lineTo(-xt, ys - yt);
-      builder.lineTo(-xt, -ys);
-      builder.lineTo(xs - xt, -ys);
-      builder.lineTo(xs - xt, -ys + yt);
-      builder.lineTo(xt, -ys + yt);
-      builder.close();
-    }
-    return this.shape;
+    return new ZProfileBuilder(flangeWidth, height,
+      webThickness, flangeThickness);
   }
 };
 registerIfcHelperClass(IfcZShapeProfileDefHelper);
@@ -1858,30 +1748,15 @@ class IfcTrapeziumProfileDefHelper extends IfcParameterizedProfileDefHelper
     super(instance);
   }
 
-  getShape()
+  getProfileBuilder()
   {
-    if (this.shape === null)
-    {
-      this.shape = new THREE.Shape();
+    const profileDef = this.instance;
+    const bottomXDim = profileDef.BottomXDim;
+    const height = profileDef.YDim;
+    const topXDim = profileDef.TopXDim;
+    const topXOffset = profileDef.TopXOffset;
 
-      const profile = this.instance;
-      const profMat = profile.Position.helper.getMatrix();
-
-      const xb = 0.5 * profile.BottomXDim;
-      const yd = 0.5 * profile.YDim;
-      const xd = profile.TopXDim;
-      const xo = profile.TopXOffset;
-
-      const builder = PathBuilder;
-      builder.setup(this.shape, profMat);
-
-      builder.moveTo(xb, -yd);
-      builder.lineTo(-xb, -yd);
-      builder.lineTo(-xb + xo, yd);
-      builder.lineTo(-xb + xo + xd, yd);
-      builder.close();
-    }
-    return this.shape;
+    return new TrapeziumBuilder(bottomXDim, height, topXDim, topXOffset);
   }
 };
 registerIfcHelperClass(IfcTrapeziumProfileDefHelper);
@@ -1892,34 +1767,39 @@ class IfcArbitraryClosedProfileDefHelper extends IfcProfileDefHelper
   constructor(instance)
   {
     super(instance);
-    this.shape = null;
+    this.profile = null;
   }
 
-  getShape()
+  getProfile()
   {
-    if (this.shape === null)
+    if (this.profile === null)
     {
-      const profile = this.instance;
+      const profileDef = this.instance;
 
-      const curve = profile.OuterCurve; // IfcCurve
+      const curve = profileDef.OuterCurve; // IfcCurve
       const curvePoints = curve.helper.getPoints();
       if (curvePoints)
       {
-        var shape = new THREE.Shape();
-        shape.moveTo(curvePoints[0].x, curvePoints[0].y);
-        for (let i = 1; i < curvePoints.length; i++)
-        {
-          shape.lineTo(curvePoints[i].x, curvePoints[i].y);
-        }
-        shape.closePath();
-        this.shape = shape;
+        const shape = new THREE.Shape();
+        this.addPointsToPath(shape, curvePoints);
+        this.profile = new Profile(new ProfileGeometry(shape));
       }
       else
       {
         console.warn("Unsupported curve", curve);
       }
     }
-    return this.shape;
+    return this.profile;
+  }
+
+  addPointsToPath(path, curvePoints)
+  {
+    path.moveTo(curvePoints[0].x, curvePoints[0].y);
+    for (let i = 1; i < curvePoints.length; i++)
+    {
+      path.lineTo(curvePoints[i].x, curvePoints[i].y);
+    }
+    path.closePath();
   }
 };
 registerIfcHelperClass(IfcArbitraryClosedProfileDefHelper);
@@ -1931,38 +1811,40 @@ class IfcArbitraryProfileDefWithVoidsHelper
   constructor(instance)
   {
     super(instance);
-    this.shape = null;
+    this.profile = null;
   }
 
-  getShape()
+  getProfile()
   {
-    if (this.shape === null)
+    if (this.profile === null)
     {
-      const profile = this.instance;
-      const shape = super.getShape();
-      const innerCurves = profile.InnerCurves; // IFCCURVE[]
-      for (let c = 0; c < innerCurves.length; c++)
+      const profileDef = this.instance;
+      const curve = profileDef.OuterCurve; // IfcCurve
+      let curvePoints = curve.helper.getPoints();
+      if (curvePoints)
       {
-        let innerCurve = innerCurves[c];
-        let curvePoints = innerCurve.helper.getPoints();
-        if (curvePoints)
+        const shape = new THREE.Shape();
+        this.addPointsToPath(shape, curvePoints);
+
+        const innerCurves = profileDef.InnerCurves; // IfcCurve[]
+        for (let innerCurve of innerCurves)
         {
-          let path = new THREE.Path();
-          path.moveTo(curvePoints[0].x, curvePoints[0].y);
-          for (let i = 1; i < curvePoints.length; i++)
+          curvePoints = innerCurve.helper.getPoints();
+          if (curvePoints)
           {
-            path.lineTo(curvePoints[i].x, curvePoints[i].y);
+            let hole = new THREE.Path();
+            this.addPointsToPath(hole, curvePoints);
+            shape.holes.push(hole);
           }
-          path.closePath();
-          shape.holes.push(path);
+          else
+          {
+            console.warn("Unsupported inner curve", innerCurve);
+          }
         }
-        else
-        {
-          console.warn("Unsupported inner curve", innerCurve);
-        }
+        this.profile = new Profile(new ProfileGeometry(shape));
       }
     }
-    return this.shape;
+    return this.profile;
   }
 };
 registerIfcHelperClass(IfcArbitraryProfileDefWithVoidsHelper);

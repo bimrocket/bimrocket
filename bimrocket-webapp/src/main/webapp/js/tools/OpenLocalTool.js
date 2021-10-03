@@ -91,6 +91,7 @@ class OpenLocalTool extends Tool
           },
           onError : error =>
           {
+            console.info(error);
             application.progressBar.visible = false;
             MessageDialog.create("ERROR", error)
               .setClassName("error")

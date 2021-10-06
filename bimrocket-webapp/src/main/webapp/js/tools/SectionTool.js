@@ -90,8 +90,8 @@ class SectionTool extends Tool
     planeMesh.name = "sectionPlane";
     this.planeMesh = planeMesh;
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseWheel = this.onMouseWheel.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerWheel = this.onPointerWheel.bind(this);
     this.createPanel();
 
     this.sectionColorElem.value = sectionColor;
@@ -143,29 +143,27 @@ class SectionTool extends Tool
   {
     this.panel.visible = true;
     const container = this.application.container;
-    container.addEventListener('mouseup', this._onMouseUp, false);
-    container.addEventListener('mousewheel', this._onMouseWheel, false);
-    container.addEventListener('DOMMouseScroll', this._onMouseWheel, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
+    container.addEventListener('wheel', this._onPointerWheel, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('mouseup', this._onMouseUp, false);
-    container.removeEventListener('mousewheel', this._onMouseWheel, false);
-    container.removeEventListener('DOMMouseScroll', this._onMouseWheel, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
+    container.removeEventListener('wheel', this._onPointerWheel, false);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
-    const mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
     const application = this.application;
     const scene = application.scene;
 
-    const intersect = this.intersect(mousePosition, scene, true);
+    const intersect = this.intersect(pointerPosition, scene, true);
     if (intersect)
     {
       const object = intersect.object;
@@ -191,7 +189,7 @@ class SectionTool extends Tool
     application.repaint();
   }
 
-  onMouseWheel(event)
+  onPointerWheel(event)
   {
     if (!this.isCanvasEvent(event)) return;
 

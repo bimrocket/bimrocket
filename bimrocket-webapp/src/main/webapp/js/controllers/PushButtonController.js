@@ -23,8 +23,8 @@ class PushButtonController extends PanelController
     this.buttonClass = this.createProperty("string", "Button class",
       "rounded_button");
 
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseUp = this.onMouseUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
 
     this.createPanel();
   }
@@ -36,8 +36,8 @@ class PushButtonController extends PanelController
     let buttonElem = document.createElement("div");
     this.buttonElem = buttonElem;
 
-    buttonElem.addEventListener('mousedown', this._onMouseDown, false);
-    buttonElem.addEventListener('mouseup', this._onMouseUp, false);
+    buttonElem.addEventListener('pointerdown', this._onPointerDown, false);
+    buttonElem.addEventListener('pointerup', this._onPointerUp, false);
 
     this.panel.bodyElem.appendChild(buttonElem);
 
@@ -54,13 +54,13 @@ class PushButtonController extends PanelController
     }
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     let buttonElem = event.target || event.srcElement;
     this.output.value = this.valueDown.value;
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     var buttonElem = event.target || event.srcElement;
     this.output.value = this.valueUp.value;

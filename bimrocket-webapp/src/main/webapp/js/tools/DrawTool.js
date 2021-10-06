@@ -19,7 +19,7 @@ class DrawTool extends Tool
     this.className = "draw";
     this.setOptions(options);
 
-    this.lastMousePosition = new THREE.Vector2();
+    this.lastPointerPosition = new THREE.Vector2();
     this.startPosition = null;
     this.snapPoint = null;
     this.brepSelector = new BrepSelector();
@@ -27,8 +27,8 @@ class DrawTool extends Tool
     this.line = null;
     this.point = null;
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
     this._onKeyUp = this.onKeyUp.bind(this);
     this._animate = this.animate.bind(this);
 
@@ -74,8 +74,8 @@ class DrawTool extends Tool
     this._createOverlays();
 
     var container = application.container;
-    container.addEventListener('mouseup', this._onMouseUp, false);
-    container.addEventListener('mousemove', this._onMouseMove, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
+    container.addEventListener('pointermove', this._onPointerMove, false);
     document.addEventListener('keyup', this._onKeyUp, false);
     application.addEventListener('animation', this._animate);
 
@@ -96,15 +96,15 @@ class DrawTool extends Tool
     application.repaint();
 
     var container = application.container;
-    container.removeEventListener('mouseup', this._onMouseUp, false);
-    container.removeEventListener('mousemove', this._onMouseMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
     document.removeEventListener('keyup', this._onKeyUp, false);
     application.removeEventListener('animation', this._animate);
 
     application.showSelectionLines();
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (event.button === 0)
     {
@@ -112,9 +112,9 @@ class DrawTool extends Tool
     }
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
-    this.lastMousePosition = this.getMousePosition(event);
+    this.lastPointerPosition = this.getEventPosition(event);
     this.needsUpdate = true;
   }
 
@@ -154,8 +154,8 @@ class DrawTool extends Tool
       var snapPoints = [];
 
       var container = this.application.container;
-      var x = (this.lastMousePosition.x / container.clientWidth) * 2 - 1;
-      var y = -(this.lastMousePosition.y / container.clientHeight) * 2 + 1;
+      var x = (this.lastPointerPosition.x / container.clientWidth) * 2 - 1;
+      var y = -(this.lastPointerPosition.y / container.clientHeight) * 2 + 1;
       var pixels = 20.0;
       var snap = pixels / container.clientWidth;
 
@@ -206,7 +206,7 @@ class DrawTool extends Tool
       {
         this.posElem.innerHTML = "";
         this.point.visible = false;
-        var groundIntersection = this.intersect(this.lastMousePosition,
+        var groundIntersection = this.intersect(this.lastPointerPosition,
           ground, false);
         if (groundIntersection !== null)
         {

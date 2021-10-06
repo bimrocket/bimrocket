@@ -25,7 +25,7 @@ class MeasureLengthTool extends Tool
     this.material = new THREE.LineBasicMaterial(
       { linewidth:2, color: new THREE.Color(0x0000ff), opacity: 1,
       depthTest: false});
-    this._onMouseUp = this.onMouseUp.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
 
     this.createPanel();
   }
@@ -55,23 +55,23 @@ class MeasureLengthTool extends Tool
   {
     this.panel.visible = true;
     var container = this.application.container;
-    container.addEventListener('mouseup', this._onMouseUp, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
     var container = this.application.container;
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     const scene = this.application.scene;
-    let mousePosition = this.getMousePosition(event);
-    let intersect = this.intersect(mousePosition, scene, true);
+    let pointerPosition = this.getEventPosition(event);
+    let intersect = this.intersect(pointerPosition, scene, true);
     if (intersect)
     {
       let point = intersect.point;

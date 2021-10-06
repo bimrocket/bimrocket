@@ -6,6 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
+import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
 class OrbitTool extends Tool
@@ -46,7 +47,6 @@ class OrbitTool extends Tool
 
     // internals
     this.vector = new THREE.Vector3();
-    this.position = new THREE.Vector3(); // camera parent CS
     this.center = new THREE.Vector3(); // camera parent CS
 
     this.EPS = 0.00001;
@@ -64,8 +64,6 @@ class OrbitTool extends Tool
     this.panEnd = new THREE.Vector2();
     this.panVector = new THREE.Vector2();
 
-    this.viewVector = new THREE.Vector3();
-
     this.phiDelta = 0;
     this.thetaDelta = 0;
     this.zoomDelta = 0;
@@ -75,13 +73,19 @@ class OrbitTool extends Tool
     this.STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
     this.state = this.STATE.NONE;
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
-    this._onMouseWheel = this.onMouseWheel.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
+    this._onWheel = this.onWheel.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
+
+    const geometry = new THREE.SphereGeometry(1, 8, 8);
+    const material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+    const sphere = new THREE.Mesh(geometry, material);
+    sphere.name = THREE.Object3D.HIDDEN_PREFIX + "orbit_center";
+    this.sphere = sphere;
 
     this.createPanel();
   }
@@ -103,9 +107,8 @@ class OrbitTool extends Tool
     const container = application.container;
 
     container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('mousedown', this._onMouseDown, false);
-    container.addEventListener('mousewheel', this._onMouseWheel, false);
-    container.addEventListener('DOMMouseScroll', this._onMouseWheel, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
+    container.addEventListener('wheel', this._onWheel, false);
     application.addEventListener('animation', this._animate);
     application.addEventListener('scene', this._onScene);
   }
@@ -118,9 +121,8 @@ class OrbitTool extends Tool
     const container = application.container;
 
     container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('mousedown', this._onMouseDown, false);
-    container.removeEventListener('mousewheel', this._onMouseWheel, false);
-    container.removeEventListener('DOMMouseScroll', this._onMouseWheel, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
+    container.removeEventListener('wheel', this._onWheel, false);
     application.removeEventListener('animation', this._animate);
     application.removeEventListener('scene', this._onScene);
   }
@@ -131,7 +133,7 @@ class OrbitTool extends Tool
 
     if (!this.updateCamera && !application.needsRepaint) return;
 
-    var camera = application.camera;
+    const camera = application.camera;
 
     this.theta += this.thetaDelta;
     this.phi += this.phiDelta;
@@ -175,23 +177,19 @@ class OrbitTool extends Tool
 
     if (this.xDelta !== 0 || this.yDelta !== 0)
     {
-      var m = camera.matrix;
+      const matrix = camera.matrix;
       this.center.set(this.xDelta, this.yDelta, -this.radius);
-      this.center.applyMatrix4(m);
+      this.center.applyMatrix4(matrix);
     }
 
-    var vector = this.vector;
-    var position = this.position;
-    var center = this.center;
+    const vector = this.vector;
+    const center = this.center;
 
     vector.x = Math.sin(this.phi) * Math.sin(this.theta);
     vector.y = Math.sin(this.phi) * Math.cos(this.theta);
     vector.z = Math.cos(this.phi);
 
-    position.copy(center);
-    vector.setLength(this.radius);
-    position.add(vector);
-    camera.position.copy(position);
+    camera.position.copy(center).addScaledVector(vector, this.radius);
     camera.updateMatrix();
     camera.lookAt(center);
     camera.updateMatrix();
@@ -202,7 +200,7 @@ class OrbitTool extends Tool
     this.xDelta = 0;
     this.yDelta = 0;
 
-    var changeEvent = {type: "nodeChanged", objects: [camera], source : this};
+    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
     application.notifyEventListeners("scene", changeEvent);
 
     this.updateCamera = false;
@@ -229,12 +227,12 @@ class OrbitTool extends Tool
 
   resetParameters()
   {
-    var camera = this.application.camera;
+    const camera = this.application.camera;
 
     camera.updateMatrix();
-    var matrix = camera.matrix;
-    var me = matrix.elements;
-    var vz = new THREE.Vector3();
+    const matrix = camera.matrix;
+    const me = matrix.elements;
+    const vz = new THREE.Vector3();
     vz.x = me[8];
     vz.y = me[9];
     vz.z = me[10];
@@ -344,25 +342,28 @@ class OrbitTool extends Tool
     const camera = application.camera;
     const scene = application.scene;
 
-    let centerPosition = new THREE.Vector2();
+    const centerPosition = new THREE.Vector2();
     centerPosition.x = container.clientWidth / 2;
     centerPosition.y = container.clientHeight / 2;
-    var intersect = this.intersect(centerPosition, scene, true);
+    const intersect = this.intersect(centerPosition, scene, true);
     if (intersect)
     {
       this.center.copy(intersect.point);
     }
     else
     {
-      // center = 10 units in front of observer
-      this.viewVector.setFromMatrixColumn(camera.matrix, 2);
-      this.center.copy(camera.position).addScaledVector(this.viewVector, -10);
+      const centerDistance = this.findCenterDistance();
+      const viewVector = new THREE.Vector3();
+      viewVector.setFromMatrixColumn(camera.matrix, 2);
+      this.center.copy(camera.position);
+      this.center.addScaledVector(viewVector, -centerDistance);
     }
+    // convert center in WCS to camera parent CS
     camera.parent.worldToLocal(this.center);
     this.radius = this.center.distanceTo(camera.position);
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -370,37 +371,59 @@ class OrbitTool extends Tool
 
     this.updateCenter();
 
-    var mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
     if (event.button === this.rotateButton)
     {
       this.state = this.STATE.ROTATE;
-      this.rotateStart.copy(mousePosition);
+      this.rotateStart.copy(pointerPosition);
     }
     else if (event.button === this.zoomButton)
     {
       this.state = this.STATE.ZOOM;
-      this.zoomStart.copy(mousePosition);
+      this.zoomStart.copy(pointerPosition);
     }
     else if (event.button === this.panButton)
     {
       this.state = this.STATE.PAN;
-      this.panStart.copy(mousePosition);
+      this.panStart.copy(pointerPosition);
     }
-    var container = this.application.container;
-    container.addEventListener('mousemove', this._onMouseMove, false);
-    container.addEventListener('mouseup', this._onMouseUp, false);
+    const application = this.application;
+    const container = application.container;
+    container.addEventListener('pointermove', this._onPointerMove, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
+
+    // add & update sphere
+    this.application.overlays.add(this.sphere);
+
+    const spherePosition = this.center.clone();
+    const camera = application.camera;
+    const parentMatrix = camera.parent.matrixWorld;
+    spherePosition.applyMatrix4(parentMatrix);
+    this.sphere.position.copy(spherePosition);
+    let scale;
+    if (camera instanceof THREE.PerspectiveCamera)
+    {
+      scale = this.radius * 0.01;
+    }
+    else
+    {
+      scale = 0.005 * (camera.right - camera.left) / camera.zoom;
+    }
+    this.sphere.scale.set(scale, scale, scale);
+    this.sphere.updateMatrix();
+    application.notifyObjectsChanged(this.sphere);
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
 
-    var mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
     if (this.state === this.STATE.ROTATE)
     {
-      this.rotateEnd.copy(mousePosition);
+      this.rotateEnd.copy(pointerPosition);
       this.rotateVector.subVectors(this.rotateEnd, this.rotateStart);
 
       this.rotateLeft(2 * Math.PI * this.rotateVector.x /
@@ -412,7 +435,7 @@ class OrbitTool extends Tool
     }
     else if (this.state === this.STATE.ZOOM)
     {
-      this.zoomEnd.copy(mousePosition);
+      this.zoomEnd.copy(pointerPosition);
       this.zoomVector.subVectors(this.zoomEnd, this.zoomStart);
 
       if (this.zoomVector.y !== 0)
@@ -423,22 +446,22 @@ class OrbitTool extends Tool
     }
     else if (this.state === this.STATE.PAN)
     {
-      this.panEnd.copy(mousePosition);
+      this.panEnd.copy(pointerPosition);
 
-      var camera = this.application.camera;
-      var container = this.application.container;
+      const camera = this.application.camera;
+      const container = this.application.container;
 
       this.panVector.subVectors(this.panEnd, this.panStart);
-      var vectorcc = new THREE.Vector3();
+      const vectorcc = new THREE.Vector3();
       vectorcc.x = this.panVector.x / container.clientWidth;
       vectorcc.y = this.panVector.y / container.clientHeight;
       vectorcc.z = 0;
 
-      var matrix = new THREE.Matrix4();
+      const matrix = new THREE.Matrix4();
       matrix.copy(camera.projectionMatrix).invert();
       vectorcc.applyMatrix4(matrix);
 
-      var lambda;
+      let lambda;
       if (camera instanceof THREE.PerspectiveCamera)
       {
         lambda = this.radius / camera.near;
@@ -456,16 +479,20 @@ class OrbitTool extends Tool
     }
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     this.state = this.STATE.NONE;
 
-    var container = this.application.container;
-    container.removeEventListener('mousemove', this._onMouseMove, false);
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    const container = this.application.container;
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
+
+    // remove sphere
+    this.application.overlays.remove(this.sphere);
+    this.application.notifyObjectsChanged(this.sphere);
   }
 
-  onMouseWheel(event)
+  onWheel(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -493,6 +520,54 @@ class OrbitTool extends Tool
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
+  }
+
+  findCenterDistance()
+  {
+    const application = this.application;
+    const camera = application.camera;
+    const objectPosition = new THREE.Vector3();
+    const cameraPosition = new THREE.Vector3();
+    const viewVector = new THREE.Vector3();
+    const cameraObjectVector = new THREE.Vector3();
+
+    camera.getWorldPosition(cameraPosition);
+    camera.getWorldDirection(viewVector);
+    let minSideDistance = Infinity;
+    let minCenterDistance = 0;
+
+    const traverse = object =>
+    {
+      if (object instanceof Solid
+          || object instanceof THREE.Mesh
+          || object instanceof THREE.Line)
+      {
+        object.getWorldPosition(objectPosition);
+        cameraObjectVector.subVectors(objectPosition, cameraPosition);
+        const objectDistance = cameraObjectVector.length();
+        const centerDistance = cameraObjectVector.dot(viewVector);
+        if (centerDistance > 0)
+        {
+          const sideDistance = Math.sqrt(
+            objectDistance * objectDistance - centerDistance * centerDistance);
+          if (sideDistance < minSideDistance)
+          {
+            minSideDistance = sideDistance;
+            minCenterDistance = centerDistance;
+          }
+        }
+      }
+      else
+      {
+        for (let child of object.children)
+        {
+          traverse(child);
+        }
+      }
+    };
+
+    traverse(application.baseObject);
+    return minCenterDistance === Infinity ? 10 : minCenterDistance;
   }
 }
 

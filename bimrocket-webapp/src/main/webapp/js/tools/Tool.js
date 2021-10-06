@@ -45,21 +45,21 @@ class Tool
     }
   }
 
-  intersect(mousePosition, baseObject, recursive)
+  intersect(pointerPosition, baseObject, recursive)
   {
     const application = this.application;
     const camera = application.camera;
     const container = application.container;
     const raycaster = new THREE.Raycaster();
 
-    let mousecc = new THREE.Vector2();
-    mousecc.x = (mousePosition.x / container.clientWidth) * 2 - 1;
-    mousecc.y = -(mousePosition.y / container.clientHeight) * 2 + 1;
+    let pointercc = new THREE.Vector2();
+    pointercc.x = (pointerPosition.x / container.clientWidth) * 2 - 1;
+    pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
 
     let ray, origin, vector;
     if (camera instanceof THREE.OrthographicCamera)
     {
-      vector = new THREE.Vector3(mousecc.x, mousecc.y, 0); // NDC
+      vector = new THREE.Vector3(pointercc.x, pointercc.y, 0); // NDC
       vector.unproject(camera); // world
 
       origin = new THREE.Vector3();
@@ -74,7 +74,7 @@ class Tool
     }
     else // THREE.PerspectiveCamera
     {
-      vector = new THREE.Vector3(mousecc.x, mousecc.y, 0); // NDC
+      vector = new THREE.Vector3(pointercc.x, pointercc.y, 0); // NDC
       vector.unproject(camera); // world
       origin = new THREE.Vector3();
       camera.localToWorld(origin);
@@ -109,10 +109,10 @@ class Tool
     return object === null;
   }
 
-  getMousePosition(event)
+  getEventPosition(event)
   {
-    var x = event.offsetX || event.layerX;
-    var y = event.offsetY || event.layerY;
+    const x = event.offsetX || event.layerX;
+    const y = event.offsetY || event.layerY;
     return new THREE.Vector2(x, y);
   }
 

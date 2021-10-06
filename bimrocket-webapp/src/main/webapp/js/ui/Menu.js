@@ -20,7 +20,7 @@ class AbstractMenuItem
     I18N.set(this.anchorElement, "innerHTML", label || "menuitem");
     this.itemElement.appendChild(this.anchorElement);
 
-    this.anchorElement.addEventListener("mouseenter",
+    this.anchorElement.addEventListener("pointerenter",
       () => this.anchorElement.focus());
   }
 }

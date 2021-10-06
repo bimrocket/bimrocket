@@ -26,9 +26,9 @@ class MoveTool extends Tool
     this.vector = new THREE.Vector3();
     this.inverseMatrixWorld = new THREE.Matrix4();
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
 
     this.createPanel();
@@ -47,7 +47,7 @@ class MoveTool extends Tool
     this.panel.visible = true;
     const container = this.application.container;
     container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('mousedown', this._onMouseDown, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
   }
 
   deactivate()
@@ -55,10 +55,10 @@ class MoveTool extends Tool
     this.panel.visible = false;
     const container = this.application.container;
     container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('mousedown', this._onMouseDown, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -69,9 +69,9 @@ class MoveTool extends Tool
     this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {
-      let mousePosition = this.getMousePosition(event);
+      let pointerPosition = this.getEventPosition(event);
       const scene = application.scene;
-      let intersect = this.intersect(mousePosition, scene, true);
+      let intersect = this.intersect(pointerPosition, scene, true);
       if (intersect !== null)
       {
         this.initialPoint.copy(intersect.point);
@@ -79,8 +79,8 @@ class MoveTool extends Tool
 
         this.initialPosition.copy(object.position);
         const container = this.application.container;
-        container.addEventListener('mousemove', this._onMouseMove, false);
-        container.addEventListener('mouseup', this._onMouseUp, false);
+        container.addEventListener('pointermove', this._onPointerMove, false);
+        container.addEventListener('pointerup', this._onPointerUp, false);
 
         object.parent.updateMatrix();
         object.parent.updateMatrixWorld(true);
@@ -89,7 +89,7 @@ class MoveTool extends Tool
     }
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -97,9 +97,9 @@ class MoveTool extends Tool
 
     const application = this.application;
 
-    const mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
     const scene = application.scene;
-    let intersect = this.intersect(mousePosition, scene, true);
+    let intersect = this.intersect(pointerPosition, scene, true);
     if (intersect !== null)
     {
       let v0 = new THREE.Vector3();
@@ -124,15 +124,15 @@ class MoveTool extends Tool
     }
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     this.object = null;
 
     var container = this.application.container;
-      container.removeEventListener('mousemove', this._onMouseMove, false);
-      container.removeEventListener('mouseup', this._onMouseUp, false);
+      container.removeEventListener('pointermove', this._onPointerMove, false);
+      container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
   onContextMenu(event)

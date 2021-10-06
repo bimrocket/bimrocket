@@ -33,7 +33,7 @@ class TabbedPane
       tabSelectorElem.href = "#";
       I18N.set(tabSelectorElem, "innerHTML", label || name);
       tabSelectorElem.addEventListener("click", () => this.showTab(name));
-      tabSelectorElem.addEventListener("mousedown", () => this.showTab(name));
+      tabSelectorElem.addEventListener("pointerdown", () => this.showTab(name));
       tabSelectorElem.className = "selector";
       this.headerElem.appendChild(tabSelectorElem);
 

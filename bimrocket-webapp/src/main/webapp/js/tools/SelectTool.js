@@ -18,7 +18,7 @@ class SelectTool extends Tool
     this.className = "select";
     this.setOptions(options);
 
-    this._onMouseUp = this.onMouseUp.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
     this.createPanel();
   }
 
@@ -46,17 +46,17 @@ class SelectTool extends Tool
   {
     this.panel.visible = true;
     var container = this.application.container;
-    container.addEventListener('mouseup', this._onMouseUp, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
     var container = this.application.container;
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -64,8 +64,8 @@ class SelectTool extends Tool
     const scene = application.scene;
     const selection = application.selection;
 
-    var mousePosition = this.getMousePosition(event);
-    var intersect = this.intersect(mousePosition, scene, true);
+    var pointerPosition = this.getEventPosition(event);
+    var intersect = this.intersect(pointerPosition, scene, true);
     if (intersect)
     {
       var point = intersect.point;

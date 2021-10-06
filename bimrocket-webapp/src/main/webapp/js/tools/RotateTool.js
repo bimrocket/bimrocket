@@ -23,9 +23,9 @@ class RotateTool extends Tool
     this.rotateStart = 0;
     this.rotateEnd = 0;
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
 
     this.createPanel();
@@ -43,7 +43,7 @@ class RotateTool extends Tool
     this.panel.visible = true;
     const container = this.application.container;
     container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('mousedown', this._onMouseDown, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
   }
 
   deactivate()
@@ -51,36 +51,36 @@ class RotateTool extends Tool
     this.panel.visible = false;
     const container = this.application.container;
     container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('mousedown', this._onMouseDown, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     const application = this.application;
 
     event.preventDefault();
-    let mousePosition = this.getMousePosition(event);
+    let pointerPosition = this.getEventPosition(event);
 
     this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {
-      this.rotateStart = mousePosition.x;
+      this.rotateStart = pointerPosition.x;
       let container = application.container;
-      container.addEventListener('mousemove', this._onMouseMove, false);
-      container.addEventListener('mouseup', this._onMouseUp, false);
+      container.addEventListener('pointermove', this._onPointerMove, false);
+      container.addEventListener('pointerup', this._onPointerUp, false);
     }
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
-    var mousePosition = this.getMousePosition(event);
+    var pointerPosition = this.getEventPosition(event);
 
-    this.rotateEnd = mousePosition.x;
+    this.rotateEnd = pointerPosition.x;
     let delta = this.rotateEnd - this.rotateStart;
     for (let i = 0; i < this.objects.length; i++)
     {
@@ -95,15 +95,15 @@ class RotateTool extends Tool
     this.application.notifyEventListeners("scene", changeEvent);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     this.objects = [];
 
     const container = this.application.container;
-    container.removeEventListener('mousemove', this._onMouseMove, false);
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
   onContextMenu(event)

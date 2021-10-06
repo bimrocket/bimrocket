@@ -21,9 +21,9 @@ class BIMLayoutTool extends Tool
     this.className = "bim_layout";
     this.setOptions(options);
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
     this._animate = this.animate.bind(this);
 
     this.rotateStart = new THREE.Vector2();
@@ -64,7 +64,7 @@ class BIMLayoutTool extends Tool
     const application = this.application;
     const container = application.container;
 
-    container.addEventListener('mousedown', this._onMouseDown, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
     application.addEventListener('animation', this._animate);
 
     this.sites = [];
@@ -168,7 +168,7 @@ class BIMLayoutTool extends Tool
 
     const application = this.application;
     const container = application.container;
-    container.removeEventListener('mousedown', this._onMouseDown, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
     application.removeEventListener('animation', this._animate);
   }
 
@@ -199,28 +199,28 @@ class BIMLayoutTool extends Tool
     }
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
 
     const container = this.application.container;
-    container.addEventListener('mousemove', this._onMouseMove, false);
-    container.addEventListener('mouseup', this._onMouseUp, false);
+    container.addEventListener('pointermove', this._onPointerMove, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
 
-    this.rotateStart = this.getMousePosition(event);
+    this.rotateStart = this.getEventPosition(event);
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
 
-    let mousePosition = this.getMousePosition(event);
+    let pointerPosition = this.getEventPosition(event);
 
-    this.rotateEnd.copy(mousePosition);
+    this.rotateEnd.copy(pointerPosition);
     this.rotateVector.subVectors(this.rotateEnd, this.rotateStart);
     this.rotateStart.copy(this.rotateEnd);
 
@@ -231,11 +231,11 @@ class BIMLayoutTool extends Tool
     this.updateCamera = true;
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     const container = this.application.container;
-    container.removeEventListener('mousemove', this._onMouseMove, false);
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
   showAll()

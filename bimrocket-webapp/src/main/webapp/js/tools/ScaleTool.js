@@ -22,9 +22,9 @@ class ScaleTool extends Tool
     this.scaleStart = 0;
     this.scaleEnd = 0;
 
-    this._onMouseUp = this.onMouseUp.bind(this);
-    this._onMouseDown = this.onMouseDown.bind(this);
-    this._onMouseMove = this.onMouseMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
 
     this.createPanel();
@@ -42,7 +42,7 @@ class ScaleTool extends Tool
     this.panel.visible = true;
     const container = this.application.container;
     container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('mousedown', this._onMouseDown, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
   }
 
   deactivate()
@@ -50,36 +50,36 @@ class ScaleTool extends Tool
     this.panel.visible = false;
     const container = this.application.container;
     container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('mousedown', this._onMouseDown, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
   }
 
-  onMouseDown(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     const application = this.application;
 
     event.preventDefault();
-    const mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
 
     this.objects = application.selection.roots;
     if (this.objects.length > 0)
     {
-      this.scaleStart = mousePosition.x;
+      this.scaleStart = pointerPosition.x;
       const container = application.container;
-      container.addEventListener('mousemove', this._onMouseMove, false);
-      container.addEventListener('mouseup', this._onMouseUp, false);
+      container.addEventListener('pointermove', this._onPointerMove, false);
+      container.addEventListener('pointerup', this._onPointerUp, false);
     }
   }
 
-  onMouseMove(event)
+  onPointerMove(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     event.preventDefault();
-    const mousePosition = this.getMousePosition(event);
+    const pointerPosition = this.getEventPosition(event);
 
-    this.scaleEnd = mousePosition.x;
+    this.scaleEnd = pointerPosition.x;
     let delta = this.scaleEnd - this.scaleStart;
     let factor = 1 + delta * 0.01;
 
@@ -99,15 +99,15 @@ class ScaleTool extends Tool
     this.application.notifyEventListeners("scene", changeEvent);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
     this.object = null;
 
     var container = this.application.container;
-    container.removeEventListener('mousemove', this._onMouseMove, false);
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
   onContextMenu(event)

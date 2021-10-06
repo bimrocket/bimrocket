@@ -18,7 +18,7 @@ class PushPullTool extends Tool
     this.className = "pushpull";
     this.setOptions(options);
 
-    this._onMouseUp = this.onMouseUp.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
     this.createPanel();
   }
 
@@ -44,7 +44,7 @@ class PushPullTool extends Tool
     const application = this.application;
     const container = application.container;
 
-    container.addEventListener('mouseup', this._onMouseUp, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
     application.repaint();
   }
 
@@ -55,10 +55,10 @@ class PushPullTool extends Tool
     const application = this.application;
     const container = application.container;
 
-    container.removeEventListener('mouseup', this._onMouseUp, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
   }
 
-  onMouseUp(event)
+  onPointerUp(event)
   {
   }
 }

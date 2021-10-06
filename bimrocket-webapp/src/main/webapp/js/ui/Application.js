@@ -123,6 +123,7 @@ class Application
 
     const container = document.createElement("div");
     container.className = "container";
+    container.style.touchAction = "none";
     this.container = container;
     element.appendChild(container);
 

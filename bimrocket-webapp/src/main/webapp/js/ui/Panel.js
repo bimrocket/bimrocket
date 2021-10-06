@@ -429,14 +429,14 @@ class PanelResizer
 
     const reset = () =>
     {
-      container.removeEventListener("mousemove", move, false);
-      container.removeEventListener("mouseup", reset, false);
+      container.removeEventListener("pointermove", move, false);
+      container.removeEventListener("pointerup", reset, false);
     };
 
-    element.addEventListener("mousedown", () =>
+    element.addEventListener("pointerdown", () =>
     {
-      container.addEventListener("mousemove", move, false);
-      container.addEventListener("mouseup", reset, false);
+      container.addEventListener("pointermove", move, false);
+      container.addEventListener("pointerup", reset, false);
     });
   }
 

@@ -5,7 +5,7 @@
  */
 
 import { Solid } from "../Solid.js";
-import { ObjectBuilder } from "../ObjectBuilder.js";
+import { ObjectBuilder } from "./ObjectBuilder.js";
 import * as THREE from "../../lib/three.module.js";
 
 class Cloner extends ObjectBuilder
@@ -44,6 +44,8 @@ class Cloner extends ObjectBuilder
     return true;
   }
 };
+
+ObjectBuilder.registerBuilder(Cloner);
 
 export { Cloner };
 

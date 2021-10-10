@@ -12,7 +12,7 @@ import { Profile } from "../../core/Profile.js";
 import { ProfileGeometry } from "../../core/ProfileGeometry.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
-import { ObjectBuilder } from "../../core/ObjectBuilder.js";
+import { ObjectBuilder } from "../../core/builders/ObjectBuilder.js";
 import { Cloner } from "../../core/builders/Cloner.js";
 import { Extruder } from "../../core/builders/Extruder.js";
 import { BooleanOperator } from "../../core/builders/BooleanOperator.js";
@@ -461,10 +461,12 @@ class IFCLoader extends THREE.Loader
     let clonedObject = object.clone(false);
     clonedObject._ifc = object._ifc;
 
-    if (!(object instanceof Solid) || full)
+    if (full)
     {
-      for (let child of object.children)
+      const start = object instanceof Solid ? 2 : 0;
+      for (let i = start; i < object.children.length; i++)
       {
+        let child = object.children[i];
         clonedObject.add(this.cloneObject3D(child, full));
       }
     }

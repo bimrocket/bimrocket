@@ -6,7 +6,7 @@
 
 import { Solid } from "../../core/Solid.js";
 import { BSP } from "../../core/BSP.js";
-import { ObjectBuilder } from "../../core/ObjectBuilder.js";
+import { ObjectBuilder } from "../../core/builders/ObjectBuilder.js";
 import { IFC } from "./IFC.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -113,6 +113,8 @@ class IFCVoider extends ObjectBuilder
     return true;
   }
 };
+
+ObjectBuilder.registerBuilder(IFCVoider);
 
 export { IFCVoider };
 

@@ -4,21 +4,33 @@
  * @author realor
  */
 import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cord } from "../core/Cord.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { CordGeometry } from "../core/CordGeometry.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
   static VERSION = 1
 
+  constructor()
+  {
+  }
+
   parse(object)
   {
+    const dateString = new Date().toISOString();
+
     let model =
     {
       metadata :
       {
         format : "BIMROCKET FILE (brf)",
-        version : BRFExporter.VERSION
+        version : BRFExporter.VERSION,
+        creation : dateString,
+        agent : navigator.userAgent
       },
       geometries : {},
       materials : {},
@@ -32,7 +44,7 @@ class BRFExporter
 
   export(object, model)
   {
-    const id = String(object.id);
+    const id = "O" + object.id;
 
     let entry = {
       id : id,
@@ -41,33 +53,33 @@ class BRFExporter
       visible : object.visible
     };
 
-    model.objects[entry.id] = entry;
+    model.objects[id] = entry;
 
     if (object.parent)
     {
-      const parentId = String(object.parent.id);
+      const parentId = "O" + object.parent.id;
       if (typeof model.objects[parentId] !== "undefined")
       {
-        entry.parent = parentId;
+        entry.parent = { type : "#object", id : parentId };
       }
     }
 
     let position = object.position;
     if (position.x !== 0 || position.y !== 0 || position.z !== 0)
     {
-      entry.position = { x: position.x, y: position.y, z: position.z };
+      entry.position = this.exportVector(position);
     }
 
     let rotation = object.rotation;
     if (rotation.x !== 0 || rotation.y !== 0 || rotation.z !== 0)
     {
-      entry.rotation = { x: rotation.x, y: rotation.y, z: rotation.z };
+      entry.rotation = this.exportEuler(rotation);
     }
 
     let scale = object.scale;
     if (scale.x !== 1.0 || scale.y !== 1.0 || scale.z !== 1.0)
     {
-      entry.scale = { x: scale.x, y: scale.y, z: scale.z };
+      entry.scale = this.exportVector(scale);
     }
 
     if (Object.keys(object.userData).length > 0)
@@ -79,35 +91,45 @@ class BRFExporter
     {
       let geometry = object.geometry;
       this.exportGeometry(geometry, model);
-      entry.geometry = String(geometry.id);
+      entry.geometry = { type : "#geometry", id: String(geometry.id) };
       entry.edgesVisible = object.edgesVisible;
       entry.facesVisible = object.facesVisible;
-      entry.operation = object.operation;
+    }
+    else if (object instanceof Profile)
+    {
+      let geometry = object.geometry;
+      this.exportGeometry(geometry, model);
+      entry.geometry = { type : "#geometry", id : String(geometry.id) };
+    }
+    else if (object instanceof Cord)
+    {
+      let geometry = object.geometry;
+      this.exportGeometry(geometry, model);
+      entry.geometry = { type : "#geometry", id : String(geometry.id) };
     }
     else if (object instanceof THREE.Mesh)
     {
       let geometry = object.geometry;
       this.exportGeometry(geometry, model);
-      entry.geometry = String(geometry.id);
+      entry.geometry = { type : "#geometry", id : String(geometry.id) };
     }
 
     if (object.material)
     {
       let material = object.material;
       this.exportMaterial(material, model);
-      entry.material = String(material.id);
+      entry.material = { type : "#material", id : String(material.id) };
     }
 
-    if (object instanceof Solid)
+    if (object.builder)
     {
-      for (let i = 2; i < object.children.length; i++)
-      {
-        this.export(object.children[i], model);
-      }
+      entry.builder = this.exportBuilder(object.builder);
     }
-    else
+
+    for (let child of object.children)
     {
-      for (let child of object.children)
+      if (child.name === null
+        || !child.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
       {
         this.export(child, model);
       }
@@ -130,13 +152,48 @@ class BRFExporter
         entry.vertices = [];
         for (let vertex of geometry.vertices)
         {
-          entry.vertices.push({ x : vertex.x, y : vertex.y, z : vertex.z });
+          entry.vertices.push(this.exportVector(vertex));
         }
         entry.faces = [];
         entry.isManifold = geometry.isManifold;
         for (let face of geometry.faces)
         {
           entry.faces.push(face.indices);
+        }
+      }
+      else if (geometry instanceof ProfileGeometry)
+      {
+        const path = geometry.path;
+        entry.type = "ProfileGeometry";
+        entry.isClosed = geometry.isClosed();
+        const points = path.getPoints();
+        entry.points = [];
+        for (let point of points)
+        {
+          entry.points.push(this.exportVector(point));
+        }
+        if (path instanceof THREE.Shape)
+        {
+          entry.holes = [];
+          const holes = path.getPointsHoles();
+          for (let hole of holes)
+          {
+            const holePoints = [];
+            entry.holes.push(holePoints);
+            for (let point of hole)
+            {
+              holePoints.push(this.exportVector(point));
+            }
+          }
+        }
+      }
+      else if (geometry instanceof CordGeometry)
+      {
+        entry.type = "CordGeometry";
+        entry.points = [];
+        for (let point of geometry.points)
+        {
+          entry.points.push({ x : point.x, y : point.y, z : point.z });
         }
       }
       else if (geometry instanceof THREE.BufferGeometry)
@@ -189,6 +246,54 @@ class BRFExporter
       }
       model.materials[id] = entry;
     }
+  }
+
+  exportBuilder(builder)
+  {
+    const builderEntry = {};
+    builderEntry.type = builder.constructor.name;
+    const properties = Object.keys(builder);
+    for (let property of properties)
+    {
+      if (!property.startsWith("_"))
+      {
+        let value = builder[property];
+        let type = typeof value;
+        if (type === "number" || type === "string" || type === "boolean")
+        {
+          builderEntry[property] = value;
+        }
+        else if (value instanceof THREE.Vector3
+                || value instanceof THREE.Vector2)
+        {
+          builderEntry[property] = this.exportVector(value);
+        }
+        else if (value instanceof THREE.Euler)
+        {
+          builderEntry[property] = this.exportEuler(value);
+        }
+        else if (value instanceof THREE.Object3D)
+        {
+          builderEntry[property] = { type: "#object", id : "O" + value.id };
+        }
+      }
+    }
+    return builderEntry;
+  }
+
+  exportVector(vector)
+  {
+    const v = { x: vector.x, y : vector.y };
+    if (vector instanceof THREE.Vector3)
+    {
+      v.z = vector.z;
+    }
+    return v;
+  }
+
+  exportEuler(euler)
+  {
+    return { type: "Euler", x : euler.x, y : euler.y, z : euler.z };
   }
 }
 

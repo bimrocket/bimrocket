@@ -98,7 +98,7 @@ export const translations =
   "tool.rotate.label" : "Rotar",
   "tool.rotate.help" : "Arrastar con botón izquierdo del ratón para rotar",
 
-  "tool.scale.label" : "Scalar",
+  "tool.scale.label" : "Escalar",
   "tool.scale.help" : "Arrastar con botón izquierdo del ratón para escalar",
 
   "tool.union.label" : "Unión",

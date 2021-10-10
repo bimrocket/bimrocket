@@ -4,13 +4,14 @@
  * @author realor
  */
 
-import { ObjectBuilder } from "../ObjectBuilder.js";
+import { ObjectBuilder } from "./ObjectBuilder.js";
+import { SolidBuilder } from "./SolidBuilder.js";
 import { SolidGeometry } from "../SolidGeometry.js";
 import { Solid } from "../Solid.js";
 import { BSP } from "../BSP.js";
 import * as THREE from "../../lib/three.module.js";
 
-class BooleanOperator extends ObjectBuilder
+class BooleanOperator extends SolidBuilder
 {
   static UNION = "union";
   static INTERSECT = "intersect";
@@ -71,6 +72,8 @@ class BooleanOperator extends ObjectBuilder
     return true;
   }
 }
+
+ObjectBuilder.registerBuilder(BooleanOperator);
 
 export { BooleanOperator };
 

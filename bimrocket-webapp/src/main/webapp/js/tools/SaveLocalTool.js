@@ -19,12 +19,13 @@ class SaveLocalTool extends Tool
     this.help = "tool.savelocal.help";
     this.className = "savelocal";
     this.url = null;
+    this.defaultFileName = "scene.brf";
     this.setOptions(options);
   }
 
   activate()
   {
-    let dialog = new SaveDialog(this.label, "scene.stl");
+    let dialog = new SaveDialog(this.label, this.defaultFileName);
     dialog.setI18N(this.application.i18n);
     dialog.onSave = (name, format, onlySelection) =>
     {
@@ -47,8 +48,8 @@ class SaveLocalTool extends Tool
     }
     let intent =
     {
-      object : application.selection.object,
-      name : name || "scene.stl"
+      object : application.selection.object || application.baseObject,
+      name : name || this.defaultFileName
     };
 
     try

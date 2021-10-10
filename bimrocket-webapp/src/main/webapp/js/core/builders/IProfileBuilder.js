@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
 import { ProfileGeometry } from "../ProfileGeometry.js";
 import * as THREE from "../../lib/three.module.js";
@@ -47,5 +48,7 @@ class IProfileBuilder extends ProfileBuilder
     return true;
   }
 };
+
+ObjectBuilder.registerBuilder(IProfileBuilder);
 
 export { IProfileBuilder };

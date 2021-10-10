@@ -4,7 +4,8 @@
  * @author realor
  */
 
-import { ObjectBuilder } from "../ObjectBuilder.js";
+import { ObjectBuilder } from "./ObjectBuilder.js";
+import { SolidBuilder } from "./SolidBuilder.js";
 import { Solid } from "../Solid.js";
 import { Profile } from "../Profile.js";
 import { Cord } from "../Cord.js";
@@ -12,7 +13,7 @@ import { SolidGeometry } from "../SolidGeometry.js";
 import { ProfileGeometry } from "../ProfileGeometry.js";
 import * as THREE from "../../lib/three.module.js";
 
-class Extruder extends ObjectBuilder
+class Extruder extends SolidBuilder
 {
   depth = 1;
   direction = new THREE.Vector3(0, 0, 1);
@@ -325,6 +326,8 @@ class Extruder extends ObjectBuilder
     return undefined;
   }
 };
+
+ObjectBuilder.registerBuilder(Extruder);
 
 export { Extruder }
 

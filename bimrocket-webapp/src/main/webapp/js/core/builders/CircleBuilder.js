@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
 import { ProfileGeometry } from "../ProfileGeometry.js";
 import * as THREE from "../../lib/three.module.js";
@@ -40,6 +41,8 @@ class CircleBuilder extends ProfileBuilder
     path.closePath();
   }
 };
+
+ObjectBuilder.registerBuilder(CircleBuilder);
 
 export { CircleBuilder };
 

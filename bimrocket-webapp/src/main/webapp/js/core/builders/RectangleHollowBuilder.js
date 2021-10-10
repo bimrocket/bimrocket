@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { ObjectBuilder } from "./ObjectBuilder.js";
 import { RectangleBuilder } from "./RectangleBuilder.js";
 import { ProfileGeometry } from "../ProfileGeometry.js";
 import * as THREE from "../../lib/three.module.js";
@@ -33,5 +34,7 @@ class RectangleHollowBuilder extends RectangleBuilder
     profile.updateGeometry(new ProfileGeometry(shape));
   }
 };
+
+ObjectBuilder.registerBuilder(RectangleHollowBuilder);
 
 export { RectangleHollowBuilder };

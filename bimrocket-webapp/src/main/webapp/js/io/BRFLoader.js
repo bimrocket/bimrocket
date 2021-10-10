@@ -3,8 +3,13 @@
  *
  * @author realor
  */
-import { Solid } from "../core/Solid.js"
-import { SolidGeometry } from "../core/SolidGeometry.js"
+import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cord } from "../core/Cord.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { CordGeometry } from "../core/CordGeometry.js";
+import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFLoader extends THREE.Loader
@@ -76,9 +81,9 @@ class BRFLoader extends THREE.Loader
     {
       let entry = objects[id];
       let object = entry._object;
-      if (entry.parent)
+      if (entry.parent && objects[entry.parent.id])
       {
-        let parent = objects[entry.parent]._object;
+        let parent = objects[entry.parent.id]._object;
         if (parent)
         {
           parent.add(object);
@@ -109,6 +114,43 @@ class BRFLoader extends THREE.Loader
         geometry.addFace(...face);
       }
       geometry.updateFaceNormals();
+    }
+    else if (entry.type === "CordGeometry")
+    {
+      const points = [];
+      for (let point of entry.points)
+      {
+        let position = new THREE.Vector3(point.x, point.y, point.z);
+        points.push(position);
+      }
+      geometry = new CordGeometry(points);
+    }
+    else if (entry.type === "ProfileGeometry")
+    {
+      const path = entry.isClosed ? new THREE.Shape() : new THREE.Path();
+      const points = [];
+      for (let point of entry.points)
+      {
+        let position = new THREE.Vector2(point.x, point.y);
+        points.push(position);
+      }
+      path.setFromPoints(points);
+      if (entry.isClosed)
+      {
+        for (let hole of entry.holes)
+        {
+          let holePoints = [];
+          for (let point of hole)
+          {
+            let position = new THREE.Vector2(point.x, point.y);
+            holePoints.push(position);
+          }
+          let holePath = new THREE.Path();
+          holePath.setFromPoints(holePoints);
+          path.holes.push(holePath);
+        }
+      }
+      geometry = new ProfileGeometry(path);
     }
     else if (entry.type === "BufferGeometry")
     {
@@ -182,7 +224,14 @@ class BRFLoader extends THREE.Loader
       object = new Solid();
       object.edgesVisible = entry.edgesVisible;
       object.facesVisible = entry.facesVisible;
-      object.operation = entry.operation;
+    }
+    else if (entry.type === "Profile")
+    {
+      object = new Profile();
+    }
+    else if (entry.type === "Cord")
+    {
+      object = new Cord();
     }
     else if (entry.type === "Mesh")
     {
@@ -210,9 +259,9 @@ class BRFLoader extends THREE.Loader
     }
 
     const geometries = model.geometries;
-    if (entry.geometry && geometries[entry.geometry])
+    if (entry.geometry && geometries[entry.geometry.id])
     {
-      let geometry = geometries[entry.geometry]._geometry;
+      let geometry = geometries[entry.geometry.id]._geometry;
       if (geometry instanceof SolidGeometry)
       {
         object.updateGeometry(geometry, false);
@@ -224,9 +273,9 @@ class BRFLoader extends THREE.Loader
     }
 
     const materials = model.materials;
-    if (entry.material && materials[entry.material])
+    if (entry.material && materials[entry.material.id])
     {
-      let material = materials[entry.material]._material;
+      let material = materials[entry.material.id]._material;
       if (material)
       {
         object.material = material;
@@ -238,7 +287,57 @@ class BRFLoader extends THREE.Loader
       object.userData = entry.userData;
     }
 
+    if (entry.builder)
+    {
+      const cls = ObjectBuilder.BUILDERS[entry.builder.type];
+      if (cls)
+      {
+        const builder = new cls();
+        object.builder = builder;
+
+        const properties = Object.keys(entry.builder);
+        for (let property of properties)
+        {
+          if (property !== "type")
+          {
+            let value = entry.builder[property];
+            builder[property] = this.parseValue(value, model);
+          }
+        }
+      }
+    }
     return object;
+  }
+
+  parseValue(value, model)
+  {
+    if (typeof value === "object")
+    {
+      let type = value.type;
+      if (type === "undefined")
+      {
+        type = typeof value.z === "number" ? "Vector3" : "Vector2";
+      }
+      switch (type)
+      {
+        case "Vector3": return new THREE.Vector3(value.x, value.y, value.z);
+        case "Vector2": return new THREE.Vector2(value.x, value.y);
+        case "Euler": return new THREE.Euler(value.x, value.y, value.z);
+        case "#object":
+          if (model.objects[value.id])
+            return model.objects[value.id]._object;
+          break;
+        case "#geometry":
+          if (model.geometries[value.id])
+            return model.geometries[value.id]._geometry;
+          break;
+        case "#material":
+          if (model.materials[value.id])
+            return model.materials[value.id]._material;
+          break;
+      }
+    }
+    return value;
   }
 }
 

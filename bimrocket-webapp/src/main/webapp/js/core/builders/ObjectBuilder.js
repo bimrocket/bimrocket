@@ -4,32 +4,30 @@
  * @author realor
  */
 
-import { Solid } from "./Solid.js";
-import * as THREE from "../lib/three.module.js";
+import { Solid } from "../Solid.js";
+import * as THREE from "../../lib/three.module.js";
 
 class ObjectBuilder
 {
   static DEFAULT_INSTANCE = new ObjectBuilder();
 
+  static BUILDERS = {};
+
   constructor()
   {
   }
 
-
   /*
    * Calls action(dep) for each object dependency
    *
-   * Default implementation traverses object children
+   * Traverse children by default
    */
   traverseDependencies(object, action)
   {
     const children = object.children;
-    let i = object instanceof Solid ? 2 : 0;
-    while (i < children.length)
+    for (let child of children)
     {
-      let child = children[i];
       action(child);
-      i++;
     }
   }
 
@@ -44,6 +42,11 @@ class ObjectBuilder
   }
 
   /* static methods */
+
+  static registerBuilder(builder)
+  {
+    this.BUILDERS[builder.name] = builder;
+  }
 
   static mark(object)
   {

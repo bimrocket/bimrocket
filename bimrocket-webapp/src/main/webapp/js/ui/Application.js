@@ -13,7 +13,7 @@ import { Cord } from "../core/Cord.js";
 import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
 import { Cloner } from "../core/builders/Cloner.js";
-import { ObjectBuilder } from "../core/ObjectBuilder.js";
+import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
 import { SolidGeometry, EdgeMap } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IOManager } from "../io/IOManager.js";

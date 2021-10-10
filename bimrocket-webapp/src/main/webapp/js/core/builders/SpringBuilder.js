@@ -4,12 +4,13 @@
  *  @author realor
  */
 
-import { ObjectBuilder } from "../ObjectBuilder.js";
+import { ObjectBuilder } from "./ObjectBuilder.js";
+import { CordBuilder } from "./CordBuilder.js";
 import { Cord } from "../Cord.js";
 import { CordGeometry } from "../CordGeometry.js";
 import * as THREE from "../../lib/three.module.js";
 
-class SpringBuilder extends ObjectBuilder
+class SpringBuilder extends CordBuilder
 {
   constructor(radius = 1, laps = 4, advance = 1, segments = 32)
   {
@@ -18,10 +19,6 @@ class SpringBuilder extends ObjectBuilder
     this.laps = laps;
     this.advance = advance;
     this.segments = segments;
-  }
-
-  traverseDependencies()
-  {
   }
 
   performBuild(cord)
@@ -51,8 +48,9 @@ class SpringBuilder extends ObjectBuilder
     }
     return true;
   }
-
 };
+
+ObjectBuilder.registerBuilder(SpringBuilder);
 
 export { SpringBuilder };
 

@@ -6,7 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { Solid } from "../core/Solid.js";
-import { ObjectBuilder } from "../core/ObjectBuilder.js";
+import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
 import { BooleanOperator } from "../core/builders/BooleanOperator.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";

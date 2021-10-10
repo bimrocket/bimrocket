@@ -8,7 +8,7 @@ import * as THREE from "../lib/three.module.js";
 
 class CordGeometry extends THREE.BufferGeometry
 {
-  constructor(points, divisions = 24)
+  constructor(points = [], divisions = 24)
   {
     super();
     this.points = points; // THREE.Vector3[]

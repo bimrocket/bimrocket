@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import { ObjectBuilder } from "../../core/ObjectBuilder.js";
+import { ObjectBuilder } from "../../core/builders/ObjectBuilder.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
 import { Profile } from "../../core/Profile.js";

@@ -6,7 +6,7 @@ ul.inspector
   margin-left: 0;
   list-style: none;
   padding-left:0;
-  text-align: left;  
+  text-align: left;
 }
 
 ul.inspector ul
@@ -145,9 +145,27 @@ ul.inspector li.property > span.value
   vertical-align: middle;
 }
 
+ul.inspector li.property > a.value
+{
+  text-align: left;
+  font-size:12px;
+  margin-left: 2px;
+  line-height: 18px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  vertical-align: middle;
+  color: #202080;
+  text-decoration: none;
+}
+
+ul.inspector li.property > a.value:hover
+{
+  text-decoration: underline;
+}
+
 ul.inspector li.property.editable > span.label
 {
-  cursor: pointer;  
+  cursor: pointer;
 }
 
 ul.inspector li.property.editable > span.value
@@ -215,7 +233,7 @@ ul.inspector_list
   margin-top: 4px;
   margin-left: 4px;
   padding-left:0;
-  text-align: left;    
+  text-align: left;
   list-style-type:none;
 }
 

@@ -37,7 +37,8 @@ class Inspector extends Panel
       new VectorRenderer(this),
       new EulerRenderer(this),
       new ExpressionRenderer(this),
-      new MaterialRenderer(this)];
+      new MaterialRenderer(this),
+      new Object3DRenderer(this)];
     this.editors = [
       new StringEditor(this),
       new NumberEditor(this),
@@ -845,6 +846,35 @@ class MaterialRenderer extends PropertyRenderer
       colorElem.title = rgb;
       valueElem.appendChild(colorElem);
     }
+    propElem.appendChild(valueElem);
+    return valueElem;
+  }
+}
+
+class Object3DRenderer extends PropertyRenderer
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Object3D;
+  }
+
+  getClassName(value)
+  {
+    return "object3D";
+  }
+
+  render(object, propElem)
+  {
+    let valueElem = document.createElement("a");
+    valueElem.className = "value";
+    valueElem.innerHTML = object.name || "object-" + object.id;
+    valueElem.addEventListener("click",
+      () => this.inspector.application.selection.set(object));
     propElem.appendChild(valueElem);
     return valueElem;
   }

@@ -257,8 +257,13 @@ class IFCLoader extends THREE.Loader
           const mappedObject3D = reprMap.helper.getObject3D();
           if (mappedObject3D && mappedObject3D.parent === null)
           {
+            let typeName = typeProduct.Name || typeProduct.GlobalId;
+            if (typeName.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+            {
+              typeName = typeName.substring(1);
+            }
             let typeGroup = new THREE.Group();
-            typeGroup.name = typeProduct.Name || typeProduct.GlobalId;
+            typeGroup.name = typeName;
             typeGroup._ifc = typeProduct;
             typeGroup.add(mappedObject3D);
             typeGroup.userData.IFC =

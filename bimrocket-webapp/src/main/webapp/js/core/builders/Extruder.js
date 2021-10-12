@@ -325,6 +325,14 @@ class Extruder extends SolidBuilder
     }
     return undefined;
   }
+
+  copy(source)
+  {
+    this.depth = source.depth;
+    this.direction.copy(source.direction);
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(Extruder);

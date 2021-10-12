@@ -35,7 +35,7 @@ class Profile extends THREE.LineSegments
 
 		this.material = source.material;
 		this.geometry = source.geometry;
-    this.builder = source.builder;
+    this.builder = source.builder ? source.builder.clone() : null;
 
 		return this;
 	}

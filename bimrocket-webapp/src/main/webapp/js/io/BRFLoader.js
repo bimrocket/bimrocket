@@ -76,23 +76,27 @@ class BRFLoader extends THREE.Loader
       entry._object = this.parseObject(entry, model);
     }
 
-    // build object tree
+    // build object tree and create object builders
     for (let id in objects)
     {
       let entry = objects[id];
       let object = entry._object;
-      if (entry.parent && objects[entry.parent.id])
+      if (entry.children)
       {
-        let parent = objects[entry.parent.id]._object;
-        if (parent)
+        for (let child of entry.children)
         {
-          parent.add(object);
+          object.add(model.objects[child.id]._object);
         }
       }
-      else rootObject = object;
+      if (entry.builder)
+      {
+        this.parseBuilder(entry, model);
+      }
     }
-
-    return rootObject;
+    const root = model.objects[model.root.id]._object;
+    root.updateMatrixWorld();
+    ObjectBuilder.build(root);
+    return root;
   }
 
   parseGeometry(entry)
@@ -257,6 +261,7 @@ class BRFLoader extends THREE.Loader
     {
       object.scale.set(scale.x, scale.y, scale.z);
     }
+    object.updateMatrix();
 
     const geometries = model.geometries;
     if (entry.geometry && geometries[entry.geometry.id])
@@ -286,13 +291,18 @@ class BRFLoader extends THREE.Loader
     {
       object.userData = entry.userData;
     }
+    return object;
+  }
 
+  parseBuilder(entry, model)
+  {
     if (entry.builder)
     {
       const cls = ObjectBuilder.BUILDERS[entry.builder.type];
       if (cls)
       {
         const builder = new cls();
+        const object = entry._object;
         object.builder = builder;
 
         const properties = Object.keys(entry.builder);
@@ -301,43 +311,56 @@ class BRFLoader extends THREE.Loader
           if (property !== "type")
           {
             let value = entry.builder[property];
-            builder[property] = this.parseValue(value, model);
+            this.setPropertyValue(builder, property, value, model);
           }
         }
       }
     }
-    return object;
   }
 
-  parseValue(value, model)
+  setPropertyValue(builder, property, value, model)
   {
+    let type = typeof value;
     if (typeof value === "object")
     {
-      let type = value.type;
-      if (type === "undefined")
+      type = value.type;
+      if (type === undefined)
       {
         type = typeof value.z === "number" ? "Vector3" : "Vector2";
       }
-      switch (type)
-      {
-        case "Vector3": return new THREE.Vector3(value.x, value.y, value.z);
-        case "Vector2": return new THREE.Vector2(value.x, value.y);
-        case "Euler": return new THREE.Euler(value.x, value.y, value.z);
-        case "#object":
-          if (model.objects[value.id])
-            return model.objects[value.id]._object;
-          break;
-        case "#geometry":
-          if (model.geometries[value.id])
-            return model.geometries[value.id]._geometry;
-          break;
-        case "#material":
-          if (model.materials[value.id])
-            return model.materials[value.id]._material;
-          break;
-      }
     }
-    return value;
+
+    switch (type)
+    {
+      case "number":
+      case "string":
+      case "boolean":
+        builder[property] = value;
+        break;
+      case "Vector3":
+      case "Euler":
+        builder[property].set(value.x, value.y, value.z);
+        break;
+      case "Vector2":
+        builder[property].set(value.x, value.y);
+        break;
+      case "#object":
+        if (model.objects[value.id])
+          builder[property] = model.objects[value.id]._object;
+          if (builder[property] === undefined)
+          {
+            console.info(builder, property, value);
+          }
+        break;
+      case "#geometry":
+        if (model.geometries[value.id])
+          builder[property] = model.geometries[value.id]._geometry;
+        break;
+      case "#material":
+        if (model.materials[value.id])
+          builder[property] = model.materials[value.id]._material;
+        break;
+    }
   }
 }
 

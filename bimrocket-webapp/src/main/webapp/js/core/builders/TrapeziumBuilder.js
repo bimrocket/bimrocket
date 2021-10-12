@@ -39,6 +39,16 @@ class TrapeziumBuilder extends ProfileBuilder
 
     return true;
   }
+
+  copy(source)
+  {
+    this.bottomXDim = source.bottomXDim;
+    this.height = source.height;
+    this.topXDim = source.topXDim;
+    this.topXOffset = source.topXOffset;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(TrapeziumBuilder);

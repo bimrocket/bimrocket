@@ -71,6 +71,13 @@ class BooleanOperator extends SolidBuilder
 
     return true;
   }
+
+  copy(source)
+  {
+    this.operation = source.operation;
+
+    return this;
+  }
 }
 
 ObjectBuilder.registerBuilder(BooleanOperator);

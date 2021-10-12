@@ -41,6 +41,15 @@ class EllipseBuilder extends ProfileBuilder
     }
     path.closePath();
   }
+
+  copy(source)
+  {
+    this.xradius = source.xradius;
+    this.yradius = source.yradius;
+    this.segments = source.segments;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(EllipseBuilder);

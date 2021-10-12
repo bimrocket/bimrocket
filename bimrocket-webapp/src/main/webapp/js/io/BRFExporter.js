@@ -34,17 +34,18 @@ class BRFExporter
       },
       geometries : {},
       materials : {},
-      objects : {}
+      objects : {},
+      root : { type : "#object", id : String(object.id) }
     };
 
     this.export(object, model);
 
-    return JSON.stringify(model, null, 2);
+    return JSON.stringify(model, null, 1);
   }
 
   export(object, model)
   {
-    const id = "O" + object.id;
+    const id = String(object.id);
 
     let entry = {
       id : id,
@@ -54,15 +55,6 @@ class BRFExporter
     };
 
     model.objects[id] = entry;
-
-    if (object.parent)
-    {
-      const parentId = "O" + object.parent.id;
-      if (typeof model.objects[parentId] !== "undefined")
-      {
-        entry.parent = { type : "#object", id : parentId };
-      }
-    }
 
     let position = object.position;
     if (position.x !== 0 || position.y !== 0 || position.z !== 0)
@@ -89,49 +81,47 @@ class BRFExporter
 
     if (object instanceof Solid)
     {
-      let geometry = object.geometry;
-      this.exportGeometry(geometry, model);
-      entry.geometry = { type : "#geometry", id: String(geometry.id) };
       entry.edgesVisible = object.edgesVisible;
       entry.facesVisible = object.facesVisible;
     }
-    else if (object instanceof Profile)
+
+    let exportGeometry = true;
+    let exportChildren = true;
+    if (object.builder)
     {
-      let geometry = object.geometry;
-      this.exportGeometry(geometry, model);
-      entry.geometry = { type : "#geometry", id : String(geometry.id) };
-    }
-    else if (object instanceof Cord)
-    {
-      let geometry = object.geometry;
-      this.exportGeometry(geometry, model);
-      entry.geometry = { type : "#geometry", id : String(geometry.id) };
-    }
-    else if (object instanceof THREE.Mesh)
-    {
-      let geometry = object.geometry;
-      this.exportGeometry(geometry, model);
-      entry.geometry = { type : "#geometry", id : String(geometry.id) };
+      entry.builder = this.exportBuilder(object.builder);
+      exportGeometry = !object.builder.isGeometryBuilder(object);
+      exportChildren = !object.builder.isChildrenBuilder(object);
     }
 
-    if (object.material)
+    let geometry = object.geometry;
+    if (geometry && exportGeometry)
     {
-      let material = object.material;
+      this.exportGeometry(geometry, model);
+      entry.geometry = { type : "#geometry", id: String(geometry.id) };
+    }
+
+    let material = object.material;
+    if (material)
+    {
       this.exportMaterial(material, model);
       entry.material = { type : "#material", id : String(material.id) };
     }
 
-    if (object.builder)
+    if (exportChildren)
     {
-      entry.builder = this.exportBuilder(object.builder);
-    }
-
-    for (let child of object.children)
-    {
-      if (child.name === null
-        || !child.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+      for (let child of object.children)
       {
-        this.export(child, model);
+        if (child.name === null
+          || !child.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+        {
+          this.export(child, model);
+          if (entry.children === undefined)
+          {
+            entry.children = [];
+          }
+          entry.children.push({ type : "#object", id : String(child.id) });
+        }
       }
     }
   }
@@ -274,7 +264,7 @@ class BRFExporter
         }
         else if (value instanceof THREE.Object3D)
         {
-          builderEntry[property] = { type: "#object", id : "O" + value.id };
+          builderEntry[property] = { type: "#object", id : String(value.id) };
         }
       }
     }

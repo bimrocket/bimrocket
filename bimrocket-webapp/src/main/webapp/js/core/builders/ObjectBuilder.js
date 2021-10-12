@@ -11,7 +11,7 @@ class ObjectBuilder
 {
   static DEFAULT_INSTANCE = new ObjectBuilder();
 
-  static BUILDERS = {};
+  static BUILDERS = {}; // builder registry
 
   constructor()
   {
@@ -34,11 +34,53 @@ class ObjectBuilder
   /*
    * Builds object assuming its dependencies have already been built
    *
-   * returns true if object has actually changed
+   * @returns {Boolean} true if object has actually changed, false othwerwise.
    */
   performBuild(object)
   {
     return false;
+  }
+
+  /*
+   * Tells whether this builder constructs the geometry of the object
+   *
+   * @returns {Boolean} true if this builder constructs the geometry,
+   * false otherwise. By default, this method returns true.
+   */
+  isGeometryBuilder(object)
+  {
+    return true;
+  }
+
+  /*
+   * Tells whether this builder constructs the children of the object
+   *
+   * @returns {Boolean} true if this builder constructs the children of
+   * the object, false otherwise. By default, this method returns false.
+   */
+  isChildrenBuilder(object)
+  {
+    return false;
+  }
+
+  /*
+   * Clones this builder
+   *
+   * @returns {ObjectBuilder} a clone of this builder
+   */
+  clone()
+  {
+    return new this.constructor().copy(this);
+  }
+
+  /*
+   * Copies the parameters of the source builder to this builder
+   *
+   * @returns {ObjectBuilder} this builder
+   */
+  copy(source)
+  {
+    return this;
   }
 
   /* static methods */

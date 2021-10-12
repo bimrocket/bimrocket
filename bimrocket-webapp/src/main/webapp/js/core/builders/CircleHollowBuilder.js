@@ -33,6 +33,14 @@ class CircleHollowBuilder extends CircleBuilder
 
     return true;
   }
+
+  copy(source)
+  {
+    super.copy(source);
+    this.wallThickness = source.wallThickness;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(CircleHollowBuilder);

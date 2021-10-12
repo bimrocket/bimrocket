@@ -48,6 +48,16 @@ class SpringBuilder extends CordBuilder
     }
     return true;
   }
+
+  copy(source)
+  {
+    this.radius = source.radius;
+    this.laps = source.laps;
+    this.advance = source.advance;
+    this.segments = source.segments;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(SpringBuilder);

@@ -39,6 +39,15 @@ class LProfileBuilder extends ProfileBuilder
 
     return true;
   }
+
+  copy(source)
+  {
+    this.width = source.width;
+    this.height = source.height;
+    this.thickness = source.thickness;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(LProfileBuilder);

@@ -40,6 +40,14 @@ class RectangleBuilder extends ProfileBuilder
     path.lineTo(-xdim, ydim);
     path.closePath();
   }
+
+  copy(source)
+  {
+    this.width = source.width;
+    this.height = source.height;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(RectangleBuilder);

@@ -40,6 +40,14 @@ class CircleBuilder extends ProfileBuilder
     }
     path.closePath();
   }
+
+  copy(source)
+  {
+    this.radius = source.radius;
+    this.segments = source.segments;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(CircleBuilder);

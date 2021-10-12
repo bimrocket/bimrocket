@@ -47,6 +47,16 @@ class IProfileBuilder extends ProfileBuilder
 
     return true;
   }
+
+  copy(source)
+  {
+    this.width = source.width;
+    this.height = source.height;
+    this.webThickness = source.webThickness;
+    this.flangeThickness = source.flangeThickness;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(IProfileBuilder);

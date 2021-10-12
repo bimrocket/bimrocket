@@ -33,6 +33,14 @@ class RectangleHollowBuilder extends RectangleBuilder
 
     profile.updateGeometry(new ProfileGeometry(shape));
   }
+
+  copy(source)
+  {
+    super.copy(source);
+    this.wallThickness = source.wallThickness;
+
+    return this;
+  }
 };
 
 ObjectBuilder.registerBuilder(RectangleHollowBuilder);

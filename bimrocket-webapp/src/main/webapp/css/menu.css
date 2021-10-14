@@ -8,7 +8,7 @@ nav ul {
 	position: relative;
   z-index: 100;
 }
-	
+
 nav ul li {
 	margin: 0px;
 	display:inline-block;
@@ -18,7 +18,7 @@ nav ul li {
 
 nav a {
 	display:block;
-	padding:0 10px;	
+	padding:0 10px;
 	color:white;
 	font-size:14px;
 	text-decoration:none;
@@ -40,16 +40,20 @@ nav ul ul {
 	top: 28px;
 }
 
+nav ul ul ul {
+  margin-top: -1px;
+}
+
 nav ul li.drop > ul {
 	display:inherit;
   animation: fade_in 0.3s;
 }
-	
+
 nav ul ul li {
 	width:170px;
 	float:none;
 	display:list-item;
-	position: relative;  
+	position: relative;
   box-shadow: 0px 8px 6px -6px rgba(50, 50, 50, 0.3);
   background-color: #f0f0f0;
   border-left: 1px solid gray;
@@ -88,7 +92,7 @@ nav ul ul a.menu
 }
 
 @media all and (max-width : 768px) {
-  
+
 	nav {
 		margin: 0;
     bottom: 0;
@@ -96,30 +100,30 @@ nav ul ul a.menu
     overflow-y: auto;
   }
 
-  nav::-webkit-scrollbar 
+  nav::-webkit-scrollbar
   {
     width: 0px;
     height: 0px;
   }
-  
+
 	nav ul ul,
   nav ul ul ul li
   {
 		float: none;
 		position:static;
 	}
-	
+
   nav ul ul ul {
     height: inherit;
   	top:inherit;
 	  left:inherit;
   }
-  
+
   nav ul ul li:last-child {
     border-bottom: none;
-  }  
-  
-	nav ul li,  
+  }
+
+	nav ul li,
   nav ul ul li,
 	nav ul li.drop > ul,
   nav ul ul li.drop > ul {
@@ -127,27 +131,27 @@ nav ul ul a.menu
 		width: 100%;
     background-color: #254441;
   }
-  
+
 	nav ul li.drop > ul
   {
 		padding:4px 30px;
   }
-  
+
   nav ul li a,
   nav ul ul li a {
    color: white;
    padding: 4px 16px;
   }
-  
+
   nav ul ul ul li:first-child {
     border-top: none;
-  }  
-  
+  }
+
   nav li > a:after { content:  ' +'; }
   nav li.drop > a:after { content:  ' -'; }
   nav li > a:only-child:after { content: ''; }
   nav ul li ul li:hover { background: transparent; }
-  
+
   nav > ul
   {
     position: absolute;
@@ -155,17 +159,17 @@ nav ul ul a.menu
     left: 0;
     display: none;
   }
-  
+
   nav > ul.menu_hide
   {
-    display: none; 
+    display: none;
   }
 
   nav > ul.menu_drop
   {
-    display: block; 
+    display: block;
   }
-  
+
   .menu_button
   {
     position: absolute;

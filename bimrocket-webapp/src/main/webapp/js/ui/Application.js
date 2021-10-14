@@ -1006,30 +1006,38 @@ class Application
     }
   }
 
-  addObject(object, parent, attach)
+  addObject(object, parent = null, attach = false)
   {
     if (!(object instanceof THREE.Object3D)) return;
 
-    if (!(parent instanceof THREE.Object3D))
+    if (parent === null)
     {
       parent = this.selection.object || this.baseObject;
-      while (parent instanceof THREE.Mesh
-             || parent instanceof Solid
-             || parent instanceof Cord
-             || parent instanceof Profile)
+      const scene = this.scene;
+      while (parent !== scene)
       {
-        parent = parent.parent;
+        if (parent.type === "Object3D"
+            || parent.type === "Group"
+            || (parent.type === "Solid" && object.type === "Profile")
+            || (parent.type === "Solid" && object.type === "Cord"))
+        {
+          break;
+        }
+        else
+        {
+          parent = parent.parent;
+        }
       }
     }
     if (attach)
     {
       parent.attach(object);
-      object.updateMatrix();
     }
     else
     {
       parent.add(object);
     }
+    object.updateMatrix();
 
     let addEvent = {type : "added", object : object, parent: parent,
       source : this};

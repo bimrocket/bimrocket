@@ -12,7 +12,7 @@ import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
-import { SpringBuilder } from "../core/builders/SpringBuilder.js";
+import { HelicoidBuilder } from "../core/builders/HelicoidBuilder.js";
 import { RectangleBuilder } from "../core/builders/RectangleBuilder.js";
 import { CircleBuilder } from "../core/builders/CircleBuilder.js";
 import { Extruder } from "../core/builders/Extruder.js";
@@ -35,86 +35,185 @@ class AddObjectTool extends Tool
 
   execute()
   {
-    const objectType = this.objectType || "group";
-
+    const objectType = this.objectType || "Group";
     let object;
-    if (objectType === "group")
+
+    switch (objectType)
     {
-      object = new THREE.Group();
+      case "Group":
+        object = new THREE.Group();
+        break;
+      case "Box":
+        object = this.createBox();
+        break;
+      case "Cylinder":
+        object = this.createCylinder();
+        break;
+      case "Sphere":
+        object = this.createSphere();
+        break;
+      case "Spring":
+        object = this.createSpring();
+        break;
+      case "Logo":
+        object = this.createLogo();
+        break;
+      case "Rectangle":
+        object = this.createProfile("RectangleBuilder");
+        break;
+      case "RectangleHollow":
+        object = this.createProfile("RectangleHollowBuilder");
+        break;
+      case "Circle":
+        object = this.createProfile("CircleBuilder");
+        break;
+      case "CircleHollow":
+        object = this.createProfile("CircleHollowBuilder");
+        break;
+      case "Ellipse":
+        object = this.createProfile("EllipseBuilder");
+        break;
+      case "Trapezium":
+        object = this.createProfile("TrapeziumBuilder");
+        break;
+      case "IProfile":
+        object = this.createProfile("IProfileBuilder");
+        break;
+      case "LProfile":
+        object = this.createProfile("LProfileBuilder");
+        break;
+      case "TProfile":
+        object = this.createProfile("TProfileBuilder");
+        break;
+      case "UProfile":
+        object = this.createProfile("UProfileBuilder");
+        break;
+      case "ZProfile":
+        object = this.createProfile("ZProfileBuilder");
+        break;
+      case "ZProfile":
+        object = this.createProfile("ZProfileBuilder");
+        break;
+      case "Helicoid":
+        object = this.createCord("HelicoidBuilder");
+        break;
     }
-    else
+    if (object)
     {
-      object = new Solid();
+      this.counter++;
+      object.name = objectType + "_" + this.counter;
 
-      let geometry, shape, size, profile;
-      switch (objectType)
-      {
-        case "box":
-          profile = new Profile();
-          profile.builder = new RectangleBuilder(1, 1);
-          object.add(profile);
-          object.builder = new Extruder(1);
-          ObjectBuilder.build(object);
-          break;
-        case "cylinder":
-          profile = new Profile();
-          profile.builder = new CircleBuilder(0.5, 24);
-          object.add(profile);
-          object.builder = new Extruder(1);
-          ObjectBuilder.build(object);
-          break;
-        case "sphere":
-          geometry = new THREE.SphereGeometry(0.5, 24, 24);
-          var rad = THREE.MathUtils.degToRad(90);
-          var matrix = new THREE.Matrix4().makeRotationX(rad);
-          geometry.applyMatrix4(matrix);
-          object.updateGeometry(geometry);
-          break;
-        case "spring":
-          let cord = new Cord();
-          cord.builder = new SpringBuilder();
-          ObjectBuilder.build(cord);
-          object.add(cord);
-          profile = new Profile();
-          profile.builder = new CircleBuilder(0.2);
-          object.add(profile);
-          object.builder = new Extruder();
-          ObjectBuilder.build(object);
-          break;
-        default:
-          shape = new THREE.Shape();
-          size = 0.5;
-          shape.moveTo(-size, -size);
-          shape.lineTo(size, -size);
-          shape.lineTo(2 * size, 0);
-          shape.lineTo(size, size);
-          shape.lineTo(-size, size);
-          shape.closePath();
-          let hole = new THREE.Path();
-          hole.moveTo(-size / 2, -size / 2);
-          hole.lineTo(size / 2, -size / 2);
-          hole.lineTo(size / 2, size / 2);
-          hole.lineTo(-size / 2, size / 2);
-          hole.closePath();
-          shape.holes.push(hole);
-          hole = new THREE.Path();
-          hole.moveTo(-size / 4 + 0.5, -size / 4);
-          hole.lineTo(size / 4 + 0.5, -size / 4);
-          hole.lineTo(size / 4 + 0.5, size / 4);
-          hole.lineTo(-size / 4 + 0.5, size / 4);
-          hole.closePath();
-          shape.holes.push(hole);
-
-          profile = new Profile(new ProfileGeometry(shape));
-          object.add(profile);
-          object.builder = new Extruder(this.height);
-          ObjectBuilder.build(object);
-      }
+      this.application.addObject(object, null, false);
     }
-    this.counter++;
-    object.name = objectType + "_" + this.counter;
+  }
 
-    this.application.addObject(object, null, true);
+  createBox()
+  {
+    const solid = new Solid();
+    const profile = new Profile();
+    profile.name = "Rectangle";
+    profile.builder = new RectangleBuilder(1, 1);
+    solid.add(profile);
+    solid.builder = new Extruder(1);
+    ObjectBuilder.build(solid);
+    return solid;
+  }
+
+  createCylinder()
+  {
+    const solid = new Solid();
+    const profile = new Profile();
+    profile.name = "Circle";
+    profile.builder = new CircleBuilder(0.5, 24);
+    solid.add(profile);
+    solid.builder = new Extruder(1);
+    ObjectBuilder.build(solid);
+    return solid;
+  }
+
+  createSphere()
+  {
+    const solid = new Solid();
+    const geometry = new THREE.SphereGeometry(0.5, 24, 24);
+    const rad = THREE.MathUtils.degToRad(90);
+    const matrix = new THREE.Matrix4().makeRotationX(rad);
+    geometry.applyMatrix4(matrix);
+    solid.updateGeometry(geometry);
+    return solid;
+  }
+
+  createSpring()
+  {
+    const solid = new Solid();
+    let cord = new Cord();
+    cord.name = "Helicoid";
+    cord.builder = new HelicoidBuilder();
+    ObjectBuilder.build(cord);
+    solid.add(cord);
+    const profile = new Profile();
+    profile.name = "Circle";
+    profile.builder = new CircleBuilder(0.2);
+    solid.add(profile);
+    solid.builder = new Extruder();
+    ObjectBuilder.build(solid);
+    return solid;
+  }
+
+  createLogo()
+  {
+    const solid = new Solid();
+    const shape = new THREE.Shape();
+    const size = 0.5;
+    shape.moveTo(-size, -size);
+    shape.lineTo(size, -size);
+    shape.lineTo(2 * size, 0);
+    shape.lineTo(size, size);
+    shape.lineTo(-size, size);
+    shape.closePath();
+    const hole = new THREE.Path();
+    hole.moveTo(-size / 2, -size / 2);
+    hole.lineTo(size / 2, -size / 2);
+    hole.lineTo(size / 2, size / 2);
+    hole.lineTo(-size / 2, size / 2);
+    hole.closePath();
+    shape.holes.push(hole);
+    hole = new THREE.Path();
+    hole.moveTo(-size / 4 + 0.5, -size / 4);
+    hole.lineTo(size / 4 + 0.5, -size / 4);
+    hole.lineTo(size / 4 + 0.5, size / 4);
+    hole.lineTo(-size / 4 + 0.5, size / 4);
+    hole.closePath();
+    shape.holes.push(hole);
+
+    const profile = new Profile(new ProfileGeometry(shape));
+    solid.add(profile);
+    solid.builder = new Extruder(this.height);
+    ObjectBuilder.build(solid);
+    return solid;
+  }
+
+  createProfile(profileBuilderName)
+  {
+    const cls = ObjectBuilder.BUILDERS[profileBuilderName];
+    if (cls === undefined) return;
+
+    const builder = new cls();
+    const profile = new Profile();
+    profile.builder = builder;
+    ObjectBuilder.build(profile);
+    return profile;
+  }
+
+  createCord(cordBuilderName)
+  {
+    const cls = ObjectBuilder.BUILDERS[cordBuilderName];
+    if (cls === undefined) return;
+
+    const builder = new cls();
+    const cord = new Cord();
+    cord.builder = builder;
+    ObjectBuilder.build(cord);
+    return cord;
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * SpringBuilder.js
+ * HelicoidBuilder.js
  *
  *  @author realor
  */
@@ -10,7 +10,7 @@ import { Cord } from "../Cord.js";
 import { CordGeometry } from "../CordGeometry.js";
 import * as THREE from "../../lib/three.module.js";
 
-class SpringBuilder extends CordBuilder
+class HelicoidBuilder extends CordBuilder
 {
   constructor(radius = 1, laps = 4, advance = 1, segments = 32)
   {
@@ -60,8 +60,8 @@ class SpringBuilder extends CordBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(SpringBuilder);
+ObjectBuilder.registerBuilder(HelicoidBuilder);
 
-export { SpringBuilder };
+export { HelicoidBuilder };
 
 

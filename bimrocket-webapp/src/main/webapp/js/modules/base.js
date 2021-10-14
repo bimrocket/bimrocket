@@ -173,19 +173,49 @@ export function load(application)
       type : "orthographic" });
   const addBoxTool = new AddObjectTool(application,
     { name : "add_box", label : "tool.add_box.label",
-      objectType : "box" });
+      objectType : "Box" });
   const addCylinderTool = new AddObjectTool(application,
     { name : "add_cylinder", label : "tool.add_cylinder.label",
-      objectType : "cylinder" });
+      objectType : "Cylinder" });
   const addSphereTool = new AddObjectTool(application,
     { name : "add_sphere", label : "tool.add_sphere.label",
-      objectType : "sphere" });
+      objectType : "Sphere" });
   const addSpringTool = new AddObjectTool(application,
     { name : "add_spring", label : "tool.add_spring.label",
-      objectType : "spring" });
+      objectType : "Spring" });
+  const addRectangleTool = new AddObjectTool(application,
+    { name : "add_rectangle", label : "tool.add_rectangle.label",
+      objectType : "Rectangle" });
+  const addCircleTool = new AddObjectTool(application,
+    { name : "add_circle", label : "tool.add_circle.label",
+      objectType : "Circle" });
+  const addEllipseTool = new AddObjectTool(application,
+    { name : "add_ellipse", label : "tool.add_ellipse.label",
+      objectType : "Ellipse" });
+  const addTrapeziumTool = new AddObjectTool(application,
+    { name : "add_trapezium", label : "tool.add_trapezium.label",
+      objectType : "Trapezium" });
+  const addIProfileTool = new AddObjectTool(application,
+    { name : "add_iprofile", label : "tool.add_iprofile.label",
+      objectType : "IProfile" });
+  const addLProfileTool = new AddObjectTool(application,
+    { name : "add_lprofile", label : "tool.add_lprofile.label",
+      objectType : "LProfile" });
+  const addTProfileTool = new AddObjectTool(application,
+    { name : "add_tprofile", label : "tool.add_tprofile.label",
+      objectType : "TProfile" });
+  const addUProfileTool = new AddObjectTool(application,
+    { name : "add_uprofile", label : "tool.add_uprofile.label",
+      objectType : "UProfile" });
+  const addZProfileTool = new AddObjectTool(application,
+    { name : "add_zprofile", label : "tool.add_zprofile.label",
+      objectType : "ZProfile" });
+  const addHelicoidTool = new AddObjectTool(application,
+    { name : "add_helicoid", label : "tool.add_helicoid.label",
+      objectType : "Helicoid" });
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
-      objectType : "group" });
+      objectType : "Group" });
   const removeTool = new RemoveTool(application);
   const cloneTool = new CloneTool(application);
   const clonerTool = new CloneTool(application,
@@ -265,6 +295,16 @@ export function load(application)
   application.addTool(addCylinderTool);
   application.addTool(addSphereTool);
   application.addTool(addSpringTool);
+  application.addTool(addRectangleTool);
+  application.addTool(addCircleTool);
+  application.addTool(addEllipseTool);
+  application.addTool(addTrapeziumTool);
+  application.addTool(addIProfileTool);
+  application.addTool(addLProfileTool);
+  application.addTool(addTProfileTool);
+  application.addTool(addUProfileTool);
+  application.addTool(addZProfileTool);
+  application.addTool(addHelicoidTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(cloneTool);
@@ -341,20 +381,33 @@ export function load(application)
 
   const designMenu = menuBar.addMenu("menu.design");
   const addMenu = designMenu.addMenu("menu.design.add");
-  addMenu.addMenuItem(addBoxTool);
-  addMenu.addMenuItem(addCylinderTool);
-  addMenu.addMenuItem(addSphereTool);
-  addMenu.addMenuItem(addSpringTool);
+  const addSolidMenu = addMenu.addMenu("menu.design.add_solid");
+  addSolidMenu.addMenuItem(addBoxTool);
+  addSolidMenu.addMenuItem(addCylinderTool);
+  addSolidMenu.addMenuItem(addSphereTool);
+  addSolidMenu.addMenuItem(addSpringTool);
+  const addProfileMenu = addMenu.addMenu("menu.design.add_profile");
+  addProfileMenu.addMenuItem(addRectangleTool);
+  addProfileMenu.addMenuItem(addCircleTool);
+  addProfileMenu.addMenuItem(addEllipseTool);
+  addProfileMenu.addMenuItem(addTrapeziumTool);
+  addProfileMenu.addMenuItem(addIProfileTool);
+  addProfileMenu.addMenuItem(addLProfileTool);
+  addProfileMenu.addMenuItem(addTProfileTool);
+  addProfileMenu.addMenuItem(addUProfileTool);
+  addProfileMenu.addMenuItem(addZProfileTool);
+  const addCordMenu = addMenu.addMenu("menu.design.add_cord");
+  addCordMenu.addMenuItem(addHelicoidTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
-  const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");
-  booleanOperationMenu.addMenuItem(unionTool);
-  booleanOperationMenu.addMenuItem(intersectionTool);
-  booleanOperationMenu.addMenuItem(subtractionTool);
   const transformMenu = designMenu.addMenu("menu.design.transform");
   transformMenu.addMenuItem(moveTool);
   transformMenu.addMenuItem(rotateTool);
   transformMenu.addMenuItem(scaleTool);
+  const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");
+  booleanOperationMenu.addMenuItem(unionTool);
+  booleanOperationMenu.addMenuItem(intersectionTool);
+  booleanOperationMenu.addMenuItem(subtractionTool);
   designMenu.addMenuItem(clipTool);
   designMenu.addMenuItem(makeSolidTool);
   designMenu.addMenuItem(inspectGeometryTool);

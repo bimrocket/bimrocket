@@ -104,6 +104,8 @@ export const translations =
   "tool.scale.label" : "Escalar",
   "tool.scale.help" : "Arrastar con botón izquierdo del ratón para escalar",
 
+  "tool.extrude.label" : "Extrusionar",
+
   "tool.union.label" : "Unión",
 
   "tool.intersection.label" : "Intersección",

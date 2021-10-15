@@ -26,6 +26,7 @@ import { MoveTool } from "../tools/MoveTool.js";
 import { RotateTool } from "../tools/RotateTool.js";
 import { ScaleTool } from "../tools/ScaleTool.js";
 import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
+import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { ClipTool } from "../tools/ClipTool.js";
 import { MakeSolidTool } from "../tools/MakeSolidTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
@@ -151,6 +152,7 @@ export function load(application)
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
   const scaleTool = new ScaleTool(application);
+  const extrudeTool = new ExtrudeTool(application);
   const unionTool = new BooleanOperationTool(application,
     { name : "union", label : "tool.union.label",
       operation : BooleanOperator.UNION });
@@ -277,6 +279,7 @@ export function load(application)
   application.addTool(moveTool);
   application.addTool(rotateTool);
   application.addTool(scaleTool);
+  application.addTool(extrudeTool);
   application.addTool(unionTool);
   application.addTool(intersectionTool);
   application.addTool(subtractionTool);
@@ -408,6 +411,7 @@ export function load(application)
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
   booleanOperationMenu.addMenuItem(subtractionTool);
+  designMenu.addMenuItem(extrudeTool);
   designMenu.addMenuItem(clipTool);
   designMenu.addMenuItem(makeSolidTool);
   designMenu.addMenuItem(inspectGeometryTool);

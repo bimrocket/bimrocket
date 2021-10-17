@@ -257,6 +257,9 @@ export const translations =
   "label.property_type" : "Property type:",
   "label.property_value" : "Property value:",
 
+  "label.formula.path" : "Property:",
+  "label.formula.expression" : "Expression:",
+
   "option.edges" : "Edges",
   "option.faces" : "Faces",
   "option.solid" : "Solid",
@@ -270,6 +273,7 @@ export const translations =
   "title.delete_cloud_service" : "Delete cloud service",
   "title.delete_from_cloud" : "Delete from cloud",
   "title.unsaved_changes" : "Unsaved changes",
+  "title.formula" : "Formula",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,

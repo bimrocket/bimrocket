@@ -25,6 +25,7 @@ import { WEBGL } from "../utils/WebGL.js";
 import { LineDashedShaderMaterial } from "../core/materials/LineDashedShaderMaterial.js";
 import { Inspector } from "../ui/Inspector.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
+import { Formula } from "../formula/Formula.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -1281,19 +1282,50 @@ class Application
     return controller;
   }
 
+  evaluateFormulas()
+  {
+    const updated = [];
+
+    const updateFormula = object =>
+    {
+      if (Formula.update(object))
+      {
+        updated.push(object);
+      }
+
+      for (let child of object.children)
+      {
+        updateFormula(child);
+      }
+    };
+
+    updateFormula(this.scene);
+    console.info("Objects updated by formulas", updated);
+
+    if (updated.length > 0)
+    {
+      let sceneEvent = {type: "nodeChanged", objects: updated,
+        source : this};
+      this.notifyEventListeners("scene", sceneEvent);
+    }
+  }
+
   rebuild()
   {
     const baseObject = this.baseObject;
 
     const built = [];
     ObjectBuilder.markAndBuild(baseObject, built);
-    console.info("REBUILD", built);
+    console.info("Objects rebuilt", built);
 
-    let sceneEvent = {type: "structureChanged", objects: built,
-      source : ObjectBuilder};
-    this.notifyEventListeners("scene", sceneEvent);
+    if (built.length > 0)
+    {
+      let sceneEvent = {type: "structureChanged", objects: built,
+        source : ObjectBuilder};
+      this.notifyEventListeners("scene", sceneEvent);
 
-    this.updateSelection();
+      this.updateSelection();
+    }
   }
 
   startControllers(object)

@@ -209,6 +209,11 @@
   border: 1px solid #C0C0C0;
 }
 
+.dialog .error
+{
+  color: #C00000;
+}
+
 @keyframes fade_in_dialog
 {
   0% {opacity: 0; visibility: visible; }

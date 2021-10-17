@@ -180,6 +180,13 @@ input[type=range]::-moz-range-track
   background: rgba(128, 128, 128, 0.1);
 }
 
+div.code_editor
+{
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+  font-size: 12px;
+  font-family: monospace;
+}
 
 /* animation */
 

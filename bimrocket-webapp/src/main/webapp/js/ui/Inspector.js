@@ -11,6 +11,9 @@ import { Application } from "./Application.js";
 import { Expression } from "../utils/Expression.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
+import { Formula } from "../formula/Formula.js";
+import { FormulaDialog } from "./FormulaDialog.js";
+import { PropertyDialog } from "./PropertyDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -26,6 +29,7 @@ class Inspector extends Panel
     this.state = {};
     this.objectSectionName = 'Object';
     this.builderSectionName = 'Builder';
+    this.formulasSectionName = 'Formulas';
     this.geometrySectionName = 'Geometry';
     this.propertiesSectionName = "Properties";
     this.controllersSectionName = "Controllers";
@@ -36,6 +40,7 @@ class Inspector extends Panel
       new BooleanRenderer(this),
       new VectorRenderer(this),
       new EulerRenderer(this),
+      new FormulaRenderer(this),
       new ExpressionRenderer(this),
       new MaterialRenderer(this),
       new Object3DRenderer(this)];
@@ -45,6 +50,7 @@ class Inspector extends Panel
       new BooleanEditor(this),
       new VectorEditor(this),
       new EulerEditor(this),
+      new FormulaEditor(this),
       new ExpressionEditor(this)];
     this.edition =
     {
@@ -131,16 +137,16 @@ class Inspector extends Panel
       }
 
       // builder
+      if (this.state[this.builderSectionName] === undefined)
+      {
+        this.state[this.builderSectionName] = "expanded";
+      }
+      let builderListElem = this.createSection(this.builderSectionName,
+        topListElem);
+
       let builder = object.builder;
       if (builder)
       {
-        if (this.state[this.builderSectionName] === undefined)
-        {
-          this.state[this.builderSectionName] = "expanded";
-        }
-        let builderListElem = this.createSection(this.builderSectionName,
-          topListElem);
-
         this.createReadOnlyProperty("type", builder.constructor.name,
           builderListElem);
 
@@ -156,6 +162,19 @@ class Inspector extends Panel
             }
           }
         }
+      }
+
+      // formulas
+      if (this.state[this.formulasSectionName] === undefined)
+      {
+        this.state[this.formulasSectionName] = "expanded";
+      }
+      let formulasListElem = this.createSection(this.formulasSectionName,
+        topListElem, [this.createAddFormulaAction(object)]);
+      const formulas = Formula.getAll(object);
+      for (let path in formulas)
+      {
+        this.createWriteableProperty(formulas, path, formulasListElem);
       }
 
       // geometry
@@ -397,12 +416,17 @@ class Inspector extends Panel
   createValueElem(propertyValue, renderer, editor, object,
     propertyName, propElem)
   {
-    let valueElem = renderer.render(propertyValue, propElem);
-    if (editor)
+    let valueElem = renderer.render(propertyValue);
+    if (valueElem)
     {
-      valueElem.addEventListener("click", () =>
-        this.startEdition(object, propertyName, renderer, editor, propElem),
-        false);
+      propElem.appendChild(valueElem);
+
+      if (editor)
+      {
+        valueElem.addEventListener("click", () =>
+          this.startEdition(object, propertyName, renderer, editor, propElem),
+          false);
+      }
     }
   }
 
@@ -412,47 +436,30 @@ class Inspector extends Panel
 
     const listener = () =>
     {
-      const dialog = new Dialog("title.object_properties");
-      dialog.setSize(240, 210);
-      dialog.setI18N(application.i18n);
-      let nameElem = dialog.addTextField("propertyName",
-        "label.property_name", "");
-      let typeElem = dialog.addSelectField("propertyType",
-        "label.property_type", ["string", "number", "boolean", "object"]);
-      let valueElem = dialog.addTextField("propertyValue",
-       "label.property_value", "");
-
-      dialog.addButton("accept", "button.accept", () =>
-      {
-        dialog.hide();
-        let propertyName = nameElem.value;
-        let propertyType = typeElem.value;
-        let propertyValue = valueElem.value;
-        switch (propertyType)
-        {
-          case "string":
-            dictionary[propertyName] = propertyValue;
-            break;
-          case "number":
-            dictionary[propertyName] = Number(propertyValue);
-            break;
-          case "boolean":
-            dictionary[propertyName] = Boolean(propertyValue);
-            break;
-          case "object":
-            dictionary[propertyName] = {};
-            break;
-        }
-        this.showProperties(object);
-      });
-      dialog.addButton("cancel", "button.cancel", () => dialog.hide());
+      const dialog = new PropertyDialog(this, object, dictionary);
       dialog.show();
-      nameElem.focus();
     };
 
     return {
       className: "add_button",
       label: "Add property",
+      listener : listener
+    };
+  }
+
+  createAddFormulaAction(object)
+  {
+    const application = this.application;
+
+    const listener = () =>
+    {
+      const dialog = new FormulaDialog(this, object);
+      dialog.show();
+    };
+
+    return {
+      className: "add_button",
+      label: "Add formula",
       listener : listener
     };
   }
@@ -486,8 +493,6 @@ class Inspector extends Panel
     }
 
     let propertyValue = object[propertyName];
-    let valueElem = propElem.childNodes[propElem.childNodes.length - 1];
-    propElem.removeChild(valueElem);
 
     this.edition.object = object;
     this.edition.propertyName = propertyName;
@@ -495,7 +500,14 @@ class Inspector extends Panel
     this.edition.editor = editor;
     this.edition.propElem = propElem;
 
-    editor.edit(propertyValue, propElem);
+    let valueElem = editor.edit(propertyValue);
+    if (valueElem)
+    {
+      let oldValueElem = propElem.childNodes[propElem.childNodes.length - 1];
+      propElem.removeChild(oldValueElem);
+      propElem.appendChild(valueElem);
+      if (valueElem.focus) valueElem.focus();
+    }
   }
 
   endEdition(value)
@@ -541,6 +553,11 @@ class Inspector extends Panel
       this.edition.editor, this.edition.object, this.edition.propertyName,
       propElem);
 
+    this.clearEdition();
+  }
+
+  clearEdition()
+  {
     this.edition.object = null;
     this.edition.propertyName = null;
     this.edition.renderer = null;
@@ -614,7 +631,7 @@ class PropertyRenderer
     return "";
   }
 
-  render(value, propElem) // returns elem
+  render(value) // returns elem
   {
     return null;
   }
@@ -637,12 +654,11 @@ class StringRenderer extends PropertyRenderer
     return "string";
   }
 
-  render(text, propElem)
+  render(text)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
     valueElem.innerHTML = text;
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -664,12 +680,11 @@ class NumberRenderer extends PropertyRenderer
     return "number";
   }
 
-  render(number, propElem)
+  render(number)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
     valueElem.innerHTML = Math.round(number * 1000) / 1000;
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -691,12 +706,11 @@ class BooleanRenderer extends PropertyRenderer
     return "boolean";
   }
 
-  render(value, propElem)
+  render(value)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
     valueElem.innerHTML = value;
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -718,7 +732,7 @@ class VectorRenderer extends PropertyRenderer
     return "vector";
   }
 
-  render(vector, propElem)
+  render(vector)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
@@ -731,7 +745,6 @@ class VectorRenderer extends PropertyRenderer
       round(vector.y) + ', ' +
       round(vector.z) + ')';
     valueElem.innerHTML = out;
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -753,7 +766,7 @@ class EulerRenderer extends PropertyRenderer
     return "euler";
   }
 
-  render(euler, propElem)
+  render(euler)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
@@ -767,7 +780,6 @@ class EulerRenderer extends PropertyRenderer
       angle(euler.y) + 'º, ' +
       angle(euler.z) + 'º)';
     valueElem.innerHTML = out;
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -784,24 +796,49 @@ class ExpressionRenderer extends PropertyRenderer
     return value instanceof Expression;
   }
 
-  getClassName(property)
+  getClassName(expression)
   {
-    return property.type;
+    return expression.type;
   }
 
-  render(property, propElem)
+  render(expression)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-    if (property.definition)
+    if (expression.definition)
     {
-      valueElem.innerHTML = "${" + property.definition + "}";
+      valueElem.innerHTML = "${" + expression.definition + "}";
     }
     else
     {
-      valueElem.innerHTML = property.value;
+      valueElem.innerHTML = expression.value;
     }
-    propElem.appendChild(valueElem);
+    return valueElem;
+  }
+};
+
+class FormulaRenderer extends PropertyRenderer
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof Formula;
+  }
+
+  getClassName(value)
+  {
+    return "formula";
+  }
+
+  render(formula)
+  {
+    let valueElem = document.createElement("span");
+    valueElem.className = "value";
+    valueElem.innerHTML = formula.expression;
     return valueElem;
   }
 };
@@ -823,7 +860,7 @@ class MaterialRenderer extends PropertyRenderer
     return "material";
   }
 
-  render(material, propElem)
+  render(material)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
@@ -846,7 +883,6 @@ class MaterialRenderer extends PropertyRenderer
       colorElem.title = rgb;
       valueElem.appendChild(colorElem);
     }
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -868,14 +904,13 @@ class Object3DRenderer extends PropertyRenderer
     return "object3D";
   }
 
-  render(object, propElem)
+  render(object)
   {
     let valueElem = document.createElement("a");
     valueElem.className = "value";
     valueElem.innerHTML = object.name || "object-" + object.id;
     valueElem.addEventListener("click",
       () => this.inspector.application.selection.set(object));
-    propElem.appendChild(valueElem);
     return valueElem;
   }
 }
@@ -894,7 +929,7 @@ class PropertyEditor
     return false;
   }
 
-  edit(value, propElem) // returns elem
+  edit(value) // returns the editor element
   {
     return null;
   }
@@ -912,7 +947,7 @@ class StringEditor extends PropertyEditor
     return typeof value === "string";
   }
 
-  edit(text, propElem)
+  edit(text)
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
@@ -928,8 +963,6 @@ class StringEditor extends PropertyEditor
         this.inspector.stopEdition();
       }
     }, false);
-    propElem.appendChild(valueElem);
-    valueElem.focus();
     return valueElem;
   }
 }
@@ -946,7 +979,7 @@ class NumberEditor extends PropertyEditor
     return typeof value === "number";
   }
 
-  edit(number, propElem)
+  edit(number)
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
@@ -967,8 +1000,6 @@ class NumberEditor extends PropertyEditor
         this.inspector.stopEdition();
       }
     }, false);
-    propElem.appendChild(valueElem);
-    valueElem.focus();
     return valueElem;
   }
 }
@@ -985,13 +1016,11 @@ class BooleanEditor extends PropertyEditor
     return typeof value === "boolean";
   }
 
-  edit(value, propElem)
+  edit(value)
   {
-    let valueElem = document.createElement("span");
-    propElem.appendChild(valueElem);
-
     let checked = value;
     this.inspector.endEdition(!checked);
+    return null;
   }
 }
 
@@ -1012,7 +1041,7 @@ class DimensionEditor extends PropertyEditor
     return {"x": x, "y": y, "z": z};
   }
 
-  edit(vector, propElem)
+  edit(vector)
   {
     let dimId = "dim_edit_";
 
@@ -1071,9 +1100,8 @@ class DimensionEditor extends PropertyEditor
     listElem.appendChild(createDimensionEditor(vector, "x"));
     listElem.appendChild(createDimensionEditor(vector, "y"));
     listElem.appendChild(createDimensionEditor(vector, "z"));
-    propElem.appendChild(listElem);
 
-    document.getElementById(dimId + "x").focus();
+    listElem.focus = () => document.getElementById(dimId + "x").focus();
 
     return listElem;
   }
@@ -1137,18 +1165,18 @@ class ExpressionEditor extends PropertyEditor
     return value instanceof Expression;
   }
 
-  edit(property, propElem) // returns elem
+  edit(expression)
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
 
-    if (property.definition)
+    if (expression.definition)
     {
-      valueElem.value = "${" + property.definition + "}";
+      valueElem.value = "${" + expression.definition + "}";
     }
     else
     {
-      valueElem.value = property.value;
+      valueElem.value = expression.value;
     }
     valueElem.addEventListener("keyup", event =>
     {
@@ -1157,13 +1185,13 @@ class ExpressionEditor extends PropertyEditor
         let expr = valueElem.value;
         if (expr.match(/\${.*}/))
         {
-          property.definition = expr.substring(2, expr.length - 1);
-          this.inspector.endEdition(property);
+          expression.definition = expr.substring(2, expr.length - 1);
+          this.inspector.endEdition(expression);
         }
         else
         {
-          property.definition = null;
-          property.value = expr;
+          expression.definition = null;
+          expression.value = expr;
         }
       }
       else if (event.keyCode === 27)
@@ -1171,10 +1199,34 @@ class ExpressionEditor extends PropertyEditor
         this.inspector.stopEdition();
       }
     }, false);
-    propElem.appendChild(valueElem);
-    valueElem.focus();
     return valueElem;
   }
 }
+
+class FormulaEditor extends PropertyEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof Formula;
+  }
+
+  edit(formula)
+  {
+    const inspector = this.inspector;
+
+    const dialog = new FormulaDialog(inspector, inspector.object, formula);
+    dialog.show();
+
+    this.inspector.clearEdition();
+
+    return null;
+  }
+}
+
 
 export { Inspector };

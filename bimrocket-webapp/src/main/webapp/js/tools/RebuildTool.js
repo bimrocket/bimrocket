@@ -20,6 +20,7 @@ class RebuildTool extends Tool
 
   execute()
   {
+    this.application.evaluateFormulas();
     this.application.rebuild();
   }
 }

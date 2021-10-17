@@ -257,6 +257,9 @@ export const translations =
   "label.property_type" : "Tipo de la propiedad:",
   "label.property_value" : "Valor de la propiedad:",
 
+  "label.formula.path" : "Propiedad:",
+  "label.formula.expression" : "Expresión:",
+
   "option.edges" : "Aristas",
   "option.faces" : "Caras",
   "option.solid" : "Sólido",
@@ -270,6 +273,7 @@ export const translations =
   "title.delete_cloud_service" : "Borrar servicio de nube",
   "title.delete_from_cloud" : "Borrar de la nube",
   "title.unsaved_changes" : "Cambios no guardados",
+  "title.formula" : "Fórmula",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,

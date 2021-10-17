@@ -10,6 +10,7 @@ import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
 import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFLoader extends THREE.Loader
@@ -93,6 +94,25 @@ class BRFLoader extends THREE.Loader
         this.parseBuilder(entry, model);
       }
     }
+
+    // restore formulas
+    for (let id in objects)
+    {
+      let entry = objects[id];
+      let object = entry._object;
+
+      const formulas = entry.formulas;
+      if (formulas)
+      {
+        for (let path in formulas)
+        {
+          let expression = formulas[path];
+          Formula.set(object, path, expression);
+        }
+      }
+    }
+
+    // build scene
     const root = model.objects[model.root.id]._object;
     root.updateMatrixWorld();
     ObjectBuilder.build(root);
@@ -291,6 +311,7 @@ class BRFLoader extends THREE.Loader
     {
       object.userData = entry.userData;
     }
+
     return object;
   }
 

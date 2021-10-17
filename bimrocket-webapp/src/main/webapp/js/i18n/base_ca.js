@@ -257,6 +257,9 @@ export const translations =
   "label.property_type" : "Tipus de la propietat:",
   "label.property_value" : "Valor de la propietat:",
 
+  "label.formula.path" : "Propietat:",
+  "label.formula.expression" : "Expressió:",
+
   "option.edges" : "Arestes",
   "option.faces" : "Cares",
   "option.solid" : "Sòlid",
@@ -270,6 +273,7 @@ export const translations =
   "title.delete_cloud_service" : "Esborra servei de núvol",
   "title.delete_from_cloud" : "Esborra del núvol",
   "title.unsaved_changes" : "Canvis no desats",
+  "title.formula" : "Fórmula",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,

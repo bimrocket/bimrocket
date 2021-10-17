@@ -9,6 +9,7 @@ import { Cord } from "../core/Cord.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
@@ -106,6 +107,17 @@ class BRFExporter
     {
       this.exportMaterial(material, model);
       entry.material = { type : "#material", id : String(material.id) };
+    }
+
+    const formulas = Formula.getAll(object);
+    if (formulas)
+    {
+      entry.formulas = {};
+      for (let path in formulas)
+      {
+        let formula = formulas[path];
+        entry.formulas[formula.path] = formula.expression;
+      }
     }
 
     if (exportChildren)

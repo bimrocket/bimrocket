@@ -5,44 +5,39 @@
  */
 
 import { AnimationController } from "./AnimationController.js";
-import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
 class RotationController extends AnimationController
 {
-  static type = "RotationController";
-  static description = "Rotates an object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
     let minAngle = object.rotation.z * 180 / Math.PI;
     let maxAngle = minAngle + 90;
 
-    this.axis = this.createProperty("string", "Axis (x, y or z)", "z");
-    this.minAngle = this.createProperty("number", "Min. angle (degrees)",
-      minAngle);
-    this.maxAngle = this.createProperty("number", "Max. angle (degrees)",
-      maxAngle);
-    this.minValue = this.createProperty("number", "Min. value", 0);
-    this.maxValue = this.createProperty("number", "Max. value", 1);
-    this.maxSpeed = this.createProperty("number", "Max. speed (degrees/s)", 30);
+    this.axis = "z";
+    this.minAngle = minAngle; // degrees
+    this.maxAngle = maxAngle; // degrees
+    this.minValue = 0;
+    this.maxValue = 1;
+    this.maxSpeed = 90; // degrees / second
   }
 
   animate(event)
   {
-    let value = this.input.value;
+    let value = this.input;
     if (value === null) return;
 
     value = parseFloat(value);
     if (typeof value !== "number") return;
 
-    let axis = this.axis.value || "z";
-    let minValue = parseFloat(this.minValue.value);
-    let maxValue = parseFloat(this.maxValue.value);
-    let minAngle = parseFloat(this.minAngle.value) * Math.PI / 180;
-    let maxAngle = parseFloat(this.maxAngle.value) * Math.PI / 180;
-    let maxSpeed = parseFloat(this.maxSpeed.value) * Math.PI / 180;
+    let axis = this.axis|| "z";
+    let minValue = parseFloat(this.minValue);
+    let maxValue = parseFloat(this.maxValue);
+    let minAngle = parseFloat(this.minAngle) * Math.PI / 180;
+    let maxAngle = parseFloat(this.maxAngle) * Math.PI / 180;
+    let maxSpeed = parseFloat(this.maxSpeed) * Math.PI / 180;
 
     let factor = (value - minValue) / (maxValue - minValue); // [0..1]
     let targetAngle = minAngle + factor * (maxAngle - minAngle);
@@ -60,11 +55,11 @@ class RotationController extends AnimationController
       else if (speed < -maxSpeed) speed = -maxSpeed;
       this.object.rotation[axis] += speed * event.delta;
       this.object.updateMatrix();
-      this.application.notifyObjectsChanged(this.object);
+      this.application.notifyObjectsChanged(this.object, this);
     }
   }
 }
 
-ControllerManager.addClass(RotationController);
+Controller.addClass(RotationController);
 
 export { RotationController };

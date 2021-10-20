@@ -45,11 +45,8 @@ import { StyleTool } from "../tools/StyleTool.js";
 import { OutlinerTool } from "../tools/OutlinerTool.js";
 import { InspectorTool } from "../tools/InspectorTool.js";
 import { StatisticsTool } from "../tools/StatisticsTool.js";
-import { CreateControllerTool } from "../tools/CreateControllerTool.js";
 import { StartControllersTool } from "../tools/StartControllersTool.js";
 import { StopControllersTool } from "../tools/StopControllersTool.js";
-import { LoadControllersTool } from "../tools/LoadControllersTool.js";
-import { SaveControllersTool } from "../tools/SaveControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
@@ -65,7 +62,6 @@ import { PushButtonController } from "../controllers/PushButtonController.js";
 import { RotationController } from "../controllers/RotationController.js";
 import { ToggleButtonController } from "../controllers/ToggleButtonController.js";
 import { TranslationController } from "../controllers/TranslationController.js";
-import { WFSController } from "../controllers/WFSController.js";
 import { BRFLoader } from "../io/BRFLoader.js";
 import { BRFExporter } from "../io/BRFExporter.js";
 import { ColladaLoader } from "../io/ColladaLoader.js";
@@ -252,11 +248,8 @@ export function load(application)
   const outlinerTool = new OutlinerTool(application);
   const inspectorTool = new InspectorTool(application);
   const statisticsTool = new StatisticsTool(application);
-  const createControllerTool = new CreateControllerTool(application);
   const startControllersTool = new StartControllersTool(application);
   const stopControllersTool = new StopControllersTool(application);
-  const loadControllersTool = new LoadControllersTool(application);
-  const saveControllersTool = new SaveControllersTool(application);
   const aboutTool = new AboutTool(application);
   const githubTool = new OpenLinkTool(application,
   { name : "gihub", label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
@@ -328,9 +321,6 @@ export function load(application)
   application.addTool(statisticsTool);
   application.addTool(startControllersTool);
   application.addTool(stopControllersTool);
-  application.addTool(createControllerTool);
-  application.addTool(loadControllersTool);
-  application.addTool(saveControllersTool);
   application.addTool(aboutTool);
   application.addTool(githubTool);
 
@@ -424,9 +414,6 @@ export function load(application)
   measureMenu.addMenuItem(measureSelectionTool);
 
   const controlMenu = menuBar.addMenu("menu.control");
-  controlMenu.addMenuItem(createControllerTool);
-  controlMenu.addMenuItem(loadControllersTool);
-  controlMenu.addMenuItem(saveControllersTool);
   controlMenu.addMenuItem(startControllersTool);
   controlMenu.addMenuItem(stopControllersTool);
 

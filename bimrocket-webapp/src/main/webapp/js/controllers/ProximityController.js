@@ -5,23 +5,20 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import * as THREE from "../lib/three.module.js";
 
 class ProximityController extends Controller
 {
-  static type = "ProximityController";
-  static description = "Detects proximity to objects.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.distance = this.createProperty("number", "Distance", 3);
-    this.output = this.createProperty("number", "Output flag");
-    this.objects = this.createProperty("string", "Objects group");
+    this.distance = 3;
+    this.output = 0;
+    this.objectsGroup = "";
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
+    this._objects = null;
     this._vector1 = new THREE.Vector3();
     this._vector2 = new THREE.Vector3();
   }
@@ -29,8 +26,11 @@ class ProximityController extends Controller
   onStart()
   {
     const application = this.application;
-    this._objects = application.scene.getObjectByName(this.objects.value);
-    console.info("OBJECTS:" + this._objects);
+    if (this.objectsGroup && this.objectsGroup.length > 0)
+    {
+      this._objects = application.scene.getObjectByName(this.objectsGroup);
+      console.info("OBJECTS:" + this._objects);
+    }
     application.addEventListener("scene", this._onNodeChanged);
   }
 
@@ -50,8 +50,8 @@ class ProximityController extends Controller
         {
           if (object.parent === this._objects)
           {
-            let range = parseFloat(this.distance.value || 1);
-            let value = this.output.value;
+            let range = parseFloat(this.distance || 1);
+            let value = this.output;
             let newValue = 0;
             let children = this._objects.children;
             let i = 0;
@@ -63,23 +63,25 @@ class ProximityController extends Controller
             }
             if (newValue !== value)
             {
-              this.output.value = newValue;
+              this.output = newValue;
+              this.application.notifyObjectsChanged(this.object, this);
             }
           }
         }
       }
       else // camera
       {
-        var camera = this.application.camera;
+        const camera = this.application.camera;
         if (event.objects.includes(camera) ||
             event.objects.includes(this.object))
         {
-          let range = parseFloat(this.distance.value || 1);
-          let value = this.output.value;
+          let range = parseFloat(this.distance || 1);
+          let value = this.output;
           let newValue = this.isNearObject(camera, range) ? 1 : 0;
           if (newValue !== value)
           {
-            this.output.value = newValue;
+            this.output = newValue;
+            this.application.notifyObjectsChanged(this.object, this);
           }
         }
       }
@@ -94,12 +96,12 @@ class ProximityController extends Controller
     this._vector2.set(0, 0, 0);
     this.object.localToWorld(this._vector2);
 
-    var distance = this._vector1.distanceTo(this._vector2);
+    const distance = this._vector1.distanceTo(this._vector2);
 
     return distance < range;
   }
 }
 
-ControllerManager.addClass(ProximityController);
+Controller.addClass(ProximityController);
 
 export { ProximityController };

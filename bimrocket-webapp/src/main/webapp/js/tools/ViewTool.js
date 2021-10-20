@@ -29,7 +29,7 @@ class ViewTool extends Tool
     const container = application.container;
     const aspect = container.clientWidth / container.clientHeight;
     const camera = application.camera;
-    
+
     camera.rotation.x = THREE.MathUtils.degToRad(this.x);
     camera.rotation.y = THREE.MathUtils.degToRad(this.y);
     camera.rotation.z = THREE.MathUtils.degToRad(this.z);
@@ -38,8 +38,7 @@ class ViewTool extends Tool
     application.scene.updateMatrixWorld(true);
     ObjectUtils.zoomAll(camera, application.baseObject, aspect);
 
-    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-    application.notifyEventListeners("scene", changeEvent);
+    application.notifyObjectsChanged(camera, this);
   }
 }
 

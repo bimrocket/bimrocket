@@ -3,19 +3,15 @@
  *
  * @author realor
  */
-import { ControllerManager } from "./ControllerManager.js";
 import { Controller } from "./Controller.js";
 
 class AnimationController extends Controller
 {
-  static type = "AnimationController";
-  static description = "Animates an object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.input = this.createProperty("number", "Input value", 0);
+    this.input = 0;
 
     this._animating = false;
     this._animate = this.animate.bind(this);
@@ -60,7 +56,7 @@ class AnimationController extends Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && this.input.isBoundTo(event.objects))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.startAnimation();
     }

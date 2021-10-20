@@ -210,12 +210,6 @@ export const translations =
 
   "tool.reset_matrix.label" : "Inicialitza matriu",
 
-  "tool.create_controller.label" : "Crea controlador",
-
-  "tool.load_controllers.label" : "Carrega controlad.",
-
-  "tool.save_controllers.label" : "Desa controladors",
-
   "tool.start_controllers.label" : "Inicia controladors",
 
   "tool.stop_controllers.label" : "Atura controladors",
@@ -260,6 +254,13 @@ export const translations =
   "label.formula.path" : "Propietat:",
   "label.formula.expression" : "Expressió:",
 
+  "label.add_property" : "Afegeix propietat",
+  "label.add_formula" : "Afegeix fórmula",
+  "label.add_controller" : "Afegeix controlador",
+  "label.remove_controller" : "Esborra controlador",
+  "label.start_controller" : "Inicia controlador",
+  "label.stop_controller" : "Atura controlador",
+
   "option.edges" : "Arestes",
   "option.faces" : "Cares",
   "option.solid" : "Sòlid",
@@ -274,6 +275,8 @@ export const translations =
   "title.delete_from_cloud" : "Esborra del núvol",
   "title.unsaved_changes" : "Canvis no desats",
   "title.formula" : "Fórmula",
+  "title.add_controller" : "Afegeix controlador",
+  "title.remove_controller" : "Esborra controlador",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,
@@ -295,5 +298,19 @@ export const translations =
   "question.discard_changes" : "Vols descartar els canvis no desats?",
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,
   "question.delete_folder" : name => `Vols esborrar la carpeta ${name}?`,
-  "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`
+  "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`,
+  "question.remove_controller" : name => `Vols esborrar el controlador ${name}?`,
+
+  "controller.AutoPilotController" : "Condueix un objecte.",
+  "controller.Brain4itPostController" : "Fa un POST a Brain4it.",
+  "controller.Brain4itWatchController" : "Observa funcions exteriors de Brain4it.",
+  "controller.ColorController" : "Coloreja un objecte.",
+  "controller.DisplayController" : "Mostra un valor en un panell.",
+  "controller.LightController" : "Il·lumina un objecte.",
+  "controller.LoadController" : "Carrega un model a l'escena.",
+  "controller.ProximityController" : "Detecta proximitat a objectes.",
+  "controller.PushButtonController" : "Mostra un butó.",
+  "controller.RotationController" : "Rota un objecte.",
+  "controller.ToggleButtonController" : "Mostra un interruptor.",
+  "controller.TranslationController" : "Desplaça un objecte."
 };

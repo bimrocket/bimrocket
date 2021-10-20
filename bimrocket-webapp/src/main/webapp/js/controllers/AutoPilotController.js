@@ -5,24 +5,20 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
 class AutoPilotController extends Controller
 {
-  static type = "AutoPilotController";
-  static description = "Pilot an object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.distance = this.createProperty("number", "Distance (m)");
-    this.maxVelocity = this.createProperty("number", "Maximum velocity (m/s)");
-    this.maxAcceleration = this.createProperty("number", "Maximum acceleration (m2/s)");
-    this.vehicles = this.createProperty("string", "Vehicles group");
-    this.trafficLights = this.createProperty("string", "Traffic lights group");
+    this.distance = 0;
+    this.maxVelocity = 1;
+    this.maxAcceleration = 1;
+    this.vehiclesGroup = "vehicles";
+    this.trafficLightsGroup = "trafficLights";
 
     this._animate = this.animate.bind(this);
 
@@ -43,15 +39,16 @@ class AutoPilotController extends Controller
 
     this._velocity = 0;
     this._acceleration = 0;
-
     this._sleep = 0;
   }
 
   onStart()
   {
     const application = this.application;
-    this._vehicles = application.scene.getObjectByName(this.vehicles.value);
-    this._trafficLights = application.scene.getObjectByName(this.trafficLights.value);
+    this._vehicles =
+      application.scene.getObjectByName(this.vehiclesGroup);
+    this._trafficLights =
+      application.scene.getObjectByName(this.trafficLightsGroup);
 
     application.updateVisibility(this.object, true);
 
@@ -95,7 +92,7 @@ class AutoPilotController extends Controller
       {
         if (obstacle.distance > safetyDistance)
         {
-          this._acceleration = parseFloat(this.maxAcceleration.value);
+          this._acceleration = parseFloat(this.maxAcceleration);
         }
       }
       else // match velocities
@@ -106,9 +103,9 @@ class AutoPilotController extends Controller
       }
       this._velocity += this._acceleration * event.delta;
 
-      if (this._velocity > this.maxVelocity.value)
+      if (this._velocity > this.maxVelocity)
       {
-        this._velocity = parseFloat(this.maxVelocity.value);
+        this._velocity = parseFloat(this.maxVelocity);
       }
       else if (this._velocity < 0)
       {
@@ -121,7 +118,7 @@ class AutoPilotController extends Controller
       this.object.position.y += delta * this._direction.y;
       this.object.position.z += delta * this._direction.z;
 
-      if (this.object.position.distanceTo(this._position0) > this.distance.value)
+      if (this.object.position.distanceTo(this._position0) > this.distance)
       {
         this._sleep = Math.random() * 10;
         this.object.visible = false;
@@ -232,7 +229,7 @@ class AutoPilotController extends Controller
   }
 }
 
-ControllerManager.addClass(AutoPilotController);
+Controller.addClass(AutoPilotController);
 
 export { AutoPilotController };
 

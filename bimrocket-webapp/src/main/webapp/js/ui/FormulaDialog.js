@@ -11,12 +11,12 @@ import "../lib/codemirror.js";
 
 class FormulaDialog extends Dialog
 {
-  constructor(inspector, object, formula)
+  constructor(application, object, formula)
   {
     super("title.formula");
-    this.inspector = inspector;
+    this.application = application;
     this.object = object;
-    this.setI18N(this.inspector.application.i18n);
+    this.setI18N(this.application.i18n);
 
     this.setSize(400, 200);
 
@@ -72,7 +72,7 @@ class FormulaDialog extends Dialog
         try
         {
           Formula.set(this.object, path, expression);
-          this.inspector.application.notifyObjectsChanged(this.object);
+          this.application.notifyObjectsChanged(this.object, this);
           this.hide();
         }
         catch (ex)
@@ -83,7 +83,7 @@ class FormulaDialog extends Dialog
       else
       {
         Formula.remove(this.object, path);
-        this.inspector.application.notifyObjectsChanged(this.object);
+        this.application.notifyObjectsChanged(this.object, this);
         this.hide();
       }
     }

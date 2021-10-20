@@ -95,6 +95,17 @@ class BRFExporter
       exportChildren = !object.builder.isChildrenBuilder(object);
     }
 
+    let controllers = object.controllers;
+    if (controllers)
+    {
+      entry.controllers = {};
+      for (let key in controllers)
+      {
+        let controller = controllers[key];
+        entry.controllers[key] = this.exportController(controller);
+      }
+    }
+
     let geometry = object.geometry;
     if (geometry && exportGeometry)
     {
@@ -254,33 +265,47 @@ class BRFExporter
   {
     const builderEntry = {};
     builderEntry.type = builder.constructor.name;
-    const properties = Object.keys(builder);
+    this.exportProperties(builder, builderEntry);
+    return builderEntry;
+  }
+
+  exportController(controller)
+  {
+    const controllerEntry = {};
+    controllerEntry.type = controller.constructor.name;
+    this.exportProperties(controller, controllerEntry, "name", "object");
+    return controllerEntry;
+  }
+
+  exportProperties(element, entry, ...exclude)
+  {
+    const properties = Object.keys(element);
     for (let property of properties)
     {
-      if (!property.startsWith("_"))
+      if (!property.startsWith("_") && !exclude.includes(property))
       {
-        let value = builder[property];
+        let value = element[property];
         let type = typeof value;
         if (type === "number" || type === "string" || type === "boolean")
         {
-          builderEntry[property] = value;
+          entry[property] = value;
         }
         else if (value instanceof THREE.Vector3
                 || value instanceof THREE.Vector2)
         {
-          builderEntry[property] = this.exportVector(value);
+          entry[property] = this.exportVector(value);
         }
         else if (value instanceof THREE.Euler)
         {
-          builderEntry[property] = this.exportEuler(value);
+          entry[property] = this.exportEuler(value);
         }
         else if (value instanceof THREE.Object3D)
         {
-          builderEntry[property] = { type: "#object", id : String(value.id) };
+          entry[property] = { type: "#object", id : String(value.id) };
         }
       }
     }
-    return builderEntry;
+    return entry;
   }
 
   exportVector(vector)

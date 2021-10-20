@@ -8,16 +8,21 @@ import { Controller } from "./Controller.js";
 
 class PanelController extends Controller
 {
-  static type = "PanellController";
-  static description = "Shows a panel.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
-    this.title = this.createProperty("string", "Title", "");
+    super(object, name);
+    this.title = "Title";
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
     this._onSelection = this.onSelection.bind(this);
+    this.panel = null;
+  }
+
+  init(application)
+  {
+    this.application = application;
+    this.createPanel();
+    if (this.autoStart) this.start();
   }
 
   onStart()
@@ -38,7 +43,7 @@ class PanelController extends Controller
 
   createPanel(position = "left", height = 100)
   {
-    this.panel =  this.application.createPanel(this.name, position);
+    this.panel = this.application.createPanel(this.name, position);
     this.panel.preferredHeight = height;
     this.panel.bodyElem.classList.add("center");
   }
@@ -58,6 +63,7 @@ class PanelController extends Controller
 
   update()
   {
+    // updates panel content
   }
 }
 

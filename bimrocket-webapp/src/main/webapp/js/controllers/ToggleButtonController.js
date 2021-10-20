@@ -5,26 +5,20 @@
  */
 
 import { PanelController } from "./PanelController.js";
-import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
 class ToggleButtonController extends PanelController
 {
-  static type = "ToggleButtonController";
-  static description = "Shows a toggle button.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.output = this.createProperty("number", "Output value");
-    this.valueOff = this.createProperty("number", "Value off", 0);
-    this.valueOn = this.createProperty("number", "Value on", 1);
-    this.buttonClass = this.createProperty("string", "Button class",
-      "toggle_button");
+    this.output = 0;
+    this.valueOff = 0;
+    this.valueOn = 1;
+    this.buttonClass = "toggle_button";
 
     this._onValueChange = this.onValueChange.bind(this);
-
-    this.createPanel();
   }
 
   createPanel()
@@ -37,7 +31,7 @@ class ToggleButtonController extends PanelController
     let inputElem = document.createElement("input");
     this.inputElem = inputElem;
     inputElem.type = "checkbox";
-    inputElem.checked = parseInt(this.output.value) === this.valueOn.value;
+    inputElem.checked = parseInt(this.output) === this.valueOn;
     buttonElem.appendChild(inputElem);
 
     let labelElem = document.createElement("label");
@@ -54,15 +48,13 @@ class ToggleButtonController extends PanelController
 
   onValueChange(event)
   {
-    this.output.value = this.inputElem.checked ?
-      this.valueOn.value : this.valueOff.value;
+    this.output = this.inputElem.checked ? this.valueOn : this.valueOff;
+    this.application.notifyObjectsChanged(this.object, this);
   }
 
   onNodeChanged(event)
   {
-    this.panel.visible = this.application.selection.contains(this.object);
-
-    if (event.type === "nodeChanged" && event.objects.includes(this.object))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.update();
     }
@@ -70,11 +62,18 @@ class ToggleButtonController extends PanelController
 
   update()
   {
-    this.panel.title = this.title.value || "";
-    this.buttonElem.className = this.buttonClass.value || "toggle_button";
+    this.panel.title = this.title || "";
+    this.panel.visible = this.application.selection.contains(this.object);
+    this.buttonElem.className = this.buttonClass || "toggle_button";
+    let output = this.inputElem.checked ? this.valueOn : this.valueOff;
+    if (output !== this.output)
+    {
+      this.output = output;
+      this.application.notifyObjectsChanged(this.object, this);
+    }
   }
 }
 
-ControllerManager.addClass(ToggleButtonController);
+Controller.addClass(ToggleButtonController);
 
 export { ToggleButtonController };

@@ -62,6 +62,7 @@ class CloudExplorerTool extends Tool
     {
       object.updateMatrix();
 
+      application.initControllers(object);
       application.addObject(object, application.baseObject);
       let container = application.container;
       let aspect = container.clientWidth / container.clientHeight;
@@ -70,8 +71,7 @@ class CloudExplorerTool extends Tool
       object.updateMatrixWorld(true);
       ObjectUtils.zoomAll(camera, object, aspect);
 
-      let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-      application.notifyEventListeners("scene", changeEvent);
+      application.notifyObjectsChanged(camera, this);
 
       application.progressBar.visible = false;
       panel.showButtonsPanel();

@@ -5,38 +5,33 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
 class ColorController extends Controller
 {
-  static type = "ColorController";
-  static description = "Colorize an object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
-    this.input = this.createProperty("number", "Input value", 0);
-    this.minColor = this.createProperty("color", "Min. color", "#808080");
-    this.maxColor = this.createProperty("color", "Max. color", "#FFFF00");
-    this.minValue = this.createProperty("number", "Min. value", 0);
-    this.maxValue = this.createProperty("number", "Max. value", 1);
-    this.emissive = this.createProperty("number", "Emissive", 0);
+    super(object, name);
+    this.input = 0;
+    this.minColor = "#808080";
+    this.maxColor = "#FFFF00";
+    this.minValue = 0;
+    this.maxValue = 1;
+    this.emissive = 0;
 
-    this.material = new THREE.MeshPhongMaterial({
+    this._material = new THREE.MeshPhongMaterial({
       color: 0xFFFF00, emissive: 0xFFFFFF, emissiveIntensity : 0.0,
       side: THREE.DoubleSide});
 
-    this.materialMap = new Map();
-
+    this._materialMap = new Map();
     this._onNodeChanged = this.onNodeChanged.bind(this);
   }
 
   onStart()
   {
     this.replaceMaterial();
-    this.updateColor(this.input.value, true);
+    this.updateColor(this.input, true);
     this.application.addEventListener("scene", this._onNodeChanged);
   }
 
@@ -44,24 +39,24 @@ class ColorController extends Controller
   {
     this.restoreMaterial();
     this.application.removeEventListener("scene", this._onNodeChanged);
-    this.application.notifyObjectsChanged(this.object);
+    this.application.notifyObjectsChanged(this.object, this);
   }
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && this.input.isBoundTo(event.objects))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
-      this.updateColor(this.input.value, false);
+      this.updateColor(this.input, false);
     }
   }
 
   updateColor(value, force)
   {
     let color = null;
-    let minValue = this.minValue.value;
-    let maxValue = this.maxValue.value;
-    let minColor = this.minColor.value;
-    let maxColor = this.maxColor.value;
+    let minValue = this.minValue;
+    let maxValue = this.maxValue;
+    let minColor = this.minColor;
+    let maxColor = this.maxColor;
 
     let factor;
     if (value <= minValue)
@@ -81,11 +76,11 @@ class ColorController extends Controller
       color.lerp(this.parseColor(maxColor), factor);
     }
 
-    if (force || this.material.color.getHex() !== color.getHex())
+    if (force || this._material.color.getHex() !== color.getHex())
     {
-      this.material.color = color;
-      this.material.emissiveIntensity = factor * this.emissive.value;
-      this.application.notifyObjectsChanged(this.object);
+      this._material.color = color;
+      this._material.emissiveIntensity = factor * this.emissive;
+      this.application.notifyObjectsChanged(this.object, this);
     }
   }
 
@@ -98,10 +93,10 @@ class ColorController extends Controller
 
   replaceMaterial()
   {
-    let material = this.material;
-    let materialMap = this.materialMap;
+    let material = this._material;
+    let materialMap = this._materialMap;
 
-    this.object.traverse(function(object)
+    this.object.traverse(object =>
     {
       if (object instanceof Solid)
       {
@@ -113,15 +108,16 @@ class ColorController extends Controller
 
   restoreMaterial()
   {
-    let materialMap = this.materialMap;
+    let materialMap = this._materialMap;
 
-    this.object.traverse(function(object)
+    this.object.traverse(object =>
     {
       if (object instanceof Solid)
       {
         let oldMaterial = materialMap[object];
         if (oldMaterial)
         {
+          if (object.material) object.material.dispose();
           object.material = oldMaterial;
         }
       }
@@ -130,6 +126,6 @@ class ColorController extends Controller
   }
 }
 
-ControllerManager.addClass(ColorController);
+Controller.addClass(ColorController);
 
 export { ColorController };

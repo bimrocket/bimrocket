@@ -5,26 +5,23 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import { Brain4it } from "../lib/Brain4it.js"
 
 class Brain4itPostController extends Controller
 {
-  static type = "Brain4itPostController";
-  static description = "Posts a value to Brain4it.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.url = this.createProperty("string", "Server URL");
-    this.module = this.createProperty("string", "Module");
-    this.accessKey = this.createProperty("string", "Access key");
-    this.func = this.createProperty("string", "Function to call");
-    this.input = this.createProperty("number", "Input value");
+    this.url = "";
+    this.module = "your_module";
+    this.accessKey = "access_key";
+    this.func = "@function_to_call";
+    this.input = 0;
+    this.autoStart = false;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
-    this.value = null;
+    this._value = null;
   }
 
   onStart()
@@ -39,10 +36,10 @@ class Brain4itPostController extends Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && this.input.isBoundTo(event.objects))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
-      let value = this.input.value;
-      if (value !== this.value)
+      let value = this.input;
+      if (value !== this._value)
       {
         this.postData(value);
       }
@@ -51,15 +48,17 @@ class Brain4itPostController extends Controller
 
   postData(value)
   {
-    this.value = value;
+    this._value = value;
 
-    let url = this.url.value;
+    let url = this.url;
+    if (url.trim().length === 0) return;
+
     if (url[0] === '/')
     {
       url = document.location.protocol + "//" + document.location.host + url;
     }
-    let module = this.module.value;
-    let func = this.func.value;
+    let module = this.module;
+    let func = this.func;
     console.info("POST " + url + " -> " + value);
 
     let client = new Brain4it.Client(url, module + "/" + func);
@@ -67,6 +66,6 @@ class Brain4itPostController extends Controller
   }
 }
 
-ControllerManager.addClass(Brain4itPostController);
+Controller.addClass(Brain4itPostController);
 
 export { Brain4itPostController };

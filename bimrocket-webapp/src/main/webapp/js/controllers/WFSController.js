@@ -5,34 +5,31 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import { GMLLoader } from "../io/gis/GMLLoader.js";
 import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
 
 class WFSController extends Controller
 {
-  static type = "WFSController";
-  static description = "Loads geometry from a Web Feature Service.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.url = this.createProperty("string", "WFS service url");
-    this.username = this.createProperty("string", "Username");
-    this.password = this.createProperty("string", "Password");
-    this.layer = this.createProperty("string", "Layer");
-    this.format = this.createProperty("string", "Format (GML,GeoJSON)");
-    this.bbox = this.createProperty("string", "Bounding box(x1,y1,x2,y2)");
-    this.count = this.createProperty("number", "Feature count");
-    this.offsetX = this.createProperty("number", "Offset x");
-    this.offsetY = this.createProperty("number", "Offset y");
-    this.offsetZ = this.createProperty("number", "Offset z");
-    this.rotationZ = this.createProperty("number", "Rotation in z-axis");
-    this.extrusion = this.createProperty("string", "Polygon extrusion");
-    this.diameter = this.createProperty("string", "LineString diameter");
-    this.color = this.createProperty("string", "Diffuse Color (0xrrggbb)");
-    this.model = this.createProperty("string", "Model URL");
+    this.url = "https://your_server.com/wfs?";
+    this.username = "username";
+    this.password = "password";
+    this.layer = "layer";
+    this.format = "GeoJSON";
+    this.bbox = "(0,0,100,100)";
+    this.count = 0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.offsetZ = 0;
+    this.rotationZ = 0;
+    this.extrusion = 1;
+    this.diameter = 0.1;
+    this.color = "#0000ff";
+    this.model = "https://your_server.com/model.dae";
+    this.autoStart = false;
 
     this._onLoad = this.onLoad.bind(this);
     this._onProgress = this.onProgress.bind(this);
@@ -63,10 +60,17 @@ class WFSController extends Controller
 
   getFeature()
   {
-    var url = this.url.value;
-    var layer = this.layer.value;
-    var format = this.format.value || "GeoJSON";
-    var loader;
+    let url = this.url;
+    if (url.trim().length === 0) return;
+
+    if (url[0] === '/')
+    {
+      url = document.location.protocol + "//" + document.location.host + url;
+    }
+
+    let layer = this.layer;
+    let format = this.format || "GeoJSON";
+    let loader;
     if (format === "GML")
     {
       loader = new GMLLoader();
@@ -75,36 +79,41 @@ class WFSController extends Controller
     {
       loader = new GeoJSONLoader();
     }
-    url += "&service=wfs&version=2.0.0&request=GetFeature&outputFormat=" +
+    url += "service=wfs&version=2.0.0&request=GetFeature&outputFormat=" +
       loader.mimeType + "&typeName=" + layer;
-    var count = this.count.value;
-    if (count)
+    const count = this.count;
+    if (count > 0)
     {
-      url += "&count=" + this.value;
+      url += "&count=" + count;
     }
-    var bbox = this.bbox.value;
-    if (bbox)
+    const bbox = this.bbox.value;
+    if (bbox && bbox.length > 0)
     {
       url += "&bbox=" + bbox;
     }
     loader.options = {
       name: layer || "wfs",
-      username: this.username.value,
-      password: this.password.value,
-      offsetX: this.offsetX.value,
-      offsetY: this.offsetY.value,
-      offsetZ: this.offsetZ.value,
-      rotationZ: this.rotationZ.value,
-      extrusion: this.extrusion.value,
-      diameter: this.diameter.value,
+      username: this.username,
+      password: this.password,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      offsetZ: this.offsetZ,
+      rotationZ: this.rotationZ,
+      extrusion: this.extrusion,
+      diameter: this.diameter,
       color: this.color.value,
       model: this.model.value
     };
 
     loader.load(url, this._onLoad, this._onProgress, this._onError);
   }
+
+  static getDescription()
+  {
+    return "gis|controller." + this.name;
+  }
 }
 
-ControllerManager.addClass(WFSController);
+Controller.addClass(WFSController);
 
 export { WFSController };

@@ -5,23 +5,20 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
-import { ColladaLoader } from "../io/ColladaLoader.js";
+import { IOManager } from "../io/IOManager.js";
 
 class LoadController extends Controller
 {
-  static type = "LoadController";
-  static description = "Loads a model into scene.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.url = this.createProperty("string", "Model url");
-    this.offsetX = this.createProperty("number", "Offset x expression");
-    this.offsetY = this.createProperty("number", "Offset y expression");
-    this.offsetZ = this.createProperty("number", "Offset z expression");
-    this.rotationZ = this.createProperty("number", "Rotation in z-axis expression");
+    this.url = "https://your_server.com/model.dae";
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.offsetZ = 0;
+    this.rotationZ = 0;
+    this.autoStart = false;
 
     this._onLoad = this.onLoad.bind(this);
     this._onProgress = this.onProgress.bind(this);
@@ -47,23 +44,38 @@ class LoadController extends Controller
   {
   }
 
-  onError()
+  onError(error)
   {
+    console.info(error);
   }
 
   loadModel()
   {
-    const url = this.url.value;
-    if (url)
-    {
-      const loader = new ColladaLoader();
+    let url = this.url;
+    if (url.trim().length === 0) return;
 
-      console.info("Loading model from " + url);
-      loader.load(url, this._onLoad, this._onProgress, this._onError);
+    if (url[0] === '/')
+    {
+      url = document.location.protocol + "//" + document.location.host + url;
     }
+
+    const application = this.application;
+    const intent = {
+      url : url,
+      options : { units : this.application.units },
+      onCompleted : object =>
+      {
+        object.updateMatrix();
+        application.initControllers(object);
+        application.addObject(object, this.object);
+      },
+      onError: error => this.onError(error)
+    };
+
+    IOManager.load(intent);
   }
 }
 
-ControllerManager.addClass(LoadController);
+Controller.addClass(LoadController);
 
 export { LoadController };

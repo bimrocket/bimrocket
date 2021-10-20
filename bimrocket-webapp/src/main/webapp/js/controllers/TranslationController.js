@@ -5,44 +5,39 @@
  */
 
 import { AnimationController } from "./AnimationController.js";
-import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
 class TranslationController extends AnimationController
 {
-  static type = "TranslationController";
-  static description = "Translates an object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
     let minPosition = object.position.x;
     let maxPosition = object.position.x + 1;
 
-    this.axis = this.createProperty("string", "Axis (x, y or z)", "x");
-    this.minPosition = this.createProperty("number", "Min. position",
-      minPosition);
-    this.maxPosition = this.createProperty("number", "Max. position",
-      maxPosition);
-    this.minValue = this.createProperty("number", "Min. value", 0);
-    this.maxValue = this.createProperty("number", "Max. value", 1);
-    this.maxSpeed = this.createProperty("number", "Max. speed (u/s)", 1);
+    this.axis = "x";
+    this.minPosition = minPosition;
+    this.maxPosition = maxPosition;
+    this.minValue = 0;
+    this.maxValue = 1;
+    this.maxSpeed = 1;
   }
 
   animate(event)
   {
-    let value = this.input.value;
+    let value = this.input;
     if (value === null) return;
 
     value = parseFloat(value);
     if (typeof value !== "number") return;
 
-    let axis = this.axis.value || "x";
-    let minValue = parseFloat(this.minValue.value);
-    let maxValue = parseFloat(this.maxValue.value);
-    let minPosition = parseFloat(this.minPosition.value);
-    let maxPosition = parseFloat(this.maxPosition.value);
-    let maxSpeed = parseFloat(this.maxSpeed.value);
+    let axis = this.axis || "x";
+    let minValue = parseFloat(this.minValue);
+    let maxValue = parseFloat(this.maxValue);
+    let minPosition = parseFloat(this.minPosition);
+    let maxPosition = parseFloat(this.maxPosition);
+    let maxSpeed = parseFloat(this.maxSpeed);
 
     let factor = (value - minValue) / (maxValue - minValue); // [0..1]
     let targetPosition = minPosition + factor * (maxPosition - minPosition);
@@ -59,11 +54,11 @@ class TranslationController extends AnimationController
       else if (speed < -maxSpeed) speed = -maxSpeed;
       this.object.position[axis] += speed * event.delta;
       this.object.updateMatrix();
-      this.application.notifyObjectsChanged(this.object);
+      this.application.notifyObjectsChanged(this.object, this);
     }
   }
 }
 
-ControllerManager.addClass(TranslationController);
+Controller.addClass(TranslationController);
 
 export { TranslationController };

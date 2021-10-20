@@ -1148,14 +1148,14 @@ class Application
     }
   }
 
-  notifyObjectsChanged(objects, type = "nodeChanged")
+  notifyObjectsChanged(objects, source = this)
   {
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
 
-    let sceneEvent = {type: type, objects: objects, source : this};
+    let sceneEvent = {type: "nodeChanged", objects: objects, source : source};
     this.notifyEventListeners("scene", sceneEvent);
   }
 
@@ -1185,9 +1185,7 @@ class Application
     let set = ObjectUtils.updateVisibility(objects, visible);
     let changedObjects = Array.from(set);
 
-    let sceneEvent = {type: "nodeChanged", objects: changedObjects,
-      source : this};
-    this.notifyEventListeners("scene", sceneEvent);
+    this.notifyObjectsChanged(changedObjects);
   }
 
   updateStyle(objects, edgesVisible, facesVisible)
@@ -1205,9 +1203,7 @@ class Application
       edgesVisible, facesVisible);
     let changedObjects = Array.from(set);
 
-    let sceneEvent = {type: "nodeChanged", objects: changedObjects,
-      source : this};
-    this.notifyEventListeners("scene", sceneEvent);
+    this.notifyObjectsChanged(changedObjects);
   }
 
   selectObjects(event, objects)
@@ -1229,25 +1225,48 @@ class Application
     }
   }
 
+  initControllers(object)
+  {
+    this.handleControllers(controller => controller.init(this), object);
+  }
+
+  startControllers(object)
+  {
+    const set = new Set();
+    this.handleControllers(controller =>
+    { controller.start(); set.add(controller.object); }, object);
+    const objects = Array.from(set);
+    this.notifyObjectsChanged(objects, this);
+  }
+
+  stopControllers(object)
+  {
+    const set = new Set();
+    this.handleControllers(controller =>
+    { controller.stop(); set.add(controller.object); }, object);
+    const objects = Array.from(set);
+    this.notifyObjectsChanged(objects, this);
+  }
+
   handleControllers(handler, object)
   {
     if (object === undefined) object = this.scene;
 
-    object.traverse(function(object)
+    object.traverse(obj =>
     {
-      let objectControllers = object.controllers;
+      let objectControllers = obj.controllers;
       if (objectControllers)
       {
-        for (let i = 0; i < objectControllers.length; i++)
+        for (let name in objectControllers)
         {
-          handler(objectControllers[i]);
+          let controller = objectControllers[name];
+          handler(controller);
         }
       }
     });
   }
 
-  createController(controllerClass = null, object = null,
-    name = null, start = false)
+  createController(controllerClass = null, object = null, name = null)
   {
     if (controllerClass === null) return;
 
@@ -1255,29 +1274,22 @@ class Application
     {
       object = this.baseObject;
     }
-    if (name === null)
+    if (name === null || name.trim().length === 0)
     {
-      let count = object.controllers ? object.controllers.length : 0;
-      name = "C" + count;
+      let count = object.controllers ?
+        Object.keys(object.controllers).length : 0;
+      name = "ctr_" + count;
     }
-    let controller = new controllerClass(this, object, name);
-    if (object.controllers)
+    let controller = new controllerClass(object, name);
+    if (object.controllers === undefined)
     {
-      object.controllers.push(controller);
+      object.controllers = {};
     }
-    else
-    {
-      object.controllers = [controller];
-    }
+    object.controllers[name] = controller;
 
-    if (start)
-    {
-      controller.start();
-    }
+    controller.init(this);
 
-    let sceneEvent = {type: "nodeChanged", objects: [object],
-      source : this};
-    this.notifyEventListeners("scene", sceneEvent);
+    this.notifyObjectsChanged(object);
 
     return controller;
   }
@@ -1304,9 +1316,7 @@ class Application
 
     if (updated.length > 0)
     {
-      let sceneEvent = {type: "nodeChanged", objects: updated,
-        source : this};
-      this.notifyEventListeners("scene", sceneEvent);
+      this.notifyObjectsChanged(updated);
     }
   }
 
@@ -1326,22 +1336,6 @@ class Application
 
       this.updateSelection();
     }
-  }
-
-  startControllers(object)
-  {
-    this.handleControllers(function(controller)
-    {
-      controller.start();
-    }, object);
-  }
-
-  stopControllers(object)
-  {
-    this.handleControllers(function(controller)
-    {
-      controller.stop();
-    }, object);
   }
 
   updateCameraAspectRatio()

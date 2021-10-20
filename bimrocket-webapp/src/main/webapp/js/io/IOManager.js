@@ -109,7 +109,8 @@ class IOManager
             }
             else
             {
-              onError(request.statusText + " (" + request.status + ")");
+              if (onError)
+                onError(request.statusText + " (" + request.status + ")");
             }
           }
           else if (request.readyState === 3)

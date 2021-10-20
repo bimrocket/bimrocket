@@ -753,9 +753,7 @@ class FlyTool extends Tool
       camera.lookAt(this.target);
       camera.updateMatrix();
 
-      const changeEvent = {type: "nodeChanged", objects: [camera],
-        source : this};
-      application.notifyEventListeners("scene", changeEvent);
+      application.notifyObjectsChanged(camera, this);
 
       this.updateCamera = false;
     }

@@ -11,6 +11,7 @@ import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
 import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
 import { Formula } from "../formula/Formula.js";
+import { Controller } from "../controllers/Controller.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFLoader extends THREE.Loader
@@ -49,8 +50,6 @@ class BRFLoader extends THREE.Loader
 
   parse(text)
   {
-    let rootObject = null;
-
     let model = JSON.parse(text);
 
     // parse geometries
@@ -77,7 +76,7 @@ class BRFLoader extends THREE.Loader
       entry._object = this.parseObject(entry, model);
     }
 
-    // build object tree and create object builders
+    // build object tree and create object builders and controllers
     for (let id in objects)
     {
       let entry = objects[id];
@@ -92,6 +91,10 @@ class BRFLoader extends THREE.Loader
       if (entry.builder)
       {
         this.parseBuilder(entry, model);
+      }
+      if (entry.controllers)
+      {
+        this.parseControllers(entry, model);
       }
     }
 
@@ -326,20 +329,45 @@ class BRFLoader extends THREE.Loader
         const object = entry._object;
         object.builder = builder;
 
-        const properties = Object.keys(entry.builder);
-        for (let property of properties)
+        this.setProperties(builder, entry.builder, model);
+      }
+    }
+  }
+
+  parseControllers(entry, model)
+  {
+    let controllerEntries = entry.controllers;
+    if (controllerEntries)
+    {
+      const object = entry._object;
+      object.controllers = {};
+      for (let name in controllerEntries)
+      {
+        let controllerEntry = controllerEntries[name];
+        let controllerClass = Controller.classes[controllerEntry.type];
+        if (controllerClass)
         {
-          if (property !== "type")
-          {
-            let value = entry.builder[property];
-            this.setPropertyValue(builder, property, value, model);
-          }
+          let controller = new controllerClass(object, name);
+          object.controllers[name] = controller;
+          this.setProperties(controller, controllerEntry, model);
         }
       }
     }
   }
 
-  setPropertyValue(builder, property, value, model)
+  setProperties(element, entry, model)
+  {
+    for (let property in entry)
+    {
+      if (property !== "type")
+      {
+        let value = entry[property];
+        this.setPropertyValue(element, property, value, model);
+      }
+    }
+  }
+
+  setPropertyValue(element, property, value, model)
   {
     let type = typeof value;
     if (typeof value === "object")
@@ -356,30 +384,26 @@ class BRFLoader extends THREE.Loader
       case "number":
       case "string":
       case "boolean":
-        builder[property] = value;
+        element[property] = value;
         break;
       case "Vector3":
       case "Euler":
-        builder[property].set(value.x, value.y, value.z);
+        element[property].set(value.x, value.y, value.z);
         break;
       case "Vector2":
-        builder[property].set(value.x, value.y);
+        element[property].set(value.x, value.y);
         break;
       case "#object":
         if (model.objects[value.id])
-          builder[property] = model.objects[value.id]._object;
-          if (builder[property] === undefined)
-          {
-            console.info(builder, property, value);
-          }
+          element[property] = model.objects[value.id]._object;
         break;
       case "#geometry":
         if (model.geometries[value.id])
-          builder[property] = model.geometries[value.id]._geometry;
+          element[property] = model.geometries[value.id]._geometry;
         break;
       case "#material":
         if (model.materials[value.id])
-          builder[property] = model.materials[value.id]._material;
+          element[property] = model.materials[value.id]._material;
         break;
     }
   }

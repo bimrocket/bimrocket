@@ -30,8 +30,7 @@ class ZoomAllTool extends Tool
     application.scene.updateMatrixWorld(true);
     ObjectUtils.zoomAll(camera, application.baseObject, aspect);
 
-    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-    application.notifyEventListeners("scene", changeEvent);
+    application.notifyObjectsChanged(camera, this);
   }
 }
 

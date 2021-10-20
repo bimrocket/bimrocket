@@ -200,8 +200,7 @@ class OrbitTool extends Tool
     this.xDelta = 0;
     this.yDelta = 0;
 
-    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-    application.notifyEventListeners("scene", changeEvent);
+    application.notifyObjectsChanged(camera, this);
 
     this.updateCamera = false;
   }
@@ -411,7 +410,7 @@ class OrbitTool extends Tool
     }
     this.sphere.scale.set(scale, scale, scale);
     this.sphere.updateMatrix();
-    application.notifyObjectsChanged(this.sphere);
+    application.notifyObjectsChanged(this.sphere, this);
   }
 
   onPointerMove(event)
@@ -489,7 +488,7 @@ class OrbitTool extends Tool
 
     // remove sphere
     this.application.overlays.remove(this.sphere);
-    this.application.notifyObjectsChanged(this.sphere);
+    this.application.notifyObjectsChanged(this.sphere, this);
   }
 
   onWheel(event)

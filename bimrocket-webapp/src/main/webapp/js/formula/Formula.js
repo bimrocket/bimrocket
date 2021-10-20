@@ -78,13 +78,27 @@ class Formula
     }
   }
 
-  static update(object, path)
+  static update(object, path = "", prefix = path === "" ? true : false)
   {
     let updated = false;
 
     if (object.formulas)
     {
-      if (path)
+      if (prefix)
+      {
+        const formulas = object.formulas;
+        for (let key in formulas)
+        {
+          if (key.startsWith(path))
+          {
+            let formula = formulas[key];
+            const oldValue = formula.getFn(object);
+            const newValue = formula.evaluate(object);
+            updated = updated || oldValue !== newValue;
+          }
+        }
+      }
+      else
       {
         const formula = object.formulas[path];
         if (formula)
@@ -92,17 +106,6 @@ class Formula
           const oldValue = formula.getFn(object);
           const newValue = formula.evaluate(object);
           updated = oldValue !== newValue;
-        }
-      }
-      else
-      {
-        const formulas = object.formulas;
-        for (let path in formulas)
-        {
-          let formula = formulas[path];
-          const oldValue = formula.getFn(object);
-          const newValue = formula.evaluate(object);
-          updated = updated || oldValue !== newValue;
         }
       }
     }

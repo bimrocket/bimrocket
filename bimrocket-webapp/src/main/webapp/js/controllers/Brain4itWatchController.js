@@ -5,29 +5,25 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import { Brain4it } from "../lib/Brain4it.js"
 
 Brain4it.monitors = {};
 
 class Brain4itWatchController extends Controller
 {
-  static type = "Brain4itWatchController";
-  static description = "Watches for expression changes.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.url = this.createProperty("string", "Server URL");
-    this.module = this.createProperty("string", "Module");
-    this.accessKey = this.createProperty("string", "Access key");
-    this.func = this.createProperty("string", "Function to watch");
-    this.output = this.createProperty("string", "Output value");
+    this.url = "";
+    this.module = "your_module";
+    this.accessKey = "access_key";
+    this.func = "@function_to_call";
+    this.output = 0;
+    this.autoStart = false;
 
     this._monitor = null;
     this._functionKey = null;
-
     this._callback = this.callback.bind(this);
     this._onNodeChanged = this.onNodeChanged.bind(this);
   }
@@ -46,7 +42,7 @@ class Brain4itWatchController extends Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" && event.objects.includes(this.object))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.watch();
     }
@@ -55,15 +51,22 @@ class Brain4itWatchController extends Controller
   callback(name, value)
   {
     console.info("MONITOR " + name + " = " + value);
-    this.output.value = value;
+    this.output = value;
+    this.application.notifyObjectsChanged(this.object, this);
   }
 
   watch()
   {
-    let url = this.url.value;
-    let module = this.module.value;
-    let accessKey = this.accessKey.value || "";
-    let func = this.func.value;
+    let url = this.url;
+    if (url.trim().length === 0) return;
+
+    if (url[0] === '/')
+    {
+      url = document.location.protocol + "//" + document.location.host + url;
+    }
+    let module = this.module;
+    let accessKey = this.accessKey || "";
+    let func = this.func;
     let moduleKey = url + "/" + module + "/" + accessKey;
     let functionKey = moduleKey + "/" + func;
 
@@ -80,8 +83,9 @@ class Brain4itWatchController extends Controller
 
       this._monitor = monitor;
       this._functionKey = functionKey;
-      console.info("WATCH", this.func.value);
-      monitor.watch(func, this._callback);
+      this._func = func;
+      console.info("WATCH", func);
+      monitor.watch(this._func, this._callback);
     }
   }
 
@@ -90,13 +94,14 @@ class Brain4itWatchController extends Controller
     if (this._monitor)
     {
       console.info("UNWATCH");
-      this._monitor.unwatch(this._callback);
+      this._monitor.unwatch(this._func, this._callback);
       this._monitor = null;
       this._functionKey = null;
+      this._func = null;
     }
   }
 }
 
-ControllerManager.addClass(Brain4itWatchController);
+Controller.addClass(Brain4itWatchController);
 
 export { Brain4itWatchController };

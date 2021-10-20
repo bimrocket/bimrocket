@@ -192,8 +192,7 @@ class BIMLayoutTool extends Tool
 
       application.scene.updateMatrixWorld(true);
       ObjectUtils.zoomAll(camera, this.selectedObject, aspect, true);
-      let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-      application.notifyEventListeners("scene", changeEvent);
+      application.notifyObjectsChanged(camera, this);
 
       this.updateCamera = false;
     }
@@ -253,9 +252,7 @@ class BIMLayoutTool extends Tool
           if (!obj.visible)
           {
             obj.visible = true;
-            const sceneEvent = {type: "nodeChanged", objects: [obj],
-              source : this};
-            application.notifyEventListeners("scene", sceneEvent);
+            application.notifyObjectsChanged(obj, this);
           }
         }
       }
@@ -305,9 +302,7 @@ class BIMLayoutTool extends Tool
 
           if (oldVisibility !== obj.visible)
           {
-            let sceneEvent = {type: "nodeChanged", objects: [obj],
-              source : this};
-            application.notifyEventListeners("scene", sceneEvent);
+            application.notifyObjectsChanged(obj, this);
           }
         }
       }

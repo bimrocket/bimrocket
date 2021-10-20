@@ -210,12 +210,6 @@ export const translations =
 
   "tool.reset_matrix.label" : "Inicializar matriz",
 
-  "tool.create_controller.label" : "Crear controlador",
-
-  "tool.load_controllers.label" : "Cargar controladores",
-
-  "tool.save_controllers.label" : "Guardar controlad.",
-
   "tool.start_controllers.label" : "Iniciar controlad.",
 
   "tool.stop_controllers.label" : "Parar controladores",
@@ -260,6 +254,13 @@ export const translations =
   "label.formula.path" : "Propiedad:",
   "label.formula.expression" : "Expresión:",
 
+  "label.add_property" : "Añadir propiedad",
+  "label.add_formula" : "Añadir fórmula",
+  "label.add_controller" : "Añadir controlador",
+  "label.remove_controller" : "Borrar controlador",
+  "label.start_controller" : "Iniciar controlador",
+  "label.stop_controller" : "Parar controlador",
+
   "option.edges" : "Aristas",
   "option.faces" : "Caras",
   "option.solid" : "Sólido",
@@ -274,6 +275,8 @@ export const translations =
   "title.delete_from_cloud" : "Borrar de la nube",
   "title.unsaved_changes" : "Cambios no guardados",
   "title.formula" : "Fórmula",
+  "title.add_controller" : "Añadir controlador",
+  "title.remove_controller" : "Borrar controlador",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,
@@ -295,5 +298,19 @@ export const translations =
   "question.discard_changes" : "Descartar los cambios no guardados?",
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
-  "question.delete_file" : name => `Quieres borrar el fichero ${name}?`
+  "question.delete_file" : name => `Quieres borrar el fichero ${name}?`,
+  "question.remove_controller" : name => `Quieres esborrar el controlador ${name}?`,
+
+  "controller.AutoPilotController" : "Conduce un objeto.",
+  "controller.Brain4itPostController" : "Hace un POST a Brain4it.",
+  "controller.Brain4itWatchController" : "Observa funciones exteriores de Brain4it.",
+  "controller.ColorController" : "Colorea un objeto.",
+  "controller.DisplayController" : "Muestra un valor en un panel.",
+  "controller.LightController" : "Ilumina un objeto.",
+  "controller.LoadController" : "Carga un modelo en la escena.",
+  "controller.ProximityController" : "Detecta proximidad a objetos.",
+  "controller.PushButtonController" : "Muestra un pulsador.",
+  "controller.RotationController" : "Rota un objeto.",
+  "controller.ToggleButtonController" : "Muestra un interruptor.",
+  "controller.TranslationController" : "Desplaza un objeto."
 };

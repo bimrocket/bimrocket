@@ -118,9 +118,7 @@ class MoveTool extends Tool
         object.position.add(this.vector);
         object.updateMatrix();
       }
-      const changeEvent = {type: "nodeChanged",
-        objects: this.objects, source : this};
-      application.notifyEventListeners("scene", changeEvent);
+      application.notifyObjectsChanged(this.objects, this);
     }
   }
 

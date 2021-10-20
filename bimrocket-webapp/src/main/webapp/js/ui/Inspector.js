@@ -7,13 +7,14 @@
 import { Panel } from "./Panel.js";
 import { Tree } from "./Tree.js";
 import { Dialog } from "./Dialog.js";
+import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Application } from "./Application.js";
-import { Expression } from "../utils/Expression.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Formula } from "../formula/Formula.js";
 import { FormulaDialog } from "./FormulaDialog.js";
 import { PropertyDialog } from "./PropertyDialog.js";
+import { ControllerDialog } from "./ControllerDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -41,7 +42,6 @@ class Inspector extends Panel
       new VectorRenderer(this),
       new EulerRenderer(this),
       new FormulaRenderer(this),
-      new ExpressionRenderer(this),
       new MaterialRenderer(this),
       new Object3DRenderer(this)];
     this.editors = [
@@ -50,8 +50,7 @@ class Inspector extends Panel
       new BooleanEditor(this),
       new VectorEditor(this),
       new EulerEditor(this),
-      new FormulaEditor(this),
-      new ExpressionEditor(this)];
+      new FormulaEditor(this)];
     this.edition =
     {
       object : null,
@@ -253,33 +252,38 @@ class Inspector extends Panel
         this.state[this.controllersSectionName] = "expanded";
       }
       let controllersListElem =
-        this.createSection(this.controllersSectionName, topListElem);
+        this.createSection(this.controllersSectionName, topListElem,
+        [this.createAddControllerAction(object)]);
       if (controllers)
       {
-        for (let i = 0; i < controllers.length; i++)
+        for (let name in controllers)
         {
-          let controller = controllers[i];
-          let name = controller.constructor.type;
-          if (controller.name) name += ":" + controller.name;
+          let controller = controllers[name];
           if (this.state[name] === undefined)
           {
             this.state[name] = 'expanded';
           }
           let controlListElem = this.createSection(name, controllersListElem,
-            [this.createRemoveControllerAction(controller)]);
-          this.createWriteableProperty(controller, "name", controlListElem);
+            [this.createStartControllerAction(controller),
+             this.createStopControllerAction(controller),
+             this.createRemoveControllerAction(controller)]);
+          this.createReadOnlyProperty("type",
+            controller.constructor.name, controlListElem);
+          this.createReadOnlyProperty("started",
+            controller.isStarted(), controlListElem);
 
           for (let propertyName in controller)
           {
-            let property = controller[propertyName];
-            if (property instanceof Expression)
+            if (propertyName !== "name" && propertyName !== "object" &&
+                !propertyName.startsWith("_"))
             {
-              this.createProperty(property.label, property, controller,
-                propertyName, controlListElem);
+              this.createWriteableProperty(controller, propertyName,
+                controlListElem);
             }
           }
         }
       }
+      this.application.i18n.updateTree(this.bodyElem);
     }
   }
 
@@ -351,8 +355,8 @@ class Inspector extends Panel
         let action = actions[k];
         let actionElem = document.createElement('span');
         actionElem.className = action.className;
-        actionElem.alt = action.label;
-        actionElem.title = action.label;
+        I18N.set(actionElem, "alt", action.label);
+        I18N.set(actionElem, "title", action.label);
         actionElem.setAttribute("role", "button");
         actionElem.addEventListener("click", action.listener);
         sectionElem.appendChild(actionElem);
@@ -432,34 +436,45 @@ class Inspector extends Panel
 
   createAddPropertyAction(object, dictionary)
   {
-    const application = this.application;
-
     const listener = () =>
     {
-      const dialog = new PropertyDialog(this, object, dictionary);
+      const dialog = new PropertyDialog(this.application, object, dictionary);
       dialog.show();
     };
 
     return {
-      className: "add_button",
-      label: "Add property",
+      className: "button add",
+      label: "label.add_property",
       listener : listener
     };
   }
 
   createAddFormulaAction(object)
   {
-    const application = this.application;
-
     const listener = () =>
     {
-      const dialog = new FormulaDialog(this, object);
+      const dialog = new FormulaDialog(this.application, object);
       dialog.show();
     };
 
     return {
-      className: "add_button",
-      label: "Add formula",
+      className: "button add",
+      label: "label.add_formula",
+      listener : listener
+    };
+  }
+
+  createAddControllerAction(object)
+  {
+    const listener = () =>
+    {
+      const dialog = new ControllerDialog(this.application, object);
+      dialog.show();
+    };
+
+    return {
+      className: "button add",
+      label: "label.add_controller",
       listener : listener
     };
   }
@@ -468,19 +483,57 @@ class Inspector extends Panel
   {
     const listener = () =>
     {
-      controller.stop();
-      let object = controller.object;
-      let index = object.controllers.indexOf(controller);
-      if (index !== -1)
+      ConfirmDialog.create("title.remove_controller",
+        "question.remove_controller", controller.name).setAction(() =>
       {
-        object.controllers.splice(index, 1);
+        controller.stop();
+        let object = controller.object;
+        delete object.controllers[controller.name];
+        this.showProperties(object);
+      }).setI18N(this.application.i18n).show();
+    };
+
+    return {
+      className: "button remove",
+      label: "label.remove_controller",
+      listener : listener
+    };
+  }
+
+  createStartControllerAction(controller)
+  {
+    const listener = () =>
+    {
+      if (!controller.isStarted())
+      {
+        controller.start();
+        let object = controller.object;
         this.showProperties(object);
       }
     };
 
     return {
-      className: "remove_button",
-      label: "Remove controller",
+      className: "button start",
+      label: "label.start_controller",
+      listener : listener
+    };
+  }
+
+  createStopControllerAction(controller)
+  {
+    const listener = () =>
+    {
+      if (controller.isStarted())
+      {
+        controller.stop();
+        let object = controller.object;
+        this.showProperties(object);
+      }
+    };
+
+    return {
+      className: "button stop",
+      label: "label.stop_controller",
       listener : listener
     };
   }
@@ -537,9 +590,7 @@ class Inspector extends Panel
     }
     this.stopEdition();
 
-    let changeEvent = {type: "nodeChanged", objects: [this.object],
-      source : this};
-    this.application.notifyEventListeners("scene", changeEvent);
+    this.application.notifyObjectsChanged(this.object, this);
   }
 
   stopEdition()
@@ -783,39 +834,6 @@ class EulerRenderer extends PropertyRenderer
     return valueElem;
   }
 }
-
-class ExpressionRenderer extends PropertyRenderer
-{
-  constructor(inspector)
-  {
-    super(inspector);
-  }
-
-  isSupported(value)
-  {
-    return value instanceof Expression;
-  }
-
-  getClassName(expression)
-  {
-    return expression.type;
-  }
-
-  render(expression)
-  {
-    let valueElem = document.createElement("span");
-    valueElem.className = "value";
-    if (expression.definition)
-    {
-      valueElem.innerHTML = "${" + expression.definition + "}";
-    }
-    else
-    {
-      valueElem.innerHTML = expression.value;
-    }
-    return valueElem;
-  }
-};
 
 class FormulaRenderer extends PropertyRenderer
 {
@@ -1153,56 +1171,6 @@ class EulerEditor extends DimensionEditor
   }
 }
 
-class ExpressionEditor extends PropertyEditor
-{
-  constructor(inspector)
-  {
-    super(inspector);
-  }
-
-  isSupported(value)
-  {
-    return value instanceof Expression;
-  }
-
-  edit(expression)
-  {
-    let valueElem = document.createElement("input");
-    valueElem.className = "value";
-
-    if (expression.definition)
-    {
-      valueElem.value = "${" + expression.definition + "}";
-    }
-    else
-    {
-      valueElem.value = expression.value;
-    }
-    valueElem.addEventListener("keyup", event =>
-    {
-      if (event.keyCode === 13)
-      {
-        let expr = valueElem.value;
-        if (expr.match(/\${.*}/))
-        {
-          expression.definition = expr.substring(2, expr.length - 1);
-          this.inspector.endEdition(expression);
-        }
-        else
-        {
-          expression.definition = null;
-          expression.value = expr;
-        }
-      }
-      else if (event.keyCode === 27)
-      {
-        this.inspector.stopEdition();
-      }
-    }, false);
-    return valueElem;
-  }
-}
-
 class FormulaEditor extends PropertyEditor
 {
   constructor(inspector)
@@ -1219,7 +1187,8 @@ class FormulaEditor extends PropertyEditor
   {
     const inspector = this.inspector;
 
-    const dialog = new FormulaDialog(inspector, inspector.object, formula);
+    const dialog = new FormulaDialog(inspector.application,
+      inspector.object, formula);
     dialog.show();
 
     this.inspector.clearEdition();

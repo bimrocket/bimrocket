@@ -5,28 +5,23 @@
  */
 
 import { PanelController } from "./PanelController.js";
-import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
 class PushButtonController extends PanelController
 {
-  static type = "PushButtonController";
-  static description = "Shows a push button.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.output = this.createProperty("number", "Output value");
-    this.valueUp = this.createProperty("number", "Value up", 0);
-    this.valueDown = this.createProperty("number", "Value down", 1);
-    this.label = this.createProperty("string", "Label", "PUSH");
-    this.buttonClass = this.createProperty("string", "Button class",
-      "rounded_button");
+    this.output = 0;
+    this.valueUp = 0;
+    this.valueDown = 1;
+    this.label = "PUSH";
+    this.buttonClass = "rounded_button";
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
-
-    this.createPanel();
+    this._pressed = false;
   }
 
   createPanel()
@@ -44,36 +39,43 @@ class PushButtonController extends PanelController
     this.update();
   }
 
+  onPointerDown(event)
+  {
+    this._pressed = true;
+    this.output = this.valueDown;
+    this.application.notifyObjectsChanged(this.object, this);
+  }
+
+  onPointerUp(event)
+  {
+    this._pressed = false;
+    this.output = this.valueUp;
+    this.application.notifyObjectsChanged(this.object, this);
+  }
+
   onNodeChanged(event)
   {
-    this.panel.visible = this.application.selection.contains(this.object);
-
-    if (event.type === "nodeChanged" && event.objects.includes(this.object))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.update();
     }
   }
 
-  onPointerDown(event)
-  {
-    let buttonElem = event.target || event.srcElement;
-    this.output.value = this.valueDown.value;
-  }
-
-  onPointerUp(event)
-  {
-    var buttonElem = event.target || event.srcElement;
-    this.output.value = this.valueUp.value;
-  }
-
   update()
   {
-    this.panel.title = this.title.value || "";
-    this.buttonElem.innerHTML = this.label.value || 'PUSH';
-    this.buttonElem.className = this.buttonClass.value || "rounded_button";
+    this.panel.title = this.title || "";
+    this.panel.visible = this.application.selection.contains(this.object);
+    this.buttonElem.innerHTML = this.label || 'PUSH';
+    this.buttonElem.className = this.buttonClass || "rounded_button";
+    let output = this._pressed ? this.valueDown : this.valueUp;
+    if (output !== this.output)
+    {
+      this.output = output;
+      this.application.notifyObjectsChanged(this.object, this);
+    }
   }
 }
 
-ControllerManager.addClass(PushButtonController);
+Controller.addClass(PushButtonController);
 
 export { PushButtonController };

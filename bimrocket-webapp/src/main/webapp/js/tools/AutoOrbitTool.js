@@ -102,8 +102,7 @@ class AutoOrbitTool extends Tool
     camera.lookAt(this.center);
     camera.updateMatrix();
 
-    const changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-    application.notifyEventListeners("scene", changeEvent);
+    application.notifyObjectsChanged(camera, this);
   }
 }
 

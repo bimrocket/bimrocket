@@ -5,27 +5,24 @@
  */
 
 import { Controller } from "./Controller.js";
-import { ControllerManager } from "./ControllerManager.js";
 import * as THREE from "../lib/three.module.js";
 
 class LightController extends Controller
 {
-  static type = "LightController";
-  static description = "Lights and object.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
-    this.input = this.createProperty("number", "Input value", 0);
-    this.minValue = this.createProperty("number", "Min. value", 0);
-    this.maxValue = this.createProperty("number", "Max. value", 1);
-    this.intensity = this.createProperty("number", "Intensity", 1);
-    this.distance = this.createProperty("number", "Distance", 3);
-    this.offsetX = this.createProperty("number", "Offset X", 0);
-    this.offsetY = this.createProperty("number", "Offset Y", 0);
-    this.offsetZ = this.createProperty("number", "Offset Z", 0);
+    super(object, name);
+    this.input = 0;
+    this.minValue = 0;
+    this.maxValue = 1;
+    this.intensity = 1;
+    this.distance = 3;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.offsetZ = 0;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
+    this._light = null;
   }
 
   onStart()
@@ -43,9 +40,7 @@ class LightController extends Controller
 
   onNodeChanged(event)
   {
-    if (event.type === "nodeChanged" &&
-        (this.input.isBoundTo(event.objects) ||
-         event.objects.includes(this.object)))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.update(false);
     }
@@ -53,13 +48,13 @@ class LightController extends Controller
 
   update(force)
   {
-    let value = this.input.value;
-    let distance = this.distance.value;
-    let minValue = this.minValue.value;
-    let maxValue = this.maxValue.value;
-    let offsetX = this.offsetX.value;
-    let offsetY = this.offsetY.value;
-    let offsetZ = this.offsetZ.value;
+    let value = this.input;
+    let distance = this.distance;
+    let minValue = this.minValue;
+    let maxValue = this.maxValue;
+    let offsetX = this.offsetX;
+    let offsetY = this.offsetY;
+    let offsetZ = this.offsetZ;
 
     let factor;
     if (value <= minValue)
@@ -75,42 +70,42 @@ class LightController extends Controller
       factor = (value - minValue) / (maxValue - minValue); // [0..1]
     }
 
-    let intensity = factor * this.intensity.value;
+    let intensity = factor * this.intensity;
     if (force ||
-         this.light.intensity !== intensity ||
-         this.light.distance !== distance ||
-         this.light.position.x !== offsetX ||
-         this.light.position.y !== offsetY ||
-         this.light.position.z !== offsetZ)
+         this._light.intensity !== intensity ||
+         this._light.distance !== distance ||
+         this._light.position.x !== offsetX ||
+         this._light.position.y !== offsetY ||
+         this._light.position.z !== offsetZ)
     {
-      this.light.intensity = intensity;
-      this.light.distance = distance;
-      this.light.position.set(offsetX, offsetY, offsetZ);
-      this.light.updateMatrix();
-      this.application.notifyObjectsChanged(this.object);
+      this._light.intensity = intensity;
+      this._light.distance = distance;
+      this._light.position.set(offsetX, offsetY, offsetZ);
+      this._light.updateMatrix();
+      this.application.notifyObjectsChanged(this.object, this);
     }
   }
 
   createLight()
   {
-    this.light = new THREE.PointLight(0xFFFFFF);
-    this.light.name = "light";
-    this.object.add(this.light);
-    var addEvent = {type : "added", object : this.light, parent: this.object,
+    this._light = new THREE.PointLight(0xFFFFFF);
+    this._light.name = "light";
+    this.object.add(this._light);
+    const addEvent = {type : "added", object : this._light, parent: this.object,
       source : this};
     this.application.notifyEventListeners("scene", addEvent);
   }
 
   destroyLight()
   {
-    this.object.remove(this.light);
-    var removeEvent = {type : "removed", object : this.light,
+    this.object.remove(this._light);
+    const removeEvent = {type : "removed", object : this._light,
       parent: this.object, source : this};
     this.application.notifyEventListeners("scene", removeEvent);
-    this.light = null;
+    this._light = null;
   }
 }
 
-ControllerManager.addClass(LightController);
+Controller.addClass(LightController);
 
 export { LightController };

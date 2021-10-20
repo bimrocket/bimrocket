@@ -71,28 +71,43 @@ ul.inspector li.section > span
   background-position: 2px center;
 }
 
-ul.inspector li.section > span.add_button
+ul.inspector li.section > span.button
 {
   display:inline-block;
   padding: 0px;
-  width: 12px;
-  height:12px;
+  width: 11px;
+  height:11px;
   background-repeat: no-repeat;
-  background-position: 2px center;
-  background-image: url(images/add.svg);
+  background-position: 0px center;
   vertical-align: middle;
+  margin-left: 5px;
+  margin-right: 5px;
+  background-size: 11px;
 }
 
-ul.inspector li.section > span.remove_button
+ul.inspector li.section > span.button:hover
 {
-  display:inline-block;
-  padding: 0px;
-  width: 12px;
-  height:12px;
-  background-repeat: no-repeat;
-  background-position: 2px center;
+  box-shadow: 0px 0px 4px 0px #c0a0a0;
+}
+
+ul.inspector li.section > span.button.add
+{
+  background-image: url(images/add.svg);
+}
+
+ul.inspector li.section > span.button.remove
+{
   background-image: url(images/remove.svg);
-  vertical-align: middle;
+}
+
+ul.inspector li.section > span.button.start
+{
+  background-image: url(images/start.svg);
+}
+
+ul.inspector li.section > span.button.stop
+{
+  background-image: url(images/stop.svg);
 }
 
 ul.inspector li.section > span:hover

@@ -31,7 +31,7 @@ class ResetMatrixTool extends Tool
       object.updateMatrixWorld();
       object.updateGeometry(object.geometry);
 
-      application.notifyObjectsChanged(object);
+      application.notifyObjectsChanged(object, this);
       application.updateSelection();
     }
   }

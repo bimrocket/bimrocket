@@ -210,12 +210,6 @@ export const translations =
 
   "tool.reset_matrix.label" : "Reset matrix",
 
-  "tool.create_controller.label" : "Create controller",
-
-  "tool.load_controllers.label" : "Load controllers",
-
-  "tool.save_controllers.label" : "Save controllers",
-
   "tool.start_controllers.label" : "Start controllers",
 
   "tool.stop_controllers.label" : "Stop controllers",
@@ -260,6 +254,13 @@ export const translations =
   "label.formula.path" : "Property:",
   "label.formula.expression" : "Expression:",
 
+  "label.add_property" : "Add property",
+  "label.add_formula" : "Add formula",
+  "label.add_controller" : "Add controller",
+  "label.remove_controller" : "Remove controller",
+  "label.start_controller" : "Start controller",
+  "label.stop_controller" : "Stop controller",
+
   "option.edges" : "Edges",
   "option.faces" : "Faces",
   "option.solid" : "Solid",
@@ -274,6 +275,8 @@ export const translations =
   "title.delete_from_cloud" : "Delete from cloud",
   "title.unsaved_changes" : "Unsaved changes",
   "title.formula" : "Formula",
+  "title.add_controller" : "Add controller",
+  "title.remove_controller" : "Remove controller",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,
@@ -295,5 +298,19 @@ export const translations =
   "question.discard_changes" : "Discard unsaved changes?",
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,
-  "question.delete_file" : name => `Do you want to delete the ${name} file?`
+  "question.delete_file" : name => `Do you want to delete the ${name} file?`,
+  "question.remove_controller" : name => `Remove controller ${name}?`,
+
+  "controller.AutoPilotController" : "Drives an object.",
+  "controller.Brain4itPostController" : "Posts a value to Brain4it.",
+  "controller.Brain4itWatchController" : "Watches for Brain4it exterior functions.",
+  "controller.ColorController" : "Colors an object.",
+  "controller.DisplayController" : "Displays a value on a panel.",
+  "controller.LightController" : "Lights an object.",
+  "controller.LoadController" : "Loads a model into scene.",
+  "controller.ProximityController" : "Detects proximity to objects.",
+  "controller.PushButtonController" : "Shows a push button.",
+  "controller.RotationController" : "Rotates an object.",
+  "controller.ToggleButtonController" : "Shows a toggle button.",
+  "controller.TranslationController" : "Translates an object."
 };

@@ -8,13 +8,13 @@ import { Dialog } from "./Dialog.js";
 
 class PropertyDialog extends Dialog
 {
-  constructor(inspector, object, dictionary)
+  constructor(application, object, dictionary)
   {
     super("title.object_properties");
-    this.inspector = inspector;
+    this.application = application;
     this.object = object;
     this.dictionary = dictionary;
-    this.setI18N(this.inspector.application.i18n);
+    this.setI18N(this.application.i18n);
 
     this.setSize(240, 210);
 
@@ -59,7 +59,7 @@ class PropertyDialog extends Dialog
         dictionary[propertyName] = {};
         break;
     }
-    this.inspector.application.notifyObjectsChanged(this.object);
+    this.application.notifyObjectsChanged(this.object, this);
   }
 
   onCancel()

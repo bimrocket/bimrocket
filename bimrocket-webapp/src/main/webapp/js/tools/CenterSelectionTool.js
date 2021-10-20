@@ -1,6 +1,6 @@
-/* 
+/*
  * CenterTool.js
- * 
+ *
  * @author realor
  */
 
@@ -36,14 +36,13 @@ class CenterSelectionTool extends Tool
         application.updateVisibility(objects, true);
       }
       const container = application.container;
-      const aspect = container.clientWidth / container.clientHeight;   
+      const aspect = container.clientWidth / container.clientHeight;
       const camera = application.camera;
 
       application.scene.updateMatrixWorld(true);
       ObjectUtils.zoomAll(camera, objects, aspect, true);
 
-      let changeEvent = {type: "nodeChanged", objects: [camera], source : this};
-      application.notifyEventListeners("scene", changeEvent);
+      application.notifyObjectsChanged(camera, this);
     }
   }
 }

@@ -90,9 +90,7 @@ class RotateTool extends Tool
     }
     this.rotateStart = this.rotateEnd;
 
-    const changeEvent = {type: "nodeChanged",
-      objects: this.objects, source : this};
-    this.application.notifyEventListeners("scene", changeEvent);
+    this.application.notifyObjectsChanged(this.objects, this);
   }
 
   onPointerUp(event)

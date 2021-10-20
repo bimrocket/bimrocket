@@ -5,24 +5,18 @@
  */
 
 import { PanelController } from "./PanelController.js";
-import { ControllerManager } from "./ControllerManager.js";
+import { Controller } from "./Controller.js";
 
 class DisplayController extends PanelController
 {
-  static type = "DisplayController";
-  static description = "Displays a value on a panel.";
-
-  constructor(application, object, name)
+  constructor(object, name)
   {
-    super(application, object, name);
+    super(object, name);
 
-    this.input = this.createProperty("number", "Input value");
-    this.units = this.createProperty("string", "Units");
-    this.decimals = this.createProperty("number", "Number of decimals", 2);
-    this.displayClass = this.createProperty("string", "Display class",
-      "default");
-
-    this.createPanel();
+    this.input = 0;
+    this.units = "meters";
+    this.decimals = 2;
+    this.displayClass = "default";
   }
 
   createPanel()
@@ -30,7 +24,7 @@ class DisplayController extends PanelController
     super.createPanel();
 
     let panelElem = document.createElement("div");
-    panelElem.className = "display " + (this.displayClass.value || "default");
+    panelElem.className = "display " + (this.displayClass || "default");
     this.displayElem = document.createElement("div");
     panelElem.appendChild(this.displayElem);
 
@@ -41,9 +35,7 @@ class DisplayController extends PanelController
 
   onNodeChanged(event)
   {
-    this.panel.visible = this.application.selection.contains(this.object);
-
-    if (event.type === "nodeChanged" && this.input.isBoundTo(event.objects))
+    if (event.type === "nodeChanged" && this.hasChanged(event))
     {
       this.update();
     }
@@ -51,14 +43,15 @@ class DisplayController extends PanelController
 
   update()
   {
-    this.panel.title = this.title.value || "";
-    let value = this.input.value;
-    let num = parseFloat(value).toFixed(this.decimals.value);
-    let units = this.units.value || "";
+    this.panel.title = this.title || "";
+    this.panel.visible = this.application.selection.contains(this.object);
+    let value = this.input;
+    let num = parseFloat(value).toFixed(this.decimals);
+    let units = this.units || "";
     this.displayElem.innerHTML = "" + num + " " + units;
   }
 }
 
-ControllerManager.addClass(DisplayController);
+Controller.addClass(DisplayController);
 
 export { DisplayController };

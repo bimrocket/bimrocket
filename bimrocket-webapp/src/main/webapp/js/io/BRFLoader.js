@@ -9,7 +9,7 @@ import { Cord } from "../core/Cord.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
-import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Formula } from "../formula/Formula.js";
 import { Controller } from "../controllers/Controller.js";
 import * as THREE from "../lib/three.module.js";
@@ -322,7 +322,7 @@ class BRFLoader extends THREE.Loader
   {
     if (entry.builder)
     {
-      const cls = ObjectBuilder.BUILDERS[entry.builder.type];
+      const cls = ObjectBuilder.classes[entry.builder.type];
       if (cls)
       {
         const builder = new cls();

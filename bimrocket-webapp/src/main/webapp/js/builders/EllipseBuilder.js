@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class EllipseBuilder extends ProfileBuilder
 {
@@ -52,7 +52,7 @@ class EllipseBuilder extends ProfileBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(EllipseBuilder);
+ObjectBuilder.addClass(EllipseBuilder);
 
 export { EllipseBuilder };
 

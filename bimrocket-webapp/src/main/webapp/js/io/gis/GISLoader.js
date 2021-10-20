@@ -4,14 +4,14 @@
  * @author realor
  */
 
-import { ObjectBuilder } from "../../core/builders/ObjectBuilder.js";
+import { ObjectBuilder } from "../../builders/ObjectBuilder.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
 import { Profile } from "../../core/Profile.js";
 import { ProfileGeometry } from "../../core/ProfileGeometry.js";
 import { Cord } from "../../core/Cord.js";
 import { CordGeometry } from "../../core/CordGeometry.js";
-import { Extruder } from "../../core/builders/Extruder.js";
+import { Extruder } from "../../builders/Extruder.js";
 import { ColladaLoader } from "../ColladaLoader.js";
 import * as THREE from "../../lib/three.module.js";
 

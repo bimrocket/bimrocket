@@ -6,9 +6,9 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { CordBuilder } from "./CordBuilder.js";
-import { Cord } from "../Cord.js";
-import { CordGeometry } from "../CordGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { Cord } from "../core/Cord.js";
+import { CordGeometry } from "../core/CordGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class HelicoidBuilder extends CordBuilder
 {
@@ -60,7 +60,7 @@ class HelicoidBuilder extends CordBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(HelicoidBuilder);
+ObjectBuilder.addClass(HelicoidBuilder);
 
 export { HelicoidBuilder };
 

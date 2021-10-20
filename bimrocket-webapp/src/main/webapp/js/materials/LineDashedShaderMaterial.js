@@ -4,7 +4,7 @@
  * @author rabbib76, realor
  */
 
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "../lib/three.module.js";
 
 class LineDashedShaderMaterial extends THREE.ShaderMaterial
 {

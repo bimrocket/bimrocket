@@ -6,10 +6,10 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { SolidBuilder } from "./SolidBuilder.js";
-import { SolidGeometry } from "../SolidGeometry.js";
-import { Solid } from "../Solid.js";
-import { BSP } from "../BSP.js";
-import * as THREE from "../../lib/three.module.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
+import { Solid } from "../core/Solid.js";
+import { BSP } from "../core/BSP.js";
+import * as THREE from "../lib/three.module.js";
 
 class BooleanOperator extends SolidBuilder
 {
@@ -80,7 +80,7 @@ class BooleanOperator extends SolidBuilder
   }
 }
 
-ObjectBuilder.registerBuilder(BooleanOperator);
+ObjectBuilder.addClass(BooleanOperator);
 
 export { BooleanOperator };
 

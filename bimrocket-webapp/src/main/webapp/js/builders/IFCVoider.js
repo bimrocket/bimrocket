@@ -4,11 +4,11 @@
  * @author realor
  */
 
-import { Solid } from "../../core/Solid.js";
-import { BSP } from "../../core/BSP.js";
-import { ObjectBuilder } from "../../core/builders/ObjectBuilder.js";
-import { IFC } from "./IFC.js";
-import * as THREE from "../../lib/three.module.js";
+import { Solid } from "../core/Solid.js";
+import { BSP } from "../core/BSP.js";
+import { ObjectBuilder } from "./ObjectBuilder.js";
+import { IFC } from "../io/ifc/IFC.js";
+import * as THREE from "../lib/three.module.js";
 
 class IFCVoider extends ObjectBuilder
 {
@@ -114,7 +114,7 @@ class IFCVoider extends ObjectBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(IFCVoider);
+ObjectBuilder.addClass(IFCVoider);
 
 export { IFCVoider };
 

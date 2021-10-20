@@ -11,11 +11,11 @@ import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
-import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
-import { HelicoidBuilder } from "../core/builders/HelicoidBuilder.js";
-import { RectangleBuilder } from "../core/builders/RectangleBuilder.js";
-import { CircleBuilder } from "../core/builders/CircleBuilder.js";
-import { Extruder } from "../core/builders/Extruder.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
+import { HelicoidBuilder } from "../builders/HelicoidBuilder.js";
+import { RectangleBuilder } from "../builders/RectangleBuilder.js";
+import { CircleBuilder } from "../builders/CircleBuilder.js";
+import { Extruder } from "../builders/Extruder.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -194,7 +194,7 @@ class AddObjectTool extends Tool
 
   createProfile(profileBuilderName)
   {
-    const cls = ObjectBuilder.BUILDERS[profileBuilderName];
+    const cls = ObjectBuilder.classes[profileBuilderName];
     if (cls === undefined) return;
 
     const builder = new cls();
@@ -206,7 +206,7 @@ class AddObjectTool extends Tool
 
   createCord(cordBuilderName)
   {
-    const cls = ObjectBuilder.BUILDERS[cordBuilderName];
+    const cls = ObjectBuilder.classes[cordBuilderName];
     if (cls === undefined) return;
 
     const builder = new cls();

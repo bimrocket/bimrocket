@@ -50,7 +50,7 @@ import { StopControllersTool } from "../tools/StopControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
-import { BooleanOperator } from "../core/builders/BooleanOperator.js";
+import { BooleanOperator } from "../builders/BooleanOperator.js";
 import { Brain4itPostController } from "../controllers/Brain4itPostController.js";
 import { Brain4itWatchController } from "../controllers/Brain4itWatchController.js";
 import { ColorController } from "../controllers/ColorController.js";

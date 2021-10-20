@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { CircleBuilder } from "./CircleBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class CircleHollowBuilder extends CircleBuilder
 {
@@ -43,7 +43,7 @@ class CircleHollowBuilder extends CircleBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(CircleHollowBuilder);
+ObjectBuilder.addClass(CircleHollowBuilder);
 
 export { CircleHollowBuilder };
 

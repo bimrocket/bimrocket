@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class RectangleBuilder extends ProfileBuilder
 {
@@ -50,7 +50,7 @@ class RectangleBuilder extends ProfileBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(RectangleBuilder);
+ObjectBuilder.addClass(RectangleBuilder);
 
 export { RectangleBuilder };
 

@@ -8,6 +8,8 @@ import { Formula } from "../formula/Formula.js";
 
 class Controller
 {
+  static classes = {};
+
   constructor(object, name)
   {
     this.application = null;
@@ -61,8 +63,6 @@ class Controller
   }
 
   /* static methods */
-
-  static classes = {};
 
   static addClass(controllerClass)
   {

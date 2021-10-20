@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class TProfileBuilder extends ProfileBuilder
 {
@@ -56,6 +56,6 @@ class TProfileBuilder extends ProfileBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(TProfileBuilder);
+ObjectBuilder.addClass(TProfileBuilder);
 
 export { TProfileBuilder };

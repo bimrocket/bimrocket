@@ -4,11 +4,11 @@
  * @author realor
  */
 
-import { Solid } from "../Solid.js";
-import { Profile } from "../Profile.js";
-import { Cord } from "../Cord.js";
+import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cord } from "../core/Cord.js";
 import { ObjectBuilder } from "./ObjectBuilder.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "../lib/three.module.js";
 
 class Cloner extends ObjectBuilder
 {
@@ -77,7 +77,7 @@ class Cloner extends ObjectBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(Cloner);
+ObjectBuilder.addClass(Cloner);
 
 export { Cloner };
 

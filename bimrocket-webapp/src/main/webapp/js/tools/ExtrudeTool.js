@@ -7,8 +7,8 @@
 import { Tool } from "./Tool.js";
 import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
-import { ObjectBuilder } from "../core/builders/ObjectBuilder.js";
-import { Extruder } from "../core/builders/Extruder.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
+import { Extruder } from "../builders/Extruder.js";
 import * as THREE from "../lib/three.module.js";
 
 class ExtrudeTool extends Tool

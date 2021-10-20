@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class TrapeziumBuilder extends ProfileBuilder
 {
@@ -51,6 +51,6 @@ class TrapeziumBuilder extends ProfileBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(TrapeziumBuilder);
+ObjectBuilder.addClass(TrapeziumBuilder);
 
 export { TrapeziumBuilder };

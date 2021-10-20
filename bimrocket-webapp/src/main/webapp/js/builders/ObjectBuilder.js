@@ -4,14 +4,14 @@
  * @author realor
  */
 
-import { Solid } from "../Solid.js";
-import * as THREE from "../../lib/three.module.js";
+import { Solid } from "../core/Solid.js";
+import * as THREE from "../lib/three.module.js";
 
 class ObjectBuilder
 {
   static DEFAULT_INSTANCE = new ObjectBuilder();
 
-  static BUILDERS = {}; // builder registry
+  static classes = {}; // builder registry
 
   constructor()
   {
@@ -85,9 +85,24 @@ class ObjectBuilder
 
   /* static methods */
 
-  static registerBuilder(builder)
+  static addClass(builderClass)
   {
-    this.BUILDERS[builder.name] = builder;
+    this.classes[builderClass.name] = builderClass;
+  }
+
+  /* returns an array with the names of the builders of the given class */
+  static getTypesOf(builderClass)
+  {
+    let types = [];
+    for (let className in this.classes)
+    {
+      let cls = this.classes[className];
+      if (cls.prototype instanceof builderClass || cls === builderClass)
+      {
+        types.push(className);
+      }
+    }
+    return types;
   }
 
   static mark(object)

@@ -6,8 +6,8 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { RectangleBuilder } from "./RectangleBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class RectangleHollowBuilder extends RectangleBuilder
 {
@@ -43,6 +43,6 @@ class RectangleHollowBuilder extends RectangleBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(RectangleHollowBuilder);
+ObjectBuilder.addClass(RectangleHollowBuilder);
 
 export { RectangleHollowBuilder };

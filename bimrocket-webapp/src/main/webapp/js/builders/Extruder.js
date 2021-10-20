@@ -6,12 +6,12 @@
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { SolidBuilder } from "./SolidBuilder.js";
-import { Solid } from "../Solid.js";
-import { Profile } from "../Profile.js";
-import { Cord } from "../Cord.js";
-import { SolidGeometry } from "../SolidGeometry.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cord } from "../core/Cord.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
 class Extruder extends SolidBuilder
 {
@@ -335,7 +335,7 @@ class Extruder extends SolidBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(Extruder);
+ObjectBuilder.addClass(Extruder);
 
 export { Extruder }
 

@@ -1,20 +1,21 @@
 /*
- * IProfileBuilder.js
+ * ZProfileBuilder.js
  *
  * @author realor
  */
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { ProfileBuilder } from "./ProfileBuilder.js";
-import { ProfileGeometry } from "../ProfileGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import * as THREE from "../lib/three.module.js";
 
-class IProfileBuilder extends ProfileBuilder
+class ZProfileBuilder extends ProfileBuilder
 {
-  constructor(width = 1, height = 1, webThickness = 0.1, flangeThickness = 0.1)
+  constructor(flangeWidth = 1, height = 1,
+    webThickness = 0.1, flangeThickness = 0.1)
   {
     super();
-    this.width = width;
+    this.flangeWidth = flangeWidth;
     this.height = height;
     this.webThickness = webThickness;
     this.flangeThickness = flangeThickness;
@@ -24,23 +25,19 @@ class IProfileBuilder extends ProfileBuilder
   {
     const shape = new THREE.Shape();
 
-    const xs = 0.5 * this.width;
+    const xs = 0.5 * this.flangeWidth;
     const ys = 0.5 * this.height;
     const xt = 0.5 * this.webThickness;
     const yt = this.flangeThickness;
 
-    shape.moveTo(-xs, ys - yt);
+    shape.moveTo(xt, ys);
+    shape.lineTo(-xs + xt, ys);
+    shape.lineTo(-xs + xt, ys - yt);
     shape.lineTo(-xt, ys - yt);
-    shape.lineTo(-xt, -ys + yt);
-    shape.lineTo(-xs, -ys + yt);
-    shape.lineTo(-xs, -ys);
-    shape.lineTo(xs, -ys);
-    shape.lineTo(xs, -ys + yt);
+    shape.lineTo(-xt, -ys);
+    shape.lineTo(xs - xt, -ys);
+    shape.lineTo(xs - xt, -ys + yt);
     shape.lineTo(xt, -ys + yt);
-    shape.lineTo(xt, ys - yt);
-    shape.lineTo(xs, ys - yt);
-    shape.lineTo(xs, ys);
-    shape.lineTo(-xs, ys);
     shape.closePath();
 
     profile.updateGeometry(new ProfileGeometry(shape));
@@ -50,7 +47,7 @@ class IProfileBuilder extends ProfileBuilder
 
   copy(source)
   {
-    this.width = source.width;
+    this.flangeWidth = source.flangeWidth;
     this.height = source.height;
     this.webThickness = source.webThickness;
     this.flangeThickness = source.flangeThickness;
@@ -59,6 +56,6 @@ class IProfileBuilder extends ProfileBuilder
   }
 };
 
-ObjectBuilder.registerBuilder(IProfileBuilder);
+ObjectBuilder.addClass(ZProfileBuilder);
 
-export { IProfileBuilder };
+export { ZProfileBuilder };

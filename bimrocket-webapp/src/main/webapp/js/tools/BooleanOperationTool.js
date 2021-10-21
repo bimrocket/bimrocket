@@ -69,11 +69,11 @@ class BooleanOperationTool extends Tool
 
       if (this.keepParent)
       {
-        application.addObject(result, parent, true);
+        application.addObject(result, parent, true, true);
       }
       else
       {
-        application.addObject(result, application.baseObject, true);
+        application.addObject(result, application.baseObject, true, true);
       }
 
       application.selection.set(result);

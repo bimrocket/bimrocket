@@ -56,7 +56,7 @@ class ClipTool extends Tool
 
       var solid = new Solid(bspResult.toSolidGeometry());
 
-      application.addObject(solid);
+      application.addObject(solid, null, false, true);
     }
   }
 }

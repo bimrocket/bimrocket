@@ -103,7 +103,7 @@ class AddObjectTool extends Tool
       this.counter++;
       object.name = objectType + "_" + this.counter;
 
-      this.application.addObject(object, null, false);
+      this.application.addObject(object, null, false, true);
     }
   }
 

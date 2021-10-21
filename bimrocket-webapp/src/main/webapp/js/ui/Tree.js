@@ -213,6 +213,7 @@ class TreeNode
       this.childrenElem.innerHTML = "";
     }
     this.children = [];
+    this.buttonElem.style.display = "none";
   }
 }
 

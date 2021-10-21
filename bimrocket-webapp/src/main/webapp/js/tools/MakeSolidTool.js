@@ -32,7 +32,7 @@ class MakeSolidTool extends Tool
       solid.updateMatrix();
       let parent = object.parent;
       application.removeObject(object);
-      application.addObject(solid, parent, false);
+      application.addObject(solid, parent, false, true);
       application.selection.set(solid);
     }
     else if (object instanceof Solid)

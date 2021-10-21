@@ -76,7 +76,7 @@ class OpenLocalTool extends Tool
           {
             object.updateMatrix();
             application.initControllers(object);
-            application.addObject(object, application.baseObject);
+            application.addObject(object, application.baseObject, false, true);
             let container = application.container;
             let aspect = container.clientWidth / container.clientHeight;
             let camera = application.camera;

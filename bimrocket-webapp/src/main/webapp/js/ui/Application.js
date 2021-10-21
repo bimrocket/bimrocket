@@ -1007,7 +1007,7 @@ class Application
     }
   }
 
-  addObject(object, parent = null, attach = false)
+  addObject(object, parent = null, attach = false, select = false)
   {
     if (!(object instanceof THREE.Object3D)) return;
 
@@ -1044,8 +1044,10 @@ class Application
       source : this};
     this.notifyEventListeners("scene", addEvent);
 
-    this.selection.set(object);
-
+    if (select)
+    {
+      this.selection.set(object);
+    }
     return object;
   }
 
@@ -1148,14 +1150,14 @@ class Application
     }
   }
 
-  notifyObjectsChanged(objects, source = this)
+  notifyObjectsChanged(objects, source = this, type = "nodeChanged")
   {
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
 
-    let sceneEvent = {type: "nodeChanged", objects: objects, source : source};
+    let sceneEvent = { type: type, objects: objects, source : source };
     this.notifyEventListeners("scene", sceneEvent);
   }
 

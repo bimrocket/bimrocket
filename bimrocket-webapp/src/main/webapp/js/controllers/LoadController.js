@@ -6,6 +6,8 @@
 
 import { Controller } from "./Controller.js";
 import { IOManager } from "../io/IOManager.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { Formula } from "../formula/Formula.js";
 
 class LoadController extends Controller
 {
@@ -13,13 +15,10 @@ class LoadController extends Controller
   {
     super(object, name);
 
-    this.url = "https://your_server.com/model.dae";
-    this.offsetX = 0;
-    this.offsetY = 0;
-    this.offsetZ = 0;
-    this.rotationZ = 0;
+    this.url = "https://your_server.com/model.brf";
     this.autoStart = false;
 
+    this._url = null; // last url loaded
     this._onLoad = this.onLoad.bind(this);
     this._onProgress = this.onProgress.bind(this);
     this._onError = this.onError.bind(this);
@@ -27,7 +26,23 @@ class LoadController extends Controller
 
   onStart()
   {
-    this.loadModel();
+    this.updateFormulas();
+
+    let url = this.url;
+    if (url.trim().length === 0) return;
+
+    if (url[0] === '/')
+    {
+      url = document.location.protocol + "//" + document.location.host + url;
+    }
+    if (url !== this._url || this.object.children.length === 0)
+    {
+      if (url !== this._url && this.object.children.length > 0)
+      {
+        this.clearModel();
+      }
+      this.loadModel(url);
+    }
   }
 
   onStop()
@@ -36,7 +51,6 @@ class LoadController extends Controller
 
   onLoad(dae)
   {
-    console.info(dae.scene);
     this.application.addObject(dae.scene, this.object);
   }
 
@@ -49,22 +63,15 @@ class LoadController extends Controller
     console.info(error);
   }
 
-  loadModel()
+  loadModel(url)
   {
-    let url = this.url;
-    if (url.trim().length === 0) return;
-
-    if (url[0] === '/')
-    {
-      url = document.location.protocol + "//" + document.location.host + url;
-    }
-
     const application = this.application;
     const intent = {
       url : url,
       options : { units : this.application.units },
       onCompleted : object =>
       {
+        this._url = url;
         object.updateMatrix();
         application.initControllers(object);
         application.addObject(object, this.object);
@@ -73,6 +80,14 @@ class LoadController extends Controller
     };
 
     IOManager.load(intent);
+  }
+
+  clearModel()
+  {
+    const application = this.application;
+    ObjectUtils.dispose(this.object);
+    this.object.clear();
+    application.notifyObjectsChanged(this.object, this, "structureChanged");
   }
 }
 

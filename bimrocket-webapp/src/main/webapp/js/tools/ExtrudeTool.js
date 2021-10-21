@@ -41,7 +41,7 @@ class ExtrudeTool extends Tool
       profile.visible = false;
       solid.add(profile);
       ObjectBuilder.build(solid);
-      application.addObject(solid, parent, false);
+      application.addObject(solid, parent, false, true);
       application.selection.set(solid);
     }
   }

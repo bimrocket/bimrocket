@@ -58,10 +58,10 @@ class Controller
 
   hasChanged(event)
   {
-    return updateFormulas()
+    return this.updateFormulas()
       || (event.source !== this && event.objects.includes(this.object));
   }
-  
+
   updateFormulas()
   {
     return Formula.update(this.object, "controllers." + this.name, true);

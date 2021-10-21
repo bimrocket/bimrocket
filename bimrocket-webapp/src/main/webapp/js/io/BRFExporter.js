@@ -10,6 +10,7 @@ import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
 import { Formula } from "../formula/Formula.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
@@ -87,12 +88,13 @@ class BRFExporter
     }
 
     let exportGeometry = true;
-    let exportChildren = true;
+    let exportChildren = ObjectUtils.isExportableChildren(object);
     if (object.builder)
     {
       entry.builder = this.exportBuilder(object.builder);
       exportGeometry = !object.builder.isGeometryBuilder(object);
-      exportChildren = !object.builder.isChildrenBuilder(object);
+      exportChildren = exportChildren
+        && !object.builder.isChildrenBuilder(object);
     }
 
     let controllers = object.controllers;
@@ -135,8 +137,7 @@ class BRFExporter
     {
       for (let child of object.children)
       {
-        if (child.name === null
-          || !child.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+        if (ObjectUtils.isExportable(child))
         {
           this.export(child, model);
           if (entry.children === undefined)

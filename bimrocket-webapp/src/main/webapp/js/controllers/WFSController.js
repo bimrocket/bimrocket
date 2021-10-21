@@ -38,6 +38,13 @@ class WFSController extends Controller
 
   onStart()
   {
+    const object = this.object;
+    if (object.userData.export === undefined)
+    {
+      object.userData.export = {};
+    }
+    object.userData.export.exportChildren = false;
+
     this.getFeature();
   }
 

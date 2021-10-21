@@ -27,6 +27,12 @@ class LoadController extends Controller
   onStart()
   {
     this.updateFormulas();
+    const object = this.object;
+    if (object.userData.export === undefined)
+    {
+      object.userData.export = {};
+    }
+    object.userData.export.exportChildren = false;
 
     let url = this.url;
     if (url.trim().length === 0) return;

@@ -18,12 +18,13 @@ class FormulaDialog extends Dialog
     this.object = object;
     this.setI18N(this.application.i18n);
 
-    this.setSize(400, 200);
+    this.setSize(640, 300);
 
     const path = formula ? formula.path : "";
     const expression = formula ? formula.expression : "";
 
-    this.pathElem = this.addTextField("path", "label.formula.path", path);
+    this.pathElem = this.addTextField("path", "label.formula.path", path,
+      "code");
 
     this.expressionLabel = document.createElement("div");
     I18N.set(this.expressionLabel, "innerHTML", "label.formula.expression");

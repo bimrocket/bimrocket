@@ -89,19 +89,15 @@ class LightController extends Controller
   createLight()
   {
     this._light = new THREE.PointLight(0xFFFFFF);
-    this._light.name = "light";
-    this.object.add(this._light);
-    const addEvent = {type : "added", object : this._light, parent: this.object,
-      source : this};
-    this.application.notifyEventListeners("scene", addEvent);
+    const light = this._light;
+    light.name = "light";
+    light.userData.export = { export : false };
+    this.application.addObject(light, this.object);
   }
 
   destroyLight()
   {
-    this.object.remove(this._light);
-    const removeEvent = {type : "removed", object : this._light,
-      parent: this.object, source : this};
-    this.application.notifyEventListeners("scene", removeEvent);
+    this.application.removeObject(this._light, this.object);
     this._light = null;
   }
 }

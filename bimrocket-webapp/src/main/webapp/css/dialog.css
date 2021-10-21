@@ -158,6 +158,13 @@
   box-sizing: border-box;
 }
 
+.dialog .body .code > input[type=text]
+{
+  font-family: monospace;
+  font-size: 14px;
+  color: #404040;
+}
+
 .dialog .body span.row
 {
   display:block;

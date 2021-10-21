@@ -409,6 +409,35 @@ class ObjectUtils
     }
     return object === parent;
   }
+
+  static isExportable(object)
+  {
+    if (object.name && object.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+      return false; // hidden object
+
+    const exportInfo = object.userData.export;
+    if (exportInfo)
+    {
+      if (exportInfo.export === false) // marked as non exportable
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  static isExportableChildren(object)
+  {
+    const exportInfo = object.userData.export;
+    if (exportInfo)
+    {
+      if (exportInfo.exportChildren === false) // children non exportable
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 export { ObjectUtils };

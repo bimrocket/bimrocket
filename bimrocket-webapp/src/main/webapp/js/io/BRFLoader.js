@@ -110,7 +110,15 @@ class BRFLoader extends THREE.Loader
         for (let path in formulas)
         {
           let expression = formulas[path];
-          Formula.set(object, path, expression);
+          try
+          {
+            Formula.set(object, path, expression);
+          }
+          catch (ex)
+          {
+            console.warn("Error evaluating formula: " +
+              object.name + "/" + path);
+          }
         }
       }
     }
@@ -264,6 +272,12 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.Mesh();
     }
+    else
+    {
+      object = new THREE.Object3D();
+      console.warn("Unsupported object type: " + entry.type);
+    }
+
     object.name = entry.name;
     object.visible = entry.visible;
 

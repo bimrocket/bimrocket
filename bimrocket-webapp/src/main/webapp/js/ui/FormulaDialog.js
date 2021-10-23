@@ -7,7 +7,6 @@
 import { Dialog } from "./Dialog.js";
 import { Formula } from "../formula/Formula.js";
 import { I18N } from "../i18n/I18N.js";
-import "../lib/codemirror.js";
 
 class FormulaDialog extends Dialog
 {
@@ -26,15 +25,9 @@ class FormulaDialog extends Dialog
     this.pathElem = this.addTextField("path", "label.formula.path", path,
       "code");
 
-    this.expressionLabel = document.createElement("div");
-    I18N.set(this.expressionLabel, "innerHTML", "label.formula.expression");
-    this.bodyElem.appendChild(this.expressionLabel);
-
-    this.expressionElem = document.createElement("div");
-    this.expressionElem.className = "code_editor";
-
-    this.bodyElem.appendChild(this.expressionElem);
-    this.initEditor(expression);
+    this.editorView = this.addCodeEditor("editor",
+      "label.formula.expression", expression,
+      { "language" : "javascript", "height" : "calc(100% - 80px)" });
 
     this.errorElem = document.createElement("div");
     this.errorElem.className = "error";
@@ -93,72 +86,6 @@ class FormulaDialog extends Dialog
   onCancel()
   {
     this.hide();
-  }
-
-  initEditor(expression)
-  {
-    const { keymap, highlightSpecialChars, drawSelection, EditorView } =
-      CM["@codemirror/view"];
-    const { history, historyKeymap } = CM["@codemirror/history"];
-    const { defaultKeymap } = CM["@codemirror/commands"];
-    const { bracketMatching } = CM["@codemirror/matchbrackets"];
-    const { javascript, javascriptLanguage } = CM["@codemirror/lang-javascript"];
-    const { defaultHighlightStyle } = CM["@codemirror/highlight"];
-    const { EditorState } = CM["@codemirror/state"];
-
-    let theme = EditorView.theme({
-      "&.cm-focused .cm-cursor" : {
-        borderLeftColor: "#000",
-        borderLeftWidth: "2px"
-      },
-      "&.cm-focused .cm-matchingBracket" : {
-        "backgroundColor" : "yellow",
-        "color" : "black"
-      },
-      "& .ͼa" : {
-        "color" : "#444",
-        "fontWeight" : "bold"
-      },
-      "& .ͼl" : {
-        "color" : "#808080"
-      },
-      "& .ͼf" : {
-        "color" : "#8080e0"
-      },
-      "& .ͼd" : {
-        "color" : "#2020ff"
-      },
-      "& .ͼb" : {
-        "color" : "#008000"
-      },
-      "& .cm-wrap" : {
-        "height" : "100%"
-      },
-      "& .cm-scroller" : {
-        "overflow" : "auto"
-      }
-    });
-
-    this.editorView = new EditorView(
-    {
-      parent: this.expressionElem
-    });
-
-    let editorState = EditorState.create(
-    {
-      doc: expression || "",
-        extensions : [
-          highlightSpecialChars(),
-          drawSelection(),
-          history(),
-          bracketMatching(),
-          defaultHighlightStyle.fallback,
-          keymap.of(historyKeymap, defaultKeymap),
-          javascript(),
-          theme]
-    });
-
-    this.editorView.setState(editorState);
   }
 }
 

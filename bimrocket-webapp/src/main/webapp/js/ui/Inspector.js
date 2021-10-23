@@ -13,6 +13,7 @@ import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Formula } from "../formula/Formula.js";
 import { FormulaDialog } from "./FormulaDialog.js";
+import { PropertiesDialog } from "./PropertiesDialog.js";
 import { PropertyDialog } from "./PropertyDialog.js";
 import { ControllerDialog } from "./ControllerDialog.js";
 import { I18N } from "../i18n/I18N.js";
@@ -217,7 +218,8 @@ class Inspector extends Panel
       }
 
       let propListElem = this.createSection(this.propertiesSectionName,
-        topListElem, [this.createAddPropertyAction(object, userData)]);
+        topListElem, [this.createAddPropertyAction(object, userData),
+        this.createEditPropertiesAction(object)]);
 
       for (let propertyName in userData)
       {
@@ -447,6 +449,22 @@ class Inspector extends Panel
       label: "label.add_property",
       listener : listener
     };
+  }
+
+  createEditPropertiesAction(object)
+  {
+    const listener = () =>
+    {
+      const dialog = new PropertiesDialog(this.application, object);
+      dialog.show();
+    };
+
+    return {
+      className: "button edit",
+      label: "label.edit_properties",
+      listener : listener
+    };
+
   }
 
   createAddFormulaAction(object)

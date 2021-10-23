@@ -182,10 +182,29 @@ input[type=range]::-moz-range-track
 
 div.code_editor
 {
+  position: relative;
+  height: 100px;
+}
+
+div.code_editor > label
+{
+  position: absolute;
+  height: 20px;
+  width: 100%;
+}
+
+div.code_editor > .cm-editor-holder
+{
+  position: absolute;
+  top: 20px;
   border: 1px solid #c0c0c0;
   border-radius: 2px;
   font-size: 14px;
   font-family: monospace;
+  height: calc(100% - 20px);
+  width: 100%;
+  overflow: auto;
+  box-sizing: border-box;
 }
 
 /* animation */

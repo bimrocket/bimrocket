@@ -144,6 +144,11 @@ class Dialog
   {
     return Controls.addButton(this.footerElem, name, label, action);
   }
+
+  addCodeEditor(name, label, value, options)
+  {
+    return Controls.addCodeEditor(this.bodyElem, name, label, value, options);
+  }
 }
 
 export { Dialog };

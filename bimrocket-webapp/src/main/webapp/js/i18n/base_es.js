@@ -117,7 +117,6 @@ export const translations =
   "tool.clip.label" : "Recortar",
 
   "tool.script.label" : "Programas",
-  "tool.script.editor" : "Editor de código",
   "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbitar",
@@ -250,6 +249,8 @@ export const translations =
   "label.property_name" : "Nombre de la propiedad:",
   "label.property_type" : "Tipo de la propiedad:",
   "label.property_value" : "Valor de la propiedad:",
+  "label.properties" : "Propiedades (JSON):",
+  "label.edit_properties" : "Editar propiedades",
 
   "label.formula.path" : "Propiedad:",
   "label.formula.expression" : "Expresión:",
@@ -277,6 +278,8 @@ export const translations =
   "title.formula" : "Fórmula",
   "title.add_controller" : "Añadir controlador",
   "title.remove_controller" : "Borrar controlador",
+  "title.properties" : "Propiedades",
+  "title.script_editor" : "Editor de código",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,

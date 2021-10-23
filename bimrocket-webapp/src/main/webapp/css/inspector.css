@@ -95,6 +95,11 @@ ul.inspector li.section > span.button.add
   background-image: url(images/add.svg);
 }
 
+ul.inspector li.section > span.button.edit
+{
+  background-image: url(images/edit.svg);
+}
+
 ul.inspector li.section > span.button.remove
 {
   background-image: url(images/remove.svg);

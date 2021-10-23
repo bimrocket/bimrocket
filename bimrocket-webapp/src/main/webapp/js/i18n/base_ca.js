@@ -117,7 +117,6 @@ export const translations =
   "tool.clip.label" : "Retalla",
 
   "tool.script.label" : "Programes",
-  "tool.script.editor" : "Editor de codi",
   "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbita",
@@ -250,6 +249,8 @@ export const translations =
   "label.property_name" : "Nom de la propietat:",
   "label.property_type" : "Tipus de la propietat:",
   "label.property_value" : "Valor de la propietat:",
+  "label.properties" : "Propietats (JSON):",
+  "label.edit_properties" : "Edita propietats",
 
   "label.formula.path" : "Propietat:",
   "label.formula.expression" : "Expressió:",
@@ -277,6 +278,8 @@ export const translations =
   "title.formula" : "Fórmula",
   "title.add_controller" : "Afegeix controlador",
   "title.remove_controller" : "Esborra controlador",
+  "title.properties" : "Propietats",
+  "title.script_editor" : "Editor de codi",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,

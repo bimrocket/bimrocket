@@ -281,9 +281,9 @@ class BCFPanel extends Panel
     this.saveProjectNameButton = Controls.addButton(this.saveProjectButtonsElem,
       "saveProjectName", "button.save", () => this.saveProjectName());
 
-    this.extensionsElem = Controls.addTextAreaField(this.setupBodyElem,
-      "extensions_json", "bim|label.project_extensions");
-    this.extensionsElem.setAttribute("spellcheck", "false");
+    this.extensionsView = Controls.addCodeEditor(this.setupBodyElem,
+      "extensions_json", "bim|label.project_extensions", "",
+      { "language" : "json", "height" : "200px" });
 
     this.saveExtensionsButtonsElem = document.createElement("div");
     this.saveExtensionsButtonsElem.className = "bcf_buttons";
@@ -774,7 +774,7 @@ class BCFPanel extends Panel
   saveProjectExtensions()
   {
     const application  = this.application;
-    const extensionsText = this.extensionsElem.value;
+    const extensionsText = this.extensionsView.state.doc.toString();
     const oldExtensionsText = JSON.stringify(this.extensions, null, 2);
 
     if (extensionsText !== oldExtensionsText)
@@ -861,7 +861,13 @@ class BCFPanel extends Panel
     const index = this.projectElem.selectedIndex;
     const options = this.projectElem.options;
     this.projectNameElem.value = options[index].label;
-    this.extensionsElem.value = JSON.stringify(this.extensions, null, 2);
+
+    const json = JSON.stringify(this.extensions, null, 2);
+
+    const state = this.extensionsView.state;
+    const tx = state.update(
+      { changes: { from: 0, to: state.doc.length, insert: json } });
+    this.extensionsView.dispatch(tx);
   }
 
   populateTopicTable()

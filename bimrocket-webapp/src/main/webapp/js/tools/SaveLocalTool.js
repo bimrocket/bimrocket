@@ -46,9 +46,11 @@ class SaveLocalTool extends Tool
     {
       window.URL.revokeObjectURL(this.url);
     }
+    const object = application.getModelRoot(onlySelection);
+
     let intent =
     {
-      object : application.selection.object || application.baseObject,
+      object : object,
       name : name || this.defaultFileName
     };
 

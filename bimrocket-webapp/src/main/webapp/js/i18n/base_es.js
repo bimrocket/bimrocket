@@ -245,6 +245,8 @@ export const translations =
 
   "label.name" : "Nombre:",
   "label.format" : "Formato:",
+  "label.save_selection" : "Guarda solo la selección",
+
   "label.folder_name" : "Nombre de la carpeta:",
   "label.property_name" : "Nombre de la propiedad:",
   "label.property_type" : "Tipo de la propiedad:",

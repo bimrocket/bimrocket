@@ -107,17 +107,19 @@ class CloudExplorerTool extends Tool
     {
       panel.entryName = name;
       panel.entryType = Metadata.FILE;
-      this.savePath(panel.basePath + "/" + name);
+      this.savePath(panel.basePath + "/" + name, onlySelection);
     };
     dialog.show();
   }
 
-  savePath(path)
+  savePath(path, onlySelection)
   {
     const application = this.application;
     const panel = this.panel;
 
-    let object = application.selection.object || application.baseObject;
+    const roots = application.selection.roots;
+
+    const object = application.getModelRoot(onlySelection);
 
     const intent =
     {

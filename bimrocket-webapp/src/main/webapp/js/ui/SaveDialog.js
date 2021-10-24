@@ -23,12 +23,11 @@ class SaveDialog extends Dialog
     }
     this.nameElem = this.addTextField("saveEntryName", "label.name", name);
 
-    this.addButton("save", "button.save", () =>
-    {
-      this.hide();
-      this.setExtension(this.formatSelect.value);
-      this.onSave(this.nameElem.value, this.formatSelect.value, false);
-    });
+    let formatInfo = IOManager.getFormatInfo(name);
+    let format = formatInfo && formatInfo.exporterClass ?
+      formatInfo.extension : SaveDialog.DEFAULT_EXPORT_FORMAT;
+    this.setExtension(format);
+
     let options = [];
     for (let formatName in IOManager.formats)
     {
@@ -38,15 +37,22 @@ class SaveDialog extends Dialog
         options.push([formatName, format.description]);
       }
     }
-    let formatInfo = IOManager.getFormatInfo(name);
-    let format = formatInfo && formatInfo.exporterClass ?
-      formatInfo.extension : SaveDialog.DEFAULT_EXPORT_FORMAT;
-    this.setExtension(format);
 
     this.formatSelect = this.addSelectField("saveFormat", "label.format",
       options, format);
     this.formatSelect.addEventListener("change",
       event => this.setExtension(this.formatSelect.value));
+
+    this.saveSelectionElem = this.addCheckBoxField("save_sel",
+      "label.save_selection", false);
+
+    this.addButton("save", "button.save", () =>
+    {
+      this.hide();
+      this.setExtension(this.formatSelect.value);
+      this.onSave(this.nameElem.value, this.formatSelect.value,
+        this.saveSelectionElem.checked);
+    });
 
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());

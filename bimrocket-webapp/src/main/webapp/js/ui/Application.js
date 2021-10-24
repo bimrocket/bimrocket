@@ -442,6 +442,43 @@ class Application
     this.needsRepaint = true;
   }
 
+  /* gets the model root depending on selection */
+  getModelRoot(lowestRoot = false)
+  {
+    let root;
+    const roots = this.selection.roots;
+
+    if (roots.length === 0) // nothing selected
+    {
+      if (this.baseObject.children.length === 1)
+      {
+        root = this.baseObject.children[0];
+      }
+      else
+      {
+        root = this.baseObject;
+      }
+    }
+    else if (roots.length === 1)
+    {
+      root = roots[0];
+      if (!lowestRoot)
+      {
+        // find top root (under baseObject)
+        while (root.parent !== this.baseObject &&
+               root !== this.scene && root !== this.baseObject)
+        {
+          root = root.parent;
+        }
+      }
+    }
+    else // multiple roots
+    {
+      root = this.baseObject;
+    }
+    return root;
+  }
+
   get units()
   {
     if (this._units === null)

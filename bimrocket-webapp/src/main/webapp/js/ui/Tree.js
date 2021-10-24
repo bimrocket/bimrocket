@@ -211,9 +211,9 @@ class TreeNode
     if (this.childrenElem)
     {
       this.childrenElem.innerHTML = "";
+      this.buttonElem.style.display = "none";
     }
     this.children = [];
-    this.buttonElem.style.display = "none";
   }
 }
 

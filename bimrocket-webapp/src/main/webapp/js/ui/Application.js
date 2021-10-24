@@ -1059,6 +1059,8 @@ class Application
     }
     if (object && object !== this.baseObject && object !== this.scene)
     {
+      this.stopControllers(object);
+
       let parent = object.parent;
       if (parent)
       {
@@ -1069,7 +1071,7 @@ class Application
         source : this};
       this.notifyEventListeners("scene", removeEvent);
 
-      this.selection.remove(object);
+      this.selection.remove(object); // TODO: unselect child objects
     }
   }
 

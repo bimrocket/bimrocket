@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 class Cord extends THREE.LineSegments
@@ -36,6 +37,8 @@ class Cord extends THREE.LineSegments
 		this.material = source.material;
 		this.geometry = source.geometry;
     this.builder = source.builder ? source.builder.clone() : null;
+
+    Formula.copy(this, source);
 
 		return this;
 	}

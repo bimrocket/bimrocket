@@ -6,6 +6,7 @@
 
 import { SolidGeometry, EdgeMap } from "./SolidGeometry.js";
 import { BSP } from "./BSP.js";
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 class Solid extends THREE.Object3D
@@ -211,6 +212,8 @@ class Solid extends THREE.Object3D
     this.edgesVisible = source.edgesVisible;
     this.builder = source.builder ? source.builder.clone() : null;
     this.updateMatrix();
+
+    Formula.copy(this, source);
 
     if (recursive === true)
     {

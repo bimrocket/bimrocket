@@ -111,6 +111,21 @@ class Formula
     }
     return updated;
   }
+
+  static copy(target, source)
+  {
+    if (target.formulas === undefined)
+    {
+      target.formulas = {};
+    }
+
+    const targetFormulas = target.formulas;
+    const sourceFormulas = source.formulas;
+    for (let path in sourceFormulas)
+    {
+      targetFormulas[path] = sourceFormulas[path];
+    }
+  }
 }
 
 export { Formula };

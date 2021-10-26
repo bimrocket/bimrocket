@@ -346,7 +346,8 @@ class FlyTool extends Tool
 
   onKeyDown(event)
   {
-    if (event.srcElement.nodeName.toUpperCase() === "INPUT") return;
+    if (event.srcElement.nodeName.toUpperCase() === "INPUT" ||
+        event.srcElement.classList.contains("cm-content")) return;
 
     event.preventDefault();
 

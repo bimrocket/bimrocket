@@ -15,6 +15,7 @@ import { Formula } from "../formula/Formula.js";
 import { FormulaDialog } from "./FormulaDialog.js";
 import { PropertiesDialog } from "./PropertiesDialog.js";
 import { PropertyDialog } from "./PropertyDialog.js";
+import { BuilderDialog } from "./BuilderDialog.js";
 import { ControllerDialog } from "./ControllerDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
@@ -142,7 +143,7 @@ class Inspector extends Panel
         this.state[this.builderSectionName] = "expanded";
       }
       let builderListElem = this.createSection(this.builderSectionName,
-        topListElem);
+        topListElem, [this.createSetBuilderAction(object)]);
 
       let builder = object.builder;
       if (builder)
@@ -434,6 +435,21 @@ class Inspector extends Panel
           false);
       }
     }
+  }
+
+  createSetBuilderAction(object)
+  {
+    const listener = () =>
+    {
+      const dialog = new BuilderDialog(this.application, object);
+      dialog.show();
+    };
+
+    return {
+      className: "button edit",
+      label: "label.object_builder",
+      listener : listener
+    };
   }
 
   createAddPropertyAction(object, dictionary)

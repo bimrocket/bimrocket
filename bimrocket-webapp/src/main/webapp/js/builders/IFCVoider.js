@@ -7,10 +7,11 @@
 import { Solid } from "../core/Solid.js";
 import { BSP } from "../core/BSP.js";
 import { ObjectBuilder } from "./ObjectBuilder.js";
+import { SolidBuilder } from "./SolidBuilder.js";
 import { IFC } from "../io/ifc/IFC.js";
 import * as THREE from "../lib/three.module.js";
 
-class IFCVoider extends ObjectBuilder
+class IFCVoider extends SolidBuilder
 {
   constructor()
   {
@@ -19,7 +20,8 @@ class IFCVoider extends ObjectBuilder
 
   traverseDependencies(productRepr, action)
   {
-    if (productRepr.children.length < 3) return;
+    if (!(productRepr instanceof Solid) 
+        || productRepr.children.length < 3) return;
 
     action(productRepr.parent);
 

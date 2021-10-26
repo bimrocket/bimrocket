@@ -263,6 +263,7 @@ export const translations =
   "label.remove_controller" : "Remove controller",
   "label.start_controller" : "Start controller",
   "label.stop_controller" : "Stop controller",
+  "label.object_builder" : "Object builder",
 
   "option.edges" : "Edges",
   "option.faces" : "Faces",
@@ -282,6 +283,7 @@ export const translations =
   "title.remove_controller" : "Remove controller",
   "title.properties" : "Properties",
   "title.script_editor" : "Script editor",
+  "title.object_builder" : "Object builder",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,

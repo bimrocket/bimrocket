@@ -1,6 +1,6 @@
 /**
  * GeometryUtils.js
- * 
+ *
  * @author realor
  */
 
@@ -74,13 +74,13 @@ class GeometryUtils
   {
     if (!(normal instanceof THREE.Vector3)) normal = new THREE.Vector3();
     else normal.set(0, 0, 0);
-    
+
     // Newell's method
-    var count = vertexPositions.length;
-    var pi, pj;
-    for (var i = 0; i < count; i++)
+    const count = vertexPositions.length;
+    let pi, pj;
+    for (let i = 0; i < count; i++)
     {
-      var j = (i + 1) % count;
+      let j = (i + 1) % count;
       if (accessor)
       {
         pi = vertexPositions[i][accessor];
@@ -206,7 +206,7 @@ class GeometryUtils
         let vb = i + 1;
         let vc = i + 2;
 
-        addFace(va, vb, vc);        
+        addFace(va, vb, vc);
       }
     }
   }

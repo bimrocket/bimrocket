@@ -6,7 +6,11 @@
 
 import { Controller } from "./Controller.js";
 import { GMLLoader } from "../io/gis/GMLLoader.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { GeometryMerger } from "../builders/GeometryMerger.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
+import * as THREE from "../lib/three.module.js";
 
 class WFSController extends Controller
 {
@@ -14,21 +18,15 @@ class WFSController extends Controller
   {
     super(object, name);
 
-    this.url = "https://your_server.com/wfs?";
+    this.url = "https://your_server.com/wfs";
     this.username = "username";
     this.password = "password";
     this.layer = "layer";
     this.format = "GeoJSON";
     this.bbox = "(0,0,100,100)";
     this.count = 0;
-    this.offsetX = 0;
-    this.offsetY = 0;
-    this.offsetZ = 0;
-    this.rotationZ = 0;
-    this.extrusion = 1;
-    this.diameter = 0.1;
-    this.color = "#0000ff";
-    this.model = "https://your_server.com/model.dae";
+    this.mergeGeometries = false;
+    this.origin = new THREE.Vector3(420878, 4582247, 0);
     this.autoStart = false;
 
     this._onLoad = this.onLoad.bind(this);
@@ -38,13 +36,6 @@ class WFSController extends Controller
 
   onStart()
   {
-    const object = this.object;
-    if (object.userData.export === undefined)
-    {
-      object.userData.export = {};
-    }
-    object.userData.export.exportChildren = false;
-
     this.getFeature();
   }
 
@@ -52,9 +43,34 @@ class WFSController extends Controller
   {
   }
 
-  onLoad(group)
+  onLoad(featureGroup)
   {
-    this.application.addObject(group, this.object);
+    console.info("Feature " + this.layer + " loaded.");
+    const oldFeatureGroup = this.object.getObjectByName("features");
+    if (oldFeatureGroup)
+    {
+      ObjectUtils.dispose(oldFeatureGroup);
+      this.object.remove(oldFeatureGroup);
+    }
+    featureGroup.updateMatrix();
+    if (this.mergeGeometries)
+    {
+      const mergeGroup = new THREE.Group();
+      mergeGroup.builder = new GeometryMerger();
+      mergeGroup.add(featureGroup);
+      ObjectBuilder.build(mergeGroup);
+      featureGroup = mergeGroup;
+    }
+
+    this.object.add(featureGroup);
+    featureGroup.name = "features";
+    if (featureGroup.userData.export === undefined)
+    {
+      featureGroup.userData.export = {};
+    }
+    featureGroup.userData.export.exportChildren = false;
+
+    this.application.notifyObjectsChanged(this.object, this, "structureChanged");
   }
 
   onProgress()
@@ -86,6 +102,14 @@ class WFSController extends Controller
     {
       loader = new GeoJSONLoader();
     }
+    if (url.indexOf("?") === -1)
+    {
+      url += "?";
+    }
+    else
+    {
+      url += "&";
+    }
     url += "service=wfs&version=2.0.0&request=GetFeature&outputFormat=" +
       loader.mimeType + "&typeName=" + layer;
     const count = this.count;
@@ -102,14 +126,8 @@ class WFSController extends Controller
       name: layer || "wfs",
       username: this.username,
       password: this.password,
-      offsetX: this.offsetX,
-      offsetY: this.offsetY,
-      offsetZ: this.offsetZ,
-      rotationZ: this.rotationZ,
-      extrusion: this.extrusion,
-      diameter: this.diameter,
-      color: this.color.value,
-      model: this.model.value
+      origin: this.origin,
+      representation: this.object.getObjectByName("representation")
     };
 
     loader.load(url, this._onLoad, this._onProgress, this._onError);

@@ -51,6 +51,7 @@ import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
 import { BooleanOperator } from "../builders/BooleanOperator.js";
+import { GeometryMerger } from "../builders/GeometryMerger.js";
 import { Brain4itPostController } from "../controllers/Brain4itPostController.js";
 import { Brain4itWatchController } from "../controllers/Brain4itWatchController.js";
 import { ColorController } from "../controllers/ColorController.js";
@@ -73,6 +74,7 @@ import { STLExporter } from "../io/STLExporter.js";
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
+import * as THREE from "../lib/three.module.js";
 
 export function load(application)
 {
@@ -478,4 +480,7 @@ export function load(application)
 
   // select baseObject
   application.selection.set(application.baseObject);
+
+  // globals
+  window.THREE = THREE;
 }

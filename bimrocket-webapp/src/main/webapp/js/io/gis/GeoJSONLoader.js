@@ -5,6 +5,8 @@
  */
 
 import { GISLoader } from "./GISLoader.js";
+import { Solid } from "../../core/Solid.js";
+import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import * as THREE from "../../lib/three.module.js";
 
 class GeoJSONLoader extends GISLoader
@@ -17,8 +19,8 @@ class GeoJSONLoader extends GISLoader
   parse(data)
   {
     const options = this.options;
-    const group = new THREE.Group();
-    group.name = this.options.name || "layer";
+    const featureGroup = new THREE.Group();
+    featureGroup.name = this.options.name || "layer";
     let jsonObject = JSON.parse(data);
     let features = jsonObject.features;
     for (let f = 0; f < features.length; f++)
@@ -29,14 +31,15 @@ class GeoJSONLoader extends GISLoader
       if (geometry)
       {
         this.createObject(geometry.type, feature.id || "feature",
-          geometry.coordinates, properties, group);
+          geometry.coordinates, properties, featureGroup);
       }
       else
       {
-        this.createNonVisibleObject(feature.id || "feature_nv", properties, group);
+        this.createNonVisibleObject(feature.id || "feature_nv",
+          properties, featureGroup);
       }
     }
-    return group;
+    return featureGroup;
   }
 }
 

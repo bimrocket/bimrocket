@@ -104,6 +104,12 @@ class Extruder extends SolidBuilder
     }
     else
     {
+      if (this.depth === 0)
+      {
+        solid.updateGeometry(new SolidGeometry());
+        return true;
+      }
+
       // extrude in direction vector
       extrudeVector = new THREE.Vector3();
       extrudeVector.copy(direction).normalize();

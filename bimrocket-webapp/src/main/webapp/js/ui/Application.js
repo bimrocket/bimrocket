@@ -229,7 +229,7 @@ class Application
           }
           if (updateSelection) this.updateSelection();
         }
-        else if (event.type === "removed")
+        else if (event.type === "added" || event.type === "removed")
         {
           event.parent.needsRebuild = true;
         }
@@ -377,7 +377,7 @@ class Application
     this.orthographicCamera = camera;
 
     camera = new THREE.PerspectiveCamera(60,
-      container.clientWidth / container.clientHeight, 0.1, 2000);
+      container.clientWidth / container.clientHeight, 0.1, 4000);
     camera.position.set(0, -10, 0.2);
     camera.name = "Perspective";
     camera.aspect = container.clientWidth / container.clientHeight;
@@ -1337,27 +1337,13 @@ class Application
 
   evaluateFormulas()
   {
-    const updated = [];
+    const updatedObjects = Formula.updateTree(this.scene);
 
-    const updateFormula = object =>
+    console.info("Objects updated by formulas", updatedObjects);
+
+    if (updatedObjects.length > 0)
     {
-      if (Formula.update(object))
-      {
-        updated.push(object);
-      }
-
-      for (let child of object.children)
-      {
-        updateFormula(child);
-      }
-    };
-
-    updateFormula(this.scene);
-    console.info("Objects updated by formulas", updated);
-
-    if (updated.length > 0)
-    {
-      this.notifyObjectsChanged(updated);
+      this.notifyObjectsChanged(updatedObjects);
     }
   }
 

@@ -25,7 +25,7 @@ class Formula
 
   /* static methods */
 
-  static set(object, path, expression, evaluate = true)
+  static create(object, path, expression, evaluate = true)
   {
     if (object.formulas === undefined)
     {
@@ -35,6 +35,18 @@ class Formula
     if (evaluate) formula.evaluate(object);
 
     object.formulas[path] = formula;
+    return formula;
+  }
+
+  static set(object, formula, evaluate = true)
+  {
+    if (object.formulas === undefined)
+    {
+      object.formulas = {};
+    }
+    if (evaluate) formula.evaluate(object);
+
+    object.formulas[formula.path] = formula;
     return formula;
   }
 
@@ -64,6 +76,21 @@ class Formula
         object.formulas = {};
       }
     }
+  }
+
+  static isDefined(object, path = "")
+  {
+    if (object.formulas)
+    {
+      for (let key in object.formulas)
+      {
+        if (key.startsWith(path))
+        {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   static eval(object, path)
@@ -110,6 +137,28 @@ class Formula
       }
     }
     return updated;
+  }
+
+  static updateTree(object, path = "", prefix = path === "" ? true : false)
+  {
+    const updatedObjects = [];
+
+    const updateFormulas = object =>
+    {
+      if (Formula.update(object, path, prefix))
+      {
+        updatedObjects.push(object);
+      }
+
+      for (let child of object.children)
+      {
+        updateFormulas(child);
+      }
+    };
+
+    updateFormulas(object);
+
+    return updatedObjects;
   }
 
   static copy(target, source)

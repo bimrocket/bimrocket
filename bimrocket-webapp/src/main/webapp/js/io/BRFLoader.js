@@ -112,7 +112,7 @@ class BRFLoader extends THREE.Loader
           let expression = formulas[path];
           try
           {
-            Formula.set(object, path, expression);
+            Formula.create(object, path, expression);
           }
           catch (ex)
           {
@@ -376,7 +376,10 @@ class BRFLoader extends THREE.Loader
       if (property !== "type")
       {
         let value = entry[property];
-        this.setPropertyValue(element, property, value, model);
+        if (element[property] !== undefined)
+        {
+          this.setPropertyValue(element, property, value, model);
+        }
       }
     }
   }

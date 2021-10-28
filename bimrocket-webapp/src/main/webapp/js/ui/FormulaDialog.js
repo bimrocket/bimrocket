@@ -65,7 +65,7 @@ class FormulaDialog extends Dialog
       {
         try
         {
-          Formula.set(this.object, path, expression);
+          Formula.create(this.object, path, expression);
           this.application.notifyObjectsChanged(this.object, this);
           this.hide();
         }

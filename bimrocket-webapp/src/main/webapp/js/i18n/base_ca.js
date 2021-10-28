@@ -264,6 +264,7 @@ export const translations =
   "label.start_controller" : "Inicia controlador",
   "label.stop_controller" : "Atura controlador",
   "label.object_builder" : "Constructor d'objecte",
+  "label.change_material" : "Canvia material",
 
   "option.edges" : "Arestes",
   "option.faces" : "Cares",

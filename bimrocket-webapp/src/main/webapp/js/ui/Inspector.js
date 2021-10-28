@@ -31,6 +31,7 @@ class Inspector extends Panel
     this.object = null;
     this.state = {};
     this.objectSectionName = 'Object';
+    this.materialSectionName = 'Material';
     this.builderSectionName = 'Builder';
     this.formulasSectionName = 'Formulas';
     this.geometrySectionName = 'Geometry';
@@ -44,7 +45,7 @@ class Inspector extends Panel
       new VectorRenderer(this),
       new EulerRenderer(this),
       new FormulaRenderer(this),
-      new MaterialRenderer(this),
+      new ColorRenderer(this),
       new Object3DRenderer(this)];
     this.editors = [
       new StringEditor(this),
@@ -52,7 +53,8 @@ class Inspector extends Panel
       new BooleanEditor(this),
       new VectorEditor(this),
       new EulerEditor(this),
-      new FormulaEditor(this)];
+      new FormulaEditor(this),
+      new ColorEditor(this)];
     this.edition =
     {
       object : null,
@@ -134,7 +136,38 @@ class Inspector extends Panel
       let material = object.material;
       if (material)
       {
-        this.createReadOnlyProperty("material", material, objListElem);
+        // material
+        if (this.state[this.materialSectionName] === undefined)
+        {
+          this.state[this.materialSectionName] = "expanded";
+        }
+        let materialListElem = this.createSection(this.materialSectionName,
+          topListElem, [this.createChangeMaterialAction(object)]);
+
+        for (let propertyName of ["uuid", "type", "name", "color", "specular",
+          "emissive", "shininess", "opacity", "transparent",
+          "emissiveIntensity", "fog"])
+        {
+          if (material[propertyName] !== undefined)
+          {
+            let propertyValue = material[propertyName];
+            if (propertyValue !== null)
+            {
+              if (propertyName === "uuid" || propertyName === "type"
+                  || material === Solid.EdgeMaterial
+                  || material === Solid.FaceMaterial)
+              {
+                this.createReadOnlyProperty(propertyName, propertyValue,
+                  materialListElem);
+              }
+              else
+              {
+                this.createWriteableProperty(material, propertyName,
+                  materialListElem);
+              }
+            }
+          }
+        }
       }
 
       // builder
@@ -435,6 +468,21 @@ class Inspector extends Panel
           false);
       }
     }
+  }
+
+  createChangeMaterialAction(object)
+  {
+    const listener = () =>
+    {
+      object.material = object.material.clone();
+      this.application.notifyObjectsChanged(this.object, "");
+    };
+
+    return {
+      className: "button edit",
+      label: "label.change_material",
+      listener : listener
+    };
   }
 
   createSetBuilderAction(object)
@@ -895,7 +943,7 @@ class FormulaRenderer extends PropertyRenderer
   }
 };
 
-class MaterialRenderer extends PropertyRenderer
+class ColorRenderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -904,37 +952,33 @@ class MaterialRenderer extends PropertyRenderer
 
   isSupported(value)
   {
-    return value instanceof THREE.Material;
+    return value instanceof THREE.Color;
   }
 
   getClassName(value)
   {
-    return "material";
+    return "color";
   }
 
-  render(material)
+  render(color)
   {
+    const rgb = "rgb(" + Math.round(255 * color.r) +
+      " ," + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
+
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-    if (material.name)
-    {
-      let nameElem = document.createElement("span");
-      nameElem.className = "name";
-      nameElem.innerHTML = material.name;
-      valueElem.appendChild(nameElem);
-    }
-    if (material.color)
-    {
-      let colorElem = document.createElement("span");
-      colorElem.className = "color";
-      let color = material.color;
-      let rgb = "rgb(" + Math.round(255 * color.r) +
-        "," + Math.round(255 * color.g) + "," + Math.round(255 * color.b) + ")";
-      colorElem.style.backgroundColor = rgb;
-      colorElem.alt = rgb;
-      colorElem.title = rgb;
-      valueElem.appendChild(colorElem);
-    }
+
+    let codeElem = document.createElement("span");
+    codeElem.innerHTML = rgb;
+    valueElem.appendChild(codeElem);
+
+    let colorElem = document.createElement("span");
+    colorElem.className = "color";
+    colorElem.style.backgroundColor = rgb;
+    colorElem.alt = rgb;
+    colorElem.title = rgb;
+    valueElem.appendChild(colorElem);
+
     return valueElem;
   }
 }
@@ -1231,5 +1275,85 @@ class FormulaEditor extends PropertyEditor
   }
 }
 
+class ColorEditor extends PropertyEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Color;
+  }
+
+  edit(color)
+  {
+    let dimId = "color_edit_";
+
+    const parseDimension = dim =>
+    {
+      let valueElem = document.getElementById(dimId + dim);
+      let value = valueElem.value;
+      let num = parseFloat(value);
+      return isNaN(num) ? color[dim] : num;
+    };
+
+    const endEdition = () =>
+    {
+      let r = parseDimension("r") / 255;
+      let g = parseDimension("g") / 255;
+      let b = parseDimension("b") / 255;
+      this.inspector.endEdition(new THREE.Color(r, g, b));
+    };
+
+    const keyListener = event =>
+    {
+      if (event.keyCode === 13)
+      {
+        endEdition();
+      }
+      else if (event.keyCode === 27)
+      {
+        this.inspector.stopEdition();
+      }
+    };
+
+    const createDimensionEditor = (color, dim) =>
+    {
+      let itemElem = document.createElement("li");
+
+      let labelElem = document.createElement("label");
+      labelElem.innerHTML = dim + ":";
+      labelElem.htmlFor = dimId + dim;
+
+      let valueElem = document.createElement("input");
+      valueElem.id = dimId + dim;
+      valueElem.type = "number";
+      valueElem.className = "value";
+      valueElem.value = color[dim] * 255;
+      valueElem.min = 0;
+      valueElem.max = 255;
+      valueElem.step = 1;
+      valueElem.addEventListener("keyup", keyListener, false);
+
+      itemElem.appendChild(labelElem);
+      itemElem.appendChild(valueElem);
+
+      return itemElem;
+    };
+
+    let listElem = document.createElement("ul");
+    listElem.className = "list_3";
+
+    listElem.appendChild(createDimensionEditor(color, "r"));
+    listElem.appendChild(createDimensionEditor(color, "g"));
+    listElem.appendChild(createDimensionEditor(color, "b"));
+
+    listElem.focus = () => document.getElementById(dimId + "r").focus();
+
+    return listElem;
+  }
+}
 
 export { Inspector };

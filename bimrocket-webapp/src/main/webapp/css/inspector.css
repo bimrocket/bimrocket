@@ -214,18 +214,25 @@ ul.inspector li.property.formula
   background-image: url(images/inspector/formula.svg);
 }
 
-ul.inspector li.property.material span.name
+ul.inspector li.property.color > span.name
 {
   margin-right: 2px;
   vertical-align: middle;
 }
 
-ul.inspector li.property.material span.color
+ul.inspector li.property.color > span.value
+{
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property.color > span.value > span.color
 {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   border: 1px solid #202020;
+  margin-left: 4px;
   vertical-align: middle;
 }
 

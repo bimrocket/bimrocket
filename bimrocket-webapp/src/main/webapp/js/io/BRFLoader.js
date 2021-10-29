@@ -376,7 +376,7 @@ class BRFLoader extends THREE.Loader
       if (property !== "type")
       {
         let value = entry[property];
-        if (element[property] !== undefined)
+        if (property in element)
         {
           this.setPropertyValue(element, property, value, model);
         }

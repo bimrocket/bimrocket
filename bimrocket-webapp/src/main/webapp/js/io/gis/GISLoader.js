@@ -126,11 +126,11 @@ class GISLoader extends THREE.Loader
 
   createPoint(name, coordinates, properties, parent)
   {
-    let solid = null;
-    if (this.representation instanceof Solid)
+    let object = null;
+    if (this.representation instanceof THREE.Object3D)
     {
-      solid = this.representation.clone();
-      this.cloneMaterials(solid);
+      object = this.representation.clone();
+      object.userData.selection = { "group" : true };
     }
     else
     {
@@ -138,25 +138,26 @@ class GISLoader extends THREE.Loader
       let profile = new Profile();
       profile.builder = new CircleBuilder(0.5);
       profile.name = "Profile";
-      solid = new Solid();
+      let solid = new Solid();
       solid.add(profile);
       solid.builder = new Extruder(1);
       ObjectBuilder.build(solid);
+      object = solid;
     }
-    solid.visible = true;
+    object.visible = true;
 
-    solid.position.x = coordinates[0];
-    solid.position.y = coordinates[1];
-    solid.position.z = coordinates.length === 3 ? coordinates[2] : 0;
-    solid.position.sub(this.origin);
+    object.position.x = coordinates[0];
+    object.position.y = coordinates[1];
+    object.position.z = coordinates.length === 3 ? coordinates[2] : 0;
+    object.position.sub(this.origin);
 
-    this.setObjectProperties(solid, name, properties);
-    parent.add(solid);
+    this.setObjectProperties(object, name, properties);
+    parent.add(object);
 
-    Formula.updateTree(solid);
+    Formula.updateTree(object);
 
-    ObjectBuilder.build(solid);
-    solid.updateMatrix();
+    ObjectBuilder.build(object);
+    object.updateMatrix();
   }
 
   createMultiPoint(name, coordinates, properties, parent)
@@ -196,7 +197,6 @@ class GISLoader extends THREE.Loader
       solid = this.representation.clone();
       solid.add(cord);
       cord.visible = false;
-      this.cloneMaterials(solid);
     }
 
     const object = solid || cord;
@@ -263,7 +263,6 @@ class GISLoader extends THREE.Loader
       solid = this.representation.clone();
       solid.add(profile);
       profile.visible = false;
-      this.cloneMaterials(solid);
     }
 
     let object = solid || profile;
@@ -288,15 +287,6 @@ class GISLoader extends THREE.Loader
       this.createPolygon(name + "_" + i, polygonCoords, null, group);
     }
     parent.add(group);
-  }
-
-  cloneMaterials(solid)
-  {
-    if (Formula.isDefined(solid, "faceMaterial.")
-        || Formula.isDefined(solid, "material."))
-    {
-      solid.faceMaterial = solid.faceMaterial.clone();
-    }
   }
 }
 

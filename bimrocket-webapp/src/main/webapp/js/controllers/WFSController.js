@@ -23,8 +23,10 @@ class WFSController extends Controller
     this.password = "password";
     this.layer = "layer";
     this.format = "GeoJSON";
-    this.bbox = "(0,0,100,100)";
+    this.bbox = "";
+    this.cqlFilter = "";
     this.count = 0;
+    this.srsName = "";
     this.mergeGeometries = false;
     this.origin = new THREE.Vector3(420878, 4582247, 0);
     this.autoStart = false;
@@ -67,6 +69,7 @@ class WFSController extends Controller
     if (featureGroup.userData.export === undefined)
     {
       featureGroup.userData.export = {};
+      featureGroup.userData.export.export = false;
     }
     featureGroup.userData.export.exportChildren = false;
 
@@ -117,10 +120,20 @@ class WFSController extends Controller
     {
       url += "&count=" + count;
     }
-    const bbox = this.bbox.value;
+    const bbox = this.bbox;
     if (bbox && bbox.length > 0)
     {
       url += "&bbox=" + bbox;
+    }
+    const cqlFilter = this.cqlFilter;
+    if (cqlFilter && cqlFilter.length > 0)
+    {
+      url += "&CQL_FILTER=" + cqlFilter;
+    }
+    const srsName = this.srsName;
+    if (srsName && srsName.length > 0)
+    {
+      url += "&srsName=" + srsName;
     }
     loader.options = {
       name: layer || "wfs",

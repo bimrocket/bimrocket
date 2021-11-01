@@ -36,6 +36,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -45,6 +46,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 
@@ -59,38 +61,43 @@ public class ProxyEndpoint
 {
   @GET
   @PermitAll
-  public Response doGet(@QueryParam("url") String url, @Context UriInfo info)
+  public Response doGet(@QueryParam("url") String url,
+    @Context UriInfo info, @Context HttpHeaders headers)
   {
     if (url == null) return Response.ok().build();
 
-    StringBuilder buffer = new StringBuilder(url);
-    boolean firstParam = true;
-    MultivaluedMap<String, String> queryParameters = info.getQueryParameters();
-    for (String name : queryParameters.keySet())
-    {
-      if (!name.equals("url"))
-      {
-        List<String> values = queryParameters.get(name);
-        for (String value : values)
-        {
-          if (firstParam)
-          {
-            buffer.append("?");
-            firstParam = false;
-          }
-          else
-          {
-            buffer.append("&");
-          }
-          buffer.append(name).append("=").append(value);
-        }
-      }
-    }
     try
     {
+      StringBuilder buffer = new StringBuilder(url);
+      boolean firstParam = true;
+
+      MultivaluedMap<String, String> queryParams = info.getQueryParameters();
+      for (String name : queryParams.keySet())
+      {
+        if (!name.equals("url"))
+        {
+          List<String> values = queryParams.get(name);
+          for (String value : values)
+          {
+            if (firstParam)
+            {
+              buffer.append("?");
+              firstParam = false;
+            }
+            else
+            {
+              buffer.append("&");
+            }
+            String encodedValue = URLEncoder.encode(value, "UTF-8");
+            buffer.append(name).append("=").append(encodedValue);
+          }
+        }
+      }
+
       URL targetUrl = new URL(buffer.toString());
       System.out.println("Connecting to " + targetUrl);
       HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
+
       conn.connect();
 
       InputStream responseStream;

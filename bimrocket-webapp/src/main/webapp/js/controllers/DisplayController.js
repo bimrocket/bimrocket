@@ -6,6 +6,8 @@
 
 import { PanelController } from "./PanelController.js";
 import { Controller } from "./Controller.js";
+import { Controls } from "../ui/Controls.js";
+import { I18N } from "../i18n/I18N.js";
 
 class DisplayController extends PanelController
 {
@@ -16,12 +18,15 @@ class DisplayController extends PanelController
     this.input = 0;
     this.units = "meters";
     this.decimals = 2;
+    this.detailUrl = "";
+    this.detailTarget = "_blank";
+    this.detailLabel = "Show more";
     this.displayClass = "default";
   }
 
   createPanel()
   {
-    super.createPanel();
+    super.createPanel("left", 80);
 
     let panelElem = document.createElement("div");
     panelElem.className = "display " + (this.displayClass || "default");
@@ -29,6 +34,10 @@ class DisplayController extends PanelController
     panelElem.appendChild(this.displayElem);
 
     this.panel.bodyElem.appendChild(panelElem);
+
+    this.detailButton = Controls.addButton(this.panel.bodyElem, "detail",
+      this.detailLabel, () => this.openUrl(), "detail");
+    this.detailButton.style.display = "none";
 
     this.update();
   }
@@ -44,11 +53,20 @@ class DisplayController extends PanelController
   update()
   {
     this.panel.title = this.title || "";
-    this.panel.visible = this.application.selection.contains(this.object);
     let value = this.input;
     let num = parseFloat(value).toFixed(this.decimals);
     let units = this.units || "";
     this.displayElem.innerHTML = "" + num + " " + units;
+    if (this.detailUrl.length > 0)
+    {
+      this.detailButton.style.display = "";
+      I18N.set(this.detailButton, "innerHTML", this.detailLabel);
+    }
+  }
+
+  openUrl()
+  {
+    window.open(this.detailUrl, this.detailTarget).focus();
   }
 }
 

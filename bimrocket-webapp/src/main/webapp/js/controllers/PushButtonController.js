@@ -18,6 +18,7 @@ class PushButtonController extends PanelController
     this.valueDown = 1;
     this.label = "PUSH";
     this.buttonClass = "rounded_button";
+    this.height = 150;
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
@@ -64,7 +65,6 @@ class PushButtonController extends PanelController
   update()
   {
     this.panel.title = this.title || "";
-    this.panel.visible = this.application.selection.contains(this.object);
     this.buttonElem.innerHTML = this.label || 'PUSH';
     this.buttonElem.className = this.buttonClass || "rounded_button";
     let output = this._pressed ? this.valueDown : this.valueUp;

@@ -12,6 +12,7 @@ class PanelController extends Controller
   {
     super(object, name);
     this.title = "Title";
+    this.alwaysVisible = false;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
     this._onSelection = this.onSelection.bind(this);
@@ -30,7 +31,11 @@ class PanelController extends Controller
     const application = this.application;
     application.addEventListener("scene", this._onNodeChanged);
     application.addEventListener("selection", this._onSelection);
-    this.update();
+    this.panel.visible = this.isPanelVisible();
+    if (this.panel.visible)
+    {
+      this.update();
+    }
   }
 
   onStop()
@@ -48,22 +53,30 @@ class PanelController extends Controller
     this.panel.bodyElem.classList.add("center");
   }
 
-  onNodeChanged(event)
-  {
-  }
-
   onSelection(event)
   {
-    this.panel.visible = this.application.selection.contains(this.object);
+    this.panel.visible = this.isPanelVisible();
     if (this.panel.visible)
     {
       this.update();
     }
   }
 
+  onNodeChanged(event)
+  {
+  }
+
   update()
   {
     // updates panel content
+  }
+
+  isPanelVisible()
+  {
+    const application = this.application;
+    const selection = application.selection;
+
+    return this.alwaysVisible || selection.contains(this.object);
   }
 }
 

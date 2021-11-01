@@ -17,6 +17,7 @@ class ToggleButtonController extends PanelController
     this.valueOff = 0;
     this.valueOn = 1;
     this.buttonClass = "toggle_button";
+    this.height = 150;
 
     this._onValueChange = this.onValueChange.bind(this);
   }
@@ -63,7 +64,6 @@ class ToggleButtonController extends PanelController
   update()
   {
     this.panel.title = this.title || "";
-    this.panel.visible = this.application.selection.contains(this.object);
     this.buttonElem.className = this.buttonClass || "toggle_button";
     let output = this.inputElem.checked ? this.valueOn : this.valueOff;
     if (output !== this.output)

@@ -88,6 +88,8 @@ class Application
     this._selectionLines = null;
     this._axisLines = null;
 
+    this.textureLoader = new THREE.TextureLoader();
+
    	THREE.Object3D.DefaultMatrixAutoUpdate = false;
    	THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
     THREE.Object3D.HIDDEN_PREFIX = ".";
@@ -1364,6 +1366,34 @@ class Application
       this.updateSelection();
     }
   }
+
+  loadTexture(imagePath, callback)
+  {
+    const texture = this.textureLoader.load(imagePath, tex =>
+    {
+      if (callback)
+      {
+        callback(tex);
+      }
+      this.repaint();
+    });
+    texture.name = imagePath;
+    return texture;
+  }
+
+//  loadTexture(imagePath, callback)
+//  {
+//    this.textureLoader.load(imagePath, texture =>
+//    {
+//      texture.name = imagePath;
+//      console.info("texture " + imagePath + " loaded.", texture.image);
+//      if (callback)
+//      {
+//        callback(texture);
+//      }
+//      this.repaint();
+//    });
+//  }
 
   updateCameraAspectRatio()
   {

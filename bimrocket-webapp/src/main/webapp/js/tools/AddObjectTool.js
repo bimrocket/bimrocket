@@ -97,6 +97,9 @@ class AddObjectTool extends Tool
       case "Helicoid":
         object = this.createCord("HelicoidBuilder");
         break;
+      case "Sprite":
+        object = this.createSprite();
+        break;
     }
     if (object)
     {
@@ -214,6 +217,22 @@ class AddObjectTool extends Tool
     cord.builder = builder;
     ObjectBuilder.build(cord);
     return cord;
+  }
+
+  createSprite()
+  {
+    const texture = this.application.loadTexture("textures/sphere.png");
+
+    const material = new THREE.SpriteMaterial({
+      name: "sphere",
+      map: texture,
+      color: 0xffffff,
+      sizeAttenuation: false
+    });
+
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(0.1, 0.1, 0.1);
+    return sprite;
   }
 }
 

@@ -22,6 +22,12 @@ import * as THREE from "../lib/three.module.js";
 
 class Inspector extends Panel
 {
+  static mainMaterialProperties = ["uuid", "type", "name", "color", "specular",
+    "emissive", "shininess", "opacity", "transparent",
+    "emissiveIntensity", "fog", "depthTest", "depthWrite",
+    "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
+    "sizeAttenuation", "map"];
+
   constructor(application)
   {
     super(application);
@@ -38,23 +44,28 @@ class Inspector extends Panel
     this.propertiesSectionName = "Properties";
     this.controllersSectionName = "Controllers";
 
-    this.renderers = [
-      new StringRenderer(this),
-      new NumberRenderer(this),
-      new BooleanRenderer(this),
-      new VectorRenderer(this),
-      new EulerRenderer(this),
-      new FormulaRenderer(this),
-      new ColorRenderer(this),
-      new Object3DRenderer(this)];
-    this.editors = [
-      new StringEditor(this),
-      new NumberEditor(this),
-      new BooleanEditor(this),
-      new VectorEditor(this),
-      new EulerEditor(this),
-      new FormulaEditor(this),
-      new ColorEditor(this)];
+    this.renderers = {};
+    this.editors = {};
+
+    this.addRenderer(StringRenderer);
+    this.addRenderer(NumberRenderer);
+    this.addRenderer(BooleanRenderer);
+    this.addRenderer(VectorRenderer);
+    this.addRenderer(EulerRenderer);
+    this.addRenderer(FormulaRenderer);
+    this.addRenderer(ColorRenderer);
+    this.addRenderer(TextureRenderer);
+    this.addRenderer(Object3DRenderer);
+
+    this.addEditor(StringEditor);
+    this.addEditor(NumberEditor);
+    this.addEditor(BooleanEditor);
+    this.addEditor(VectorEditor);
+    this.addEditor(EulerEditor);
+    this.addEditor(FormulaEditor);
+    this.addEditor(ColorEditor);
+    this.addEditor(TextureEditor);
+
     this.edition =
     {
       object : null,
@@ -111,26 +122,26 @@ class Inspector extends Panel
       }
       // object
       let objListElem = this.createSection(this.objectSectionName, topListElem);
-      this.createReadOnlyProperty("id", object.id, objListElem);
+      this.createReadOnlyProperty(objListElem, "id", object.id);
       for (var propertyName in object)
       {
         if (this.isSupportedProperty(propertyName))
         {
           if (this.isReadOnlyProperty(propertyName))
           {
-            this.createReadOnlyProperty(propertyName, object[propertyName],
-              objListElem);
+            this.createReadOnlyProperty(objListElem,
+              propertyName, object[propertyName]);
           }
           else
           {
-            this.createWriteableProperty(object, propertyName, objListElem);
+            this.createWriteableProperty(objListElem, object, propertyName);
           }
         }
       }
       if (object instanceof Solid)
       {
-        this.createWriteableProperty(object, "edgesVisible", objListElem);
-        this.createWriteableProperty(object, "facesVisible", objListElem);
+        this.createWriteableProperty(objListElem, object, "edgesVisible");
+        this.createWriteableProperty(objListElem, object, "facesVisible");
       }
 
       let material = object.material;
@@ -144,26 +155,30 @@ class Inspector extends Panel
         let materialListElem = this.createSection(this.materialSectionName,
           topListElem, [this.createChangeMaterialAction(object)]);
 
-        for (let propertyName of ["uuid", "type", "name", "color", "specular",
-          "emissive", "shininess", "opacity", "transparent",
-          "emissiveIntensity", "fog"])
+        for (let propertyName of Inspector.mainMaterialProperties)
         {
-          if (material[propertyName] !== undefined)
+          if (propertyName in material)
           {
-            let propertyValue = material[propertyName];
-            if (propertyValue !== null)
+            if (propertyName === "uuid" || propertyName === "type"
+                || material === Solid.EdgeMaterial
+                || material === Solid.FaceMaterial)
             {
-              if (propertyName === "uuid" || propertyName === "type"
-                  || material === Solid.EdgeMaterial
-                  || material === Solid.FaceMaterial)
+              let propertyValue = material[propertyName];
+              this.createReadOnlyProperty(materialListElem,
+                propertyName, propertyValue);
+            }
+            else
+            {
+              if (propertyName === "map")
               {
-                this.createReadOnlyProperty(propertyName, propertyValue,
-                  materialListElem);
+                this.createWriteableProperty(materialListElem,
+                  material, propertyName,
+                  this.renderers.TextureRenderer, this.editors.TextureEditor);
               }
               else
               {
-                this.createWriteableProperty(material, propertyName,
-                  materialListElem);
+                this.createWriteableProperty(materialListElem,
+                  material, propertyName);
               }
             }
           }
@@ -181,8 +196,8 @@ class Inspector extends Panel
       let builder = object.builder;
       if (builder)
       {
-        this.createReadOnlyProperty("type", builder.constructor.name,
-          builderListElem);
+        this.createReadOnlyProperty(builderListElem,
+           "type", builder.constructor.name);
 
         for (let propertyName in builder)
         {
@@ -191,8 +206,8 @@ class Inspector extends Panel
           {
             if (propertyValue !== null)
             {
-              this.createWriteableProperty(builder, propertyName,
-                builderListElem);
+              this.createWriteableProperty(builderListElem,
+                builder, propertyName);
             }
           }
         }
@@ -208,7 +223,7 @@ class Inspector extends Panel
       const formulas = Formula.getAll(object);
       for (let path in formulas)
       {
-        this.createWriteableProperty(formulas, path, formulasListElem);
+        this.createWriteableProperty(formulasListElem, formulas, path);
       }
 
       // geometry
@@ -222,24 +237,24 @@ class Inspector extends Panel
         let geomListElem = this.createSection(this.geometrySectionName,
           topListElem);
 
-        this.createReadOnlyProperty("uuid", geometry.uuid, geomListElem);
-        this.createReadOnlyProperty("type", geometry.type, geomListElem);
+        this.createReadOnlyProperty(geomListElem, "uuid", geometry.uuid);
+        this.createReadOnlyProperty(geomListElem, "type", geometry.type);
 
         if (geometry instanceof SolidGeometry)
         {
-          this.createReadOnlyProperty("vertices",
-            geometry.vertices.length, geomListElem);
-          this.createReadOnlyProperty("faces",
-            geometry.faces.length, geomListElem);
-          this.createReadOnlyProperty("isManifold",
-            geometry.isManifold, geomListElem);
+          this.createReadOnlyProperty(geomListElem, "vertices",
+            geometry.vertices.length);
+          this.createReadOnlyProperty(geomListElem, "faces",
+            geometry.faces.length);
+          this.createReadOnlyProperty(geomListElem, "isManifold",
+            geometry.isManifold);
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {
           for (let name in geometry.attributes)
           {
-            this.createReadOnlyProperty(name,
-              geometry.attributes[name].array.length, geomListElem);
+            this.createReadOnlyProperty(geomListElem, name,
+              geometry.attributes[name].array.length);
           }
         }
       }
@@ -271,13 +286,13 @@ class Inspector extends Panel
             [this.createAddPropertyAction(object, dictionary)]);
           for (let dictPropertyName in dictionary)
           {
-            this.createWriteableProperty(dictionary,
-              dictPropertyName, dictListElem);
+            this.createWriteableProperty(dictListElem, dictionary,
+              dictPropertyName);
           }
         }
         else
         {
-          this.createWriteableProperty(userData, propertyName, propListElem);
+          this.createWriteableProperty(propListElem, userData, propertyName);
         }
       }
 
@@ -303,18 +318,18 @@ class Inspector extends Panel
             [this.createStartControllerAction(controller),
              this.createStopControllerAction(controller),
              this.createRemoveControllerAction(controller)]);
-          this.createReadOnlyProperty("type",
-            controller.constructor.name, controlListElem);
-          this.createReadOnlyProperty("started",
-            controller.isStarted(), controlListElem);
+          this.createReadOnlyProperty(controlListElem, "type",
+            controller.constructor.name);
+          this.createReadOnlyProperty(controlListElem, "started",
+            controller.isStarted());
 
           for (let propertyName in controller)
           {
             if (propertyName !== "name" && propertyName !== "object" &&
                 !propertyName.startsWith("_"))
             {
-              this.createWriteableProperty(controller, propertyName,
-                controlListElem);
+              this.createWriteableProperty(controlListElem, controller,
+                propertyName);
             }
           }
         }
@@ -406,55 +421,53 @@ class Inspector extends Panel
     return listElem;
   }
 
-  createReadOnlyProperty(propertyLabel, propertyValue, parentElem)
+  createReadOnlyProperty(parentElem, propertyName, propertyValue)
   {
-    this.createProperty(propertyLabel, propertyValue, null, null, parentElem);
+    this.createProperty(parentElem, propertyName, propertyValue);
   }
 
-  createWriteableProperty(object, propertyName, parentElem)
+  createWriteableProperty(parentElem, object, propertyName, renderer, editor)
   {
-    this.createProperty(null, null, object, propertyName, parentElem);
+    let propertyValue = object[propertyName];
+    this.createProperty(parentElem, propertyName, propertyValue,
+      object, renderer, editor);
   };
 
-  createProperty(propertyLabel, propertyValue, object, propertyName, parentElem)
+  createProperty(parentElem, propertyName, propertyValue,
+    object = null, renderer = null, editor = null)
   {
-    if (propertyValue === null && object && propertyName)
-    {
-      propertyValue = object[propertyName];
-    }
-    let renderer = this.getRenderer(propertyValue);
+    renderer = renderer || this.getRenderer(propertyValue);
     if (renderer)
     {
       let propElem = document.createElement('li');
       propElem.className = "property " + renderer.getClassName(propertyValue);
       parentElem.appendChild(propElem);
-      if (!propertyLabel)
-      {
-        propertyLabel = propertyName;
-      }
+
       let labelElem = document.createElement('span');
-      labelElem.innerHTML = propertyLabel + ':';
+      labelElem.innerHTML = propertyName + ':';
       labelElem.className = 'label';
       propElem.appendChild(labelElem);
 
-      let editor = object && propertyName ?
-        this.getEditor(propertyValue) : null;
+      if (object)
+      {
+        editor = editor || this.getEditor(propertyValue);
+      }
 
-      this.createValueElem(propertyValue, renderer, editor,
-        object, propertyName, propElem);
+      this.createValueElem(propElem, propertyValue, renderer, editor,
+        object, propertyName);
 
-      if (editor)
+      if (object && editor)
       {
         labelElem.addEventListener("click", event =>
-          this.startEdition(object, propertyName, renderer, editor, propElem),
+          this.startEdition(propElem, object, propertyName, renderer, editor),
           false);
         propElem.className += " editable";
       }
     }
   }
 
-  createValueElem(propertyValue, renderer, editor, object,
-    propertyName, propElem)
+  createValueElem(propElem, propertyValue, renderer, editor,
+    object, propertyName)
   {
     let valueElem = renderer.render(propertyValue);
     if (valueElem)
@@ -464,7 +477,7 @@ class Inspector extends Panel
       if (editor)
       {
         valueElem.addEventListener("click", () =>
-          this.startEdition(object, propertyName, renderer, editor, propElem),
+          this.startEdition(propElem, object, propertyName, renderer, editor),
           false);
       }
     }
@@ -620,7 +633,7 @@ class Inspector extends Panel
     };
   }
 
-  startEdition(object, propertyName, renderer, editor, propElem)
+  startEdition(propElem, object, propertyName, renderer, editor)
   {
     if (this.edition.object !== null)
     {
@@ -635,7 +648,7 @@ class Inspector extends Panel
     this.edition.editor = editor;
     this.edition.propElem = propElem;
 
-    let valueElem = editor.edit(propertyValue);
+    let valueElem = editor.edit(object, propertyName, propertyValue);
     if (valueElem)
     {
       let oldValueElem = propElem.childNodes[propElem.childNodes.length - 1];
@@ -645,33 +658,9 @@ class Inspector extends Panel
     }
   }
 
-  endEdition(value)
+  endEdition()
   {
-    let object = this.edition.object;
-    let propertyName = this.edition.propertyName;
-    let oldValue = object[propertyName];
-
-    if (oldValue !== null && typeof oldValue === "object")
-    {
-      if (typeof oldValue.copy === "function")
-      {
-        object[propertyName].copy(value);
-        if (object instanceof THREE.Object3D)
-        {
-          object.updateMatrix();
-        }
-      }
-      else
-      {
-        object[propertyName] = value;
-      }
-    }
-    else
-    {
-      object[propertyName] = value;
-    }
     this.stopEdition();
-
     this.application.notifyObjectsChanged(this.object, this);
   }
 
@@ -682,9 +671,8 @@ class Inspector extends Panel
     propElem.removeChild(valueElem);
     let propertyValue = this.edition.object[this.edition.propertyName];
 
-    this.createValueElem(propertyValue, this.edition.renderer,
-      this.edition.editor, this.edition.object, this.edition.propertyName,
-      propElem);
+    this.createValueElem(propElem, propertyValue, this.edition.renderer,
+      this.edition.editor, this.edition.object, this.edition.propertyName);
 
     this.clearEdition();
   }
@@ -714,34 +702,40 @@ class Inspector extends Panel
     return false;
   }
 
+  addRenderer(rendererClass)
+  {
+    this.renderers[rendererClass.name] = new rendererClass(this);
+  }
+
+  addEditor(editorClass)
+  {
+    this.editors[editorClass.name] = new editorClass(this);
+  }
+
   getRenderer(value)
   {
-    let renderer = null;
-    let i = 0;
-    while (i < this.renderers.length && renderer === null)
+    for (let rendererName in this.renderers)
     {
-      if (this.renderers[i].isSupported(value))
+      let renderer = this.renderers[rendererName];
+      if (renderer.isSupported(value))
       {
-        renderer = this.renderers[i];
+        return renderer;
       }
-      else i++;
     }
-    return renderer;
+    return null;
   }
 
   getEditor(value)
   {
-    let editor = null;
-    let i = 0;
-    while (i < this.editors.length && editor === null)
+    for (let editorName in this.editors)
     {
-      if (this.editors[i].isSupported(value))
+      let editor = this.editors[editorName];
+      if (editor.isSupported(value))
       {
-        editor = this.editors[i];
+        return editor;
       }
-      else i++;
     }
-    return editor;
+    return null;
   }
 };
 
@@ -963,7 +957,7 @@ class ColorRenderer extends PropertyRenderer
   render(color)
   {
     const rgb = "rgb(" + Math.round(255 * color.r) +
-      " ," + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
+      ", " + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
 
     let valueElem = document.createElement("span");
     valueElem.className = "value";
@@ -1011,6 +1005,35 @@ class Object3DRenderer extends PropertyRenderer
   }
 }
 
+class TextureRenderer extends PropertyRenderer
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Texture;
+  }
+
+  getClassName(value)
+  {
+    return "texture";
+  }
+
+  render(texture)
+  {
+    let valueElem = document.createElement("span");
+    valueElem.className = "value";
+    if (texture)
+    {
+      valueElem.innerHTML = texture.name || texture.image.src;
+    }
+    return valueElem;
+  }
+}
+
 /* PropertyEditors */
 
 class PropertyEditor
@@ -1025,7 +1048,7 @@ class PropertyEditor
     return false;
   }
 
-  edit(value) // returns the editor element
+  edit(object, propertyName, value) // returns the editor element
   {
     return null;
   }
@@ -1043,7 +1066,7 @@ class StringEditor extends PropertyEditor
     return typeof value === "string";
   }
 
-  edit(text)
+  edit(object, propertyName, text)
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
@@ -1052,7 +1075,8 @@ class StringEditor extends PropertyEditor
     {
       if (event.keyCode === 13)
       {
-        this.inspector.endEdition(valueElem.value);
+        object[propertyName] = valueElem.value;
+        this.inspector.endEdition();
       }
       else if (event.keyCode === 27)
       {
@@ -1075,7 +1099,7 @@ class NumberEditor extends PropertyEditor
     return typeof value === "number";
   }
 
-  edit(number)
+  edit(object, propertyName, number)
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
@@ -1088,7 +1112,8 @@ class NumberEditor extends PropertyEditor
         number = parseFloat(valueElem.value);
         if (!isNaN(number))
         {
-          this.inspector.endEdition(number);
+          object[propertyName] = number;
+          this.inspector.endEdition();
         }
       }
       else if (event.keyCode === 27)
@@ -1112,10 +1137,11 @@ class BooleanEditor extends PropertyEditor
     return typeof value === "boolean";
   }
 
-  edit(value)
+  edit(object, propertyName, value)
   {
     let checked = value;
-    this.inspector.endEdition(!checked);
+    object[propertyName] = !checked;
+    this.inspector.endEdition();
     return null;
   }
 }
@@ -1137,7 +1163,7 @@ class DimensionEditor extends PropertyEditor
     return {"x": x, "y": y, "z": z};
   }
 
-  edit(vector)
+  edit(object, propertyName, vector)
   {
     let dimId = "dim_edit_";
 
@@ -1154,7 +1180,12 @@ class DimensionEditor extends PropertyEditor
       let x = parseDimension("x");
       let y = parseDimension("y");
       let z = parseDimension("z");
-      this.inspector.endEdition(this.createInstance(x, y, z));
+      object[propertyName].copy(this.createInstance(x, y, z));
+      if (object instanceof THREE.Object3D)
+      {
+        object.updateMatrix();
+      }
+      this.inspector.endEdition();
     };
 
     const keyListener = event =>
@@ -1261,7 +1292,7 @@ class FormulaEditor extends PropertyEditor
     return value instanceof Formula;
   }
 
-  edit(formula)
+  edit(object, propertyName, formula)
   {
     const inspector = this.inspector;
 
@@ -1287,7 +1318,7 @@ class ColorEditor extends PropertyEditor
     return value instanceof THREE.Color;
   }
 
-  edit(color)
+  edit(object, propertyName, color)
   {
     let dimId = "color_edit_";
 
@@ -1304,7 +1335,9 @@ class ColorEditor extends PropertyEditor
       let r = parseDimension("r") / 255;
       let g = parseDimension("g") / 255;
       let b = parseDimension("b") / 255;
-      this.inspector.endEdition(new THREE.Color(r, g, b));
+
+      object[propertyName].copy(new THREE.Color(r, g, b));
+      this.inspector.endEdition();
     };
 
     const keyListener = event =>
@@ -1353,6 +1386,60 @@ class ColorEditor extends PropertyEditor
     listElem.focus = () => document.getElementById(dimId + "r").focus();
 
     return listElem;
+  }
+}
+
+class TextureEditor extends PropertyEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Texture;
+  }
+
+  edit(material, propertyName, texture)
+  {
+    let valueElem = document.createElement("input");
+    valueElem.className = "value";
+    const value = texture ? texture.name : "";
+    valueElem.value = value;
+    valueElem.addEventListener("keyup", event =>
+    {
+      if (event.keyCode === 13)
+      {
+        let imagePath = valueElem.value.trim();
+        if (value === imagePath)
+        {
+          this.inspector.stopEdition();
+        }
+        else
+        {
+          if (imagePath.trim() === "")
+          {
+            if (material[propertyName] !== null) material.needsUpdate = true;
+            material[propertyName] = null;
+            this.inspector.endEdition();
+          }
+          else
+          {
+            if (material[propertyName] === null) material.needsUpdate = true;
+            let newTexture = this.inspector.application.loadTexture(imagePath);
+            material[propertyName] = newTexture;
+            this.inspector.endEdition();
+          }
+          if (texture) texture.dispose();
+        }
+      }
+      else if (event.keyCode === 27)
+      {
+        this.inspector.stopEdition();
+      }
+    }, false);
+    return valueElem;
   }
 }
 

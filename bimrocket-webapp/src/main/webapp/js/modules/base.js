@@ -216,6 +216,10 @@ export function load(application)
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "Group" });
+  const addSpriteTool = new AddObjectTool(application,
+    { name : "add_sprite", label : "tool.add_sprite.label",
+      objectType : "Sprite" });
+
   const removeTool = new RemoveTool(application);
   const cloneTool = new CloneTool(application);
   const clonerTool = new CloneTool(application,
@@ -303,6 +307,7 @@ export function load(application)
   application.addTool(addUProfileTool);
   application.addTool(addZProfileTool);
   application.addTool(addHelicoidTool);
+  application.addTool(addSpriteTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(cloneTool);
@@ -395,6 +400,7 @@ export function load(application)
   addCordMenu.addMenuItem(addHelicoidTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
+  addMenu.addMenuItem(addSpriteTool);
   const transformMenu = designMenu.addMenu("menu.design.transform");
   transformMenu.addMenuItem(moveTool);
   transformMenu.addMenuItem(rotateTool);

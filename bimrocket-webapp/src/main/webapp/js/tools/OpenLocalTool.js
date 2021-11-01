@@ -95,7 +95,8 @@ class OpenLocalTool extends Tool
               .setClassName("error")
               .setI18N(application.i18n).show();
           },
-          options : { units : application.units }
+          options : { units : application.units,
+            loadTexture : imagePath => this.application.loadTexture(imagePath) }
         };
         IOManager.load(intent); // async load
       };

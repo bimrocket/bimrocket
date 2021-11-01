@@ -164,6 +164,7 @@ export const translations =
   "tool.add_uprofile.label" : "Perfil U",
   "tool.add_zprofile.label" : "Perfil Z",
   "tool.add_helicoid.label" : "Helicoide",
+  "tool.add_sprite.label" : "Sprite",
 
   "tool.view.top" : "Zenital",
   "tool.view.front" : "Frontal",

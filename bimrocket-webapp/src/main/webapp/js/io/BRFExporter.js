@@ -87,12 +87,13 @@ class BRFExporter
       entry.facesVisible = object.facesVisible;
     }
 
-    let exportGeometry = true;
+    let exportGeometry = !(object instanceof THREE.Sprite);
     let exportChildren = ObjectUtils.isExportableChildren(object);
     if (object.builder)
     {
       entry.builder = this.exportBuilder(object.builder);
-      exportGeometry = !object.builder.isGeometryBuilder(object);
+      exportGeometry = exportGeometry
+        && !object.builder.isGeometryBuilder(object);
       exportChildren = exportChildren
         && !object.builder.isChildrenBuilder(object);
     }
@@ -243,7 +244,12 @@ class BRFExporter
         name : material.name,
         opacity : material.opacity,
         transparent : material.transparent,
-        side : material.side
+        side : material.side,
+        depthTest : material.depthTest,
+        depthWrite : material.depthWrite,
+        polygonOffset : material.polygonOffset,
+        polygonOffsetFactor : material.polygonOffsetFactor,
+        polygonOffsetUnits : material.polygonOffsetUnits
       };
 
       if (material.color)
@@ -258,6 +264,17 @@ class BRFExporter
         entry.shininess = material.shininess;
         entry.reflectivity = material.reflectivity;
       }
+
+      if (material instanceof THREE.SpriteMaterial)
+      {
+        entry.sizeAttenuation = material.sizeAttenuation;
+      }
+
+      if (material.map)
+      {
+        entry.map = { "type" : "Texture", "image" : material.map.name };
+      }
+
       model.materials[id] = entry;
     }
   }

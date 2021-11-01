@@ -19,33 +19,34 @@ class BRFLoader extends THREE.Loader
   constructor()
   {
     super();
+    this.options = {};
   }
 
   load(url, onLoad, onProgress, onError)
   {
-		const loader = new FileLoader(this.manager);
-		loader.setPath(this.path);
-		loader.setRequestHeader(this.requestHeader);
-		loader.setWithCredentials(this.withCredentials);
-		loader.load(url, text =>
+    const loader = new FileLoader(this.manager);
+    loader.setPath(this.path);
+    loader.setRequestHeader(this.requestHeader);
+    loader.setWithCredentials(this.withCredentials);
+    loader.load(url, text =>
     {
-			try
+      try
       {
-				onLoad(this.parse(text));
-			}
+        onLoad(this.parse(text));
+      }
       catch (ex)
       {
-				if (onError)
+        if (onError)
         {
-					onError(ex);
-				}
+          onError(ex);
+        }
         else
         {
-					console.error(ex);
-				}
-				this.manager.itemError(url);
-			}
-		}, onProgress, onError);
+          console.error(ex);
+        }
+        this.manager.itemError(url);
+      }
+    }, onProgress, onError);
   }
 
   parse(text)
@@ -222,23 +223,9 @@ class BRFLoader extends THREE.Loader
   parseMaterial(entry)
   {
     let material = new THREE[entry.type];
-    material.name = entry.name;
-    material.opacity = entry.opacity;
-    material.transparent = entry.transparent;
-    material.side = entry.side;
 
-    if (entry.color)
-    {
-      material.color.set(entry.color);
-    }
+    this.setProperties(material, entry);
 
-    if (material instanceof THREE.MeshPhongMaterial)
-    {
-      material.shininess = entry.shininess;
-      material.reflectivity = entry.reflectivity;
-      material.specular.set(entry.specular);
-      material.emissive.set(entry.emissive);
-    }
     return material;
   }
 
@@ -272,6 +259,10 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.Mesh();
     }
+    else if (entry.type === "Sprite")
+    {
+      object = new THREE.Sprite();
+    }
     else
     {
       object = new THREE.Object3D();
@@ -300,17 +291,20 @@ class BRFLoader extends THREE.Loader
     }
     object.updateMatrix();
 
-    const geometries = model.geometries;
-    if (entry.geometry && geometries[entry.geometry.id])
+    if (!(object instanceof THREE.Sprite))
     {
-      let geometry = geometries[entry.geometry.id]._geometry;
-      if (geometry instanceof SolidGeometry)
+      const geometries = model.geometries;
+      if (entry.geometry && geometries[entry.geometry.id])
       {
-        object.updateGeometry(geometry, false);
-      }
-      else if (geometry instanceof THREE.BufferGeometry)
-      {
-        object.geometry = geometry;
+        let geometry = geometries[entry.geometry.id]._geometry;
+        if (geometry instanceof SolidGeometry)
+        {
+          object.updateGeometry(geometry, false);
+        }
+        else if (geometry instanceof THREE.BufferGeometry)
+        {
+          object.geometry = geometry;
+        }
       }
     }
 
@@ -373,11 +367,11 @@ class BRFLoader extends THREE.Loader
   {
     for (let property in entry)
     {
-      if (property !== "type")
+      if (property !== "type" && property !== "id" && property !== "uuid")
       {
-        let value = entry[property];
-        if (property in element)
+        if (property in element && !property.startsWith("_"))
         {
+          let value = entry[property];
           this.setPropertyValue(element, property, value, model);
         }
       }
@@ -396,32 +390,71 @@ class BRFLoader extends THREE.Loader
       }
     }
 
-    switch (type)
+    let actualValue = element[property];
+    let actualType = typeof actualValue;
+    if (actualType === "string" && type === "string")
     {
-      case "number":
-      case "string":
-      case "boolean":
-        element[property] = value;
-        break;
-      case "Vector3":
-      case "Euler":
-        element[property].set(value.x, value.y, value.z);
-        break;
-      case "Vector2":
-        element[property].set(value.x, value.y);
-        break;
-      case "#object":
-        if (model.objects[value.id])
-          element[property] = model.objects[value.id]._object;
-        break;
-      case "#geometry":
-        if (model.geometries[value.id])
-          element[property] = model.geometries[value.id]._geometry;
-        break;
-      case "#material":
-        if (model.materials[value.id])
-          element[property] = model.materials[value.id]._material;
-        break;
+      element[property] = value;
+    }
+    else if (actualType === "number" && type === "number")
+    {
+      element[property] = value;
+    }
+    else if (actualType === "boolean" && type === "boolean")
+    {
+      element[property] = value;
+    }
+    else if (actualValue instanceof THREE.Vector3 && type === "Vector3")
+    {
+      element[property].set(value.x, value.y, value.z);
+    }
+    else if (actualValue instanceof THREE.Vector2 && type === "Vector2")
+    {
+      element[property].set(value.x, value.y);
+    }
+    else if (actualValue instanceof THREE.Euler && type === "Euler")
+    {
+      element[property].set(value.x, value.y, value.z);
+    }
+    else if (actualValue instanceof THREE.Color)
+    {
+      if (type === "string")
+      {
+        element[property].set(value);
+      }
+      else if (type === "Color")
+      {
+        element[property].set(value.r, value.g, value.b);
+      }
+    }
+    else if (type === "#object")
+    {
+      if (model.objects[value.id])
+        element[property] = model.objects[value.id]._object;
+    }
+    else if (type === "#geometry")
+    {
+      if (model.geometries[value.id])
+        element[property] = model.geometries[value.id]._geometry;
+    }
+    else if (type === "#material")
+    {
+      if (model.materials[value.id])
+        element[property] = model.materials[value.id]._material;
+    }
+    else if (type === "Texture" && element instanceof THREE.Material)
+    {
+      const loadTexture = this.options.loadTexture;
+      if (loadTexture)
+      {
+        const texture = loadTexture(value.image);
+        element[property] = texture;
+        element.needsUpdate = true;
+      }
+    }
+    else
+    {
+      console.warn("Invalid value for property " + property + ": " + value);
     }
   }
 }

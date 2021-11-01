@@ -82,6 +82,7 @@ class Tool
     }
     raycaster.set(origin, ray.normalize());
     raycaster.far = Math.Infinity;
+    raycaster.camera = camera;
 
     let intersects = raycaster.intersectObjects([baseObject], recursive);
     let i = 0;

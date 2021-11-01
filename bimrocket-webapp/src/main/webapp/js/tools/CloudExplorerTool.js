@@ -91,7 +91,8 @@ class CloudExplorerTool extends Tool
           .setClassName("error")
           .setI18N(application.i18n).show();
       },
-      options : { units : this.application.units }
+      options : { units : this.application.units,
+        loadTexture : imagePath => this.application.loadTexture(imagePath) }
     };
     panel.showProgressBar();
     IOManager.load(intent);

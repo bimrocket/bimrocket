@@ -172,7 +172,6 @@ class Panel
 
   zoom()
   {
-    this.minimized = false;
     if (this.panelManager)
     {
       let position = this.panelManager.isLargeScreen() ? this.position : null;
@@ -181,9 +180,12 @@ class Panel
       {
         if (panel !== this)
         {
-          panel.minimized = true;
+          panel.element.classList.add("minimized");
         }
       }
+      this.element.classList.remove("minimized");
+      this.panelManager.setAnimationEnabled(true);
+      this.panelManager.updateLayout();
     }
   }
 
@@ -356,6 +358,18 @@ class PanelManager
     }
 
     let availableHeight = height - fixedHeight;
+    let i = 0;
+    while (availableHeight < 0 && i < total)
+    {
+      let j = total - i - 1;
+      let panel = panels[j];
+      if (!panel.minimized && panel.preferredHeight > 0)
+      {
+        panel.element.classList.add("minimized");
+        availableHeight += (panel.preferredHeight - this.headerHeight);
+      }
+      i++;
+    }
     let extendedPanelHeight = Math.floor(availableHeight / extendedPanelsCount);
     let bottom = this.margin;
     for (let i = 0; i < total; i++)

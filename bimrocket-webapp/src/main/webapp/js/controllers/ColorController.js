@@ -14,14 +14,15 @@ class ColorController extends Controller
   {
     super(object, name);
     this.input = 0;
-    this.minColor = "#808080";
-    this.maxColor = "#FFFF00";
+    this.minColor = new THREE.Color(0.5, 0.5, 0.5);
+    this.maxColor = new THREE.Color(1, 1, 0);
     this.minValue = 0;
     this.maxValue = 1;
     this.emissive = 0;
 
     this._material = new THREE.MeshPhongMaterial({
-      color: 0xFFFF00, emissive: 0xFFFFFF, emissiveIntensity : 0.0,
+      color: new THREE.Color(0.5, 0.5, 0.5),
+      emissive: 0xFFFFFF, emissiveIntensity : 0.0,
       side: THREE.DoubleSide});
 
     this._materialMap = new Map();
@@ -61,34 +62,27 @@ class ColorController extends Controller
     let factor;
     if (value <= minValue)
     {
-      color = this.parseColor(minColor);
+      color = minColor;
       factor = 0;
     }
     else if (value >= maxValue)
     {
-      color = this.parseColor(maxColor);
+      color = maxColor;
       factor = 1;
     }
     else // interpolate color
     {
       factor = (value - minValue) / (maxValue - minValue); // [0..1]
-      color = this.parseColor(minColor);
-      color.lerp(this.parseColor(maxColor), factor);
+      color = minColor.clone();
+      color.lerp(maxColor, factor);
     }
 
     if (force || this._material.color.getHex() !== color.getHex())
     {
-      this._material.color = color;
+      this._material.color.copy(color);
       this._material.emissiveIntensity = factor * this.emissive;
       this.application.notifyObjectsChanged(this.object, this);
     }
-  }
-
-  parseColor(colorString)
-  {
-    let color = new THREE.Color();
-    color.set(colorString);
-    return color;
   }
 
   replaceMaterial()

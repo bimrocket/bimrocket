@@ -317,6 +317,10 @@ class BRFExporter
         {
           entry[property] = this.exportEuler(value);
         }
+        else if (value instanceof THREE.Color)
+        {
+          entry[property] = this.exportColor(value);
+        }
         else if (value instanceof THREE.Object3D)
         {
           entry[property] = { type: "#object", id : String(value.id) };
@@ -339,6 +343,11 @@ class BRFExporter
   exportEuler(euler)
   {
     return { type: "Euler", x : euler.x, y : euler.y, z : euler.z };
+  }
+
+  exportColor(color)
+  {
+    return "#" + color.getHexString();
   }
 }
 

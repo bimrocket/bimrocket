@@ -18,7 +18,7 @@ class SelectTool extends Tool
     this.className = "select";
     this.setOptions(options);
 
-    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
     this.createPanel();
   }
 
@@ -46,17 +46,17 @@ class SelectTool extends Tool
   {
     this.panel.visible = true;
     var container = this.application.container;
-    container.addEventListener('pointerup', this._onPointerUp, false);
+    container.addEventListener('pointerdown', this._onPointerDown, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
     var container = this.application.container;
-    container.removeEventListener('pointerup', this._onPointerUp, false);
+    container.removeEventListener('pointerdown', this._onPointerDown, false);
   }
 
-  onPointerUp(event)
+  onPointerDown(event)
   {
     if (!this.isCanvasEvent(event)) return;
 

@@ -65,7 +65,7 @@ class Menu extends AbstractMenuItem
     this.anchorElement.addEventListener("click", event =>
     {
       event.preventDefault();
-      if (this.isVisible())
+      if (this.isVisible() && this.menuBar.isVertical())
       {
         this.hide();
       }
@@ -75,6 +75,9 @@ class Menu extends AbstractMenuItem
         this.drop();
       }
     });
+
+    this.anchorElement.addEventListener("contextmenu",
+      event => event.preventDefault());
 
     this.anchorElement.addEventListener("focusin", () =>
     {

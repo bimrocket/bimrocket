@@ -209,6 +209,21 @@ ul.inspector li.property.boolean
   background-image: url(images/inspector/boolean.svg);
 }
 
+ul.inspector li.property.vector
+{
+  background-image: url(images/inspector/vector.svg);
+}
+
+ul.inspector li.property.euler
+{
+  background-image: url(images/inspector/euler.svg);
+}
+
+ul.inspector li.property.color
+{
+  background-image: url(images/inspector/color.svg);
+}
+
 ul.inspector li.property.formula
 {
   background-image: url(images/inspector/formula.svg);
@@ -226,7 +241,7 @@ ul.inspector li.property.color > span.value
   vertical-align: middle;
 }
 
-ul.inspector li.property.color > span.value > span.color
+ul.inspector li.property.color > span.value > .color
 {
   display: inline-block;
   width: 11px;
@@ -234,6 +249,7 @@ ul.inspector li.property.color > span.value > span.color
   border: 1px solid #202020;
   margin-left: 4px;
   vertical-align: middle;
+  cursor: pointer;
 }
 
 ul.inspector li.property ul.list_3 li

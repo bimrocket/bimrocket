@@ -17,6 +17,7 @@ import { PropertiesDialog } from "./PropertiesDialog.js";
 import { PropertyDialog } from "./PropertyDialog.js";
 import { BuilderDialog } from "./BuilderDialog.js";
 import { ControllerDialog } from "./ControllerDialog.js";
+import { Controls } from "./Controls.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -648,13 +649,13 @@ class Inspector extends Panel
     this.edition.editor = editor;
     this.edition.propElem = propElem;
 
-    let valueElem = editor.edit(object, propertyName, propertyValue);
-    if (valueElem)
+    let editorElem = editor.edit(object, propertyName, propertyValue);
+    if (editorElem)
     {
-      let oldValueElem = propElem.childNodes[propElem.childNodes.length - 1];
-      propElem.removeChild(oldValueElem);
-      propElem.appendChild(valueElem);
-      if (valueElem.focus) valueElem.focus();
+      this.application.i18n.updateTree(editorElem);
+      propElem.removeChild(propElem.lastChild);
+      propElem.appendChild(editorElem);
+      if (editorElem.focus) editorElem.focus();
     }
   }
 
@@ -667,8 +668,10 @@ class Inspector extends Panel
   stopEdition()
   {
     let propElem = this.edition.propElem;
-    let valueElem = propElem.childNodes[propElem.childNodes.length - 1];
-    propElem.removeChild(valueElem);
+    if (propElem === null || this.edition.object === null) return;
+
+    propElem.removeChild(propElem.lastChild);
+
     let propertyValue = this.edition.object[this.edition.propertyName];
 
     this.createValueElem(propElem, propertyValue, this.edition.renderer,
@@ -1311,6 +1314,7 @@ class ColorEditor extends PropertyEditor
   constructor(inspector)
   {
     super(inspector);
+    this._color = new THREE.Color();
   }
 
   isSupported(value)
@@ -1320,72 +1324,68 @@ class ColorEditor extends PropertyEditor
 
   edit(object, propertyName, color)
   {
-    let dimId = "color_edit_";
+    const groupElem = document.createElement("span");
+    groupElem.className = "value";
 
-    const parseDimension = dim =>
+    const rgb = "rgb(" + Math.round(255 * color.r) +
+      ", " + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
+
+    let codeElem = document.createElement("span");
+    codeElem.innerHTML = rgb;
+    codeElem.style.color = "#6060c0";
+    codeElem.addEventListener("click",
+      () => { colorElem.focus(); colorElem.click(); });
+    groupElem.appendChild(codeElem);
+
+    let hexString = "#" + color.getHexString();
+    const sampleElem = document.createElement("label");
+    sampleElem.className = "color";
+    sampleElem.style.backgroundColor = hexString;
+    sampleElem.alt = rgb;
+    sampleElem.title = rgb;
+    sampleElem.style.borderColor = "#6060c0";
+    groupElem.appendChild(sampleElem);
+
+    const colorElem = document.createElement("input");
+    colorElem.className = "value";
+    colorElem.type = "color";
+    colorElem.value = "#" + color.getHexString();
+    colorElem.style.visibility = "hidden";
+    colorElem.style.width = "0";
+    colorElem.style.height = "0";
+    sampleElem.appendChild(colorElem);
+
+    colorElem.addEventListener("change", () =>
     {
-      let valueElem = document.getElementById(dimId + dim);
-      let value = valueElem.value;
-      let num = parseFloat(value);
-      return isNaN(num) ? color[dim] : num;
-    };
-
-    const endEdition = () =>
-    {
-      let r = parseDimension("r") / 255;
-      let g = parseDimension("g") / 255;
-      let b = parseDimension("b") / 255;
-
-      object[propertyName].copy(new THREE.Color(r, g, b));
+      object[propertyName].set(colorElem.value);
+      document.body.removeEventListener("keydown", keyDownListener);
+      document.body.removeEventListener("pointerdown", pointerDownListener);
       this.inspector.endEdition();
-    };
+    });
 
-    const keyListener = event =>
+    const cancel = () =>
     {
-      if (event.keyCode === 13)
-      {
-        endEdition();
-      }
-      else if (event.keyCode === 27)
-      {
-        this.inspector.stopEdition();
-      }
+      document.body.removeEventListener("keydown", keyDownListener);
+      document.body.removeEventListener("pointerdown", pointerDownListener);
+      this.inspector.stopEdition();
     };
 
-    const createDimensionEditor = (color, dim) =>
+    const keyDownListener = event =>
     {
-      let itemElem = document.createElement("li");
-
-      let labelElem = document.createElement("label");
-      labelElem.innerHTML = dim + ":";
-      labelElem.htmlFor = dimId + dim;
-
-      let valueElem = document.createElement("input");
-      valueElem.id = dimId + dim;
-      valueElem.type = "number";
-      valueElem.className = "value";
-      valueElem.value = color[dim] * 255;
-      valueElem.min = 0;
-      valueElem.max = 255;
-      valueElem.step = 1;
-      valueElem.addEventListener("keyup", keyListener, false);
-
-      itemElem.appendChild(labelElem);
-      itemElem.appendChild(valueElem);
-
-      return itemElem;
+      if (event.keyCode === 27) cancel();
     };
 
-    let listElem = document.createElement("ul");
-    listElem.className = "list_3";
+    const pointerDownListener = event =>
+    {
+      if (event.srcElement.parentNode !== groupElem) cancel();
+    };
 
-    listElem.appendChild(createDimensionEditor(color, "r"));
-    listElem.appendChild(createDimensionEditor(color, "g"));
-    listElem.appendChild(createDimensionEditor(color, "b"));
+    document.body.addEventListener("keydown", keyDownListener);
+    document.body.addEventListener("pointerdown", pointerDownListener);
 
-    listElem.focus = () => document.getElementById(dimId + "r").focus();
+    groupElem.focus = () => { colorElem.focus(); colorElem.click(); };
 
-    return listElem;
+    return groupElem;
   }
 }
 

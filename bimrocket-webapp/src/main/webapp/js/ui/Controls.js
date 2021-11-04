@@ -117,7 +117,7 @@ class Controls
     inputElem.id = id;
     inputElem.name = name;
     inputElem.type = type || "text";
-    if (value) inputElem.value = value;
+    if (value !== undefined && value !== null) inputElem.value = value;
     groupElem.appendChild(inputElem);
 
     return inputElem;

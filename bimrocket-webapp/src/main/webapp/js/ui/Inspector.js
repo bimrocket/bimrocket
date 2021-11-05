@@ -1314,7 +1314,6 @@ class ColorEditor extends PropertyEditor
   constructor(inspector)
   {
     super(inspector);
-    this._color = new THREE.Color();
   }
 
   isSupported(value)
@@ -1365,6 +1364,9 @@ class ColorEditor extends PropertyEditor
 
     const cancel = () =>
     {
+      if (colorElem.value.toLowerCase() !== "#" + color.getHexString())
+        return; // ignore: it is a change
+
       document.body.removeEventListener("keydown", keyDownListener);
       document.body.removeEventListener("pointerdown", pointerDownListener);
       this.inspector.stopEdition();

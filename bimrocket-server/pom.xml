@@ -112,6 +112,7 @@
         <version>2.3</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
+          <warName>bimrocket-server</warName>
         </configuration>
       </plugin>
       <plugin>
@@ -131,7 +132,7 @@
                 <package>org.bimrocket.api</package>
               </resourcePackages>
               <prettyPrint>TRUE</prettyPrint>
-            </configuration>            
+            </configuration>
             <phase>compile</phase>
             <goals>
               <goal>resolve</goal>

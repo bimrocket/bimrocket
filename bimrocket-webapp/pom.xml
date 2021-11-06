@@ -79,6 +79,7 @@
         <version>2.3</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
+          <warName>bimrocket</warName>
         </configuration>
       </plugin>
     </plugins>

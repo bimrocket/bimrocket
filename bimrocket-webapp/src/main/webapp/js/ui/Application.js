@@ -32,7 +32,7 @@ import * as THREE from "../lib/three.module.js";
 class Application
 {
   static NAME = "BIMROCKET";
-  static VERSION = 0.1;
+  static VERSION = "$VERSION$";
   static EDGES_SELECTION = "edges";
   static FACES_SELECTION = "faces";
   static UNITS = [

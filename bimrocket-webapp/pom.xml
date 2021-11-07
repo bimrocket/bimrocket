@@ -71,6 +71,19 @@
               </arguments>
             </configuration>
           </execution>
+          <execution>
+            <id>set version</id>
+            <phase>install</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.bimrocket.util.BimRocketInfo</mainClass>
+              <arguments>
+                ${basedir}/target/${project.artifactId}-${project.version}/js/ui/Application.js
+              </arguments>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>

@@ -15,4 +15,33 @@
     <version>1.0</version>
   </parent>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>2.2.5</version>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+          <prefix>git</prefix>
+          <dateFormat>yyyy-MM-dd HH:mm:ss Z</dateFormat>
+          <dateFormatTimeZone>${user.timezone}</dateFormatTimeZone>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <verbose>true</verbose>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.basedir}/target/classes/org/bimrocket/util/git.properties</generateGitPropertiesFilename>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

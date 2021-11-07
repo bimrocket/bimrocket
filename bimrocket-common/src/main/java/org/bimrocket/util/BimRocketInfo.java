@@ -51,8 +51,8 @@ public class BimRocketInfo
     String commitCount = getCommitCount();
 
     StringBuilder buffer = new StringBuilder();
-    if (tagName.length() == 0) buffer.append(buildVersion);
-    else buffer.append(tagName);
+    if (tagName.startsWith("v")) buffer.append(tagName.substring(1));
+    else buffer.append(buildVersion);
     buffer.append("-r");
     buffer.append(commitCount);
 

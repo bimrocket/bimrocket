@@ -111,20 +111,21 @@ public class BimRocketInfo
 
   public static void main(String[] args) throws Exception
   {
-    if (args.length == 0)
+    if (args.length < 2)
     {
-      System.out.println("Usage: <filename>");
+      System.out.println("Usage: <input_file> <output_file>");
     }
     else
     {
       String versionLabel = BimRocketInfo.getVersionLabel();
-      String filename = args[0];
-      Path path = Paths.get(filename);
-      String content = new String(Files.readAllBytes(path), "UTF-8");
+      String inputFilename = args[0];
+      Path inputPath = Paths.get(inputFilename);
+      String content = new String(Files.readAllBytes(inputPath), "UTF-8");
       content = content.replace("$VERSION$", versionLabel);
-      Files.write(path, content.getBytes("UTF-8"));
-      System.out.println("Version label [" + versionLabel +
-        "] updated in file [" + filename + "].");
+      String outputFilename = args[1];
+      Path outputPath = Paths.get(outputFilename);
+      Files.write(outputPath, content.getBytes("UTF-8"));
+      System.out.println("Version label [" + versionLabel + "] updated.");
     }
   }
 }

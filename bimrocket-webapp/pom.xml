@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.bimrocket</groupId>
@@ -43,7 +45,7 @@
         <executions>
           <execution>
             <id>ifc4_classes_generation</id>
-            <phase>install</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>java</goal>
             </goals>
@@ -58,7 +60,7 @@
           </execution>
           <execution>
             <id>ifc2x3_classes_generation</id>
-            <phase>install</phase>
+            <phase>generate-sources</phase>
             <goals>
               <goal>java</goal>
             </goals>
@@ -73,14 +75,15 @@
           </execution>
           <execution>
             <id>set version</id>
-            <phase>install</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>java</goal>
             </goals>
             <configuration>
               <mainClass>org.bimrocket.util.BimRocketInfo</mainClass>
               <arguments>
-                ${basedir}/target/${project.artifactId}-${project.version}/js/ui/Application.js
+                <argument>${basedir}/src/main/webapp/js/ui/Application.js</argument>
+                <argument>${basedir}/target/Application.js</argument>
               </arguments>
             </configuration>
           </execution>
@@ -93,6 +96,15 @@
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <warName>bimrocket</warName>
+          <webResources>
+            <resource>
+              <directory>${basedir}/target</directory>
+              <targetPath>js/ui</targetPath>
+              <includes>
+                <include>Application.js</include>
+              </includes>
+            </resource>
+          </webResources>
         </configuration>
       </plugin>
     </plugins>

@@ -1,22 +1,25 @@
 .progress_bar
 {
   position: absolute;
-  left: 30%;
-  right: 30%;
+  --hbw: min(50%, 200px);
+  left: calc(50% - var(--hbw));
+  right: calc(50% - var(--hbw));
   bottom: 50%;
-  height: 40px;
+  height: 44px;
 }
 
 .progress_bar .message
 {
   color: black;
   position:absolute;
-  height: 20px;
+  height: 24px;
+  line-height: 24px;
   top:0;
-  left:0;
-  right:0;
+  left:4px;
+  right:4px;
   text-align: left;
   text-shadow: 0px 0px 6px white;
+  overflow: hidden;
 }
 
 .progress_bar .bar
@@ -25,8 +28,8 @@
   position:absolute;
   height: 16px;
   bottom:4px;
-  left:0;
-  right:0;
+  left:4px;
+  right:4px;
   border: 1px solid #808080;
   line-height: 17px;
   color:black;

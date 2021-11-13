@@ -62,6 +62,7 @@ class WFSController extends Controller
       mergeGroup.add(featureGroup);
       ObjectBuilder.build(mergeGroup);
       featureGroup = mergeGroup;
+      featureGroup.updateMatrix();
     }
 
     this.object.add(featureGroup);

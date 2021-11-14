@@ -143,7 +143,7 @@ class Outliner extends Panel
     // mark new selection
     const selection = this.application.selection;
     const objects = selection.objects;
-    const lastObject = objects.at(-1);
+    const lastObject = objects[objects.length - 1];
     for (let object of objects)
     {
       let treeNode = this.map.get(object);

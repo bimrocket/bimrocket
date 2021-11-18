@@ -24,6 +24,7 @@ nav a {
 	text-decoration:none;
   cursor: pointer;
   line-height: 28px;
+  user-select: none;
 }
 
 nav a:hover,
@@ -180,5 +181,6 @@ nav ul ul a.menu
     color: white;
     z-index:200;
     font-size: 14px;
+    user-select: none;
   }
 }

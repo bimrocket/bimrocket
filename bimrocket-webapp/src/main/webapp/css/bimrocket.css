@@ -1,4 +1,4 @@
-/* 
+/*
     Created on : 14-sep-2019, 9:07:32
     Author     : realor
 */
@@ -42,7 +42,7 @@
 .logo_panel > img
 {
   width: 400px;
-  max-width: 80%;  
+  max-width: 80%;
 }
 
 .logo_panel.visible
@@ -76,6 +76,7 @@ header > a.logo_link
   z-index: 1;
   left: 0;
   top: 0;
+  user-select: none;
 }
 
 header > a.logo_link > img

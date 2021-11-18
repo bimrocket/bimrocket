@@ -564,6 +564,7 @@ div.script_code
   background-repeat: no-repeat;
   border : 1px solid transparent;
   box-sizing: border-box;
+  touch-action: none;
 }
 
 .fly_panel .keypad .leftWheel .stick
@@ -571,6 +572,7 @@ div.script_code
   top: calc(50% - 0.5 * var(--stick_size));
   left: calc(50% - 0.5 * var(--stick_size));
   background-image: url(images/tools/fly_drone_front.svg);
+  touch-action: none;
 }
 
 .fly_panel .keypad .rightWheel .stick
@@ -578,6 +580,7 @@ div.script_code
   top: calc(50% - 0.5 * var(--stick_size));
   left: calc(50% - 0.5 * var(--stick_size));
   background-image: url(images/tools/fly_drone_top.svg);
+  touch-action: none;
 }
 
 .fly_panel.stick .leftWheel button,

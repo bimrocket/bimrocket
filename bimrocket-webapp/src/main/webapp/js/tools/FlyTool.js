@@ -143,9 +143,6 @@ class FlyTool extends Tool
 
     this._onKeyUp = this.onKeyUp.bind(this);
     this._onKeyDown = this.onKeyDown.bind(this);
-    this._onWheelDown = this.onWheelDown.bind(this);
-    this._onWheelUp = this.onWheelUp.bind(this);
-    this._onWheelMove = this.onWheelMove.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
 
@@ -175,7 +172,6 @@ class FlyTool extends Tool
 
       const subpanel = {
         name : subpanelDef.name,
-        active : false,
         element : subpanelElem
       };
 
@@ -183,10 +179,7 @@ class FlyTool extends Tool
 
       if (subpanelDef.xControl && subpanelDef.yControl)
       {
-        const stickElem = document.createElement("div");
-        stickElem.className = "stick";
-        subpanelElem.appendChild(stickElem);
-        subpanel.stickElement = stickElem;
+        subpanel.stick = new Stick(this, subpanel);
         subpanel.xControl = subpanelDef.xControl;
         subpanel.yControl = subpanelDef.yControl;
       }
@@ -216,13 +209,20 @@ class FlyTool extends Tool
       I18N.set(button, "alt", "tool.fly." + action.name);
       if (action.control)
       {
-        let onPressed = () => this[action.control] = action.value;
-        let onReleased = () => this[action.control] = 0;
-        button.addEventListener("mousedown", onPressed);
-        button.addEventListener("mouseup", onReleased);
-        button.addEventListener("mouseout", onReleased);
-        button.addEventListener("touchstart", onPressed);
-        button.addEventListener("touchend", onReleased);
+        let onPressed = event =>
+        {
+          this[action.control] = action.value;
+          button.setPointerCapture(event.pointerId);
+        };
+
+        let onReleased = event =>
+        {
+          this[action.control] = 0;
+          button.setPointerCapture(event.pointerId);
+        };
+        button.addEventListener("pointerdown", onPressed);
+        button.addEventListener("pointerup", onReleased);
+        button.addEventListener("contextmenu", event => event.preventDefault());
       }
       else
       {
@@ -311,17 +311,11 @@ class FlyTool extends Tool
       for (let subpanelName in this.subpanels)
       {
         let subpanel = this.subpanels[subpanelName];
-        if (subpanel.stickElement)
+        if (subpanel.stick)
         {
-          let subpanelElem = subpanel.element;
-          subpanelElem.addEventListener("mousedown", this._onWheelDown);
-          subpanelElem.addEventListener("touchstart", this._onWheelDown);
+          subpanel.stick.activate();
         }
       }
-      document.addEventListener("mouseup", this._onWheelUp);
-      document.addEventListener("touchend", this._onWheelUp);
-      document.addEventListener("mousemove", this._onWheelMove);
-      document.addEventListener("touchmove", this._onWheelMove);
     }
     else // mode === "stick"
     {
@@ -330,17 +324,11 @@ class FlyTool extends Tool
       for (let subpanelName in this.subpanels)
       {
         let subpanel = this.subpanels[subpanelName];
-        if (subpanel.stickElement)
+        if (subpanel.stick)
         {
-          let subpanelElem = subpanel.element;
-          subpanelElem.removeEventListener("mousedown", this._onWheelDown);
-          subpanelElem.removeEventListener("touchstart", this._onWheelDown);
+          subpanel.stick.deactivate();
         }
       }
-      document.removeEventListener("mouseup", this._onWheelUp);
-      document.removeEventListener("touchend", this._onWheelUp);
-      document.removeEventListener("mousemove", this._onWheelMove);
-      document.removeEventListener("touchmove", this._onWheelMove);
     }
   }
 
@@ -437,142 +425,6 @@ class FlyTool extends Tool
       dialog.setI18N(this.application.i18n);
       dialog.show();
     }
-  }
-
-  onWheelDown(event)
-  {
-    let positions = this.getEventPositions(event);
-    for (let position of positions)
-    {
-      const subpanel = this.findSubpanel(position.x, position.y, false);
-      if (subpanel)
-      {
-        subpanel.active = true;
-        const control = this.updateStickPosition(
-          position.x, position.y, subpanel);
-        this[subpanel.xControl] = control.x;
-        this[subpanel.yControl] = control.y;
-      }
-    }
-  }
-
-  onWheelUp(event)
-  {
-    let positions = this.getEventPositions(event);
-    for (let position of positions)
-    {
-      const subpanel = this.findSubpanel(position.x, position.y, true);
-      if (subpanel)
-      {
-        subpanel.active = false;
-        const stickElem = subpanel.stickElement;
-        stickElem.style.left = "";
-        stickElem.style.top = "";
-        this[subpanel.xControl] = 0;
-        this[subpanel.yControl] = 0;
-      }
-    }
-  }
-
-  onWheelMove(event)
-  {
-    let positions = this.getEventPositions(event);
-    for (let position of positions)
-    {
-      const subpanel = this.findSubpanel(position.x, position.y, true);
-      if (subpanel)
-      {
-        const control = this.updateStickPosition(
-          position.x, position.y, subpanel);
-        this[subpanel.xControl] = control.x;
-        this[subpanel.yControl] = control.y;
-      }
-    }
-  }
-
-  updateStickPosition(clientX, clientY, subpanel)
-  {
-    const stickElem = subpanel.stickElement;
-    const size = stickElem.offsetWidth;
-    const subpanelElem = subpanel.element;
-    const rect = subpanelElem.getBoundingClientRect();
-
-    let layerX = clientX - rect.left;
-    let layerY = clientY - rect.top;
-
-    let x = 2 * (layerX / rect.width) - 1;
-    let y = -2 * (layerY / rect.height) + 1;
-
-    let radius = (rect.width - size) / rect.width;
-
-    if (Math.sqrt(x * x + y * y) > radius)
-    {
-      let angle = Math.atan2(y, x);
-      x = radius * Math.cos(angle);
-      y = radius * Math.sin(angle);
-      layerX = (x + 1) * 0.5 * rect.width;
-      layerY = (1 - y) * 0.5 * rect.height;
-    }
-
-    stickElem.style.left = -1 + (layerX - 0.5 * size) + "px";
-    stickElem.style.top = -1 + (layerY - 0.5 * size) + "px";
-
-    x = x.toFixed(2);
-    y = y.toFixed(2);
-
-    return {x, y};
-  }
-
-  findSubpanel(clientX, clientY, active = false)
-  {
-    let minDist = 0;
-    let closest = null;
-    for (let subpanelName in this.subpanels)
-    {
-      let subpanel = this.subpanels[subpanelName];
-      if (subpanel.stickElement && subpanel.active === active)
-      {
-        let stickElem = subpanel.stickElement;
-        let rect = stickElem.getBoundingClientRect();
-        let layerX = clientX - rect.left;
-        let layerY = clientY - rect.top;
-
-        let dist = Math.sqrt(layerX * layerX + layerY * layerY);
-        if (closest === null)
-        {
-          closest = subpanel;
-          minDist = dist;
-        }
-        else
-        {
-          if (dist < minDist)
-          {
-            minDist = dist;
-            closest = subpanel;
-          }
-        }
-      }
-    }
-    return closest;
-  }
-
-  getEventPositions(event)
-  {
-    const positions = [];
-
-    if (event instanceof MouseEvent)
-    {
-      positions.push({ x : event.clientX, y : event.clientY });
-    }
-    else if (event instanceof TouchEvent)
-    {
-      let touches = event.changedTouches;
-      for (let touch of touches)
-      {
-        positions.push({ x : touch.clientX, y : touch.clientY });
-      }
-    }
-    return positions;
   }
 
   animate(event)
@@ -911,6 +763,99 @@ class FlyTool extends Tool
       object = object.parent;
     }
     return collidable;
+  }
+}
+
+class Stick
+{
+  constructor(tool, subpanel)
+  {
+    this.subpanel = subpanel;
+    const element = document.createElement("div");
+    this.element = element;
+    element.className = "stick";
+    element.style.touchAction = "none";
+    subpanel.element.style.touchAction = "none";
+    subpanel.element.appendChild(element);
+
+    this.onDown = event =>
+    {
+      subpanel.element.addEventListener("pointermove", this.onMove);
+      subpanel.element.setPointerCapture(event.pointerId);
+
+      const control = this.updatePosition(event.clientX, event.clientY);
+      tool[subpanel.xControl] = control.x;
+      tool[subpanel.yControl] = control.y;
+    };
+
+    this.onUp = event =>
+    {
+      subpanel.element.removeEventListener("pointermove", this.onMove);
+      subpanel.element.releasePointerCapture(event.pointerId);
+
+      element.style.left = "";
+      element.style.top = "";
+      tool[subpanel.xControl] = 0;
+      tool[subpanel.yControl] = 0;
+    };
+
+    this.onMove = event =>
+    {
+      let control = this.updatePosition(event.clientX, event.clientY);
+
+      tool[subpanel.xControl] = control.x;
+      tool[subpanel.yControl] = control.y;
+    };
+
+    subpanel.element.addEventListener("contextmenu",
+      event => event.preventDefault());
+  }
+
+  activate()
+  {
+    const subpanel = this.subpanel;
+    subpanel.element.addEventListener("pointerdown", this.onDown);
+    subpanel.element.addEventListener("pointerup", this.onUp);
+  }
+
+  deactivate()
+  {
+    const subpanel = this.subpanel;
+    subpanel.element.removeEventListener("pointerdown", this.onDown);
+    subpanel.element.removeEventListener("pointerup", this.onUp);
+  }
+
+  updatePosition(clientX, clientY)
+  {
+    const stickElem = this.element;
+    const size = stickElem.offsetWidth;
+    const subpanelElem = this.subpanel.element;
+    const rect = subpanelElem.getBoundingClientRect();
+
+    let layerX = clientX - rect.left;
+    let layerY = clientY - rect.top;
+
+    let x = 2 * (layerX / rect.width) - 1;
+    let y = -2 * (layerY / rect.height) + 1;
+
+    let radius = (rect.width - size) / rect.width;
+
+    if (Math.sqrt(x * x + y * y) > radius)
+    {
+      let angle = Math.atan2(y, x);
+      x = radius * Math.cos(angle);
+      y = radius * Math.sin(angle);
+      layerX = (x + 1) * 0.5 * rect.width;
+      layerY = (1 - y) * 0.5 * rect.height;
+    }
+
+    stickElem.style.left = -1 + (layerX - 0.5 * size) + "px";
+    stickElem.style.top = -1 + (layerY - 0.5 * size) + "px";
+
+    x = x.toFixed(2);
+    y = y.toFixed(2);
+
+    return {x, y};
   }
 }
 

@@ -8,6 +8,7 @@ import { Tool } from "./Tool.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { Controls } from "../ui/Controls.js";
+import { GestureHandler } from "../ui/GestureHandler.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -74,13 +75,13 @@ class SectionTool extends Tool
     planeStencilMat.stencilZPass = THREE.ReplaceStencilOp;
     const loader = new THREE.TextureLoader();
     loader.load("textures/section.png", texture =>
-      {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(200, 200);
-        planeStencilMat.map = texture;
-        planeStencilMat.needsUpdate = true;
-      });
+    {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(200, 200);
+      planeStencilMat.map = texture;
+      planeStencilMat.needsUpdate = true;
+    });
     this.planeStencilMat = planeStencilMat;
 
     let planeGeom = new THREE.PlaneBufferGeometry(100, 100);
@@ -90,11 +91,12 @@ class SectionTool extends Tool
     planeMesh.name = "sectionPlane";
     this.planeMesh = planeMesh;
 
-    this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerWheel = this.onPointerWheel.bind(this);
+    this._onWheel = this.onWheel.bind(this);
     this.createPanel();
 
     this.sectionColorElem.value = sectionColor;
+
+    this.gestureHandler = new GestureHandler(this);
   }
 
   createPanel()
@@ -143,27 +145,24 @@ class SectionTool extends Tool
   {
     this.panel.visible = true;
     const container = this.application.container;
-    container.addEventListener('pointerup', this._onPointerUp, false);
-    container.addEventListener('wheel', this._onPointerWheel, false);
+    container.addEventListener('wheel', this._onWheel, false);
+    this.gestureHandler.enable();
   }
 
   deactivate()
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-    container.removeEventListener('wheel', this._onPointerWheel, false);
+    container.removeEventListener('wheel', this._onWheel, false);
+    this.gestureHandler.disable();
   }
 
-  onPointerUp(event)
+  onTap(position, button)
   {
-    if (!this.isCanvasEvent(event)) return;
-
-    const pointerPosition = this.getEventPosition(event);
     const application = this.application;
     const scene = application.scene;
 
-    const intersect = this.intersect(pointerPosition, scene, true);
+    const intersect = this.intersect(position, scene, true);
     if (intersect)
     {
       const object = intersect.object;
@@ -189,7 +188,25 @@ class SectionTool extends Tool
     application.repaint();
   }
 
-  onPointerWheel(event)
+  onDrag(position, direction, pointerCount, button)
+  {
+    const application = this.application;
+
+    if (!application.renderer.localClippingEnabled) return;
+
+    let absDir = Math.abs(direction.y);
+
+    this.offset += 0.005 * Math.sign(direction.y) * Math.pow(absDir, 1.5);
+
+    this.offset = Math.round(1000 * this.offset) / 1000;
+
+    this.updatePlane();
+    this.updateOffsetLabel();
+
+    application.repaint();
+  }
+
+  onWheel(event)
   {
     if (!this.isCanvasEvent(event)) return;
 
@@ -204,7 +221,7 @@ class SectionTool extends Tool
     }
     else if (event.detail)
     { // Firefox
-      delta = -0.02 * event.detail;
+      delta = -0.005 * event.detail;
     }
     this.offset += delta;
 

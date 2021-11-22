@@ -778,9 +778,9 @@ class Stick
     subpanel.element.style.touchAction = "none";
     subpanel.element.appendChild(element);
 
-    this.onDown = event =>
+    this.onPointerDown = event =>
     {
-      subpanel.element.addEventListener("pointermove", this.onMove);
+      subpanel.element.addEventListener("pointermove", this.onPointerMove);
       subpanel.element.setPointerCapture(event.pointerId);
 
       const control = this.updatePosition(event.clientX, event.clientY);
@@ -788,9 +788,9 @@ class Stick
       tool[subpanel.yControl] = control.y;
     };
 
-    this.onUp = event =>
+    this.onPointerUp = event =>
     {
-      subpanel.element.removeEventListener("pointermove", this.onMove);
+      subpanel.element.removeEventListener("pointermove", this.onPointerMove);
       subpanel.element.releasePointerCapture(event.pointerId);
 
       element.style.left = "";
@@ -799,7 +799,7 @@ class Stick
       tool[subpanel.yControl] = 0;
     };
 
-    this.onMove = event =>
+    this.onPointerMove = event =>
     {
       let control = this.updatePosition(event.clientX, event.clientY);
 
@@ -814,15 +814,15 @@ class Stick
   activate()
   {
     const subpanel = this.subpanel;
-    subpanel.element.addEventListener("pointerdown", this.onDown);
-    subpanel.element.addEventListener("pointerup", this.onUp);
+    subpanel.element.addEventListener("pointerdown", this.onPointerDown);
+    subpanel.element.addEventListener("pointerup", this.onPointerUp);
   }
 
   deactivate()
   {
     const subpanel = this.subpanel;
-    subpanel.element.removeEventListener("pointerdown", this.onDown);
-    subpanel.element.removeEventListener("pointerup", this.onUp);
+    subpanel.element.removeEventListener("pointerdown", this.onPointerDown);
+    subpanel.element.removeEventListener("pointerup", this.onPointerUp);
   }
 
   updatePosition(clientX, clientY)

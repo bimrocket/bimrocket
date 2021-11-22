@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Solid } from "../core/Solid.js";
+import { GestureHandler } from "../ui/GestureHandler.js";
 import * as THREE from "../lib/three.module.js";
 
 class OrbitTool extends Tool
@@ -70,16 +71,9 @@ class OrbitTool extends Tool
     this.xDelta = 0;
     this.yDelta = 0;
 
-    this.STATE = { NONE: -1, ROTATE: 0, ZOOM: 1, PAN: 2 };
-    this.state = this.STATE.NONE;
-
-    this._onPointerDown = this.onPointerDown.bind(this);
-    this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
     this._onWheel = this.onWheel.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
-    this._onContextMenu = this.onContextMenu.bind(this);
 
     const geometry = new THREE.SphereGeometry(1, 8, 8);
     const material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
@@ -88,6 +82,8 @@ class OrbitTool extends Tool
     this.sphere = sphere;
 
     this.createPanel();
+
+    this.gestureHandler = new GestureHandler(this);
   }
 
   createPanel()
@@ -105,12 +101,10 @@ class OrbitTool extends Tool
 
     const application = this.application;
     const container = application.container;
-
-    container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('pointerdown', this._onPointerDown, false);
     container.addEventListener('wheel', this._onWheel, false);
     application.addEventListener('animation', this._animate);
     application.addEventListener('scene', this._onScene);
+    this.gestureHandler.enable();
   }
 
   deactivate()
@@ -119,12 +113,10 @@ class OrbitTool extends Tool
 
     const application = this.application;
     const container = application.container;
-
-    container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('pointerdown', this._onPointerDown, false);
     container.removeEventListener('wheel', this._onWheel, false);
     application.removeEventListener('animation', this._animate);
     application.removeEventListener('scene', this._onScene);
+    this.gestureHandler.disable();
   }
 
   animate(event)
@@ -362,37 +354,13 @@ class OrbitTool extends Tool
     this.radius = this.center.distanceTo(camera.position);
   }
 
-  onPointerDown(event)
+  onStartGesture()
   {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
     this.updateCenter();
 
-    const pointerPosition = this.getEventPosition(event);
-    if (event.button === this.rotateButton)
-    {
-      this.state = this.STATE.ROTATE;
-      this.rotateStart.copy(pointerPosition);
-    }
-    else if (event.button === this.zoomButton)
-    {
-      this.state = this.STATE.ZOOM;
-      this.zoomStart.copy(pointerPosition);
-    }
-    else if (event.button === this.panButton)
-    {
-      this.state = this.STATE.PAN;
-      this.panStart.copy(pointerPosition);
-    }
-    const application = this.application;
-    const container = application.container;
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    container.addEventListener('pointerup', this._onPointerUp, false);
-
     // add & update sphere
-    this.application.overlays.add(this.sphere);
+    const application = this.application;
+    application.overlays.add(this.sphere);
 
     const spherePosition = this.center.clone();
     const camera = application.camera;
@@ -413,47 +381,16 @@ class OrbitTool extends Tool
     application.notifyObjectsChanged(this.sphere, this);
   }
 
-  onPointerMove(event)
+  onDrag(position, direction, pointerCount, button)
   {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
-    const pointerPosition = this.getEventPosition(event);
-    if (this.state === this.STATE.ROTATE)
+    if (button === this.panButton || pointerCount === 2)
     {
-      this.rotateEnd.copy(pointerPosition);
-      this.rotateVector.subVectors(this.rotateEnd, this.rotateStart);
-
-      this.rotateLeft(2 * Math.PI * this.rotateVector.x /
-        this.PIXELS_PER_ROUND * this.userRotateSpeed);
-      this.rotateUp(2 * Math.PI * this.rotateVector.y /
-        this.PIXELS_PER_ROUND * this.userRotateSpeed);
-
-      this.rotateStart.copy(this.rotateEnd);
-    }
-    else if (this.state === this.STATE.ZOOM)
-    {
-      this.zoomEnd.copy(pointerPosition);
-      this.zoomVector.subVectors(this.zoomEnd, this.zoomStart);
-
-      if (this.zoomVector.y !== 0)
-      {
-        this.zoomIn(0.1 * this.zoomVector.y);
-      }
-      this.zoomStart.copy(this.zoomEnd);
-    }
-    else if (this.state === this.STATE.PAN)
-    {
-      this.panEnd.copy(pointerPosition);
-
       const camera = this.application.camera;
       const container = this.application.container;
 
-      this.panVector.subVectors(this.panEnd, this.panStart);
       const vectorcc = new THREE.Vector3();
-      vectorcc.x = this.panVector.x / container.clientWidth;
-      vectorcc.y = this.panVector.y / container.clientHeight;
+      vectorcc.x = direction.x / container.clientWidth;
+      vectorcc.y = direction.y / container.clientHeight;
       vectorcc.z = 0;
 
       const matrix = new THREE.Matrix4();
@@ -473,19 +410,32 @@ class OrbitTool extends Tool
       vectorcc.y *= lambda;
       this.panLeft(vectorcc.x);
       this.panDown(vectorcc.y);
+    }
+    else if (button === this.rotateButton)
+    {
+      this.rotateLeft(2 * Math.PI * direction.x /
+        this.PIXELS_PER_ROUND * this.userRotateSpeed);
+      this.rotateUp(2 * Math.PI * direction.y /
+        this.PIXELS_PER_ROUND * this.userRotateSpeed);
+    }
+    else if (button === this.zoomButton)
+    {
+      if (direction.y !== 0)
+      {
+        let absDir = Math.abs(direction.y);
 
-      this.panStart.copy(this.panEnd);
+        this.zoomIn(0.002 * Math.sign(direction.y) * Math.pow(absDir, 1.5));
+      }
     }
   }
 
-  onPointerUp(event)
+  onZoom(position, delta)
   {
-    this.state = this.STATE.NONE;
+    this.zoomIn(0.005 * delta);
+  }
 
-    const container = this.application.container;
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-
+  onEndGesture()
+  {
     // remove sphere
     this.application.overlays.remove(this.sphere);
     this.application.notifyObjectsChanged(this.sphere, this);
@@ -512,13 +462,6 @@ class OrbitTool extends Tool
     {
       this.zoomIn(delta);
     }
-  }
-
-  onContextMenu(event)
-  {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
   }
 
   findCenterDistance()

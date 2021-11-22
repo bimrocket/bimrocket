@@ -120,7 +120,7 @@ export const translations =
   "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbitar",
-  "tool.orbit.help" : "Botón izquierdo: rotar, botón derecho: desplazar, rueda ratón: zoom.",
+  "tool.orbit.help" : "Rotación: arrastrar con botón izquierdo, Desplazar: arrastrar con botón derecho o 2 punteros, Zoom: girar rueda, arrastrar con botón central o zoom con 2 punteros.",
 
   "tool.auto_orbit.label" : "Auto orbitar",
   "tool.auto_orbit.help" : "Auto orbitar",
@@ -145,7 +145,7 @@ export const translations =
   "tool.view.label" : "Ver",
 
   "tool.section.label" : "Sección",
-  "tool.section.help" : "Pulsa sobre una cara para seleccionar el plano de sección. Rueda de ratón para desplazar el plano de sección.",
+  "tool.section.help" : "Toca una cara para seleccionar el plano de sección. Arrastra el puntero o gira la rueda para desplazar el plano de sección.",
 
   "tool.add_object.label" : "Añadir objeto",
 

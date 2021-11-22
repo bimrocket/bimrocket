@@ -120,7 +120,7 @@ export const translations =
   "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbita",
-  "tool.orbit.help" : "Botó esquerre: rota, botó dret: desplaça, rota ratólí: zoom.",
+  "tool.orbit.help" : "Rotació: arrossega amb butó esquerre, Desplaça: arrossega amb botó dret o 2 punters, Zoom: gira roda, arrossega amb botó central o zoom amb 2 punters.",
 
   "tool.auto_orbit.label" : "Auto orbita",
   "tool.auto_orbit.help" : "Auto orbita",
@@ -145,7 +145,7 @@ export const translations =
   "tool.view.label" : "Veure",
 
   "tool.section.label" : "Secció",
-  "tool.section.help" : "Prem sobre una cara per seleccionar el pla de secció. Roda de ratolí per desplaçar el pla de secció.",
+  "tool.section.help" : "Toca una cara per seleccionar el pla de secció. Arrossega el punter o gira la roda per desplaçar el pla de secció.",
 
   "tool.add_object.label" : "Afegeix objecte",
 

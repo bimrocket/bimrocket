@@ -120,7 +120,7 @@ export const translations =
   "tool.script.name" : "Script:",
 
   "tool.orbit.label" : "Orbit",
-  "tool.orbit.help" : "Drag left mouse button: rotate, Drag right mouse button: pan, Mouse wheel: zoom.",
+  "tool.orbit.help" : "Rotate: drag with left button, Pan: drag with right button or 2 pointers, Zoom: spin wheel, drag with middle button or zoom with 2 pointers.",
 
   "tool.auto_orbit.label" : "Auto orbit",
   "tool.auto_orbit.help" : "Auto orbit",
@@ -145,7 +145,7 @@ export const translations =
   "tool.view.label" : "View",
 
   "tool.section.label" : "Section",
-  "tool.section.help" : "Mouse click on face to select the clipping plane. Mouse wheel to offset the clipping plane.",
+  "tool.section.help" : "Tap face to select the clipping plane. Drag the pointer or spin the wheel to offset the clipping plane.",
 
   "tool.add_object.label" : "Add object",
 

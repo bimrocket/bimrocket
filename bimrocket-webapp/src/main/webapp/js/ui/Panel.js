@@ -441,16 +441,18 @@ class PanelResizer
       this.panelManager.updateLayout();
     };
 
-    const reset = () =>
+    const reset = event =>
     {
-      container.removeEventListener("pointermove", move, false);
-      container.removeEventListener("pointerup", reset, false);
+      element.removeEventListener("pointermove", move, false);
+      element.removeEventListener("pointerup", reset, false);
+      element.releasePointerCapture(event.pointerId);
     };
 
-    element.addEventListener("pointerdown", () =>
+    element.addEventListener("pointerdown", event =>
     {
-      container.addEventListener("pointermove", move, false);
-      container.addEventListener("pointerup", reset, false);
+      element.addEventListener("pointermove", move, false);
+      element.addEventListener("pointerup", reset, false);
+      element.setPointerCapture(event.pointerId);
     });
   }
 

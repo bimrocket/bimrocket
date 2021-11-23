@@ -15,7 +15,7 @@ export function load(application)
   IOManager.formats["geojson"] =
   {
     description : "GeoJSON (*.geojson)",
-    extension: "json",
+    extension: "geojson",
     loaderClass : GeoJSONLoader,
     options : {}
   };

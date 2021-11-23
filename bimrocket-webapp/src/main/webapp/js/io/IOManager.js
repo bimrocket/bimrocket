@@ -234,6 +234,18 @@ class IOManager
       return object;
     }
   }
+  
+  static getSupportedLoaderExtensions()
+  {
+    const extensions = [];
+    const formats = IOManager.formats;
+    for (let formatName in formats)
+    {
+      let format = formats[formatName];
+      extensions.push(format.extension);
+    }
+    return extensions;
+  }
 }
 
 export { IOManager };

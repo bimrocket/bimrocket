@@ -31,6 +31,9 @@ class OpenLocalTool extends Tool
 
     inputFile.type = "file";
     inputFile.id = this.name + "_file";
+    
+    const extensions = IOManager.getSupportedLoaderExtensions();    
+    inputFile.accept = extensions.map(extension => "." + extension).join(", ");
 
     document.body.appendChild(inputFile);
     inputFile.addEventListener("change", this._onChange, false);

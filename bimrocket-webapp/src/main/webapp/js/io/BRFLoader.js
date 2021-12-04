@@ -381,7 +381,7 @@ class BRFLoader extends THREE.Loader
   setPropertyValue(element, property, value, model)
   {
     let type = typeof value;
-    if (typeof value === "object")
+    if (type === "object" && value)
     {
       type = value.type;
       if (type === undefined)
@@ -451,6 +451,10 @@ class BRFLoader extends THREE.Loader
         element[property] = texture;
         element.needsUpdate = true;
       }
+    }
+    else if (value === null)
+    {
+      element[property] = null;
     }
     else
     {

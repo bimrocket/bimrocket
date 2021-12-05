@@ -123,7 +123,7 @@ class OrbitTool extends Tool
   {
     const application = this.application;
 
-    if (!this.updateCamera && !application.needsRepaint) return;
+    if (!this.updateCamera) return;
 
     const camera = application.camera;
 
@@ -132,7 +132,7 @@ class OrbitTool extends Tool
 
     if (camera instanceof THREE.OrthographicCamera)
     {
-      var factor = 1 + this.zoomDelta;
+      let factor = 1 + this.zoomDelta;
       if (factor < 0.1) factor = 0.1;
       else if (factor > 1.5) factor = 1.5;
       this.orthoZoom *= factor;

@@ -100,7 +100,7 @@ select::selection
 
 /* scrollbars */
 
-div
+div, ul
 {
   scrollbar-width: thin;
   scrollbar-color: #ffb0b0 transparent;

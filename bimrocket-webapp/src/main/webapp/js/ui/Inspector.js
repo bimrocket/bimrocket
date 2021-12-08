@@ -1031,7 +1031,18 @@ class TextureRenderer extends PropertyRenderer
     valueElem.className = "value";
     if (texture)
     {
-      valueElem.innerHTML = texture.name || texture.image.src;
+      if (texture.name)
+      {
+        valueElem.innerHTML = texture.name;
+      }
+      else if (texture.image)
+      {
+        valueElem.innerHTML = texture.image.src;
+      }
+      else
+      {
+        valueElem.innerHTML = "";
+      }
     }
     return valueElem;
   }
@@ -1407,7 +1418,19 @@ class TextureEditor extends PropertyEditor
   {
     let valueElem = document.createElement("input");
     valueElem.className = "value";
-    const value = texture ? texture.name : "";
+    let value = "";
+    if (texture)
+    {
+      if (texture.name)
+      {
+        value = texture.name;
+      }
+      else if (texture.image)
+      {
+        value = texture.image.src;
+      }
+    }
+
     valueElem.value = value;
     valueElem.addEventListener("keyup", event =>
     {
@@ -1420,7 +1443,7 @@ class TextureEditor extends PropertyEditor
         }
         else
         {
-          if (imagePath.trim() === "")
+          if (imagePath === "")
           {
             if (material[propertyName] !== null) material.needsUpdate = true;
             material[propertyName] = null;
@@ -1428,10 +1451,13 @@ class TextureEditor extends PropertyEditor
           }
           else
           {
+            const manager = this.inspector.application.loadingManager;
             if (material[propertyName] === null) material.needsUpdate = true;
-            let newTexture = this.inspector.application.loadTexture(imagePath);
+            const textureLoader = new THREE.TextureLoader(manager);
+            const newTexture = textureLoader.load(imagePath,
+              () => this.inspector.endEdition());
+            newTexture.name = imagePath;
             material[propertyName] = newTexture;
-            this.inspector.endEdition();
           }
           if (texture) texture.dispose();
         }

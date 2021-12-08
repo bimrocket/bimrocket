@@ -31,8 +31,8 @@ class OpenLocalTool extends Tool
 
     inputFile.type = "file";
     inputFile.id = this.name + "_file";
-    
-    const extensions = IOManager.getSupportedLoaderExtensions();    
+
+    const extensions = IOManager.getSupportedLoaderExtensions();
     inputFile.accept = extensions.map(extension => "." + extension).join(", ");
 
     document.body.appendChild(inputFile);
@@ -98,8 +98,8 @@ class OpenLocalTool extends Tool
               .setClassName("error")
               .setI18N(application.i18n).show();
           },
-          options : { units : application.units,
-            loadTexture : imagePath => this.application.loadTexture(imagePath) }
+          manager : this.application.loadingManager,
+          units : application.units
         };
         IOManager.load(intent); // async load
       };

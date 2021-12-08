@@ -16,9 +16,10 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFLoader extends THREE.Loader
 {
-  constructor()
+  constructor(manager)
   {
-    super();
+    super(manager);
+
     this.options = {};
   }
 
@@ -444,13 +445,10 @@ class BRFLoader extends THREE.Loader
     }
     else if (type === "Texture" && element instanceof THREE.Material)
     {
-      const loadTexture = this.options.loadTexture;
-      if (loadTexture)
-      {
-        const texture = loadTexture(value.image);
-        element[property] = texture;
-        element.needsUpdate = true;
-      }
+      const textureLoader = new THREE.TextureLoader(this.manager);
+      const texture = textureLoader.load(value.image);
+      element[property] = texture;
+      element.needsUpdate = true;
     }
     else if (value === null)
     {

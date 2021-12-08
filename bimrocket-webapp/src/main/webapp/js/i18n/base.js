@@ -35,6 +35,7 @@ export const translations =
   "button.no" : "No",
   "button.discard" : "Discard",
 
+  "units.km" : "kilometers",
   "units.m" : "meters",
   "units.cm" : "centimeters",
   "units.mm" : "milimeters",

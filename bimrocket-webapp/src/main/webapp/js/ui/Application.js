@@ -36,6 +36,7 @@ class Application
   static EDGES_SELECTION = "edges";
   static FACES_SELECTION = "faces";
   static UNITS = [
+    ["km", "units.km"],
     ["m", "units.m"],
     ["cm", "units.cm"],
     ["mm", "units.mm"],
@@ -88,7 +89,17 @@ class Application
     this._selectionLines = null;
     this._axisLines = null;
 
-    this.textureLoader = new THREE.TextureLoader();
+    this.loadingManager = new THREE.LoadingManager();
+    const loadingManager = this.loadingManager;
+    loadingManager.onStart = (url, itemsLoaded, itemsTotal) =>
+    {
+      console.info(url, itemsLoaded, itemsTotal);
+    };
+    loadingManager.onLoad = () =>
+    {
+      console.info("Load completed.");
+      this.repaint();
+    };
 
    	THREE.Object3D.DefaultMatrixAutoUpdate = false;
    	THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
@@ -202,6 +213,15 @@ class Application
 
     // listeners
     window.addEventListener("resize", this.onResize.bind(this), false);
+
+    window.addEventListener("beforeunload", event =>
+    {
+      if (this.unsavedChanges)
+      {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    });
 
     this.addEventListener("scene", event =>
     {
@@ -915,10 +935,9 @@ class Application
 
   notifyEventListeners(type, event)
   {
-    var eventListeners = this._eventListeners[type];
-    for (var i = 0; i < eventListeners.length; i++)
+    const eventListeners = this._eventListeners[type];
+    for (let listener of eventListeners)
     {
-      var listener = eventListeners[i];
       listener(event);
     }
   }
@@ -1366,34 +1385,6 @@ class Application
       this.updateSelection();
     }
   }
-
-  loadTexture(imagePath, callback)
-  {
-    const texture = this.textureLoader.load(imagePath, tex =>
-    {
-      if (callback)
-      {
-        callback(tex);
-      }
-      this.repaint();
-    });
-    texture.name = imagePath;
-    return texture;
-  }
-
-//  loadTexture(imagePath, callback)
-//  {
-//    this.textureLoader.load(imagePath, texture =>
-//    {
-//      texture.name = imagePath;
-//      console.info("texture " + imagePath + " loaded.", texture.image);
-//      if (callback)
-//      {
-//        callback(texture);
-//      }
-//      this.repaint();
-//    });
-//  }
 
   updateCameraAspectRatio()
   {

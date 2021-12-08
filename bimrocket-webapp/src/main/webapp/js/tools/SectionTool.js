@@ -73,8 +73,9 @@ class SectionTool extends Tool
     planeStencilMat.stencilFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZFail = THREE.ReplaceStencilOp;
     planeStencilMat.stencilZPass = THREE.ReplaceStencilOp;
-    const loader = new THREE.TextureLoader();
-    loader.load("textures/section.png", texture =>
+    const manager = this.application.loadingManager;
+    const textureLoader = new THREE.TextureLoader(manager);
+    textureLoader.load("textures/section.png", texture =>
     {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;

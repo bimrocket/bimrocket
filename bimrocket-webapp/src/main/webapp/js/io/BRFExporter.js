@@ -15,10 +15,11 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 1
+  static VERSION = 1;
 
   constructor()
   {
+    this.options = {};
   }
 
   parse(object)

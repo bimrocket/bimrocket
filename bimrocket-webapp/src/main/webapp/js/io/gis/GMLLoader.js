@@ -9,9 +9,9 @@ import * as THREE from "../../lib/three.module.js";
 
 class GMLLoader extends GISLoader
 {
-  constructor()
+  constructor(manager)
   {
-    super("text/xml; subtype=gml/3.1.1");
+    super(manager, "text/xml; subtype=gml/3.1.1");
   }
 
   parse(xml)

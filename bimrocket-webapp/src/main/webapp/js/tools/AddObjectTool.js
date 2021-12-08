@@ -221,7 +221,9 @@ class AddObjectTool extends Tool
 
   createSprite()
   {
-    const texture = this.application.loadTexture("textures/sphere.png");
+    const manager = this.application.loadingManager;
+    const textureLoader = new THREE.TextureLoader(manager);
+    const texture = textureLoader.load("textures/sphere.png");
 
     const material = new THREE.SpriteMaterial({
       name: "sphere",

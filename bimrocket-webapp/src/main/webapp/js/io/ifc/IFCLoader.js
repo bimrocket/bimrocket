@@ -36,9 +36,19 @@ import * as THREE from "../../lib/three.module.js";
 
 class IFCLoader extends THREE.Loader
 {
-	constructor(manager)
+  static options =
+  {
+    units : "m", // default model units
+    minCircleSegments : 16, // minimum circle segments
+    circleSegmentsByRadius : 64, // circle segments by meter of radius
+    halfSpaceSize : 30 // half space size in meters
+  };
+
+  constructor(manager)
   {
     super(manager);
+
+    this.options = Object.assign({}, IFCLoader.options);
   }
 
   load(url, onLoad, onProgress, onError)
@@ -49,15 +59,6 @@ class IFCLoader extends THREE.Loader
 
   parse(text, onCompleted, onProgress, onError)
   {
-    let options = this.options || {};
-    // minimum circle segments
-    options.minCircleSegments = options.minCircleSegments || 16;
-    // circle segments by meter of radius
-    options.circleSegmentsByRadius = options.circleSegmentsByRadius || 64;
-    // half space size in meters
-    options.halfSpaceSize = options.halfSpaceSize || 30;
-    this.options = options;
-
     let ifcFile = new IFCFile();
 
     console.info("parsing file...");
@@ -118,32 +119,24 @@ class IFCLoader extends THREE.Loader
                   unit.UnitType === '.LENGTHUNIT.')
               {
                 // unit name = METRE
-                let scale = 1;
+                let factor = 1;
 
                 if (unit.Prefix)
                 {
-                  let factor = IFC.FACTOR_PREFIX[unit.Prefix] || 1;
-                  // set factor respect metre unit
-                  project._loader.modelFactor = factor;
-                  scale = factor;
+                  let prefix = IFC.UNIT_PREFIXES[unit.Prefix];
+                  if (prefix)
+                  {
+                    // set factor respect metre unit
+                    factor = prefix.factor;
+                    model.userData.units = prefix.symbol + "m";
+                  }
                 }
-                let appUnits = options.units || "m";
-                if (appUnits === "cm")
+                else
                 {
-                  scale *= 100;
+                  // meters
+                  model.userData.units = "m";
                 }
-                else if (appUnits === "mm")
-                {
-                  scale *= 1000;
-                }
-                else if (appUnits === "in")
-                {
-                  scale *= 39.3701;
-                }
-                model.scale.x = scale;
-                model.scale.y = scale;
-                model.scale.z = scale;
-                model.updateMatrix();
+                project._loader.modelFactor = factor;
               }
             }
           }
@@ -3297,6 +3290,5 @@ class IfcPropertySetHelper extends IfcHelper
   }
 };
 registerIfcHelperClass(IfcPropertySetHelper);
-
 
 export { IFCLoader };

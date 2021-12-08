@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "../lib/three.module.js";
 
 class IOManager
@@ -33,13 +34,13 @@ class IOManager
     return formatInfo || null;
   }
 
-  static createLoader(format)
+  static createLoader(format, manager)
   {
     let loader = null;
     let formatInfo = this.formats[format];
     if (formatInfo && formatInfo.loaderClass)
     {
-      loader = new formatInfo.loaderClass();
+      loader = new formatInfo.loaderClass(manager);
       loader.loadMethod = formatInfo.loadMethod || loader.loadMethod || 0;
     }
     return loader;
@@ -47,8 +48,8 @@ class IOManager
 
   static createExporter(format)
   {
-    var exporter = null;
-    var formatInfo = this.formats[format];
+    let exporter = null;
+    let formatInfo = this.formats[format];
     if (formatInfo && formatInfo.exporterClass)
     {
       exporter = new formatInfo.exporterClass();
@@ -64,6 +65,8 @@ class IOManager
     let onCompleted = intent.onCompleted; // onCompleted(object3D)
     let onProgress = intent.onProgress; // onProgress({progress: 0..100, message: text})
     let onError = intent.onError; // onError(error)
+    let manager = intent.manager; // LoadingManager
+    let units = intent.units || "m"; // application units
     let options = intent.options;
 
     try
@@ -74,14 +77,18 @@ class IOManager
       }
       if (!format) throw "Can't determinate format";
 
-      let loader = this.createLoader(format);
+      let loader = this.createLoader(format, manager);
 
       if (!loader) throw "Unsupported format: " + format;
 
-      loader.options = options || {};
+      if (loader.options && options)
+      {
+        Object.assign(loader.options, options);
+      }
       if (data)
       {
-        this.parseData(loader, url, data, onCompleted, onProgress, onError);
+        this.parseData(loader, url, data, units,
+          onCompleted, onProgress, onError);
       }
       else
       {
@@ -99,7 +106,7 @@ class IOManager
               data = request.responseText;
               try
               {
-                this.parseData(loader, url, data,
+                this.parseData(loader, url, data, units,
                   onCompleted, onProgress, onError);
               }
               catch (exc)
@@ -164,9 +171,9 @@ class IOManager
 
       if (!exporter) throw "Unsupported format: " + format;
 
-      if (options)
+      if (exporter.options && options)
       {
-        exporter.options = options;
+        Object.assign(exporter.options, options);
       }
       return this.parseObject(exporter, object,
         onCompleted, onProgress, onError);
@@ -177,23 +184,30 @@ class IOManager
     }
   }
 
-  static parseData(loader, url, data, onCompleted, onProgress, onError)
+  static parseData(loader, url, data, units,
+    onCompleted, onProgress, onError)
   {
-    if (loader.loadMethod === 1)
+    const loadCompleted = (model) =>
+    {
+      ObjectUtils.scaleModel(model, units);
+      if (onCompleted) onCompleted(model);
+    };
+
+    if (loader.loadMethod === 1) // ColladaLoader
     {
       let path = THREE.LoaderUtils.extractUrlBase(url);
       let result = loader.parse(data, path);
-      if (onCompleted) onCompleted(result.scene);
+      loadCompleted(result.scene);
     }
-    else if (loader.loadMethod === 2)
+    else if (loader.loadMethod === 2) // IFCLoader
     {
-      loader.parse(data, onCompleted, onProgress, onError);
+      loader.parse(data, loadCompleted, onProgress, onError);
     }
-    else // general case
+    else // general case: BRFLoader, STLLoader, OBJLoader...
     {
       let result = loader.parse(data);
       let object = this.createObject(result);
-      if (onCompleted) onCompleted(object);
+      loadCompleted(object);
     }
   }
 
@@ -230,11 +244,11 @@ class IOManager
     else if (result instanceof THREE.Object3D)
     {
       let object = result;
-      object.traverse(function(o){ o.updateMatrix(); });
+      object.traverse(obj => obj.updateMatrix());
       return object;
     }
   }
-  
+
   static getSupportedLoaderExtensions()
   {
     const extensions = [];

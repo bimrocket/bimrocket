@@ -438,6 +438,34 @@ class ObjectUtils
     }
     return true;
   }
-}
 
-export { ObjectUtils };
+  static scaleModel(model, toUnits = "m", fromUnits)
+  {
+    fromUnits = fromUnits || model.userData.units;
+    if (fromUnits)
+    {
+      const METER_CONVERSION_FACTORS =
+      {
+        "km" : 0.001,
+        "m"  : 1,
+        "cm" : 100,
+        "mm" : 1000,
+        "in" : 39.3701
+      };
+
+      let factor1 = METER_CONVERSION_FACTORS[toUnits];
+      let factor2 = METER_CONVERSION_FACTORS[fromUnits];
+
+      if (factor1 !== undefined && factor2 !== undefined)
+      {
+        let scale = factor1 / factor2;
+        model.scale.set(scale, scale, scale);
+        model.updateMatrix();
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+export { ObjectUtils, };

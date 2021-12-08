@@ -19,9 +19,9 @@ import * as THREE from "../../lib/three.module.js";
 
 class GISLoader extends THREE.Loader
 {
-  constructor(mimeType)
+  constructor(manager, mimeType)
   {
-    super();
+    super(manager);
     this.options = {};
     this.mimeType = mimeType;
     this.origin = new THREE.Vector3();

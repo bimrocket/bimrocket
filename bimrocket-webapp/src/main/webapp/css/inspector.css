@@ -229,6 +229,11 @@ ul.inspector li.property.formula
   background-image: url(images/inspector/formula.svg);
 }
 
+ul.inspector li.property.texture
+{
+  background-image: url(images/inspector/texture.svg);
+}
+
 ul.inspector li.property.color > span.name
 {
   margin-right: 2px;

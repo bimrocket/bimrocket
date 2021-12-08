@@ -11,9 +11,9 @@ import * as THREE from "../../lib/three.module.js";
 
 class GeoJSONLoader extends GISLoader
 {
-  constructor()
+  constructor(manager)
   {
-    super("application/json");
+    super(manager, "application/json");
   }
 
   parse(data)

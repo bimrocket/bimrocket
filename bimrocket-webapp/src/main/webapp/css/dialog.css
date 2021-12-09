@@ -221,6 +221,34 @@
   color: #C00000;
 }
 
+.dialog div.console
+{
+  font-family: monospace;
+  font-size: 14px;
+  color: #404040;
+  border: 1px solid #C0C0C0;
+  border-radius: 2px;
+  padding: 2px 4px 2px 2px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.dialog div.console div.info
+{
+  color: #808080;
+}
+
+.dialog div.console div.warn
+{
+  color: #C0C000;
+}
+
+.dialog div.console div.error
+{
+  color: #C00000;
+}
+
 @keyframes fade_in_dialog
 {
   0% {opacity: 0; visibility: visible; }

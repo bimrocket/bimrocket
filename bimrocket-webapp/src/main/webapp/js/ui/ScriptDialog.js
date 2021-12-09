@@ -45,18 +45,23 @@ class ScriptDialog extends Dialog
     this.scriptCode = "";
     this.saved = true;
 
-    this.setSize(640, 540);
+    this.setSize(760, 650);
+
+    const editorHeight = 75;
+    const consoleHeight = 100 - editorHeight;
 
     this.nameField = this.addTextField("name", "tool.script.name", "",
       "script_name");
 
     this.editorView = this.addCodeEditor("editor",
       "label.formula.expression", "",
-      { "language" : "javascript", "height" : "calc(100% - 70px)" });
+      { "language" : "javascript",
+        "height" : "calc(" + editorHeight + "% - 38px)" });
 
-    this.resultElem = document.createElement("div");
-    this.resultElem.className = "";
-    this.bodyElem.appendChild(this.resultElem);
+    this.consoleElem = document.createElement("div");
+    this.consoleElem.className = "console";
+    this.consoleElem.style.height = consoleHeight + "%";
+    this.bodyElem.appendChild(this.consoleElem);
 
     this.runButton = this.addButton("run", "button.run", () =>
     {
@@ -67,7 +72,6 @@ class ScriptDialog extends Dialog
     this.saveButton = this.addButton("save", "button.save", () =>
     {
       this.endEdition();
-      this.hide();
       if (saveAction) saveAction(this.scriptName, this.scriptCode);
     });
 
@@ -100,34 +104,28 @@ class ScriptDialog extends Dialog
     {
       this.editorView.focus();
     }
-    this.resultElem.innerHTML = "";
+    this.consoleElem.innerHTML = "";
   }
 
   run(code)
   {
-    this.addGlobals();
+    this.enterConsole();
     try
     {
+      this.consoleElem.innerHTML = "";
       const fn = new Function(code);
-      const result = fn();
-      if (result === undefined)
-      {
-        this.hide();
-      }
-      else
-      {
-        this.resultElem.innerHTML = String(result);
-        this.resultElem.className = "";
-      }
+      let t0 = Date.now();
+      fn();
+      let t1 = Date.now();
+      this.log("info", "Execution completed in " + (t1 - t0) + " ms.");
     }
     catch (ex)
     {
-      this.resultElem.innerHTML = String(ex);
-      this.resultElem.className = "error";
+      this.log("error", ex);
     }
     finally
     {
-      this.removeGlobals();
+      this.exitConsole();
     }
   }
 
@@ -142,16 +140,38 @@ class ScriptDialog extends Dialog
     }
   };
 
-  addGlobals()
+  log(className, ...args)
   {
+    for (let arg of args)
+    {
+      let message = document.createElement("div");
+      message.className = className;
+      message.innerHTML = String(arg);
+      this.consoleElem.appendChild(message);
+    }
+  }
+
+  enterConsole()
+  {
+    this.console = console;
+
+    console = {
+      log : (...args) => this.log("info", args),
+      info : (...args) => this.log("info", args),
+      warn : (...args) => this.log("warn", args),
+      error : (...args) => this.log("error", args)
+    };
+
     for (let name in ScriptDialog.GLOBALS)
     {
       window[name] = ScriptDialog.GLOBALS[name];
     }
   }
 
-  removeGlobals()
+  exitConsole()
   {
+    console = this.console;
+
     for (let name in ScriptDialog.GLOBALS)
     {
       delete window[name];

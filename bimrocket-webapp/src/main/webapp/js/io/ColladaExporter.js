@@ -633,7 +633,7 @@ class ColladaExporter {
 				'</contributor>' +
 				`<created>${ ( new Date() ).toISOString() }</created>` +
 				`<modified>${ ( new Date() ).toISOString() }</modified>` +
-				'<up_axis>Y_UP</up_axis>'
+				'<up_axis>Z_UP</up_axis>'
 			) +
 			'</asset>';
 

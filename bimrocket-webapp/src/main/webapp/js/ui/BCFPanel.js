@@ -211,7 +211,12 @@ class BCFPanel extends Panel
     this.viewpointsPanelElem.appendChild(this.viewpointListElem);
 
     this.createViewpointButton = Controls.addButton(this.viewpointsPanelElem,
-      "createViewpoint", "button.create", () => this.createViewpoint());
+      "createViewpoint", "bim|button.screenshot",
+      () => this.createViewpoint());
+
+    this.createViewpointFromFileButton = Controls.addButton(
+      this.viewpointsPanelElem, "createViewpointFF", "bim|button.upload_image",
+      () => this.createViewpointFromFile());
 
     /* comments panel */
 
@@ -586,7 +591,7 @@ class BCFPanel extends Panel
       error => this.onError(error));
   }
 
-  createViewpoint()
+  createViewpoint(imageURL = null)
   {
     const application = this.application;
     const viewpoint = {};
@@ -638,24 +643,71 @@ class BCFPanel extends Panel
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    const canvas = this.application.renderer.domElement;
-    const imageSource = canvas.toDataURL("image/png");
-
-    let image = imageSource;
-    const index = image.indexOf(",");
-    if (index !== -1)
+    if (imageURL === null)
     {
-      image = image.substring(index + 1);
+      // capture image from canvas
+      const canvas = this.application.renderer.domElement;
+      imageURL = canvas.toDataURL("image/png");
     }
 
-    viewpoint.snapshot =
+    let format = null;
+
+    if (imageURL.startsWith("data:image/jpeg;base64,"))
     {
-      snapshot_type : "png",
-      snapshot_data : image
+      format = "jpeg";
+    }
+    else if (imageURL.startsWith("data:image/png;base64,"))
+    {
+      format = "png";
+    }
+    if (format)
+    {
+      const index = imageURL.indexOf(",");
+      let image = imageURL.substring(index + 1);
+
+      viewpoint.snapshot =
+      {
+        snapshot_type : format,
+        snapshot_data : image
+      };
+
+      this.service.createViewpoint(projectId, topicGuid, viewpoint,
+        onCompleted, error => this.onError(error));
+    }
+    else
+    {
+      this.onError("Unsupported image format");
+    }
+  }
+
+  createViewpointFromFile()
+  {
+    const onChange = () =>
+    {
+      let files = this.inputFile.files;
+      if (files.length > 0)
+      {
+        let file = files[0];
+        let reader = new FileReader();
+        reader.onload = () =>
+        {
+          let imageURL = reader.result;
+          this.createViewpoint(imageURL);
+        };
+        reader.readAsDataURL(file);
+      }
     };
 
-    this.service.createViewpoint(projectId, topicGuid, viewpoint,
-      onCompleted, error => this.onError(error));
+    let inputFile = document.createElement("input");
+    this.inputFile = inputFile;
+
+    inputFile.type = "file";
+    inputFile.id = this.name + "_file";
+
+    inputFile.accept = ".jpeg, .jpg, .png";
+    inputFile.addEventListener("change", onChange, false);
+
+    inputFile.click();
   }
 
   deleteViewpoint(viewpoint)

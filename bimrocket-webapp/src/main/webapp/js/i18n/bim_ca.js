@@ -8,6 +8,8 @@ export const translations =
 {
   "button.show_all" : "Mostra tot",
   "button.explore_selection" : "Explora selecció",
+  "button.screenshot" : "Captura pantalla",
+  "button.upload_image" : "Puja imatge",
 
   "tool.bim_inventory.label" : "Inventari BIM",
   "tool.bim_inventory.help" : "Inventari BIM",

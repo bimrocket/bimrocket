@@ -1162,6 +1162,8 @@ class Application
   cutObjects()
   {
     let cutObjects = this.selection.roots;
+    cutObjects = cutObjects.filter(
+      root => root !== this.scene && root.parent !== this.scene);
     this._cutObjects = cutObjects;
     if (cutObjects.length > 0)
     {

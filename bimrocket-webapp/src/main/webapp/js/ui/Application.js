@@ -361,6 +361,7 @@ class Application
 
     this.scene = new THREE.Scene();
     const scene = this.scene;
+    scene.userData.selection = { "type" : "none" };
     scene.name = "Scene";
 
     // Add lights

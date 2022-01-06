@@ -34,6 +34,7 @@ export const translations =
   "button.yes" : "Si",
   "button.no" : "No",
   "button.discard" : "Descarta",
+  "button.optimize" : "Optimitza",
 
   "units.km" : "kilometres",
   "units.m" : "metres",
@@ -224,6 +225,8 @@ export const translations =
   "tool.statistics.label" : "Estadístiques",
   "tool.statistics.help" : "Estadístiques",
 
+  "tool.inspect_geometry.help" : "Selecciona la geometria",
+
   "tool.about.label" : "Quant a",
 
   "label.language" : "Idioma:",
@@ -304,6 +307,11 @@ export const translations =
   "message.folder_created" : "Carpeta creada.",
   "message.file_deleted" : "Fitxer esborrat.",
   "message.folder_deleted" : "Carpeta esborrada.",
+
+  "message.object_name" : objectName => `Objecte: ${objectName}`,
+  "message.vertex_count" : vertexCount => `Vèrtexs: ${vertexCount}`,
+  "message.face_count" : faceCount => `Cares: ${faceCount}`,
+  "message.is_manifold" : manifold => `És varietat: ${manifold ? "si" : "no"}`,
 
   "question.discard_changes" : "Vols descartar els canvis no desats?",
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

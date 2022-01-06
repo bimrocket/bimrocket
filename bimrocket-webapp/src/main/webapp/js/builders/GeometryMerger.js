@@ -103,14 +103,16 @@ class GeometryMerger extends ObjectBuilder
 
       if (solid.facesVisible)
       {
+        const vertices = solid.geometry.vertices;
         for (let face of solid.geometry.faces)
         {
-          let vertexCount = face.getVertexCount();
-          for (let n = 2; n < vertexCount; n++)
+          let faceTriangles = face.getTriangles();
+          for (let t of faceTriangles)
           {
-            triangle[0].copy(face.getVertex(0)).applyMatrix4(matrix);
-            triangle[1].copy(face.getVertex(n - 1)).applyMatrix4(matrix);
-            triangle[2].copy(face.getVertex(n)).applyMatrix4(matrix);
+            for (let i = 0; i < 3; i++)
+            {
+              triangle[i].copy(vertices[t[i]]).applyMatrix4(matrix);
+            }
 
             GeometryUtils.calculateNormal(triangle, undefined, normal);
 

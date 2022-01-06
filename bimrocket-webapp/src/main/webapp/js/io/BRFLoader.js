@@ -9,6 +9,7 @@ import { Cord } from "../core/Cord.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
+import { SolidOptimizer } from "../core/SolidOptimizer.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Formula } from "../formula/Formula.js";
 import { Controller } from "../controllers/Controller.js";
@@ -59,7 +60,7 @@ class BRFLoader extends THREE.Loader
     for (let id in geometries)
     {
       let entry = geometries[id];
-      entry._geometry = this.parseGeometry(entry);
+      entry._geometry = this.parseGeometry(entry, model);
     }
 
     // parse materials
@@ -132,7 +133,7 @@ class BRFLoader extends THREE.Loader
     return root;
   }
 
-  parseGeometry(entry)
+  parseGeometry(entry, model)
   {
     let geometry = null;
 
@@ -146,11 +147,33 @@ class BRFLoader extends THREE.Loader
         let position = new THREE.Vector3(vertex.x, vertex.y, vertex.z);
         geometry.vertices.push(position);
       }
-      for (let face of entry.faces)
+      for (let loops of entry.faces)
       {
-        geometry.addFace(...face);
+        if (Array.isArray(loops))
+        {
+          var outerLoop = loops[0];
+          if (Array.isArray(outerLoop))
+          {
+            let face = geometry.addFace(...outerLoop);
+            for (let h = 1; h < loops.length; h++)
+            {
+              face.addHole(...loops[h]);
+            }
+          }
+          else
+          {
+            // no holes, loops is outerLoop
+            outerLoop = loops;
+            geometry.addFace(...outerLoop);
+          }
+        }
       }
       geometry.updateFaceNormals();
+      if (model.metadata.version < 2)
+      {
+        const optimizer = new SolidOptimizer(geometry);
+        geometry = optimizer.optimize();
+      }
     }
     else if (entry.type === "CordGeometry")
     {
@@ -300,7 +323,7 @@ class BRFLoader extends THREE.Loader
         let geometry = geometries[entry.geometry.id]._geometry;
         if (geometry instanceof SolidGeometry)
         {
-          object.updateGeometry(geometry, false);
+          object.updateGeometry(geometry);
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {

@@ -86,6 +86,7 @@ class CloudExplorerTool extends Tool
       onProgress : data => panel.setProgress(data.progress, data.message),
       onError : error =>
       {
+        console.error(error);
         panel.showButtonsPanel();
         MessageDialog.create("ERROR", error)
           .setClassName("error")

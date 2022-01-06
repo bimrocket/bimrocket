@@ -54,7 +54,8 @@ class ClipTool extends Tool
 
       let bspResult = bsp1.clip(bsp2);
 
-      var solid = new Solid(bspResult.toSolidGeometry());
+      let solid = new Solid();
+      solid.updateGeometry(bspResult.toSolidGeometry(), true);
 
       application.addObject(solid, null, false, true);
     }

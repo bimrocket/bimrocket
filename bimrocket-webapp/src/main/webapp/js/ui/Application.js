@@ -14,7 +14,7 @@ import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
 import { Cloner } from "../builders/Cloner.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
-import { SolidGeometry, EdgeMap } from "../core/SolidGeometry.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IOManager } from "../io/IOManager.js";
 import { Selection } from "../utils/Selection.js";
@@ -742,13 +742,12 @@ class Application
           linesGroup.add(lines);
         }
       }
-      else // show faces
+      else // show faces (triangles)
       {
         let geometry = solid.geometry;
         if (geometry)
         {
-          let edgeMap = new EdgeMap(geometry);
-          let edgesGeometry = edgeMap.getEdgesGeometry(0);
+          let edgesGeometry = geometry.getTrianglesGeometry();
 
           let lines = new THREE.LineSegments(edgesGeometry, material);
           lines.name = "SelectionLines";

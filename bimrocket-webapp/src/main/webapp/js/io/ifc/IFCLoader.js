@@ -644,7 +644,7 @@ class IfcProductHelper extends IfcHelper
             // set IFCVoider no representation
             if (reprObject3D instanceof Solid)
             {
-              let voider = new Solid(reprObject3D.geometry);
+              let voider = new Solid();
               voider.name = IFC.RepresentationName;
               voider.material = reprObject3D.material;
               voider.userData = reprObject3D.userData;
@@ -871,71 +871,78 @@ class IfcPolygonalBoundedHalfSpaceHelper
 
       if (surface instanceof schema.IfcPlane)
       {
-        const size = halfSpace._loader.options.halfSpaceSize /
-          halfSpace._loader.modelFactor;
-        const extruder = new Extruder(size);
-
-        // polygon solid
-        const curvePoints = boundary.helper.getPoints();
-        let shape = new THREE.Shape();
-        shape.moveTo(curvePoints[0].x, curvePoints[0].y);
-        for (let i = 1; i < curvePoints.length; i++)
+        try
         {
-          shape.lineTo(curvePoints[i].x, curvePoints[i].y);
+          const size = halfSpace._loader.options.halfSpaceSize /
+            halfSpace._loader.modelFactor;
+          const extruder = new Extruder(size);
+
+          // polygon solid
+          const curvePoints = boundary.helper.getPoints();
+          let shape = new THREE.Shape();
+          shape.moveTo(curvePoints[0].x, curvePoints[0].y);
+          for (let i = 1; i < curvePoints.length; i++)
+          {
+            shape.lineTo(curvePoints[i].x, curvePoints[i].y);
+          }
+          shape.closePath();
+
+          const polygonProfile = new Profile(new ProfileGeometry(shape));
+          polygonProfile.name = "polygon";
+          polygonProfile.visible = false;
+          polygonProfile._ifc = boundary;
+          const polygonSolid = new Solid();
+          polygonSolid.add(polygonProfile);
+          polygonSolid.builder = extruder;
+
+          let matrix = base.helper.getMatrix();
+          matrix.decompose(polygonSolid.position, polygonSolid.rotation,
+            polygonSolid.scale);
+          polygonSolid.updateMatrix();
+
+          // plane solid
+          const plane = surface.Position;
+
+          shape = new THREE.Shape();
+          shape.moveTo(-size, -size);
+          shape.lineTo(size, -size);
+          shape.lineTo(size, size);
+          shape.lineTo(-size, size);
+          shape.closePath();
+
+          let planeProfile = new Profile(new ProfileGeometry(shape));
+          planeProfile.name = "plane";
+          planeProfile.visible = false;
+          let planeSolid = new Solid();
+          planeSolid.add(planeProfile);
+          planeSolid.builder = extruder;
+
+          matrix = plane.helper.getMatrix();
+          if (!flag)
+          {
+            matrix = matrix.clone();
+            let rotMatrix = new THREE.Matrix4();
+            rotMatrix.makeRotationX(Math.PI);
+            matrix.multiply(rotMatrix);
+          }
+          matrix.decompose(planeSolid.position, planeSolid.rotation,
+            planeSolid.scale);
+          planeSolid.updateMatrix();
+
+          let halfSpaceSolid = new Solid();
+          halfSpaceSolid.name = "polygonalHalfSpace";
+          halfSpaceSolid.add(polygonSolid);
+          halfSpaceSolid.add(planeSolid);
+          halfSpaceSolid.builder = new BooleanOperator(BooleanOperator.SUBTRACT);
+          ObjectBuilder.build(halfSpaceSolid);
+
+          this.object3D = halfSpaceSolid;
+          this.object3D._ifc = halfSpace;
         }
-        shape.closePath();
-
-        const polygonProfile = new Profile(new ProfileGeometry(shape));
-        polygonProfile.name = "polygon";
-        polygonProfile.visible = false;
-        polygonProfile._ifc = boundary;
-        const polygonSolid = new Solid();
-        polygonSolid.add(polygonProfile);
-        polygonSolid.builder = extruder;
-
-        let matrix = base.helper.getMatrix();
-        matrix.decompose(polygonSolid.position, polygonSolid.rotation,
-          polygonSolid.scale);
-        polygonSolid.updateMatrix();
-
-        // plane solid
-        const plane = surface.Position;
-
-        shape = new THREE.Shape();
-        shape.moveTo(-size, -size);
-        shape.lineTo(size, -size);
-        shape.lineTo(size, size);
-        shape.lineTo(-size, size);
-        shape.closePath();
-
-        let planeProfile = new Profile(new ProfileGeometry(shape));
-        planeProfile.name = "plane";
-        planeProfile.visible = false;
-        let planeSolid = new Solid();
-        planeSolid.add(planeProfile);
-        planeSolid.builder = extruder;
-
-        matrix = plane.helper.getMatrix();
-        if (!flag)
+        catch (ex)
         {
-          matrix = matrix.clone();
-          let rotMatrix = new THREE.Matrix4();
-          rotMatrix.makeRotationX(Math.PI);
-          matrix.multiply(rotMatrix);
+          console.warn(ex);
         }
-        matrix.decompose(planeSolid.position, planeSolid.rotation,
-          planeSolid.scale);
-        planeSolid.updateMatrix();
-
-        let halfSpaceSolid = new Solid();
-        halfSpaceSolid.name = "polygonalHalfSpace";
-        halfSpaceSolid.add(polygonSolid);
-        halfSpaceSolid.add(planeSolid);
-        halfSpaceSolid.builder = new BooleanOperator(BooleanOperator.SUBTRACT);
-        ObjectBuilder.build(halfSpaceSolid);
-
-        this.object3D = halfSpaceSolid;
-        this.object3D._ifc = halfSpace;
       }
     }
     return this.object3D;
@@ -1046,7 +1053,9 @@ class IfcTriangulatedFaceSetHelper extends IfcGeometricRepresentationItemHelper
         let c = triangle[2] - 1;
         geometry.addFace(a, b, c);
       }
-      this.object3D = new Solid(geometry);
+      let solid = new Solid();
+      solid.updateGeometry(geometry, true);
+      this.object3D = solid;
       this.object3D._ifc = faceSet;
     }
     return this.object3D;
@@ -1078,16 +1087,13 @@ class IfcPolygonalFaceSetHelper extends IfcGeometricRepresentationItemHelper
         let face = faces[f];
         let coordIndex = face.CoordIndex;
 
-        let faceVertices = [];
         let faceIndices = [];
-        let faceHoles = [];
-
         for (let i = 0; i < coordIndex.length; i++)
         {
-          let vertexIndex = coordIndex[i] - 1;
-          faceVertices.push(geometry.vertices[vertexIndex]);
+          let vertexIndex = coordIndex[i] - 1;  // 1-base index
           faceIndices.push(vertexIndex);
         }
+        let geomFace = geometry.addFace(...faceIndices);
 
         let innerCoordIndices = face.InnerCoordIndices;
         if (innerCoordIndices)
@@ -1095,27 +1101,14 @@ class IfcPolygonalFaceSetHelper extends IfcGeometricRepresentationItemHelper
           for (let h = 0; h < innerCoordIndices.length; h++)
           {
             let hole = innerCoordIndices[h];
-            let holeVertices = [];
+            let holeIndices = [];
             for (let hv = 0; hv < hole.length; hv++)
             {
-              let vertexIndex = hole[hv] - 1;
-              holeVertices.push(geometry.vertices[vertexIndex]);
-              faceIndices.push(vertexIndex);
+              let vertexIndex = hole[hv] - 1; // 1-base index
+              holeIndices.push(vertexIndex);
             }
-            faceHoles.push(holeVertices);
+            geomFace.addHole(...holeIndices);
           }
-        }
-
-        let triangles = GeometryUtils.triangulateFace(faceVertices,
-          faceHoles);
-
-        for (let t = 0; t < triangles.length; t++)
-        {
-          let triangle = triangles[t];
-          let a = faceIndices[triangle[0]];
-          let b = faceIndices[triangle[1]];
-          let c = faceIndices[triangle[2]];
-          geometry.addFace(a, b, c);
         }
       }
       this.object3D = new Solid(geometry);
@@ -1151,24 +1144,31 @@ class IfcExtrudedAreaSolidHelper extends IfcGeometricRepresentationItemHelper
         let profile = profileDef.helper.getProfile();
         if (profile)
         {
-          if (profile.parent)
+          try
           {
-            profile = profile.clone();
+            if (profile.parent)
+            {
+              profile = profile.clone();
+            }
+            profile._ifc = profileDef;
+
+            let solid = new Solid();
+            solid.add(profile);
+            solid.builder = new Extruder(depth, direction);
+            ObjectBuilder.build(solid);
+            solid._ifc = solid;
+
+            if (matrix)
+            {
+              matrix.decompose(solid.position, solid.quaternion, solid.scale);
+              solid.updateMatrix();
+            }
+            this.object3D = solid;
           }
-
-          profile._ifc = profileDef;
-          let solid = new Solid();
-          solid.add(profile);
-          solid.builder = new Extruder(depth, direction);
-          ObjectBuilder.build(solid);
-          solid._ifc = solid;
-
-          if (matrix)
+          catch (ex)
           {
-            matrix.decompose(solid.position, solid.quaternion, solid.scale);
-            solid.updateMatrix();
+            console.warn(ex);
           }
-          this.object3D = solid;
         }
         else console.warn("Unsupported profile", profileDef);
       }
@@ -2197,10 +2197,6 @@ class IfcConnectedFaceSetHelper extends IfcHelper
 
       let faces = faceSet.CfsFaces;
 
-      let numVertices = 0;
-      let vertices = [];
-      let indices = [];
-
       let geometry = new SolidGeometry();
 
       for (let f = 0; f < faces.length; f++)
@@ -2232,30 +2228,19 @@ class IfcConnectedFaceSetHelper extends IfcHelper
           }
         }
 
-        if (faceVertices && faceVertices.length > 0)
+        if (faceVertices && faceVertices.length >= 3)
         {
-          vertices.push(...faceVertices);
-          for (let h = 0; h < holes.length; h++)
+          let face = geometry.addFace(...faceVertices);
+          for (let holeVertices of holes)
           {
-            vertices.push(...holes[h]);
+            if (holeVertices.length >= 3)
+            face.addHole(...holeVertices);
           }
-
-          let triangles = GeometryUtils.triangulateFace(faceVertices, holes);
-
-          geometry.vertices = vertices;
-
-          for (let t = 0; t < triangles.length; t++)
-          {
-            let triangle = triangles[t];
-            let a = numVertices + triangle[0];
-            let b = numVertices + triangle[1];
-            let c = numVertices + triangle[2];
-            geometry.addFace(a, b, c);
-          }
-          numVertices = vertices.length;
         }
       }
-      this.object3D = new Solid(geometry);
+      let solid = new Solid();
+      solid.updateGeometry(geometry, true);
+      this.object3D = solid;
       this.object3D._ifc = faceSet;
     }
     return this.object3D;

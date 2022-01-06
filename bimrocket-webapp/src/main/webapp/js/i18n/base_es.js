@@ -34,6 +34,7 @@ export const translations =
   "button.yes" : "Si",
   "button.no" : "No",
   "button.discard" : "Descartar",
+  "button.optimize" : "Optimizar",
 
   "units.km" : "kilometros",
   "units.m" : "metros",
@@ -224,6 +225,8 @@ export const translations =
   "tool.statistics.label" : "Estadísticas",
   "tool.statistics.help" : "Estadísticas",
 
+  "tool.inspect_geometry.help" : "Selecciona la geometría",
+
   "tool.about.label" : "Acerca de ",
 
   "label.language" : "Idioma:",
@@ -304,6 +307,11 @@ export const translations =
   "message.folder_created" : "Carpeta creada.",
   "message.file_deleted" : "Fichero borrado.",
   "message.folder_deleted" : "Carpeta borrada.",
+
+  "message.object_name" : objectName => `Objeto: ${objectName}`,
+  "message.vertex_count" : vertexCount => `Vértices: ${vertexCount}`,
+  "message.face_count" : faceCount => `Caras: ${faceCount}`,
+  "message.is_manifold" : manifold => `Es variedad: ${manifold ? "si" : "no"}`,
 
   "question.discard_changes" : "Descartar los cambios no guardados?",
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

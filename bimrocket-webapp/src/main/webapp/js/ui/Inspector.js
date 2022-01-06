@@ -24,7 +24,7 @@ import * as THREE from "../lib/three.module.js";
 class Inspector extends Panel
 {
   static mainMaterialProperties = ["uuid", "type", "name", "color", "specular",
-    "emissive", "shininess", "opacity", "transparent",
+    "emissive", "shininess", "opacity", "transparent", "side",
     "emissiveIntensity", "fog", "depthTest", "depthWrite",
     "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
     "sizeAttenuation", "map"];

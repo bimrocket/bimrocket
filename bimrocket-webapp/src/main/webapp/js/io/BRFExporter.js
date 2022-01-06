@@ -15,7 +15,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 1;
+  static VERSION = 2;
 
   constructor()
   {
@@ -174,7 +174,19 @@ class BRFExporter
         entry.isManifold = geometry.isManifold;
         for (let face of geometry.faces)
         {
-          entry.faces.push(face.indices);
+          if (face.holes.length === 0)
+          {
+            entry.faces.push(face.indices);
+          }
+          else
+          {
+            let loops = [face.indices];
+            for (let hole of face.holes)
+            {
+              loops.push(hole.indices);
+            }
+            entry.faces.push(loops);
+          };
         }
       }
       else if (geometry instanceof ProfileGeometry)

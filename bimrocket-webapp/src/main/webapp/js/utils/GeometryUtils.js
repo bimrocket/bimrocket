@@ -16,26 +16,22 @@ class GeometryUtils
   static _vector5 = new THREE.Vector3;
   static _plane1 = new THREE.Plane;
 
-  static pointOnLine(point, line)
+  static isPointOnSegment(pointToCheck, pointA, pointB, distance = 0.0001)
   {
-    var v1 = GeometryUtils._vector1;
-    var v2 = GeometryUtils._vector2;
-    v1.copy(point).sub(line.start);
-    v2.copy(line.end).sub(line.start);
-    var v1LengthSq = v1.lengthSq();
-    var v2LengthSq = v2.lengthSq();
-    if (v1LengthSq <= v2LengthSq)
-    {
-      var v2Length = Math.sqrt(v2LengthSq);
-      v2.divideScalar(v2Length); // v2 is unitary now
-      var projection = v1.dot(v2);
-      if (projection >= 0 && projection <= v2Length)
-      {
-        var distance = Math.sqrt(v1LengthSq - projection * projection);
-        return distance < GeometryUtils.PRECISION;
-      }
-    }
-    return false;
+    const vAB = GeometryUtils._vector1;
+    const vAP = GeometryUtils._vector2;
+
+    vAB.subVectors(pointB, pointA);
+    vAP.subVectors(pointToCheck, pointA);
+
+    const lengthAB = vAB.length();
+    const lengthAP = vAP.length();
+    vAB.normalize();
+
+    const proj = vAP.dot(vAB);
+    if (proj < 0 || proj > lengthAB) return false;
+
+    return lengthAP * lengthAP - proj * proj < distance * distance;
   }
 
   static linesIntersect(line1, line2, position)
@@ -70,7 +66,7 @@ class GeometryUtils
     return false;
   }
 
-  static calculateNormal(vertexPositions, accessor, normal)
+  static calculateNormal(vertexPositions, accessFn, normal)
   {
     if (!(normal instanceof THREE.Vector3)) normal = new THREE.Vector3();
     else normal.set(0, 0, 0);
@@ -81,10 +77,10 @@ class GeometryUtils
     for (let i = 0; i < count; i++)
     {
       let j = (i + 1) % count;
-      if (accessor)
+      if (accessFn)
       {
-        pi = vertexPositions[i][accessor];
-        pj = vertexPositions[j][accessor];
+        pi = accessFn(vertexPositions[i]);
+        pj = accessFn(vertexPositions[j]);
       }
       else
       {
@@ -100,44 +96,48 @@ class GeometryUtils
   }
 
   /* triangulate a 3D face */
-  static triangulateFace(vertices, holes)
+  static triangulateFace(vertices, holes, normal)
   {
     const vx = GeometryUtils._vector1;
     const vy = GeometryUtils._vector2;
     const vz = GeometryUtils._vector3;
 
-    GeometryUtils.calculateNormal(vertices, null, vz);
-    var v0 = vertices[0];
-    var v1 = vertices[1];
+    if (normal instanceof THREE.Vector3)
+    {
+      vz.copy(normal);
+    }
+    else
+    {
+      GeometryUtils.calculateNormal(vertices, undefined, vz);
+    }
+    const v0 = vertices[0];
+    const v1 = vertices[1];
     vx.subVectors(v1, v0).normalize();
     vy.crossVectors(vz, vx);
 
-    var base = new THREE.Matrix4();
-    base.set(vx.x, vy.x, vz.x, v0.x,
+    const matrix = new THREE.Matrix4();
+    matrix.set(vx.x, vy.x, vz.x, v0.x,
              vx.y, vy.y, vz.y, v0.y,
              vx.z, vy.z, vz.z, v0.z,
-             0, 0, 0, 1);
+             0, 0, 0, 1).invert();
 
-    var m = new THREE.Matrix4();
-    m.copy(base).invert();
-
-    var projectVertices = function(vertices)
+    const projectVertices = (vertices) =>
     {
-      var projectedVertices = [];
-      for (var i = 0; i < vertices.length; i++)
+      let projectedVertices = [];
+      for (let vertex of vertices)
       {
-        var point = new THREE.Vector3();
-        point.copy(vertices[i]);
-        projectedVertices.push(point.applyMatrix4(m));
+        let point = new THREE.Vector3();
+        point.copy(vertex);
+        projectedVertices.push(point.applyMatrix4(matrix));
       }
       return projectedVertices;
     };
 
-    var projectedVertices = projectVertices(vertices);
-    var projectedHoles = [];
-    for (var i = 0; i < holes.length; i++)
+    let projectedVertices = projectVertices(vertices);
+    let projectedHoles = [];
+    for (let hole of holes)
     {
-      projectedHoles.push(projectVertices(holes[i]));
+      projectedHoles.push(projectVertices(hole));
     }
 
     return THREE.ShapeUtils.triangulateShape(projectedVertices, projectedHoles);

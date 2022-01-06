@@ -681,3 +681,53 @@ div.script_code
   margin-right: 4px;
   width: 60px;
 }
+
+.inspect_geometry ul.tree .selected
+{
+  background-color: #FFA0A0;
+  color: black;
+}
+
+
+.inspect_geometry ul.tree li.face
+{
+  background-image: url(images/geometry/loop.svg);
+}
+
+.inspect_geometry ul.tree li.face.holes
+{
+  background-image: url(images/geometry/face.svg);
+}
+
+.inspect_geometry ul.tree li.loop
+{
+  background-image: url(images/geometry/loop.svg);
+}
+
+.inspect_geometry ul.tree li.hole
+{
+  background-image: url(images/geometry/hole.svg);
+}
+
+.inspect_geometry ul.tree li.vertex
+{
+  background-image: url(images/geometry/vertex.svg);
+}
+
+.inspect_geometry ul.tree li.normal
+{
+  background-image: url(images/geometry/normal.svg);
+}
+
+.inspect_geometry ul.summary
+{
+  text-align: left;
+  padding-left: 4px;
+  margin-bottom: 0;
+}
+
+.inspect_geometry ul.summary li
+{
+  text-align: left;
+  list-style-type: none;
+}

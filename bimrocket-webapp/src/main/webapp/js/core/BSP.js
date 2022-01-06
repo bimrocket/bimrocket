@@ -20,23 +20,46 @@ class BSP
 
   fromSolidGeometry(geometry, matrix)
   {
+    let vertices = geometry.vertices;
     let faces = geometry.faces;
-    for (let f = 0; f < faces.length; f++)
+    for (let face of faces)
     {
-      let face = faces[f];
-      let vertexCount = face.getVertexCount();
-      let polygon = new Polygon();
-      for (let n = 0; n < vertexCount; n++)
+      if (face.holes.length === 0 && face.isConvex())
       {
-        let vertex = face.getVertex(n).clone();
-        if (matrix)
+        // convex polygon without holes, direct copy
+        let polygon = new Polygon();
+        for (let v of face.indices)
         {
-          vertex.applyMatrix4(matrix);
+          let vertex = vertices[v].clone();
+          if (matrix)
+          {
+            vertex.applyMatrix4(matrix);
+          }
+          polygon.vertices.push(vertex);
         }
-        polygon.vertices.push(vertex);
+        polygon.updateNormal();
+        this.addPolygon(polygon);
       }
-      polygon.updateNormal();
-      this.addPolygon(polygon);
+      else
+      {
+        // take triangulation for other cases
+        let triangles = face.getTriangles();
+        for (let triangle of triangles)
+        {
+          let polygon = new Polygon();
+          for (let n = 0; n < 3; n++)
+          {
+            let vertex = vertices[triangle[n]].clone();
+            if (matrix)
+            {
+              vertex.applyMatrix4(matrix);
+            }
+            polygon.vertices.push(vertex);
+          }
+          polygon.updateNormal();
+          this.addPolygon(polygon);
+        }
+      }
     }
   }
 
@@ -44,15 +67,11 @@ class BSP
   {
     let polygons = this.getPolygons();
     let geometry = new SolidGeometry();
-    for (let i = 0; i < polygons.length; i++)
+    for (let polygon of polygons)
     {
-      let polygon = polygons[i];
-      let vertices = polygon.vertices;
-      let face = geometry.addFace();
-      for (let n = 0; n < vertices.length; n++)
-      {
-        face.addVertex(vertices[n].clone());
-      }
+      let vertices = polygon.vertices.map(vertex => vertex.clone());
+      let face = geometry.addFace(...vertices);
+
       if (polygon.normal)
       {
         face.normal = polygon.normal.clone();
@@ -145,6 +164,8 @@ class BSP
    */
   invert()
   {
+    if (this.plane === null) return this;
+
     for (let i = 0; i < this.coplanarPolygons.length; i++)
     {
       this.coplanarPolygons[i].flip();
@@ -236,7 +257,7 @@ class BSP
    */
   subtract(bsp)
   {
-    // substract = a - b = ~(~(a & ~b)) = ~(~a | b)
+    // subtract = a - b = ~(~(a & ~b)) = ~(~a | b)
 
     let a = this;
     let b = bsp;

@@ -20,7 +20,7 @@ class IFCVoider extends SolidBuilder
 
   traverseDependencies(productRepr, action)
   {
-    if (!(productRepr instanceof Solid) 
+    if (!(productRepr instanceof Solid)
         || productRepr.children.length < 3) return;
 
     action(productRepr.parent);
@@ -84,7 +84,7 @@ class IFCVoider extends SolidBuilder
     }
     if (openingReprs.length === 0)
     {
-      productRepr.updateGeometry(unvoidedRepr.geometry, false);
+      productRepr.updateGeometry(unvoidedRepr.geometry);
       return true;
     }
 
@@ -110,7 +110,7 @@ class IFCVoider extends SolidBuilder
     inverseMatrixWorld.copy(productRepr.matrixWorld).invert();
     geometry.applyMatrix4(inverseMatrixWorld);
 
-    productRepr.updateGeometry(geometry);
+    productRepr.updateGeometry(geometry, true);
 
     return true;
   }

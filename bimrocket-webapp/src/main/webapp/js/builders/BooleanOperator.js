@@ -67,7 +67,7 @@ class BooleanOperator extends SolidBuilder
     }
     let geometry = resultBSP.toSolidGeometry();
 
-    solid.updateGeometry(geometry);
+    solid.updateGeometry(geometry, true);
 
     return true;
   }

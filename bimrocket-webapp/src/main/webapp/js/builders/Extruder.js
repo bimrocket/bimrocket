@@ -17,6 +17,7 @@ class Extruder extends SolidBuilder
 {
   depth = 1;
   direction = new THREE.Vector3(0, 0, 1);
+  minPointDistance = 0.0001;
 
   constructor(depth, direction)
   {
@@ -43,22 +44,44 @@ class Extruder extends SolidBuilder
 
     const points = shape.extractPoints(profile.geometry.divisions);
     let outerRing = points.shape;
-    const innerRings = points.holes;
+    let innerRings = points.holes;
 
     // prepare shape, orient rings and remove duplicated vertices
 
-    const removeDuplicatedVertex = ring =>
+    const removeDuplicatedVertices = ring =>
     {
-      const first = ring[0];
-      const last = ring[ring.length - 1];
-      if (first.equals(last))
+      let i = 0;
+      for (let j = 1; j < ring.length; j++)
+      {
+        let point1 = ring[i];
+        let point2 = ring[j];
+        if (point1.distanceTo(point2) >= this.minPointDistance)
+        {
+          i++;
+          ring[i] = point2;
+        }
+      }
+      while (i < ring.length - 1)
+      {
+        ring.pop();
+      }
+
+      if (ring.length >= 2 &&
+          ring[0].distanceTo(ring[ring.length - 1]) < this.minPointDistance)
       {
         ring.pop();
       }
     };
 
-    removeDuplicatedVertex(outerRing);
-    innerRings.forEach(removeDuplicatedVertex);
+    removeDuplicatedVertices(outerRing);
+
+    if (outerRing.length < 3)
+    {
+      throw "Can't extrude an invalid profile";
+    }
+
+    innerRings.forEach(removeDuplicatedVertices);
+    innerRings = innerRings.filter(innerRing => innerRing.length >= 3);
 
     if (THREE.ShapeUtils.isClockWise(outerRing))
     {
@@ -89,7 +112,7 @@ class Extruder extends SolidBuilder
       array.push(cordPoints[0]);
       for (let i = 1; i < cordPoints.length; i++)
       {
-        if (cordPoints[i - 1].distanceTo(cordPoints[i]) > 0.0001)
+        if (cordPoints[i - 1].distanceTo(cordPoints[i]) >= this.minPointDistance)
         {
           array.push(cordPoints[i].clone());
         }
@@ -120,9 +143,6 @@ class Extruder extends SolidBuilder
       cordPoints.push(new THREE.Vector3(0, 0, 0));
       cordPoints.push(new THREE.Vector3(0, 0, extrudeVector.z));
     }
-
-    // triangulate shape
-    const triangles = THREE.ShapeUtils.triangulateShape(outerRing, innerRings);
 
     const p1 = new THREE.Vector3();
     const p2 = new THREE.Vector3();
@@ -203,13 +223,23 @@ class Extruder extends SolidBuilder
     }
 
     // add bottom face (vertices1)
-    for (let t = 0; t < triangles.length; t++)
+    let offset = 0;
+    let indices = [];
+    for (let i = 0; i < outerRing.length; i++)
     {
-      let triangle = triangles[t];
-      let a = triangle[0];
-      let b = triangle[1];
-      let c = triangle[2];
-      geometry.addFace(c, b, a); // reverse face
+      indices.push(offset++);
+    }
+    indices.reverse();
+    let bottomFace = geometry.addFace(...indices);
+    for (let innerRing of innerRings)
+    {
+      indices = [];
+      for (let i = 0; i < innerRing.length; i++)
+      {
+        indices.push(offset++);
+      }
+      indices.reverse();
+      bottomFace.addHole(...indices);
     }
 
     let stepVertexCount = geometry.vertices.length;
@@ -231,7 +261,7 @@ class Extruder extends SolidBuilder
         let vertex = new THREE.Vector3();
         vertex = ray.intersectPlane(plane, vertex);
         if (vertex === null)
-          throw "Can't extrude this shape for the given directrix";
+          throw "Can't extrude this profile for the given directrix";
         geometry.vertices.push(vertex);
       }
 
@@ -271,14 +301,21 @@ class Extruder extends SolidBuilder
       offset2 += stepVertexCount;
     }
 
-    // add top face (vertices2)
-    for (let t = 0; t < triangles.length; t++)
+    indices = [];
+    offset = offset1;
+    for (let i = 0; i < outerRing.length; i++)
     {
-      let triangle = triangles[t];
-      let a = triangle[0];
-      let b = triangle[1];
-      let c = triangle[2];
-      geometry.addFace(offset1 + a, offset1 + b, offset1 + c);
+      indices.push(offset++);
+    }
+    let topFace = geometry.addFace(...indices);
+    for (let innerRing of innerRings)
+    {
+      indices = [];
+      for (let i = 0; i < innerRing.length; i++)
+      {
+        indices.push(offset++);
+      }
+      topFace.addHole(...indices);
     }
 
     if (extrudeVector)
@@ -301,7 +338,9 @@ class Extruder extends SolidBuilder
       geometry.applyMatrix4(shearMatrix);
     }
 
-    solid.updateGeometry(geometry, true);
+    geometry.isManifold = true;
+
+    solid.updateGeometry(geometry);
 
     return true;
   }

@@ -4,8 +4,9 @@
  * @author realor
  */
 
-import { SolidGeometry, EdgeMap } from "./SolidGeometry.js";
 import { BSP } from "./BSP.js";
+import { SolidGeometry } from "./SolidGeometry.js";
+import { SolidOptimizer } from "./SolidOptimizer.js";
 import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -16,7 +17,7 @@ class Solid extends THREE.Object3D
   static FaceMaterial = new THREE.MeshPhongMaterial({
     name: 'SolidFaceMaterial',
     color: 0xc0c0c0,
-    side: THREE.FrontSide,
+    side: THREE.DoubleSide,
     shininess: 1,
     flatShading: false});
   static EdgeMaterial = new THREE.LineBasicMaterial({
@@ -251,15 +252,15 @@ class Solid extends THREE.Object3D
       const triangle = new THREE.Triangle();
       const matrixWorld = this.matrixWorld;
 
-      for (let f = 0; f < geometry.faces.length; f++)
+      const vertices = geometry.vertices;
+      for (let face of geometry.faces)
       {
-        let face = geometry.faces[f];
-        let vertexCount = face.getVertexCount();
-        for (let n = 2; n < vertexCount; n++)
+        let triangles = face.getTriangles();
+        for (let tri of triangles)
         {
-          let vertex0 = face.getVertex(0);
-          let vertex1 = face.getVertex(n - 1);
-          let vertex2 = face.getVertex(n);
+          let vertex0 = vertices[tri[0]];
+          let vertex1 = vertices[tri[1]];
+          let vertex2 = vertices[tri[2]];
 
           triangle.a.copy(vertex0).applyMatrix4(matrixWorld);
           triangle.b.copy(vertex1).applyMatrix4(matrixWorld);
@@ -282,15 +283,15 @@ class Solid extends THREE.Object3D
       const vertex1 = new THREE.Vector3();
       const vertex2 = new THREE.Vector3();
 
-      for (let f = 0; f < geometry.faces.length; f++)
+      const vertices = geometry.vertices;
+      for (let face of geometry.faces)
       {
-        let face = geometry.faces[f];
-        let vertexCount = face.getVertexCount();
-        for (let n = 2; n < vertexCount; n++)
+        let triangles = face.getTriangles();
+        for (let tri of triangles)
         {
-          vertex0.copy(face.getVertex(0)).applyMatrix4(matrixWorld);
-          vertex1.copy(face.getVertex(n - 1)).applyMatrix4(matrixWorld);
-          vertex2.copy(face.getVertex(n)).applyMatrix4(matrixWorld);
+          vertex0.copy(vertices[tri[0]]).applyMatrix4(matrixWorld);
+          vertex1.copy(vertices[tri[1]]).applyMatrix4(matrixWorld);
+          vertex2.copy(vertices[tri[2]]).applyMatrix4(matrixWorld);
 
           volume += vertex0.dot(vertex1.cross(vertex2)) / 6.0;
         }
@@ -299,7 +300,7 @@ class Solid extends THREE.Object3D
     return volume;
   }
 
-  updateGeometry(geometry, fix = true, debug = false)
+  updateGeometry(geometry, optimize = false)
   {
     this._facesObject.geometry.dispose();
     this._edgesObject.geometry.dispose();
@@ -315,105 +316,15 @@ class Solid extends THREE.Object3D
       solidGeometry.copy(geometry);
     }
 
-    let edgeMap;
-    if (fix)
+    if (optimize)
     {
-      edgeMap = solidGeometry.fixEdges(debug);
-    }
-    else
-    {
-      edgeMap = new EdgeMap(solidGeometry);
+      let optimizer = new SolidOptimizer(solidGeometry);
+      solidGeometry = optimizer.optimize();
     }
 
     solidGeometry.updateBuffers();
     this._facesObject.geometry = solidGeometry;
-
-    let edgesGeometry = edgeMap.getEdgesGeometry(5); // 5 degres;
-    this._edgesObject.geometry = edgesGeometry;
-  }
-
-  fixGeometry(application)
-  {
-    let edgeMap = this.geometry.fixEdges(true);
-    let vertices = this.geometry.vertices;
-
-    const edgeVertices = [];
-    const faceVertices = [];
-
-    for (let key in edgeMap.map)
-    {
-      let edge = edgeMap.map[key];
-
-      let roundVertex = function(v)
-      {
-        return "[" + Math.round(100000 * v.x) / 100000 + ", " +
-                     Math.round(100000 * v.y) / 100000 + ", " +
-                     Math.round(100000 * v.z) / 100000 + "]";
-      };
-
-      if (edge.face2 === undefined)
-      {
-        let vertex1 = vertices[edge.index1];
-        let vertex2 = vertices[edge.index2];
-
-        console.info("bad egde", edge.index1, edge.index2,
-          roundVertex(vertex1), roundVertex(vertex2),
-          vertex2.clone().sub(vertex1).length());
-
-        edgeVertices.push(vertex1.x, vertex1.y, vertex1.z);
-        edgeVertices.push(vertex2.x, vertex2.y, vertex2.z);
-
-        let face = edge.face1;
-        console.info("bad face", face.indices);
-        let vertexCount = face.getVertexCount();
-        for (let n = 2; n < vertexCount; n++)
-        {
-          let vertex0 = face.getVertex(0);
-          faceVertices.push(vertex0);
-
-          let vertex1 = face.getVertex(n - 1);
-          faceVertices.push(vertex1);
-
-          let vertex2 = face.getVertex(n);
-          faceVertices.push(vertex2);
-        }
-      }
-    }
-    console.info("faceVertices", faceVertices);
-    console.info("edgeVertices", edgeVertices);
-
-    if (faceVertices.length > 0)
-    {
-      const facesGeometry = new THREE.BufferGeometry();
-      facesGeometry.setFromPoints(faceVertices);
-
-      const errorFaceMaterial = new THREE.MeshPhongMaterial({
-        name : "ErrorFaceMaterial",
-        color: 0xFFFF00, shininess: 1,
-        flatShading: true,
-        side: THREE.DoubleSide});
-
-      const errorMesh = new THREE.Mesh(facesGeometry, errorFaceMaterial);
-      errorMesh.name = "ErrorFaces";
-      application.addObject(errorMesh, this.parent);
-    }
-
-    if (edgeVertices.length > 0)
-    {
-      const edgesGeometry = new THREE.BufferGeometry();
-      edgesGeometry.setAttribute('position',
-        new THREE.Float32BufferAttribute(edgeVertices, 3));
-
-      const errorEdgeMaterial = new THREE.LineBasicMaterial(
-      {name: 'ErrorEdgeMaterial', color: 0xff0000, linewidth: 3,
-        depthTest: false, depthWrite: false});
-
-      let errorLines = new THREE.LineSegments(edgesGeometry, errorEdgeMaterial);
-      errorLines.raycast = function(){};
-      errorLines.name = "ErrorLines";
-
-      application.addObject(errorLines, this.parent);
-    }
+    this._edgesObject.geometry = solidGeometry.getEdgesGeometry();
   }
 }
 

@@ -38,7 +38,7 @@ class MakeSolidTool extends Tool
     else if (object instanceof Solid)
     {
       application.selection.clear();
-      object.updateGeometry(object.geometry);
+      object.updateGeometry(object.geometry, true);
       application.selection.set(object);
     }
   }

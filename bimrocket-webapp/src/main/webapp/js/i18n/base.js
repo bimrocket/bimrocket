@@ -34,6 +34,7 @@ export const translations =
   "button.yes" : "Yes",
   "button.no" : "No",
   "button.discard" : "Discard",
+  "button.optimize" : "Optimize",
 
   "units.km" : "kilometers",
   "units.m" : "meters",
@@ -224,6 +225,8 @@ export const translations =
   "tool.statistics.label" : "Statistics",
   "tool.statistics.help" : "Statistics",
 
+  "tool.inspect_geometry.help" : "Select geometry to inspect",
+
   "tool.about.label" : "About",
 
   "label.language" : "Language:",
@@ -304,6 +307,11 @@ export const translations =
   "message.folder_created" : "Folder created.",
   "message.file_deleted" : "File deleted.",
   "message.folder_deleted" : "Folder deleted.",
+
+  "message.object_name" : objectName => `Object: ${objectName}`,
+  "message.vertex_count" : vertexCount => `Vertices: ${vertexCount}`,
+  "message.face_count" : faceCount => `Faces: ${faceCount}`,
+  "message.is_manifold" : manifold => `Is manifold: ${manifold ? "yes" : "no"}`,
 
   "question.discard_changes" : "Discard unsaved changes?",
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

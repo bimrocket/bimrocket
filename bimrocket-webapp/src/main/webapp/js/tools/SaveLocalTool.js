@@ -39,7 +39,7 @@ class SaveLocalTool extends Tool
   {
   }
 
-  onSave(name, format, onlySelection)
+  onSave(name, formatName, onlySelection)
   {
     const application = this.application;
     if (this.url)

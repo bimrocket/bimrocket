@@ -23,23 +23,29 @@ class SaveDialog extends Dialog
     }
     this.nameElem = this.addTextField("saveEntryName", "label.name", name);
 
-    let formatInfo = IOManager.getFormatInfo(name);
-    let format = formatInfo && formatInfo.exporterClass ?
-      formatInfo.extension : SaveDialog.DEFAULT_EXPORT_FORMAT;
-    this.setExtension(format);
+    let formatName = IOManager.getFormat(name);
+    let formatInfo = IOManager.formats[formatName];
+
+    if (!(formatInfo && formatInfo.exporterClass))
+    {
+      formatName = SaveDialog.DEFAULT_EXPORT_FORMAT;
+      formatInfo = IOManager.formats[formatName];
+    }
+    let extension = formatInfo.extensions[0];
+    this.setExtension(extension);
 
     let options = [];
     for (let formatName in IOManager.formats)
     {
-      let format = IOManager.formats[formatName];
-      if (format.exporterClass)
+      let formatInfo = IOManager.formats[formatName];
+      if (formatInfo.exporterClass)
       {
-        options.push([formatName, format.description]);
+        options.push([formatName, formatInfo.description]);
       }
     }
 
     this.formatSelect = this.addSelectField("saveFormat", "label.format",
-      options, format);
+      options, formatName);
     this.formatSelect.addEventListener("change",
       event => this.setExtension(this.formatSelect.value));
 

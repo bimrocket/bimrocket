@@ -11,33 +11,39 @@ class IOManager
 {
   static formats = {};
 
-  static getFormat(name)
+  static getFormat(fileName)
   {
-    let format = null;
-    if (typeof name === "string")
+    let extension = null;
+    if (typeof fileName === "string")
     {
-      let index = name.lastIndexOf(".");
+      let index = fileName.lastIndexOf(".");
       if (index !== -1)
       {
-        format = name.substring(index + 1).toLowerCase();
+        extension = fileName.substring(index + 1).toLowerCase();
       }
     }
-    return format;
+    if (extension === null) return null;
+    for (let formatName in this.formats)
+    {
+      let formatInfo = this.formats[formatName];
+      if (formatInfo.extensions.indexOf(extension) !== -1) return formatName;
+    }
+    return null;
   }
 
-  static getFormatInfo(name)
+  static getFormatInfo(fileName)
   {
-    let format = this.getFormat(name);
-    let formatInfo = format ?
-      IOManager.formats[format] :
-      IOManager.formats[name];
+    let formatName = this.getFormat(fileName);
+    let formatInfo = formatName ?
+      IOManager.formats[formatName] :
+      IOManager.formats[fileName];
     return formatInfo || null;
   }
 
-  static createLoader(format, manager)
+  static createLoader(formatName, manager)
   {
     let loader = null;
-    let formatInfo = this.formats[format];
+    let formatInfo = this.formats[formatName];
     if (formatInfo && formatInfo.loaderClass)
     {
       loader = new formatInfo.loaderClass(manager);
@@ -46,10 +52,10 @@ class IOManager
     return loader;
   }
 
-  static createExporter(format)
+  static createExporter(formatName)
   {
     let exporter = null;
-    let formatInfo = this.formats[format];
+    let formatInfo = this.formats[formatName];
     if (formatInfo && formatInfo.exporterClass)
     {
       exporter = new formatInfo.exporterClass();
@@ -59,7 +65,7 @@ class IOManager
 
   static load(intent)
   {
-    let format = intent.format;
+    let formatName = intent.format;
     let url = intent.url;
     let data = intent.data;
     let onCompleted = intent.onCompleted; // onCompleted(object3D)
@@ -71,15 +77,15 @@ class IOManager
 
     try
     {
-      if (!format && url)
+      if (!formatName && url)
       {
-        format = this.getFormat(url);
+        formatName = this.getFormat(url);
       }
-      if (!format) throw "Can't determinate format";
+      if (!formatName) throw "Can't determinate format";
 
-      let loader = this.createLoader(format, manager);
+      let loader = this.createLoader(formatName, manager);
 
-      if (!loader) throw "Unsupported format: " + format;
+      if (!loader) throw "Unsupported format: " + formatName;
 
       if (loader.options && options)
       {
@@ -150,8 +156,8 @@ class IOManager
 
   static export(intent)
   {
-    let format = intent.format;
-    let name = intent.name;
+    let formatName = intent.format;
+    let fileName = intent.name;
     let onCompleted = intent.onCompleted;
     let onProgress = intent.onProgress;
     let onError = intent.onError;
@@ -160,16 +166,16 @@ class IOManager
 
     try
     {
-      if (!format && name)
+      if (!formatName && fileName)
       {
-        format = this.getFormat(name);
+        formatName = this.getFormat(fileName);
       }
 
-      if (!format) throw "Can't determinate format";
+      if (!formatName) throw "Can't determinate format";
 
-      let exporter = this.createExporter(format);
+      let exporter = this.createExporter(formatName);
 
-      if (!exporter) throw "Unsupported format: " + format;
+      if (!exporter) throw "Unsupported format: " + formatName;
 
       if (exporter.options && options)
       {
@@ -255,8 +261,8 @@ class IOManager
     const formats = IOManager.formats;
     for (let formatName in formats)
     {
-      let format = formats[formatName];
-      extensions.push(format.extension);
+      let formatInfo = formats[formatName];
+      extensions.push(...formatInfo.extensions);
     }
     return extensions;
   }

@@ -82,7 +82,7 @@ export function load(application)
   IOManager.formats["brf"] =
   {
     description : "BIMROCKET (*.brf)",
-    extension: "brf",
+    extensions: ["brf"],
     loaderClass : BRFLoader,
     exporterClass : BRFExporter,
     options : {}
@@ -91,7 +91,7 @@ export function load(application)
   IOManager.formats["dae"] =
   {
     description: "Collada (*.dae)",
-    extension: "dae",
+    extensions: ["dae"],
     loaderClass : ColladaLoader,
     exporterClass : ColladaExporter,
     loadMethod : 1,
@@ -101,7 +101,7 @@ export function load(application)
   IOManager.formats["obj"] =
   {
     description: "Wavefront object (*.obj)",
-    extension: "obj",
+    extensions: ["obj"],
     loaderClass : OBJLoader,
     exporterClass : OBJExporter,
     options : {}
@@ -110,7 +110,7 @@ export function load(application)
   IOManager.formats["stl"] =
   {
     description : "Stereolithography (*.stl)",
-    extension: "stl",
+    extensions: ["stl"],
     loaderClass : STLLoader,
     exporterClass : STLExporter,
     options : {}

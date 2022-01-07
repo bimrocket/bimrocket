@@ -21,7 +21,7 @@ export function load(application)
   IOManager.formats["ifc"] =
   {
     description : "Industry foundation classes STEP (*.ifc)",
-    extension: "ifc",
+    extensions: ["ifc"],
     loaderClass: IFCSTEPLoader,
     loadMethod : 2,
     options : {}

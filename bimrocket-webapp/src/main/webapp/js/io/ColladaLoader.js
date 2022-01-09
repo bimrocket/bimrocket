@@ -205,7 +205,7 @@ class ColladaLoader extends Loader {
 
 		function parseAssetUpAxis( xml ) {
 
-			return xml !== undefined ? xml.textContent : 'Z_UP';
+			return xml !== undefined ? xml.textContent : 'Y_UP';
 
 		}
 
@@ -1276,7 +1276,7 @@ class ColladaLoader extends Loader {
 						break;
 					case 'transparent':
 						data[ child.nodeName ] = {
-							opaque: child.getAttribute( 'opaque' ),
+							opaque: child.hasAttribute( 'opaque' ) ? child.getAttribute( 'opaque' ) : 'A_ONE',
 							data: parseEffectParameter( child )
 						};
 						break;
@@ -1737,7 +1737,6 @@ class ColladaLoader extends Loader {
 							material.opacity = color[ 0 ] * transparency.float;
 							break;
 						default:
-							material.opacity = 1 - transparency.float;
 							console.warn( 'THREE.ColladaLoader: Invalid opaque type "%s" of transparent tag.', transparent.opaque );
 
 					}

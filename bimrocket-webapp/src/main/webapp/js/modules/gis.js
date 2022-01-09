@@ -18,6 +18,7 @@ export function load(application)
     description : "GeoJSON (*.geojson)",
     extensions: ["geojson"],
     loaderClass : GeoJSONLoader,
+    dataType : "text",
     options : {}
   };
 
@@ -27,6 +28,7 @@ export function load(application)
     extensions: ["grd", "asc"],
     loaderClass : ASCIIGridLoader,
     loadMethod: 2,
+    dataType : "text",
     options : {}
   };
 

@@ -24,6 +24,7 @@ export function load(application)
     extensions: ["ifc"],
     loaderClass: IFCSTEPLoader,
     loadMethod : 2,
+    dataType : "text",
     options : {}
   };
 

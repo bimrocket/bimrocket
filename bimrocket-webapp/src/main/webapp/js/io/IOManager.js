@@ -83,6 +83,8 @@ class IOManager
       }
       if (!formatName) throw "Can't determinate format";
 
+      let formatInfo = IOManager.formats[formatName];
+
       let loader = this.createLoader(formatName, manager);
 
       if (!loader) throw "Unsupported format: " + formatName;
@@ -109,7 +111,14 @@ class IOManager
             if (request.status === 0 ||
               request.status === 200 || request.status === 207)
             {
-              data = request.responseText;
+              if (formatInfo.dataType === "arraybuffer")
+              {
+                data = request.response.arrayBuffer();
+              }
+              else
+              {
+                data = request.responseText;
+              }
               try
               {
                 this.parseData(loader, url, data, units,

@@ -85,6 +85,7 @@ export function load(application)
     extensions: ["brf"],
     loaderClass : BRFLoader,
     exporterClass : BRFExporter,
+    dataType : "text",
     options : {}
   };
 
@@ -95,6 +96,7 @@ export function load(application)
     loaderClass : ColladaLoader,
     exporterClass : ColladaExporter,
     loadMethod : 1,
+    dataType : "text",
     options : {}
   };
 
@@ -104,6 +106,7 @@ export function load(application)
     extensions: ["obj"],
     loaderClass : OBJLoader,
     exporterClass : OBJExporter,
+    dataType : "text",
     options : {}
   };
 
@@ -113,6 +116,7 @@ export function load(application)
     extensions: ["stl"],
     loaderClass : STLLoader,
     exporterClass : STLExporter,
+    dataType : "arraybuffer",
     options : {}
   };
 

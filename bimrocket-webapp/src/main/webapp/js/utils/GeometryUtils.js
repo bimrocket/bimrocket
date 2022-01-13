@@ -16,22 +16,45 @@ class GeometryUtils
   static _vector5 = new THREE.Vector3;
   static _plane1 = new THREE.Plane;
 
-  static isPointOnSegment(pointToCheck, pointA, pointB, distance = 0.0001)
+  static isPointOnSegment(point, pointA, pointB, distance = 0.0001)
   {
-    const vAB = GeometryUtils._vector1;
-    const vAP = GeometryUtils._vector2;
+    const projectedPoint = this._vector1;
+
+    if (this.projectPointOnSegment(point, pointA, pointB, projectedPoint))
+    {
+      return projectedPoint.distanceToSquared(point) < distance * distance;
+    }
+    return false;
+  }
+
+  static projectPointOnSegment(point, pointA, pointB, projectedPoint)
+  {
+    const vAB = this._vector2;
+    const vAP = this._vector3;
+    const vProjAB = this._vector4;
 
     vAB.subVectors(pointB, pointA);
-    vAP.subVectors(pointToCheck, pointA);
+    vAP.subVectors(point, pointA);
 
-    const lengthAB = vAB.length();
-    const lengthAP = vAP.length();
-    vAB.normalize();
+    const denominator = vAB.lengthSq();
 
-    const proj = vAP.dot(vAB);
-    if (proj < 0 || proj > lengthAB) return false;
+    if (denominator === 0) return null;
 
-    return lengthAP * lengthAP - proj * proj < distance * distance;
+		const scalar = vAB.dot(vAP) / denominator;
+
+    if (scalar >= 0 && scalar <= 1)
+    {
+		  vProjAB.copy(vAB).multiplyScalar(scalar);
+
+      if (!(projectedPoint instanceof THREE.Vector3))
+      {
+        projectedPoint = new THREE.Vector3();
+      }
+      projectedPoint.copy(pointA).add(vProjAB);
+
+      return projectedPoint;
+    }
+    return null;
   }
 
   static linesIntersect(line1, line2, position)

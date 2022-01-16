@@ -389,7 +389,7 @@ class Application
     scene.add(sunLight2);
 
     // initial camera
-    var camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -100, 100);
+    var camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
     camera.position.set(0, -30, 2);
     camera.name = "Orthographic";
     camera.updateProjectionMatrix();

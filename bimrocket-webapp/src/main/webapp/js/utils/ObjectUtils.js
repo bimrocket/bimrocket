@@ -138,35 +138,35 @@ class ObjectUtils
 
     let boxWidth = box.max.x - box.min.x;
     let boxHeight = box.max.y - box.min.y;
+    let boxDepth = box.max.z - box.min.z;
 
+    let offset;
     if (camera instanceof THREE.PerspectiveCamera)
     {
-      let boxDepth = box.max.z - box.min.z;
-
       let ymax = camera.near * Math.tan(THREE.Math.degToRad(camera.fov * 0.5));
   		let xmax = ymax * camera.aspect;
 
       let yoffset = boxHeight * camera.near / (2 * ymax);
       let xoffset = boxWidth * camera.near / (2 * xmax);
 
-      let offset = Math.max(xoffset, yoffset) + 0.5 * boxDepth;
-
-      let v = new THREE.Vector3();
-      v.x = matrix.elements[8];
-      v.y = matrix.elements[9];
-      v.z = matrix.elements[10];
-      v.normalize(); // view vector (zaxis) in parent CS
-
-      v.multiplyScalar(offset);
-      center.add(v);
+      offset = Math.max(xoffset, yoffset) + 0.5 * boxDepth;
     }
     else // Ortho camera
     {
-      camera.left = -0.5 * boxWidth;
-      camera.right = 0.5 * boxWidth;
-      camera.top = 0.5 * boxHeight;
-      camera.bottom = -0.5 * boxHeight;
+      let factor = 0.5 * 1.1; // 10% extra space
+      camera.left = -factor * boxWidth;
+      camera.right = factor * boxWidth;
+      camera.top = factor * boxHeight;
+      camera.bottom = -factor * boxHeight;
+
+      offset = camera.far - boxDepth;
     }
+    let v = new THREE.Vector3();
+    v.setFromMatrixColumn(matrix, 2); // view vector (zaxis) in parent CS
+    v.normalize();
+    v.multiplyScalar(offset);
+    center.add(v);
+
     camera.zoom = 1;
     camera.position.copy(center);
     camera.updateMatrix();

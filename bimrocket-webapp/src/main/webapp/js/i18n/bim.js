@@ -25,7 +25,7 @@ export const translations =
 
   "tab.comments" : "Comments",
   "tab.viewpoints" : "Viewpoints",
-  "tab.links" : "Links",
+  "tab.doc_refs" : "Documents",
   "tab.audit" : "Audit",
 
   "tab.types" : "Types",
@@ -52,6 +52,8 @@ export const translations =
   "label.project_extensions" : "Project extensions:",
   "label.comment" : "Comment:",
   "label.zoom_image" : "Zoom image",
+  "label.doc_ref_url" : "Document url:",
+  "label.doc_ref_description" : "Description:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -62,6 +64,7 @@ export const translations =
   "title.delete_viewpoint" : "Delete viewpoint",
   "title.delete_bcf_service" : "Delete BCF service",
   "title.viewpoint" : "Topic viewpoint",
+  "title.delete_doc_ref" : "Delete document reference",
 
   "message.no_bim_object_selected" : "No BIM object selected.",
 
@@ -75,9 +78,12 @@ export const translations =
   "message.viewpoint_deleted" : "Viewpoint deleted.",
   "message.project_saved" : "Project saved.",
   "message.project_extensions_saved" : "Project extensions saved.",
+  "message.doc_ref_deleted" : "Document reference deleted.",
+  "message.doc_ref_saved" : "Document reference saved.",
 
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",
   "question.delete_viewpoint" : "Do you want to delete this viewpoint?",
+  "question.delete_doc_ref" : "Do you want to delete this document reference?",
   "question.delete_bcf_service" : name => `Do you want to delete the ${name} service?`
 };

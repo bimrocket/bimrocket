@@ -25,7 +25,7 @@ export const translations =
 
   "tab.comments" : "Comentaris",
   "tab.viewpoints" : "Vistes",
-  "tab.links" : "Enllaços",
+  "tab.doc_refs" : "Documents",
   "tab.audit" : "Auditoria",
 
   "tab.types" : "Tipus",
@@ -52,6 +52,8 @@ export const translations =
   "label.project_extensions" : "Extensions del projecte:",
   "label.comment" : "Comentari:",
   "label.zoom_image" : "Amplia imatge",
+  "label.doc_ref_url" : "Url del document:",
+  "label.doc_ref_description" : "Descripció:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
@@ -62,6 +64,7 @@ export const translations =
   "title.delete_viewpoint" : "Esborra punt de vista",
   "title.delete_bcf_service" : "Esborra servei BCF",
   "title.viewpoint" : "Vista de la incidència",
+  "title.delete_doc_ref" : "Esborra referència a document",
 
   "message.no_bim_object_selected" : "Cap objecte BIM seleccionat.",
 
@@ -75,9 +78,12 @@ export const translations =
   "message.viewpoint_deleted" : "Punt de vista esborrat.",
   "message.project_saved" : "Projecte desat.",
   "message.project_extensions_saved" : "Extensions desades.",
+  "message.doc_ref_deleted" : "Referència a document esborrada.",
+  "message.doc_ref_saved" : "Referència a document desada.",
 
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
   "question.delete_comment" : "Vols esborrar aquest comentari?",
   "question.delete_viewpoint" : "Vols esborrar aquest punt de vista?",
+  "question.delete_doc_ref" : "Vols esborrar aquesta referència a document?",
   "question.delete_bcf_service" : name => `Vols esborrar el servei ${name}?`
 };

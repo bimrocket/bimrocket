@@ -197,6 +197,31 @@ ul.bcf_list li
   display:block;
 }
 
+.bcf_tabs .bcf_list span.icon
+{
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-right: 2px;
+}
+
+.bcf_tabs .bcf_list span.icon.viewpoint
+{
+  background-image: url(images/bcf/viewpoint.svg);
+}
+
+.bcf_tabs .bcf_list span.icon.comment
+{
+  background-image: url(images/bcf/comment.svg);
+}
+
+.bcf_tabs .bcf_list span.icon.doc_ref
+{
+  background-image: url(images/bcf/document.svg);
+}
+
 .bcf_tabs .viewpoint_snapshot img
 {
   width: 100%;

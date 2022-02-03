@@ -31,10 +31,12 @@ class BCFPanel extends Panel
     this.topics = null;
     this.extensions = null;
     this.index = -1;
-    this.commentGuid = null;
-    this.comments = null;
     this.viewpointGuid = null;
     this.viewpoints = null;
+    this.commentGuid = null;
+    this.comments = null;
+    this.docRefs = null;
+    this.docRefGuid = null;
 
     // search panel
     this.searchPanelElem = document.createElement("div");
@@ -231,10 +233,26 @@ class BCFPanel extends Panel
       "comment", "bim|label.comment");
     this.saveCommentButton = Controls.addButton(this.commentsPanelElem,
       "saveComment", "button.save", () => this.saveComment());
+    this.cancelCommentButton = Controls.addButton(this.commentsPanelElem,
+      "cancelComment", "button.cancel", () => this.cancelComment());
 
-    /* links panel */
+    /* document reference panel */
 
-    this.linksPanelElem = this.tabbedPane.addTab("links", "bim|tab.links");
+    this.docRefsPanelElem =
+      this.tabbedPane.addTab("documents", "bim|tab.doc_refs");
+
+    this.docRefListElem = document.createElement("ul");
+    this.docRefListElem.classList = "bcf_list";
+    this.docRefsPanelElem.appendChild(this.docRefListElem);
+
+    this.docRefUrlElem = Controls.addTextAreaField(this.docRefsPanelElem,
+      "docRefUrl", "bim|label.doc_ref_url");
+    this.docRefDescElem = Controls.addTextAreaField(this.docRefsPanelElem,
+      "docRefDesc", "bim|label.doc_ref_description");
+    this.saveDocRefButton = Controls.addButton(this.docRefsPanelElem,
+      "saveDocRef", "button.save", () => this.saveDocumentReference());
+    this.cancelDocRefButton = Controls.addButton(this.docRefsPanelElem,
+      "cancelDocRef", "button.cancel", () => this.cancelDocumentReference());
 
     /* audit panel */
 
@@ -375,8 +393,9 @@ class BCFPanel extends Panel
       Controls.setSelectValue(this.stageElem, null);
       Controls.setSelectValue(this.assignedToElem, null);
 
-      this.commentListElem.innerHTML = "";
       this.viewpointListElem.innerHTML = "";
+      this.commentListElem.innerHTML = "";
+      this.docRefListElem.innerHTML = "";
     }
 
     if (topic)
@@ -385,7 +404,8 @@ class BCFPanel extends Panel
       if (index !== -1)
       {
         this.loadComments();
-        this.loadViewpoints(true);
+        this.loadViewpoints();
+        this.loadDocumentReferences();
       }
     }
     else
@@ -394,6 +414,9 @@ class BCFPanel extends Panel
     }
     this.commentGuid = null;
     this.commentElem.value = null;
+    this.docRefGuid = null;
+    this.docRefUrlElem.value = null;
+    this.docRefDescElem.value = null;
   }
 
   showPreviousTopic()
@@ -493,83 +516,6 @@ class BCFPanel extends Panel
       this.service.deleteTopic(projectId, topicGuid, onCompleted,
         error => this.onError(error));
     }
-  }
-
-  loadComments(scrollBottom)
-  {
-    const onCompleted = comments =>
-    {
-      this.comments = comments;
-      console.info(comments);
-      this.populateCommentList();
-      if (scrollBottom)
-      {
-        this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
-      }
-    };
-    let projectId = this.getProjectId();
-    let topicGuid = this.guidElem.value;
-
-    this.service.getComments(projectId, topicGuid, onCompleted,
-      error => this.onError(error));
-  }
-
-  saveComment()
-  {
-    const application = this.application;
-    let projectId = this.getProjectId();
-    let topicGuid = this.guidElem.value;
-    let comment =
-    {
-      "comment" : this.commentElem.value
-    };
-
-    const onCompleted = comment =>
-    {
-      this.commentElem.value = null;
-      console.info(comment);
-      this.commentGuid = null;
-      this.loadComments(true);
-      Toast.create("bim|message.comment_saved")
-        .setI18N(application.i18n).show();
-    };
-
-    if (this.commentGuid) // update
-    {
-      this.service.updateComment(projectId, topicGuid, this.commentGuid,
-        comment, onCompleted, error => this.onError(error));
-    }
-    else // creation
-    {
-      this.service.createComment(projectId, topicGuid, comment,
-        onCompleted, error => this.onError(error));
-    }
-  }
-
-  deleteComment(comment)
-  {
-    const application = this.application;
-    const onCompleted = () =>
-    {
-      this.loadComments();
-      Toast.create("bim|message.comment_deleted")
-        .setI18N(application.i18n).show();
-    };
-
-    let projectId = this.getProjectId();
-    let topicGuid = this.guidElem.value;
-    if (topicGuid)
-    {
-      this.service.deleteComment(projectId, topicGuid, comment.guid,
-        onCompleted, error => this.onError(error));
-    }
-  }
-
-  editComment(comment)
-  {
-    this.commentGuid = comment.guid;
-    this.commentElem.value = comment.comment;
-    this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
   }
 
   loadViewpoints(focusOnFirst)
@@ -726,6 +672,178 @@ class BCFPanel extends Panel
     if (topicGuid)
     {
       this.service.deleteViewpoint(projectId, topicGuid, viewpoint.guid,
+        onCompleted, error => this.onError(error));
+    }
+  }
+
+  loadComments(scrollBottom)
+  {
+    const onCompleted = comments =>
+    {
+      this.comments = comments;
+      console.info(comments);
+      this.populateCommentList();
+      if (scrollBottom)
+      {
+        this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+      }
+    };
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+
+    this.service.getComments(projectId, topicGuid, onCompleted,
+      error => this.onError(error));
+  }
+
+  saveComment()
+  {
+    const application = this.application;
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+    let comment =
+    {
+      "comment" : this.commentElem.value
+    };
+
+    const onCompleted = comment =>
+    {
+      this.commentElem.value = null;
+      console.info(comment);
+      this.commentGuid = null;
+      this.loadComments(true);
+      Toast.create("bim|message.comment_saved")
+        .setI18N(application.i18n).show();
+    };
+
+    if (this.commentGuid) // update
+    {
+      this.service.updateComment(projectId, topicGuid, this.commentGuid,
+        comment, onCompleted, error => this.onError(error));
+    }
+    else // creation
+    {
+      this.service.createComment(projectId, topicGuid, comment,
+        onCompleted, error => this.onError(error));
+    }
+  }
+
+  deleteComment(comment)
+  {
+    const application = this.application;
+    const onCompleted = () =>
+    {
+      this.loadComments();
+      Toast.create("bim|message.comment_deleted")
+        .setI18N(application.i18n).show();
+    };
+
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+    if (topicGuid)
+    {
+      this.service.deleteComment(projectId, topicGuid, comment.guid,
+        onCompleted, error => this.onError(error));
+    }
+  }
+
+  editComment(comment)
+  {
+    this.commentGuid = comment.guid;
+    this.commentElem.value = comment.comment;
+    this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+  }
+
+  cancelComment()
+  {
+    this.commentGuid = null;
+    this.commentElem.value = null;
+    this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+  }
+
+  loadDocumentReferences(scrollBottom)
+  {
+    const onCompleted = docRefs =>
+    {
+      this.docRefs = docRefs;
+      console.info(docRefs);
+      this.populateDocumentReferenceList();
+      if (scrollBottom)
+      {
+        this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+      }
+    };
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+
+    this.service.getDocumentReferences(projectId, topicGuid, onCompleted,
+      error => this.onError(error));
+  }
+
+  saveDocumentReference()
+  {
+    const application = this.application;
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+    let docRef =
+    {
+      "url" : this.docRefUrlElem.value,
+      "description" : this.docRefDescElem.value
+    };
+
+    const onCompleted = docRef =>
+    {
+      this.docRefUrlElem.value = null;
+      this.docRefDescElem.value = null;
+      console.info(docRef);
+      this.docRefGuid = null;
+      this.loadDocumentReferences(true);
+      Toast.create("bim|message.doc_ref_saved")
+        .setI18N(application.i18n).show();
+    };
+
+    if (this.docRefGuid) // update
+    {
+      this.service.updateDocumentReference(projectId, topicGuid,
+        this.docRefGuid, docRef, onCompleted, error => this.onError(error));
+    }
+    else // creation
+    {
+      this.service.createDocumentReference(projectId, topicGuid, docRef,
+        onCompleted, error => this.onError(error));
+    }
+  }
+
+  editDocumentReference(docRef)
+  {
+    this.docRefGuid = docRef.guid;
+    this.docRefUrlElem.value = docRef.url;
+    this.docRefDescElem.value = docRef.description;
+    this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+  }
+
+  cancelDocumentReference()
+  {
+    this.docRefGuid = null;
+    this.docRefUrlElem.value = null;
+    this.docRefDescElem.value = null;
+    this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
+  }
+
+  deleteDocumentReference(docRef)
+  {
+    const application = this.application;
+    const onCompleted = () =>
+    {
+      this.loadDocumentReferences();
+      Toast.create("bim|message.doc_ref_deleted")
+        .setI18N(application.i18n).show();
+    };
+
+    let projectId = this.getProjectId();
+    let topicGuid = this.guidElem.value;
+    if (topicGuid)
+    {
+      this.service.deleteDocumentReference(projectId, topicGuid, docRef.guid,
         onCompleted, error => this.onError(error));
     }
   }
@@ -950,6 +1068,10 @@ class BCFPanel extends Panel
       let itemListHeaderElem = document.createElement("div");
       itemListElem.appendChild(itemListHeaderElem);
 
+      let spanElem = document.createElement("span");
+      spanElem.className = "icon comment";
+      itemListHeaderElem.appendChild(spanElem);
+
       let authorDate = comment.author || "anonymous";
       if (comment.date)
       {
@@ -977,6 +1099,43 @@ class BCFPanel extends Panel
     }
   }
 
+  populateDocumentReferenceList()
+  {
+    const docRefs = this.docRefs;
+    const docRefsElem = this.docRefListElem;
+    docRefsElem.innerHTML = "";
+    for (let docRef of docRefs)
+    {
+      let itemListElem = document.createElement("li");
+
+      let spanElem = document.createElement("span");
+      spanElem.className = "icon doc_ref";
+      itemListElem.appendChild(spanElem);
+
+      let linkElem = document.createElement("a");
+      linkElem.href = docRef.url;
+      linkElem.target = "_blank";
+      linkElem.innerHTML = docRef.description;
+      itemListElem.appendChild(linkElem);
+
+      Controls.addButton(itemListElem, "updateDocRef", "button.edit",
+         () => this.editDocumentReference(docRef),
+        "bcf_edit_doc_ref");
+      Controls.addButton(itemListElem, "deleteDocRef", "button.delete",
+         () =>
+         {
+           ConfirmDialog.create("bim|title.delete_doc_ref",
+             "bim|question.delete_doc_ref")
+             .setAction(() => this.deleteDocumentReference(docRef))
+             .setAcceptLabel("button.delete")
+             .setI18N(this.application.i18n).show();
+         }, "bcf_delete_doc_ref");
+
+      this.application.i18n.updateTree(itemListElem);
+      docRefsElem.appendChild(itemListElem);
+    }
+  }
+
   populateViewpointList()
   {
     let projectId = this.getProjectId();
@@ -988,6 +1147,11 @@ class BCFPanel extends Panel
     for (let viewpoint of viewpoints)
     {
       let itemListElem = document.createElement("li");
+
+      let spanElem = document.createElement("span");
+      spanElem.className = "icon viewpoint";
+      itemListElem.appendChild(spanElem);
+
       let vpType = "";
       if (viewpoint.perspective_camera)
       {

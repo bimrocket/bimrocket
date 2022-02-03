@@ -105,6 +105,35 @@ class BCFService extends Service
       null, onCompleted, onError);
   }
 
+  getViewpoints(projectId, topicGuid, onCompleted, onError)
+  {
+    this.invoke("GET",
+      "projects/" + projectId +
+      "/topics/" + topicGuid + "/viewpoints", null, onCompleted, onError);
+  }
+
+  getViewpoint(projectId, topicGuid, viewpointGuid, onCompleted, onError)
+  {
+    this.invoke("GET",
+      "projects/" + projectId +
+      "/topics/" + topicGuid + "/viewpoints/" + viewpointGuid, null,
+      onCompleted, onError);
+  }
+
+  createViewpoint(projectId, topicGuid, viewpoint, onCompleted, onError)
+  {
+    this.invoke("POST",
+      "projects/" + projectId + "/topics/" + topicGuid +
+      "/viewpoints", viewpoint, onCompleted, onError);
+  }
+
+  deleteViewpoint(projectId, topicGuid, viewpointGuid, onCompleted, onError)
+  {
+    this.invoke("DELETE",
+      "projects/" + projectId + "/topics/" + topicGuid +
+      "/viewpoints/" + viewpointGuid, null, onCompleted, onError);
+  }
+
   getComments(projectId, topicGuid, onCompleted, onError)
   {
     this.invoke("GET", "projects/" + projectId + "/topics/" +
@@ -139,33 +168,34 @@ class BCFService extends Service
       "/comments/" + commentGuid, null, onCompleted, onError);
   }
 
-  getViewpoints(projectId, topicGuid, onCompleted, onError)
+  getDocumentReferences(projectId, topicGuid, onCompleted, onError)
   {
     this.invoke("GET",
-      "projects/" + projectId +
-      "/topics/" + topicGuid + "/viewpoints", null, onCompleted, onError);
+      "projects/" + projectId + "/topics/" + topicGuid +
+      "/document_references", null, onCompleted, onError);
   }
 
-  getViewpoint(projectId, topicGuid, viewpointGuid, onCompleted, onError)
-  {
-    this.invoke("GET",
-      "projects/" + projectId +
-      "/topics/" + topicGuid + "/viewpoints/" + viewpointGuid, null,
-      onCompleted, onError);
-  }
-
-  createViewpoint(projectId, topicGuid, viewpoint, onCompleted, onError)
+  createDocumentReference(projectId, topicGuid, docRef, onCompleted, onError)
   {
     this.invoke("POST",
       "projects/" + projectId + "/topics/" + topicGuid +
-      "/viewpoints", viewpoint, onCompleted, onError);
+      "/document_references", docRef, onCompleted, onError);
   }
 
-  deleteViewpoint(projectId, topicGuid, viewpointGuid, onCompleted, onError)
+  updateDocumentReference(projectId, topicGuid, docRefGuid, docRef,
+    onCompleted, onError)
+  {
+    this.invoke("PUT",
+      "projects/" + projectId + "/topics/" + topicGuid +
+      "/document_references/" + docRefGuid, docRef, onCompleted, onError);
+  }
+
+  deleteDocumentReference(projectId, topicGuid, docRefGuid,
+    onCompleted, onError)
   {
     this.invoke("DELETE",
       "projects/" + projectId + "/topics/" + topicGuid +
-      "/viewpoints/" + viewpointGuid, null, onCompleted, onError);
+      "/document_references/" + docRefGuid, null, onCompleted, onError);
   }
 
   invoke(method, path, data, onCompleted, onError)

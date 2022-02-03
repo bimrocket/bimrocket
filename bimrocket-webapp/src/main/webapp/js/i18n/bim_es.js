@@ -25,7 +25,7 @@ export const translations =
 
   "tab.comments" : "Comentarios",
   "tab.viewpoints" : "Vistas",
-  "tab.links" : "Enlaces",
+  "tab.doc_refs" : "Documentos",
   "tab.audit" : "Auditoria",
 
   "tab.types" : "Tipos",
@@ -52,6 +52,8 @@ export const translations =
   "label.project_extensions" : "Extensiones del proyecto:",
   "label.comment" : "Comentario:",
   "label.zoom_image" : "Ampliar imagen",
+  "label.doc_ref_url" : "Url del documento:",
+  "label.doc_ref_description" : "Descripción:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
@@ -62,6 +64,7 @@ export const translations =
   "title.delete_viewpoint" : "Borrar punto de vista",
   "title.delete_bcf_service" : "Borrar servicio BCF",
   "title.viewpoint" : "Vista de la incidencia",
+  "title.delete_doc_ref" : "Borrar referencia a documento",
 
   "message.no_bim_object_selected" : "Ningún objeto BIM seleccionado.",
 
@@ -75,9 +78,12 @@ export const translations =
   "message.viewpoint_deleted" : "Punto de vista borrado.",
   "message.project_saved" : "Proyecto guardado.",
   "message.project_extensions_saved" : "Extensiones guardadas.",
+  "message.doc_ref_deleted" : "Referencia a documento borrada.",
+  "message.doc_ref_saved" : "Referencia a documento guardada.",
 
   "question.delete_topic" : "Quieres borrar esta incidencia?",
   "question.delete_comment" : "Quieres borrar este comentario?",
   "question.delete_viewpoint" : "Quieres borrar este punto de vista?",
+  "question.delete_doc_ref" : "Quieres borrar esta referencia a documento?",
   "question.delete_bcf_service" : name => `Quieres borrar el servicio ${name}?`
 };

@@ -62,72 +62,65 @@ public class ProxyEndpoint
   @GET
   @PermitAll
   public Response doGet(@QueryParam("url") String url,
-    @Context UriInfo info, @Context HttpHeaders headers)
+    @Context UriInfo info, @Context HttpHeaders headers) throws Exception
   {
     if (url == null) return Response.ok().build();
 
-    try
-    {
-      StringBuilder buffer = new StringBuilder(url);
-      boolean firstParam = true;
+    StringBuilder buffer = new StringBuilder(url);
+    boolean firstParam = true;
 
-      MultivaluedMap<String, String> queryParams = info.getQueryParameters();
-      for (String name : queryParams.keySet())
+    MultivaluedMap<String, String> queryParams = info.getQueryParameters();
+    for (String name : queryParams.keySet())
+    {
+      if (!name.equals("url"))
       {
-        if (!name.equals("url"))
+        List<String> values = queryParams.get(name);
+        for (String value : values)
         {
-          List<String> values = queryParams.get(name);
-          for (String value : values)
+          if (firstParam)
           {
-            if (firstParam)
-            {
-              buffer.append("?");
-              firstParam = false;
-            }
-            else
-            {
-              buffer.append("&");
-            }
-            String encodedValue = URLEncoder.encode(value, "UTF-8");
-            buffer.append(name).append("=").append(encodedValue);
+            buffer.append("?");
+            firstParam = false;
           }
+          else
+          {
+            buffer.append("&");
+          }
+          String encodedValue = URLEncoder.encode(value, "UTF-8");
+          buffer.append(name).append("=").append(encodedValue);
         }
       }
-
-      URL targetUrl = new URL(buffer.toString());
-      System.out.println("Connecting to " + targetUrl);
-      HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
-
-      conn.connect();
-
-      InputStream responseStream;
-      try
-      {
-        responseStream = conn.getInputStream();
-      }
-      catch (IOException ex)
-      {
-        responseStream = conn.getErrorStream();
-      }
-      InputStream is = responseStream;
-
-      String contentType = conn.getContentType();
-      int pos = contentType.indexOf(";");
-      if (pos != -1)
-      {
-        contentType = contentType.substring(0, pos);
-      }
-
-      StreamingOutput output = (OutputStream out) ->
-      {
-        IOUtils.copy(is, out);
-      };
-
-      return Response.ok(output).header("Content-Type", contentType).build();
     }
-    catch (Exception ex)
+
+    URL targetUrl = new URL(buffer.toString());
+    System.out.println("Connecting to " + targetUrl);
+    HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
+
+    conn.connect();
+
+    InputStream responseStream;
+    try
     {
-      return Response.serverError().entity(ex.toString()).build();
+      responseStream = conn.getInputStream();
     }
+    catch (IOException ex)
+    {
+      responseStream = conn.getErrorStream();
+    }
+    InputStream is = responseStream;
+
+    String contentType = conn.getContentType();
+    int pos = contentType.indexOf(";");
+    if (pos != -1)
+    {
+      contentType = contentType.substring(0, pos);
+    }
+
+    StreamingOutput output = (OutputStream out) ->
+    {
+      IOUtils.copy(is, out);
+    };
+
+    return Response.ok(output).header("Content-Type", contentType).build();
   }
 }

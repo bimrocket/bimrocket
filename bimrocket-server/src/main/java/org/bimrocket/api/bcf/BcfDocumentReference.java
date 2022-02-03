@@ -28,49 +28,80 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.api.bcf;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Id;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class BcfDocumentReference
 {
-  @JsonProperty("code")
-  private int code;
+  @Id
+  @JsonProperty("guid")
+  private String id;
 
-  @JsonProperty("message")
-  private String message;
+  @JsonProperty("document_guid")
+  private String documentGuid;
 
-  public ApiError()
+  @JsonProperty("url")
+  private String url;
+
+  @JsonProperty("description")
+  private String description;
+
+  @JsonProperty("topic_guid")
+  private String topicId;
+
+  public String getId()
   {
+    return id;
   }
 
-  public ApiError(int code, String message)
+  public void setId(String id)
   {
-    this.code = code;
-    this.message = message;
+    this.id = id;
   }
 
-  public int getCode()
+  public String getDocumentGuid()
   {
-    return code;
+    return documentGuid;
   }
 
-  public void setCode(int code)
+  public void setDocumentGuid(String documentGuid)
   {
-    this.code = code;
+    this.documentGuid = documentGuid;
   }
 
-  public String getMessage()
+  public String getUrl()
   {
-    return message;
+    return url;
   }
 
-  public void setMessage(String message)
+  public void setUrl(String url)
   {
-    this.message = message;
+    this.url = url;
+  }
+
+  public String getDescription()
+  {
+    return description;
+  }
+
+  public void setDescription(String description)
+  {
+    this.description = description;
+  }
+
+  public String getTopicId()
+  {
+    return topicId;
+  }
+
+  public void setTopicId(String topicId)
+  {
+    this.topicId = topicId;
   }
 }

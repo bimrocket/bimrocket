@@ -142,7 +142,8 @@ public class AuthenticationFilter implements ContainerRequestFilter
       List<String> contentTypes = Arrays.asList(producesValue);
       if (contentTypes.contains(APPLICATION_JSON))
       {
-        return ApiError.response(statusCode, message);
+        ApiError error = new ApiError(statusCode, message);
+        return Response.status(statusCode).entity(error).build();
       }
       else if (contentTypes.contains(TEXT_XML))
       {

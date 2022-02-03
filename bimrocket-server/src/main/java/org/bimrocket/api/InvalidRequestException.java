@@ -30,47 +30,16 @@
  */
 package org.bimrocket.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  *
  * @author realor
  */
-public class ApiError
+public class InvalidRequestException extends RuntimeException
 {
-  @JsonProperty("code")
-  private int code;
+  private static final long serialVersionUID = 856024482L;
 
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
+  public InvalidRequestException(String message)
   {
-  }
-
-  public ApiError(int code, String message)
-  {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
+    super(message);
   }
 }

@@ -66,7 +66,9 @@ public class OrientDao<E> implements Dao<E>
   {
     String query = "select * from " + cls.getSimpleName();
 
-    query += addFilter(filter) + addOrderBy(orderBy);
+    query += addFilter(filter);
+
+    if (orderBy != null) query += addOrderBy(orderBy);
 
     List<E> list = db.objectQuery(query, filter);
     for (int i = 0; i < list.size(); i++)
@@ -142,7 +144,7 @@ public class OrientDao<E> implements Dao<E>
     {
       OResult result = resultSet.next();
       removeObject(result.getElement().get());
-      return true;      
+      return true;
     }
     return false;
   }
@@ -165,14 +167,14 @@ public class OrientDao<E> implements Dao<E>
     }
     return count;
   }
-  
+
   private void removeObject(Object object)
   {
     if (object instanceof OElement)
     {
-      OElement element = (OElement)object;    
+      OElement element = (OElement)object;
 
-      System.out.println("delete " + element.getSchemaType().get().getName() + 
+      System.out.println("delete " + element.getSchemaType().get().getName() +
         " " + element.getIdentity());
       db.delete(element.getIdentity());
 

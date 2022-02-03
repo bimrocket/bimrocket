@@ -56,6 +56,7 @@ public class BcfOrientDaoConnectionFactory
     entityManager.registerEntityClass(BcfLine.class);
     entityManager.registerEntityClass(BcfOrthogonalCamera.class);
     entityManager.registerEntityClass(BcfPerspectiveCamera.class);
+    entityManager.registerEntityClass(BcfDocumentReference.class);
     entityManager.registerEntityClass(BcfPoint.class);
     entityManager.registerEntityClass(BcfProject.class);
     entityManager.registerEntityClass(BcfTopic.class);

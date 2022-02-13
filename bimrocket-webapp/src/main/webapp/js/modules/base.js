@@ -29,6 +29,7 @@ import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { ClipTool } from "../tools/ClipTool.js";
 import { MakeSolidTool } from "../tools/MakeSolidTool.js";
+import { DrawProfileTool } from "../tools/DrawProfileTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
 import { ActivateCameraTool } from "../tools/ActivateCameraTool.js";
@@ -166,6 +167,7 @@ export function load(application)
       operation : BooleanOperator.SUBTRACT });
   const clipTool = new ClipTool(application);
   const makeSolidTool = new MakeSolidTool(application);
+  const drawProfileTool = new DrawProfileTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
   const activateCameraTool = new ActivateCameraTool(application);
@@ -413,6 +415,7 @@ export function load(application)
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
   booleanOperationMenu.addMenuItem(subtractionTool);
+  designMenu.addMenuItem(drawProfileTool);
   designMenu.addMenuItem(extrudeTool);
   designMenu.addMenuItem(clipTool);
   designMenu.addMenuItem(makeSolidTool);

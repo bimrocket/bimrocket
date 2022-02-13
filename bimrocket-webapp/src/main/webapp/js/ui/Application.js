@@ -22,6 +22,7 @@ import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { ModuleLoader } from "../utils/ModuleLoader.js";
 import { WEBGL } from "../utils/WebGL.js";
+import { PointSelector } from "../utils/PointSelector.js";
 import { LineDashedShaderMaterial } from "../materials/LineDashedShaderMaterial.js";
 import { Inspector } from "../ui/Inspector.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
@@ -210,6 +211,8 @@ class Application
       {color: selectionColor, dashSize: 4, gapSize: 4,
        depthTest: false, depthWrite: false});
 
+
+    this.pointSelector = new PointSelector(this);
 
     // listeners
     window.addEventListener("resize", this.onResize.bind(this), false);

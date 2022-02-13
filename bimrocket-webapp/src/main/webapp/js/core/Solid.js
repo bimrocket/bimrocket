@@ -194,7 +194,7 @@ class Solid extends THREE.Object3D
       geometry.applyMatrix4(inverseMatrixWorld);
       solid = this;
     }
-    solid.updateGeometry(geometry);
+    solid.updateGeometry(geometry, true);
 
     return solid;
   }

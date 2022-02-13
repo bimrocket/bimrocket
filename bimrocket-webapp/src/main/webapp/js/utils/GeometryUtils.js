@@ -9,12 +9,12 @@ import * as THREE from "../lib/three.module.js";
 class GeometryUtils
 {
   static PRECISION = 0.00001;
-  static _vector1 = new THREE.Vector3;
-  static _vector2 = new THREE.Vector3;
-  static _vector3 = new THREE.Vector3;
-  static _vector4 = new THREE.Vector3;
-  static _vector5 = new THREE.Vector3;
-  static _plane1 = new THREE.Plane;
+  static _vector1 = new THREE.Vector3();
+  static _vector2 = new THREE.Vector3();
+  static _vector3 = new THREE.Vector3();
+  static _vector4 = new THREE.Vector3();
+  static _vector5 = new THREE.Vector3();
+  static _plane1 = new THREE.Plane();
 
   static isPointOnSegment(point, pointA, pointB, distance = 0.0001)
   {
@@ -57,36 +57,35 @@ class GeometryUtils
     return null;
   }
 
-  static linesIntersect(line1, line2, position)
+  static intersectLines(line1, line2, position1, position2)
   {
-    const vector1 = GeometryUtils._vector3;
-    const vector2 = GeometryUtils._vector4;
+    const vector1 = GeometryUtils._vector1;
+    const vector2 = GeometryUtils._vector2;
     const normal = GeometryUtils._vector5;
     const plane = GeometryUtils._plane1;
+    position1 = position1 || GeometryUtils._vector3;
+    position2 = position2 || GeometryUtils._vector4;
 
     vector1.subVectors(line1.end, line1.start).normalize();
     vector2.subVectors(line2.end, line2.start).normalize();
+
     if (Math.abs(vector1.dot(vector2)) < 0.9999) // are not parallel
     {
       normal.copy(vector1).cross(vector2).normalize();
-      plane.setFromNormalAndCoplanarPoint(normal, line1.start);
-      if (Math.abs(plane.distanceToPoint(line2.start)) < 0.001)
+
+      vector1.cross(normal).normalize();
+      plane.setFromNormalAndCoplanarPoint(vector1, line1.start);
+      if (plane.intersectLine(line2, position2))
       {
-        // are coplanars
-        vector1.cross(normal).normalize();
-        plane.setFromNormalAndCoplanarPoint(vector1, line1.start);
-        if (plane.intersectLine(line2, position))
+        vector2.cross(normal).normalize();
+        plane.setFromNormalAndCoplanarPoint(vector2, line2.start);
+        if (plane.intersectLine(line1, position1))
         {
-          vector2.cross(normal).normalize();
-          plane.setFromNormalAndCoplanarPoint(vector2, line2.start);
-          if (plane.intersectLine(line1, position))
-          {
-            return true;
-          }
+          return position1.distanceTo(position2);
         }
       }
     }
-    return false;
+    return -1;
   }
 
   static calculateNormal(vertexPositions, accessFn, normal)

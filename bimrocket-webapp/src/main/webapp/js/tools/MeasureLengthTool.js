@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "../lib/three.module.js";
 
 class MeasureLengthTool extends Tool
@@ -20,11 +21,17 @@ class MeasureLengthTool extends Tool
     this.className = "measure_length";
     this.setOptions(options);
 
-    this.points = [];
-    this.lineString = null;
-    this.material = new THREE.LineBasicMaterial(
+    this.vertices = []; // Vector3[]
+    this.line = null; // THREE.Line
+    this.points = null; // THREE.Points
+
+    this.lineMaterial = new THREE.LineBasicMaterial(
       { linewidth:2, color: new THREE.Color(0x0000ff), opacity: 1,
       depthTest: false});
+
+    this.pointsMaterial = new THREE.PointsMaterial(
+      { color : 0, size: 4, sizeAttenuation : false, depthTest : false });
+
     this._onPointerUp = this.onPointerUp.bind(this);
 
     this.createPanel();
@@ -53,42 +60,62 @@ class MeasureLengthTool extends Tool
 
   activate()
   {
+    const application = this.application;
+    const container = application.container;
     this.panel.visible = true;
-    var container = this.application.container;
     container.addEventListener('pointerup', this._onPointerUp, false);
+    application.pointSelector.activate();
+    if (this.line
+        && !ObjectUtils.isObjectDescendantOf(this.line, application.scene))
+    {
+      this.vertices = [];
+      this.updateLineString();
+    }
   }
 
   deactivate()
   {
+    const application = this.application;
+    const container = application.container;
     this.panel.visible = false;
-    var container = this.application.container;
     container.removeEventListener('pointerup', this._onPointerUp, false);
+    application.pointSelector.deactivate();
   }
 
   onPointerUp(event)
   {
-    if (!this.isCanvasEvent(event)) return;
+    const pointSelector = this.application.pointSelector;
+    if (!pointSelector.isPointSelectionEvent(event)) return;
 
-    const scene = this.application.scene;
-    let pointerPosition = this.getEventPosition(event);
-    let intersect = this.intersect(pointerPosition, scene, true);
-    if (intersect)
+    let snap = pointSelector.snap;
+    if (snap)
     {
-      let point = intersect.point;
-      this.points.push(point);
+      let axisMatrixWorld = snap.object ?
+        snap.object.matrixWorld.clone() : new THREE.Matrix4();
+
+      axisMatrixWorld.setPosition(snap.positionWorld);
+
+      pointSelector.setAxisGuides(axisMatrixWorld, true);
+
+      let vertex = snap.positionWorld;
+      this.vertices.push(vertex);
       this.updateLineString();
+    }
+    else
+    {
+      pointSelector.clearAxisGuides();
     }
   }
 
   resetLineString()
   {
-    this.points = [];
+    this.vertices = [];
     this.updateLineString();
   }
 
   removeLastPoint()
   {
-    this.points.pop();
+    this.vertices.pop();
     this.updateLineString();
   }
 
@@ -97,27 +124,39 @@ class MeasureLengthTool extends Tool
     const application = this.application;
     const overlays = application.overlays;
 
-    if (this.lineString !== null)
+    if (this.line !== null)
     {
-      overlays.remove(this.lineString);
+      application.removeObject(this.line);
+      this.line = null;
     }
-    let vertices = [];
-    for (let point of this.points)
-    {
-      vertices.push(point);
-    }
-    let geometry = new THREE.BufferGeometry();
-    geometry.setFromPoints(vertices);
 
-    this.lineString = new THREE.Line(geometry, this.material, THREE.LineStrip);
-    this.lineString.raycast = function(){};
-    overlays.add(this.lineString);
+    if (this.points !== null)
+    {
+      application.removeObject(this.points);
+      this.points = null;
+    }
+
+    if (this.vertices.length > 0)
+    {
+      let geometry = new THREE.BufferGeometry();
+      geometry.setFromPoints(this.vertices);
+
+      this.line = new THREE.Line(geometry, this.lineMaterial,
+        THREE.LineStrip);
+      this.line.raycast = function(){};
+      overlays.add(this.line);
+
+      this.points = new THREE.Points(geometry, this.pointsMaterial);
+      this.points.raycast = function(){};
+      overlays.add(this.points);
+    }
+
     application.repaint();
 
-    let length = (this.getLineStringLength()).toFixed(application.decimals);
+    let length = this.getLineStringLength();
 
     I18N.set(this.distElem, "innerHTML", "message.measure_length",
-      length, application.units);
+      length.toFixed(application.decimals), application.units);
     application.i18n.update(this.distElem);
   }
 
@@ -125,10 +164,10 @@ class MeasureLengthTool extends Tool
   {
     let length = 0;
     const v = new THREE.Vector3();
-    for (let i = 0; i < this.points.length - 1; i++)
+    for (let i = 0; i < this.vertices.length - 1; i++)
     {
-      let p1 = this.points[i];
-      let p2 = this.points[i + 1];
+      let p1 = this.vertices[i];
+      let p2 = this.vertices[i + 1];
       v.set(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
       length += v.length();
     }

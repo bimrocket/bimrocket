@@ -87,8 +87,7 @@ export const translations =
   "tool.print.label" : "Imprimir",
   "tool.print.help" : "Imprimir escena a pdf",
 
-  "tool.draw.label" : "Dibuixa",
-  "tool.draw.help" : "Eina de dibuix",
+  "tool.draw_profile.label" : "Dibuixa perfil",
 
   "tool.measure_length.label" : "Mesura longitud",
   "tool.measure_length.help" : "Mesura longitud",
@@ -270,6 +269,17 @@ export const translations =
   "label.stop_controller" : "Atura controlador",
   "label.object_builder" : "Constructor d'objecte",
   "label.change_material" : "Canvia material",
+
+  "label.on_vertex" : "Sobre vèrtex",
+  "label.on_edge" : "Sobre aresta",
+  "label.on_face" : "Sobre cara",
+  "label.on_edge_face" : "Sobre intersecció aresta-cara",
+  "label.on_guide_face" : "Sobre intersecció guia-cara",
+  "label.on_edge_edge" : "Sobre intersecció aresta-aresta",
+  "label.on_guide_edge" : "Sobre intersecció guia-aresta",
+  "label.on_x_axis" : "Sobre eix X",
+  "label.on_y_axis" : "Sobre eix Y",
+  "label.on_z_axis" : "Sobre eix Z",
 
   "option.edges" : "Arestes",
   "option.faces" : "Cares",

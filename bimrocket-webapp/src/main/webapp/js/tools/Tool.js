@@ -56,31 +56,7 @@ class Tool
     pointercc.x = (pointerPosition.x / container.clientWidth) * 2 - 1;
     pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
 
-    let ray, origin, vector;
-    if (camera instanceof THREE.OrthographicCamera)
-    {
-      vector = new THREE.Vector3(pointercc.x, pointercc.y, 0); // NDC
-      vector.unproject(camera); // world
-
-      origin = new THREE.Vector3();
-      camera.localToWorld(origin); // world
-      let viewVector = new THREE.Vector3(0, 0, -1);
-      camera.localToWorld(viewVector); // world
-      ray = viewVector.sub(origin);
-      origin = vector;
-      origin.x -= 1000 * ray.x;
-      origin.y -= 1000 * ray.y;
-      origin.z -= 1000 * ray.z;
-    }
-    else // THREE.PerspectiveCamera
-    {
-      vector = new THREE.Vector3(pointercc.x, pointercc.y, 0); // NDC
-      vector.unproject(camera); // world
-      origin = new THREE.Vector3();
-      camera.localToWorld(origin);
-      ray = vector.sub(origin);
-    }
-    raycaster.set(origin, ray.normalize());
+    raycaster.setFromCamera(pointercc, camera);
     raycaster.far = Math.Infinity;
     raycaster.camera = camera;
 

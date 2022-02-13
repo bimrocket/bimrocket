@@ -87,8 +87,7 @@ export const translations =
   "tool.print.label" : "Print",
   "tool.print.help" : "Print scene to pdf",
 
-  "tool.draw.label" : "Draw",
-  "tool.draw.help" : "Draw tool",
+  "tool.draw_profile.label" : "Draw profile",
 
   "tool.measure_length.label" : "Measure length",
   "tool.measure_length.help" : "Measure length",
@@ -270,6 +269,17 @@ export const translations =
   "label.stop_controller" : "Stop controller",
   "label.object_builder" : "Object builder",
   "label.change_material" : "Change material",
+
+  "label.on_vertex" : "On vertex",
+  "label.on_edge" : "On edge",
+  "label.on_face" : "On face",
+  "label.on_edge_face" : "On edge-face intersection",
+  "label.on_guide_face" : "On guide-face intersection",
+  "label.on_edge_edge" : "On edge-edge intersection",
+  "label.on_guide_edge" : "On guide-edge intersection",
+  "label.on_x_axis" : "On X axis",
+  "label.on_y_axis" : "On Y axis",
+  "label.on_z_axis" : "On Z axis",
 
   "option.edges" : "Edges",
   "option.faces" : "Faces",

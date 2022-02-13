@@ -12,6 +12,15 @@ import * as THREE from "../lib/three.module.js";
 
 class ObjectUtils
 {
+  static METER_CONVERSION_FACTORS =
+  {
+    "km" : 0.001,
+    "m"  : 1,
+    "cm" : 100,
+    "mm" : 1000,
+    "in" : 39.3701
+  };
+
   static find(root, condition)
   {
     const selection = [];
@@ -444,17 +453,8 @@ class ObjectUtils
     fromUnits = fromUnits || model.userData.units;
     if (fromUnits)
     {
-      const METER_CONVERSION_FACTORS =
-      {
-        "km" : 0.001,
-        "m"  : 1,
-        "cm" : 100,
-        "mm" : 1000,
-        "in" : 39.3701
-      };
-
-      let factor1 = METER_CONVERSION_FACTORS[toUnits];
-      let factor2 = METER_CONVERSION_FACTORS[fromUnits];
+      let factor1 = this.METER_CONVERSION_FACTORS[toUnits];
+      let factor2 = this.METER_CONVERSION_FACTORS[fromUnits];
 
       if (factor1 !== undefined && factor2 !== undefined)
       {

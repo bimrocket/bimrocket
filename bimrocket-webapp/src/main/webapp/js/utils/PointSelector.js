@@ -6,6 +6,7 @@
 
 import { Application } from "../ui/Application.js";
 import { GeometryUtils } from "./GeometryUtils.js";
+import { ObjectUtils } from "./ObjectUtils.js";
 import { Solid } from "../core/Solid.js";
 import { I18N } from "../i18n/I18N.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
@@ -40,16 +41,14 @@ class PointSelector
 
     this._onPointerMove = this.onPointerMove.bind(this);
 
-    const k = 1000;
-
     this.axisGuides =
     [
       {
         label: "label.on_x_axis",
         startPoint: new THREE.Vector3(),
         endPoint: new THREE.Vector3(),
-        startLocal : new THREE.Vector3(-k, 0, 0),
-        endLocal : new THREE.Vector3(k, 0, 0),
+        startLocal : new THREE.Vector3(-1, 0, 0),
+        endLocal : new THREE.Vector3(1, 0, 0),
         material : new THREE.LineDashedMaterial(
          { color: new THREE.Color(1, 0, 0),
            transparent: true,
@@ -60,8 +59,8 @@ class PointSelector
         label: "label.on_y_axis",
         startPoint: new THREE.Vector3(),
         endPoint: new THREE.Vector3(),
-        startLocal : new THREE.Vector3(0, -k, 0),
-        endLocal : new THREE.Vector3(0, k, 0),
+        startLocal : new THREE.Vector3(0, -1, 0),
+        endLocal : new THREE.Vector3(0, 1, 0),
         material : new THREE.LineBasicMaterial(
          { color: new THREE.Color(0, 1, 0),
            transparent: true,
@@ -72,8 +71,8 @@ class PointSelector
         label: "label.on_z_axis",
         startPoint: new THREE.Vector3(),
         endPoint: new THREE.Vector3(),
-        startLocal : new THREE.Vector3(0, 0, -k),
-        endLocal : new THREE.Vector3(0, 0, k),
+        startLocal : new THREE.Vector3(0, 0, -1),
+        endLocal : new THREE.Vector3(0, 0, 1),
         material : new THREE.LineBasicMaterial(
          { color: new THREE.Color(0, 0, 1),
            transparent: true,
@@ -136,10 +135,21 @@ class PointSelector
 
   setAxisGuides(axisMatrixWorld, visible = false)
   {
+    const scale = axisMatrixWorld.getMaxScaleOnAxis();
+    const factor = 1 / scale;
+
+    let scaleMatrix = new THREE.Matrix4();
+    scaleMatrix.makeScale(factor, factor, factor);
+    axisMatrixWorld.multiply(scaleMatrix);
+
+    let k = 1000;
+
     for (let guide of this.axisGuides)
     {
-      guide.startPoint.copy(guide.startLocal).applyMatrix4(axisMatrixWorld);
-      guide.endPoint.copy(guide.endLocal).applyMatrix4(axisMatrixWorld);
+      guide.startPoint.copy(guide.startLocal)
+        .multiplyScalar(k).applyMatrix4(axisMatrixWorld);
+      guide.endPoint.copy(guide.endLocal)
+        .multiplyScalar(k).applyMatrix4(axisMatrixWorld);
     }
     this.axisGuidesEnabled = true;
 

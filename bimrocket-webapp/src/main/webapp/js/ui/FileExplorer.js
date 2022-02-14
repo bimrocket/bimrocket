@@ -79,25 +79,42 @@ class FileExplorer extends Panel
 
   addContextButtons()
   {
-    const isServiceList = () => this.service === null;
-    const isDirectoryList = () => this.service !== null;
-    const isEntrySelected = () => this.entryName !== "";
-
     this.addContextButton("open", "button.open",
-      () => this.openEntry(), isEntrySelected);
+      () => this.openEntry(), () => this.isEntrySelected());
     this.addContextButton("add", "button.add",
-      () => this.showAddDialog(), isServiceList);
+      () => this.showAddDialog(), () => this.isServiceList());
     this.addContextButton("edit", "button.edit",
-      () => this.showEditDialog(), () => isServiceList() && isEntrySelected());
+      () => this.showEditDialog(),
+      () => this.isServiceList() && this.isEntrySelected());
     this.addContextButton("delete", "button.delete",
-      () => this.showDeleteDialog(), isEntrySelected);
+      () => this.showDeleteDialog(), () => this.isEntrySelected());
     this.addContextButton("folder", "button.folder",
-      () => this.showFolderDialog(), isDirectoryList);
+      () => this.showFolderDialog(), () => this.isDirectoryList());
     this.addContextButton("upload", "button.upload",
-      () => this.showUploadDialog(), isDirectoryList);
+      () => this.showUploadDialog(), () => this.isDirectoryList());
     this.addContextButton("download", "button.download",
       () => this.download(this.basePath + "/" + this.entryName),
-      () => isDirectoryList() && this.entryType === Metadata.FILE);
+      () => this.isDirectoryList() && this.isFileEntrySelected());
+  }
+
+  isServiceList()
+  {
+    return this.service === null;
+  }
+
+  isDirectoryList()
+  {
+    return this.service !== null;
+  }
+
+  isEntrySelected()
+  {
+    return this.entryName !== "";
+  }
+
+  isFileEntrySelected()
+  {
+    return this.entryType === Metadata.FILE;
   }
 
   showAddDialog()
@@ -546,33 +563,6 @@ class FileExplorer extends Panel
     for (let child of children)
     {
       child.style.display = child._isVisible() ? "inline" : "none";
-    }
-  }
-
-  updateButtons2()
-  {
-    const entryType = this.entryType;
-
-    if (this.service === null) // service list
-    {
-      this.addButtonElem.style.display = "inline";
-      this.folderButtonElem.style.display = "none";
-      this.uploadButtonElem.style.display = "none";
-      this.downloadButtonElem.style.display = "none";
-      this.openButtonElem.style.display = entryType ? "inline" : "none";
-      this.editButtonElem.style.display = entryType ? "inline" : "none";
-      this.deleteButtonElem.style.display = entryType ? "inline" : "none";
-    }
-    else
-    {
-      this.folderButtonElem.style.display = "inline";
-      this.uploadButtonElem.style.display = "inline";
-      this.addButtonElem.style.display = "none";
-      this.editButtonElem.style.display = "none";
-      this.openButtonElem.style.display = entryType ? "inline" : "none";
-      this.deleteButtonElem.style.display = entryType ? "inline" : "none";
-      this.downloadButtonElem.style.display =
-        entryType === Metadata.FILE ? "inline" : "none";
     }
   }
 

@@ -99,8 +99,11 @@ class WebdavService extends FileService
             {
               if (request.status === 200)
               {
-                progressCallback({progress : 100,
-                  message : "Download completed."});
+                if (progressCallback)
+                {
+                  progressCallback({progress : 100,
+                    message : "Download completed."});
+                }
                 setTimeout(() => readyCallback(
                   new Result(OK, "", path, metadata, null, request.response))
                   , 100);

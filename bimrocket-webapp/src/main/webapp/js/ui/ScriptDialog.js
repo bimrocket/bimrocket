@@ -104,11 +104,16 @@ class ScriptDialog extends Dialog
     {
       this.editorView.focus();
     }
+  }
+
+  clearConsole()
+  {
     this.consoleElem.innerHTML = "";
   }
 
   run(code)
   {
+    let error = null;
     this.enterConsole();
     try
     {
@@ -122,11 +127,13 @@ class ScriptDialog extends Dialog
     catch (ex)
     {
       this.log("error", ex);
+      error = ex;
     }
     finally
     {
       this.exitConsole();
     }
+    return error;
   }
 
   endEdition()

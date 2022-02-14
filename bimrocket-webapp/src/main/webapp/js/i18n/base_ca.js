@@ -35,6 +35,7 @@ export const translations =
   "button.no" : "No",
   "button.discard" : "Descarta",
   "button.optimize" : "Optimitza",
+  "button.editor" : "Editor",
 
   "units.km" : "kilometres",
   "units.m" : "metres",
@@ -323,7 +324,7 @@ export const translations =
   "message.face_count" : faceCount => `Cares: ${faceCount}`,
   "message.is_manifold" : manifold => `És varietat: ${manifold ? "si" : "no"}`,
 
-  "question.discard_changes" : "Vols descartar els canvis no desats?",
+  "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,
   "question.delete_folder" : name => `Vols esborrar la carpeta ${name}?`,
   "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`,

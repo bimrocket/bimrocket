@@ -35,6 +35,7 @@ export const translations =
   "button.no" : "No",
   "button.discard" : "Descartar",
   "button.optimize" : "Optimizar",
+  "button.editor" : "Editor",
 
   "units.km" : "kilometros",
   "units.m" : "metros",
@@ -323,7 +324,7 @@ export const translations =
   "message.face_count" : faceCount => `Caras: ${faceCount}`,
   "message.is_manifold" : manifold => `Es variedad: ${manifold ? "si" : "no"}`,
 
-  "question.discard_changes" : "Descartar los cambios no guardados?",
+  "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
   "question.delete_file" : name => `Quieres borrar el fichero ${name}?`,

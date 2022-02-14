@@ -42,35 +42,14 @@ class ScriptTool extends Tool
       (name, code) => this.onSave(name, code));
     this.dialog = dialog;
 
-    const showFile = (url, data) =>
-    {
-      const index = url.lastIndexOf("/");
-      let name = url.substring(index + 1);
+    panel.openFile = (url, code) =>
+      this.openFile(() => this.showFile(url, code));
 
-      dialog.scriptName = name;
-      dialog.scriptCode = data;
-      dialog.saved = true;
-      dialog.show();
-    };
+    panel.addContextButton("run", "button.run",
+      () => this.openFile(() => this.runFile()),
+      () => panel.isDirectoryList() && panel.isEntrySelected());
 
-    panel.openFile = (url, data) =>
-    {
-      if (!dialog.saved)
-      {
-        ConfirmDialog.create("title.unsaved_changes",
-          "question.discard_changes")
-          .setAction(() => showFile(url, data))
-          .setAcceptLabel("button.discard")
-          .setCancelLabel("button.no")
-          .setI18N(application.i18n).show();
-      }
-      else
-      {
-        showFile(url, data);
-      }
-    };
-
-    panel.addContextButton("editor", "Editor",
+    panel.addContextButton("editor", "button.editor",
       () => dialog.show(), () => true);
 
     application.panelManager.addPanel(this.panel);
@@ -112,6 +91,63 @@ class ScriptTool extends Tool
         .setClassName("error")
         .setI18N(this.application.i18n).show();
     }
+  }
+
+  openFile(action)
+  {
+    const dialog = this.dialog;
+    const application = this.application;
+
+    if (!dialog.saved)
+    {
+      ConfirmDialog.create("title.unsaved_changes",
+        "question.discard_changes", dialog.scriptName)
+        .setAction(action)
+        .setAcceptLabel("button.discard")
+        .setCancelLabel("button.no")
+        .setI18N(application.i18n).show();
+    }
+    else
+    {
+      action();
+    }
+  }
+
+  showFile(url, code)
+  {
+    const dialog = this.dialog;
+
+    const index = url.lastIndexOf("/");
+    let name = url.substring(index + 1);
+
+    dialog.scriptName = name;
+    dialog.scriptCode = code;
+    dialog.saved = true;
+    dialog.clearConsole();
+    dialog.show();
+  }
+
+  runFile()
+  {
+    const dialog = this.dialog;
+    const panel = this.panel;
+    let path = panel.basePath + panel.entryName;
+
+    panel.showProgressBar();
+
+    panel.service.open(path, result =>
+    {
+      let code = result.data;
+      dialog.scriptName = panel.entryName;
+      dialog.scriptCode = code;
+      dialog.saved = true;
+      let error = dialog.run(code);
+      panel.showButtonsPanel();
+      if (error)
+      {
+        dialog.show();
+      }
+    }, data => panel.setProgress(data.progress, data.message));
   }
 }
 

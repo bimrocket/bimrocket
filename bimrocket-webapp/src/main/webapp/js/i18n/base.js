@@ -35,6 +35,7 @@ export const translations =
   "button.no" : "No",
   "button.discard" : "Discard",
   "button.optimize" : "Optimize",
+  "button.editor" : "Editor",
 
   "units.km" : "kilometers",
   "units.m" : "meters",
@@ -323,7 +324,7 @@ export const translations =
   "message.face_count" : faceCount => `Faces: ${faceCount}`,
   "message.is_manifold" : manifold => `Is manifold: ${manifold ? "yes" : "no"}`,
 
-  "question.discard_changes" : "Discard unsaved changes?",
+  "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,
   "question.delete_file" : name => `Do you want to delete the ${name} file?`,

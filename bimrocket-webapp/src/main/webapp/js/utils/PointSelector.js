@@ -573,10 +573,9 @@ class PointSelector
     {
       const snaps = [];
 
-      baseObject.traverse(object =>
+      baseObject.traverseVisible(object =>
       {
-        if (object.visible
-          && object.facesVisible
+        if (object.facesVisible
           && object instanceof Solid
           && rayIntersectsObject(object))
         {

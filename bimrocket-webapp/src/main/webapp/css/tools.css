@@ -731,3 +731,78 @@ div.script_code
   text-align: left;
   list-style-type: none;
 }
+
+.property_selector_scroll
+{
+  height: 40%;
+  overflow: auto;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+  padding: 4px;
+}
+
+.property_selector_tree .selected
+{
+  background-color: #F0A0A0;
+}
+
+.property_selector_tree li.property_set
+{
+  background-image: url(images/collection.svg);
+}
+
+.property_selector_tree li.string
+{
+  background-image: url(images/inspector/string.svg);
+  color: blue;
+}
+
+.property_selector_tree li.boolean
+{
+  background-image: url(images/inspector/boolean.svg);
+  color: #008000;
+}
+
+.property_selector_tree li.number
+{
+  background-image: url(images/inspector/number.svg);
+}
+
+.property_selector_tree li.string a
+{
+  color: #0000ff;  
+}
+
+.property_selector_tree li.boolean a
+{
+  color: #008080;  
+}
+
+.property_selector_tree li.number a
+{
+  color: #404040;
+}
+
+.property_selector_toolbar
+{
+  height: 30px;
+  min-height: 30px;
+  text-align: center;
+}
+
+.property_expression
+{
+  height: 40%;
+}
+
+.property_expression > textarea
+{
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  font-family: monospace;
+  font-size:14px;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}

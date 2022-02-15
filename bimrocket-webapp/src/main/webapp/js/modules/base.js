@@ -383,7 +383,7 @@ export function load(application)
   selectMenu.addMenuItem(selectTool);
   selectMenu.addMenuItem(selectParentTool);
   selectMenu.addMenuItem(selectReprTool);
-//    selectMenu.addMenuItem(exportSelectionTool);
+  selectMenu.addMenuItem(exportSelectionTool);
 
   const designMenu = menuBar.addMenu("menu.design");
   const addMenu = designMenu.addMenu("menu.design.add");

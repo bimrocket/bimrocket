@@ -45,7 +45,7 @@ class ScriptDialog extends Dialog
     this.scriptCode = "";
     this.saved = true;
 
-    this.setSize(760, 650);
+    this.setSize(760, 600);
 
     const editorHeight = 75;
     const consoleHeight = 100 - editorHeight;

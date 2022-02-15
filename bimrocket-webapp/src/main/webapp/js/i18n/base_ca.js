@@ -36,6 +36,7 @@ export const translations =
   "button.discard" : "Descarta",
   "button.optimize" : "Optimitza",
   "button.editor" : "Editor",
+  "button.clear" : "Neteja",
 
   "units.km" : "kilometres",
   "units.m" : "metres",

@@ -6,6 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
+import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
 
 class ExportSelectionTool extends Tool
 {
@@ -17,75 +18,137 @@ class ExportSelectionTool extends Tool
     this.help = "tool.export_selection.help";
     this.className = "export_selection";
     this.setOptions(options);
-    this.createPanel();
+    this.immediate = true;
+
+    this.dialog = new PropertySelectorDialog(this.application);
+    const dialog = this.dialog;
+    dialog.addContextButton("add_prop", "button.add", 
+      () => this.addProperty());
+    dialog.addContextButton("clear_prop", "button.clear", 
+      () => this.clearProperties());  
+      
+    dialog.onAccept = () => this.exportProperties();
   }
 
-  createPanel()
+  execute()
   {
-    this.panel = this.application.createPanel(this.label, "left");
-
-    this.propertySelect = Controls.addSelectField(this.panel.bodyElem,
-      "exp_property", "Properties:");
-
-    this.propertySelect.style.maxWidth = "98%";
-
-//    this.url = window.URL.createObjectURL(data);
-//
-//    let linkElem = document.createElement("a");
-//    linkElem.download = intent.name;
-//    linkElem.target = "_blank";
-//    linkElem.href = this.url;
-//    linkElem.style.display = "block";
-//    linkElem.click();
+    this.dialog.show();
   }
+  
+  addProperty()
+  {    
+    const dialog = this.dialog;
+    let path = dialog.getSelectedNodePath();
+    let propertyMap = dialog.propertyMap;
 
-  activate()
-  {
-    this.panel.visible = true;
-    let options = this.findPaths();
-    Controls.setSelectOptions(this.propertySelect, options);
+    let paths = [];
+    if (path.length === 1)
+    {
+      let items = propertyMap.get(path[0]);
+      if (items instanceof Map)
+      {
+        for (let key of items.keys())
+        {
+          paths.push([path[0], key]);
+        }
+      }
+      else paths.push(path);
+    }
+    else paths.push(path);
+    
+    for (let path of paths)
+    {
+      let line = '"' + path[path.length - 1] + '" : [';
+      for (let i = 0; i < path.length; i++)
+      {
+        let part = path[i];
+        if (i > 0) line += ", ";
+        line += '"' + part + '"';
+      }
+      line += "]";
+      dialog.editor.value += line + "\n";
+    }
   }
-
-  deactivate()
-  {
-    this.panel.visible = false;
+  
+  clearProperties()
+  {    
+    const dialog = this.dialog;
+    dialog.editor.value = "";
   }
-
-  findPaths()
+  
+  exportProperties()
   {
     const application = this.application;
-
-    const roots = application.selection.roots;
-
-    const pathSet = new Set();
-
-    for (let root of roots)
+    const dialog = this.dialog;
+    
+    try
     {
-      root.traverse(object =>
+      let properties = dialog.editor.value;
+      let lines = properties.split("\n").filter(line => line.trim().length > 0);
+      let json = "{" + lines.join(",") + "}";
+      let filter = JSON.parse(json);
+      let roots = application.selection.roots;
+      let exportedData = [];
+      
+      let headers = [];
+      for (let key in filter)
       {
-        this.addPaths(object.userData, "", pathSet);
-      });
+        headers.push(key);
+      }
+      exportedData.push(headers.join(";"));
+      
+      for (let root of roots)
+      {
+        exportedData.push(this.extractData(root, filter));
+      }
+      let csv = "\uFEFF" + exportedData.join("\n");
+      const blob = new Blob([csv], {type : 'text/csv'});
+      let url = window.URL.createObjectURL(blob);
+
+      let linkElem = document.createElement("a");
+      linkElem.download = "export.csv";
+      linkElem.target = "_blank";
+      linkElem.href = url;
+      linkElem.style.display = "block";
+      linkElem.click();
+      
+      dialog.hide();
     }
-    return Array.from(pathSet).sort();
+    catch (ex)
+    {
+      console.info(ex); 
+    }
   }
-
-  addPaths(data, path, pathSet)
+  
+  extractData(object, filter)
   {
-    for (let key in data)
+    let line = "";
+    for (let columnName in filter)
     {
-      let value = data[key];
-      let type = typeof value;
-      let newPath = path.length > 0 ? path + "." + key : key;
-
-      if (type === "string" || type === "number" || type === "boolean")
+      let path = filter[columnName];
+      let value = object.userData;
+      let i = 0;
+      while (i < path.length && typeof value === "object")
       {
-        pathSet.add(newPath);
+        let key = path[i];
+        value = value[key];
+        i++;
       }
-      else if (type === "object")
+      if (line.length > 0) line += ";";
+      if (value === undefined)
       {
-        this.addPaths(value, newPath, pathSet);
       }
+      else if (typeof value === "string")
+      {
+        line += '"' + value + '"';
+      }
+      else if (typeof value === "number")
+      {
+        line += ("" + value).replace(".", ",");
+      }
+      else line += value;
     }
+    return line;
   }
 }
 

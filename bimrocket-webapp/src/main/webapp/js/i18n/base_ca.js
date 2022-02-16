@@ -80,6 +80,8 @@ export const translations =
 
   "tool.select_by_name.label" : "Selecciona per nom",
 
+  "tool.select_by_property.label" : "Selec. per propietat",
+
   "tool.select_parent.label" : "Selecciona el pare",
 
   "tool.export_selection.label" : "Exporta selecció",
@@ -302,6 +304,8 @@ export const translations =
   "title.properties" : "Propietats",
   "title.script_editor" : "Editor de codi",
   "title.object_builder" : "Constructor d'objecte",
+  "title.select_by_property" : "Selecció per propietats",
+  "title.export_selection" : "Exporta selecció",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,

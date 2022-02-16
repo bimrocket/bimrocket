@@ -20,13 +20,17 @@ class ExportSelectionTool extends Tool
     this.setOptions(options);
     this.immediate = true;
 
-    this.dialog = new PropertySelectorDialog(this.application);
+    this.dialog = new PropertySelectorDialog(this.application,
+      { title : "title.export_selection",
+        selectValues : false,
+        findPropertiesOnSelection : true
+      });
     const dialog = this.dialog;
-    dialog.addContextButton("add_prop", "button.add", 
+    dialog.addContextButton("add_prop", "button.add",
       () => this.addProperty());
-    dialog.addContextButton("clear_prop", "button.clear", 
-      () => this.clearProperties());  
-      
+    dialog.addContextButton("clear_prop", "button.clear",
+      () => this.clearProperties());
+
     dialog.onAccept = () => this.exportProperties();
   }
 
@@ -34,9 +38,9 @@ class ExportSelectionTool extends Tool
   {
     this.dialog.show();
   }
-  
+
   addProperty()
-  {    
+  {
     const dialog = this.dialog;
     let path = dialog.getSelectedNodePath();
     let propertyMap = dialog.propertyMap;
@@ -55,7 +59,7 @@ class ExportSelectionTool extends Tool
       else paths.push(path);
     }
     else paths.push(path);
-    
+
     for (let path of paths)
     {
       let line = '"' + path[path.length - 1] + '" : [';
@@ -69,18 +73,18 @@ class ExportSelectionTool extends Tool
       dialog.editor.value += line + "\n";
     }
   }
-  
+
   clearProperties()
-  {    
+  {
     const dialog = this.dialog;
     dialog.editor.value = "";
   }
-  
+
   exportProperties()
   {
     const application = this.application;
     const dialog = this.dialog;
-    
+
     try
     {
       let properties = dialog.editor.value;
@@ -89,14 +93,14 @@ class ExportSelectionTool extends Tool
       let filter = JSON.parse(json);
       let roots = application.selection.roots;
       let exportedData = [];
-      
+
       let headers = [];
       for (let key in filter)
       {
         headers.push(key);
       }
       exportedData.push(headers.join(";"));
-      
+
       for (let root of roots)
       {
         exportedData.push(this.extractData(root, filter));
@@ -111,15 +115,15 @@ class ExportSelectionTool extends Tool
       linkElem.href = url;
       linkElem.style.display = "block";
       linkElem.click();
-      
+
       dialog.hide();
     }
     catch (ex)
     {
-      console.info(ex); 
+      console.info(ex);
     }
   }
-  
+
   extractData(object, filter)
   {
     let line = "";

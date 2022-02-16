@@ -18,7 +18,7 @@ class PropertySelectorDialog extends Dialog
     this.setI18N(this.application.i18n);
 
     this.setSize(700, 600);
-    
+
     this.treeLabel = document.createElement("div");
     this.treeLabel.innerHTML = options.treeLabel || "Selection properties:";
     this.bodyElem.appendChild(this.treeLabel);
@@ -29,17 +29,19 @@ class PropertySelectorDialog extends Dialog
 
     this.propertyTree = new Tree(this.treeScrollElem);
     this.propertyTree.rootsElem.classList.add("property_selector_tree");
-    
+
     this.toolBarElem = document.createElement("div");
     this.toolBarElem.className = "property_selector_toolbar";
     this.bodyElem.appendChild(this.toolBarElem);
 
-    this.editor = Controls.addTextAreaField(this.bodyElem, 
-      "property_input_area", options.editorLabel || "Expression:", 
+    this.editor = Controls.addTextAreaField(this.bodyElem,
+      "property_input_area", options.editorLabel || "Expression:",
       options.editorValue || "", "property_expression");
     this.editor.setAttribute("spellcheck", "false");
 
     this.selectValues = options.selectValues === true;
+    this.findPropertiesOnSelection = options.findPropertiesOnSelection || false;
+    this.isValue = false;
 
     this.selectedNode = null;
 
@@ -70,13 +72,13 @@ class PropertySelectorDialog extends Dialog
   {
     this.hide();
   }
-  
+
   addContextButton(name, label, action)
   {
     const buttonElem = Controls.addButton(this.toolBarElem,
       name, label, action);
   }
-  
+
   getSelectedNodePath()
   {
     let path = [];
@@ -88,33 +90,35 @@ class PropertySelectorDialog extends Dialog
     }
     return path.reverse();
   }
-  
+
   updateTree(value, node)
   {
     if (value instanceof Map)
     {
-      for (let key of value.keys())
+      const keys = Array.from(value.keys()).sort();
+      for (let key of keys)
       {
-        let subNode = node.addNode(key, 
-          event => this.selectNode(subNode), "property_set");
+        let subNode = node.addNode(key,
+          event => this.selectNode(subNode, false), "property_set");
         let subValue = value.get(key);
-        this.updateTree(subValue, subNode);      
+        this.updateTree(subValue, subNode);
       }
     }
     else if (value instanceof Set)
     {
-      for (let subValue of value.values())
+      const values = Array.from(value.values()).sort();
+      for (let subValue of values)
       {
         let type = typeof subValue;
         if (this.selectValues)
         {
-          let valueNode = node.addNode(subValue, 
-            event => this.selectNode(valueNode), type);
+          let valueNode = node.addNode(subValue,
+            event => this.selectNode(valueNode, true), type);
         }
         else
         {
-          node.addNode(subValue, () => {}, type);          
-        }          
+          node.addNode(subValue, () => {}, type);
+        }
       }
     }
   }
@@ -123,7 +127,8 @@ class PropertySelectorDialog extends Dialog
   {
     const application = this.application;
 
-    const roots = application.selection.roots;
+    const roots = this.findPropertiesOnSelection ?
+      application.selection.roots : [application.baseObject];
 
     const propertyMap = new Map();
 
@@ -154,7 +159,7 @@ class PropertySelectorDialog extends Dialog
         }
         valueSet.add(value);
       }
-      else if (type === "object")
+      else if (type === "object" && value !== null)
       {
         let subPropertyMap = propertyMap.get(key);
         if (subPropertyMap === undefined || !(subPropertyMap instanceof Map))
@@ -166,16 +171,16 @@ class PropertySelectorDialog extends Dialog
       }
     }
   }
-  
-  selectNode(node)
+
+  selectNode(node, isValue)
   {
-    console.info(node);
+    this.isValue = isValue;
 
     if (this.selectedNode)
     {
       this.selectedNode.removeClass("selected");
     }
-    
+
     this.selectedNode = node;
     node.addClass("selected");
   }

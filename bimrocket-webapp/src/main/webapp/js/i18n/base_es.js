@@ -80,6 +80,8 @@ export const translations =
 
   "tool.select_by_name.label" : "Selección por nombre",
 
+  "tool.select_by_property.label" : "Selec. por propiedad",
+
   "tool.select_parent.label" : "Seleccionar padre",
 
   "tool.export_selection.label" : "Exportar selección",
@@ -302,6 +304,8 @@ export const translations =
   "title.properties" : "Propiedades",
   "title.script_editor" : "Editor de código",
   "title.object_builder" : "Constructor de objeto",
+  "title.select_by_property" : "Selección por propiedades",
+  "title.export_selection" : "Exportar selección",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,

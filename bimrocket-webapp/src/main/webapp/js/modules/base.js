@@ -13,6 +13,7 @@ import { PrintTool } from "../tools/PrintTool.js";
 import { SelectTool } from "../tools/SelectTool.js";
 import { SelectParentTool } from "../tools/SelectParentTool.js";
 import { SelectByNameTool } from "../tools/SelectByNameTool.js";
+import { SelectByPropertyTool } from "../tools/SelectByPropertyTool.js";
 import { ExportSelectionTool } from "../tools/ExportSelectionTool.js";
 import { OrbitTool } from "../tools/OrbitTool.js";
 import { FlyTool } from "../tools/FlyTool.js";
@@ -130,6 +131,7 @@ export function load(application)
   const printTool = new PrintTool(application);
   const selectTool = new SelectTool(application);
   const selectParentTool = new SelectParentTool(application);
+  const selectByPropertyTool = new SelectByPropertyTool(application);
   const selectReprTool = new SelectByNameTool(application,
   { name : "IfcRepresentation", label: "IfcRepresentation",
     propertyName : "IfcRepresentation" });
@@ -276,6 +278,7 @@ export function load(application)
   application.addTool(selectTool);
   application.addTool(selectParentTool);
   application.addTool(selectReprTool);
+  application.addTool(selectByPropertyTool);
   application.addTool(exportSelectionTool);
   application.addTool(orbitTool);
   application.addTool(flyTool);
@@ -383,6 +386,7 @@ export function load(application)
   selectMenu.addMenuItem(selectTool);
   selectMenu.addMenuItem(selectParentTool);
   selectMenu.addMenuItem(selectReprTool);
+  selectMenu.addMenuItem(selectByPropertyTool);
   selectMenu.addMenuItem(exportSelectionTool);
 
   const designMenu = menuBar.addMenu("menu.design");

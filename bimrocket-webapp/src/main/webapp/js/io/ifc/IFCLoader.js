@@ -103,8 +103,8 @@ class IFCLoader extends THREE.Loader
         model.userData.IFC = {
           ifcClassName : "IfcProject",
           GlobalId : project.GlobalId,
-          Name: project.Name,
-          Description : project.Description
+          Name: this.unBox(project.Name),
+          Description : this.unBox(project.Description)
         };
         let contextUnits = project.UnitsInContext;
         if (contextUnits)
@@ -263,7 +263,7 @@ class IFCLoader extends THREE.Loader
             {
               ifcClassName: typeProduct.constructor.name,
               GlobalId : typeProduct.GlobalId,
-              Name : typeProduct.Name
+              Name : this.unBox(typeProduct.Name)
             };
             types.add(typeGroup);
 
@@ -440,6 +440,11 @@ class IFCLoader extends THREE.Loader
     return model;
   }
 
+  unBox(value)
+  {
+    return value && value.Value !== undefined ? value.Value : value;
+  }
+
   getCircleSegments(radius)
   {
     let meterRadius = radius * this.modelFactor;
@@ -601,8 +606,8 @@ class IfcProductHelper extends IfcHelper
       object3D.userData.IFC = {
         ifcClassName : product.constructor.name,
         GlobalId : product.GlobalId,
-        Name: product.Name,
-        Description : product.Description
+        Name: loader.unBox(product.Name),
+        Description : loader.unBox(product.Description)
       };
       object3D._ifc = product;
 
@@ -3242,6 +3247,7 @@ class IfcPropertySetHelper extends IfcHelper
     {
       const pset = this.instance;
       const schema = this.instance.constructor.schema;
+      const loader = pset._loader;
 
       this.properties =  {};
       for (var i = 0; i < pset.HasProperties.length; i++)
@@ -3249,16 +3255,8 @@ class IfcPropertySetHelper extends IfcHelper
         var prop = pset.HasProperties[i];
         if (prop instanceof schema.IfcPropertySingleValue)
         {
-          var name = prop.Name;
-          if (name && name.Value)
-          {
-            name = name.Value;
-          }
-          var value = prop.NominalValue;
-          if (value && value.Value)
-          {
-            value = value.Value;
-          }
+          var name = loader.unBox(prop.Name);
+          var value = loader.unBox(prop.NominalValue);
           if (value === ".T.")
           {
             value = true;

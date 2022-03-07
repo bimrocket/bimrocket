@@ -27,6 +27,7 @@ import { LineDashedShaderMaterial } from "../materials/LineDashedShaderMaterial.
 import { Inspector } from "../ui/Inspector.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { Formula } from "../formula/Formula.js";
+import { LoginDialog } from "./LoginDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -214,18 +215,14 @@ class Application
 
     this.pointSelector = new PointSelector(this);
 
+    // set language
+    this.i18n.userLanguages = window.localStorage.getItem("bimrocket.language")
+      || navigator.language;
+
+    // init scene
+    this.initScene();
+
     // listeners
-    window.addEventListener("resize", this.onResize.bind(this), false);
-
-    window.addEventListener("beforeunload", event =>
-    {
-      if (this.unsavedChanges)
-      {
-        event.preventDefault();
-        event.returnValue = "";
-      }
-    });
-
     this.addEventListener("scene", event =>
     {
       if (event.type === "cameraActivated")
@@ -270,6 +267,18 @@ class Application
       }
     });
 
+    window.addEventListener("resize", this.onResize.bind(this), false);
+
+    window.addEventListener("beforeunload", event =>
+    {
+      if (this.unsavedChanges)
+      {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    });
+
+    // animation
     let __animationEvent = {delta : 0};
     let __animationCounter = 0;
     let animate = () =>
@@ -294,65 +303,10 @@ class Application
       }
     };
 
-    // init scene
-    const params = WebUtils.getQueryParams();
-    const url = params["url"];
-    if (url)
-    {
-      this.loadScene(params);
-    }
-    else
-    {
-      this.initScene();
-    }
     animate();
-
-    this.i18n.userLanguages = window.localStorage.getItem("bimrocket.language")
-      || navigator.language;
   }
 
-  loadScene(params)
-  {
-    const url = params["url"];
-    const application = this;
-    const intent =
-    {
-      url : url,
-      onProgress : data =>
-      {
-        application.progressBar.progress = data.progress;
-        application.progressBar.message = data.message;
-      },
-      onCompleted : object =>
-      {
-        application.initScene(object);
-        application.progressBar.visible = false;
-        const toolName = params["tool"];
-        if (toolName)
-        {
-          let tool = this.tools[toolName];
-          if (tool)
-          {
-            application.useTool(tool);
-          }
-        }
-      },
-      onError : error =>
-      {
-        application.progressBar.visible = false;
-        MessageDialog.create("ERROR", error)
-          .setClassName("error")
-          .setI18N(application.i18n).show();
-      },
-      options : { units : application.units }
-    };
-    application.progressBar.message = "Loading file...";
-    application.progressBar.progress = undefined;
-    application.progressBar.visible = true;
-    IOManager.load(intent); // asynchron load
-  }
-
-  initScene(object)
+  initScene()
   {
     const container = this.container;
 
@@ -418,12 +372,13 @@ class Application
 
     // Add base group
     this.baseObject = new THREE.Group();
-    this.baseObject.name = "Base";
-    this.baseObject.userData.selection = {type : "none"};
+    const baseObject = this.baseObject;
+    baseObject.name = "Base";
+    baseObject.userData.selection = {type : "none"};
 
-    this.baseObject.updateMatrix();
+    baseObject.updateMatrix();
 
-    scene.add(this.baseObject);
+    scene.add(baseObject);
 
     // Add clipping group
     this.clippingGroup = new THREE.Group();
@@ -436,25 +391,11 @@ class Application
     this.overlays.matrixAutoUpdate = false;
     this.scene.add(this.overlays);
 
-    // Add initial object
-    if (object instanceof THREE.Object3D)
-    {
-      this.baseObject.add(object);
-
-      this.scene.updateMatrix();
-      this.scene.updateMatrixWorld(true);
-
-      let container = this.container;
-      let aspect = container.clientWidth / container.clientHeight;
-      let camera = this.camera;
-
-      ObjectUtils.zoomAll(camera, this.baseObject, aspect);
-    }
     let sceneEvent = {type : "structureChanged",
       objects : [this.scene], source : this};
     this.notifyEventListeners("scene", sceneEvent);
 
-    this.selection.set(object || this.baseObject);
+    this.selection.set(baseObject);
   }
 
   render()
@@ -1453,7 +1394,7 @@ class Application
       }
       else
       {
-        setTimeout(() => this.hideLogo(), 1000);
+        setTimeout(() => { this.hideLogo(); this.loadModelFromUrl(); }, 1000);
       };
     };
 
@@ -1474,6 +1415,72 @@ class Application
   {
     this.logoPanel.classList.add("hidden");
     this.logoPanel.classList.remove("visible");
+  }
+
+  loadModelFromUrl()
+  {
+    const params = WebUtils.getQueryParams();
+
+    const url = params["url"];
+    if (url === undefined) return;
+
+    const application = this;
+    const intent =
+    {
+      url : url,
+      onProgress : data =>
+      {
+        application.progressBar.progress = data.progress;
+        application.progressBar.message = data.message;
+      },
+      onCompleted : object =>
+      {
+        application.addObject(object);
+        application.progressBar.visible = false;
+        const toolName = params["tool"];
+        if (toolName)
+        {
+          let tool = this.tools[toolName];
+          if (tool)
+          {
+            application.useTool(tool);
+          }
+        }
+      },
+      onError : error =>
+      {
+        application.progressBar.visible = false;
+        MessageDialog.create("ERROR", error)
+          .setClassName("error")
+          .setI18N(application.i18n).show();
+      },
+      options : { units : application.units }
+    };
+    application.progressBar.message = "Loading file...";
+    application.progressBar.progress = undefined;
+    application.progressBar.visible = true;
+
+    const auth = params["auth"];
+    if (auth === "Basic")
+    {
+      let dialog = new LoginDialog(application);
+      dialog.login = (username, password) =>
+      {
+        intent.basicAuthCredentials =
+        { "username" : username, "password" : password };
+        IOManager.load(intent);
+      };
+      dialog.onCancel = () =>
+      {
+        dialog.hide();
+        application.progressBar.visible = false;
+      };
+      dialog.show();
+    }
+    else
+    {
+      IOManager.load(intent); // asynchron load
+    }
   }
 }
 

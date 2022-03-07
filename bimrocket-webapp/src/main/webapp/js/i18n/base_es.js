@@ -255,6 +255,9 @@ export const translations =
   "label.format" : "Formato:",
   "label.save_selection" : "Guarda solo la selección",
 
+  "label.username" : "Usuario:",
+  "label.password" : "Contraseña:",
+
   "label.folder_name" : "Nombre de la carpeta:",
   "label.property_name" : "Nombre de la propiedad:",
   "label.property_type" : "Tipo de la propiedad:",
@@ -306,6 +309,7 @@ export const translations =
   "title.object_builder" : "Constructor de objeto",
   "title.select_by_property" : "Selección por propiedades",
   "title.export_selection" : "Exportar selección",
+  "title.login" : "Identificación",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,

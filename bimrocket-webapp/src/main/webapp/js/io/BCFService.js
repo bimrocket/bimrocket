@@ -6,6 +6,7 @@
 
 import { Service } from "./Service.js";
 import { ServiceManager } from "./ServiceManager.js";
+import { WebUtils } from "../utils/WebUtils.js";
 
 class BCFService extends Service
 {
@@ -247,11 +248,8 @@ class BCFService extends Service
     request.open(method, this.url + "/bcf/2.1/" + path);
     request.setRequestHeader("Content-Type", "application/json");
 
-    if (this.username && this.password)
-    {
-      const userPass = this.username + ":" + this.password;
-      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
-    }
+    WebUtils.setBasicAuthorization(request, this.username, this.password);
+
     if (data)
     {
       request.send(JSON.stringify(data));

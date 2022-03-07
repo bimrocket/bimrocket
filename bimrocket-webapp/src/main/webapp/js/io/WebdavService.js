@@ -6,6 +6,7 @@
 
 import { FileService, Metadata, Result } from "./FileService.js";
 import { ServiceManager } from "./ServiceManager.js";
+import { WebUtils } from "../utils/WebUtils.js";
 
 class WebdavService extends FileService
 {
@@ -123,9 +124,9 @@ class WebdavService extends FileService
                 progressCallback({progress : progress, message : message});
               };
             }
-            this.setCredentials(request);
+            WebUtils.setBasicAuthorization(request,
+              this.username, this.password);
             request.send();
-
           }
         }
         catch (ex)
@@ -150,7 +151,7 @@ class WebdavService extends FileService
     };
     request.open("PROPFIND", url, true);
     request.setRequestHeader("depth", "1");
-    this.setCredentials(request);
+    WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send();
   }
 
@@ -178,7 +179,7 @@ class WebdavService extends FileService
       }
     };
     request.open("PUT", url, true);
-    this.setCredentials(request);
+    WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send(data);
   }
 
@@ -206,7 +207,7 @@ class WebdavService extends FileService
       }
     };
     request.open("DELETE", url, true);
-    this.setCredentials(request);
+    WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send();
   }
 
@@ -235,38 +236,19 @@ class WebdavService extends FileService
       }
     };
     request.open("MKCOL", url, true);
-    this.setCredentials(request);
+    WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send();
-  }
-
-  setCredentials(request)
-  {
-    if (this.username && this.password)
-    {
-      const userPass = this.username + ":" + this.password;
-      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
-    }
   }
 
   createError(message, status)
   {
-    let error = null;
-    switch (status)
+    let statusMessage = WebUtils.getHttpStatusMessage(status);
+    if (statusMessage.length > 0)
     {
-      case 403:
-        error =  "Access forbidden";
-        break;
-      case 404:
-        error = "Not found";
-        break;
-      case 405:
-        error = "Not allowed";
-        break;
-      case 500:
-        error = "Internal server error";
-        break;
+      message += ": " + statusMessage;
     }
-    if (error) message = message + ": " + error + " (HTTP " + status + ").";
+    message += " (HTTP " + status + ").";
+
     return new Result(Result.ERROR, message);
   }
 

@@ -5,6 +5,7 @@
  */
 
 import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { WebUtils } from "../utils/WebUtils.js";
 import * as THREE from "../lib/three.module.js";
 
 class IOManager
@@ -74,6 +75,7 @@ class IOManager
     let manager = intent.manager; // LoadingManager
     let units = intent.units || "m"; // application units
     let options = intent.options;
+    let basicAuthCredentials = intent.basicAuthCredentials;
 
     try
     {
@@ -93,6 +95,7 @@ class IOManager
       {
         Object.assign(loader.options, options);
       }
+
       if (data)
       {
         this.parseData(loader, url, data, units,
@@ -132,7 +135,10 @@ class IOManager
             else
             {
               if (onError)
-                onError(request.statusText + " (" + request.status + ")");
+              {
+                let message = WebUtils.getHttpStatusMessage(request.status);
+                onError(message + " (HTTP " + request.status + ")");
+              }
             }
           }
           else if (request.readyState === 3)
@@ -154,6 +160,11 @@ class IOManager
           }
         };
         request.open("GET", url, true);
+        if (basicAuthCredentials)
+        {
+          WebUtils.setBasicAuthorization(request,
+            basicAuthCredentials.username, basicAuthCredentials.password);
+        }
         request.send();
       }
     }

@@ -6,6 +6,52 @@
 
 class WebUtils
 {
+  static getHttpStatusMessage(status)
+  {
+    let message;
+
+    switch (status)
+    {
+      case 200:
+        message = "OK";
+        break;
+      case 400:
+        message = "Bad request";
+        break;
+      case 401:
+        message = "Unathorized";
+        break;
+      case 403:
+        message = "Access forbidden";
+        break;
+      case 404:
+        message = "Not found";
+        break;
+      case 405:
+        message = "Not allowed";
+        break;
+      case 500:
+        message = "Internal server error";
+        break;
+      case 501:
+        message = "Not implemented";
+        break;
+      default:
+        message = "";
+    }
+    return message;
+  };
+
+  static setBasicAuthorization(request, username, password)
+  {
+    if (username !== null && username.length > 0
+        && password !== null && password.length > 0)
+    {
+      const userPass = username + ":" + password;
+      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
+    }
+  }
+
   static getQueryParams()
   {
     var queryString = {};

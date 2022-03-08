@@ -66,14 +66,16 @@ class ScriptDialog extends Dialog
     this.runButton = this.addButton("run", "button.run", () =>
     {
       this.endEdition();
-      this.run(this.scriptCode);
+      this.run();
     });
 
     this.saveButton = this.addButton("save", "button.save", () =>
     {
       this.endEdition();
-      if (saveAction) saveAction(this.scriptName, this.scriptCode);
+      saveAction(this.scriptName, this.scriptCode);
     });
+
+    this.saveButton.style.display = saveAction ? "" : "none";
 
     this.closeButton = this.addButton("cancel", "button.close", () =>
     {
@@ -111,14 +113,14 @@ class ScriptDialog extends Dialog
     this.consoleElem.innerHTML = "";
   }
 
-  run(code)
+  run()
   {
     let error = null;
     this.enterConsole();
     try
     {
       this.consoleElem.innerHTML = "";
-      const fn = new Function(code);
+      const fn = new Function(this.scriptCode);
       let t0 = Date.now();
       fn();
       let t1 = Date.now();

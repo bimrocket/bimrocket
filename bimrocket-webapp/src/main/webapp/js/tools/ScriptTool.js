@@ -141,7 +141,7 @@ class ScriptTool extends Tool
       dialog.scriptName = panel.entryName;
       dialog.scriptCode = code;
       dialog.saved = true;
-      let error = dialog.run(code);
+      let error = dialog.run();
       panel.showButtonsPanel();
       if (error)
       {

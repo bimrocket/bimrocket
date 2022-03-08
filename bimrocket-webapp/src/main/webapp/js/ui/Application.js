@@ -28,6 +28,7 @@ import { Inspector } from "../ui/Inspector.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { Formula } from "../formula/Formula.js";
 import { LoginDialog } from "./LoginDialog.js";
+import { ScriptDialog } from "./ScriptDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -1437,15 +1438,7 @@ class Application
       {
         application.addObject(object);
         application.progressBar.visible = false;
-        const toolName = params["tool"];
-        if (toolName)
-        {
-          let tool = this.tools[toolName];
-          if (tool)
-          {
-            application.useTool(tool);
-          }
-        }
+        application.initTasks(params);        
       },
       onError : error =>
       {
@@ -1481,6 +1474,53 @@ class Application
     {
       IOManager.load(intent); // asynchron load
     }
+  }
+  
+  initTasks(params)
+  {
+    const toolName = params["tool"];
+    if (toolName)
+    {
+      let tool = this.tools[toolName];
+      if (tool)
+      {
+        this.useTool(tool);
+      }
+    }
+    else
+    {
+      const scriptPath = params["script"];
+      if (scriptPath)
+      {
+        const request = new XMLHttpRequest();
+        request.open('GET', scriptPath, true);
+        request.onload = () => 
+        {
+          console.info(request.status);
+          if (request.status === 200)
+          {
+            const scriptCode = request.responseText;
+            const dialog = new ScriptDialog(this);
+            dialog.scriptName = "init_script";
+            dialog.scriptCode = scriptCode;
+            let error = dialog.run();
+            if (error)
+            {
+              dialog.show();
+            }
+          }
+          else
+          {
+            let message = WebUtils.getHttpStatusMessage(request.status);
+            MessageDialog.create("ERROR", "Can't open script: " + message + 
+              " (HTTP " + request.status + ")")
+              .setClassName("error")
+              .setI18N(this.i18n).show();            
+          }
+        };
+        request.send();
+      }
+    }        
   }
 }
 

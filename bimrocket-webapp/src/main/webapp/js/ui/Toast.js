@@ -8,7 +8,7 @@ import { I18N } from "../i18n/I18N.js";
 
 class Toast
 {
-  constructor(message)
+  constructor(message, ...args)
   {
     this.message = message;
     this.millis = 2000;
@@ -19,16 +19,16 @@ class Toast
     this.toastElem.style.left = "50%";
     this.toastElem.style.opacity = 0;
     this.toastElem.className = "toast";
-    I18N.set(this.toastElem, "innerHTML", message);
+    I18N.set(this.toastElem, "innerHTML", message, ...args);
 
     this.setSize(180, 32);
     this.setTop(80);
     this.setClassName("toast");
   }
 
-  static create(message)
+  static create(message, ...args)
   {
-    return new Toast(message);
+    return new Toast(message, ...args);
   }
 
   setClassName(className)

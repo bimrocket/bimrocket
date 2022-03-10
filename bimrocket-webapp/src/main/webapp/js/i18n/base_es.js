@@ -268,6 +268,11 @@ export const translations =
   "label.formula.path" : "Propiedad:",
   "label.formula.expression" : "Expresión:",
 
+  "label.selection_by_properties" : "Propiedades:",
+  "label.expression" : "Expresión:",
+  "label.selection_properties" : "Propiedades de la selección:",
+  "label.exported_properties" : "Propiedades a exportar:",
+
   "label.add_property" : "Añadir propiedad",
   "label.add_formula" : "Añadir fórmula",
   "label.add_controller" : "Añadir controlador",
@@ -318,10 +323,11 @@ export const translations =
   "message.solids_area_volume" : ratio => `Area/Volumen: ${ratio}`,
 
   "message.invalid_service" : service => `Servicio no válido: [${service}].`,
-  "message.objects_selected" : count => `${count} objetos seleccionados:`,
+  "message.objects_selected" : count => `${count} objeto${count === 1 ? '' : 's'} seleccionado${count === 1 ? '' : 's'}:`,
   "message.no_solid_selected" : "Ningún sólido seleccionado.",
   "message.controllers_loaded" : count => `${count} controladores cargados.`,
   "message.select_directory" : "Selecciona el directorio donde guardar el fichero.",
+  "message.objects_selected_by_prop" : count => `${count} objeto${count === 1 ? '' : 's'} seleccionado${count === 1 ? '' : 's'}.`,
 
   "message.file_saved" : "Fichero guardado.",
   "message.folder_created" : "Carpeta creada.",

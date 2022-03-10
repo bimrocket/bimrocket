@@ -7,6 +7,8 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
+import { Toast } from "../ui/Toast.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 
 class SelectByPropertyTool extends Tool
 {
@@ -30,6 +32,8 @@ class SelectByPropertyTool extends Tool
       () => this.addProperty());
     dialog.addContextButton("add_expr_eq", "=",
       () => this.addExpression("=="));
+    dialog.addContextButton("add_expr_neq", "!=",
+      () => this.addExpression("!="));
     dialog.addContextButton("add_expr_gt", ">",
       () => this.addExpression(">"));
     dialog.addContextButton("add_expr_lt", "<",
@@ -134,10 +138,14 @@ class SelectByPropertyTool extends Tool
         selection.add(...selectedObjects);
         dialog.hide();
       }
+      Toast.create("message.objects_selected_by_prop", selectedObjects.length)
+        .setI18N(application.i18n).show();
     }
     catch (ex)
     {
-      console.info(ex);
+      MessageDialog.create("ERROR", ex)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
     }
   }
 }

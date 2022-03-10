@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 
 class ExportSelectionTool extends Tool
 {
@@ -23,6 +24,8 @@ class ExportSelectionTool extends Tool
     this.dialog = new PropertySelectorDialog(this.application,
       { title : "title.export_selection",
         selectValues : false,
+        treeLabel : "label.selection_properties",
+        editorLabel : "label.exported_properties",
         findPropertiesOnSelection : true
       });
     const dialog = this.dialog;
@@ -120,7 +123,9 @@ class ExportSelectionTool extends Tool
     }
     catch (ex)
     {
-      console.info(ex);
+      MessageDialog.create("ERROR", ex)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
     }
   }
 

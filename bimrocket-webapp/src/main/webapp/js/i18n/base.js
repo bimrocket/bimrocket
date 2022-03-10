@@ -268,6 +268,11 @@ export const translations =
   "label.formula.path" : "Property:",
   "label.formula.expression" : "Expression:",
 
+  "label.selection_by_properties" : "Properties:",
+  "label.expression" : "Expression:",
+  "label.selection_properties" : "Selection properties:",
+  "label.exported_properties" : "Properties to export:",
+
   "label.add_property" : "Add property",
   "label.add_formula" : "Add formula",
   "label.add_controller" : "Add controller",
@@ -318,10 +323,11 @@ export const translations =
   "message.solids_area_volume" : ratio => `Area/Volume: ${ratio}`,
 
   "message.invalid_service" : service => `Invalid service: [${service}].`,
-  "message.objects_selected" : count => `${count} objects selected:`,
+  "message.objects_selected" : count => `${count} object${count === 1 ? '' : 's'} selected:`,
   "message.no_solid_selected" : "No solid selected.",
   "message.controllers_loaded" : count => `${count} controllers loaded.`,
   "message.select_directory" : "Select directory to save file.",
+  "message.objects_selected_by_prop" : count => `${count} object${count === 1 ? '' : 's'} selected.`,
 
   "message.file_saved" : "File saved.",
   "message.folder_created" : "Folder created.",

@@ -18,6 +18,7 @@ class LoginDialog extends Dialog
 
     this.usernameElem = this.addTextField("loginUser",
       "label.username", "");
+    this.usernameElem.setAttribute("spellcheck", "false");
 
     this.passwordElem = this.addPasswordField("loginPassword",
       "label.password", "");

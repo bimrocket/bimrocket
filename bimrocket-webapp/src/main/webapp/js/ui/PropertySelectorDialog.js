@@ -20,7 +20,8 @@ class PropertySelectorDialog extends Dialog
     this.setSize(700, 600);
 
     this.treeLabel = document.createElement("div");
-    this.treeLabel.innerHTML = options.treeLabel || "Selection properties:";
+    I18N.set(this.treeLabel, "innerHTML", options.treeLabel ||
+      "label.selection_by_properties");
     this.bodyElem.appendChild(this.treeLabel);
 
     this.treeScrollElem = document.createElement("div");
@@ -35,7 +36,7 @@ class PropertySelectorDialog extends Dialog
     this.bodyElem.appendChild(this.toolBarElem);
 
     this.editor = Controls.addTextAreaField(this.bodyElem,
-      "property_input_area", options.editorLabel || "Expression:",
+      "property_input_area", options.editorLabel || "label.expression",
       options.editorValue || "", "property_expression");
     this.editor.setAttribute("spellcheck", "false");
 

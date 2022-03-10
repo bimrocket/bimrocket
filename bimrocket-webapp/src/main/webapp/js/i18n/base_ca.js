@@ -268,6 +268,11 @@ export const translations =
   "label.formula.path" : "Propietat:",
   "label.formula.expression" : "Expressió:",
 
+  "label.selection_by_properties" : "Propietats:",
+  "label.expression" : "Expressió:",
+  "label.selection_properties" : "Propietats de la selecció:",
+  "label.exported_properties" : "Propietats a exportar:",
+
   "label.add_property" : "Afegeix propietat",
   "label.add_formula" : "Afegeix fórmula",
   "label.add_controller" : "Afegeix controlador",
@@ -318,10 +323,11 @@ export const translations =
   "message.solids_area_volume" : ratio => `Àrea/Volum: ${ratio}`,
 
   "message.invalid_service" : service => `Servei no vàlid: [${service}].`,
-  "message.objects_selected" : count => `${count} objectes seleccionats:`,
+  "message.objects_selected" : count => `${count} objecte${count === 1 ? '' : 's'} seleccionat${count === 1 ? '' : 's'}:`,
   "message.no_solid_selected" : "Cap sòlid seleccionat.",
   "message.controllers_loaded" : count => `${count} controladors carregats.`,
   "message.select_directory" : "Selecciona el directori on desar el fitxer.",
+  "message.objects_selected_by_prop" : count => `${count} objecte${count === 1 ? '' : 's'} seleccionat${count === 1 ? '' : 's'}.`,
 
   "message.file_saved" : "Fitxer desat.",
   "message.folder_created" : "Carpeta creada.",

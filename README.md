@@ -1,4 +1,7 @@
 # BIMROCKET
+
+[![Java CI with Maven](https://github.com/bimrocket/bimrocket/actions/workflows/maven.yml/badge.svg)](https://github.com/bimrocket/bimrocket/actions/workflows/maven.yml)
+
 BIMROCKET is an open source platform for managing BIM projects. It has a web application to view and edit IFC models and a server to store BIM projects in an OrientDB database.
 
 ## features
@@ -14,6 +17,7 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Multiple selection of objects.
 - Edition of the model structure and the object properties.
 - Dynamic sectioning of models.
+- Vertex and egde snapping in measure and draw tools.
 - Scripting tool.
 - Object controllers (programs that change the object state)
 - Load IFC files directly from local disk or the web server. Support for multiple IFC schemas (IFC2x3, IFC4, ...).

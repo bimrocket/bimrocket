@@ -21,6 +21,51 @@ class ObjectUtils
     "in" : 39.3701
   };
 
+  static getUserDataValue(object, ...properties)
+  {
+    let data = object.userData;
+    let i = 0;
+    while (i < properties.length && typeof data === "object")
+    {
+      let property = properties[i];
+      data = data[property];
+      i++;
+    }
+    if (data === null || data === undefined) data = "";
+
+    return data;
+  }
+
+  /**
+   *
+   * @param {String} expression : an expression with references to
+   * object variable and $ function.
+   * @returns {Function} : function fn(object)
+   */
+  static createEvalFunction(expression)
+  {
+    let fn;
+
+    if (typeof expression === "string")
+    {
+      fn = new Function("object", "$", "return " + expression + ";");
+    }
+    else if (typeof expression === "function")
+    {
+      fn = expression;
+    }
+    else
+    {
+      fn = () => "";
+    }
+
+    return (object) =>
+    {
+      const $ = (...properties) => this.getUserDataValue(object, ...properties);
+      return fn(object, $);
+    };
+  }
+
   static find(root, condition)
   {
     const selection = [];
@@ -468,4 +513,4 @@ class ObjectUtils
   }
 };
 
-export { ObjectUtils, };
+export { ObjectUtils };

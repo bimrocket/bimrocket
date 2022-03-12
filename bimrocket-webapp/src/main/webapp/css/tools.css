@@ -807,3 +807,8 @@ div.script_code
   overflow-x: scroll;
   color: #606060;
 }
+
+.property_selector_toolbar button
+{
+  min-width: 24px;
+}

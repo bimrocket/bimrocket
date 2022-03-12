@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Toast } from "../ui/Toast.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 
@@ -28,20 +29,28 @@ class SelectByPropertyTool extends Tool
         findPropertiesOnSelection : false
       });
     const dialog = this.dialog;
+
     dialog.addContextButton("add_prop", "button.add",
       () => this.addProperty());
+
     dialog.addContextButton("add_expr_eq", "=",
       () => this.addExpression("=="));
+
     dialog.addContextButton("add_expr_neq", "!=",
       () => this.addExpression("!="));
-    dialog.addContextButton("add_expr_gt", ">",
-      () => this.addExpression(">"));
+
     dialog.addContextButton("add_expr_lt", "<",
       () => this.addExpression("<"));
+
+    dialog.addContextButton("add_expr_gt", ">",
+      () => this.addExpression(">"));
+
     dialog.addContextButton("add_op_and", "And",
       () => this.addOperator("&&"));
+
     dialog.addContextButton("add_op_or", "Or",
       () => this.addOperator("||"));
+
     dialog.addContextButton("clear_prop", "button.clear",
       () => this.clearExpression());
 
@@ -120,9 +129,7 @@ class SelectByPropertyTool extends Tool
     try
     {
       let expression = dialog.editor.value;
-      let fn = new Function("object",
-        "const $ = (...p) => _readObjectValue_(object, ...p); return " +
-        expression + ";");
+      const fn = ObjectUtils.createEvalFunction(expression);
 
       let selectedObjects = [];
 
@@ -149,18 +156,5 @@ class SelectByPropertyTool extends Tool
     }
   }
 }
-
-window._readObjectValue_ = (object, ...properties) =>
-{
-  let data = object.userData;
-  let i = 0;
-  while (i < properties.length && typeof data === "object")
-  {
-    let property = properties[i];
-    data = data[property];
-    i++;
-  }
-  return data;
-};
 
 export { SelectByPropertyTool };

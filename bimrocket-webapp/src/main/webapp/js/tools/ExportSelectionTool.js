@@ -8,6 +8,8 @@ import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import * as THREE from "../lib/three.module.js";
 
 class ExportSelectionTool extends Tool
 {
@@ -29,8 +31,10 @@ class ExportSelectionTool extends Tool
         findPropertiesOnSelection : true
       });
     const dialog = this.dialog;
+
     dialog.addContextButton("add_prop", "button.add",
       () => this.addProperty());
+
     dialog.addContextButton("clear_prop", "button.clear",
       () => this.clearProperties());
 
@@ -65,14 +69,14 @@ class ExportSelectionTool extends Tool
 
     for (let path of paths)
     {
-      let line = '"' + path[path.length - 1] + '" : [';
+      let line = '"' + path[path.length - 1] + '" : $(';
       for (let i = 0; i < path.length; i++)
       {
         let part = path[i];
         if (i > 0) line += ", ";
         line += '"' + part + '"';
       }
-      line += "]";
+      line += ")";
       dialog.editor.value += line + "\n";
     }
   }
@@ -92,13 +96,16 @@ class ExportSelectionTool extends Tool
     {
       let properties = dialog.editor.value;
       let lines = properties.split("\n").filter(line => line.trim().length > 0);
-      let json = "{" + lines.join(",") + "}";
-      let filter = JSON.parse(json);
+      let exportExpression = "{" + lines.join(",") + "}";
       let roots = application.selection.roots;
       let exportedData = [];
 
+      let fn = ObjectUtils.createEvalFunction(exportExpression);
+
+      let headersObject = fn(new THREE.Object3D());
+
       let headers = [];
-      for (let key in filter)
+      for (let key in headersObject)
       {
         headers.push(key);
       }
@@ -106,7 +113,7 @@ class ExportSelectionTool extends Tool
 
       for (let root of roots)
       {
-        exportedData.push(this.extractData(root, filter));
+        exportedData.push(this.toCSVRow(fn(root)));
       }
       let csv = "\uFEFF" + exportedData.join("\n");
       const blob = new Blob([csv], {type : 'text/csv'});
@@ -129,20 +136,12 @@ class ExportSelectionTool extends Tool
     }
   }
 
-  extractData(object, filter)
+  toCSVRow(data)
   {
     let line = "";
-    for (let columnName in filter)
+    for (let columnName in data)
     {
-      let path = filter[columnName];
-      let value = object.userData;
-      let i = 0;
-      while (i < path.length && typeof value === "object")
-      {
-        let key = path[i];
-        value = value[key];
-        i++;
-      }
+      let value = data[columnName];
       if (line.length > 0) line += ";";
       if (value === undefined)
       {

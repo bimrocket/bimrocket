@@ -32,7 +32,7 @@ class ScriptTool extends Tool
     this.className = "script";
     this.setOptions(options);
 
-    const panel = new FileExplorer(application);
+    const panel = new FileExplorer(application, false);
     this.panel = panel;
 
     panel.title = this.label;
@@ -43,14 +43,30 @@ class ScriptTool extends Tool
     this.dialog = dialog;
 
     panel.openFile = (url, code) =>
-      this.openFile(() => this.showFile(url, code));
+      this.openScript(() => this.setScript(url, code, false, true));
 
-    panel.addContextButton("run", "button.run",
-      () => this.openFile(() => this.runFile()),
+    panel.addContextButton("open", "button.open",
+      () => panel.openEntry(),
+      () => panel.isEntrySelected() && !panel.isFileEntrySelected());
+
+    panel.addContextButton("open_file", "button.run",
+      () => panel.openEntry(),
+      () => panel.isDirectoryList() && panel.isFileEntrySelected());
+
+    panel.addContextButton("edit", "button.edit",
+      () => this.openScript(() => this.loadSelectedScript(true, false)),
       () => panel.isDirectoryList() && panel.isEntrySelected());
 
+    panel.addContextButton("new", "button.new",
+      () => this.openScript(() => this.setScript("", "", true, false)),
+      () => true);
+
     panel.addContextButton("editor", "button.editor",
-      () => dialog.show(), () => true);
+      () => dialog.show(),
+      () => true);
+
+    panel.addCommonContextButtons();
+    panel.addServiceContextButtons();
 
     application.panelManager.addPanel(this.panel);
   }
@@ -93,7 +109,7 @@ class ScriptTool extends Tool
     }
   }
 
-  openFile(action)
+  openScript(action)
   {
     const dialog = this.dialog;
     const application = this.application;
@@ -113,21 +129,7 @@ class ScriptTool extends Tool
     }
   }
 
-  showFile(url, code)
-  {
-    const dialog = this.dialog;
-
-    const index = url.lastIndexOf("/");
-    let name = url.substring(index + 1);
-
-    dialog.scriptName = name;
-    dialog.scriptCode = code;
-    dialog.saved = true;
-    dialog.clearConsole();
-    dialog.show();
-  }
-
-  runFile()
+  loadSelectedScript(show, run)
   {
     const dialog = this.dialog;
     const panel = this.panel;
@@ -138,16 +140,44 @@ class ScriptTool extends Tool
     panel.service.open(path, result =>
     {
       let code = result.data;
-      dialog.scriptName = panel.entryName;
-      dialog.scriptCode = code;
-      dialog.saved = true;
+      if (result.status === Result.OK)
+      {
+        this.setScript(path, code, show, run);
+        panel.showButtonsPanel();
+      }
+      else
+      {
+        MessageDialog.create("ERROR", result.message)
+          .setClassName("error")
+          .setI18N(this.application.i18n).show();
+        panel.showButtonsPanel();
+      }
+    }, data => panel.setProgress(data.progress, data.message));
+  }
+
+  setScript(url, code, show, run)
+  {
+    const dialog = this.dialog;
+
+    const index = url.lastIndexOf("/");
+    let name = url.substring(index + 1);
+
+    dialog.scriptName = name;
+    dialog.scriptCode = code;
+    dialog.saved = true;
+    dialog.clearConsole();
+    if (show)
+    {
+      dialog.show();
+    }
+    if (run)
+    {
       let error = dialog.run();
-      panel.showButtonsPanel();
       if (error)
       {
         dialog.show();
       }
-    }, data => panel.setProgress(data.progress, data.message));
+    }
   }
 }
 

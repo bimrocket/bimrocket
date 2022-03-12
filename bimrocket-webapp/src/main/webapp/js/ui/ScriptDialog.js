@@ -125,6 +125,8 @@ class ScriptDialog extends Dialog
       fn();
       let t1 = Date.now();
       this.log("info", "Execution completed in " + (t1 - t0) + " ms.");
+      Toast.create("message.script_executed")
+        .setI18N(this.application.i18n).show();
     }
     catch (ex)
     {

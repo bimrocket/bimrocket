@@ -17,7 +17,7 @@ import { I18N } from "../i18n/I18N.js";
 
 class FileExplorer extends Panel
 {
-  constructor(application)
+  constructor(application, createContextButtons = true)
   {
     super(application);
     this.id = "file_explorer";
@@ -67,7 +67,10 @@ class FileExplorer extends Panel
     this.footerElem.appendChild(this.buttonsPanelElem);
     this.showButtonsPanel();
 
-    this.addContextButtons();
+    if (createContextButtons)
+    {
+      this.addContextButtons();
+    }
   }
 
   addContextButton(name, label, action, isVisible)
@@ -80,21 +83,41 @@ class FileExplorer extends Panel
   addContextButtons()
   {
     this.addContextButton("open", "button.open",
-      () => this.openEntry(), () => this.isEntrySelected());
-    this.addContextButton("add", "button.add",
-      () => this.showAddDialog(), () => this.isServiceList());
-    this.addContextButton("edit", "button.edit",
-      () => this.showEditDialog(),
-      () => this.isServiceList() && this.isEntrySelected());
+      () => this.openEntry(),
+      () => this.isEntrySelected());
+
+    this.addCommonContextButtons();
+    this.addServiceContextButtons();
+  }
+
+  addCommonContextButtons()
+  {
     this.addContextButton("delete", "button.delete",
-      () => this.showDeleteDialog(), () => this.isEntrySelected());
+      () => this.showDeleteDialog(),
+      () => this.isEntrySelected());
+
     this.addContextButton("folder", "button.folder",
-      () => this.showFolderDialog(), () => this.isDirectoryList());
+      () => this.showFolderDialog(),
+      () => this.isDirectoryList());
+
     this.addContextButton("upload", "button.upload",
-      () => this.showUploadDialog(), () => this.isDirectoryList());
+      () => this.showUploadDialog(),
+      () => this.isDirectoryList());
+
     this.addContextButton("download", "button.download",
       () => this.download(this.basePath + "/" + this.entryName),
       () => this.isDirectoryList() && this.isFileEntrySelected());
+  }
+
+  addServiceContextButtons()
+  {
+    this.addContextButton("add", "button.add",
+      () => this.showAddDialog(),
+      () => this.isServiceList());
+
+    this.addContextButton("edit", "button.edit",
+      () => this.showEditDialog(),
+      () => this.isServiceList() && this.isEntrySelected());
   }
 
   isServiceList()
@@ -115,6 +138,11 @@ class FileExplorer extends Panel
   isFileEntrySelected()
   {
     return this.entryType === Metadata.FILE;
+  }
+
+  isCollectionEntrySelected()
+  {
+    return this.entryType === Metadata.COLLECTION;
   }
 
   showAddDialog()
@@ -531,7 +559,6 @@ class FileExplorer extends Panel
     this.entryType = entryType;
     this.hilight();
     this.updateButtons();
-    this.buttonsPanelElem.children[0].focus();
   }
 
   openEntry()
@@ -560,9 +587,22 @@ class FileExplorer extends Panel
   updateButtons()
   {
     const children = this.buttonsPanelElem.children;
+    let firstVisibleButton = null;
     for (let child of children)
     {
-      child.style.display = child._isVisible() ? "inline" : "none";
+      if (child._isVisible())
+      {
+        child.style.display = "inline";
+        if (firstVisibleButton === null) firstVisibleButton = child;
+      }
+      else
+      {
+        child.style.display = "none";
+      }
+    }
+    if (firstVisibleButton)
+    {
+      firstVisibleButton.focus();
     }
   }
 

@@ -328,6 +328,7 @@ export const translations =
   "message.controllers_loaded" : count => `${count} controladors carregats.`,
   "message.select_directory" : "Selecciona el directori on desar el fitxer.",
   "message.objects_selected_by_prop" : count => `${count} objecte${count === 1 ? '' : 's'} seleccionat${count === 1 ? '' : 's'}.`,
+  "message.script_executed" : "Programa executat.",
 
   "message.file_saved" : "Fitxer desat.",
   "message.folder_created" : "Carpeta creada.",

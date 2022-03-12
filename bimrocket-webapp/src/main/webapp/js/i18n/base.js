@@ -328,6 +328,7 @@ export const translations =
   "message.controllers_loaded" : count => `${count} controllers loaded.`,
   "message.select_directory" : "Select directory to save file.",
   "message.objects_selected_by_prop" : count => `${count} object${count === 1 ? '' : 's'} selected.`,
+  "message.script_executed" : "Script executed.",
 
   "message.file_saved" : "File saved.",
   "message.folder_created" : "Folder created.",

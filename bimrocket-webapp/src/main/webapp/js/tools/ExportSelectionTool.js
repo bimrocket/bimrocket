@@ -97,7 +97,6 @@ class ExportSelectionTool extends Tool
       let properties = dialog.editor.value;
       let lines = properties.split("\n").filter(line => line.trim().length > 0);
       let exportExpression = "{" + lines.join(",") + "}";
-      let roots = application.selection.roots;
       let exportedData = [];
 
       let fn = ObjectUtils.createEvalFunction(exportExpression);
@@ -111,9 +110,10 @@ class ExportSelectionTool extends Tool
       }
       exportedData.push(headers.join(";"));
 
-      for (let root of roots)
+      let objects = application.selection.objects;
+      for (let object of objects)
       {
-        exportedData.push(this.toCSVRow(fn(root)));
+        exportedData.push(this.toCSVRow(fn(object)));
       }
       let csv = "\uFEFF" + exportedData.join("\n");
       const blob = new Blob([csv], {type : 'text/csv'});

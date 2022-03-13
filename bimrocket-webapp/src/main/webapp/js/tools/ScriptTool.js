@@ -133,7 +133,11 @@ class ScriptTool extends Tool
   {
     const dialog = this.dialog;
     const panel = this.panel;
-    let path = panel.basePath + panel.entryName;
+    let path = panel.basePath;
+    if (!path.endsWith("/")) path += "/";
+    path += panel.entryName;
+
+    console.info(path);
 
     panel.showProgressBar();
 

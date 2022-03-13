@@ -8,9 +8,10 @@ class ModuleLoader
 {
   static load(path)
   {
+    let fullPath;
     if (path.startsWith("http:") || path.startsWith("https:"))
     {
-      return import(path);
+      fullPath = path;
     }
     else
     {
@@ -18,8 +19,9 @@ class ModuleLoader
       let index = pathname.lastIndexOf("/");
       let basePath = pathname.substring(0, index) + "/js/";
 
-      return import(basePath + path);
+      fullPath = basePath + path;
     }
+    return import(fullPath);
   }
 }
 

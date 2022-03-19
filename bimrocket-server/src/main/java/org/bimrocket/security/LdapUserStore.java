@@ -160,7 +160,7 @@ public class LdapUserStore implements UserStore
   @Override
   public Set<String> getRoles(String username)
   {
-    if (StringUtils.isBlank(username)) return Collections.emptySet();
+    if (StringUtils.isBlank(username)) username = ANONYMOUS_USER;
 
     // refresh cache
     long now = System.currentTimeMillis();
@@ -183,6 +183,10 @@ public class LdapUserStore implements UserStore
       }
       roles.add(username.trim()); // nominal role
       roles.add(EVERYONE_ROLE); // everyone role
+      if (!ANONYMOUS_USER.equals(username))
+      {
+        roles.add(AUTHENTICATED_ROLE);
+      }
       roleCache.put(username, roles);
     }
     return roles;

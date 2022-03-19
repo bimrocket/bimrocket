@@ -40,9 +40,19 @@ public interface UserStore
 {
   public static final String ANONYMOUS_USER = "anonymous";
   public static final String EVERYONE_ROLE = "EVERYONE";
+  public static final String AUTHENTICATED_ROLE = "AUTHENTICATED";
 
   public boolean validateCredential(String username, String password);
 
-  // all users have their nominal role and the EVERYONE role
+  /**
+   * Gets the user roles.
+   *
+   * The returned set contains the user nominal role and the EVERYONE role.
+   * If the user is not anonymous the set will also contain the AUTHENTICATED
+   * role.
+   *
+   * @param username the username whose roles are to be obtained
+   * @return a Set containing the user roles
+   */
   public Set<String> getRoles(String username);
 }

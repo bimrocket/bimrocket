@@ -32,6 +32,8 @@ package org.bimrocket.api.proxy;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
@@ -59,68 +61,100 @@ import org.apache.commons.io.IOUtils;
 @Tag(name="Proxy", description="HTTP Proxy service")
 public class ProxyEndpoint
 {
+  @Context
+  HttpServletRequest httpServletRequest;
+
+  @Context
+  ServletContext servletContext;
+
   @GET
   @PermitAll
   public Response doGet(@QueryParam("url") String url,
-    @Context UriInfo info, @Context HttpHeaders headers) throws Exception
+    @Context UriInfo info, @Context HttpHeaders headers)
   {
     if (url == null) return Response.ok().build();
 
-    StringBuilder buffer = new StringBuilder(url);
-    boolean firstParam = true;
-
-    MultivaluedMap<String, String> queryParams = info.getQueryParameters();
-    for (String name : queryParams.keySet())
-    {
-      if (!name.equals("url"))
-      {
-        List<String> values = queryParams.get(name);
-        for (String value : values)
-        {
-          if (firstParam)
-          {
-            buffer.append("?");
-            firstParam = false;
-          }
-          else
-          {
-            buffer.append("&");
-          }
-          String encodedValue = URLEncoder.encode(value, "UTF-8");
-          buffer.append(name).append("=").append(encodedValue);
-        }
-      }
-    }
-
-    URL targetUrl = new URL(buffer.toString());
-    System.out.println("Connecting to " + targetUrl);
-    HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
-
-    conn.connect();
-
-    InputStream responseStream;
     try
     {
-      responseStream = conn.getInputStream();
-    }
-    catch (IOException ex)
-    {
-      responseStream = conn.getErrorStream();
-    }
-    InputStream is = responseStream;
+      if (!isValidUrl(url))
+        throw new SecurityException("Access forbidden to " + url);
 
-    String contentType = conn.getContentType();
-    int pos = contentType.indexOf(";");
-    if (pos != -1)
-    {
-      contentType = contentType.substring(0, pos);
+      StringBuilder buffer = new StringBuilder(url);
+      boolean firstParam = true;
+
+      MultivaluedMap<String, String> queryParams = info.getQueryParameters();
+      for (String name : queryParams.keySet())
+      {
+        if (!name.equals("url"))
+        {
+          List<String> values = queryParams.get(name);
+          for (String value : values)
+          {
+            if (firstParam)
+            {
+              buffer.append("?");
+              firstParam = false;
+            }
+            else
+            {
+              buffer.append("&");
+            }
+            String encodedValue = URLEncoder.encode(value, "UTF-8");
+            buffer.append(name).append("=").append(encodedValue);
+          }
+        }
+      }
+
+      URL targetUrl = new URL(buffer.toString());
+      System.out.println("Connecting to " + targetUrl);
+      HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
+      conn.setRequestProperty("X-Forwarded-For",
+        httpServletRequest.getRemoteAddr());
+
+      conn.connect();
+
+      InputStream responseStream;
+      try
+      {
+        responseStream = conn.getInputStream();
+      }
+      catch (IOException ex)
+      {
+        responseStream = conn.getErrorStream();
+      }
+      InputStream is = responseStream;
+
+      String contentType = conn.getContentType();
+      int pos = contentType.indexOf(";");
+      if (pos != -1)
+      {
+        contentType = contentType.substring(0, pos);
+      }
+
+      StreamingOutput output = (OutputStream out) ->
+      {
+        IOUtils.copy(is, out);
+      };
+
+      return Response.ok(output).header("Content-Type", contentType).build();
     }
-
-    StreamingOutput output = (OutputStream out) ->
+    catch (Exception ex)
     {
-      IOUtils.copy(is, out);
-    };
+      return Response.serverError().entity(ex.toString()).build();
+    }
+  }
 
-    return Response.ok(output).header("Content-Type", contentType).build();
+  private boolean isValidUrl(String url)
+  {
+    Object value = servletContext.getInitParameter("proxy.validDomains");
+    if (value instanceof String)
+    {
+      String[] validDomains = ((String)value).split(",");
+      for (String validDomain : validDomains)
+      {
+        if (url.startsWith(validDomain)) return true;
+      }
+    }
+    return false;
   }
 }

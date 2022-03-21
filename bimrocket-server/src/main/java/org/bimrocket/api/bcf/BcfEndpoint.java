@@ -58,7 +58,6 @@ import java.util.Map;
 import jakarta.ws.rs.core.Response;
 import java.util.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.bimrocket.api.ApiError;
 import org.bimrocket.api.InvalidRequestException;
 import org.bimrocket.api.NotFoundException;
 import org.bimrocket.dao.Dao;

@@ -484,82 +484,109 @@ class IFCLoader extends THREE.Loader
       name : "Wall",
       color: 0xC0C080, shininess: 1,
       flatShading: false,
-      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1.0,
-      polygonOffsetUnits: 0.5}),
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.0,
+      polygonOffsetUnits: 0.5 }),
 
     IfcWallStandardCase : new THREE.MeshPhongMaterial({
       name : "Wall",
       color: 0xC0C080, shininess: 1,
       flatShading: false,
-      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1.0,
-      polygonOffsetUnits: 0.5}),
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.0,
+      polygonOffsetUnits: 0.5 }),
 
     IfcSlab : new THREE.MeshPhongMaterial({
       name : "Slab",
       color: 0xC0C0C0, shininess: 1,
       flatShading: false,
-      side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1.0,
-      polygonOffsetUnits: 0.5}),
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: 1.0,
+      polygonOffsetUnits: 0.5 }),
 
     IfcRailing : new THREE.MeshPhongMaterial({
       name : "Railing",
       flatShading: false,
-      color: 0x606060, shininess: 1, side: THREE.DoubleSide}),
+      color: 0x606060,
+      shininess: 1,
+      side: THREE.DoubleSide }),
 
     IfcWindow : new THREE.MeshPhongMaterial({
       name : "Window",
       flatShading: false,
-      color: 0x8080FF, opacity: 0.5, transparent: true, side: THREE.DoubleSide}),
+      color: 0x8080FF,
+      opacity: 0.5,
+      transparent: true,
+      depthWrite : false,
+      side: THREE.DoubleSide }),
 
     IfcDoor : new THREE.MeshPhongMaterial({
       name : "Door",
       flatShading: false,
-      color: 0xC0C040, side: THREE.DoubleSide}),
+      color: 0xC0C040,
+      side: THREE.DoubleSide }),
 
     IfcCovering : new THREE.MeshPhongMaterial({
       name : "Covering",
       flatShading: false,
-      color: 0xC0C0C0, side: THREE.FrontSide}),
+      color: 0xC0C0C0,
+      side: THREE.FrontSide }),
 
     IfcBeam : new THREE.MeshPhongMaterial({
       name : "Beam",
       flatShading: false,
-      color: 0x606070, side: THREE.FrontSide}),
+      color: 0x606070,
+      side: THREE.FrontSide }),
 
     IfcColumn : new THREE.MeshPhongMaterial({
       name : "Column",
       flatShading: false,
-      color: 0x808080, side: THREE.FrontSide}),
+      color: 0x808080,
+      side: THREE.FrontSide }),
 
     IfcOpeningElement : new THREE.MeshPhongMaterial({
       name : "Opening",
       flatShading: false,
-      color: 0x8080FF, opacity: 0.2, transparent: true, side: THREE.FrontSide}),
+      color: 0x8080FF,
+      opacity: 0.2,
+      transparent: true,
+      depthWrite : false,
+      side: THREE.FrontSide }),
 
     IfcSpace : new THREE.MeshPhongMaterial({
       name : "Space",
       flatShading: false,
-      color: 0xC0C0F0, opacity: 0.2, transparent: true}),
+      color: 0xC0C0F0,
+      opacity: 0.2,
+      transparent: true,
+      depthWrite : false }),
 
     IfcFlowTerminal : new THREE.MeshPhongMaterial({
       name : "FlowTerminal",
       flatShading: false,
-      color: 0xFFFFFF, side: THREE.DoubleSide}),
+      color: 0xFFFFFF,
+      side: THREE.DoubleSide }),
 
     IfcFurnishingElement : new THREE.MeshPhongMaterial({
       name : "FurnishingElement",
       flatShading: false,
-      color: 0xDEB887, side: THREE.DoubleSide}),
+      color: 0xDEB887,
+      side: THREE.DoubleSide }),
 
     IfcStair : new THREE.MeshPhongMaterial({
       name : "FurnishingElement",
       flatShading: false,
-      color: 0xA0522D, side: THREE.DoubleSide}),
+      color: 0xA0522D,
+      side: THREE.DoubleSide }),
 
     IfcStairFlight : new THREE.MeshPhongMaterial({
       name : "FurnishingElement",
       flatShading: false,
-      color: 0xA0522D, side: THREE.DoubleSide})
+      color: 0xA0522D,
+      side: THREE.DoubleSide })
   };
 }
 
@@ -3217,12 +3244,15 @@ class IfcSurfaceStyleHelper extends IfcHelper
         const green = color.Green;
         const blue = color.Blue;
 
+        let transparent = transparency > 0;
+
         this.material = new THREE.MeshPhongMaterial({
           name : name,
           color: new THREE.Color(red, green, blue),
           flatShading: false,
           opacity: 1 - transparency,
-          transparent: transparency > 0,
+          transparent: transparent,
+          depthWrite : transparent ? false : true,
           side: side === '.BOTH.' ? THREE.DoubleSide : THREE.FrontSide
         });
       }

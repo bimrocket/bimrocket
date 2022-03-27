@@ -518,9 +518,8 @@ class IFCLoader extends THREE.Loader
       name : "Window",
       flatShading: false,
       color: 0x8080FF,
-      opacity: 0.5,
+      opacity: 0.3,
       transparent: true,
-      depthWrite : false,
       side: THREE.DoubleSide }),
 
     IfcDoor : new THREE.MeshPhongMaterial({
@@ -553,8 +552,7 @@ class IFCLoader extends THREE.Loader
       color: 0x8080FF,
       opacity: 0.2,
       transparent: true,
-      depthWrite : false,
-      side: THREE.FrontSide }),
+      side: THREE.DoubleSide }),
 
     IfcSpace : new THREE.MeshPhongMaterial({
       name : "Space",
@@ -562,7 +560,7 @@ class IFCLoader extends THREE.Loader
       color: 0xC0C0F0,
       opacity: 0.2,
       transparent: true,
-      depthWrite : false }),
+      side: THREE.DoubleSide }),
 
     IfcFlowTerminal : new THREE.MeshPhongMaterial({
       name : "FlowTerminal",
@@ -3245,14 +3243,14 @@ class IfcSurfaceStyleHelper extends IfcHelper
         const blue = color.Blue;
 
         let transparent = transparency > 0;
+        let opacity = 1 - transparency;
 
         this.material = new THREE.MeshPhongMaterial({
           name : name,
           color: new THREE.Color(red, green, blue),
           flatShading: false,
-          opacity: 1 - transparency,
+          opacity: opacity,
           transparent: transparent,
-          depthWrite : transparent ? false : true,
           side: side === '.BOTH.' ? THREE.DoubleSide : THREE.FrontSide
         });
       }

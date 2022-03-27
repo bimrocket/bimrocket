@@ -25,9 +25,12 @@ export const translations =
   "button.setup" : "Config.",
   "button.search" : "Buscar",
   "button.back" : "Atrás",
-  "button.home" : "Inicio",
+  "button.home" : "Reiniciar",
+  "button.rename" : "Renombrar",
+  "button.apply" : "Aplicar",
+  "button.preview" : "Probar",
   "button.view" : "Ver",
-  "button.reset" : "Iniciar",
+  "button.restore" : "Restaurar",
   "button.undo" : "Deshacer",
   "button.redo" : "Rehacer",
   "button.run" : "Ejecutar",
@@ -37,6 +40,11 @@ export const translations =
   "button.optimize" : "Optimizar",
   "button.editor" : "Editor",
   "button.clear" : "Limpiar",
+
+  "button.preview_material" : "Probar material",
+  "button.apply_material" : "Aplicar material",
+  "button.restore_materials" : "Restaurar materiales",
+  "button.material_usage" : "Usos",
 
   "units.km" : "kilometros",
   "units.m" : "metros",
@@ -99,6 +107,8 @@ export const translations =
   "tool.measure_selection.label" : "Medir selección",
 
   "tool.rebuild.label" : "Reconstruir",
+
+  "tool.paint.label" : "Pintar",
 
   "tool.move.label" : "Mover",
   "tool.move.help" : "Arrastar con botón izquierdo del ratón para mover",
@@ -282,6 +292,20 @@ export const translations =
   "label.object_builder" : "Constructor de objeto",
   "label.change_material" : "Cambiar material",
 
+  "label.material_list" : "Materiales:",
+  "label.color" : "Color difuso:",
+  "label.specular" : "Color especular:",
+  "label.emissive" : "Color emisivo:",
+  "label.material_side" : "Aplicado a:",
+  "label.front_side" : "Cara frontal",
+  "label.back_side" : "Cara posterior",
+  "label.double_side" : "Doble cara",
+  "label.depth_test" : "Test de profundidad",
+  "label.depth_write" : "Escritura de profundidad",
+  "label.opacity" : opacity => `Opacidad: ${opacity}%`,
+  "label.material_name" : "Nombre:",
+  "label.material_on_selection" : "Sobre la selección",
+
   "label.on_vertex" : "Sobre vértice",
   "label.on_edge" : "Sobre arista",
   "label.on_face" : "Sobre cara",
@@ -315,6 +339,8 @@ export const translations =
   "title.select_by_property" : "Selección por propiedades",
   "title.export_selection" : "Exportar selección",
   "title.login" : "Identificación",
+  "title.new_material" : "Nuevo material",
+  "title.rename_material" : "Renombrar material",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,

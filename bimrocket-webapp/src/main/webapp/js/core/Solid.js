@@ -48,14 +48,19 @@ class Solid extends THREE.Object3D
 
     this.builder = null;
 
+    this._edgeMaterial = Solid.EdgeMaterial;
+    this._faceMaterial = Solid.FaceMaterial;
+    this._highlightEdgeMaterial = null;
+    this._highlightFaceMaterial = null;
+
     if (geometry)
     {
       this.geometry = geometry;
+    }
 
-      if (material)
-      {
-        this.material = material;
-      }
+    if (material)
+    {
+      this.material = material;
     }
   }
 
@@ -96,32 +101,113 @@ class Solid extends THREE.Object3D
 
   get material()
   {
-    return this._facesObject.material;
+    return this.faceMaterial;
   }
 
   set material(material)
   {
-    this._facesObject.material = material;
+    this.faceMaterial = material;
   }
 
   get faceMaterial()
   {
-    return this._facesObject.material;
+    return this._faceMaterial;
   }
 
   set faceMaterial(material)
   {
-    this._facesObject.material = material;
+    if (material instanceof THREE.Material)
+    {
+      if (this._faceMaterial !== material)
+      {
+        this._faceMaterial.dispose();
+        this._faceMaterial = material;
+        if (this._highlightFaceMaterial === null)
+        {
+          this._facesObject.material = material;
+        }
+      }
+    }
   }
 
   get edgeMaterial()
   {
-    return this._edgesObject.material;
+    return this._edgesMaterial;
   }
 
   set edgeMaterial(material)
   {
-    this._edgesObject.material = material;
+    if (material instanceof THREE.Material)
+    {
+      if (this._edgeMaterial !== material)
+      {
+        this._edgeMaterial.dispose();
+        this._edgeMaterial = material;
+        if (this._highlightEdgeMaterial === null)
+        {
+          this._edgesObject.material = material;
+        }
+      }
+    }
+  }
+
+  get highlightFaceMaterial()
+  {
+    return this._highlightFaceMaterial;
+  }
+
+  set highlightFaceMaterial(material)
+  {
+    if (material === null || material instanceof THREE.Material)
+    {
+      if (this._highlightFaceMaterial !== material)
+      {
+        if (this._highlightFaceMaterial)
+        {
+          this._highlightFaceMaterial.dispose();
+        }
+
+        this._highlightFaceMaterial = material;
+        if (material === null)
+        {
+          this._facesObject.material = this._faceMaterial;
+        }
+        else
+        {
+          this._facesObject.material = material;
+        }
+      }
+    }
+  }
+
+
+  get highlightEdgeMaterial()
+  {
+    return this._highlightEdgeMaterial;
+  }
+
+  set highlightEdgeMaterial(material)
+  {
+    if (material === null || material instanceof THREE.Material)
+    {
+      if (this._highlightEdgeMaterial !== material)
+      {
+        if (this._highlightEdgeMaterial)
+        {
+          this._highlightEdgeMaterial.dispose();
+        }
+
+        this._highlightEdgeMaterial = material;
+        if (material === null)
+        {
+          this._edgesObject.material = this._edgeMaterial;
+        }
+        else
+        {
+          this._edgesObject.material = material;
+        }
+      }
+    }
   }
 
   union(solids)
@@ -207,8 +293,11 @@ class Solid extends THREE.Object3D
     this._facesObject.geometry = source._facesObject.geometry;
     this._edgesObject.geometry = source._edgesObject.geometry;
 
-    this._facesObject.material = source._facesObject.material;
-    this._edgesObject.material = source._edgesObject.material;
+    this._highlightFaceMaterial = null;
+    this._highlightEdgeMaterial = null;
+    this.faceMaterial = source._faceMaterial;
+    this.edgeMaterial = source._edgeMaterial;
+
     this.facesVisible = source.facesVisible;
     this.edgesVisible = source.edgesVisible;
     this.builder = source.builder ? source.builder.clone() : null;

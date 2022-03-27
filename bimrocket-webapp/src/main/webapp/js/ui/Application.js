@@ -170,7 +170,7 @@ class Application
     let renderer = this.renderer;
     renderer.alpha = true;
     renderer.setClearColor(0x000000, 0);
-    renderer.sortObjects = false;
+    renderer.sortObjects = true;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(this.renderer.domElement);
@@ -192,26 +192,26 @@ class Application
     const selectionColor = new THREE.Color(0, 0, 1);
 
     this.selectionMaterial = new THREE.LineBasicMaterial(
-      {color: selectionColor, linewidth: 1.5,
-       depthTest: true, depthWrite: true,
-       polygonOffset: true, polygonOffsetFactor: 2});
+      { color: selectionColor, linewidth: 1.5,
+        depthTest: true, depthWrite: true,
+        polygonOffset: true, polygonOffsetFactor: 2, transparent : true });
 
     this.deepSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: selectionColor, linewidth: 1,
-       depthTest: false, depthWrite: false});
+      { color: selectionColor, linewidth: 1,
+        depthTest: false, depthWrite: false, transparent : true });
 
     this.boxSelectionMaterial = new THREE.LineBasicMaterial(
-      {color: selectionColor, linewidth: 1.5,
-       depthTest: true, depthWrite: true,
-       polygonOffset: true, polygonOffsetFactor: 2});
+      { color: selectionColor, linewidth: 1.5,
+        depthTest: true, depthWrite: true,
+        polygonOffset: true, polygonOffsetFactor: 2 });
 
     this.invisibleSelectionMaterial = new LineDashedShaderMaterial(
-      {color: selectionColor, dashSize: 4, gapSize: 4,
-       depthTest: true, depthWrite: true});
+      { color: selectionColor, dashSize: 4, gapSize: 4,
+        depthTest: true, depthWrite: true });
 
     this.deepInvisibleSelectionMaterial = new LineDashedShaderMaterial(
-      {color: selectionColor, dashSize: 4, gapSize: 4,
-       depthTest: false, depthWrite: false});
+      { color: selectionColor, dashSize: 4, gapSize: 4,
+        depthTest: false, depthWrite: false, transparent : true });
 
 
     this.pointSelector = new PointSelector(this);
@@ -647,6 +647,7 @@ class Application
     if (this._selectionLines === null && !this.selection.isEmpty())
     {
       const linesGroup = new THREE.Group();
+      linesGroup.renderOrder = 1;
       linesGroup.name = "SelectionLines";
       const iterator = this.selection.iterator;
       let item = iterator.next();
@@ -1438,7 +1439,7 @@ class Application
       {
         application.addObject(object);
         application.progressBar.visible = false;
-        application.initTasks(params);        
+        application.initTasks(params);
       },
       onError : error =>
       {
@@ -1475,7 +1476,7 @@ class Application
       IOManager.load(intent); // asynchron load
     }
   }
-  
+
   initTasks(params)
   {
     const toolName = params["tool"];
@@ -1494,7 +1495,7 @@ class Application
       {
         const request = new XMLHttpRequest();
         request.open('GET', scriptPath, true);
-        request.onload = () => 
+        request.onload = () =>
         {
           console.info(request.status);
           if (request.status === 200)
@@ -1512,15 +1513,15 @@ class Application
           else
           {
             let message = WebUtils.getHttpStatusMessage(request.status);
-            MessageDialog.create("ERROR", "Can't open script: " + message + 
+            MessageDialog.create("ERROR", "Can't open script: " + message +
               " (HTTP " + request.status + ")")
               .setClassName("error")
-              .setI18N(this.i18n).show();            
+              .setI18N(this.i18n).show();
           }
         };
         request.send();
       }
-    }        
+    }
   }
 }
 

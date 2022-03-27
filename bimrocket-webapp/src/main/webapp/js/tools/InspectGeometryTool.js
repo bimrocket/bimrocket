@@ -24,7 +24,7 @@ class InspectGeometryTool extends Tool
 
     this.object = null;
     this.selectedNode = null;
-    this.hilightGroup = null;
+    this.highlightGroup = null;
     this.lineMaterial = new THREE.LineBasicMaterial(
       { color : 0, linewidth : 1.5, depthTest : false });
     this.pointsMaterial = new THREE.PointsMaterial(
@@ -145,7 +145,7 @@ class InspectGeometryTool extends Tool
   showSolid(solid)
   {
     this.object = solid;
-    this.clearHilight();
+    this.clearHighlight();
     this.messageElem.style.display = "none";
 
     this.listElem.style.display = "";
@@ -185,7 +185,7 @@ class InspectGeometryTool extends Tool
         let vertex = vertices[loop.indices[i]];
         let vertexNode = node.addNode(
           "v-" + loop.indices[i] + ": " + vector2String(vertex),
-          () => this.hilight(vertexNode, solid, [loop], vertex), "vertex");
+          () => this.highlight(vertexNode, solid, [loop], vertex), "vertex");
       }
     };
 
@@ -197,7 +197,7 @@ class InspectGeometryTool extends Tool
       else label += ")";
 
       let faceNode = tree.addNode(label,
-        () => this.hilight(faceNode, solid,
+        () => this.highlight(faceNode, solid,
         [face.outerLoop, ...face.holes]),
         "face" + (face.holes.length > 0 ? " holes" : ""));
       faceNode.addNode("normal: " + vector2String(face.normal),
@@ -205,14 +205,14 @@ class InspectGeometryTool extends Tool
 
       let outerNode = faceNode.addNode("outerLoop (" +
         face.outerLoop.indices.length + "v)",
-        () => this.hilight(outerNode, solid, [face.outerLoop]), "loop");
+        () => this.highlight(outerNode, solid, [face.outerLoop]), "loop");
       addVertices(outerNode, face.outerLoop);
       for (let h = 0; h < face.holes.length; h++)
       {
         let hole = face.holes[h];
         let holeNode = faceNode.addNode("hole-" + h +
           " (" + hole.indices.length + "v)",
-          () => this.hilight(holeNode, solid, [hole]), "hole");
+          () => this.highlight(holeNode, solid, [hole]), "hole");
         addVertices(holeNode, hole);
       }
     }
@@ -222,7 +222,7 @@ class InspectGeometryTool extends Tool
   {
     this.geometryTree.clear();
     this.object = null;
-    this.clearHilight();
+    this.clearHighlight();
     this.messageElem.style.display = "";
     this.listElem.style.display = "none";
     this.optimizeButton.style.display = "none";
@@ -245,14 +245,14 @@ class InspectGeometryTool extends Tool
 
     let lines = new THREE.Line(geometry, this.lineMaterial);
     lines.raycast = function() {};
-    this.hilightGroup.add(lines);
+    this.highlightGroup.add(lines);
 
     let points = new THREE.Points(geometry, this.pointsMaterial);
     points.raycast = function() {};
-    this.hilightGroup.add(points);
+    this.highlightGroup.add(points);
   }
 
-  hilight(node, solid, loops, vertex)
+  highlight(node, solid, loops, vertex)
   {
     if (this.selectedNode !== null)
     {
@@ -261,11 +261,11 @@ class InspectGeometryTool extends Tool
     node.addClass("selected");
     this.selectedNode = node;
 
-    if (this.hilightGroup !== null)
+    if (this.highlightGroup !== null)
     {
-      this.application.removeObject(this.hilightGroup);
+      this.application.removeObject(this.highlightGroup);
     }
-    this.hilightGroup = new THREE.Group();
+    this.highlightGroup = new THREE.Group();
 
     for (let loop of loops)
     {
@@ -278,18 +278,18 @@ class InspectGeometryTool extends Tool
       geometry.setFromPoints([vertex.clone().applyMatrix4(solid.matrixWorld)]);
       let points = new THREE.Points(geometry, this.vertexMaterial);
       points.raycast = function() {};
-      this.hilightGroup.add(points);
+      this.highlightGroup.add(points);
     }
 
-    this.application.addObject(this.hilightGroup, this.application.overlays);
+    this.application.addObject(this.highlightGroup, this.application.overlays);
   }
 
-  clearHilight()
+  clearHighlight()
   {
-    if (this.hilightGroup !== null)
+    if (this.highlightGroup !== null)
     {
-      this.application.removeObject(this.hilightGroup);
-      this.hilightGroup = null;
+      this.application.removeObject(this.highlightGroup);
+      this.highlightGroup = null;
     }
     if (this.selectedNode !== null)
     {

@@ -44,6 +44,7 @@ import { ZoomAllTool } from "../tools/ZoomAllTool.js";
 import { CenterSelectionTool } from "../tools/CenterSelectionTool.js";
 import { VisibilityTool } from "../tools/VisibilityTool.js";
 import { StyleTool } from "../tools/StyleTool.js";
+import { PaintTool } from "../tools/PaintTool.js";
 import { OutlinerTool } from "../tools/OutlinerTool.js";
 import { InspectorTool } from "../tools/InspectorTool.js";
 import { StatisticsTool } from "../tools/StatisticsTool.js";
@@ -258,6 +259,7 @@ export function load(application)
   const hiddenStyleTool = new StyleTool(application,
     { name : "hidden_style", label : "tool.hidden_style.label",
       edgesVisible : false, facesVisible : false });
+  const paintTool = new PaintTool(application);
 
   const outlinerTool = new OutlinerTool(application);
   const inspectorTool = new InspectorTool(application);
@@ -328,6 +330,7 @@ export function load(application)
   application.addTool(focusSelectionTool);
   application.addTool(showTool);
   application.addTool(hideTool);
+  application.addTool(paintTool);
   application.addTool(edgesStyleTool);
   application.addTool(facesStyleTool);
   application.addTool(facesEdgesStyleTool);
@@ -423,6 +426,7 @@ export function load(application)
   designMenu.addMenuItem(extrudeTool);
   designMenu.addMenuItem(clipTool);
   designMenu.addMenuItem(makeSolidTool);
+  designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(inspectGeometryTool);
   designMenu.addMenuItem(resetMatrixTool);
   designMenu.addMenuItem(rebuildTool);
@@ -465,6 +469,7 @@ export function load(application)
   toolBar.addToolButton(sectionTool);
   toolBar.addToolButton(scriptTool);
   toolBar.addToolButton(measureLengthTool);
+  toolBar.addToolButton(paintTool);
   toolBar.addToolButton(rebuildTool);
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);

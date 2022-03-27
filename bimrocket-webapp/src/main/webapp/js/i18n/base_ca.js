@@ -27,7 +27,10 @@ export const translations =
   "button.back" : "Enrere",
   "button.home" : "Inici",
   "button.view" : "Veure",
-  "button.reset" : "Inicia",
+  "button.restore" : "Restaura",
+  "button.rename" : "Reanomena",
+  "button.apply" : "Aplica",
+  "button.preview" : "Prova",
   "button.undo" : "Desfés",
   "button.redo" : "Refés",
   "button.run" : "Executa",
@@ -37,6 +40,11 @@ export const translations =
   "button.optimize" : "Optimitza",
   "button.editor" : "Editor",
   "button.clear" : "Neteja",
+
+  "button.preview_material" : "Prova material",
+  "button.apply_material" : "Aplica material",
+  "button.restore_materials" : "Restaura materials",
+  "button.material_usage" : "Usos",
 
   "units.km" : "kilometres",
   "units.m" : "metres",
@@ -99,6 +107,8 @@ export const translations =
   "tool.measure_selection.label" : "Mesura selecció",
 
   "tool.rebuild.label" : "Reconstrueix",
+
+  "tool.paint.label" : "Pinta",
 
   "tool.move.label" : "Mou",
   "tool.move.help" : "Arrossega amb botó esquerre del ratolí per moure",
@@ -282,6 +292,20 @@ export const translations =
   "label.object_builder" : "Constructor d'objecte",
   "label.change_material" : "Canvia material",
 
+  "label.material_list" : "Materials:",
+  "label.color" : "Color difús:",
+  "label.specular" : "Color especular:",
+  "label.emissive" : "Color emissiu:",
+  "label.material_side" : "Aplicat a:",
+  "label.front_side" : "Cara frontal",
+  "label.back_side" : "Cara posterior",
+  "label.double_side" : "Doble cara",
+  "label.depth_test" : "Test de profunditat",
+  "label.depth_write" : "Escriptura de profunditat",
+  "label.opacity" : opacity => `Opacitat: ${opacity}%`,
+  "label.material_name" : "Nom:",
+  "label.material_on_selection" : "Sobre la selecció",
+
   "label.on_vertex" : "Sobre vèrtex",
   "label.on_edge" : "Sobre aresta",
   "label.on_face" : "Sobre cara",
@@ -315,6 +339,8 @@ export const translations =
   "title.select_by_property" : "Selecció per propietats",
   "title.export_selection" : "Exporta selecció",
   "title.login" : "Identificació",
+  "title.new_material" : "Nou material",
+  "title.rename_material" : "Reanomena material",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,

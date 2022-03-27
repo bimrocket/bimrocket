@@ -26,11 +26,12 @@ class MeasureLengthTool extends Tool
     this.points = null; // THREE.Points
 
     this.lineMaterial = new THREE.LineBasicMaterial(
-      { linewidth:2, color: new THREE.Color(0x0000ff), opacity: 1,
-      depthTest: false});
+      { linewidth : 2, color : new THREE.Color(0x0000ff), opacity : 1,
+        depthTest : false, transparent : true });
 
     this.pointsMaterial = new THREE.PointsMaterial(
-      { color : 0, size: 4, sizeAttenuation : false, depthTest : false });
+      { color : 0, size : 4, sizeAttenuation : false,
+        depthTest : false, transparent : true });
 
     this._onPointerUp = this.onPointerUp.bind(this);
 
@@ -46,7 +47,7 @@ class MeasureLengthTool extends Tool
     this.panel.bodyElem.appendChild(helpElem);
 
     const resetButton = Controls.addButton(this.panel.bodyElem,
-      "reset_linestring", "button.reset", () => this.resetLineString());
+      "clear_linestring", "button.clear", () => this.clearLineString());
 
     const undoButton = Controls.addButton(this.panel.bodyElem,
       "undo_last", "button.undo", () => this.removeLastPoint());
@@ -107,7 +108,7 @@ class MeasureLengthTool extends Tool
     }
   }
 
-  resetLineString()
+  clearLineString()
   {
     this.vertices = [];
     this.updateLineString();

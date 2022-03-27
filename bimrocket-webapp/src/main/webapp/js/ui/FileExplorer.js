@@ -452,7 +452,7 @@ class FileExplorer extends Panel
       if (firstLink === null) firstLink = linkElem;
       this.entriesElem.appendChild(entryElem);
     }
-    this.hilight();
+    this.highlight();
     this.updateButtons();
     if (firstLink) firstLink.focus();
   }
@@ -494,12 +494,12 @@ class FileExplorer extends Panel
       if (firstLink === null) firstLink = linkElem;
       this.entriesElem.appendChild(entryElem);
     }
-    this.hilight();
+    this.highlight();
     this.updateButtons();
     if (firstLink) firstLink.focus();
   }
 
-  hilight()
+  highlight()
   {
     const entriesElem = this.entriesElem;
     for (let i = 0; i < entriesElem.childNodes.length; i++)
@@ -557,7 +557,7 @@ class FileExplorer extends Panel
   {
     this.entryName = entryName;
     this.entryType = entryType;
-    this.hilight();
+    this.highlight();
     this.updateButtons();
   }
 

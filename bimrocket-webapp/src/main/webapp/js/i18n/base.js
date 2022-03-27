@@ -27,7 +27,10 @@ export const translations =
   "button.back" : "Back",
   "button.home" : "Home",
   "button.view" : "View",
-  "button.reset" : "Reset",
+  "button.restore" : "Restore",
+  "button.rename" : "Rename",
+  "button.apply" : "Apply",
+  "button.preview" : "Preview",
   "button.undo" : "Undo",
   "button.redo" : "Redo",
   "button.run" : "Run",
@@ -37,6 +40,11 @@ export const translations =
   "button.optimize" : "Optimize",
   "button.editor" : "Editor",
   "button.clear" : "Clear",
+
+  "button.preview_material" : "Preview material",
+  "button.apply_material" : "Apply material",
+  "button.restore_materials" : "Restore materials",
+  "button.material_usage" : "Usage",
 
   "units.km" : "kilometers",
   "units.m" : "meters",
@@ -99,6 +107,8 @@ export const translations =
   "tool.measure_selection.label" : "Measure selection",
 
   "tool.rebuild.label" : "Rebuild",
+
+  "tool.paint.label" : "Paint",
 
   "tool.move.label" : "Move",
   "tool.move.help" : "Drag left mouse button to move",
@@ -282,6 +292,20 @@ export const translations =
   "label.object_builder" : "Object builder",
   "label.change_material" : "Change material",
 
+  "label.material_list" : "Materials:",
+  "label.color" : "Diffuse color:",
+  "label.specular" : "Specular color:",
+  "label.emissive" : "Emissive color:",
+  "label.material_side" : "Applied to:",
+  "label.front_side" : "Front side",
+  "label.back_side" : "Back side",
+  "label.double_side" : "Double side",
+  "label.depth_test" : "Depth test",
+  "label.depth_write" : "Depth write",
+  "label.opacity" : opacity => `Opacity: ${opacity}%`,
+  "label.material_name" : "Name:",
+  "label.material_on_selection" : "On selection",
+
   "label.on_vertex" : "On vertex",
   "label.on_edge" : "On edge",
   "label.on_face" : "On face",
@@ -315,6 +339,8 @@ export const translations =
   "title.select_by_property" : "Selection by properties",
   "title.export_selection" : "Export selection",
   "title.login" : "Login",
+  "title.new_material" : "New material",
+  "title.rename_material" : "Rename material",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,

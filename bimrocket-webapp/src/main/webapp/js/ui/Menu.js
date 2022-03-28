@@ -31,7 +31,7 @@ class MenuItem extends AbstractMenuItem
   {
     super(menuBar, tool.label);
 
-    this.anchorElement.addEventListener("pointerdown", () =>
+    this.anchorElement.addEventListener("click", () =>
     {
       if (this.menuBar.isVertical())
       {
@@ -62,7 +62,7 @@ class Menu extends AbstractMenuItem
     this.itemElement.appendChild(this.listElement);
     this.anchorElement.className = "menu";
 
-    this.anchorElement.addEventListener("pointerdown", event =>
+    this.anchorElement.addEventListener("click", event =>
     {
       event.preventDefault();
       if (this.isVisible() && this.menuBar.isVertical())
@@ -168,7 +168,7 @@ class MenuBar
     this.dropButtonElement.className = "menu_button";
     this.dropButtonElement.setAttribute("role", "button");
     this.dropButtonElement.setAttribute("aria-pressed", "false");
-    this.dropButtonElement.addEventListener("pointerdown", () =>
+    this.dropButtonElement.addEventListener("click", () =>
     {
       if (this.isVisible())
       {

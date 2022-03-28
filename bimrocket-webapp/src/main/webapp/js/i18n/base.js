@@ -46,6 +46,9 @@ export const translations =
   "button.restore_materials" : "Restore materials",
   "button.material_usage" : "Usage",
 
+  "button.menu_show" : "MENU",
+  "button.menu_hide" : "CLOSE",
+
   "units.km" : "kilometers",
   "units.m" : "meters",
   "units.cm" : "centimeters",

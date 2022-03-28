@@ -46,6 +46,9 @@ export const translations =
   "button.restore_materials" : "Restaura materials",
   "button.material_usage" : "Usos",
 
+  "button.menu_show" : "MENÚ",
+  "button.menu_hide" : "TANCA",
+
   "units.km" : "kilometres",
   "units.m" : "metres",
   "units.cm" : "centímetres",

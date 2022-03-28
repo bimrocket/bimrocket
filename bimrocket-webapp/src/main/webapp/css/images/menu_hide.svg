@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333332 4.2333335"
+   version="1.1"
+   id="svg827"
+   sodipodi:docname="menu_hide.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview829"
+     pagecolor="#74ffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="true"
+     units="px"
+     inkscape:zoom="31.087347"
+     inkscape:cx="3.94051"
+     inkscape:cy="9.9236516"
+     inkscape:window-width="1920"
+     inkscape:window-height="948"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:snap-bbox="true"
+     inkscape:bbox-paths="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-intersection-paths="true"
+     inkscape:object-paths="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:snap-midpoints="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid896" />
+  </sodipodi:namedview>
+  <defs
+     id="defs824" />
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path1492"
+       style="color:#000000;fill:#f9ffff;stroke-width:3.77953;stroke-linecap:round;-inkscape-stroke:none"
+       d="M 0.99609375 0.50195312 A 0.50078736 0.50078736 0 0 0 0.64257812 0.64257812 A 0.50078736 0.50078736 0 0 0 0.64257812 1.3515625 L 7.2949219 8.0019531 L 0.65039062 14.646484 A 0.49999937 0.49999937 0 0 0 0.65039062 15.353516 A 0.49999937 0.49999937 0 0 0 1.3515625 15.353516 L 7.9980469 8.7070312 L 14.646484 15.353516 A 0.50078736 0.50078736 0 0 0 15.353516 15.353516 A 0.50078736 0.50078736 0 0 0 15.353516 14.646484 L 8.7070312 7.9980469 L 15.353516 1.3515625 A 0.49999937 0.49999937 0 0 0 15.353516 0.65039062 A 0.49999937 0.49999937 0 0 0 14.646484 0.65039062 L 8.0019531 7.2949219 L 1.3515625 0.64257812 A 0.50078736 0.50078736 0 0 0 0.99609375 0.50195312 z "
+       transform="scale(0.26458333)" />
+  </g>
+</svg>

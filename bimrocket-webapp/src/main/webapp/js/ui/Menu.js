@@ -31,7 +31,7 @@ class MenuItem extends AbstractMenuItem
   {
     super(menuBar, tool.label);
 
-    this.anchorElement.addEventListener("click", () =>
+    this.anchorElement.addEventListener("pointerdown", () =>
     {
       if (this.menuBar.isVertical())
       {
@@ -62,7 +62,7 @@ class Menu extends AbstractMenuItem
     this.itemElement.appendChild(this.listElement);
     this.anchorElement.className = "menu";
 
-    this.anchorElement.addEventListener("click", event =>
+    this.anchorElement.addEventListener("pointerdown", event =>
     {
       event.preventDefault();
       if (this.isVisible() && this.menuBar.isVertical())
@@ -164,39 +164,49 @@ class MenuBar
 
     const menuBar = this;
     this.dropButtonElement = document.createElement("a");
-    this.dropButtonElement.innerHTML = "MENU";
+    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_show");
     this.dropButtonElement.className = "menu_button";
     this.dropButtonElement.setAttribute("role", "button");
     this.dropButtonElement.setAttribute("aria-pressed", "false");
-    this.dropButtonElement.addEventListener("click", function()
+    this.dropButtonElement.addEventListener("pointerdown", () =>
     {
-      if (menuBar.isVisible())
+      if (this.isVisible())
       {
-        menuBar.dropButtonElement.setAttribute("aria-pressed", "false");
         menuBar.hide();
       }
       else
       {
-        menuBar.dropButtonElement.setAttribute("aria-pressed", "true");
         menuBar.drop();
       }
     });
     element.appendChild(this.dropButtonElement);
 
-    document.body.addEventListener("click", event =>
+    document.body.addEventListener("pointerdown", event =>
     {
-      if (this.armed)
+      if ((this.isVertical() && this.isVisible())
+          || (!this.isVertical() && this.armed))
       {
-        // click outside menu ?
+        // click outside root menu element ?
+        const rootMenuElement = this.navElement.parentElement;
+
         let element = event.srcElement;
-        while (element !== null && element !== this.navElement)
+        while (element !== null && element !== rootMenuElement)
         {
           element = element.parentElement;
         }
         if (element === null)
         {
+          // click outside menu, hide menu
           event.preventDefault();
-          this.focusMenuItem(null);
+
+          if (this.isVertical())
+          {
+            this.hide();
+          }
+          else
+          {
+            this.hideAllMenus();
+          }
         }
       }
     }, true);
@@ -240,16 +250,23 @@ class MenuBar
   drop()
   {
     this.listElement.className = "menu_drop";
+    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_hide");
+    this.application.i18n.update(this.dropButtonElement);
+    this.dropButtonElement.setAttribute("aria-pressed", "true");
   }
 
   hide()
   {
     this.listElement.className = "menu_hide";
+    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_show");
+    this.application.i18n.update(this.dropButtonElement);
+    this.dropButtonElement.setAttribute("aria-pressed", "false");
+    this.armed = false;
   }
 
   isVertical()
   {
-    return document.body.clientWidth < 768;
+    return document.body.clientWidth < 950;
   }
 
   focusMenuItem(menuItem)
@@ -308,7 +325,7 @@ class MenuBar
       let menu = this.menus[i];
       menu.hide(true);
     }
-    this.menuItem = false;
+    this.menuItem = null;
     this.armed = false;
   }
 }

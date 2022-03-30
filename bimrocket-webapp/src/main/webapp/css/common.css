@@ -82,6 +82,31 @@ input[readonly]
   color: #a0a0a0;
 }
 
+fieldset
+{
+  padding: 6px;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+}
+
+fieldset > label
+{
+  vertical-align: middle;
+  text-align: left;
+  display: inline-block;
+}
+
+fieldset > label > input
+{
+  vertical-align: text-bottom;
+}
+
+fieldset > label > span
+{
+  vertical-align: middle;
+}
+
 /* selection */
 
 ::-moz-selection,

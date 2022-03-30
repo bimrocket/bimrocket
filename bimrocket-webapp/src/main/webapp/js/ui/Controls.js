@@ -217,13 +217,24 @@ class Controls
     }
   }
 
-  static addRadioButtons(parent, name, label, options, value, className)
+  static addRadioButtons(parent, name, label, options, value, className,
+    clickListener)
   {
-    const id = this.getNextId();
-    const groupElem = Controls.addField(parent, id, label, className);
+    const groupElem = document.createElement("fieldset");
+    parent.appendChild(groupElem);
+    if (className) groupElem.className = className;
 
+    if (label)
+    {
+      const legendElem = document.createElement("legend");
+      groupElem.appendChild(legendElem);
+      I18N.set(legendElem, "innerHTML",label);
+    }
+
+    const id = this.getNextId();
     const hiddenElem = document.createElement("input");
     hiddenElem.type = "hidden";
+    hiddenElem.id = id;
     groupElem.appendChild(hiddenElem);
 
     for (let i = 0; i < options.length; i++)
@@ -244,13 +255,18 @@ class Controls
       {
         let elem = event.target || event.srcElement;
         hiddenElem.value = elem.value;
+        if (clickListener) clickListener(event);
       }, false);
-      groupElem.appendChild(radioElem);
 
       let labelElem = document.createElement("label");
-      I18N.set(labelElem, "innerHTML",
+      let spanElem = document.createElement("span");
+
+      I18N.set(spanElem, "innerHTML",
         option instanceof Array ? option[1] : option);
       labelElem.htmlFor = radioElem.id;
+
+      labelElem.appendChild(radioElem);
+      labelElem.appendChild(spanElem);
       groupElem.appendChild(labelElem);
     }
     return hiddenElem;

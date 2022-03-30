@@ -5,6 +5,8 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Controls } from "../ui/Controls.js";
+import { Application } from "../ui/Application.js";
 import { I18N } from "../i18n/I18N.js";
 
 class SelectTool extends Tool
@@ -25,21 +27,27 @@ class SelectTool extends Tool
   createPanel()
   {
     this.panel = this.application.createPanel(this.label, "left");
-    this.panel.preferredHeight = 120;
+    this.panel.preferredHeight = 140;
 
     const helpElem = document.createElement("div");
+    I18N.set(helpElem, "innerHTML", this.help);
+    helpElem.style.marginBottom = "4px";
     this.panel.bodyElem.appendChild(helpElem);
+
+    this.selectModeElem = Controls.addRadioButtons(this.panel.bodyElem,
+      "selection_mode", "label.selection_mode",
+      [[Application.SET_SELECTION_MODE, "label.set_selection_mode"],
+       [Application.ADD_SELECTION_MODE, "label.add_selection_mode"],
+       [Application.REMOVE_SELECTION_MODE, "label.remove_selection_mode"]],
+      Application.SET_SELECTION_MODE, "selection_mode", () =>
+      {
+        this.application.selectionMode = this.selectModeElem.value;
+      });
 
     this.posElem = document.createElement("div");
     this.posElem.style.textAlign = "center";
     this.posElem.style.padding = "4px";
     this.panel.bodyElem.appendChild(this.posElem);
-
-    this.controllersElem = document.createElement("div");
-    this.controllersElem.className = "controllers";
-    this.panel.bodyElem.appendChild(this.controllersElem);
-
-    I18N.set(helpElem, "innerHTML", this.help);
   }
 
   activate()

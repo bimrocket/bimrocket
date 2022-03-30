@@ -87,7 +87,7 @@ export const translations =
   "tool.savelocal.help" : "Guardar en local",
 
   "tool.select.label" : "Seleccionar",
-  "tool.select.help" : "Clic ratón: selección",
+  "tool.select.help" : "Puntero: selección por punto",
 
   "tool.select_by_name.label" : "Selección por nombre",
 
@@ -319,6 +319,11 @@ export const translations =
   "label.on_x_axis" : "Sobre eje X",
   "label.on_y_axis" : "Sobre eje Y",
   "label.on_z_axis" : "Sobre eje Z",
+
+  "label.selection_mode" : "Modo de selección",
+  "label.set_selection_mode" : "Establecer",
+  "label.add_selection_mode" : "Sumar",
+  "label.remove_selection_mode" : "Restar",
 
   "option.edges" : "Aristas",
   "option.faces" : "Caras",

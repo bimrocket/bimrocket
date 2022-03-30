@@ -87,7 +87,7 @@ export const translations =
   "tool.savelocal.help" : "Save to local disk",
 
   "tool.select.label" : "Select",
-  "tool.select.help" : "Mouse click: select",
+  "tool.select.help" : "Pointer: select by point",
 
   "tool.select_by_name.label" : "Select by name",
 
@@ -319,6 +319,11 @@ export const translations =
   "label.on_x_axis" : "On X axis",
   "label.on_y_axis" : "On Y axis",
   "label.on_z_axis" : "On Z axis",
+
+  "label.selection_mode" : "Selection mode",
+  "label.set_selection_mode" : "Set",
+  "label.add_selection_mode" : "Add",
+  "label.remove_selection_mode" : "Remove",
 
   "option.edges" : "Edges",
   "option.faces" : "Faces",

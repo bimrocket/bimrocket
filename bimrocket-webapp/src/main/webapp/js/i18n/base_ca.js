@@ -87,7 +87,7 @@ export const translations =
   "tool.savelocal.help" : "Desa en disc local",
 
   "tool.select.label" : "Selecciona",
-  "tool.select.help" : "Clic ratolí: selecció",
+  "tool.select.help" : "Punter: selecció per punt",
 
   "tool.select_by_name.label" : "Selecciona per nom",
 
@@ -319,6 +319,11 @@ export const translations =
   "label.on_x_axis" : "Sobre eix X",
   "label.on_y_axis" : "Sobre eix Y",
   "label.on_z_axis" : "Sobre eix Z",
+
+  "label.selection_mode" : "Mode de selecció",
+  "label.set_selection_mode" : "Estableix",
+  "label.add_selection_mode" : "Suma",
+  "label.remove_selection_mode" : "Resta",
 
   "option.edges" : "Arestes",
   "option.faces" : "Cares",

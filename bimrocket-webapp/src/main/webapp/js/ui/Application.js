@@ -45,6 +45,9 @@ class Application
     ["mm", "units.mm"],
     ["in", "units.in"]
   ];
+  static SET_SELECTION_MODE = "set";
+  static ADD_SELECTION_MODE = "add";
+  static REMOVE_SELECTION_MODE = "remove";
 
   constructor(element = document.body)
   {
@@ -72,6 +75,7 @@ class Application
 
     /* selection */
     this.selection = new Selection(this, true);
+    this.selectionMode = Application.SET_SELECTION_MODE;
     this.selectionPaintMode = Application.EDGES_SELECTION;
     this._showDeepSelection = null;
     this._showLocalAxes = null;
@@ -1232,7 +1236,18 @@ class Application
     }
     else
     {
-      selection.set(...objects);
+      if (this.selectionMode === Application.ADD_SELECTION_MODE)
+      {
+        selection.add(...objects);
+      }
+      else if (this.selectionMode === Application.REMOVE_SELECTION_MODE)
+      {
+        selection.remove(...objects);
+      }
+      else
+      {
+        selection.set(...objects);
+      }
     }
   }
 

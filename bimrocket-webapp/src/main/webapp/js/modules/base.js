@@ -282,6 +282,11 @@ export function load(application)
   application.addTool(selectReprTool);
   application.addTool(selectByPropertyTool);
   application.addTool(exportSelectionTool);
+  application.addTool(topViewTool);
+  application.addTool(frontViewTool);
+  application.addTool(backViewTool);
+  application.addTool(leftViewTool);
+  application.addTool(rightViewTool);
   application.addTool(orbitTool);
   application.addTool(flyTool);
   application.addTool(autoOrbitTool);

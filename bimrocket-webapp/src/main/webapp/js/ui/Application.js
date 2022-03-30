@@ -920,9 +920,10 @@ class Application
     for (let name in serviceGroup)
     {
       let service = serviceGroup[name];
-      data.push({
-          className : service.constructor.name,
-          parameters: service.getParameters()
+      data.push(
+      {
+        className : service.constructor.name,
+        parameters: service.getParameters()
       });
     }
     let json = JSON.stringify(data);

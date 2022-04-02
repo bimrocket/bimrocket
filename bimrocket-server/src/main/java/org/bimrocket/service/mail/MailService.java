@@ -126,6 +126,16 @@ public class MailService
     }
   }
 
+  public void asyncSendMail(String from, String to, String subject,
+    String body, String contentType)
+  {
+    Thread thread = new Thread(() ->
+    {
+      sendMail(from, to, subject, body, contentType);
+    });
+    thread.start();
+  }
+
   private String getInitParameter(String name, String defaultValue)
   {
     String value = servletContext.getInitParameter(name);

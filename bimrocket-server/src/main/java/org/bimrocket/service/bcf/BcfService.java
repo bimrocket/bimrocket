@@ -262,7 +262,10 @@ public class BcfService
       topic.setIndex(project.getLastTopicIndex());
       topic = dao.insert(topic);
 
-      if (mailService.isEnabled() && topic.getAssignedTo() != null)
+      String assignedTo = topic.getAssignedTo();
+
+      if (mailService.isEnabled() && assignedTo != null
+          && assignedTo.contains("@"))
       {
         Map<String, String> vars = new HashMap<>();
         vars.put("project.name", project.getName());
@@ -283,7 +286,7 @@ public class BcfService
         String subject = substitutor.replace(subjectPattern);
         String message = substitutor.replace(messagePattern);
 
-        mailService.sendMail(null, topic.getAssignedTo(), subject,
+        mailService.asyncSendMail(null, topic.getAssignedTo(), subject,
           message, null);
       }
       return topic;

@@ -174,8 +174,6 @@ public class OrientDao<E> implements Dao<E>
     {
       OElement element = (OElement)object;
 
-      System.out.println("delete " + element.getSchemaType().get().getName() +
-        " " + element.getIdentity());
       db.delete(element.getIdentity());
 
       Set<String> propertyNames = element.getPropertyNames();

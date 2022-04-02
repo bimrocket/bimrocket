@@ -25,7 +25,7 @@
 
   <context-param>
     <param-name>bcfDao.class</param-name>
-    <param-value>org.bimrocket.api.bcf.dao.BcfOrientDaoConnectionFactory</param-value>
+    <param-value>org.bimrocket.service.bcf.dao.BcfOrientDaoConnectionFactory</param-value>
   </context-param>
   <context-param>
     <param-name>bcfDao.url</param-name>
@@ -38,6 +38,16 @@
   <context-param>
     <param-name>bcfDao.password</param-name>
     <param-value>orientdb</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>bcf.mail.createTopic.subject</param-name>
+    <param-value>${project.name}#${index}: ${title} [${priority}]</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>bcf.mail.createTopic.message</param-name>
+    <param-value>${description}</param-value>
   </context-param>
 
   <context-param>
@@ -67,12 +77,27 @@
     <param-value>https://gis.santfeliu.cat/</param-value>
   </context-param>
 
+  <context-param>
+    <param-name>mail.smtp.from</param-name>
+    <param-value>admin@bimrocket.org</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>mail.smtp.contenttype</param-name>
+    <param-value>text/plain;charset=ISO-8859-1</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>mail.smtp.host</param-name>
+    <param-value>helios</param-value>
+  </context-param>
+
   <servlet>
     <servlet-name>api</servlet-name>
     <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
     <init-param>
       <param-name>jakarta.ws.rs.Application</param-name>
-      <param-value>org.bimrocket.api.BimRocketApplication</param-value>
+      <param-value>org.bimrocket.BimRocketApplication</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>

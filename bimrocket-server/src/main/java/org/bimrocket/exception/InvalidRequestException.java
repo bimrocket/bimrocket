@@ -28,32 +28,18 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
-
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.ext.Provider;
-import java.io.IOException;
+package org.bimrocket.exception;
 
 /**
  *
  * @author realor
  */
-@Provider
-public class CORSFilter implements ContainerResponseFilter
+public class InvalidRequestException extends RuntimeException
 {
-  @Override
-  public void filter(ContainerRequestContext requestContext,
-    ContainerResponseContext responseContext) throws IOException
+  private static final long serialVersionUID = 856024482L;
+
+  public InvalidRequestException(String message)
   {
-    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-    headers.add("Access-Control-Allow-Origin", "*");
-    headers.add("Access-Control-Allow-Credentials", "true");
-    headers.add("Access-Control-Allow-Headers",
-     "origin,content-type,accept,authorization,depth");
-    headers.add("Access-Control-Allow-Methods",
-      "HEAD,GET,POST,PUT,DELETE,OPTIONS,PROPFIND,MKCOL");
+    super(message);
   }
 }

@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -41,6 +41,9 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.beanutils.BeanUtils;
+import org.bimrocket.config.AuthenticationFilter;
+import org.bimrocket.config.AutoScanFeature;
+import org.bimrocket.config.CORSFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 
 /**
@@ -53,7 +56,7 @@ public class BimRocketApplication extends ResourceConfig
   private final CloseableList closeableList = new CloseableList();
 
   @Inject
-  ServletContext context;
+  ServletContext servletContext;
 
   @PostConstruct
   public void init()
@@ -62,6 +65,7 @@ public class BimRocketApplication extends ResourceConfig
     packages("org.bimrocket.api");
     register(CORSFilter.class);
     register(AuthenticationFilter.class);
+    register(AutoScanFeature.class);
     initBeans();
   }
 
@@ -84,7 +88,7 @@ public class BimRocketApplication extends ResourceConfig
 
   protected void initBeans()
   {
-    String value = context.getInitParameter("bimrocket.beans");
+    String value = servletContext.getInitParameter("bimrocket.beans");
     if (value != null)
     {
       String[] beanNames = value.split(",");
@@ -97,7 +101,7 @@ public class BimRocketApplication extends ResourceConfig
           closeableList.add((AutoCloseable)bean);
         }
         property(beanName, bean);
-        context.setAttribute(beanName, bean);
+        servletContext.setAttribute(beanName, bean);
       }
     }
   }
@@ -107,7 +111,7 @@ public class BimRocketApplication extends ResourceConfig
     try
     {
       LOGGER.log(Level.INFO, "Creating bean [{0}]", beanName);
-      String beanClassName = context.getInitParameter(beanName + ".class");
+      String beanClassName = servletContext.getInitParameter(beanName + ".class");
       Class<?> beanClass = Class.forName(beanClassName);
       BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
       Object bean = beanClass.getDeclaredConstructor().newInstance();
@@ -118,7 +122,7 @@ public class BimRocketApplication extends ResourceConfig
         {
           String propertyName = property.getName();
           String attributeName = beanName + "." + propertyName;
-          String value = context.getInitParameter(attributeName);
+          String value = servletContext.getInitParameter(attributeName);
           if (value != null)
           {
             BeanUtils.setProperty(bean, property.getName(), value);

@@ -30,11 +30,9 @@
  */
 package org.bimrocket.api.print;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfWriter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -45,17 +43,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import org.apache.commons.io.IOUtils;
+import org.bimrocket.service.print.PrintService;
 import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import java.io.IOException;
 
 /**
  *
@@ -65,12 +58,12 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 @Tag(name="Print", description="PDF print service")
 public class PrintEndpoint
 {
-  public static final String BASE_PROPERTY = "print.baseProperty";
-  public static final String BASE_DIRECTORY = "print.baseDirectory";
-  
   @Context
   ServletContext servletContext;
-  
+
+  @Inject
+  PrintService printService;
+
   @POST
   @Path("/{filename}")
   @PermitAll
@@ -80,24 +73,10 @@ public class PrintEndpoint
   {
     try
     {
-      File file = getFile(filename);
-      try (FileOutputStream output = new FileOutputStream(file);
-           Document document = new Document())
-      {
-        PdfWriter writer = PdfWriter.getInstance(document, output);
-        document.open();
-        document.addTitle(filename);
-        document.addCreator("PrintService");
-        PdfContentByte canvas = writer.getDirectContent();
-        try (BufferedReader reader =
-             new BufferedReader(new InputStreamReader(input, "UTF-8")))
-        {
-          drawElements(reader, canvas);
-        }
-      }
+      printService.print(filename, input);
       return Response.ok().build();
     }
-    catch (Exception ex)
+    catch (IOException ex)
     {
       return Response.status(INTERNAL_SERVER_ERROR).build();
     }
@@ -109,67 +88,10 @@ public class PrintEndpoint
   @Produces("application/pdf")
   public Response print(@PathParam("filename") String filename)
   {
-    File file = getFile(filename);
-    if (!file.exists()) return Response.ok().build();
-
     StreamingOutput output = (OutputStream out) ->
     {
-      try (FileInputStream fis = new FileInputStream(file))
-      {
-        IOUtils.copy(fis, out);
-      }
+      printService.copy(filename, out);
     };
     return Response.ok(output).build();
-  }
-
-  private void drawElements(BufferedReader reader, PdfContentByte canvas)
-    throws IOException
-  {
-    canvas.setLineWidth(0.1f);
-    canvas.setLineCap(PdfContentByte.LINE_CAP_ROUND);
-    String line = reader.readLine();
-    while (line != null)
-    {
-      String[] parts = line.split(" ");
-      if (parts.length > 0)
-      {
-        String command = parts[0];
-        if (command.equals("moveto"))
-        {
-          float x = Float.parseFloat(parts[1]);
-          float y = Float.parseFloat(parts[2]);
-          canvas.moveTo(x, y);
-        }
-        else if (command.equals("lineto"))
-        {
-          float x = Float.parseFloat(parts[1]);
-          float y = Float.parseFloat(parts[2]);
-          canvas.lineTo(x, y);
-        }
-        else if (command.equals("stroke"))
-        {
-          canvas.stroke();
-        }
-      }
-      line = reader.readLine();
-    }
-  }
-
-  private File getFile(String filename)
-  {
-    return new File(getBaseDir(), filename);
-  }
-
-  private File getBaseDir()
-  {
-    String baseProperty = servletContext.getInitParameter(BASE_PROPERTY);
-    String baseDirectory = servletContext.getInitParameter(BASE_DIRECTORY);
-    String basePath = System.getProperty(baseProperty);
-    File baseDir = new File(basePath, baseDirectory);
-    if (!baseDir.exists())
-    {
-      baseDir.mkdirs();
-    }
-    return baseDir;
   }
 }

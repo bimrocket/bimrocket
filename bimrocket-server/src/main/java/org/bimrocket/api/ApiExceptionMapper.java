@@ -30,6 +30,8 @@
  */
 package org.bimrocket.api;
 
+import org.bimrocket.exception.NotFoundException;
+import org.bimrocket.exception.InvalidRequestException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;

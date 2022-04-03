@@ -14,7 +14,7 @@ class ToolBar
     this.buttons = [];
 
     this.buttonsElem = document.createElement("div");
-    this.buttonsElem.id = "tool_buttons";
+    this.buttonsElem.className = "tool_buttons";
     element.appendChild(this.buttonsElem);
 
     const toolListener = event =>
@@ -29,6 +29,8 @@ class ToolBar
           if (button.tool === tool)
           {
             button.buttonElem.classList.add("selected");
+            button.buttonElem.scrollIntoView(
+              { block: "center", inline: "nearest" });
           }
         }
       }
@@ -79,8 +81,11 @@ class ToolButton
     I18N.set(buttonElem, "title", tool.label);
     I18N.set(buttonElem, "alt", tool.label);
     buttonElem.className = "tool_button " + tool.className;
-    buttonElem.addEventListener('click',
-      () => this.toolBar.application.useTool(tool), false);
+    buttonElem.addEventListener('click', () =>
+    {
+      buttonElem.scrollIntoView({ block: "center", inline: "nearest" });
+      this.toolBar.application.useTool(tool);
+    }, false);
   }
 }
 

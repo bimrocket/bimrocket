@@ -4,6 +4,8 @@
  * @author realor
  */
 
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+
 class Formula
 {
   /* Formula contructor: new Formula("position.x", "position.y + 1") */
@@ -12,15 +14,13 @@ class Formula
     this.path = path;
     this.expression = expression;
     this.getFn = new Function("object", "return object." + path);
-    this.setFn = new Function("object", "position", "rotation", "scale",
-      "material", "userData", "builder", "controllers",
-      "return object." + path + "=" + expression);
+    this.setFn = ObjectUtils.createEvalFunction(
+      "object." + path + "=" + expression);
   }
 
   evaluate(object)
   {
-    return this.setFn(object, object.position, object.rotation, object.scale,
-      object.material, object.userData, object.builder, object.controllers);
+    return this.setFn(object);
   }
 
   /* static methods */
@@ -120,7 +120,7 @@ class Formula
           {
             let formula = formulas[key];
             const oldValue = formula.getFn(object);
-            const newValue = formula.evaluate(object);
+            const newValue = formula.setFn(object);
             updated = updated || oldValue !== newValue;
           }
         }
@@ -131,7 +131,7 @@ class Formula
         if (formula)
         {
           const oldValue = formula.getFn(object);
-          const newValue = formula.evaluate(object);
+          const newValue = formula.setFn(object);
           updated = oldValue !== newValue;
         }
       }

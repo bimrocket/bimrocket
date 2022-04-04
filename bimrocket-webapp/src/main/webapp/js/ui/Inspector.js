@@ -370,7 +370,8 @@ class Inspector extends Panel
       let label = object.name || object.id;
       let className = this.getObjectClass(object);
       selectionTree.addNode(label,
-        event => this.application.selectObjects(event, [object]), className);
+        event => this.application.userSelectObjects([object], event),
+        className);
     }
   }
 

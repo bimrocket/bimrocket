@@ -137,8 +137,6 @@ class ScriptTool extends Tool
     if (!path.endsWith("/")) path += "/";
     path += panel.entryName;
 
-    console.info(path);
-
     panel.showProgressBar();
 
     panel.service.open(path, result =>

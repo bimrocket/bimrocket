@@ -21,14 +21,44 @@ class ObjectUtils
     "in" : 39.3701
   };
 
-  static getUserDataValue(object, ...properties)
+  static getObjectValue(object, ...properties)
   {
-    let data = object.userData;
+    if (properties.length === 0) return object;
+
+    let data = object;
     let i = 0;
     while (i < properties.length && typeof data === "object")
     {
       let property = properties[i];
-      data = data[property];
+
+      if (data instanceof THREE.Object3D)
+      {
+        if (typeof property === "string")
+        {
+          if (property.startsWith("child:"))
+          {
+            let childName = property.substring(6);
+            data = data.getObjectByName(childName);
+          }
+          else
+          {
+            let value = data[property];
+            data = value === undefined ? data.userData[property] : value;
+          }
+        }
+        else if (typeof property === "number")
+        {
+          data = data.children[property];
+        }
+        else
+        {
+          data = undefined;
+        }
+      }
+      else
+      {
+        data = data[property];
+      }
       i++;
     }
     if (data === null || data === undefined) data = "";
@@ -37,33 +67,53 @@ class ObjectUtils
   }
 
   /**
+   * Creates a function to evaluate a expression for an object
    *
-   * @param {String} expression : an expression with references to
-   * object variable and $ function.
-   * @returns {Function} : function fn(object)
+   * @param {String|Function} expression : an expression with references to
+   * $ function. When expression is a String it can also have references to
+   * these object properties: object, position, rotation, scale, material,
+   * userData, builder and controllers.
+   *
+   * @returns {Function} : function fn(object) that evaluates expression for
+   * the given object.
+   *
+   * Examples:
+   *   ObjectUtils.createEvalFunction('$("IFC", "ifcClassName") === "IfcBeam"')
+   *   ObjectUtils.createEvalFunction($ => $("IFC", "Name") === "House")
+   *
    */
   static createEvalFunction(expression)
   {
-    let fn;
-
     if (typeof expression === "string")
     {
-      fn = new Function("object", "$", "return " + expression + ";");
+      let fn = new Function("object", "position", "rotation", "scale",
+        "material", "userData", "builder", "controllers", "$",
+        "return " + expression + ";");
+
+      return object =>
+      {
+        const $ = (...properties) =>
+          this.getObjectValue(object, ...properties);
+
+        return fn(object, object.position, object.rotation, object.scale,
+          object.material, object.userData, object.builder,
+          object.controllers, $);
+      };
     }
     else if (typeof expression === "function")
     {
-      fn = expression;
+      return object =>
+      {
+        const $ = (...properties) =>
+          this.getObjectValue(object, ...properties);
+
+        return expression($);
+      };
     }
     else
     {
-      fn = () => "";
+      return () => expression;
     }
-
-    return (object) =>
-    {
-      const $ = (...properties) => this.getUserDataValue(object, ...properties);
-      return fn(object, $);
-    };
   }
 
   static find(root, condition)
@@ -101,7 +151,157 @@ class ObjectUtils
 
   static updateVisibility(objects, visible)
   {
-    const set = new Set();
+    return this.updateAppearance(objects, { visible : visible });
+  }
+
+  static updateStyle(objects, edgesVisible = true, facesVisible = true)
+  {
+    return this.updateAppearance(objects,
+    { edgesVisible : edgesVisible, facesVisible : facesVisible });
+  }
+
+  static updateAppearance(objects, appearance)
+  {
+    const visited = appearance.visible ? new Set() : null;
+
+    let faceMaterial = undefined;
+    let edgeMaterial = undefined;
+
+    // faceMaterial
+    if (appearance.faceMaterial !== undefined)
+    {
+      faceMaterial = appearance.faceMaterial;
+    }
+    else if (appearance.faceColor !== undefined)
+    {
+      let opacity = appearance.faceOpacity === undefined ?
+        1 : appearance.faceOpacity;
+
+      faceMaterial = new THREE.MeshPhongMaterial(
+      {
+        name: "FaceMaterial-" + appearance.faceColor,
+        color : appearance.faceColor,
+        transparent : opacity < 1, opacity : opacity
+      });
+    }
+
+    // edgeMaterial
+    if (appearance.edgeMaterial !== undefined)
+    {
+      edgeMaterial = appearance.edgeMaterial;
+    }
+    else if (appearance.edgeColor !== undefined)
+    {
+      let opacity = appearance.edgeOpacity === undefined ?
+        1 : appearance.edgeOpacity;
+
+      let linewidth = appearance.linewidth === undefined ?
+        1 : appearance.linewidth;
+
+      edgeMaterial = new THREE.LineBasicMaterial(
+      {
+        name: "Line-" + appearance.edgeColor,
+        color : appearance.edgeColor,
+        transparent : opacity < 1, opacity : opacity,
+        linewidth : linewidth
+      });
+    }
+
+    return ObjectUtils.updateObjects(objects, (object, changed) =>
+    {
+      if (appearance.visible !== undefined)
+      {
+        if (object.visible !== appearance.visible)
+        {
+          object.visible = appearance.visible;
+          changed.add(object);
+
+          if (object.visible)
+          {
+            // make ancestors visible
+            let ancestor = object.parent;
+            while (ancestor !== null && !visited.has(ancestor))
+            {
+              if (ancestor.visible === false)
+              {
+                ancestor.visible = true;
+                changed.add(ancestor);
+              }
+              visited.add(ancestor);
+              ancestor = ancestor.parent;
+            }
+          }
+        }
+      }
+
+      if (object instanceof Solid)
+      {
+        let permanent = appearance.permanent === true;
+
+        if (appearance.edgesVisible !== undefined)
+        {
+          if (object.edgesVisible !== appearance.edgesVisible)
+          {
+            object.edgesVisible = appearance.edgesVisible;
+            changed.add(object);
+          }
+        }
+
+        if (appearance.facesVisible !== undefined)
+        {
+          if (object.facesVisible !== appearance.facesVisible)
+          {
+            object.facesVisible = appearance.facesVisible;
+            changed.add(object);
+          }
+        }
+
+        if (faceMaterial !== undefined)
+        {
+          if (permanent)
+          {
+            if (object.faceMaterial !== faceMaterial)
+            {
+              object.faceMaterial = faceMaterial;
+              changed.add(object);
+            }
+          }
+          else
+          {
+            if (object.highlightFaceMaterial !== faceMaterial)
+            {
+              object.highlightFaceMaterial = faceMaterial;
+              changed.add(object);
+            }
+          }
+        }
+
+        if (edgeMaterial !== undefined)
+        {
+          if (permanent)
+          {
+            if (object.edgeMaterial !== edgeMaterial)
+            {
+              object.edgeMaterial = edgeMaterial;
+              changed.add(object);
+            }
+          }
+          else
+          {
+            if (object.highlightEdgeMaterial !== edgeMaterial)
+            {
+              object.highlightEdgeMaterial = edgeMaterial;
+              changed.add(object);
+            }
+          }
+        }
+      }
+    }, true);
+  }
+
+  static updateObjects(objects, updateFunction, recursive = false)
+  {
+    const changed = new Set();
 
     if (objects instanceof THREE.Object3D)
     {
@@ -110,67 +310,33 @@ class ObjectUtils
 
     function traverse(object)
     {
-      object.visible = visible;
-      set.add(object);
+      updateFunction(object, changed);
 
       if (!(object instanceof Solid))
       {
         const children = object.children;
-        for (let i = 0; i < children.length; i++)
+        for (let child of children)
         {
-          traverse(children[i]);
+          traverse(child);
         }
       }
     }
 
-    for (let i = 0; i < objects.length; i++)
+    if (recursive)
     {
-      let object = objects[i];
-
-      traverse(object);
-
-      if (visible && !set.has(object.parent))
+      for (let object of objects)
       {
-        // make ancestors visible
-        object.traverseAncestors(ancestor =>
-        { ancestor.visible = true; set.add(ancestor); });
+        traverse(object);
       }
     }
-    return set;
-  }
-
-  static updateStyle(objects, edgesVisible, facesVisible)
-  {
-    const set = new Set();
-
-    if (objects instanceof THREE.Object3D)
+    else
     {
-      objects = [objects];
-    }
-
-    function traverse(object)
-    {
-      if (object instanceof Solid)
+      for (let object of objects)
       {
-        object.edgesVisible = edgesVisible;
-        object.facesVisible = facesVisible;
-        set.add(object);
-      }
-      else
-      {
-        const children = object.children;
-        for (let i = 0; i < children.length; i++)
-        {
-          traverse(children[i]);
-        }
+        updateFunction(object, changed);
       }
     }
-
-    for (let object of objects)
-    {
-      traverse(object);
-    }
-    return set;
+    return changed;
   }
 
   static zoomAll(camera, objects, aspect, all)

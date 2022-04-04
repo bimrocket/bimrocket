@@ -278,7 +278,7 @@ class BIMInventoryTool extends Tool
       let label = type.name + " (" + objects.length + ")";
       let className = typeName;
       let node = this.typesTree.addNode(label, event =>
-        this.application.selectObjects(event, objects), className);
+        this.application.userSelectObjects(objects, event), className);
 
       let subTypes = [];
       for (let typeId in type.subTypes)
@@ -298,7 +298,7 @@ class BIMInventoryTool extends Tool
           let subObjects = subType.objects;
           let subLabel = subType.name + " (" + subObjects.length + ")";
           node.addNode(subLabel, event =>
-            this.application.selectObjects(event, subObjects),
+            this.application.userSelectObjects(subObjects, event),
             "IfcType");
         }
       }
@@ -330,7 +330,7 @@ class BIMInventoryTool extends Tool
         if (reference.name) subLabel += ": " + reference.name;
         subLabel += " (" + objects.length + ")";
         node.addNode(subLabel, event =>
-          this.application.selectObjects(event, objects),
+          this.application.userSelectObjects(objects, event),
           "IfcClassificationReference");
       }
     }
@@ -349,7 +349,7 @@ class BIMInventoryTool extends Tool
       let objects = group.objects;
       let label = group.name + " (" + objects.length + ")";
       this.groupsTree.addNode(label, event =>
-        this.application.selectObjects(event, objects), "IfcGroup");
+        this.application.userSelectObjects(objects, event), "IfcGroup");
     }
   }
 
@@ -366,7 +366,7 @@ class BIMInventoryTool extends Tool
       let objects = layer.objects;
       let label = layer.name + " (" + objects.length + ")";
       this.layersTree.addNode(label, event =>
-        this.application.selectObjects(event, objects), "IfcLayer");
+        this.application.userSelectObjects(objects, event), "IfcLayer");
     }
   }
 

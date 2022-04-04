@@ -165,7 +165,7 @@ class Outliner extends Panel
     let onClick = event =>
     {
       this.autoScroll = false;
-      this.application.selectObjects(event, [object]);
+      this.application.userSelectObjects([object], event);
     };
 
     let treeNode;

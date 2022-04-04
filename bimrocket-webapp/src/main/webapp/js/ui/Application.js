@@ -1186,42 +1186,106 @@ class Application
     }
   }
 
-  updateVisibility(objects, visible)
+  findObjects(objectExpression, baseObject = this.baseObject)
   {
-    if (objects === null)
+    let objects;
+
+    if (objectExpression === null)
     {
       objects = this.selection.roots;
     }
-    else if (objects instanceof THREE.Object3D)
+    else if (objectExpression instanceof THREE.Object3D)
     {
       objects = [objects];
     }
+    else if (objectExpression instanceof Array)
+    {
+      objects = objectExpression; // assume condition is an Object3D array
+    }
+    else if (typeof objectExpression === "string"
+            || typeof objectExpression === "function")
+    {
+      objects = [];
+      const fn = ObjectUtils.createEvalFunction(objectExpression);
+      baseObject.traverse(object =>
+      {
+        if (fn(object)) objects.push(object);
+      });
+    }
+    else
+    {
+      objects = [];
+    }
 
-    let set = ObjectUtils.updateVisibility(objects, visible);
-    let changedObjects = Array.from(set);
-
-    this.notifyObjectsChanged(changedObjects);
+    return objects;
   }
 
-  updateStyle(objects, edgesVisible, facesVisible)
+  selectObjects(objectExpression, selectionMode)
   {
-    if (objects === null)
-    {
-      objects = this.selection.roots;
-    }
-    else if (objects instanceof THREE.Object3D)
-    {
-      objects = [objects];
-    }
+    const objects = this.findObjects(objectExpression);
+    const selection = this.selection;
 
-    let set = ObjectUtils.updateStyle(objects,
-      edgesVisible, facesVisible);
-    let changedObjects = Array.from(set);
-
-    this.notifyObjectsChanged(changedObjects);
+    if (selectionMode === Application.ADD_SELECTION_MODE)
+    {
+      selection.add(...objects);
+    }
+    else if (selectionMode === Application.REMOVE_SELECTION_MODE)
+    {
+      selection.remove(...objects);
+    }
+    else
+    {
+      selection.set(...objects);
+    }
   }
 
-  selectObjects(event, objects)
+  updateVisibility(objectExpression, visible)
+  {
+    let objects = this.findObjects(objectExpression);
+
+    const changed = ObjectUtils.updateVisibility(objects, visible);
+
+    this.notifyObjectsChanged(Array.from(changed));
+
+    return changed;
+  }
+
+  updateStyle(objectExpression, edgesVisible, facesVisible)
+  {
+    let objects = this.findObjects(objectExpression);
+
+    const changed = ObjectUtils.updateStyle(
+      objects, edgesVisible, facesVisible);
+
+    this.notifyObjectsChanged(Array.from(changed));
+
+    return changed;
+  }
+
+  updateAppearance(objectExpression, appearance)
+  {
+    let objects = this.findObjects(objectExpression);
+
+    const changed = ObjectUtils.updateAppearance(objects, appearance);
+
+    this.notifyObjectsChanged(Array.from(changed));
+
+    return changed;
+  }
+
+  updateObjects(objectExpression, updateFunction, recursive = false)
+  {
+    let objects = this.findObjects(objectExpression);
+
+    const changed = ObjectUtils.updateObjects(
+      objects, updateFunction, recursive);
+
+    this.notifyObjectsChanged(Array.from(changed));
+
+    return changed;
+  }
+
+  userSelectObjects(objects, event)
   {
     event.preventDefault();
 

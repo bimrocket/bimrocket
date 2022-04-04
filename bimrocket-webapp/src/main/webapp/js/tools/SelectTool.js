@@ -94,7 +94,7 @@ class SelectTool extends Tool
       {
         object = parent;
       }
-      application.selectObjects(event, [object]);
+      application.userSelectObjects([object], event);
     }
     else
     {

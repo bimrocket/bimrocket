@@ -26,11 +26,13 @@ class InspectGeometryTool extends Tool
     this.selectedNode = null;
     this.highlightGroup = null;
     this.lineMaterial = new THREE.LineBasicMaterial(
-      { color : 0, linewidth : 1.5, depthTest : false });
+      { color : 0, linewidth : 1.5, depthTest : false, transparent : true });
     this.pointsMaterial = new THREE.PointsMaterial(
-      { color : 0, size: 4, sizeAttenuation : false, depthTest : false });
+      { color : 0, size: 4, sizeAttenuation : false, depthTest : false,
+        transparent : true });
     this.vertexMaterial = new THREE.PointsMaterial(
-      { color : 0x000080, size: 8, sizeAttenuation : false, depthTest : false });
+      { color : 0x000080, size: 8, sizeAttenuation : false, depthTest : false, 
+        transparent : true });
 
     this.setOptions(options);
 
@@ -266,6 +268,7 @@ class InspectGeometryTool extends Tool
       this.application.removeObject(this.highlightGroup);
     }
     this.highlightGroup = new THREE.Group();
+    this.highlightGroup.renderOrder = 2;
 
     for (let loop of loops)
     {

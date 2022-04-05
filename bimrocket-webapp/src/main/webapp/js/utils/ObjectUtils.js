@@ -139,7 +139,7 @@ class ObjectUtils
       }
     });
   }
-  
+
   static findObjects(baseObject, condition)
   {
     const objects = [];
@@ -160,9 +160,9 @@ class ObjectUtils
         }
       }
     }
-    
+
     traverse(baseObject);
-    
+
     return objects;
   }
 
@@ -185,43 +185,25 @@ class ObjectUtils
     let edgeMaterial = undefined;
 
     // faceMaterial
-    if (appearance.faceMaterial !== undefined)
+    if (appearance.faceMaterial instanceof THREE.Material
+        || appearance.faceMaterial === null)
     {
       faceMaterial = appearance.faceMaterial;
     }
-    else if (appearance.faceColor !== undefined)
+    else if (typeof appearance.faceMaterial === "object")
     {
-      let opacity = appearance.faceOpacity === undefined ?
-        1 : appearance.faceOpacity;
-
-      faceMaterial = new THREE.MeshPhongMaterial(
-      {
-        name: "FaceMaterial-" + appearance.faceColor,
-        color : appearance.faceColor,
-        transparent : opacity < 1, opacity : opacity
-      });
+      faceMaterial = new THREE.MeshPhongMaterial(appearance.faceMaterial);
     }
 
     // edgeMaterial
-    if (appearance.edgeMaterial !== undefined)
+    if (appearance.edgeMaterial instanceof THREE.Material
+        || appearance.edgeMaterial === null)
     {
       edgeMaterial = appearance.edgeMaterial;
     }
-    else if (appearance.edgeColor !== undefined)
+    else if (typeof appearance.edgeMaterial === "object")
     {
-      let opacity = appearance.edgeOpacity === undefined ?
-        1 : appearance.edgeOpacity;
-
-      let linewidth = appearance.linewidth === undefined ?
-        1 : appearance.linewidth;
-
-      edgeMaterial = new THREE.LineBasicMaterial(
-      {
-        name: "Line-" + appearance.edgeColor,
-        color : appearance.edgeColor,
-        transparent : opacity < 1, opacity : opacity,
-        linewidth : linewidth
-      });
+      edgeMaterial = new THREE.LineBasicMaterial(appearance.edgeMaterial);
     }
 
     return ObjectUtils.updateObjects(objects, (object, changed) =>

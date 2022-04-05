@@ -132,7 +132,7 @@ class Solid extends THREE.Object3D
 
   get edgeMaterial()
   {
-    return this._edgesMaterial;
+    return this._edgeMaterial;
   }
 
   set edgeMaterial(material)

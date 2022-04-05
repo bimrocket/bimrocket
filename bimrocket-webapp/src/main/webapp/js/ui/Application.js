@@ -7,6 +7,7 @@
 import { Panel, PanelManager } from "../ui/Panel.js";
 import { ProgressBar } from "../ui/ProgressBar.js";
 import { MenuBar } from "../ui/Menu.js";
+import { Tool } from "../tools/Tool.js";
 import { ToolBar } from "../ui/ToolBar.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { Cord } from "../core/Cord.js";
@@ -989,6 +990,8 @@ class Application
       tool = this.tools[tool];
     }
 
+    if (tool === undefined) tool = null;
+
     let toolEvent;
     if (tool && tool.immediate)
     {
@@ -1201,7 +1204,7 @@ class Application
     else if (objectExpression instanceof Array)
     {
       // assume objectExpression is an Object3D array
-      objects = objectExpression; 
+      objects = objectExpression;
     }
     else if (typeof objectExpression === "string"
             || typeof objectExpression === "function")

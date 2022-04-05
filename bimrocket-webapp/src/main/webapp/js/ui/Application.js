@@ -1196,11 +1196,12 @@ class Application
     }
     else if (objectExpression instanceof THREE.Object3D)
     {
-      objects = [objects];
+      objects = [objectExpression];
     }
     else if (objectExpression instanceof Array)
     {
-      objects = objectExpression; // assume condition is an Object3D array
+      // assume objectExpression is an Object3D array
+      objects = objectExpression; 
     }
     else if (typeof objectExpression === "string"
             || typeof objectExpression === "function")

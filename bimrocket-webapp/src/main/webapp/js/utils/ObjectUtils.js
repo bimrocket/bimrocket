@@ -116,15 +116,6 @@ class ObjectUtils
     }
   }
 
-  static find(root, condition)
-  {
-    const selection = [];
-
-    root.traverse(object => { if (condition(object)) selection.push(object); });
-
-    return selection;
-  }
-
   static dispose(root, geometries = true, materials = true)
   {
     root.traverse(function(object)
@@ -147,6 +138,32 @@ class ObjectUtils
         }
       }
     });
+  }
+  
+  static findObjects(baseObject, condition)
+  {
+    const objects = [];
+
+    function traverse(object)
+    {
+      if (condition(object))
+      {
+        objects.push(object);
+      }
+
+      if (!(object instanceof Solid))
+      {
+        const children = object.children;
+        for (let child of children)
+        {
+          traverse(child);
+        }
+      }
+    }
+    
+    traverse(baseObject);
+    
+    return objects;
   }
 
   static updateVisibility(objects, visible)

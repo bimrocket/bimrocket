@@ -1206,12 +1206,8 @@ class Application
     else if (typeof objectExpression === "string"
             || typeof objectExpression === "function")
     {
-      objects = [];
-      const fn = ObjectUtils.createEvalFunction(objectExpression);
-      baseObject.traverse(object =>
-      {
-        if (fn(object)) objects.push(object);
-      });
+      const condition = ObjectUtils.createEvalFunction(objectExpression);
+      objects = ObjectUtils.findObjects(baseObject, condition);
     }
     else
     {

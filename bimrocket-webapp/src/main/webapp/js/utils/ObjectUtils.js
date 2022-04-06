@@ -27,7 +27,7 @@ class ObjectUtils
 
     let data = object;
     let i = 0;
-    while (i < properties.length && typeof data === "object")
+    while (i < properties.length && data && typeof data === "object")
     {
       let property = properties[i];
 
@@ -38,7 +38,36 @@ class ObjectUtils
           if (property.startsWith("child:"))
           {
             let childName = property.substring(6);
-            data = data.getObjectByName(childName);
+            let children = data.children;
+            data = null;
+            for (let child of children)
+            {
+              if (child.name === childName)
+              {
+                data = child;
+                break;
+              }
+            }
+          }
+          else if (property.startsWith("descendant:"))
+          {
+            let descendantName = property.substring(11);
+            let children = data.children;
+            for (let child of children)
+            {
+              data = child.getObjectByName(descendantName);
+              if (data) break;
+            }
+          }
+          else if (property.startsWith("ancestor:"))
+          {
+            let ancestorName = property.substring(9);
+            let ancestor = data.parent;
+            while (ancestor !== null && ancestor.name !== ancestorName)
+            {
+              ancestor = ancestor.parent;
+            }
+            data = ancestor;
           }
           else
           {
@@ -140,22 +169,28 @@ class ObjectUtils
     });
   }
 
-  static findObjects(baseObject, condition)
+  static findObjects(condition, baseObject, nested = false)
   {
     const objects = [];
 
     function traverse(object)
     {
-      if (condition(object))
+      let accepted = condition(object);
+
+      if (accepted)
       {
         objects.push(object);
       }
-      else if (!(object instanceof Solid))
+
+      if (!accepted || nested)
       {
-        const children = object.children;
-        for (let child of children)
+        if (!(object instanceof Solid))
         {
-          traverse(child);
+          const children = object.children;
+          for (let child of children)
+          {
+            traverse(child);
+          }
         }
       }
     }

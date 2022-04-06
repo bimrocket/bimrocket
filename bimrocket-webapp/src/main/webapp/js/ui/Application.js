@@ -1189,7 +1189,7 @@ class Application
     }
   }
 
-  findObjects(objectExpression, baseObject = this.baseObject)
+  findObjects(objectExpression, baseObject = this.baseObject, nested = false)
   {
     let objects;
 
@@ -1210,7 +1210,7 @@ class Application
             || typeof objectExpression === "function")
     {
       const condition = ObjectUtils.createEvalFunction(objectExpression);
-      objects = ObjectUtils.findObjects(baseObject, condition);
+      objects = ObjectUtils.findObjects(condition, baseObject, nested);
     }
     else
     {

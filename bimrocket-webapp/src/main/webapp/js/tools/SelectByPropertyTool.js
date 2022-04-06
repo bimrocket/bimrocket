@@ -128,18 +128,11 @@ class SelectByPropertyTool extends Tool
 
     try
     {
-      let expression = dialog.editor.value;
-      const fn = ObjectUtils.createEvalFunction(expression);
+      let objectExpression = dialog.editor.value;
 
-      let selectedObjects = [];
+      let selectedObjects = application.findObjects(objectExpression,
+        application.baseObject, true);
 
-      application.baseObject.traverse(object =>
-      {
-        if (fn(object))
-        {
-          selectedObjects.push(object);
-        }
-      });
       if (selectedObjects.length > 0)
       {
         selection.add(...selectedObjects);

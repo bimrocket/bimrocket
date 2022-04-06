@@ -150,8 +150,7 @@ class ObjectUtils
       {
         objects.push(object);
       }
-
-      if (!(object instanceof Solid))
+      else if (!(object instanceof Solid))
       {
         const children = object.children;
         for (let child of children)

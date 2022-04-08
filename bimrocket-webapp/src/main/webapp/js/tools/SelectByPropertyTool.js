@@ -30,31 +30,43 @@ class SelectByPropertyTool extends Tool
       });
     const dialog = this.dialog;
 
-    dialog.addContextButton("add_prop", "button.add",
+    this.addButton = dialog.addContextButton("add_prop", "button.add",
       () => this.addProperty());
 
-    dialog.addContextButton("add_expr_eq", "=",
+    this.eqButton =  dialog.addContextButton("add_expr_eq", "=",
       () => this.addExpression("=="));
 
-    dialog.addContextButton("add_expr_neq", "!=",
+    this.neqButton = dialog.addContextButton("add_expr_neq", "!=",
       () => this.addExpression("!="));
 
-    dialog.addContextButton("add_expr_lt", "<",
+    this.ltButton = dialog.addContextButton("add_expr_lt", "<",
       () => this.addExpression("<"));
 
-    dialog.addContextButton("add_expr_gt", ">",
+    this.gtButton = dialog.addContextButton("add_expr_gt", ">",
       () => this.addExpression(">"));
 
-    dialog.addContextButton("add_op_and", "And",
+    this.andButton = dialog.addContextButton("add_op_and", "And",
       () => this.addOperator("&&"));
 
-    dialog.addContextButton("add_op_or", "Or",
+    this.orButton = dialog.addContextButton("add_op_or", "Or",
       () => this.addOperator("||"));
 
-    dialog.addContextButton("clear_prop", "button.clear",
+    this.clearButton = dialog.addContextButton("clear_prop", "button.clear",
       () => this.clearExpression());
 
     dialog.onAccept = () => this.selectObjects();
+
+    dialog.updateContextButtons = () =>
+    {
+      let path = dialog.getSelectedNodePath();
+      let pathLength = path.length;
+
+      this.addButton.disabled = pathLength === 0 || pathLength >= 3;
+      this.eqButton.disabled = pathLength !== 3;
+      this.neqButton.disabled = pathLength !== 3;
+      this.ltButton.disabled = pathLength !== 3;
+      this.gtButton.disabled = pathLength !== 3;
+    };
   }
 
   execute()
@@ -78,7 +90,7 @@ class SelectByPropertyTool extends Tool
     }
     line += ") ";
 
-    dialog.editor.value += line;
+    dialog.appendCode(line);
   }
 
   addExpression(operator)
@@ -105,19 +117,19 @@ class SelectByPropertyTool extends Tool
     {
       line += value;
     }
-    dialog.editor.value += line + "\n";
+    dialog.appendCode(line + "\n");
   }
 
   addOperator(operator)
   {
     const dialog = this.dialog;
-    dialog.editor.value += operator + "\n";
+    dialog.appendCode(operator + "\n");
   }
 
   clearExpression()
   {
     const dialog = this.dialog;
-    dialog.editor.value = "";
+    dialog.setCode("");
   }
 
   selectObjects()
@@ -128,7 +140,7 @@ class SelectByPropertyTool extends Tool
 
     try
     {
-      let objectExpression = dialog.editor.value;
+      let objectExpression = dialog.getCode();
 
       let selectedObjects = application.findObjects(objectExpression,
         application.baseObject, true);

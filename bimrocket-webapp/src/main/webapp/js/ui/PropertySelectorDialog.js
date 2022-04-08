@@ -35,10 +35,10 @@ class PropertySelectorDialog extends Dialog
     this.toolBarElem.className = "property_selector_toolbar";
     this.bodyElem.appendChild(this.toolBarElem);
 
-    this.editor = Controls.addTextAreaField(this.bodyElem,
-      "property_input_area", options.editorLabel || "label.expression",
-      options.editorValue || "", "property_expression");
-    this.editor.setAttribute("spellcheck", "false");
+    this.editorView = this.addCodeEditor("prop_sel_editor",
+      "label.expression", "",
+      { "language" : "javascript",
+        "height" : "40%" });
 
     this.selectValues = options.selectValues === true;
     this.findPropertiesOnSelection = options.findPropertiesOnSelection || false;
@@ -57,11 +57,41 @@ class PropertySelectorDialog extends Dialog
     });
   }
 
+  setCode(code)
+  {
+    const state = this.editorView.state;
+    const tx = state.update(
+      { changes: { from: 0, to: state.doc.length, insert: code } });
+    this.editorView.dispatch(tx);
+  }
+
+  getCode()
+  {
+    return this.editorView.state.doc.toString();
+  }
+
+  appendCode(code)
+  {
+    const state = this.editorView.state;
+    const tx = state.update(
+      { changes: { from: state.doc.length, insert: code } });
+    this.editorView.dispatch(tx);
+    let scrollElem = this.editorView.scrollDOM.parentElement.parentElement;
+
+    scrollElem.scrollTop = scrollElem.scrollHeight;
+  }
+
   onShow()
   {
     this.propertyMap = this.findProperties();
     this.propertyTree.clear();
     this.updateTree(this.propertyMap, this.propertyTree);
+    if (this.selectedNode)
+    {
+      this.selectedNode.removeClass("selected");
+      this.selectedNode = null;
+    }
+    this.updateContextButtons();
   }
 
   onAccept()
@@ -76,8 +106,11 @@ class PropertySelectorDialog extends Dialog
 
   addContextButton(name, label, action)
   {
-    const buttonElem = Controls.addButton(this.toolBarElem,
-      name, label, action);
+    return Controls.addButton(this.toolBarElem, name, label, action);
+  }
+
+  updateContextButtons()
+  {
   }
 
   getSelectedNodePath()
@@ -100,7 +133,11 @@ class PropertySelectorDialog extends Dialog
       for (let key of keys)
       {
         let subNode = node.addNode(key,
-          event => this.selectNode(subNode, false), "property_set");
+          event =>
+          {
+            event.preventDefault();
+            this.selectNode(subNode, false);
+          }, "property_set");
         let subValue = value.get(key);
         this.updateTree(subValue, subNode);
       }
@@ -184,6 +221,8 @@ class PropertySelectorDialog extends Dialog
 
     this.selectedNode = node;
     node.addClass("selected");
+
+    this.updateContextButtons();
   }
 }
 

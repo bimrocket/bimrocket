@@ -32,13 +32,19 @@ class ExportSelectionTool extends Tool
       });
     const dialog = this.dialog;
 
-    dialog.addContextButton("add_prop", "button.add",
+    this.addButton = dialog.addContextButton("add_prop", "button.add",
       () => this.addProperty());
 
-    dialog.addContextButton("clear_prop", "button.clear",
+    this.clearButton = dialog.addContextButton("clear_prop", "button.clear",
       () => this.clearProperties());
 
     dialog.onAccept = () => this.exportProperties();
+
+    dialog.updateContextButtons = () =>
+    {
+      let path = dialog.getSelectedNodePath();
+      this.addButton.disabled = path.length === 0;
+    };
   }
 
   execute()
@@ -77,14 +83,15 @@ class ExportSelectionTool extends Tool
         line += '"' + part + '"';
       }
       line += ")";
-      dialog.editor.value += line + "\n";
+
+      dialog.appendCode(line + "\n");
     }
   }
 
   clearProperties()
   {
     const dialog = this.dialog;
-    dialog.editor.value = "";
+    dialog.setCode("");
   }
 
   exportProperties()
@@ -94,7 +101,8 @@ class ExportSelectionTool extends Tool
 
     try
     {
-      let properties = dialog.editor.value;
+      let properties = dialog.getCode();
+
       let lines = properties.split("\n").filter(line => line.trim().length > 0);
       let exportExpression = "{" + lines.join(",") + "}";
       let exportedData = [];

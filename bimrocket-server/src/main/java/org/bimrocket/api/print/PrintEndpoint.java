@@ -43,12 +43,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
-import java.io.InputStream;
 import java.io.OutputStream;
 import org.bimrocket.service.print.PrintService;
-import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
-import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import java.io.IOException;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  *
@@ -65,32 +62,27 @@ public class PrintEndpoint
   PrintService printService;
 
   @POST
-  @Path("/{filename}")
+  @Path("/")
   @PermitAll
-  @Consumes(TEXT_PLAIN)
-  public Response print(@PathParam("filename") String filename,
-    InputStream input)
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  public PrintResult print(PrintSource printSource) throws Exception
   {
-    try
-    {
-      printService.print(filename, input);
-      return Response.ok().build();
-    }
-    catch (IOException ex)
-    {
-      return Response.status(INTERNAL_SERVER_ERROR).build();
-    }
+    String printId = printService.print(printSource);
+    PrintResult printResult = new PrintResult();
+    printResult.setPrintId(printId);
+    return printResult;
   }
 
   @GET
-  @Path("/{filename}")
+  @Path("/{printId}")
   @PermitAll
   @Produces("application/pdf")
-  public Response print(@PathParam("filename") String filename)
+  public Response print(@PathParam("printId") String printId)
   {
     StreamingOutput output = (OutputStream out) ->
     {
-      printService.copy(filename, out);
+      printService.copy(printId, out);
     };
     return Response.ok(output).build();
   }

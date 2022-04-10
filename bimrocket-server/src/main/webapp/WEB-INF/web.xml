@@ -69,7 +69,7 @@
   </context-param>
   <context-param>
     <param-name>print.baseDirectory</param-name>
-    <param-value>cloudfs</param-value>
+    <param-value>printsvc</param-value>
   </context-param>
 
   <context-param>

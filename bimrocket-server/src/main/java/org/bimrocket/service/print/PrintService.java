@@ -35,17 +35,19 @@ import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.bimrocket.api.print.PrintSource;
+import org.bimrocket.api.print.PrintCommand;
 import org.jvnet.hk2.annotations.Service;
 
 /**
@@ -64,73 +66,82 @@ public class PrintService
   @Inject
   ServletContext servletContext;
 
-  public void print(String filename, InputStream input) throws IOException
+  public String print(PrintSource printSource) throws IOException
   {
-    File file = getFile(filename);
+    String printId = UUID.randomUUID().toString().replaceAll("-", "");
+
+    String title = printSource.getTitle();
+    if (StringUtils.isBlank(title))
+    {
+      title = "Bimrocket print";
+    }
+
+    File file = getFile(printId);
+
     try (FileOutputStream output = new FileOutputStream(file);
          Document document = new Document())
     {
       PdfWriter writer = PdfWriter.getInstance(document, output);
       document.open();
-      document.addTitle(filename);
-      document.addCreator("PrintService");
+      document.addTitle(title);
+      document.addCreator("Bimrocket PrintService");
       PdfContentByte canvas = writer.getDirectContent();
-      try (BufferedReader reader =
-           new BufferedReader(new InputStreamReader(input, "UTF-8")))
-      {
-        drawElements(reader, canvas);
-      }
-      LOGGER.log(Level.INFO, "Geometry printed to file {0}", filename);
+      drawElements(printSource, canvas);
+      LOGGER.log(Level.INFO, "Geometry printed to file {0}",
+        file.getAbsoluteFile());
     }
+    return printId;
   }
 
-  public void copy(String filename, OutputStream output) throws IOException
+  public void copy(String printId, OutputStream output) throws IOException
   {
-    File file = getFile(filename);
+    File file = getFile(printId);
 
     try (FileInputStream fis = new FileInputStream(file))
     {
       IOUtils.copy(fis, output);
     }
-    LOGGER.log(Level.INFO, "File {0} sent.", filename);
+    LOGGER.log(Level.INFO, "File {0} sent.", file.getAbsoluteFile());
   }
 
-  private void drawElements(BufferedReader reader, PdfContentByte canvas)
+  private void drawElements(PrintSource printSource, PdfContentByte canvas)
     throws IOException
   {
     canvas.setLineWidth(0.1f);
     canvas.setLineCap(PdfContentByte.LINE_CAP_ROUND);
-    String line = reader.readLine();
-    while (line != null)
+    for (PrintCommand command : printSource.getCommands())
     {
-      String[] parts = line.split(" ");
-      if (parts.length > 0)
+      String type = command.getType();
+      List<? extends Object> args = command.getArguments();
+
+      switch (type)
       {
-        String command = parts[0];
-        if (command.equals("moveto"))
-        {
-          float x = Float.parseFloat(parts[1]);
-          float y = Float.parseFloat(parts[2]);
-          canvas.moveTo(x, y);
-        }
-        else if (command.equals("lineto"))
-        {
-          float x = Float.parseFloat(parts[1]);
-          float y = Float.parseFloat(parts[2]);
-          canvas.lineTo(x, y);
-        }
-        else if (command.equals("stroke"))
-        {
+        case "moveto":
+          {
+            double x = (double)args.get(0);
+            double y = (double)args.get(1);
+            canvas.moveTo((float)x, (float)y);
+            break;
+          }
+        case "lineto":
+          {
+            double x = (double)args.get(0);
+            double y = (double)args.get(1);
+            canvas.lineTo((float)x, (float)y);
+            break;
+          }
+        case "stroke":
           canvas.stroke();
-        }
+          break;
+        default:
+          break;
       }
-      line = reader.readLine();
     }
   }
 
-  private File getFile(String filename)
+  private File getFile(String printId)
   {
-    return new File(getBaseDir(), filename);
+    return new File(getBaseDir(), "print-" + printId + ".pdf");
   }
 
   private File getBaseDir()

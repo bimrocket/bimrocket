@@ -28,6 +28,7 @@ export const translations =
   "button.home" : "Reiniciar",
   "button.rename" : "Renombrar",
   "button.apply" : "Aplicar",
+  "button.print" : "Imprimir",
   "button.preview" : "Probar",
   "button.view" : "Ver",
   "button.restore" : "Restaurar",
@@ -280,6 +281,9 @@ export const translations =
 
   "label.formula.path" : "Propiedad:",
   "label.formula.expression" : "Expresión:",
+
+  "label.print_title" : "Título:",
+  "label.print_scale" : "Escala 1:",
 
   "label.selection_by_properties" : "Propiedades:",
   "label.expression" : "Expresión:",

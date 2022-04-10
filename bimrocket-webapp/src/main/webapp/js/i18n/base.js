@@ -30,6 +30,7 @@ export const translations =
   "button.restore" : "Restore",
   "button.rename" : "Rename",
   "button.apply" : "Apply",
+  "button.print" : "Print",
   "button.preview" : "Preview",
   "button.undo" : "Undo",
   "button.redo" : "Redo",
@@ -280,6 +281,9 @@ export const translations =
 
   "label.formula.path" : "Property:",
   "label.formula.expression" : "Expression:",
+
+  "label.print_title" : "Title:",
+  "label.print_scale" : "Scale 1:",
 
   "label.selection_by_properties" : "Properties:",
   "label.expression" : "Expression:",

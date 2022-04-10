@@ -7,6 +7,9 @@
 import { Tool } from "./Tool.js";
 import { Solid } from "../core/Solid.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { WebUtils } from "../utils/WebUtils.js";
+import { Controls } from "../ui/Controls.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -28,24 +31,15 @@ class PrintTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    const scalePanel = document.createElement("div");
-    this.panel.bodyElem.appendChild(scalePanel);
+    this.titleElem = Controls.addTextField(this.panel.bodyElem,
+      "print_title", "label.print_title", "", "row");
 
-    const scaleLabel = document.createElement("label");
-    scaleLabel.innerHTML = "Scale = 1 : ";
-    scalePanel.appendChild(scaleLabel);
+    this.scaleElem = Controls.addTextField(this.panel.bodyElem,
+      "print_scale", "label.print_scale", "10", "row");
+    this.scaleElem.style.width = "60px";
 
-    this.scaleInput = document.createElement("input");
-    this.scaleInput.type = "text";
-    this.scaleInput.value = "10";
-    this.scaleInput.style.width = "60px";
-    scalePanel.appendChild(this.scaleInput);
-
-    const printButton = document.createElement("button");
-    printButton.innerHTML = "Generate PDF";
-    this.panel.bodyElem.appendChild(printButton);
-    printButton.addEventListener('click',
-      () => this.drawScene(), false);
+    this.printButton = Controls.addButton(this.panel.bodyElem,
+      "print_button", "button.print", () => this.print());
 
     this.openLink = document.createElement("a");
     I18N.set(this.openLink, "innerHTML", "button.open");
@@ -64,59 +58,82 @@ class PrintTool extends Tool
     this.panel.visible = false;
   }
 
+  print()
+  {
+    this.printButton.disabled = true;
+    this.application.progressBar.progress = undefined;
+    this.application.progressBar.visible = true;
+    this.application.progressBar.message = "";
+
+    setTimeout(() => this.drawScene(), 100);
+  }
+
   drawScene()
   {
     const application = this.application;
-    var request = new XMLHttpRequest();
-    var url = location.protocol + "//" + location.host +
-      "/bimrocket-server/api/print/sample.pdf";
-    console.info("print url: " + url);
-    this.openLink.href = url;
+    const request = new XMLHttpRequest();
+    const serviceUrl = location.protocol + "//" + location.host +
+      "/bimrocket-server/api/print";
 
-    var scale = parseFloat(this.scaleInput.value);
+    let scale = parseFloat(this.scaleElem.value);
     // assume units in meters
-    var factor = 1 * 39.37007874 * 72; // dots per meter
+    let factor = 1 * 39.37007874 * 72; // dots per meter
     factor /= scale;
 
-    var matrix = new THREE.Matrix4();
+    let matrix = new THREE.Matrix4();
     matrix.makeTranslation(297, 382, 0);
     matrix.multiply((new THREE.Matrix4()).makeScale(factor, factor, factor));
     matrix.multiply(application.camera.matrixWorldInverse);
 
-    var data = this.drawObject(application.baseObject, matrix);
-
-    request.open("POST", url, true);
-    request.onreadystatechange = () =>
+    let printSource =
     {
-      if (request.readyState === 4)
-      {
-        if (request.status === 0 || request.status === 200)
-        {
-          this.openLink.click();
-        }
-      }
+      title : this.titleElem.value || "Bimrocket print",
+      commands : []
     };
-    console.info(data);
-    request.send(data);
+
+    this.drawObject(application.baseObject, matrix, printSource);
+
+    request.open("POST", serviceUrl, true);
+    request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    request.onload = () =>
+    {
+      if (request.status === 200)
+      {
+        this.printButton.disabled = false;
+        this.application.progressBar.visible = false;
+        let printResult = JSON.parse(request.responseText);
+        this.openLink.href = serviceUrl + "/" + printResult.id;
+        this.openLink.click();
+      }
+      else this.showError(request);
+    };
+    request.onerror = () =>
+    {
+      this.printButton.disabled = false;
+      this.application.progressBar.visible = false;
+      this.showError(request);
+    };
+    request.send(JSON.stringify(printSource));
   }
 
-  drawObject(object, matrix)
+  drawObject(object, matrix, printSource)
   {
-    var data = "";
+    const commands = printSource.commands;
+
     if (object instanceof Solid)
     {
       try
       {
         if (object.edgesVisible)
         {
-          var edgesGeometry = object.edgesGeometry;
-          var vertices =
+          let edgesGeometry = object.edgesGeometry;
+          let vertices =
             GeometryUtils.getBufferGeometryVertices(edgesGeometry);
 
-          var p1 = new THREE.Vector3();
-          var p2 = new THREE.Vector3();
+          let p1 = new THREE.Vector3();
+          let p2 = new THREE.Vector3();
 
-          for (var i = 0; i < vertices.length; i += 2)
+          for (let i = 0; i < vertices.length; i += 2)
           {
             p1.copy(vertices[i]);
             p1.applyMatrix4(object.matrixWorld);
@@ -126,9 +143,9 @@ class PrintTool extends Tool
             p2.applyMatrix4(object.matrixWorld);
             p2.applyMatrix4(matrix);
 
-            data += "moveto " + p1.x + " " + p1.y + "\n";
-            data += "lineto " + p2.x + " " + p2.y + "\n";
-            data += "stroke\n";
+            commands.push({ "type" : "moveto", "args" : [p1.x, p1.y] });
+            commands.push({ "type" : "lineto", "args" : [p2.x, p2.y] });
+            commands.push({ "type" : "stroke" });
           }
         }
       }
@@ -159,33 +176,52 @@ class PrintTool extends Tool
           p1.applyMatrix4(matrix);
           p2.applyMatrix4(matrix);
           p3.applyMatrix4(matrix);
-          data += "moveto " + p1.x + " " + p1.y + "\n";
-          data += "lineto " + p2.x + " " + p2.y + "\n";
-          data += "lineto " + p3.x + " " + p3.y + "\n";
-          data += "lineto " + p1.x + " " + p1.y + "\n";
-          data += "stroke\n";
+
+          commands.push({ "type" : "moveto", "args" : [p1.x, p1.y] });
+          commands.push({ "type" : "lineto", "args" : [p2.x, p2.y] });
+          commands.push({ "type" : "lineto", "args" : [p3.x, p3.y] });
+          commands.push({ "type" : "lineto", "args" : [p1.x, p1.y] });
+          commands.push({ "type" : "stroke" });
         };
 
         GeometryUtils.getBufferGeometryFaces(geometry, printFace);
       }
     }
-    var children = object.children;
-    for (var j = 0; j < children.length; j++)
+    else if (object instanceof THREE.Line)
     {
-      var child = children[j];
-      if (child.visible)
+    }
+    else
+    {
+      for (let child of object.children)
       {
-        if (object instanceof Solid)
+        if (child.visible)
         {
-          // skip
-        }
-        else
-        {
-          data += this.drawObject(child, matrix);
+          this.drawObject(child, matrix, printSource);
         }
       }
     }
-    return data;
+  }
+
+  showError(request)
+  {
+    let status = request.status;
+
+    let message;
+
+    let statusMessage = WebUtils.getHttpStatusMessage(status);
+    if (statusMessage.length > 0)
+    {
+      message = statusMessage;
+    }
+    else
+    {
+      message = "Error";
+    }
+    message += " (HTTP " + status + ").";
+
+    MessageDialog.create("ERROR", message)
+      .setClassName("error")
+      .setI18N(this.application.i18n).show();
   }
 }
 

@@ -365,6 +365,18 @@
   background-image: url(images/tools/section.svg);
 }
 
+div.row
+{
+  margin-top:2px;
+  margin-bottom:2px;
+  padding: 3px;
+}
+
+div.row > label
+{
+  margin-right: 2px;
+}
+
 div.option_block
 {
   margin-top:3px;

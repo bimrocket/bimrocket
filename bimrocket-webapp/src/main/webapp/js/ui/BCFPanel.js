@@ -25,6 +25,7 @@ class BCFPanel extends Panel
     this.title = "BCF";
     this.position = "left";
     this.group = "bcf"; // service group
+    this.minimumHeight = 200;
 
     this.service = null;
 

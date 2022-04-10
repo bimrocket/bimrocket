@@ -155,6 +155,7 @@ class FlyTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
+    this.panel.mininumHeight = 120;
 
     this.panel.bodyElem.classList.add("fly_panel");
 

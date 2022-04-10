@@ -24,6 +24,7 @@ class FileExplorer extends Panel
     this.title = "title.file_explorer";
     this.position = "left";
     this.group = "model"; // service group
+    this.minimumHeight = 200;
 
     this.service = null; // current service
     this.basePath = "/";

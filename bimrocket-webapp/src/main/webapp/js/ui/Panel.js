@@ -8,6 +8,7 @@ import { I18N } from "../i18n/I18N.js";
 
 class Panel
 {
+  static LARGE_SCREEN_WIDTH = 768;
   static POSITIONS = ["left", "right", "bottom"];
   static HEADER_HEIGHT = 24;
   static MARGIN = 6;
@@ -16,6 +17,7 @@ class Panel
   {
     this.application = application;
     this.panelManager = null;
+    this.minimumHeight = 100; // greater than HEADER_HEIGHT
     this.preferredHeight = 0; // 0: all available space, > 0: height in pixels
 
     this.element = document.createElement("div");
@@ -117,7 +119,12 @@ class Panel
     if (visible && !prevVisible)
     {
       this.element.classList.add("show");
-      if (this.panelManager) this.panelManager.updateLayout();
+      if (this.panelManager)
+      {
+        this.element.classList.remove("minimized");
+        this.panelManager.preferredPanel = this;
+        this.panelManager.updateLayout();
+      }
       this.onShow();
     }
     else if (!visible && prevVisible)
@@ -135,7 +142,14 @@ class Panel
 
   set minimized(minimized)
   {
-    if (this.panelManager) this.panelManager.setAnimationEnabled(true);
+    if (this.panelManager)
+    {
+      this.panelManager.setAnimationEnabled(true);
+      if (minimized === false)
+      {
+        this.panelManager.preferredPanel = this;
+      }
+    }
 
     let prevMinimized = this.minimized;
     if (minimized && !prevMinimized)
@@ -229,6 +243,7 @@ class PanelManager
     this.margin = 0;
     this.headerHeight = Panel.HEADER_HEIGHT;
     this.panels = [];
+    this.preferredPanel = null;
 
     this.resizers = {};
     this.resizers.left = new PanelResizer(this, "left");
@@ -333,6 +348,125 @@ class PanelManager
 
   layoutElements(panels, height)
   {
+    let minimumHeight = 0;
+
+    // calculate minimumHeight
+    for (let panel of panels)
+    {
+      if (panel.minimized)
+      {
+        minimumHeight += this.headerHeight;
+      }
+      else
+      {
+        minimumHeight += panel.minimumHeight;
+      }
+      minimumHeight += Panel.MARGIN;
+    }
+
+    // minimize required panels to fit all
+    let total = panels.length;
+    let remainingHeight = height - minimumHeight;
+    let i = 0;
+    while (remainingHeight < 0 && i < total)
+    {
+      let j = total - i - 1;
+      let panel = panels[j];
+      if (!panel.minimized && panel !== this.preferredPanel)
+      {
+        panel.element.classList.add("minimized");
+        remainingHeight += (panel.minimumHeight - this.headerHeight);
+      }
+      i++;
+    }
+
+    // calculate largePanelExtraHeight
+    let largePanelCount = 0;
+    let smallPanelRequiredHeight = 0;
+
+    for (let panel of panels)
+    {
+      if (!panel.minimized)
+      {
+        if (panel.preferredHeight === 0)
+        {
+          largePanelCount++;
+        }
+        else if (panel.preferredHeight > panel.minimumHeight)
+        {
+          smallPanelRequiredHeight +=
+            (panel.preferredHeight - panel.minimumHeight);
+        }
+      }
+    }
+
+    let largePanelExtraHeight = 0;
+    let largePanelRemainingHeight = remainingHeight - smallPanelRequiredHeight;
+    if (largePanelRemainingHeight > 0 && largePanelCount > 0)
+    {
+      largePanelExtraHeight =
+        Math.floor(largePanelRemainingHeight / largePanelCount);
+    }
+
+    // layout panels
+    let bottom = this.margin;
+    for (let i = 0; i < total; i++)
+    {
+      let j = total - i - 1;
+      let panel = panels[j];
+
+      // set panel bottom
+      panel.element.style.bottom = bottom + "px";
+
+      // set panel width
+      if (this.isLargeScreen())
+      {
+        let resizer = this.resizers[panel.position];
+        if (resizer)
+        {
+          panel.element.style.width =
+            (resizer.width - Panel.MARGIN) + "px";
+        }
+      }
+      else
+      {
+        panel.element.style.width = "";
+      }
+
+      // set panel height
+      let currentPanelHeight;
+      if (panel.minimized)
+      {
+        currentPanelHeight = this.headerHeight;
+      }
+      else if (panel.preferredHeight === 0) // large panel
+      {
+        currentPanelHeight = panel.minimumHeight + largePanelExtraHeight;
+        remainingHeight -= largePanelExtraHeight;
+      }
+      else // small panel
+      {
+        currentPanelHeight = panel.minimumHeight;
+
+        let requiredHeight = panel.preferredHeight - panel.minimumHeight;
+        if (requiredHeight > 0)
+        {
+          let extraHeight = Math.min(remainingHeight, requiredHeight);
+
+          currentPanelHeight += extraHeight;
+          remainingHeight -= extraHeight;
+        }
+      }
+      panel.element.style.height = currentPanelHeight + "px";
+
+      bottom += currentPanelHeight + Panel.MARGIN;
+    }
+    return bottom;
+  }
+
+/*
+  layoutElements(panels, height)
+  {
     let extendedPanelsCount = 0;
     let fixedHeight = 0;
     let total = panels.length;
@@ -408,10 +542,11 @@ class PanelManager
     }
     return bottom;
   }
+ */
 
   isLargeScreen()
   {
-    return this.container.clientWidth > 768;
+    return this.container.clientWidth > Panel.LARGE_SCREEN_WIDTH;
   }
 };
 

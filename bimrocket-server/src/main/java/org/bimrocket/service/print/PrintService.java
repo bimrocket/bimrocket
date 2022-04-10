@@ -31,6 +31,8 @@
 package org.bimrocket.service.print;
 
 import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.inject.Inject;
@@ -85,6 +87,8 @@ public class PrintService
       document.open();
       document.addTitle(title);
       document.addCreator("Bimrocket PrintService");
+      document.add(new Paragraph(title));
+
       PdfContentByte canvas = writer.getDirectContent();
       drawElements(printSource, canvas);
       LOGGER.log(Level.INFO, "Geometry printed to file {0}",
@@ -118,16 +122,16 @@ public class PrintService
       {
         case "moveto":
           {
-            double x = (Double)args.get(0);
-            double y = (Double)args.get(1);
-            canvas.moveTo((float)x, (float)y);
+            float x = ((Number)args.get(0)).floatValue();
+            float y = ((Number)args.get(1)).floatValue();
+            canvas.moveTo(x, y);
             break;
           }
         case "lineto":
           {
-            double x = (Double)args.get(0);
-            double y = (Double)args.get(1);
-            canvas.lineTo((float)x, (float)y);
+            float x = ((Number)args.get(0)).floatValue();
+            float y = ((Number)args.get(1)).floatValue();
+            canvas.lineTo(x, y);
             break;
           }
         case "stroke":

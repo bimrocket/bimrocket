@@ -97,10 +97,11 @@ class PrintTool extends Tool
     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     request.onload = () =>
     {
+      this.printButton.disabled = false;
+      this.application.progressBar.visible = false;
+
       if (request.status === 200)
       {
-        this.printButton.disabled = false;
-        this.application.progressBar.visible = false;
         let printResult = JSON.parse(request.responseText);
         this.openLink.href = serviceUrl + "/" + printResult.id;
         this.openLink.click();
@@ -111,6 +112,7 @@ class PrintTool extends Tool
     {
       this.printButton.disabled = false;
       this.application.progressBar.visible = false;
+
       this.showError(request);
     };
     request.send(JSON.stringify(printSource));

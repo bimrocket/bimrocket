@@ -118,15 +118,15 @@ public class PrintService
       {
         case "moveto":
           {
-            double x = (double)args.get(0);
-            double y = (double)args.get(1);
+            double x = (Double)args.get(0);
+            double y = (Double)args.get(1);
             canvas.moveTo((float)x, (float)y);
             break;
           }
         case "lineto":
           {
-            double x = (double)args.get(0);
-            double y = (double)args.get(1);
+            double x = (Double)args.get(0);
+            double y = (Double)args.get(1);
             canvas.lineTo((float)x, (float)y);
             break;
           }

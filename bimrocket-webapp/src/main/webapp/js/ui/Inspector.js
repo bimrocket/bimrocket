@@ -23,8 +23,8 @@ import * as THREE from "../lib/three.module.js";
 
 class Inspector extends Panel
 {
-  static mainMaterialProperties = ["uuid", "type", "name", "color", "specular",
-    "emissive", "shininess", "opacity", "transparent", "side",
+  static mainMaterialProperties = ["id", "uuid", "type", "name", "color", 
+    "specular", "emissive", "shininess", "opacity", "transparent", "side",
     "emissiveIntensity", "fog", "depthTest", "depthWrite",
     "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
     "sizeAttenuation", "map"];
@@ -160,7 +160,7 @@ class Inspector extends Panel
         {
           if (propertyName in material)
           {
-            if (propertyName === "uuid" || propertyName === "type"
+            if (this.isReadOnlyProperty(propertyName)
                 || material === Solid.EdgeMaterial
                 || material === Solid.FaceMaterial)
             {
@@ -238,6 +238,7 @@ class Inspector extends Panel
         let geomListElem = this.createSection(this.geometrySectionName,
           topListElem);
 
+        this.createReadOnlyProperty(geomListElem, "id", geometry.id);
         this.createReadOnlyProperty(geomListElem, "uuid", geometry.uuid);
         this.createReadOnlyProperty(geomListElem, "type", geometry.type);
 
@@ -699,8 +700,9 @@ class Inspector extends Panel
 
   isReadOnlyProperty(propertyName)
   {
-    if (propertyName === 'type') return true;
+    if (propertyName === 'id') return true;
     if (propertyName === 'uuid') return true;
+    if (propertyName === 'type') return true;
     if (propertyName.indexOf("is") === 0) return true;
 
     return false;

@@ -329,12 +329,13 @@ export const translations =
   "label.add_selection_mode" : "Suma",
   "label.remove_selection_mode" : "Resta",
 
+  "label.geometries_display" : "Geometries a mostrar:",
   "label.geometry_inventory" : "Inventari",
   "label.geometry_detail" : "Geometria",
   "label.geometry_id" : "Id",
   "label.geometry_instances" : "Instàncies",
   "label.geometry_triangles" : "Triangles",
-  "label.geometry_total_triangles" : "Total",  
+  "label.geometry_total_triangles" : "Total",
 
   "option.edges" : "Arestes",
   "option.faces" : "Cares",
@@ -382,9 +383,13 @@ export const translations =
 
   "message.object_name" : objectName => `Objecte: ${objectName}`,
   "message.geometry_id" : id => `Id de geometria: ${id}`,
-  "message.vertex_count" : vertexCount => `Vèrtexs: ${vertexCount}`,
-  "message.face_count" : faceCount => `Cares: ${faceCount}`,
+  "message.vertex_count" : count => `Vèrtexs: ${count}`,
+  "message.face_count" : count => `Cares: ${count}`,
   "message.is_manifold" : manifold => `És varietat: ${manifold ? "si" : "no"}`,
+  "message.geometry_count" : count => `Geometries: ${count}`,
+  "message.instance_count" : count => `Instàncies: ${count}`,
+  "message.modeled_triangle_count" : count => `Triangles modelitzats: ${count}`,
+  "message.rendered_triangle_count" : count => `Triangles renderitzats: ${count}`,
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

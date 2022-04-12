@@ -329,12 +329,13 @@ export const translations =
   "label.add_selection_mode" : "Add",
   "label.remove_selection_mode" : "Remove",
 
+  "label.geometries_display" : "Geometries to display:",
   "label.geometry_inventory" : "Inventory",
-  "label.geometry_detail" : "Geometry",  
+  "label.geometry_detail" : "Geometry",
   "label.geometry_id" : "Id",
   "label.geometry_instances" : "Instances",
   "label.geometry_triangles" : "Triangles",
-  "label.geometry_total_triangles" : "Total",  
+  "label.geometry_total_triangles" : "Total",
 
   "option.edges" : "Edges",
   "option.faces" : "Faces",
@@ -382,9 +383,13 @@ export const translations =
 
   "message.object_name" : objectName => `Object: ${objectName}`,
   "message.geometry_id" : id => `Geometry id: ${id}`,
-  "message.vertex_count" : vertexCount => `Vertices: ${vertexCount}`,
-  "message.face_count" : faceCount => `Faces: ${faceCount}`,
+  "message.vertex_count" : count => `Vertices: ${count}`,
+  "message.face_count" : count => `Faces: ${count}`,
   "message.is_manifold" : manifold => `Is manifold: ${manifold ? "yes" : "no"}`,
+  "message.geometry_count" : count => `Geometries: ${count}`,
+  "message.instance_count" : count => `Instances: ${count}`,
+  "message.modeled_triangle_count" : count => `Modeled triangles: ${count}`,
+  "message.rendered_triangle_count" : count => `Rendered triangles: ${count}`,
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

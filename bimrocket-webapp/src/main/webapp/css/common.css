@@ -240,7 +240,8 @@ table.data
   border-collapse: collapse;
   width:calc(100% - 8px);
   margin: 0 auto;
-  margin-top: 6px;
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 table.data > thead > tr

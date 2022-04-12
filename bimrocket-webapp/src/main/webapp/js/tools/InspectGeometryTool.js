@@ -32,7 +32,7 @@ class InspectGeometryTool extends Tool
       { color : 0, size: 4, sizeAttenuation : false, depthTest : false,
         transparent : true });
     this.vertexMaterial = new THREE.PointsMaterial(
-      { color : 0x000080, size: 8, sizeAttenuation : false, depthTest : false, 
+      { color : 0x000080, size: 8, sizeAttenuation : false, depthTest : false,
         transparent : true });
 
     this.sceneUuid = null;
@@ -46,29 +46,52 @@ class InspectGeometryTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.bodyElem.classList.add("padding");
-    
+
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
 
-    const geometryInventoryPanel = 
-      this.tabbedPane.addTab("geom_inventory", "label.geometry_inventory");    
+    const geometryInventoryPanel =
+      this.tabbedPane.addTab("geom_inventory", "label.geometry_inventory");
     geometryInventoryPanel.classList.add("inspect_geometry");
 
-    const geometryPanel = this.tabbedPane.addTab("geom_detail", 
+    const geometryPanel = this.tabbedPane.addTab("geom_detail",
       "label.geometry_detail");
     geometryPanel.classList.add("inspect_geometry");
 
     // geometry inventory panel
+    this.geometryToDisplayElem = Controls.addNumberField(geometryInventoryPanel,
+      "geom_to_display", "label.geometries_display", "100", "row");
+    this.geometryToDisplayElem.style.width = "60px";
+
     this.searchButton = Controls.addButton(geometryInventoryPanel,
       "geom_search", "button.search", () => this.searchGeometries());
 
-    this.geometryTable = Controls.addTable(geometryInventoryPanel, "geom_table", 
-      ["label.geometry_id", "label.geometry_instances", 
+    this.listInvElem = document.createElement("ul");
+    this.listInvElem.className = "summary";
+    geometryInventoryPanel.appendChild(this.listInvElem);
+
+    this.geometryCountElem = document.createElement("li");
+    this.listInvElem.appendChild(this.geometryCountElem);
+
+    this.instanceCountElem = document.createElement("li");
+    this.listInvElem.appendChild(this.instanceCountElem);
+
+    this.modeledTriangleCountElem = document.createElement("li");
+    this.listInvElem.appendChild(this.modeledTriangleCountElem);
+
+    this.renderedTriangleCountElem = document.createElement("li");
+    this.listInvElem.appendChild(this.renderedTriangleCountElem);
+
+    this.listInvElem.style.display = "none";
+
+    this.geometryTable = Controls.addTable(geometryInventoryPanel, "geom_table",
+      ["label.geometry_id", "label.geometry_instances",
         "label.geometry_triangles", "label.geometry_total_triangles"], "data");
-    
+
     this.geometryTable.style.display = "none";
 
     // geometry panel
     this.messageElem = document.createElement("div");
+    this.messageElem.style.padding = "4px";
     geometryPanel.appendChild(this.messageElem);
     I18N.set(this.messageElem, "innerHTML", "tool.inspect_geometry.help");
 
@@ -110,6 +133,7 @@ class InspectGeometryTool extends Tool
 
     if (this.sceneUuid !== application.scene.uuid)
     {
+      this.listInvElem.style.display = "none";
       this.geometryTable.tBodies[0].innerHTML = "";
       this.geometryTable.style.display = "none";
     }
@@ -183,15 +207,17 @@ class InspectGeometryTool extends Tool
     this.clearHighlight();
     this.messageElem.style.display = "none";
 
+    const formatter = new Intl.NumberFormat();
+
     this.listElem.style.display = "";
     I18N.set(this.objectNameElem, "innerHTML", "message.object_name",
       solid.name);
     I18N.set(this.geometryIdElem, "innerHTML", "message.geometry_id",
       solid.geometry.id);
     I18N.set(this.faceCountElem, "innerHTML", "message.face_count",
-      solid.geometry.faces.length);
+      formatter.format(solid.geometry.faces.length));
     I18N.set(this.vertexCountElem, "innerHTML", "message.vertex_count",
-      solid.geometry.vertices.length);
+      formatter.format(solid.geometry.vertices.length));
     I18N.set(this.isManifoldElem, "innerHTML", "message.is_manifold",
       solid.geometry.isManifold);
     this.application.i18n.updateTree(this.listElem);
@@ -346,35 +372,40 @@ class InspectGeometryTool extends Tool
       object.updateGeometry(geometry);
       this.showSolid(object);
       this.application.notifyObjectsChanged(object);
-      console.info(optimizer);
     }
   }
-  
+
   searchGeometries()
   {
     const application = this.application;
     this.sceneUuid = application.scene.uuid;
     let geometryMap = new Map();
+    let instanceCount = 0;
+    let modeledTriangleCount = 0;
+    let renderedTriangleCount = 0;
 
     function traverse(object)
     {
       if (!object.visible) return;
-      
+
       if (object instanceof Solid)
       {
         let geometry = object.geometry;
         let entry = geometryMap.get(geometry.id);
         if (entry === undefined)
         {
-          entry = 
+          entry =
           {
             geometry : geometry,
             triangleCount : geometry.getTriangleCount(),
             instances : []
           };
           geometryMap.set(geometry.id, entry);
+          modeledTriangleCount += entry.triangleCount;
         }
         entry.instances.push(object);
+        instanceCount++;
+        renderedTriangleCount += entry.triangleCount;
       }
       else
       {
@@ -388,32 +419,51 @@ class InspectGeometryTool extends Tool
 
     traverse(application.baseObject);
 
-    this.geometryTable.tBodies[0].innerHTML = "";
-    
     let entries = Array.from(geometryMap.values());
-    entries.sort((a, b) => 
+    entries.sort((a, b) =>
     {
       let sizeA = a.triangleCount * a.instances.length;
       let sizeB = b.triangleCount * b.instances.length;
       return sizeB - sizeA;
     });
-    
-    for (let entry of entries)
+
+    const formatter = new Intl.NumberFormat();
+
+    this.listInvElem.style.display = "";
+    I18N.set(this.geometryCountElem, "innerHTML",
+      "message.geometry_count", formatter.format(entries.length));
+    I18N.set(this.instanceCountElem, "innerHTML",
+      "message.instance_count", formatter.format(instanceCount));
+    I18N.set(this.modeledTriangleCountElem, "innerHTML",
+      "message.modeled_triangle_count",
+      formatter.format(modeledTriangleCount));
+    I18N.set(this.renderedTriangleCountElem, "innerHTML",
+      "message.rendered_triangle_count",
+      formatter.format(renderedTriangleCount));
+    this.application.i18n.updateTree(this.listInvElem);
+
+    this.geometryTable.tBodies[0].innerHTML = "";
+
+    let entryCount =
+      Math.min(entries.length, parseInt(this.geometryToDisplayElem.value));
+
+    for (let i = 0; i < entryCount; i++)
     {
+      let entry = entries[i];
       let rowElem = Controls.addTableRow(this.geometryTable);
       rowElem.children[0].innerHTML = entry.geometry.id;
       let instanceLink = document.createElement("a");
       instanceLink.href = "#";
-      instanceLink.innerHTML = "" + entry.instances.length;
-      instanceLink.addEventListener("click", () => this.showInstances(entry));      
+      instanceLink.innerHTML = "" + formatter.format(entry.instances.length);
+      instanceLink.addEventListener("click", () => this.showInstances(entry));
       rowElem.children[1].appendChild(instanceLink);
-      rowElem.children[2].innerHTML = entry.triangleCount;
-      rowElem.children[3].innerHTML = 
-        entry.triangleCount * entry.instances.length;
+      rowElem.children[2].innerHTML = formatter.format(entry.triangleCount);
+      rowElem.children[3].innerHTML =
+        formatter.format(entry.triangleCount * entry.instances.length);
     }
     this.geometryTable.style.display = "";
   }
-  
+
   showInstances(entry)
   {
     this.application.selection.set(...entry.instances);

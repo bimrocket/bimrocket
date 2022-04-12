@@ -168,6 +168,16 @@ class SolidGeometry extends THREE.BufferGeometry
     return edgesGeometry;
   }
 
+  getTriangleCount()
+  {
+    let triangleCount = 0;
+    for (let face of this.faces)
+    {
+      triangleCount += face.getTriangles().length;
+    }
+    return triangleCount;
+  }
+
   getTrianglesGeometry()
   {
     const edges = new Set();

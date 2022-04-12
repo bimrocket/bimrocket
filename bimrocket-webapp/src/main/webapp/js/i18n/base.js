@@ -329,6 +329,13 @@ export const translations =
   "label.add_selection_mode" : "Add",
   "label.remove_selection_mode" : "Remove",
 
+  "label.geometry_inventory" : "Inventory",
+  "label.geometry_detail" : "Geometry",  
+  "label.geometry_id" : "Id",
+  "label.geometry_instances" : "Instances",
+  "label.geometry_triangles" : "Triangles",
+  "label.geometry_total_triangles" : "Total",  
+
   "option.edges" : "Edges",
   "option.faces" : "Faces",
   "option.solid" : "Solid",
@@ -374,6 +381,7 @@ export const translations =
   "message.folder_deleted" : "Folder deleted.",
 
   "message.object_name" : objectName => `Object: ${objectName}`,
+  "message.geometry_id" : id => `Geometry id: ${id}`,
   "message.vertex_count" : vertexCount => `Vertices: ${vertexCount}`,
   "message.face_count" : faceCount => `Faces: ${faceCount}`,
   "message.is_manifold" : manifold => `Is manifold: ${manifold ? "yes" : "no"}`,

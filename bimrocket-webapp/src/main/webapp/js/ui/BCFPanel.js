@@ -114,7 +114,7 @@ class BCFPanel extends Panel
 
     this.topicTableElem = Controls.addTable(this.searchPanelElem,
       "topicTable", ["bim|col.index", "bim|col.topic", "bim|col.status"],
-      "bcf_topic_table");
+      "data");
     this.topicTableElem.style.display = "none";
     this.searchPanelElem.appendChild(this.topicTableElem);
 

@@ -705,7 +705,6 @@ div.script_code
   color: black;
 }
 
-
 .inspect_geometry ul.tree li.face
 {
   background-image: url(images/geometry/loop.svg);
@@ -747,6 +746,19 @@ div.script_code
 {
   text-align: left;
   list-style-type: none;
+}
+
+.inspect_geometry table.data a
+{
+  text-decoration: none;
+  padding: 0 5px 0 5px;
+  border-radius: 2px;
+  color: blue;
+}
+
+.inspect_geometry table.data a:hover
+{
+  background-color: #e0e0e0;
 }
 
 .property_selector_scroll

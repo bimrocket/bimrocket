@@ -25,33 +25,6 @@
   transition: all 0.4s ease;
 }
 
-table.bcf_topic_table
-{
-  padding: 4px;
-  border: 1px solid #c0c0c0;
-  box-sizing:border-box;
-  border-collapse: collapse;
-  width:calc(100% - 8px);
-  margin: 0 auto;
-  margin-top: 6px;
-}
-
-table.bcf_topic_table > thead > tr
-{
-  border-bottom: 1px solid #c0c0c0;
-  background-color: #fff0f0;
-}
-
-table.bcf_topic_table > tbody > tr
-{
-  border-bottom: 1px solid #d0d0d0;
-}
-
-table.bcf_topic_table > tbody > tr:hover
-{
-  background-color: #f0f0f0;
-}
-
 .bcf_body
 {
   padding: 4px;

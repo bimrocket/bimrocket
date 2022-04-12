@@ -232,6 +232,33 @@ div.code_editor > .cm-editor-holder
   box-sizing: border-box;
 }
 
+table.data
+{
+  padding: 0;
+  border: 1px solid #c0c0c0;
+  box-sizing:border-box;
+  border-collapse: collapse;
+  width:calc(100% - 8px);
+  margin: 0 auto;
+  margin-top: 6px;
+}
+
+table.data > thead > tr
+{
+  border-bottom: 1px solid #c0c0c0;
+  background-color: #fff0f0;
+}
+
+table.data > tbody > tr
+{
+  border-bottom: 1px solid #d0d0d0;
+}
+
+table.data > tbody > tr:hover
+{
+  background-color: #f0f0f0;
+}
+
 /* animation */
 
 @keyframes item_hover

@@ -329,6 +329,13 @@ export const translations =
   "label.add_selection_mode" : "Sumar",
   "label.remove_selection_mode" : "Restar",
 
+  "label.geometry_inventory" : "Inventario",
+  "label.geometry_detail" : "Geometría",
+  "label.geometry_id" : "Id",
+  "label.geometry_instances" : "Instancias",
+  "label.geometry_triangles" : "Triángulos",
+  "label.geometry_total_triangles" : "Total",  
+
   "option.edges" : "Aristas",
   "option.faces" : "Caras",
   "option.solid" : "Sólido",
@@ -374,6 +381,7 @@ export const translations =
   "message.folder_deleted" : "Carpeta borrada.",
 
   "message.object_name" : objectName => `Objeto: ${objectName}`,
+  "message.geometry_id" : id => `Id de geometría: ${id}`,
   "message.vertex_count" : vertexCount => `Vértices: ${vertexCount}`,
   "message.face_count" : faceCount => `Caras: ${faceCount}`,
   "message.is_manifold" : manifold => `Es variedad: ${manifold ? "si" : "no"}`,

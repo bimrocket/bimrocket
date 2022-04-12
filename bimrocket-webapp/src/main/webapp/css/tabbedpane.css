@@ -4,6 +4,7 @@
 
 .tabbed_pane > .header
 {
+  text-align: left;
 }
 
 .tabbed_pane > .header > a

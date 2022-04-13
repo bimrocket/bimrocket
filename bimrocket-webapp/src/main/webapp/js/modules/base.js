@@ -29,7 +29,8 @@ import { ScaleTool } from "../tools/ScaleTool.js";
 import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { ClipTool } from "../tools/ClipTool.js";
-import { MakeSolidTool } from "../tools/MakeSolidTool.js";
+import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
+import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { DrawProfileTool } from "../tools/DrawProfileTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
@@ -169,7 +170,8 @@ export function load(application)
     { name : "subtraction", label : "tool.subtraction.label",
       operation : BooleanOperator.SUBTRACT });
   const clipTool = new ClipTool(application);
-  const makeSolidTool = new MakeSolidTool(application);
+  const meshToSolidTool = new MeshToSolidTool(application);
+  const solidToMeshTool = new SolidToMeshTool(application);
   const drawProfileTool = new DrawProfileTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
@@ -299,7 +301,8 @@ export function load(application)
   application.addTool(intersectionTool);
   application.addTool(subtractionTool);
   application.addTool(clipTool);
-  application.addTool(makeSolidTool);
+  application.addTool(meshToSolidTool);
+  application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
   application.addTool(measureLengthTool);
   application.addTool(measureSelectionTool);
@@ -430,7 +433,9 @@ export function load(application)
   designMenu.addMenuItem(drawProfileTool);
   designMenu.addMenuItem(extrudeTool);
   designMenu.addMenuItem(clipTool);
-  designMenu.addMenuItem(makeSolidTool);
+  const convertMenu = designMenu.addMenu("menu.design.convert");
+  convertMenu.addMenuItem(meshToSolidTool);
+  convertMenu.addMenuItem(solidToMeshTool);
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(inspectGeometryTool);
   designMenu.addMenuItem(resetMatrixTool);

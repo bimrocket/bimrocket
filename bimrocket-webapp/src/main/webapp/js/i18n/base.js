@@ -69,6 +69,7 @@ export const translations =
   "menu.design.add_profile" : "Profile",
   "menu.design.add_cord" : "Cord",
   "menu.design.boolean_operation" : "Boolean operation",
+  "menu.design.convert" : "Convert",
   "menu.design.transform" : "Transform",
   "menu.measure" : "Measure",
   "menu.control" : "Control",
@@ -131,7 +132,8 @@ export const translations =
 
   "tool.subtraction.label" : "Subtraction",
 
-  "tool.make_solid.label" : "Make solid",
+  "tool.mesh_to_solid.label" : "Mesh to Solid",
+  "tool.solid_to_mesh.label" : "Solid to Mesh",
 
   "tool.clip.label" : "Clip",
 

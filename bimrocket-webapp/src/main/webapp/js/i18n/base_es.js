@@ -68,6 +68,7 @@ export const translations =
   "menu.design.add_solid" : "Sólido",
   "menu.design.add_profile" : "Perfil",
   "menu.design.add_cord" : "Cuerda",
+  "menu.design.convert" : "Convertir",
   "menu.design.boolean_operation" : "Operación booleana",
   "menu.design.transform" : "Transformar",
   "menu.measure" : "Medición",
@@ -131,7 +132,8 @@ export const translations =
 
   "tool.subtraction.label" : "Substracción",
 
-  "tool.make_solid.label" : "Crear sólido",
+  "tool.mesh_to_solid.label" : "Malla a Sólido",
+  "tool.solid_to_mesh.label" : "Sólido a Malla",
 
   "tool.clip.label" : "Recortar",
 

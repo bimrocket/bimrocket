@@ -144,6 +144,11 @@ ul.tree li.Cord
   background-image: url(images/outliner/cord.svg)
 }
 
+ul.tree li.Mesh
+{
+  background-image: url(images/outliner/mesh.svg)
+}
+
 ul.tree li.AmbientLight,
 ul.tree li.DirectionalLight,
 ul.tree li.PointLight,

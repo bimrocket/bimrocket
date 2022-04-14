@@ -90,11 +90,14 @@ class SolidToMeshTool extends Tool
     mesh.userData = solid.userData;
     mesh.visible = solid.visible && solid.facesVisible;
     mesh.parent = parent;
-    solid.parent = null;
 
     solid.matrix.decompose(mesh.position, mesh.rotation, mesh.scale);
     mesh.updateMatrix();
     if (solid.material) mesh.material = solid.material;
+
+    solid.parent = null;
+    solid.geometry.dispose();
+    solid.edgesGeometry.dispose();
 
     return mesh;
   }

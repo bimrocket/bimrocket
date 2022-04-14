@@ -218,7 +218,8 @@ class BRFLoader extends THREE.Loader
       for (let name in entry.attributes)
       {
         let attribute = entry.attributes[name];
-        let array = attribute.array;
+        let array = this.parseBufferAttributeArray(attribute);
+
         let itemSize = attribute.itemSize;
         let normalized = attribute.normalized;
         let typedArray;
@@ -481,6 +482,32 @@ class BRFLoader extends THREE.Loader
     {
       console.warn("Invalid value for property " + property + ": " + value);
     }
+  }
+
+  parseBufferAttributeArray(attribute)
+  {
+    let array = attribute.array;
+
+    if (array.length === 0) return array;
+
+    if (array[0] instanceof Array) // compressed attribute
+    {
+      let uncompressedArray = [];
+      for (let i = 0; i < array.length; i++)
+      {
+        let item = array[i];
+        if (item instanceof Array)
+        {
+          uncompressedArray.push(...item);
+        }
+        else if (typeof item === "number")
+        {
+          uncompressedArray.push(...array[item]);
+        }
+      }
+      return uncompressedArray;
+    }
+    else return array;
   }
 }
 

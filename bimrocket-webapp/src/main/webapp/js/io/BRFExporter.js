@@ -15,7 +15,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 2;
+  static VERSION = 3;
 
   constructor()
   {
@@ -43,7 +43,7 @@ class BRFExporter
 
     this.export(object, model);
 
-    return JSON.stringify(model, null, 1);
+    return JSON.stringify(model);
   }
 
   export(object, model)
@@ -236,9 +236,9 @@ class BRFExporter
           {
             type : attribute.constructor.name,
             arrayType : attribute.array.constructor.name,
-            array : Array.from(attribute.array),
             itemSize : attribute.itemSize,
-            normalized : attribute.normalized
+            normalized : attribute.normalized,
+            array: this.exportBufferAttributeArray(attribute)
           };
         }
       }
@@ -361,6 +361,69 @@ class BRFExporter
   exportColor(color)
   {
     return "#" + color.getHexString();
+  }
+
+  exportBufferAttributeArray(attribute)
+  {
+    const compress = attribute.name !== "index" &&
+      (this.options.enableBufferGeometryCompression === undefined
+      || this.options.enableBufferGeometryCompression === true);
+
+    const array = attribute.array;
+    const precision7 = array instanceof Float32Array;
+
+    if (compress)
+    {
+      const compressedArray = [];
+      const itemSize = attribute.itemSize;
+      const map = new Map();
+
+      for (let i = 0; i < array.length; i += itemSize)
+      {
+        let vector = [];
+        for (let k = 0; k < itemSize; k++)
+        {
+          if (precision7)
+          {
+            vector.push(parseFloat(array[i + k].toPrecision(7)));
+          }
+          else
+          {
+            vector.push(array[i + k]);
+          }
+        }
+        let key = vector.join(",");
+        let itemIndex = map.get(key);
+        if (itemIndex === undefined)
+        {
+          itemIndex = i / itemSize;
+          map.set(key, itemIndex);
+          compressedArray.push(vector);
+        }
+        else
+        {
+          compressedArray.push(itemIndex);
+        }
+      }
+      return compressedArray;
+    }
+    else
+    {
+      if (precision7)
+      {
+        const directArray = [];
+
+        for (let i = 0; i < array.length; i++)
+        {
+          directArray.push(parseFloat(array[i].toPrecision(7)));
+        }
+        return directArray;
+      }
+      else
+      {
+        return Array.from(array);
+      }
+    }
   }
 }
 

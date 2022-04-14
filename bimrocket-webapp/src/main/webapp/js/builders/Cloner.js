@@ -27,6 +27,17 @@ class Cloner extends ObjectBuilder
     }
   }
 
+  updateReferences(object, update)
+  {
+    let newObjectToClone = update(this.objectToClone);
+    if (newObjectToClone !== null)
+    {
+      this.objectToClone = newObjectToClone;
+      return true;
+    }
+    return false;
+  }
+
   performBuild(object)
   {
     if (this.objectToClone === undefined) return false;

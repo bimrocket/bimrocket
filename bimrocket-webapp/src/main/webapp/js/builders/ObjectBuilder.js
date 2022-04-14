@@ -31,6 +31,25 @@ class ObjectBuilder
     }
   }
 
+
+  /*
+   * Updates the builder object references
+   *
+   * The builder must call update(refObject) for each direct reference
+   * to a dependent object.
+   *
+   * The value returned by update(refObject) is the object that must be
+   * replaced by refObject. When no replacement is required,
+   * update(refObject) will return null.
+   *
+   * @returns {Boolean} true if any replacement has been done, false otherwise.
+   *
+   */
+  updateReferences(object, update)
+  {
+    return false;
+  }
+
   /*
    * Builds object assuming its dependencies have already been built
    *

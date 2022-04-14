@@ -26,47 +26,64 @@ class MeshToSolidTool extends Tool
   {
     const application = this.application;
     const roots = application.selection.roots;
+    application.selection.clear();
     this.convert(roots);
   }
-  
+
   convert(roots)
   {
+    const replacements = new Map();
     const application = this.application;
     const parents = new Selection();
     for (let root of roots)
     {
       parents.add(root.parent);
-      this.traverse(root);
-    }    
+      this.traverse(root, replacements);
+    }
+
+    application.baseObject.traverse(object =>
+    {
+      if (object.builder)
+      {
+        let updated = object.builder.updateReferences(object,
+          ref => replacements.get(ref) || null);
+
+        if (updated)
+        {
+          object.needsRebuild = true;
+        }
+      }
+    });
+
     const changed = parents.roots;
-    application.notifyObjectsChanged(changed, this, "structureChanged");    
+    application.notifyObjectsChanged(changed, this, "structureChanged");
   }
 
-  traverse(object)
+  traverse(object, replacements)
   {
     if (object instanceof THREE.Mesh)
     {
-      this.meshToSolid(object);
+      let mesh = object;
+      let solid = this.meshToSolid(mesh);
+      replacements.set(mesh, solid);
     }
     else
     {
       let children = object.children;
       for (let child of children)
       {
-        this.traverse(child);
+        this.traverse(child, replacements);
       }
     }
   }
 
   meshToSolid(mesh)
   {
-    console.info("mesh", mesh);
-    
     const parent = mesh.parent;
     const parentIndex = parent.children.indexOf(mesh);
 
     let solid = new Solid();
-    
+
     solid.updateGeometry(mesh.geometry, true);
 
     parent.children[parentIndex] = solid;
@@ -79,7 +96,7 @@ class MeshToSolidTool extends Tool
     if (mesh.material) solid.material = mesh.material;
     mesh.matrix.decompose(solid.position, solid.rotation, solid.scale);
     solid.updateMatrix();
-    
+
     return solid;
   }
 }

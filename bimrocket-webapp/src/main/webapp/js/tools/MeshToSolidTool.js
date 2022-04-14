@@ -6,6 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { Selection } from "../utils/Selection.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Solid } from "../core/Solid.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -97,7 +98,7 @@ class MeshToSolidTool extends Tool
     solid.updateMatrix();
 
     mesh.parent = null;
-    mesh.geometry.dispose();
+    ObjectUtils.dispose(mesh);
 
     return solid;
   }

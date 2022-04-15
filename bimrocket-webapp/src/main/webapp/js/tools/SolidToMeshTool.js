@@ -27,8 +27,8 @@ class SolidToMeshTool extends Tool
   {
     const application = this.application;
     const roots = application.selection.roots;
-    application.selection.clear();
-    this.convert(roots);
+    const newRoots = this.convert(roots);
+    application.selection.set(...newRoots);
   }
 
   convert(roots)
@@ -58,6 +58,8 @@ class SolidToMeshTool extends Tool
 
     const changed = parents.roots;
     application.notifyObjectsChanged(changed, this, "structureChanged");
+
+    return roots.map(object => replacements.get(object) || object);
   }
 
   traverse(object, replacements)

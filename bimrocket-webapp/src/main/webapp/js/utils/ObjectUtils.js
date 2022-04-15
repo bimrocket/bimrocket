@@ -12,6 +12,8 @@ import * as THREE from "../lib/three.module.js";
 
 class ObjectUtils
 {
+  static ORIGINAL_MATERIAL = "originalMaterial";
+
   static METER_CONVERSION_FACTORS =
   {
     "km" : 0.001,
@@ -169,6 +171,52 @@ class ObjectUtils
     });
   }
 
+  static applyMaterial(object, material, original = true)
+  {
+    const ORIGINAL_MATERIAL = ObjectUtils.ORIGINAL_MATERIAL;
+    let changed = false;
+
+    if (material === null) // restore original material if possible
+    {
+      if (object[ORIGINAL_MATERIAL])
+      {
+        object.material.dispose();
+        object.material = object[ORIGINAL_MATERIAL];
+        object[ORIGINAL_MATERIAL] = null;
+        changed = true;
+      }
+    }
+    else if (material instanceof THREE.Material)
+    {
+      if (original)
+      {
+        if (object[ORIGINAL_MATERIAL])
+        {
+          object[ORIGINAL_MATERIAL].dispose();
+          object[ORIGINAL_MATERIAL] = null;
+        }
+      }
+      else
+      {
+        if (object[ORIGINAL_MATERIAL])
+        {
+          // original material already saved
+        }
+        else
+        {
+          object[ORIGINAL_MATERIAL] = object.material;
+        }
+      }
+      if (object.material !== material)
+      {
+        object.material.dispose();
+        object.material = material;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   static findObjects(condition, baseObject, nested = false)
   {
     const objects = [];
@@ -215,30 +263,23 @@ class ObjectUtils
   {
     const visited = appearance.visible ? new Set() : null;
 
-    let faceMaterial = undefined;
-    let edgeMaterial = undefined;
+    const setupMaterial = (property, materialClass) =>
+    {
+      let material = appearance[property];
 
-    // faceMaterial
-    if (appearance.faceMaterial instanceof THREE.Material
-        || appearance.faceMaterial === null)
-    {
-      faceMaterial = appearance.faceMaterial;
-    }
-    else if (typeof appearance.faceMaterial === "object")
-    {
-      faceMaterial = new THREE.MeshPhongMaterial(appearance.faceMaterial);
-    }
+      if (material instanceof THREE.Material || material === null)
+        return material;
 
-    // edgeMaterial
-    if (appearance.edgeMaterial instanceof THREE.Material
-        || appearance.edgeMaterial === null)
-    {
-      edgeMaterial = appearance.edgeMaterial;
-    }
-    else if (typeof appearance.edgeMaterial === "object")
-    {
-      edgeMaterial = new THREE.LineBasicMaterial(appearance.edgeMaterial);
-    }
+      if (typeof material === "object")
+      {
+        return new materialClass(material);
+      }
+      return undefined;
+    };
+
+    let meshMaterial = setupMaterial("meshMaterial", THREE.MeshPhongMaterial);
+    let lineMaterial = setupMaterial("lineMaterial", THREE.LineBasicMaterial);
+    let pointsMaterial = setupMaterial("pointsMaterial", THREE.PointsMaterial);
 
     return ObjectUtils.updateObjects(objects, (object, changed) =>
     {
@@ -267,9 +308,39 @@ class ObjectUtils
         }
       }
 
-      if (object instanceof Solid)
+      const original = appearance.original === true;
+
+      if (object instanceof THREE.Mesh)
       {
-        let permanent = appearance.permanent === true;
+        if (ObjectUtils.applyMaterial(object, meshMaterial, original))
+        {
+          changed.add(object);
+        }
+      }
+      else if (object instanceof THREE.Line)
+      {
+        if (ObjectUtils.applyMaterial(object, lineMaterial, original))
+        {
+          changed.add(object);
+        }
+      }
+      else if (object instanceof THREE.Points)
+      {
+        if (ObjectUtils.applyMaterial(object, pointsMaterial, original))
+        {
+          changed.add(object);
+        }
+      }
+      else if (object instanceof Solid)
+      {
+        if (appearance.facesVisible !== undefined)
+        {
+          if (object.facesVisible !== appearance.facesVisible)
+          {
+            object.facesVisible = appearance.facesVisible;
+            changed.add(object);
+          }
+        }
 
         if (appearance.edgesVisible !== undefined)
         {
@@ -280,53 +351,30 @@ class ObjectUtils
           }
         }
 
-        if (appearance.facesVisible !== undefined)
+        if (ObjectUtils.applyMaterial(object.facesObject,
+            meshMaterial, original))
         {
-          if (object.facesVisible !== appearance.facesVisible)
-          {
-            object.facesVisible = appearance.facesVisible;
-            changed.add(object);
-          }
+          changed.add(object);
         }
 
-        if (faceMaterial !== undefined)
+        if (ObjectUtils.applyMaterial(object.edgesObject,
+            lineMaterial, original))
         {
-          if (permanent)
-          {
-            if (object.faceMaterial !== faceMaterial)
-            {
-              object.faceMaterial = faceMaterial;
-              changed.add(object);
-            }
-          }
-          else
-          {
-            if (object.highlightFaceMaterial !== faceMaterial)
-            {
-              object.highlightFaceMaterial = faceMaterial;
-              changed.add(object);
-            }
-          }
+          changed.add(object);
         }
-
-        if (edgeMaterial !== undefined)
+      }
+      else if (object instanceof Profile)
+      {
+        if (ObjectUtils.applyMaterial(object, lineMaterial, original))
         {
-          if (permanent)
-          {
-            if (object.edgeMaterial !== edgeMaterial)
-            {
-              object.edgeMaterial = edgeMaterial;
-              changed.add(object);
-            }
-          }
-          else
-          {
-            if (object.highlightEdgeMaterial !== edgeMaterial)
-            {
-              object.highlightEdgeMaterial = edgeMaterial;
-              changed.add(object);
-            }
-          }
+          changed.add(object);
+        }
+      }
+      else if (object instanceof Cord)
+      {
+        if (ObjectUtils.applyMaterial(object, lineMaterial, original))
+        {
+          changed.add(object);
         }
       }
     }, true);
@@ -345,7 +393,12 @@ class ObjectUtils
     {
       updateFunction(object, changed);
 
-      if (!(object instanceof Solid))
+      if (!(object instanceof Solid)
+          && !(object instanceof Profile)
+          && !(object instanceof Cord)
+          && !(object instanceof THREE.Mesh)
+          && !(object instanceof THREE.Line)
+          && !(object instanceof THREE.Points))
       {
         const children = object.children;
         for (let child of children)

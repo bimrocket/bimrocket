@@ -9,6 +9,7 @@ import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { Solid } from "../core/Solid.js";
 import { InputDialog } from "../ui/InputDialog.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "../lib/three.module.js";
 
 class PaintTool extends Tool
@@ -161,15 +162,19 @@ class PaintTool extends Tool
     this.previewMaterialButton = Controls.addButton(this.applyElem,
       "preview_material", "button.preview_material",
       () => this.applyMaterial(
-      (object, material) => object.highlightFaceMaterial = material));
+      { meshMaterial: this.getSelectedMaterial() }));
 
     this.applyMaterialButton = Controls.addButton(this.applyElem,
-      "apply_material", "button.apply_material", () => this.applyMaterial(
-      (object, material) => object.material = material));
+      "apply_material", "button.apply_material",
+      () => this.applyMaterial(
+      {
+        meshMaterial: this.getSelectedMaterial(),
+        original : true
+      }));
 
     this.restoreMaterialsButton = Controls.addButton(this.applyElem,
-      "restore_material", "button.restore_materials", () => this.applyMaterial(
-      (object) => object.highlightFaceMaterial = null));
+      "restore_material", "button.restore_materials",
+      () => this.applyMaterial({ meshMaterial : null }));
   }
 
   activate()
@@ -237,20 +242,15 @@ class PaintTool extends Tool
 
     application.baseObject.traverse(object =>
     {
-      let material = object.material;
-      if (material instanceof THREE.MeshLambertMaterial
-          || material instanceof THREE.MeshPhongMaterial)
+      for (let name of ["material", ObjectUtils.ORIGINAL_MATERIAL])
       {
-        let materialId = String(material.id);
-        materials.set(materialId, material);
-      }
-
-      material = object.highlightFaceMaterial;
-      if (material instanceof THREE.MeshLambertMaterial
-          || material instanceof THREE.MeshPhongMaterial)
-      {
-        let materialId = String(material.id);
-        materials.set(materialId, material);
+        let material = object[name];
+        if (material instanceof THREE.MeshLambertMaterial
+            || material instanceof THREE.MeshPhongMaterial)
+        {
+          let materialId = String(material.id);
+          materials.set(materialId, material);
+        }
       }
     });
 
@@ -322,7 +322,7 @@ class PaintTool extends Tool
       {
         if (object.visible)
         {
-          if (object.faceMaterial === material)
+          if (object.material === material)
           {
             usages.push(object);
           }
@@ -332,24 +332,11 @@ class PaintTool extends Tool
     this.application.selection.set(...usages);
   }
 
-  applyMaterial(action)
+  applyMaterial(appearance)
   {
     const application = this.application;
-    let material = this.getSelectedMaterial();
-    if (material)
-    {
-      const roots = application.selection.roots;
-      for (let root of roots)
-      {
-        root.traverse(object =>
-        {
-          if (object instanceof Solid)
-          {
-            action(object, material);
-          }
-        });
-      }
-    }
+    const roots = application.selection.roots;
+    ObjectUtils.updateAppearance(roots, appearance);
     application.repaint();
   }
 

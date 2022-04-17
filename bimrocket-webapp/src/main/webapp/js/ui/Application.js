@@ -1499,6 +1499,14 @@ class Application
     this.logoPanel.classList.remove("visible");
   }
 
+  fullscreen()
+  {
+    if (document.body.requestFullscreen)
+    {
+      document.body.requestFullscreen();
+    }
+  }
+
   loadModelFromUrl()
   {
     const params = WebUtils.getQueryParams();

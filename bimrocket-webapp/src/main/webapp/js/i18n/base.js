@@ -223,6 +223,8 @@ export const translations =
 
   "tool.zoom_all.label" : "Zoom all",
 
+  "tool.fullscreen.label" : "Enter fullscreen",
+
   "tool.center_selection.label" : "Center selection",
 
   "tool.focus_selection.label" : "Focus on selection",

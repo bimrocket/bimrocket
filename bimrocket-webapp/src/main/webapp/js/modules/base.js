@@ -41,6 +41,7 @@ import { CloneTool } from "../tools/CloneTool.js";
 import { CutTool } from "../tools/CutTool.js";
 import { PasteTool } from "../tools/PasteTool.js";
 import { ZoomAllTool } from "../tools/ZoomAllTool.js";
+import { FullscreenTool } from "../tools/FullscreenTool.js";
 import { CenterSelectionTool } from "../tools/CenterSelectionTool.js";
 import { VisibilityTool } from "../tools/VisibilityTool.js";
 import { StyleTool } from "../tools/StyleTool.js";
@@ -236,6 +237,7 @@ export function load(application)
   const cutTool = new CutTool(application);
   const pasteTool = new PasteTool(application);
   const zoomAllTool = new ZoomAllTool(application);
+  const fullscreenTool = new FullscreenTool(application);
   const centerSelectionTool = new CenterSelectionTool(application);
   const focusSelectionTool = new CenterSelectionTool(application,
     { name : "focus_selection", label : "tool.focus_selection.label",
@@ -331,6 +333,7 @@ export function load(application)
   application.addTool(cutTool);
   application.addTool(pasteTool);
   application.addTool(zoomAllTool);
+  application.addTool(fullscreenTool);
   application.addTool(centerSelectionTool);
   application.addTool(focusSelectionTool);
   application.addTool(showTool);
@@ -389,6 +392,7 @@ export function load(application)
   projectionMenu.addMenuItem(orthographicTool);
   viewMenu.addMenuItem(activateCameraTool);
   viewMenu.addMenuItem(sectionTool);
+  viewMenu.addMenuItem(fullscreenTool);
 
   const selectMenu = menuBar.addMenu("menu.select");
   selectMenu.addMenuItem(selectTool);

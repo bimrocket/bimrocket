@@ -223,6 +223,8 @@ export const translations =
 
   "tool.zoom_all.label" : "Enquadra tot",
 
+  "tool.fullscreen.label" : "Pantalla completa",
+
   "tool.center_selection.label" : "Centra selecció",
 
   "tool.focus_selection.label" : "Focalitza selecció",

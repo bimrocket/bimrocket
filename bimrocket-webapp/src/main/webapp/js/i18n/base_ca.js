@@ -68,7 +68,7 @@ export const translations =
   "menu.design.add_solid" : "Sòlid",
   "menu.design.add_profile" : "Perfil",
   "menu.design.add_cord" : "Corda",
-  "menu.design.convert" : "Converteix",
+  "menu.design.geometry" : "Geometria",
   "menu.design.boolean_operation" : "Operació booleana",
   "menu.design.transform" : "Transformació",
   "menu.measure" : "Mesurament",

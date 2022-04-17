@@ -68,7 +68,7 @@ export const translations =
   "menu.design.add_solid" : "Sólido",
   "menu.design.add_profile" : "Perfil",
   "menu.design.add_cord" : "Cuerda",
-  "menu.design.convert" : "Convertir",
+  "menu.design.geometry" : "Geometría",
   "menu.design.boolean_operation" : "Operación booleana",
   "menu.design.transform" : "Transformar",
   "menu.measure" : "Medición",
@@ -227,7 +227,7 @@ export const translations =
 
   "tool.focus_selection.label" : "Focalizar selection",
 
-  "tool.inspect_geometry.label" : "Analizar geometria",
+  "tool.inspect_geometry.label" : "Analizar geometría",
 
   "tool.reset_matrix.label" : "Inicializar matriz",
 

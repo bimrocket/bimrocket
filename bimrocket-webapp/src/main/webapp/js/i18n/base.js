@@ -69,7 +69,7 @@ export const translations =
   "menu.design.add_profile" : "Profile",
   "menu.design.add_cord" : "Cord",
   "menu.design.boolean_operation" : "Boolean operation",
-  "menu.design.convert" : "Convert",
+  "menu.design.geometry" : "Geometry tools",
   "menu.design.transform" : "Transform",
   "menu.measure" : "Measure",
   "menu.control" : "Control",

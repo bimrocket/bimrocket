@@ -28,7 +28,6 @@ import { RotateTool } from "../tools/RotateTool.js";
 import { ScaleTool } from "../tools/ScaleTool.js";
 import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
-import { ClipTool } from "../tools/ClipTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { DrawProfileTool } from "../tools/DrawProfileTool.js";
@@ -169,7 +168,6 @@ export function load(application)
   const subtractionTool = new BooleanOperationTool(application,
     { name : "subtraction", label : "tool.subtraction.label",
       operation : BooleanOperator.SUBTRACT });
-  const clipTool = new ClipTool(application);
   const meshToSolidTool = new MeshToSolidTool(application);
   const solidToMeshTool = new SolidToMeshTool(application);
   const drawProfileTool = new DrawProfileTool(application);
@@ -300,7 +298,6 @@ export function load(application)
   application.addTool(unionTool);
   application.addTool(intersectionTool);
   application.addTool(subtractionTool);
-  application.addTool(clipTool);
   application.addTool(meshToSolidTool);
   application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
@@ -432,13 +429,12 @@ export function load(application)
   booleanOperationMenu.addMenuItem(subtractionTool);
   designMenu.addMenuItem(drawProfileTool);
   designMenu.addMenuItem(extrudeTool);
-  designMenu.addMenuItem(clipTool);
-  const convertMenu = designMenu.addMenu("menu.design.convert");
-  convertMenu.addMenuItem(meshToSolidTool);
-  convertMenu.addMenuItem(solidToMeshTool);
+  const geometryMenu = designMenu.addMenu("menu.design.geometry");
+  geometryMenu.addMenuItem(inspectGeometryTool);
+  geometryMenu.addMenuItem(meshToSolidTool);
+  geometryMenu.addMenuItem(solidToMeshTool);
+  geometryMenu.addMenuItem(resetMatrixTool);
   designMenu.addMenuItem(paintTool);
-  designMenu.addMenuItem(inspectGeometryTool);
-  designMenu.addMenuItem(resetMatrixTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
 

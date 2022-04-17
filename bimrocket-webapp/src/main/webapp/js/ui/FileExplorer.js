@@ -225,13 +225,15 @@ class FileExplorer extends Panel
     const dialog = new Dialog("title.create_folder_in_cloud");
     dialog.setSize(250, 130);
     dialog.setI18N(application.i18n);
-    let elem = dialog.addTextField("folder_name", "label.folder_name");
+    let nameElem = dialog.addTextField("folder_name", "label.folder_name");
+    nameElem.setAttribute("spellcheck", "false");
+
     dialog.addButton("folder_accept", "button.create", () => dialog.onAccept());
     dialog.addButton("folder_cancel", "button.cancel", () => dialog.onCancel());
 
     dialog.onAccept = () =>
     {
-      this.makeFolder(this.basePath + "/" + elem.value);
+      this.makeFolder(this.basePath + "/" + nameElem.value);
       dialog.hide();
     };
     dialog.onCancel = () =>
@@ -240,7 +242,7 @@ class FileExplorer extends Panel
     };
     dialog.onShow = () =>
     {
-      elem.focus();
+      nameElem.focus();
     };
     dialog.show();
   }

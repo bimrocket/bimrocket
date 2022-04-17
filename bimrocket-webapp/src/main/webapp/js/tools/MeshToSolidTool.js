@@ -15,7 +15,7 @@ class MeshToSolidTool extends Tool
   constructor(application, options)
   {
     super(application);
-    this.name = "make_solid";
+    this.name = "mesh_to_solid";
     this.label = "tool.mesh_to_solid.label";
     this.help = "tool.mesh_to_solid.help";
     this.className = "mesh_to_solid";

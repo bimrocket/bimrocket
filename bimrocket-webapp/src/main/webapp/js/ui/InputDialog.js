@@ -17,6 +17,7 @@ class InputDialog extends Dialog
     this.setSize(240, 120);
 
     this.inputElem = this.addTextField("inputName", message, value);
+    this.inputElem.setAttribute("spellcheck", "false");
 
     this.acceptButton = this.addButton("accept", "button.accept",
       () => this.onAccept(this.inputElem.value));

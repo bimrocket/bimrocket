@@ -22,6 +22,7 @@ class SaveDialog extends Dialog
       name = "scene";
     }
     this.nameElem = this.addTextField("saveEntryName", "label.name", name);
+    this.nameElem.setAttribute("spellcheck", "false");
 
     let formatName = IOManager.getFormat(name);
     let formatInfo = IOManager.formats[formatName];

@@ -47,7 +47,9 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -68,12 +70,14 @@ import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.util.Collections;
 import java.util.Set;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
 import static jakarta.ws.rs.core.Response.Status.CREATED;
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
+import java.util.Date;
 
 /**
  *
@@ -95,6 +99,9 @@ public class CloudFsEndpoint
 
   @Context
   ServletContext servletContext;
+
+  @Context
+  HttpHeaders headers;
 
   @OPTIONS
   @PermitAll
@@ -311,32 +318,47 @@ public class CloudFsEndpoint
     return !file.isHidden() && !file.getName().startsWith(".");
   }
 
-  private Response sendFileData(File file, boolean content)
+  private Response sendFileData(File file, boolean withContent)
   {
     String contentType = getContentType(file);
     long contentLength = file.length();
+    Date lastModified = new Date(file.lastModified());
+    String etag = "W/\"" + file.length() + "-" + file.lastModified() + "\"";
+    CacheControl cacheControl = new CacheControl();
+    cacheControl.setNoCache(true);
 
-    if (content)
+    ResponseBuilder builder;
+
+    if (withContent)
     {
-      StreamingOutput stream = (OutputStream output) ->
+      String reqEtag = headers.getHeaderString("If-None-Match");
+      if (etag.equals(reqEtag))
       {
-        try (FileInputStream input = new FileInputStream(file))
+        builder = Response.status(304);
+      }
+      else
+      {
+        StreamingOutput stream = (OutputStream output) ->
         {
-          IOUtils.copy(input, output);
-        }
-      };
-      return Response.ok(stream)
-        .header("Content-Type", contentType)
-        .header("Content-Length", contentLength)
-        .build();
+          try (FileInputStream input = new FileInputStream(file))
+          {
+            IOUtils.copy(input, output);
+          }
+        };
+        builder = Response.ok(stream);
+      }
     }
     else
     {
-      return Response.ok()
-        .header("Content-Type", contentType)
-        .header("Content-Length", contentLength)
-        .build();
+      builder = Response.ok();
     }
+
+    return builder.header("Content-Type", contentType)
+      .header("Content-Length", contentLength)
+      .header("ETag", etag)
+      .lastModified(lastModified)
+      .cacheControl(cacheControl)
+      .build();
   }
 
   private Response sendFileProperties(File file, String uri, String depth)

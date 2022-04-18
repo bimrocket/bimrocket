@@ -1503,7 +1503,13 @@ class Application
   {
     if (document.body.requestFullscreen)
     {
+      // chrome & firefox
       document.body.requestFullscreen();
+    }
+    else if (document.body.webkitRequestFullscreen)
+    {
+      // safari
+      document.body.webkitRequestFullscreen();
     }
   }
 

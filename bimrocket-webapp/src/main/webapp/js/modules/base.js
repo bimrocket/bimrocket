@@ -30,6 +30,7 @@ import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
+import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
 import { DrawProfileTool } from "../tools/DrawProfileTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
@@ -171,6 +172,7 @@ export function load(application)
       operation : BooleanOperator.SUBTRACT });
   const meshToSolidTool = new MeshToSolidTool(application);
   const solidToMeshTool = new SolidToMeshTool(application);
+  const mergeGeometriesTool = new MergeGeometriesTool(application);
   const drawProfileTool = new DrawProfileTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
@@ -301,6 +303,7 @@ export function load(application)
   application.addTool(intersectionTool);
   application.addTool(subtractionTool);
   application.addTool(meshToSolidTool);
+  application.addTool(mergeGeometriesTool);
   application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
   application.addTool(measureLengthTool);
@@ -437,6 +440,7 @@ export function load(application)
   geometryMenu.addMenuItem(inspectGeometryTool);
   geometryMenu.addMenuItem(meshToSolidTool);
   geometryMenu.addMenuItem(solidToMeshTool);
+  geometryMenu.addMenuItem(mergeGeometriesTool);
   geometryMenu.addMenuItem(resetMatrixTool);
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);

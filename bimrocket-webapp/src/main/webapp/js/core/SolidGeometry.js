@@ -81,6 +81,8 @@ class SolidGeometry extends THREE.BufferGeometry
       vertex.applyMatrix4(matrix);
     }
     this.updateFaceNormals();
+    this.updateBuffers();
+    return this;
   }
 
   copy(geometry)
@@ -93,16 +95,17 @@ class SolidGeometry extends THREE.BufferGeometry
         let vertex = geometry.vertices[v].clone();
         this.vertices.push(vertex);
       }
+      this.faces = [];
       for (let f = 0; f < geometry.faces.length; f++)
       {
         let face = geometry.faces[f];
         let newFace = new Face(this);
-        newFace.indices = face.indices.slice();
+        newFace.indices = [...face.indices];
         newFace.normal = face.normal ? face.normal.clone() : null;
         for (let hole of face.holes)
         {
-          let newHole = new Hole(newFace);
-          newHole.indices = hole.indices.slice();
+          let newHole = new Loop(newFace);
+          newHole.indices = [...hole.indices];
           newFace.holes.push(newHole);
         }
         this.faces.push(newFace);

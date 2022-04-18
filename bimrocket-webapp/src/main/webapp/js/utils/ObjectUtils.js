@@ -149,11 +149,11 @@ class ObjectUtils
 
   static dispose(root, geometries = true, materials = true)
   {
-    root.traverse(function(object)
+    root.traverse(object =>
     {
       if (geometries && object.geometry)
       {
-        var geometry = object.geometry;
+        const geometry = object.geometry;
         if (geometry.dispose)
         {
           geometry.dispose();
@@ -162,13 +162,24 @@ class ObjectUtils
 
       if (materials && object.material)
       {
-        var material = object.material;
-        if (material.dispose)
-        {
-          material.dispose();
-        }
+        this.disposeMaterial(object.material);
       }
     });
+  }
+
+  static disposeMaterial(material)
+  {
+    if (material instanceof THREE.Material)
+    {
+      material.dispose();
+    }
+    else if (material instanceof Array)
+    {
+      for (let mat of material)
+      {
+        mat.dispose();
+      }
+    }
   }
 
   static applyMaterial(object, material, original = true)
@@ -180,7 +191,7 @@ class ObjectUtils
     {
       if (object[ORIGINAL_MATERIAL])
       {
-        object.material.dispose();
+        this.disposeMaterial(object.material);
         object.material = object[ORIGINAL_MATERIAL];
         object[ORIGINAL_MATERIAL] = null;
         changed = true;
@@ -192,7 +203,7 @@ class ObjectUtils
       {
         if (object[ORIGINAL_MATERIAL])
         {
-          object[ORIGINAL_MATERIAL].dispose();
+          this.disposeMaterial(object[ORIGINAL_MATERIAL]);
           object[ORIGINAL_MATERIAL] = null;
         }
       }
@@ -209,7 +220,7 @@ class ObjectUtils
       }
       if (object.material !== material)
       {
-        object.material.dispose();
+        this.disposeMaterial(object.material);
         object.material = material;
         changed = true;
       }

@@ -5,6 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Solid } from "../core/Solid.js";
 
 class ResetMatrixTool extends Tool
 {
@@ -25,11 +26,15 @@ class ResetMatrixTool extends Tool
     if (object.geometry)
     {
       object.geometry.applyMatrix4(object.matrix);
+      if (object instanceof Solid)
+      {
+        object.updateGeometry(object.geometry);
+      }
+
       object.matrix.identity();
       object.matrix.decompose(
         object.position, object.quaternion, object.scale);
       object.updateMatrixWorld();
-      object.updateGeometry(object.geometry);
 
       application.notifyObjectsChanged(object, this);
       application.updateSelection();

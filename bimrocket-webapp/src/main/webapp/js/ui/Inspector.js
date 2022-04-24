@@ -23,7 +23,7 @@ import * as THREE from "../lib/three.module.js";
 
 class Inspector extends Panel
 {
-  static mainMaterialProperties = ["id", "uuid", "type", "name", "color", 
+  static mainMaterialProperties = ["id", "uuid", "type", "name", "color",
     "specular", "emissive", "shininess", "opacity", "transparent", "side",
     "emissiveIntensity", "fog", "depthTest", "depthWrite",
     "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
@@ -250,6 +250,8 @@ class Inspector extends Panel
             geometry.faces.length);
           this.createReadOnlyProperty(geomListElem, "isManifold",
             geometry.isManifold);
+          this.createReadOnlyProperty(geomListElem, "smoothAngle",
+            geometry.smoothAngle);
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {

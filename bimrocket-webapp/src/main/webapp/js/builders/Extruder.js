@@ -18,6 +18,7 @@ class Extruder extends SolidBuilder
   depth = 1;
   direction = new THREE.Vector3(0, 0, 1);
   minPointDistance = 0.0001;
+  smoothAngle = 0;
 
   constructor(depth, direction)
   {
@@ -339,6 +340,7 @@ class Extruder extends SolidBuilder
     }
 
     geometry.isManifold = true;
+    geometry.smoothAngle = this.smoothAngle;
 
     solid.updateGeometry(geometry);
 

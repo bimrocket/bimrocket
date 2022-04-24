@@ -66,6 +66,7 @@ class BooleanOperator extends SolidBuilder
       }
     }
     let geometry = resultBSP.toSolidGeometry();
+    geometry.smoothAngle = this.calculateSmoothAngle(solids);
 
     solid.updateGeometry(geometry, true);
 
@@ -77,6 +78,19 @@ class BooleanOperator extends SolidBuilder
     this.operation = source.operation;
 
     return this;
+  }
+
+  calculateSmoothAngle(solids)
+  {
+    let smoothAngle = 0;
+    for (let solid of solids)
+    {
+      if (solid.geometry.smoothAngle > smoothAngle)
+      {
+        smoothAngle = solid.geometry.smoothAngle;
+      }
+    }
+    return smoothAngle;
   }
 }
 

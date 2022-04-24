@@ -141,6 +141,7 @@ class BRFLoader extends THREE.Loader
     {
       geometry = new SolidGeometry();
       geometry.isManifold = entry.isManifold;
+      geometry.smoothAngle = entry.smoothAngle || 0;
 
       for (let vertex of entry.vertices)
       {

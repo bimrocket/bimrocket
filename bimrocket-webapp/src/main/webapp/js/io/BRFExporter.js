@@ -172,6 +172,7 @@ class BRFExporter
         }
         entry.faces = [];
         entry.isManifold = geometry.isManifold;
+        entry.smoothAngle = geometry.smoothAngle;
         for (let face of geometry.faces)
         {
           if (face.holes.length === 0)

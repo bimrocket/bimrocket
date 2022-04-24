@@ -41,6 +41,8 @@ class SolidOptimizer
     this.createVertexMap();
     this.createFaces();
 
+    this.outputGeometry.smoothAngle = this.inputGeometry.smoothAngle;
+
     return this.outputGeometry;
   }
 

@@ -16,7 +16,7 @@ class SolidGeometry extends THREE.BufferGeometry
     this.vertices = []; // THREE.Vector3
     this.faces = []; // Face
     this.isManifold = false;
-    this.generationMode = SolidGeometry.TRIANGLE_SOUP;
+    this.smoothAngle = 0;
   }
 
   addFace(...vertices)
@@ -52,18 +52,105 @@ class SolidGeometry extends THREE.BufferGeometry
     const normals = [];
     const vertices = this.vertices;
 
-    for (let face of this.faces)
+    if (this.smoothAngle > 0)
     {
-      if (face.normal === null) face.updateNormal();
-      let normal = face.normal;
-      let triangles = face.getTriangles();
-      for (let triangle of triangles)
+      const cosAngle = Math.cos(THREE.MathUtils.degToRad(this.smoothAngle));
+      const vertexMap = new Map();
+
+      const processLoopEdges = loop =>
       {
-        for (let i = 0; i < 3; i++)
+        const face = loop.face;
+        for (let v of loop.indices)
         {
-          let vertex = vertices[triangle[i]];
-          positions.push(vertex.x, vertex.y, vertex.z);
-          normals.push(normal.x, normal.y, normal.z);
+          let vertexFaceMap = vertexMap.get(v);
+          if (vertexFaceMap === undefined)
+          {
+            vertexFaceMap = new Map();
+            vertexMap.set(v, vertexFaceMap);
+          }
+          let normals = null;
+          for (let otherFace of vertexFaceMap.keys())
+          {
+            if (otherFace.normal.dot(face.normal) > cosAngle)
+            {
+              normals = vertexFaceMap.get(otherFace);
+              break;
+            }
+          }
+          if (normals === null) normals = [];
+          normals.push(face.normal);
+          vertexFaceMap.set(face, normals);
+        }
+      };
+
+      for (let face of this.faces)
+      {
+        if (face.normal === null) face.updateNormal();
+
+        processLoopEdges(face.outerLoop);
+
+        for (let hole of face.holes)
+        {
+          processLoopEdges(hole);
+        }
+      }
+
+      for (let vertexFaceMap of vertexMap.values())
+      {
+        for (let face of vertexFaceMap.keys())
+        {
+          let smoothNormal = null;
+          let normals = vertexFaceMap.get(face);
+          if (normals.length === 1)
+          {
+            smoothNormal = normals[0];
+          }
+          else
+          {
+            smoothNormal = new THREE.Vector3();
+            for (let normal of normals)
+            {
+              smoothNormal.add(normal);
+            }
+            smoothNormal.normalize();
+          }
+          vertexFaceMap.set(face, smoothNormal);
+        }
+      }
+
+      for (let face of this.faces)
+      {
+        let triangles = face.getTriangles();
+        for (let triangle of triangles)
+        {
+          for (let i = 0; i < 3; i++)
+          {
+            let v = triangle[i];
+
+            let vertex = vertices[v];
+            let normal = vertexMap.get(v).get(face);
+
+            positions.push(vertex.x, vertex.y, vertex.z);
+            normals.push(normal.x, normal.y, normal.z);
+          }
+        }
+      }
+    }
+    else
+    {
+      for (let face of this.faces)
+      {
+        if (face.normal === null) face.updateNormal();
+        let normal = face.normal;
+        let triangles = face.getTriangles();
+        for (let triangle of triangles)
+        {
+          for (let i = 0; i < 3; i++)
+          {
+            let vertex = vertices[triangle[i]];
+            positions.push(vertex.x, vertex.y, vertex.z);
+            normals.push(normal.x, normal.y, normal.z);
+          }
         }
       }
     }
@@ -72,6 +159,8 @@ class SolidGeometry extends THREE.BufferGeometry
     this.setAttribute('normal',
       new THREE.Float32BufferAttribute(normals, 3));
     this.setIndex(null);
+
+    return this;
   }
 
   applyMatrix4(matrix)
@@ -82,6 +171,16 @@ class SolidGeometry extends THREE.BufferGeometry
     }
     this.updateFaceNormals();
     this.updateBuffers();
+
+    if (this.boundingBox !== null)
+    {
+			this.computeBoundingBox();
+		}
+
+		if (this.boundingSphere !== null)
+    {
+			this.computeBoundingSphere();
+		}
     return this;
   }
 
@@ -111,6 +210,7 @@ class SolidGeometry extends THREE.BufferGeometry
         this.faces.push(newFace);
       }
       this.isManifold = geometry.isManifold;
+      this.smoothAngle = geometry.smoothAngle;
     }
     else if (geometry instanceof THREE.BufferGeometry)
     {
@@ -123,7 +223,9 @@ class SolidGeometry extends THREE.BufferGeometry
 
       GeometryUtils.getBufferGeometryFaces(geometry, addFace);
       this.isManifold = false;
+      this.smoothAngle = 0;
     }
+    return this;
   }
 
   clone()

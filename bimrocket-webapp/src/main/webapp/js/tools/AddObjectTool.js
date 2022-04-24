@@ -133,6 +133,7 @@ class AddObjectTool extends Tool
     profile.builder = new CircleBuilder(0.5, 24);
     solid.add(profile);
     solid.builder = new Extruder(1);
+    solid.builder.smoothAngle = 20;
     ObjectBuilder.build(solid);
     return solid;
   }
@@ -144,7 +145,10 @@ class AddObjectTool extends Tool
     const rad = THREE.MathUtils.degToRad(90);
     const matrix = new THREE.Matrix4().makeRotationX(rad);
     geometry.applyMatrix4(matrix);
-    solid.updateGeometry(geometry, true);
+    const solidGeometry = new SolidGeometry();
+    solidGeometry.copy(geometry);
+    solidGeometry.smoothAngle = 20;
+    solid.updateGeometry(solidGeometry, true);
     return solid;
   }
 
@@ -161,6 +165,7 @@ class AddObjectTool extends Tool
     profile.builder = new CircleBuilder(0.2);
     solid.add(profile);
     solid.builder = new Extruder();
+    solid.builder.smoothAngle = 30;
     ObjectBuilder.build(solid);
     return solid;
   }

@@ -234,6 +234,8 @@ export const translations =
 
   "tool.reset_matrix.label" : "Inicialitza matriu",
 
+  "tool.smooth_edges.label" : "Suavitza arestes",
+
   "tool.start_controllers.label" : "Inicia controladors",
 
   "tool.stop_controllers.label" : "Atura controladors",
@@ -269,6 +271,7 @@ export const translations =
   "label.service_pass" : "Paraula de pas:",
 
   "label.section_color" : "Color de secció:",
+  "label.smooth_angle" : "Angle de suavitzat:",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

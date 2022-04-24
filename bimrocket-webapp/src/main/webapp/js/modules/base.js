@@ -22,6 +22,7 @@ import { AutoOrbitTool } from "../tools/AutoOrbitTool.js";
 import { SectionTool } from "../tools/SectionTool.js";
 import { InspectGeometryTool } from "../tools/InspectGeometryTool.js";
 import { ResetMatrixTool } from "../tools/ResetMatrixTool.js";
+import { SmoothEdgesTool } from "../tools/SmoothEdgesTool.js";
 import { RebuildTool } from "../tools/RebuildTool.js";
 import { MoveTool } from "../tools/MoveTool.js";
 import { RotateTool } from "../tools/RotateTool.js";
@@ -155,6 +156,7 @@ export function load(application)
   const sectionTool = new SectionTool(application);
   const inspectGeometryTool = new InspectGeometryTool(application);
   const resetMatrixTool = new ResetMatrixTool(application);
+  const smoothEdgesTool = new SmoothEdgesTool(application);
   const scriptTool = new ScriptTool(application);
   const rebuildTool = new RebuildTool(application);
   const moveTool = new MoveTool(application);
@@ -313,6 +315,7 @@ export function load(application)
   application.addTool(orthographicTool);
   application.addTool(inspectGeometryTool);
   application.addTool(resetMatrixTool);
+  application.addTool(smoothEdgesTool);
   application.addTool(addGroupTool);
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
@@ -442,6 +445,7 @@ export function load(application)
   geometryMenu.addMenuItem(solidToMeshTool);
   geometryMenu.addMenuItem(mergeGeometriesTool);
   geometryMenu.addMenuItem(resetMatrixTool);
+  geometryMenu.addMenuItem(smoothEdgesTool);
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);

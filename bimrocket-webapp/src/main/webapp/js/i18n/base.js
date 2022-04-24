@@ -234,6 +234,8 @@ export const translations =
 
   "tool.reset_matrix.label" : "Reset matrix",
 
+  "tool.smooth_edges.label" : "Smooth edges",
+
   "tool.start_controllers.label" : "Start controllers",
 
   "tool.stop_controllers.label" : "Stop controllers",
@@ -269,6 +271,7 @@ export const translations =
   "label.service_pass" : "Password:",
 
   "label.section_color" : "Section color:",
+  "label.smooth_angle" : "Smooth angle:",
 
   "label.name" : "Name:",
   "label.format" : "Format:",

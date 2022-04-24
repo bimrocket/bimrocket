@@ -234,6 +234,8 @@ export const translations =
 
   "tool.reset_matrix.label" : "Inicializar matriz",
 
+  "tool.smooth_edges.label" : "Suavizar aristas",
+
   "tool.start_controllers.label" : "Iniciar controlad.",
 
   "tool.stop_controllers.label" : "Parar controladores",
@@ -269,6 +271,7 @@ export const translations =
   "label.service_pass" : "Contraseña:",
 
   "label.section_color" : "Color de sección:",
+  "label.smooth_angle" : "Ángulo de suavizado:",
 
   "label.name" : "Nombre:",
   "label.format" : "Formato:",

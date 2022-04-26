@@ -50,6 +50,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -124,19 +125,21 @@ public class ProxyEndpoint
       }
       InputStream is = responseStream;
 
-      String contentType = conn.getContentType();
-      int pos = contentType.indexOf(";");
-      if (pos != -1)
-      {
-        contentType = contentType.substring(0, pos);
-      }
-
       StreamingOutput output = (OutputStream out) ->
       {
         IOUtils.copy(is, out);
       };
 
-      return Response.ok(output).header("Content-Type", contentType).build();
+      Response.ResponseBuilder response = Response.ok(output);
+      Map<String, List<String>> responseHeaders = conn.getHeaderFields();
+      for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet())
+      {
+        if (entry.getKey() != null)
+        {
+          response.header(entry.getKey(), entry.getValue().get(0));
+        }
+      }
+      return response.build();
     }
     catch (Exception ex)
     {

@@ -104,7 +104,7 @@ class IOManager
       else
       {
         let request = new XMLHttpRequest();
-        let length = 0;
+        let length = -1;
         request.onreadystatechange = () =>
         {
           if (request.readyState === 4)
@@ -145,16 +145,24 @@ class IOManager
           {
             if (onProgress)
             {
-              if (length === 0)
+              if (length === -1)
               {
                 length = request.getResponseHeader("Content-Length");
               }
               else
               {
-                let progress = Math.round(
-                  100 * request.responseText.length / length);
+                let progress;
+                if (length > 0)
+                {
+                  progress = Math.round(
+                    100 * request.responseText.length / length);
+                }
+                else
+                {
+                  progress = undefined;
+                }
                 let message = "Downloading file...";
-                onProgress({progress : progress, message : message});
+                onProgress({ progress : progress, message : message });
               }
             }
           }

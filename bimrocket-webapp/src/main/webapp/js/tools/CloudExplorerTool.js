@@ -109,12 +109,12 @@ class CloudExplorerTool extends Tool
     {
       panel.entryName = name;
       panel.entryType = Metadata.FILE;
-      this.savePath(panel.basePath + "/" + name, onlySelection);
+      this.saveFile(panel.basePath + "/" + name, onlySelection);
     };
     dialog.show();
   }
 
-  savePath(path, onlySelection)
+  saveFile(path, onlySelection)
   {
     const application = this.application;
     const panel = this.panel;
@@ -129,8 +129,7 @@ class CloudExplorerTool extends Tool
       object : object,
       onCompleted : data =>
       {
-        panel.service.save(data, path,
-          result => panel.handleSaveResult(path, result));
+        panel.savePath(path, data);
       },
       onProgress : data => panel.setProgress(data.progress, data.message),
       onError : message =>

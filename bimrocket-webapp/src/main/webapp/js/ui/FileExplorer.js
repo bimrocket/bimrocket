@@ -7,6 +7,7 @@
 import { Panel } from "./Panel.js";
 import { Controls } from "./Controls.js";
 import { Dialog } from "./Dialog.js";
+import { LoginDialog } from "./LoginDialog.js";
 import { ServiceDialog } from "./ServiceDialog.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
@@ -260,33 +261,42 @@ class FileExplorer extends Panel
 
   openPath(path)
   {
-    this.showProgressBar();
+    this.showProgressBar("Reading...");
 
     this.service.open(path,
       result => this.handleOpenResult(path, result),
       data => this.setProgress(data.progress, data.message));
   }
 
+  savePath(path, data, onSuccess)
+  {
+    this.showProgressBar("Saving...");
+
+    this.service.save(path, data,
+      result => this.handleSaveResult(path, data, result, onSuccess),
+      data => this.setProgress(data.progress, data.message));
+  }
+
   deletePath(path)
   {
-    this.showProgressBar();
+    this.showProgressBar("Deleting...");
     this.service.remove(path,
       result => this.handleDeleteResult(path, result));
   }
 
   makeFolder(path)
   {
-    this.showProgressBar();
+    this.showProgressBar("Creating folder...");
     this.service.makeCollection(path,
       result => this.handleMakeFolderResult(path, result));
   }
 
   download(path)
   {
-    this.showProgressBar();
+    this.showProgressBar("Downloading file...");
     this.service.open(path,
-      result => this.handleDownloadResult(result.data),
-      data => this.setProgress(data.progress, data.message));
+      result => this.handleDownloadResult(path, result),
+      data => this.setProgress(data.progress));
   }
 
   upload(files)
@@ -300,13 +310,14 @@ class FileExplorer extends Panel
       {
         const data = event.target.result;
         const path = this.basePath + "/" + file.name;
-        this.showProgressBar();
-        this.service.save(data, path, result =>
+        this.showProgressBar("Uploading file...");
+        this.service.save(path, data, result =>
         {
           this.entryName = file.name;
           this.entryType = Metadata.FILE;
-          this.handleSaveResult(path, result);
-        });
+          this.handleUploadResult(files, result);
+        },
+        data => this.setProgress(data.progress));
       };
       reader.readAsText(file);
     }
@@ -315,14 +326,8 @@ class FileExplorer extends Panel
   handleOpenResult(path, result)
   {
     this.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      if (path === "/") this.service = null;
-      MessageDialog.create("ERROR", result.message)
-        .setClassName("error")
-        .setI18N(this.application.i18n).show();
-    }
-    else
+
+    if (result.status === Result.OK)
     {
       if (result.entries)
       {
@@ -335,26 +340,32 @@ class FileExplorer extends Panel
         this.openFile(this.service.url + path, result.data);
       }
     }
-  }
-
-  handleSaveResult(path, result)
-  {
-    const application = this.application;
-
-    this.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      MessageDialog.create("ERROR", result.message)
-        .setClassName("error")
-        .setI18N(application.i18n).show();
-    }
     else
     {
+      this.handleError(result, () => this.openPath(path), false);
+      //if (path === "/") this.service = null;
+    }
+  }
+
+  handleSaveResult(path, data, result, onSuccess)
+  {
+    const application = this.application;
+    this.showButtonsPanel();
+
+    if (result.status === Result.OK)
+    {
+      if (onSuccess) onSuccess();
+
       Toast.create("message.file_saved")
         .setI18N(application.i18n).show();
 
-      // reload current directoty
+      // reload current directory
       this.openPath(this.basePath);
+    }
+    else
+    {
+      this.handleError(result,
+        () => this.savePath(path, data, onSuccess), true);
     }
   }
 
@@ -362,12 +373,8 @@ class FileExplorer extends Panel
   {
     const application = this.application;
     this.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      MessageDialog.create("ERROR", result.message)
-        .setClassName("error").setI18N(application.i18n).show();
-    }
-    else
+
+    if (result.status === Result.OK)
     {
       if (this.entryType === Metadata.COLLECTION)
       {
@@ -386,19 +393,18 @@ class FileExplorer extends Panel
       // reload basePath
       this.openPath(this.basePath);
     }
+    else
+    {
+      this.handleError(result, () => this.deletePath(path), true);
+    }
   }
 
   handleMakeFolderResult(path, result)
   {
     const application = this.application;
     this.showButtonsPanel();
-    if (result.status === Result.ERROR)
-    {
-      MessageDialog.create("ERROR", result.message)
-        .setClassName("error")
-        .setI18N(application.i18n).show();
-    }
-    else
+
+    if (result.status === Result.OK)
     {
       Toast.create("message.folder_created")
         .setI18N(application.i18n).show();
@@ -409,24 +415,55 @@ class FileExplorer extends Panel
       // reload basePath
       this.openPath(this.basePath);
     }
+    else
+    {
+      this.handleError(result, () => this.makeFolder(path), true);
+    }
   }
 
-  handleDownloadResult(data)
+  handleDownloadResult(path, result)
   {
     this.showButtonsPanel();
 
-    if (this.downloadUrl)
+    if (result.status === Result.OK)
     {
-      window.URL.revokeObjectURL(this.downloadUrl);
+      const data = result.data;
+      if (this.downloadUrl)
+      {
+        window.URL.revokeObjectURL(this.downloadUrl);
+      }
+      const blob = new Blob([data], {type : 'application/octet-stream'});
+      this.downloadUrl = window.URL.createObjectURL(blob);
+      let linkElem = document.createElement("a");
+      linkElem.download = this.entryName;
+      linkElem.target = "_blank";
+      linkElem.href = this.downloadUrl;
+      linkElem.style.display = "block";
+      linkElem.click();
     }
-    const blob = new Blob([data], {type : 'application/octet-stream'});
-    this.downloadUrl = window.URL.createObjectURL(blob);
-    let linkElem = document.createElement("a");
-    linkElem.download = this.entryName;
-    linkElem.target = "_blank";
-    linkElem.href = this.downloadUrl;
-    linkElem.style.display = "block";
-    linkElem.click();
+    else
+    {
+      this.handleError(result, () => this.download(path), false);
+    }
+  }
+
+  handleUploadResult(files, result)
+  {
+    const application = this.application;
+    this.showButtonsPanel();
+
+    if (result.status === Result.OK)
+    {
+      Toast.create("message.file_saved")
+        .setI18N(application.i18n).show();
+
+      // reload current directory
+      this.openPath(this.basePath);
+    }
+    else
+    {
+      this.handleError(result, () => this.upload(files), true);
+    }
   }
 
   showServices()
@@ -615,10 +652,10 @@ class FileExplorer extends Panel
     this.application.progressBar.visible = false;
   }
 
-  showProgressBar()
+  showProgressBar(message = "")
   {
     this.buttonsPanelElem.style.display = "none";
-    this.application.progressBar.message = "Reading...";
+    this.application.progressBar.message = message;
     this.application.progressBar.progress = undefined;
     this.application.progressBar.visible = true;
   }
@@ -642,6 +679,37 @@ class FileExplorer extends Panel
     if (a.name < b.name) return -1;
     if (a.name > b.name) return 1;
     return 0;
+  }
+
+  handleError(result, retryAction, writeAction)
+  {
+    if (result.status === Result.INVALID_CREDENTIALS)
+    {
+      this.requestCredentials(retryAction, "message.invalid_credentials");
+    }
+    else if (result.status === Result.FORBIDDEN)
+    {
+      this.requestCredentials(retryAction, writeAction ?
+        "message.action_denied" : "message.access_denied");
+    }
+    else
+    {
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
+  }
+
+  requestCredentials(retryAction, message)
+  {
+    const loginDialog = new LoginDialog(this.application, message);
+    loginDialog.login = (username, password) =>
+    {
+      this.service.username = username;
+      this.service.password = password;
+      retryAction();
+    };
+    loginDialog.show();
   }
 };
 

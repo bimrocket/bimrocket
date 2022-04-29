@@ -8,13 +8,18 @@ import { Dialog } from "./Dialog.js";
 
 class LoginDialog extends Dialog
 {
-  constructor(application)
+  constructor(application, message)
   {
     super("title.login");
     this.application = application;
     this.setI18N(this.application.i18n);
 
     this.setSize(240, 180);
+
+    if (message)
+    {
+      this.errorElem = this.addText(message, "error block");
+    }
 
     this.usernameElem = this.addTextField("loginUser",
       "label.username", "");
@@ -38,12 +43,17 @@ class LoginDialog extends Dialog
       () => this.onCancel());
   }
 
+  setErrorMessage(message)
+  {
+    I18N
+  }
+
   onShow()
   {
     this.usernameElem.focus();
   }
 
-  onAccept(username, password)
+  onAccept()
   {
     this.hide();
     this.login(this.usernameElem.value, this.passwordElem.value);

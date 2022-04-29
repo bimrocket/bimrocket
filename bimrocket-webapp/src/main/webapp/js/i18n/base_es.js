@@ -399,6 +399,10 @@ export const translations =
   "message.modeled_triangle_count" : count => `Triángulos modelizados: ${count}`,
   "message.rendered_triangle_count" : count => `Triángulos renderizados: ${count}`,
 
+  "message.invalid_credentials" : "Credenciales incorrectas.",
+  "message.access_denied" : "Acceso denegado.",
+  "message.action_denied" : "Acción denegada.",
+
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,

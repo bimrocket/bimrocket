@@ -136,16 +136,6 @@ class WebdavService extends FileService
       }
       else
       {
-        if (request.responseXML)
-        {
-          let node =
-            request.responseXML.querySelector("error message");
-          if (node)
-          {
-            readyCallback(new Result(ERROR, node.textContent));
-            return;
-          }
-        }
         readyCallback(this.createError("Can't open", request.status));
       }
     };
@@ -155,7 +145,7 @@ class WebdavService extends FileService
     request.send();
   }
 
-  save(data, path, readyCallback, progressCallback)
+  save(path, data, readyCallback, progressCallback)
   {
     const OK = Result.OK;
     const ERROR = Result.ERROR;
@@ -178,6 +168,16 @@ class WebdavService extends FileService
         readyCallback(this.createError("Save failed", request.status));
       }
     };
+    if (progressCallback)
+    {
+      request.onprogress = event =>
+      {
+        let progress = Math.round(
+          100 * event.loaded / event.total);
+        let message = "Uploading file...";
+        progressCallback({progress : progress, message : message});
+      };
+    }
     request.open("PUT", url, true);
     WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send(data);
@@ -220,7 +220,6 @@ class WebdavService extends FileService
     const request = new XMLHttpRequest();
     request.onerror = error =>
     {
-      // ERROR
       readyCallback(new Result(ERROR, "Connection error"));
     };
     request.onload = () =>
@@ -249,7 +248,14 @@ class WebdavService extends FileService
     }
     message += " (HTTP " + status + ").";
 
-    return new Result(Result.ERROR, message);
+    let resultStatus;
+    switch (status)
+    {
+      case 401: resultStatus = Result.INVALID_CREDENTIALS; break;
+      case 403: resultStatus = Result.FORBIDDEN; break;
+      default: resultStatus = Result.ERROR;
+    }
+    return new Result(resultStatus, message);
   }
 
   getUrl(path)

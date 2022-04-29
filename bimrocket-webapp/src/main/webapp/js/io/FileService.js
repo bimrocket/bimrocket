@@ -19,7 +19,7 @@ class FileService extends Service
     readyCallback(new Result(Result.ERROR, "Not implemented."));
   }
 
-  save(data, path, readyCallback, progressCallback)
+  save(path, data, readyCallback, progressCallback)
   {
     readyCallback(new Result(Result.ERROR, "Not implemented."));
   }
@@ -38,7 +38,9 @@ class FileService extends Service
 class Result
 {
   static OK = 0;
-  static ERROR = 1;
+  static ERROR = 1; // unknown error
+  static INVALID_CREDENTIALS = 2;
+  static FORBIDDEN = 3;
 
   constructor(status, message, path, metadata, entries, data)
   {

@@ -221,6 +221,12 @@
   color: #C00000;
 }
 
+.dialog .block
+{
+  display: block;
+  text-align: center;
+}
+
 .dialog div.console
 {
   font-family: monospace;

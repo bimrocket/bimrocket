@@ -399,6 +399,10 @@ export const translations =
   "message.modeled_triangle_count" : count => `Modeled triangles: ${count}`,
   "message.rendered_triangle_count" : count => `Rendered triangles: ${count}`,
 
+  "message.invalid_credentials" : "Invalid credentials.",
+  "message.access_denied" : "Access denied.",
+  "message.action_denied" : "Action denied.",
+
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,

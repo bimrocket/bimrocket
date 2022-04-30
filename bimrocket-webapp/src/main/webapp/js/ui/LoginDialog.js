@@ -36,16 +36,11 @@ class LoginDialog extends Dialog
       }
     });
 
-    this.acceptButton = this.addButton("accept", "button.accept",
+    this.acceptButton = this.addButton("login_accept", "button.accept",
       () => this.onAccept());
 
-    this.acceptButton = this.addButton("cancel", "button.cancel",
+    this.cancelButton = this.addButton("login_cancel", "button.cancel",
       () => this.onCancel());
-  }
-
-  setErrorMessage(message)
-  {
-    I18N
   }
 
   onShow()

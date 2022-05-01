@@ -9,6 +9,7 @@ import { Controls } from "./Controls.js";
 import { ServiceDialog } from "./ServiceDialog.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { LoginDialog } from "./LoginDialog.js";
 import { Dialog } from "./Dialog.js";
 import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
@@ -336,9 +337,19 @@ class BCFPanel extends Panel
 
   showTopic(topic = null, index = -1)
   {
+    // index == -1 when topic was created or udpated
     this.searchPanelElem.style.display = "none";
     this.detailPanelElem.style.display = "";
     this.setupPanelElem.style.display = "none";
+    this.tabbedPane.paneElem.style.display = "none";
+
+    if (topic === null || index !== -1)
+    {
+      this.viewpointListElem.innerHTML = "";
+      this.commentListElem.innerHTML = "";
+      this.docRefListElem.innerHTML = "";
+    }
+
     this.deleteTopicButton.disabled = (topic === null);
     this.index = index;
 
@@ -393,25 +404,18 @@ class BCFPanel extends Panel
       Controls.setSelectValue(this.topicStatusElem, null);
       Controls.setSelectValue(this.stageElem, null);
       Controls.setSelectValue(this.assignedToElem, null);
-
-      this.viewpointListElem.innerHTML = "";
-      this.commentListElem.innerHTML = "";
-      this.docRefListElem.innerHTML = "";
     }
 
     if (topic)
     {
       this.tabbedPane.paneElem.style.display = "";
+
       if (index !== -1)
       {
-        this.loadComments();
-        this.loadViewpoints();
-        this.loadDocumentReferences();
+        this.loadComments(false,
+          () => this.loadViewpoints(false,
+          () => this.loadDocumentReferences(false)));
       }
-    }
-    else
-    {
-      this.tabbedPane.paneElem.style.display = "none";
     }
     this.commentGuid = null;
     this.commentElem.value = null;
@@ -451,16 +455,25 @@ class BCFPanel extends Panel
     let projectId = this.getProjectId();
     if (projectId === null) return;
 
+    const onCompleted = topics =>
+    {
+      this.hideProgressBar();
+      this.topics = topics;
+      this.populateTopicTable();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.searchTopics());
+    };
+
     let filter = {
       "status" : this.statusFilterElem.value,
       "priority" : this.priorityFilterElem.value,
       "assignedTo" : this.assignedToFilterElem.value
     };
-    this.service.getTopics(projectId, filter, topics =>
-    {
-      this.topics = topics;
-      this.populateTopicTable();
-    }, error => this.onError(error));
+    this.showProgressBar();
+    this.service.getTopics(projectId, filter, onCompleted, onError);
   }
 
   saveTopic()
@@ -481,21 +494,27 @@ class BCFPanel extends Panel
 
     const onCompleted = topic =>
     {
+      this.hideProgressBar();
       this.showTopic(topic);
       this.topics = null;
       Toast.create("bim|message.topic_saved")
         .setI18N(application.i18n).show();
     };
 
+    const onError = error =>
+    {
+      this.handleError(error, () => this.saveTopic());
+    };
+
+    this.showProgressBar();
     if (topicGuid) // update
     {
       this.service.updateTopic(projectId, topicGuid, topic,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
     else // creation
     {
-      this.service.createTopic(projectId, topic, onCompleted,
-        error => this.onError(error));
+      this.service.createTopic(projectId, topic, onCompleted, onError);
     }
   }
 
@@ -504,38 +523,52 @@ class BCFPanel extends Panel
     const application = this.application;
     const onCompleted = () =>
     {
+      this.hideProgressBar();
       this.showTopic();
       this.topics = null; // force topic list refresh
       Toast.create("bim|message.topic_deleted")
         .setI18N(application.i18n).show();
     };
 
+    const onError = error =>
+    {
+      this.handleError(error, () => this.deleteTopic());
+    };
+
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     if (topicGuid)
     {
-      this.service.deleteTopic(projectId, topicGuid, onCompleted,
-        error => this.onError(error));
+      this.showProgressBar();
+      this.service.deleteTopic(projectId, topicGuid, onCompleted, onError);
     }
   }
 
-  loadViewpoints(focusOnFirst)
+  loadViewpoints(scrollBottom, onSuccess)
   {
     const onCompleted = viewpoints =>
     {
+      this.hideProgressBar();
       this.viewpoints = viewpoints;
-      console.info(viewpoints);
       this.populateViewpointList();
-      if (focusOnFirst && viewpoints.length > 0)
+      if (scrollBottom)
       {
-        this.showViewpoint(viewpoints[0]);
+        this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
       }
+      if (onSuccess) onSuccess();
     };
+
+    const onError = error =>
+    {
+      this.handleError(error,
+        () => this.loadViewpoints(scrollBottom, onSuccess));
+    };
+
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.getViewpoints(projectId, topicGuid, onCompleted,
-      error => this.onError(error));
+    this.showProgressBar();
+    this.service.getViewpoints(projectId, topicGuid, onCompleted, onError);
   }
 
   createViewpoint(imageURL = null)
@@ -581,10 +614,15 @@ class BCFPanel extends Panel
 
     const onCompleted = viewpoint =>
     {
-      console.info(viewpoint);
-      this.loadViewpoints();
+      this.hideProgressBar();
+      this.loadViewpoints(true);
       Toast.create("bim|message.viewpoint_saved")
         .setI18N(application.i18n).show();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.createViewpoint(imageURL));
     };
 
     let projectId = this.getProjectId();
@@ -618,12 +656,13 @@ class BCFPanel extends Panel
         snapshot_data : image
       };
 
+      this.showProgressBar();
       this.service.createViewpoint(projectId, topicGuid, viewpoint,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
     else
     {
-      this.onError("Unsupported image format");
+      this.handleError({ code : 0, message : "Unsupported image format" });
     }
   }
 
@@ -662,9 +701,15 @@ class BCFPanel extends Panel
     const application = this.application;
     const onCompleted = () =>
     {
+      this.hideProgressBar();
       this.loadViewpoints();
       Toast.create("bim|message.viewpoint_deleted")
         .setI18N(application.i18n).show();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.deleteViewpoint(viewpoint));
     };
 
     let projectId = this.getProjectId();
@@ -672,28 +717,36 @@ class BCFPanel extends Panel
 
     if (topicGuid)
     {
+      this.showProgressBar();
       this.service.deleteViewpoint(projectId, topicGuid, viewpoint.guid,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
   }
 
-  loadComments(scrollBottom)
+  loadComments(scrollBottom, onSuccess)
   {
     const onCompleted = comments =>
     {
+      this.hideProgressBar();
       this.comments = comments;
-      console.info(comments);
       this.populateCommentList();
       if (scrollBottom)
       {
         this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
       }
+      if (onSuccess) onSuccess();
     };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.loadComments(scrollBottom, onSuccess));
+    };
+
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.getComments(projectId, topicGuid, onCompleted,
-      error => this.onError(error));
+    this.showProgressBar();
+    this.service.getComments(projectId, topicGuid, onCompleted, onError);
   }
 
   saveComment()
@@ -708,23 +761,29 @@ class BCFPanel extends Panel
 
     const onCompleted = comment =>
     {
+      this.hideProgressBar();
       this.commentElem.value = null;
-      console.info(comment);
       this.commentGuid = null;
       this.loadComments(true);
       Toast.create("bim|message.comment_saved")
         .setI18N(application.i18n).show();
     };
 
+    const onError = error =>
+    {
+      this.handleError(error, () => this.saveComment());
+    };
+
+    this.showProgressBar();
     if (this.commentGuid) // update
     {
       this.service.updateComment(projectId, topicGuid, this.commentGuid,
-        comment, onCompleted, error => this.onError(error));
+        comment, onCompleted, onError);
     }
     else // creation
     {
       this.service.createComment(projectId, topicGuid, comment,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
   }
 
@@ -733,17 +792,24 @@ class BCFPanel extends Panel
     const application = this.application;
     const onCompleted = () =>
     {
+      this.hideProgressBar();
       this.loadComments();
       Toast.create("bim|message.comment_deleted")
         .setI18N(application.i18n).show();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.deleteComment());
     };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     if (topicGuid)
     {
+      this.showProgressBar();
       this.service.deleteComment(projectId, topicGuid, comment.guid,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
   }
 
@@ -761,23 +827,32 @@ class BCFPanel extends Panel
     this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
   }
 
-  loadDocumentReferences(scrollBottom)
+  loadDocumentReferences(scrollBottom, onSuccess)
   {
     const onCompleted = docRefs =>
     {
+      this.hideProgressBar();
       this.docRefs = docRefs;
-      console.info(docRefs);
       this.populateDocumentReferenceList();
       if (scrollBottom)
       {
         this.detailPanelElem.scrollTop = this.detailPanelElem.scrollHeight;
       }
+      if (onSuccess) onSuccess();
     };
+
+    const onError = error =>
+    {
+      this.handleError(error,
+        () => this.loadDocumentReferences(scrollBottom, onSuccess));
+    };
+
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
 
-    this.service.getDocumentReferences(projectId, topicGuid, onCompleted,
-      error => this.onError(error));
+    this.showProgressBar();
+    this.service.getDocumentReferences(projectId, topicGuid,
+      onCompleted, onError);
   }
 
   saveDocumentReference()
@@ -793,24 +868,30 @@ class BCFPanel extends Panel
 
     const onCompleted = docRef =>
     {
+      this.hideProgressBar();
       this.docRefUrlElem.value = null;
       this.docRefDescElem.value = null;
-      console.info(docRef);
       this.docRefGuid = null;
       this.loadDocumentReferences(true);
       Toast.create("bim|message.doc_ref_saved")
         .setI18N(application.i18n).show();
     };
 
+    const onError = error =>
+    {
+      this.handleError(error, () => this.saveDocumentReference());
+    };
+
+    this.showProgressBar();
     if (this.docRefGuid) // update
     {
       this.service.updateDocumentReference(projectId, topicGuid,
-        this.docRefGuid, docRef, onCompleted, error => this.onError(error));
+        this.docRefGuid, docRef, onCompleted, onError);
     }
     else // creation
     {
       this.service.createDocumentReference(projectId, topicGuid, docRef,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
   }
 
@@ -835,17 +916,24 @@ class BCFPanel extends Panel
     const application = this.application;
     const onCompleted = () =>
     {
+      this.hideProgressBar();
       this.loadDocumentReferences();
       Toast.create("bim|message.doc_ref_deleted")
         .setI18N(application.i18n).show();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.deleteDocumentReference(docRef));
     };
 
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
     if (topicGuid)
     {
+      this.showProgressBar();
       this.service.deleteDocumentReference(projectId, topicGuid, docRef.guid,
-        onCompleted, error => this.onError(error));
+        onCompleted, onError);
     }
   }
 
@@ -856,13 +944,18 @@ class BCFPanel extends Panel
 
     const onCompleted = extensions =>
     {
+      this.hideProgressBar();
       this.extensions = extensions;
-      console.info(extensions);
       this.populateExtensions();
     };
 
-    this.service.getExtensions(projectId, onCompleted,
-      error => this.onError(error));
+    const onError = error =>
+    {
+      this.handleError(error, () => this.updateExtensions());
+    };
+
+    this.showProgressBar();
+    this.service.getExtensions(projectId, onCompleted, onError);
   }
 
   refreshProjects()
@@ -871,10 +964,9 @@ class BCFPanel extends Panel
 
     const onCompleted = serverProjects =>
     {
+      this.hideProgressBar();
       this.filterPanelElem.style.display = "";
       this.topicTableElem.style.display = "";
-
-      console.info(serverProjects);
 
       const projectIdSet = new Set();
 
@@ -905,14 +997,17 @@ class BCFPanel extends Panel
       this.searchTopicsButton.disabled = disabled;
       this.setupProjectButton.disabled = disabled;
       this.searchNewTopicButton.disabled = disabled;
-      if (disabled)
-      {
-        this.clearTopics();
-      }
       this.updateExtensions();
     };
 
-    this.service.getProjects(onCompleted, error => this.onError(error));
+    const onError = error =>
+    {
+      this.handleError(error, () => this.refreshProjects());
+    };
+
+    this.clearTopics();
+    this.showProgressBar();
+    this.service.getProjects(onCompleted, onError);
   }
 
   saveProjectName()
@@ -927,18 +1022,23 @@ class BCFPanel extends Panel
     {
       const onCompleted = project =>
       {
-        console.info(project);
+        this.hideProgressBar();
         options[index].label = project.name;
         Toast.create("bim|message.project_saved")
           .setI18N(application.i18n).show();
+      };
+
+      const onError = error =>
+      {
+        this.handleError(error, () => this.saveProjectName());
       };
 
       const projectId = this.getProjectId();
       const project = {
         "name" : projectName
       };
-      this.service.updateProject(projectId, project, onCompleted,
-        error => this.onError(error));
+      this.showProgressBar();
+      this.service.updateProject(projectId, project, onCompleted, onError);
     }
   }
 
@@ -952,11 +1052,16 @@ class BCFPanel extends Panel
     {
       const onCompleted = extensions =>
       {
+        this.hideProgressBar();
         this.extensions = extensions;
-        console.info(extensions);
         this.populateExtensions();
         Toast.create("bim|message.project_extensions_saved")
           .setI18N(application.i18n).show();
+      };
+
+      const onError = error =>
+      {
+        this.handleError(error, () => this.saveProjectExtensions());
       };
 
       try
@@ -964,8 +1069,9 @@ class BCFPanel extends Panel
         let extensions = JSON.parse(extensionsText);
 
         const projectId = this.getProjectId();
-        this.service.updateExtensions(projectId, extensions, onCompleted,
-          error => this.onError(error));
+        this.showProgressBar();
+        this.service.updateExtensions(projectId, extensions,
+          onCompleted, onError);
       }
       catch (ex)
       {
@@ -1050,9 +1156,13 @@ class BCFPanel extends Panel
     {
       let topic = topics[i];
       let rowElem = Controls.addTableRow(topicsElem);
-      rowElem.children[0].innerHTML = topic.index;
-      Controls.addLink(rowElem.children[1], topic.title, "#", null, null, () =>
-        { this.showTopic(topic, i); });
+
+      const openTopic = () => { this.showTopic(topic, i); };
+
+      Controls.addLink(rowElem.children[0], topic.index, "#", null, null,
+        openTopic);
+      Controls.addLink(rowElem.children[1], topic.title, "#", null, null,
+        openTopic);
       rowElem.children[2].innerHTML = topic.topic_status;
     }
   }
@@ -1307,14 +1417,6 @@ class BCFPanel extends Panel
     return dateString.substring(0, index);
   }
 
-  onError(error)
-  {
-    let message = error.message;
-    MessageDialog.create("ERROR", message)
-      .setClassName("error")
-      .setI18N(this.application.i18n).show();
-  }
-
   onShow()
   {
     this.updateServices();
@@ -1418,6 +1520,56 @@ class BCFPanel extends Panel
        .setAcceptLabel("button.delete")
        .setI18N(application.i18n).show();
     }
+  }
+
+  handleError(error, onLogin)
+  {
+    this.hideProgressBar();
+
+    if (error.code === 401)
+    {
+      this.requestCredentials("message.invalid_credentials", onLogin);
+    }
+    else if (error.code === 403)
+    {
+      this.requestCredentials("message.action_denied", onLogin);
+    }
+    else
+    {
+      let message = error.message;
+      MessageDialog.create("ERROR", message)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
+  }
+
+  requestCredentials(message, onLogin, onFailed)
+  {
+    const loginDialog = new LoginDialog(this.application, message);
+    loginDialog.login = (username, password) =>
+    {
+      this.service.username = username;
+      this.service.password = password;
+      if (onLogin) onLogin();
+    };
+    loginDialog.onCancel = () =>
+    {
+      loginDialog.hide();
+      if (onFailed) onFailed();
+    };
+    loginDialog.show();
+  }
+
+  showProgressBar()
+  {
+    this.application.progressBar.message = "";
+    this.application.progressBar.progress = undefined;
+    this.application.progressBar.visible = true;
+  }
+
+  hideProgressBar()
+  {
+    this.application.progressBar.visible = false;
   }
 }
 

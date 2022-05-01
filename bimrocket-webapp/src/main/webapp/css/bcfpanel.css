@@ -224,3 +224,10 @@ ul.bcf_list li
   box-sizing: border-box;
   background-color: #f0f0f0;
 }
+
+.bcf_body button[name="previousTopic"],
+.bcf_body button[name="nextTopic"]
+{
+  padding-left: 6px;
+  padding-right: 6px;
+}

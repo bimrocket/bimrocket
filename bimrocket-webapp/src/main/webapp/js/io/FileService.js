@@ -58,12 +58,13 @@ class Metadata
   static COLLECTION = 1;
   static FILE = 2;
 
-  constructor(name, description, type, size)
+  constructor(name, description, type, size = 0, lastModified = 0)
   {
     this.name = name;
     this.description = description;
     this.type = type;
     this.size = size;
+    this.lastModified = lastModified;
   }
 }
 

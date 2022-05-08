@@ -31,6 +31,7 @@ class FileExplorer extends Panel
     this.basePath = "/";
     this.entryName = "";
     this.entryType = null; // COLLECTION or FILE
+    this.showFileSize = true;
 
     this.serviceElem = document.createElement("div");
     this.serviceElem.className = "service_panel";
@@ -537,7 +538,17 @@ class FileExplorer extends Panel
       entryElem.entryName = entry.name;
       let linkElem = document.createElement("a");
       linkElem.href= "#";
-      linkElem.innerHTML = entry.description;
+      let label = entry.description;
+      let size = entry.size;
+      if (entry.type === FILE && size > 0 && this.showFileSize)
+      {
+        label += " (";
+        if (size > 1000000) label += (size / 1000000).toFixed(0) + "&nbsp;Mb";
+        else if (size > 1000) label += (size / 1000).toFixed(0) + "&nbsp;Kb";
+        else label += "1&nbsp;Kb";
+        label += ")";
+      }
+      linkElem.innerHTML = label;
       linkElem.addEventListener("click", event =>
         this.onEntry(entry.name, entry.type));
       linkElem.addEventListener("dblclick", event => this.openEntry());

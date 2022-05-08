@@ -70,6 +70,16 @@ class WebdavService extends FileService
               let fileName = hrefValue.substring(baseUri.length);
               let isCollectionNode = responseNode.querySelector(
                 "propstat prop resourcetype collection") !== null;
+              let contentLengthNode = responseNode.querySelector(
+                "propstat prop getcontentlength");
+              let lastModifiedNode = responseNode.querySelector(
+                "propstat prop getlastmodified");
+
+              let fileSize = contentLengthNode ?
+                parseInt(contentLengthNode.textContent) : 0;
+              let lastModified = lastModifiedNode ?
+                parseInt(lastModifiedNode.textContent) : 0;
+
               if (fileName.indexOf("/") === 0) fileName = fileName.substring(1);
 
               if (fileName.length === 0) // requested resource
@@ -78,11 +88,13 @@ class WebdavService extends FileService
                 metadata.name = hrefValue.substring(index + 1);
                 metadata.description = metadata.name;
                 metadata.type = isCollectionNode ? COLLECTION : FILE;
+                metadata.size = fileSize;
+                metadata.lastModified = lastModified;
               }
               else
               {
                 let entry = new Metadata(fileName, fileName,
-                  isCollectionNode ? COLLECTION : FILE);
+                  isCollectionNode ? COLLECTION : FILE, fileSize, lastModified);
                 entries.push(entry);
               }
             }

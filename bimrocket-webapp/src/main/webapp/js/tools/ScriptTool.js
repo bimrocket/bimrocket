@@ -33,6 +33,7 @@ class ScriptTool extends Tool
     this.setOptions(options);
 
     const panel = new FileExplorer(application, false);
+    panel.showFileSize = false;
     this.panel = panel;
     this.edit = false;
 

@@ -41,29 +41,6 @@ class IOManager
     return formatInfo || null;
   }
 
-  static createLoader(formatName, manager)
-  {
-    let loader = null;
-    let formatInfo = this.formats[formatName];
-    if (formatInfo && formatInfo.loaderClass)
-    {
-      loader = new formatInfo.loaderClass(manager);
-      loader.loadMethod = formatInfo.loadMethod || loader.loadMethod || 0;
-    }
-    return loader;
-  }
-
-  static createExporter(formatName)
-  {
-    let exporter = null;
-    let formatInfo = this.formats[formatName];
-    if (formatInfo && formatInfo.exporterClass)
-    {
-      exporter = new formatInfo.exporterClass();
-    }
-    return exporter;
-  }
-
   static load(intent)
   {
     let formatName = intent.format;
@@ -74,7 +51,6 @@ class IOManager
     let onError = intent.onError; // onError(error)
     let manager = intent.manager; // LoadingManager
     let units = intent.units || "m"; // application units
-    let options = intent.options;
     let basicAuthCredentials = intent.basicAuthCredentials;
 
     try
@@ -87,19 +63,21 @@ class IOManager
 
       let formatInfo = IOManager.formats[formatName];
 
-      let loader = this.createLoader(formatName, manager);
-
-      if (!loader) throw "Unsupported format: " + formatName;
-
-      if (loader.options && options)
+      let loader;
+      if (formatInfo && formatInfo.loader)
       {
-        Object.assign(loader.options, options);
+        loader = new formatInfo.loader.class(manager);
+        loader.loadMethod = formatInfo.loader.loadMethod || 0;
       }
+      else throw "Unsupported format: " + formatName;
+
+      const options = Object.assign({},
+        formatInfo.loader.options, intent.options);
 
       if (data)
       {
         this.parseData(loader, url, data, units,
-          onCompleted, onProgress, onError);
+          onCompleted, onProgress, onError, options);
       }
       else
       {
@@ -114,7 +92,7 @@ class IOManager
             if (request.status === 0 ||
               request.status === 200 || request.status === 207)
             {
-              if (formatInfo.dataType === "arraybuffer")
+              if (formatInfo.loader.dataType === "arraybuffer")
               {
                 data = request.response.arrayBuffer();
               }
@@ -122,15 +100,8 @@ class IOManager
               {
                 data = request.responseText;
               }
-              try
-              {
-                this.parseData(loader, url, data, units,
-                  onCompleted, onProgress, onError);
-              }
-              catch (exc)
-              {
-                if (onError) onError(exc);
-              }
+              this.parseData(loader, url, data, units,
+                onCompleted, onProgress, onError, options);
             }
             else
             {
@@ -190,7 +161,6 @@ class IOManager
     let onProgress = intent.onProgress;
     let onError = intent.onError;
     let object = intent.object;
-    let options = intent.options;
 
     try
     {
@@ -201,16 +171,22 @@ class IOManager
 
       if (!formatName) throw "Can't determinate format";
 
-      let exporter = this.createExporter(formatName);
+      let formatInfo = IOManager.formats[formatName];
 
-      if (!exporter) throw "Unsupported format: " + formatName;
-
-      if (exporter.options && options)
+      let exporter;
+      if (formatInfo && formatInfo.exporter)
       {
-        Object.assign(exporter.options, options);
+        exporter = new formatInfo.exporter.class();
+        exporter.exportMethod = formatInfo.exporter.exportMethod || 0;
+        exporter.mimeType = formatInfo.mimeType || 'application/octet-stream';
       }
-      return this.parseObject(exporter, object,
-        onCompleted, onProgress, onError);
+      else throw "Unsupported format: " + formatName;
+
+      const options = Object.assign({},
+        formatInfo.exporter.options, intent.options);
+
+      this.parseObject(exporter, object,
+        onCompleted, onProgress, onError, options);
     }
     catch (ex)
     {
@@ -219,49 +195,85 @@ class IOManager
   }
 
   static parseData(loader, url, data, units,
-    onCompleted, onProgress, onError)
+    onCompleted, onProgress, onError, options)
   {
-    const loadCompleted = (model) =>
+    const loadCompleted = model =>
     {
       ObjectUtils.scaleModel(model, units);
       if (onCompleted) onCompleted(model);
     };
 
-    if (loader.loadMethod === 1) // ColladaLoader
+    try
     {
-      let path = THREE.LoaderUtils.extractUrlBase(url);
-      let result = loader.parse(data, path);
-      loadCompleted(result.scene);
+      if (loader.loadMethod === 1) // ColladaLoader
+      {
+        let path = THREE.LoaderUtils.extractUrlBase(url);
+        let result = loader.parse(data, path);
+        loadCompleted(result.scene);
+      }
+      else if (loader.loadMethod === 2) // IFCLoader
+      {
+        loader.parse(data, loadCompleted, onProgress, onError, options);
+      }
+      else if (loader.loadMethod === 3) // GLTFLoader
+      {
+        let path = THREE.LoaderUtils.extractUrlBase(url);
+        loader.parse(data, path,
+          result => loadCompleted(result.scene), onError);
+      }
+      else // general case: BRFLoader, STLLoader, OBJLoader...
+      {
+        let result = loader.parse(data);
+        let object = this.createObject(result);
+        loadCompleted(object);
+      }
     }
-    else if (loader.loadMethod === 2) // IFCLoader
+    catch (ex)
     {
-      loader.parse(data, loadCompleted, onProgress, onError);
-    }
-    else // general case: BRFLoader, STLLoader, OBJLoader...
-    {
-      let result = loader.parse(data);
-      let object = this.createObject(result);
-      loadCompleted(object);
+      if (onError) onError(ex);
     }
   }
 
-  static parseObject(exporter, object, onCompleted, onProgress, onError)
+  static parseObject(exporter, object,
+    onCompleted, onProgress, onError, options)
   {
-    let data = "";
-    let result = exporter.parse(object);
-    if (result)
+    const exportCompleted = result =>
     {
-      if (typeof result === "string")
+      let data = "";
+      if (result)
       {
-        data = new Blob([result], {type: 'text/plain'});
+        let mimeType = exporter.mimeType;
+        if (typeof result === "string")
+        {
+          data = new Blob([result], { type: mimeType });
+        }
+        else if (typeof result.data === "string")
+        {
+          data = new Blob([result.data], { type: mimeType });
+        }
+        else if (typeof result === "object")
+        {
+          data = new Blob([JSON.stringify(result)], { type : mimeType });
+        }
       }
-      else if (typeof result.data === "string")
+      if (onCompleted) onCompleted(data);
+    };
+
+    try
+    {
+      if (exporter.exportMethod === 1)
       {
-        data = new Blob([result.data], {type: 'text/plain'});
+        exporter.parse(object, exportCompleted, onError, options);
+      }
+      else // general export method
+      {
+        exportCompleted(exporter.parse(object, options));
       }
     }
-    if (onCompleted) onCompleted(data);
-    return data;
+    catch (ex)
+    {
+      if (onError) onError(ex);
+    }
   }
 
   static createObject(result)

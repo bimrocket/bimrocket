@@ -107,7 +107,7 @@ class OpenLocalTool extends Tool
       application.progressBar.progress = undefined;
       application.progressBar.visible = true;
       let formatInfo = IOManager.getFormatInfo(file.name);
-      if (formatInfo.dataType === "arraybuffer")
+      if (formatInfo.loader.dataType === "arraybuffer")
       {
         reader.readAsArrayBuffer(file);
       }

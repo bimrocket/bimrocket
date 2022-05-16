@@ -17,19 +17,26 @@ export function load(application)
   {
     description : "GeoJSON (*.geojson)",
     extensions: ["geojson"],
-    loaderClass : GeoJSONLoader,
-    dataType : "text",
-    options : {}
+    mimeType : "application/geo+json",
+    loader :
+    {
+      class : GeoJSONLoader,
+      loadMethod : 0,
+      dataType : "text"
+    }
   };
 
   IOManager.formats["grd"] =
   {
     description : "ASCII Grid (*.grd, *.asc)",
     extensions: ["grd", "asc"],
-    loaderClass : ASCIIGridLoader,
-    loadMethod: 2,
-    dataType : "text",
-    options : {}
+    mimeType : "text/plain",
+    loader :
+    {
+      class : ASCIIGridLoader,
+      loadMethod : 2,
+      dataType : "text"
+    }
   };
 
   // load bundles

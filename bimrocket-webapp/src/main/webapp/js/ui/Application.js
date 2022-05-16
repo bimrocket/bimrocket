@@ -101,7 +101,10 @@ class Application
     const loadingManager = this.loadingManager;
     loadingManager.onStart = (url, itemsLoaded, itemsTotal) =>
     {
-      console.info(url, itemsLoaded, itemsTotal);
+      if (!url.startsWith("data:"))
+      {
+        console.info(url, itemsLoaded, itemsTotal);
+      }
     };
     loadingManager.onLoad = () =>
     {
@@ -1567,7 +1570,7 @@ class Application
     }
     else
     {
-      IOManager.load(intent); // asynchron load
+      IOManager.load(intent); // async load
     }
   }
 

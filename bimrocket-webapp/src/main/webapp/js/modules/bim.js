@@ -20,12 +20,15 @@ export function load(application)
   // register formats
   IOManager.formats["ifc"] =
   {
-    description : "Industry foundation classes STEP (*.ifc)",
+    description : "Industry foundation classes (*.ifc)",
     extensions: ["ifc"],
-    loaderClass: IFCSTEPLoader,
-    loadMethod : 2,
-    dataType : "text",
-    options : {}
+    mimeType : "application/x-step",
+    loader :
+    {
+      class : IFCSTEPLoader,
+      loadMethod : 2,
+      dataType : "text"
+    }
   };
 
   // create tools

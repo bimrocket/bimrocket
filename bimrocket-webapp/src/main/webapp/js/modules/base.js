@@ -77,6 +77,8 @@ import { OBJLoader } from "../io/OBJLoader.js";
 import { OBJExporter } from "../io/OBJExporter.js";
 import { STLLoader } from "../io/STLLoader.js";
 import { STLExporter } from "../io/STLExporter.js";
+import { GLTFLoader } from "../io/GLTFLoader.js";
+import { GLTFExporter } from "../io/GLTFExporter.js";
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
@@ -89,41 +91,104 @@ export function load(application)
   {
     description : "BIMROCKET (*.brf)",
     extensions: ["brf"],
-    loaderClass : BRFLoader,
-    exporterClass : BRFExporter,
-    dataType : "text",
-    options : {}
+    mimeType : "application/json",
+    loader :
+    {
+      class : BRFLoader,
+      loadMethod : 0,
+      dataType : "text"
+    },
+    exporter :
+    {
+      class : BRFExporter,
+      exportMethod : 0
+    }
   };
 
   IOManager.formats["dae"] =
   {
     description: "Collada (*.dae)",
     extensions: ["dae"],
-    loaderClass : ColladaLoader,
-    exporterClass : ColladaExporter,
-    loadMethod : 1,
-    dataType : "text",
-    options : {}
+    mimeType : "model/vnd.collada+xml",
+    loader :
+    {
+      class : ColladaLoader,
+      loadMethod : 1,
+      dataType : "text"
+    },
+    exporter :
+    {
+      class : ColladaExporter,
+      exportMethod : 0
+    }
   };
 
   IOManager.formats["obj"] =
   {
     description: "Wavefront object (*.obj)",
     extensions: ["obj"],
-    loaderClass : OBJLoader,
-    exporterClass : OBJExporter,
-    dataType : "text",
-    options : {}
+    mimeType : "model/obj",
+    loader :
+    {
+      class : OBJLoader,
+      loadMethod : 0,
+      dataType : "text"
+    },
+    exporter :
+    {
+      class : OBJExporter,
+      exportMethod : 0
+    }
   };
 
   IOManager.formats["stl"] =
   {
     description : "Stereolithography (*.stl)",
     extensions: ["stl"],
-    loaderClass : STLLoader,
-    exporterClass : STLExporter,
-    dataType : "arraybuffer",
-    options : {}
+    mimeType : "model/stl",
+    loader :
+    {
+      class : STLLoader,
+      loadMethod : 0,
+      dataType : "arraybuffer"
+    },
+    exporter :
+    {
+      class : STLExporter,
+      exportMethod : 0
+    }
+  };
+
+  IOManager.formats["gltf"] =
+  {
+    description : "GL Transmission Format (*.gltf)",
+    extensions: ["gltf"],
+    mimeType : "model/gltf-json",
+    loader :
+    {
+      class : GLTFLoader,
+      loadMethod : 3,
+      dataType : "arraybuffer"
+    },
+    exporter :
+    {
+      class : GLTFExporter,
+      exportMethod : 1,
+      options : { binary : false }
+    }
+  };
+
+  IOManager.formats["glb"] =
+  {
+    description : "GL Transmission Format (*.glb)",
+    extensions: ["glb"],
+    mimeType : "model/gltf-binary",
+    loader :
+    {
+      class : GLTFLoader,
+      loadMethod : 3,
+      dataType : "arraybuffer"
+    }
   };
 
   // create tools

@@ -47,18 +47,20 @@ class IFCLoader extends THREE.Loader
   constructor(manager)
   {
     super(manager);
-
-    this.options = Object.assign({}, IFCLoader.options);
   }
 
-  load(url, onLoad, onProgress, onError)
+  load(url, onLoad, onProgress, onError, options)
   {
     const fileLoader = new THREE.FileLoader(this.manager);
-    fileLoader.load(url, text => onLoad(this.parse(text)), onProgress, onError);
+    fileLoader.load(url,
+      text => this.parse(text, onLoad, onProgress, onError, options),
+      onProgress, onError);
   }
 
-  parse(text, onCompleted, onProgress, onError)
+  parse(text, onCompleted, onProgress, onError, options)
   {
+    this.options = Object.assign({}, IFCLoader.options, options);
+
     let ifcFile = new IFCFile();
 
     console.info("parsing file...");
@@ -67,8 +69,7 @@ class IFCLoader extends THREE.Loader
 
     console.info(ifcFile);
 
-    return this.buildModel(ifcFile, onCompleted, onProgress, onError,
-      this.options);
+    return this.buildModel(ifcFile, onCompleted, onProgress, onError);
   }
 
   parseFile(ifcFile, text)
@@ -76,7 +77,7 @@ class IFCLoader extends THREE.Loader
     throw "Not implemented";
   }
 
-  buildModel(ifcFile, onCompleted, onProgress, onError, options)
+  buildModel(ifcFile, onCompleted, onProgress, onError)
   {
     const model = new THREE.Group();
     const types = new THREE.Group();

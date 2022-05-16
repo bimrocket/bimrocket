@@ -48,31 +48,43 @@ class SaveLocalTool extends Tool
     }
     const object = application.getModelRoot(onlySelection);
 
+    const onCompleted = data =>
+    {
+      try
+      {
+        this.url = window.URL.createObjectURL(data);
+        let linkElem = document.createElement("a");
+        linkElem.download = intent.name;
+        linkElem.target = "_blank";
+        linkElem.href = this.url;
+        linkElem.style.display = "block";
+        linkElem.click();
+      }
+      catch (ex)
+      {
+        MessageDialog.create("ERROR", ex)
+          .setClassName("error")
+          .setI18N(application.i18n).show();
+      }
+      this.application.useTool(null);
+    };
+
+    const onError = error =>
+    {
+      MessageDialog.create("ERROR", error)
+        .setClassName("error")
+        .setI18N(application.i18n).show();
+      this.application.useTool(null);
+    };
+
     let intent =
     {
       object : object,
-      name : name || this.defaultFileName
+      name : name || this.defaultFileName,
+      onCompleted : onCompleted,
+      onError : onError
     };
-
-    try
-    {
-      let data = IOManager.export(intent);
-      this.url = window.URL.createObjectURL(data);
-
-      let linkElem = document.createElement("a");
-      linkElem.download = intent.name;
-      linkElem.target = "_blank";
-      linkElem.href = this.url;
-      linkElem.style.display = "block";
-      linkElem.click();
-    }
-    catch (ex)
-    {
-      MessageDialog.create("ERROR", ex)
-        .setClassName("error")
-        .setI18N(application.i18n).show();
-    }
-    this.application.useTool(null);
+    IOManager.export(intent);
   }
 }
 

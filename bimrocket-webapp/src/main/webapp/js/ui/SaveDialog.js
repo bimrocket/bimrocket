@@ -15,7 +15,7 @@ class SaveDialog extends Dialog
   {
     super(title);
 
-    this.setSize(240, 200);
+    this.setSize(250, 200);
 
     if (name === "")
     {
@@ -39,7 +39,7 @@ class SaveDialog extends Dialog
     for (let formatName in IOManager.formats)
     {
       let formatInfo = IOManager.formats[formatName];
-      if (formatInfo.exporterClass)
+      if (formatInfo.exporter)
       {
         options.push([formatName, formatInfo.description]);
       }

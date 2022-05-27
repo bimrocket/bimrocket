@@ -188,7 +188,13 @@ export function load(application)
       class : GLTFLoader,
       loadMethod : 3,
       dataType : "arraybuffer"
-    }
+    },
+    exporter :
+    {
+      class : GLTFExporter,
+      exportMethod : 1,
+      options : { binary : true }
+    }  
   };
 
   // create tools

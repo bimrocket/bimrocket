@@ -247,6 +247,10 @@ class IOManager
         {
           data = new Blob([result], { type: mimeType });
         }
+        else if (result instanceof ArrayBuffer)
+        {
+          data = new Blob([result], { type : mimeType });          
+        }
         else if (typeof result.data === "string")
         {
           data = new Blob([result.data], { type: mimeType });
@@ -254,6 +258,10 @@ class IOManager
         else if (typeof result === "object")
         {
           data = new Blob([JSON.stringify(result)], { type : mimeType });
+        }
+        else
+        {
+          console.warn("Unsupported export result", result);
         }
       }
       if (onCompleted) onCompleted(data);

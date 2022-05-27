@@ -200,6 +200,7 @@ class IOManager
     const loadCompleted = model =>
     {
       ObjectUtils.scaleModel(model, units);
+      model.traverse(object => object.updateMatrix());
       if (onCompleted) onCompleted(model);
     };
 
@@ -249,7 +250,7 @@ class IOManager
         }
         else if (result instanceof ArrayBuffer)
         {
-          data = new Blob([result], { type : mimeType });          
+          data = new Blob([result], { type : mimeType });
         }
         else if (typeof result.data === "string")
         {
@@ -291,15 +292,11 @@ class IOManager
       let geometry = result;
       let material = new THREE.MeshPhongMaterial(
         {color : 0x008000, side : THREE.DoubleSide});
-      let object = new THREE.Mesh(geometry, material);
-      object.updateMatrix();
-      return object;
+      return new THREE.Mesh(geometry, material);
     }
     else if (result instanceof THREE.Object3D)
     {
-      let object = result;
-      object.traverse(obj => obj.updateMatrix());
-      return object;
+      return result;
     }
   }
 

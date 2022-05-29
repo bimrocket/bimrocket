@@ -297,6 +297,8 @@ class BRFLoader extends THREE.Loader
 
     object.name = entry.name;
     object.visible = entry.visible;
+    object.castShadow = entry.castShadow || false;
+    object.receiveShadow = entry.receiveShadow || false;
 
     let position = entry.position;
     if (position)

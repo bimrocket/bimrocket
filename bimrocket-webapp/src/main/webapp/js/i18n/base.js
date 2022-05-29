@@ -262,6 +262,7 @@ export const translations =
   "label.show_local_axes" : "Show local axes",
   "label.background_color" : "Background color:",
   "label.panel_opacity" : "Panel opacity:",
+  "label.cast_shadows" : "Cast shadows",
 
   "label.service_type" : "Service type:",
   "label.service_name" : "Service name:",

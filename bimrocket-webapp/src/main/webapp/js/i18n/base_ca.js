@@ -262,6 +262,7 @@ export const translations =
   "label.show_local_axes" : "Mostra eixos locals",
   "label.background_color" : "Color de fons:",
   "label.panel_opacity" : "Opacitat de panells:",
+  "label.cast_shadows" : "Projecció d'ombres",
 
   "label.service_type" : "Tipus de servei:",
   "label.service_name" : "Nom del servei:",

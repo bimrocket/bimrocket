@@ -70,6 +70,7 @@ class Application
     this._backgroundColor2 = null;
     this._panelOpacity = null;
     this._frameRateDivisor = null;
+    this._shadowsEnabled = null;
 
     /* services */
     this.services = {}; // Service instances
@@ -160,28 +161,31 @@ class Application
     this.updateBackground();
 
     // renderer
+    let renderer;
     if (WEBGL.isWebGLAvailable())
     {
       // WebGL renderer
-      this.renderer = new THREE.WebGLRenderer(
-       {
-         antialias: true,
-         alpha:true,
-         preserveDrawingBuffer: true
-       });
+      renderer = new THREE.WebGLRenderer(
+      {
+        antialias : true,
+        alpha : true,
+        preserveDrawingBuffer : true
+      });
+      renderer.shadowMap.enabled = this.shadowsEnabled;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
     else
     {
       // fake renderer
-      this.renderer = new FakeRenderer();
+      renderer = new FakeRenderer();
     }
-    let renderer = this.renderer;
+    this.renderer = renderer;
     renderer.alpha = true;
     renderer.setClearColor(0x000000, 0);
     renderer.sortObjects = true;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(this.renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     // panelManager
     this.panelManager = new PanelManager(container);
@@ -331,31 +335,33 @@ class Application
     scene.name = "Scene";
 
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0x303030);
-    ambientLight.name = "AmbientLight";
-    ambientLight.updateMatrix();
-    scene.add(ambientLight);
+    const hemisphereLight = new THREE.HemisphereLight(0xf0f0f0, 0x808080, 1);
+    hemisphereLight.name = "HemisphereLight";
+    hemisphereLight.updateMatrix();
+    scene.add(hemisphereLight);
 
-    const sunLight = new THREE.DirectionalLight(0xFFFFFF);
-    sunLight.position.x = 1000;
-    sunLight.position.y = 800;
-    sunLight.position.z = 800;
-    sunLight.position.normalize();
+    const sunLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+    sunLight.position.x = 20;
+    sunLight.position.y = 20;
+    sunLight.position.z = 80;
     sunLight.name = "SunLight";
-    sunLight.updateMatrix();
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 4096;
+    sunLight.shadow.mapSize.height = 4096;
+    sunLight.shadow.camera.left = -40;
+    sunLight.shadow.camera.right = 40;
+    sunLight.shadow.camera.top = 40;
+    sunLight.shadow.camera.bottom = -40;
+    sunLight.shadow.camera.far = 3000;
+    sunLight.shadow.camera.near = 0.01;
+    sunLight.shadow.camera.matrixAutoUpdate = true;
+    sunLight.shadow.bias = -0.0001;
+    sunLight.target = scene;
     scene.add(sunLight);
-
-    const sunLight2 = new THREE.DirectionalLight(0xFFFFFF);
-    sunLight2.position.x = -1000;
-    sunLight2.position.y = -1000;
-    sunLight2.position.z = 800;
-    sunLight2.position.normalize();
-    sunLight2.name = "SunLight2";
-    sunLight2.updateMatrix();
-    scene.add(sunLight2);
+    sunLight.updateMatrix();
 
     // initial camera
-    var camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
+    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
     camera.position.set(0, -30, 2);
     camera.name = "Orthographic";
     camera.updateProjectionMatrix();
@@ -397,7 +403,6 @@ class Application
     // Add overlays group
     this.overlays = new THREE.Group();
     this.overlays.name = THREE.Object3D.HIDDEN_PREFIX + "overlays";
-    this.overlays.matrixAutoUpdate = false;
     this.scene.add(this.overlays);
 
     let sceneEvent = {type : "structureChanged",
@@ -594,6 +599,33 @@ class Application
     this.updateSelection();
   }
 
+  get shadowsEnabled()
+  {
+    if (this._shadowsEnabled === null)
+    {
+      this._shadowsEnabled = window.localStorage.getItem(
+        "bimrocket.shadowsEnabled") === "true";
+    }
+    return this._shadowsEnabled;
+  }
+
+  set shadowsEnabled(enabled)
+  {
+    this._shadowsEnabled = enabled;
+    window.localStorage.setItem("bimrocket.shadowsEnabled", enabled);
+
+    if (this.renderer.shadowMap)
+    {
+      if (this.renderer.shadowMap.enabled !== enabled)
+      {
+        this.renderer.shadowMap.enabled = enabled;
+        this.scene.traverse(object =>
+        { if (object.material) object.material.needsUpdate = true; });
+        this.repaint();
+      }
+    }
+  }
+
   updateBackground()
   {
     if (this._backgroundColor1 === this._backgroundColor2)
@@ -645,6 +677,7 @@ class Application
     if (this._selectionLines !== null)
     {
       this.overlays.remove(this._selectionLines);
+      ObjectUtils.dispose(this._selectionLines);
       this._selectionLines = null;
       this.repaint();
     }
@@ -732,11 +765,11 @@ class Application
     else if (object instanceof THREE.DirectionalLight)
     {
       let light = object;
-      light.updateMatrixWorld();
-      let lines = new THREE.DirectionalLightHelper(light, 1);
-
+      let lines = new THREE.DirectionalLightHelper(light, 1, 0x0);
       lines.name = "SelectionLines";
       lines.raycast = function(){};
+      lines.lightPlane.updateMatrix();
+      lines.targetLine.updateMatrix();
 
       linesGroup.add(lines);
     }

@@ -48,6 +48,9 @@ class Solid extends THREE.Object3D
 
     this.builder = null;
 
+    this.castShadow = true;
+    this.receiveShadow = true;
+
     if (geometry)
     {
       this.geometry = geometry;
@@ -102,6 +105,32 @@ class Solid extends THREE.Object3D
   set edgesVisible(edgesVisible)
   {
     this._edgesObject.visible = edgesVisible;
+  }
+
+  get castShadow()
+  {
+    return this._facesObject ? this._facesObject.castShadow : false;
+  }
+
+  set castShadow(shadow)
+  {
+    if (this._facesObject)
+    {
+      this._facesObject.castShadow = shadow;
+    }
+  }
+
+  get receiveShadow()
+  {
+    return this._facesObject ? this._facesObject.receiveShadow : false;
+  }
+
+  set receiveShadow(shadow)
+  {
+    if (this._facesObject)
+    {
+      this._facesObject.receiveShadow = shadow;
+    }
   }
 
   get material()

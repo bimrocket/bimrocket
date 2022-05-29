@@ -127,6 +127,13 @@ class OptionsTool extends Tool
     this.localAxesCheckBox.addEventListener("change", event =>
       application.showLocalAxes = this.localAxesCheckBox.checked);
 
+    // Enable/disable shadows
+
+    this.shadowsCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+      "shadows", "label.cast_shadows", false, "option_block");
+    this.shadowsCheckBox.addEventListener("change", event =>
+      application.shadowsEnabled = this.shadowsCheckBox.checked);
+
     // Background color
 
     this.backSelect = Controls.addSelectField(this.panel.bodyElem,
@@ -227,6 +234,7 @@ class OptionsTool extends Tool
     this.selPaintModeSelect.value = application.selectionPaintMode;
     this.deepSelCheckBox.checked = application.showDeepSelection;
     this.localAxesCheckBox.checked = application.showLocalAxes;
+    this.shadowsCheckBox.checked = application.shadowsEnabled;
     this.panelOpacityRange.value = 100 * application.panelOpacity;
   }
 

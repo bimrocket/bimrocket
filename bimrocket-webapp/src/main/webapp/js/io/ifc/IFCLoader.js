@@ -328,6 +328,20 @@ class IFCLoader extends THREE.Loader
       });
     };
 
+    const setCastShadowForObject = (object) =>
+    {
+      object.traverse(function(object)
+      {
+        if (object instanceof Solid)
+        {
+          if (object.material.transparent)
+          {
+            object.castShadow = false;
+          }
+        }
+      });
+    };
+
     const paintObjects = () =>
     {
       let products = ifcFile.products;
@@ -347,6 +361,7 @@ class IFCLoader extends THREE.Loader
             {
               paintObject(reprObject3D, material);
             }
+            setCastShadowForObject(reprObject3D);
           }
         }
       }
@@ -672,7 +687,7 @@ class IfcProductHelper extends IfcHelper
                   || ifcClassName === "IfcBooleanResult"
                   || ifcClassName === "IfcBooleanClippingResult"))
           {
-            // set IFCVoider no representation
+            // set IFCVoider representation
             if (reprObject3D instanceof Solid)
             {
               let voider = new Solid();

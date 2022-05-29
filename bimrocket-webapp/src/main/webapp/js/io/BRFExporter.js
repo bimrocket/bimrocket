@@ -15,7 +15,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 3;
+  static VERSION = 4;
 
   constructor()
   {
@@ -54,7 +54,9 @@ class BRFExporter
       id : id,
       type : object.type,
       name : object.name,
-      visible : object.visible
+      visible : object.visible,
+      castShadow : object.castShadow,
+      receiveShadow : object.receiveShadow
     };
 
     model.objects[id] = entry;

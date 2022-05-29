@@ -143,6 +143,8 @@ class Inspector extends Panel
       {
         this.createWriteableProperty(objListElem, object, "edgesVisible");
         this.createWriteableProperty(objListElem, object, "facesVisible");
+        this.createWriteableProperty(objListElem, object, "castShadow");
+        this.createWriteableProperty(objListElem, object, "receiveShadow");
       }
 
       let material = object.material;

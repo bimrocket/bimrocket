@@ -14,7 +14,8 @@ import {
 	NearestMipmapLinearFilter,
 	NearestMipmapNearestFilter,
   Object3D, // bimrocket
-	PropertyBinding,
+  Group, // bimrocket
+  PropertyBinding,
 	RGBAFormat,
 	RepeatWrapping,
 	Scene,
@@ -436,10 +437,8 @@ class GLTFWriter {
 		}
 
     // bimrocket: save y up
-    let matrix = null;
     if ( input instanceof Object3D ) {
-
-      matrix = input.matrix;
+      let matrix = input.matrix;
       input.matrix = matrix.clone().multiply(
         new Matrix4().makeRotationX( -Math.PI / 2 ));
 		  this.processInput( input );
@@ -2097,7 +2096,9 @@ class GLTFWriter {
 
 		for ( let i = 0; i < input.length; i ++ ) {
 
-			if ( input[ i ] instanceof Scene ) {
+			if ( input[ i ] instanceof Scene
+           // bimrocket
+           || ( input[ i ] instanceof Group && input.length === 1 )) {
 
 				this.processScene( input[ i ] );
 

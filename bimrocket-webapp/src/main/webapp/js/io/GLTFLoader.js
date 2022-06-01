@@ -8,7 +8,6 @@ import {
 	Color,
 	DirectionalLight,
 	DoubleSide,
-  Euler, //  bimrocket: Z_UP
 	FileLoader,
 	FrontSide,
 	Group,
@@ -2403,7 +2402,13 @@ class GLTFParser {
 			};
 
       // bimrocket: Z_UP
-      result.scene.quaternion.setFromEuler( new Euler( Math.PI / 2, 0, 0 ) );
+      const rotMatrix = new Matrix4().makeRotationX( Math.PI / 2 );
+      for ( let child of result.scene.children ) {
+
+        child.updateMatrix();
+        child.matrix.premultiply( rotMatrix ); // rotate object 90 deg
+        child.matrix.decompose( child.position, child.quaternion, child.scale );
+      }
 
 			addUnknownExtensionsToUserData( extensions, result, json );
 

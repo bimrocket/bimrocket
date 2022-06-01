@@ -436,19 +436,7 @@ class GLTFWriter {
 
 		}
 
-    // bimrocket: save y up
-    if ( input instanceof Object3D ) {
-      let matrix = input.matrix;
-      input.matrix = matrix.clone().multiply(
-        new Matrix4().makeRotationX( -Math.PI / 2 ));
-		  this.processInput( input );
-      input.matrix = matrix;
-
-    } else {
-
-		  this.processInput( input );
-
-    }
+		this.processInput( input );
 
 		await Promise.all( this.pending );
 
@@ -2042,7 +2030,16 @@ class GLTFWriter {
 
 			if ( child.visible || options.onlyVisible === false ) {
 
+        // bimrocket, save matrix
+        let matrix = child.matrix;
+        // bimrocket, rotate object -90 deg
+        child.matrix = new Matrix4().makeRotationX( -Math.PI / 2 )
+          .multiply(matrix);
+
 				const nodeIndex = this.processNode( child );
+
+        // bimrocket, restore matrix
+        child.matrix = matrix;
 
 				if ( nodeIndex !== null ) nodes.push( nodeIndex );
 

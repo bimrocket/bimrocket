@@ -95,6 +95,8 @@ class I18N
 
   get(key, ...args)
   {
+    if (typeof key !== "string") return "";
+
     let bundle = null;
     let index = key.indexOf(I18N.SEPARATOR);
     if (index === -1)

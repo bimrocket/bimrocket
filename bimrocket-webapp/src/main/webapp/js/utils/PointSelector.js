@@ -31,15 +31,12 @@ class PointSelector
 
     this.snap = null;
 
-    this.snapElem = document.createElement("div");
-    const snapElem = this.snapElem;
-    snapElem.style.position = "absolute";
-    snapElem.style.display = "none";
-    snapElem.style.width = this.snapSize + "px";
-    snapElem.style.height = this.snapSize + "px";
-    application.container.appendChild(snapElem);
+    this.auxiliaryPoints = []; // array of global Vector3
 
-    this._onPointerMove = this.onPointerMove.bind(this);
+    this.auxiliaryLines = []; // array of global Line3
+
+    this.touchPointerOffsetX = -48;
+    this.touchPointerOffsetY = -48;
 
     this.axisGuides =
     [
@@ -82,6 +79,17 @@ class PointSelector
     ];
 
     this.axisGuidesEnabled = false;
+
+    this.snapElem = document.createElement("div");
+    const snapElem = this.snapElem;
+    snapElem.style.position = "absolute";
+    snapElem.style.display = "none";
+    snapElem.style.width = this.snapSize + "px";
+    snapElem.style.height = this.snapSize + "px";
+    application.container.appendChild(snapElem);
+
+    this._onPointerMove = this.onPointerMove.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
   }
 
   activate()
@@ -89,6 +97,7 @@ class PointSelector
     const application = this.application;
     const container = application.container;
     container.addEventListener('pointermove', this._onPointerMove, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
   }
 
   deactivate()
@@ -96,7 +105,17 @@ class PointSelector
     const application = this.application;
     const container = application.container;
     container.removeEventListener('pointermove', this._onPointerMove, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
     this.snapElem.style.display = "none";
+  }
+
+  onPointerUp(event)
+  {
+    if (!this.isPointSelectionEvent(event)) return;
+    if (event.pointerType === "touch")
+    {
+      this.snapElem.style.display = "none";
+    }
   }
 
   onPointerMove(event)
@@ -112,6 +131,12 @@ class PointSelector
     pointerPosition.x = event.clientX - rect.left;
     pointerPosition.y = event.clientY - rect.top;
 
+    if (event.pointerType === "touch")
+    {
+      pointerPosition.x += this.touchPointerOffsetX;
+      pointerPosition.y += this.touchPointerOffsetY;
+    }
+
     let snap = this.findSnap(pointerPosition);
 
     if (snap)
@@ -120,6 +145,7 @@ class PointSelector
       snapElem.style.top = (snap.positionScreen.y - this.snapSize / 2) + "px";
       snapElem.style.display = "";
       snapElem.style.border = "1px solid white";
+      snapElem.style.borderRadius = "0";
       snapElem.style.backgroundColor = this.snapColors[snap.type];
       I18N.set(snapElem, "title", snap.label);
       application.i18n.update(snapElem);
@@ -128,7 +154,20 @@ class PointSelector
     }
     else
     {
-      snapElem.style.display = "none";
+      if (event.pointerType === "touch")
+      {
+        snapElem.style.left = (pointerPosition.x - this.snapSize / 2) + "px";
+        snapElem.style.top = (pointerPosition.y - this.snapSize / 2) + "px";
+        snapElem.style.display = "";
+        snapElem.style.border = "1px solid black";
+        snapElem.style.borderRadius = this.snapSize + "px";
+        snapElem.style.backgroundColor = "transparent";
+        snapElem.title = "";
+      }
+      else
+      {
+        snapElem.style.display = "none";
+      }
       this.snap = null;
     }
   }
@@ -376,9 +415,75 @@ class PointSelector
       return null;
     };
 
-    const findAxisGuideSnaps = () =>
+    const findSceneSnaps = snaps =>
     {
-      let guideSnaps = [];
+      baseObject.traverseVisible(object =>
+      {
+        if (object.facesVisible
+          && object instanceof Solid
+          && rayIntersectsObject(object))
+        {
+          findVertexSnaps(object, snaps);
+          findEdgeSnaps(object, snaps);
+          findFaceSnaps(object, snaps);
+        }
+      });
+    };
+
+    const findAuxiliaryPointSnaps = snaps =>
+    {
+      for (let auxiliaryPoint of this.auxiliaryPoints)
+      {
+        worldToScreen(auxiliaryPoint, positionScreen);
+
+        let distanceScreen = positionScreen.distanceTo(pointerPosition);
+        if (distanceScreen < this.snapDistance)
+        {
+          snaps.push({
+            label : "label.on_vertex",
+            type : PointSelector.VERTEX_SNAP,
+            object : null,
+            positionScreen : positionScreen.clone(),
+            distanceScreen : distanceScreen,
+            positionWorld : auxiliaryPoint.clone(),
+            distanceWorld : auxiliaryPoint.distanceTo(camera.position)
+          });
+        }
+      }
+    };
+
+    const findAuxiliaryLineSnaps = snaps =>
+    {
+      for (let auxiliaryLine of this.auxiliaryLines)
+      {
+        point1.copy(auxiliaryLine.start);
+        point2.copy(auxiliaryLine.end);
+
+        const ds = raycaster.ray.distanceSqToSegment(point1, point2,
+          null, positionWorld);
+        if (ds < 0.1)
+        {
+          worldToScreen(positionWorld, positionScreen);
+          let distanceScreen = positionScreen.distanceTo(pointerPosition);
+          if (distanceScreen < this.snapDistance)
+          {
+            snaps.push({
+              label : "label.on_edge",
+              type : PointSelector.EDGE_SNAP,
+              object : null,
+              positionScreen : positionScreen.clone(),
+              distanceScreen : distanceScreen,
+              positionWorld : positionWorld.clone(),
+              distanceWorld : positionWorld.distanceTo(camera.position),
+              line : new THREE.Line3(point1.clone(), point2.clone())
+            });
+          }
+        }
+      }
+    };
+
+    const findAxisGuideSnaps = snaps =>
+    {
       if (this.axisGuidesEnabled)
       {
         for (let guide of this.axisGuides)
@@ -394,7 +499,7 @@ class PointSelector
             let distanceScreen = positionScreen.distanceTo(pointerPosition);
             if (distanceScreen < this.snapDistance)
             {
-              guideSnaps.push({
+              snaps.push({
                 label : guide.label,
                 type : PointSelector.GUIDE_SNAP,
                 object : null,
@@ -408,7 +513,6 @@ class PointSelector
           }
         }
       }
-      return guideSnaps;
     };
 
     const filterHiddenSnaps = snaps =>
@@ -468,7 +572,9 @@ class PointSelector
       {
         for (let snap2 of snaps)
         {
-          if (snap1.object !== snap2.object)
+          if (snap1.object !== snap2.object
+              || snap1.object === null
+              || snap2.object === null)
           {
             if ((snap1.type === PointSelector.EDGE_SNAP
                 || snap1.type === PointSelector.GUIDE_SNAP)
@@ -573,22 +679,15 @@ class PointSelector
     {
       const snaps = [];
 
-      baseObject.traverseVisible(object =>
-      {
-        if (object.facesVisible
-          && object instanceof Solid
-          && rayIntersectsObject(object))
-        {
-          findVertexSnaps(object, snaps);
-          findEdgeSnaps(object, snaps);
-          findFaceSnaps(object, snaps);
-        }
-      });
+      findSceneSnaps(snaps);
+      findAuxiliaryPointSnaps(snaps);
+      findAuxiliaryLineSnaps(snaps);
+      findAxisGuideSnaps(snaps);
+
       return snaps;
     };
 
     let snaps = findSnaps();
-    snaps.push(...findAxisGuideSnaps());
     snaps = filterDuplicatedSnaps(snaps);
     snaps = addIntersectionSnaps(snaps);
     snaps = filterHiddenSnaps(snaps);

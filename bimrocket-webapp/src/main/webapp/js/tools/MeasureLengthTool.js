@@ -96,11 +96,18 @@ class MeasureLengthTool extends Tool
 
       axisMatrixWorld.setPosition(snap.positionWorld);
 
-      pointSelector.setAxisGuides(axisMatrixWorld, true);
-
       let vertex = snap.positionWorld;
       this.vertices.push(vertex);
       this.updateLineString();
+
+      pointSelector.auxiliaryPoints = this.vertices;
+      let count = this.vertices.length;
+      if (count > 1)
+      {
+        pointSelector.auxiliaryLines.push(
+          new THREE.Line3(this.vertices[count - 2], this.vertices[count - 1]));
+      }
+      pointSelector.setAxisGuides(axisMatrixWorld, true);
     }
     else
     {
@@ -110,6 +117,10 @@ class MeasureLengthTool extends Tool
 
   clearLineString()
   {
+    const pointSelector = this.application.pointSelector;
+    pointSelector.auxiliaryPoints = [];
+    pointSelector.auxiliaryLines = [];
+    pointSelector.clearAxisGuides();
     this.vertices = [];
     this.updateLineString();
   }
@@ -118,6 +129,9 @@ class MeasureLengthTool extends Tool
   {
     this.vertices.pop();
     this.updateLineString();
+    const pointSelector = this.application.pointSelector;
+    pointSelector.auxiliaryLines.pop();
+    pointSelector.clearAxisGuides();
   }
 
   updateLineString()

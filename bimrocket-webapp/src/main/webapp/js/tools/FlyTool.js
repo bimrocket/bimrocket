@@ -117,11 +117,11 @@ class FlyTool extends Tool
     this.setOptions(options);
 
     this.linearVelocity = 2; // meters/s
-    this.angularVelocity = THREE.Math.degToRad(20); // radians/s
+    this.angularVelocity = THREE.MathUtils.degToRad(20); // radians/s
     this.linearAccel = 5; // meters/s2
-    this.angularAccel = THREE.Math.degToRad(50); // radians/s2
+    this.angularAccel = THREE.MathUtils.degToRad(50); // radians/s2
     this.linearDecel = 2; // meters/s2
-    this.angularDecel = THREE.Math.degToRad(20); // radians/s2
+    this.angularDecel = THREE.MathUtils.degToRad(20); // radians/s2
 
     this.yaw = 0; // radians (0: north)
     this.pitch = 0; // radians

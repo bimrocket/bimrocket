@@ -460,7 +460,7 @@ class ObjectUtils
     let offset;
     if (camera instanceof THREE.PerspectiveCamera)
     {
-      let ymax = camera.near * Math.tan(THREE.Math.degToRad(camera.fov * 0.5));
+      let ymax = camera.near * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5));
   		let xmax = ymax * camera.aspect;
 
       let yoffset = boxHeight * camera.near / (2 * ymax);

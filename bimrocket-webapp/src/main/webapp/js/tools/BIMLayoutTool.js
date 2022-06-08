@@ -313,7 +313,7 @@ class BIMLayoutTool extends Tool
     {
       const euler = new THREE.Euler();
       euler.setFromRotationMatrix(siteObject.matrixWorld);
-      angle = THREE.Math.radToDeg(euler.z);
+      angle = THREE.MathUtils.radToDeg(euler.z);
     }
 
     if (view === 'top')
@@ -330,8 +330,8 @@ class BIMLayoutTool extends Tool
 
   pointCamera(phiDeg, tethaDeg)
   {
-    this.phi = THREE.Math.degToRad(phiDeg);
-    this.theta = THREE.Math.degToRad(tethaDeg);
+    this.phi = THREE.MathUtils.degToRad(phiDeg);
+    this.theta = THREE.MathUtils.degToRad(tethaDeg);
     this.updateCamera = true;
   }
 }

@@ -35,8 +35,8 @@ class PointSelector
 
     this.auxiliaryLines = []; // array of global Line3
 
-    this.touchPointerOffsetX = -48;
-    this.touchPointerOffsetY = -48;
+    this.touchPointerOffsetX = -40;
+    this.touchPointerOffsetY = -40;
 
     this.axisGuides =
     [
@@ -250,6 +250,9 @@ class PointSelector
     const point2 = new THREE.Vector3();
     const sphere = new THREE.Sphere();
 
+    const snapKeySet = new Set();
+    let snaps = [];
+
     let pointercc = new THREE.Vector2();
     pointercc.x = (pointerPosition.x / container.clientWidth) * 2 - 1;
     pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
@@ -281,22 +284,42 @@ class PointSelector
       return raycaster.ray.intersectsSphere(sphere);
     };
 
-    const findVertexSnaps = (object, snaps) =>
+    const isNewSnap = (type, snapPositionWorld) =>
     {
-      const matrixWorld = object.matrixWorld;
-      const geometry = object.geometry;
+      const k = 10000;
+      const snapKey = type + ":" +
+        (Math.round(snapPositionWorld.x * k) / k) + "," +
+        (Math.round(snapPositionWorld.y * k) / k) + "," +
+        (Math.round(snapPositionWorld.z * k) / k);
 
-      for (let vertex of geometry.vertices)
+      if (snapKeySet.has(snapKey))
       {
-        positionWorld.copy(vertex).applyMatrix4(matrixWorld);
-        worldToScreen(positionWorld, positionScreen);
+        return false;
+      }
+      else
+      {
+        snapKeySet.add(snapKey);
+        return true;
+      }
+    };
 
-        let distanceScreen = positionScreen.distanceTo(pointerPosition);
-        if (distanceScreen < this.snapDistance)
+    const addVertexSnap = (object, vertex, label, type) =>
+    {
+      positionWorld.copy(vertex);
+      if (object)
+      {
+        positionWorld.applyMatrix4(object.matrixWorld);
+      }
+      worldToScreen(positionWorld, positionScreen);
+
+      let distanceScreen = positionScreen.distanceTo(pointerPosition);
+      if (distanceScreen < this.snapDistance)
+      {
+        if (isNewSnap(type, positionWorld))
         {
           snaps.push({
-            label : "label.on_vertex",
-            type : PointSelector.VERTEX_SNAP,
+            label : label,
+            type : type,
             object : object,
             positionScreen : positionScreen.clone(),
             distanceScreen : distanceScreen,
@@ -304,25 +327,121 @@ class PointSelector
             distanceWorld : positionWorld.distanceTo(camera.position)
           });
         }
+        return true;
+      }
+      return false;
+    };
+
+    const addEdgeSnap = (object, vertex1, vertex2, label, type) =>
+    {
+      point1.copy(vertex1);
+      point2.copy(vertex2);
+
+      if (object)
+      {
+        const matrixWorld = object.matrixWorld;
+        point1.applyMatrix4(matrixWorld);
+        point2.applyMatrix4(matrixWorld);
+      }
+
+      const ds = raycaster.ray.distanceSqToSegment(point1, point2,
+          null, positionWorld);
+      if (ds < 0.1)
+      {
+        worldToScreen(positionWorld, positionScreen);
+        let distanceScreen = positionScreen.distanceTo(pointerPosition);
+        if (distanceScreen < this.snapDistance)
+        {
+          if (isNewSnap(type, positionWorld))
+          {
+            snaps.push({
+              label : label,
+              type : type,
+              object : object,
+              positionScreen : positionScreen.clone(),
+              distanceScreen : distanceScreen,
+              positionWorld : positionWorld.clone(),
+              distanceWorld : positionWorld.distanceTo(camera.position),
+              line : new THREE.Line3(point1.clone(), point2.clone())
+            });
+          }
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const addTriangleSnap = (object, face, vertex1, vertex2, vertex3,
+      label, type) =>
+    {
+      triangleWorld[0].copy(vertex1);
+      triangleWorld[1].copy(vertex2);
+      triangleWorld[2].copy(vertex3);
+
+      if (object)
+      {
+        for (let i = 0; i < 3; i++)
+        {
+          triangleWorld[i].applyMatrix4(object.matrixWorld);
+        }
+      }
+
+      if (raycaster.ray.intersectTriangle(
+          triangleWorld[0], triangleWorld[1], triangleWorld[2],
+          false, positionWorld) !== null)
+      {
+        if (isNewSnap(type, positionWorld))
+        {
+          let plane = new THREE.Plane();
+          plane.setFromCoplanarPoints(triangleWorld[0], triangleWorld[1],
+            triangleWorld[2]);
+
+          snaps.push({
+            label : label,
+            type : type,
+            object : object,
+            positionScreen : pointerPosition.clone(),
+            distanceScreen : 0,
+            positionWorld : positionWorld.clone(),
+            distanceWorld : positionWorld.distanceTo(camera.position),
+            face : face,
+            triangle : [ triangleWorld[0].clone(),
+              triangleWorld[1].clone(), triangleWorld[2].clone() ],
+            plane : plane
+          });
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const addSolidVertexSnaps = (object) =>
+    {
+      const vertices = object.geometry.vertices;
+
+      for (let vertex of vertices)
+      {
+        addVertexSnap(object, vertex, "label.on_vertex",
+          PointSelector.VERTEX_SNAP);
       }
     };
 
-    const findEdgeSnaps = (object, snaps) =>
+    const addSolidEdgeSnaps = (object) =>
     {
       const matrixWorld = object.matrixWorld;
       const geometry = object.geometry;
 
       for (let face of geometry.faces)
       {
-        findLoopEdgeSnaps(object, face.outerLoop, snaps);
+        addSolidLoopEdgeSnaps(object, face.outerLoop);
         for (let hole of face.holes)
         {
-          findLoopEdgeSnaps(object, hole, snaps);
+          addSolidLoopEdgeSnaps(object, hole);
         }
       }
     };
 
-    const findLoopEdgeSnaps = (object, loop, snaps) =>
+    const addSolidLoopEdgeSnaps = (object, loop) =>
     {
       const isManifold = object.geometry.isManifold;
       const vertices = object.geometry.vertices;
@@ -338,184 +457,94 @@ class PointSelector
         let vertex1 = vertices[index1];
         let vertex2 = vertices[index2];
 
-        point1.copy(vertex1).applyMatrix4(matrixWorld);
-        point2.copy(vertex2).applyMatrix4(matrixWorld);
+        addEdgeSnap(object, vertex1, vertex2, "label.on_edge",
+          PointSelector.EDGE_SNAP);
+      }
+    };
 
-        const ds = raycaster.ray.distanceSqToSegment(point1, point2,
-          null, positionWorld);
-        if (ds < 0.1)
+    const addSolidFaceSnaps = (object) =>
+    {
+      const matrixWorld = object.matrixWorld;
+      const geometry = object.geometry;
+      const vertices = geometry.vertices;
+
+      for (let face of geometry.faces)
+      {
+        for (let indices of face.getTriangles())
         {
-          worldToScreen(positionWorld, positionScreen);
-          let distanceScreen = positionScreen.distanceTo(pointerPosition);
-          if (distanceScreen < this.snapDistance)
+          if (addTriangleSnap(object, face,
+             vertices[indices[0]], vertices[indices[1]], vertices[indices[2]],
+            "label.on_face", PointSelector.FACE_SNAP))
           {
-            snaps.push({
-              label : "label.on_edge",
-              type : PointSelector.EDGE_SNAP,
-              object : object,
-              positionScreen : positionScreen.clone(),
-              distanceScreen : distanceScreen,
-              positionWorld : positionWorld.clone(),
-              distanceWorld : positionWorld.distanceTo(camera.position),
-              line : new THREE.Line3(point1.clone(), point2.clone())
-            });
+            break;
           }
         }
       }
     };
 
-    const findFaceSnaps = (object, snaps) =>
+    const addBufferGeometrySnaps = (object) =>
     {
       const matrixWorld = object.matrixWorld;
       const geometry = object.geometry;
 
-      for (let face of geometry.faces)
+      GeometryUtils.traverseBufferGeometryVertices(geometry, vertex =>
       {
-        if (rayIntersectFace(raycaster.ray, face, matrixWorld,
-            triangleWorld, positionWorld))
-        {
-          let plane = new THREE.Plane();
-          plane.setFromCoplanarPoints(triangleWorld[0], triangleWorld[1],
-            triangleWorld[2]);
-
-          snaps.push({
-            label : "label.on_face",
-            type : PointSelector.FACE_SNAP,
-            object : object,
-            positionScreen : pointerPosition.clone(),
-            distanceScreen : 0,
-            positionWorld : positionWorld.clone(),
-            distanceWorld : positionWorld.distanceTo(camera.position),
-            face : face,
-            plane : plane
-          });
-        }
-      }
+        addVertexSnap(object, vertex, "label.on_vertex",
+          PointSelector.VERTEX_SNAP);
+      });
     };
 
-    const rayIntersectFace = (ray, face, matrixWorld,
-      triangleWorld, positionWorld) =>
-    {
-      const vertices = face.geometry.vertices;
-      for (let indices of face.getTriangles())
-      {
-        for (let i = 0; i < 3; i++)
-        {
-          let vertex = vertices[indices[i]];
-          triangleWorld[i].copy(vertex).applyMatrix4(matrixWorld);
-        }
-
-        if (ray.intersectTriangle(
-            triangleWorld[0], triangleWorld[1], triangleWorld[2],
-            false, positionWorld) !== null)
-        {
-          return positionWorld;
-        }
-      }
-      return null;
-    };
-
-    const findSceneSnaps = snaps =>
+    const addSceneSnaps = () =>
     {
       baseObject.traverseVisible(object =>
       {
-        if (object.facesVisible
-          && object instanceof Solid
-          && rayIntersectsObject(object))
+        if (rayIntersectsObject(object))
         {
-          findVertexSnaps(object, snaps);
-          findEdgeSnaps(object, snaps);
-          findFaceSnaps(object, snaps);
+          if (object instanceof Solid && object.facesVisible)
+          {
+            addSolidVertexSnaps(object);
+            addSolidEdgeSnaps(object);
+            addSolidFaceSnaps(object);
+          }
+          else if (object.geometry instanceof THREE.BufferGeometry)
+          {
+            addBufferGeometrySnaps(object);
+          }
         }
       });
     };
 
-    const findAuxiliaryPointSnaps = snaps =>
+    const addAuxiliaryPointSnaps = () =>
     {
       for (let auxiliaryPoint of this.auxiliaryPoints)
       {
-        worldToScreen(auxiliaryPoint, positionScreen);
-
-        let distanceScreen = positionScreen.distanceTo(pointerPosition);
-        if (distanceScreen < this.snapDistance)
-        {
-          snaps.push({
-            label : "label.on_vertex",
-            type : PointSelector.VERTEX_SNAP,
-            object : null,
-            positionScreen : positionScreen.clone(),
-            distanceScreen : distanceScreen,
-            positionWorld : auxiliaryPoint.clone(),
-            distanceWorld : auxiliaryPoint.distanceTo(camera.position)
-          });
-        }
+        addVertexSnap(null, auxiliaryPoint, "label.on_vertex",
+          PointSelector.VERTEX_SNAP);
       }
     };
 
-    const findAuxiliaryLineSnaps = snaps =>
+    const addAuxiliaryLineSnaps = () =>
     {
       for (let auxiliaryLine of this.auxiliaryLines)
       {
-        point1.copy(auxiliaryLine.start);
-        point2.copy(auxiliaryLine.end);
-
-        const ds = raycaster.ray.distanceSqToSegment(point1, point2,
-          null, positionWorld);
-        if (ds < 0.1)
-        {
-          worldToScreen(positionWorld, positionScreen);
-          let distanceScreen = positionScreen.distanceTo(pointerPosition);
-          if (distanceScreen < this.snapDistance)
-          {
-            snaps.push({
-              label : "label.on_edge",
-              type : PointSelector.EDGE_SNAP,
-              object : null,
-              positionScreen : positionScreen.clone(),
-              distanceScreen : distanceScreen,
-              positionWorld : positionWorld.clone(),
-              distanceWorld : positionWorld.distanceTo(camera.position),
-              line : new THREE.Line3(point1.clone(), point2.clone())
-            });
-          }
-        }
+        addEdgeSnap(null, auxiliaryLine.start, auxiliaryLine.end,
+          "label.on_edge", PointSelector.EDGE_SNAP);
       }
     };
 
-    const findAxisGuideSnaps = snaps =>
+    const addAxisGuideSnaps = () =>
     {
       if (this.axisGuidesEnabled)
       {
         for (let guide of this.axisGuides)
         {
-          let startPoint = guide.startPoint;
-          let endPoint = guide.endPoint;
-
-          const ds = raycaster.ray.distanceSqToSegment(startPoint, endPoint,
-            null, positionWorld);
-          if (ds < 0.1)
-          {
-            worldToScreen(positionWorld, positionScreen);
-            let distanceScreen = positionScreen.distanceTo(pointerPosition);
-            if (distanceScreen < this.snapDistance)
-            {
-              snaps.push({
-                label : guide.label,
-                type : PointSelector.GUIDE_SNAP,
-                object : null,
-                positionScreen : positionScreen.clone(),
-                distanceScreen : distanceScreen,
-                positionWorld : positionWorld.clone(),
-                distanceWorld : positionWorld.distanceTo(camera.position),
-                line : new THREE.Line3(startPoint.clone(), endPoint.clone())
-              });
-            }
-          }
+          addEdgeSnap(null, guide.startPoint, guide.endPoint,
+            guide.label, PointSelector.GUIDE_SNAP);
         }
       }
     };
 
-    const filterHiddenSnaps = snaps =>
+    const filterHiddenSnaps = () =>
     {
       // find the first face snap (closest to observer)
       let firstFaceSnap = null;
@@ -531,7 +560,7 @@ class PointSelector
           }
         }
       }
-      if (firstFaceSnap === null) return snaps;
+      if (firstFaceSnap === null) return;
 
       // discard snaps behind the plane of the first face snap
       const visibleSnaps = [];
@@ -544,26 +573,10 @@ class PointSelector
           visibleSnaps.push(snap);
         }
       }
-      return visibleSnaps;
+      snaps = visibleSnaps;
     };
 
-    const filterDuplicatedSnaps = snaps =>
-    {
-      const map = new Map();
-      const k = 10000;
-      for (let snap of snaps)
-      {
-        let key = snap.type + ":" +
-        (Math.round(snap.positionWorld.x * k) / k) + "," +
-        (Math.round(snap.positionWorld.y * k) / k) + "," +
-        (Math.round(snap.positionWorld.z * k) / k);
-
-        map.set(key, snap);
-      }
-      return Array.from(map.values());
-    };
-
-    const addIntersectionSnaps = snaps =>
+    const addIntersectionSnaps = () =>
     {
       const interSnaps = [];
       const ray = new THREE.Ray();
@@ -572,9 +585,10 @@ class PointSelector
       {
         for (let snap2 of snaps)
         {
-          if (snap1.object !== snap2.object
+          if (snap1 !== snap2 &&
+              (snap1.object !== snap2.object
               || snap1.object === null
-              || snap2.object === null)
+              || snap2.object === null))
           {
             if ((snap1.type === PointSelector.EDGE_SNAP
                 || snap1.type === PointSelector.GUIDE_SNAP)
@@ -584,17 +598,17 @@ class PointSelector
               let edgeSnap = snap1;
               let faceSnap = snap2;
               let plane = faceSnap.plane;
-              let face = faceSnap.face;
-              let matrixWorld = faceSnap.object.matrixWorld;
-
               if (plane.intersectsLine(edgeSnap.line))
               {
                 vector.subVectors(edgeSnap.line.end, edgeSnap.line.start);
                 vector.normalize();
                 ray.set(edgeSnap.line.start, vector);
 
-                if (rayIntersectFace(ray, face,
-                    matrixWorld, triangleWorld, positionWorld))
+                if (ray.intersectTriangle(
+                  faceSnap.triangle[0],
+                  faceSnap.triangle[1],
+                  faceSnap.triangle[2],
+                  false, positionWorld) !== null)
                 {
                   worldToScreen(positionWorld, positionScreen);
                   let distanceScreen = positionScreen.distanceTo(pointerPosition);
@@ -656,11 +670,10 @@ class PointSelector
           }
         }
       }
-      interSnaps.push(...snaps);
-      return interSnaps;
+      snaps.push(...interSnaps);
     };
 
-    const selectRelevantSnap = snaps =>
+    const selectRelevantSnap = () =>
     {
       let selectedSnap = snaps[0];
       for (let snap of snaps)
@@ -675,23 +688,14 @@ class PointSelector
       return selectedSnap;
     };
 
-    const findSnaps = () =>
-    {
-      const snaps = [];
+    addSceneSnaps();
+    addAuxiliaryPointSnaps();
+    addAuxiliaryLineSnaps();
+    addAxisGuideSnaps();
+    addIntersectionSnaps();
+    filterHiddenSnaps();
 
-      findSceneSnaps(snaps);
-      findAuxiliaryPointSnaps(snaps);
-      findAuxiliaryLineSnaps(snaps);
-      findAxisGuideSnaps(snaps);
-
-      return snaps;
-    };
-
-    let snaps = findSnaps();
-    snaps = filterDuplicatedSnaps(snaps);
-    snaps = addIntersectionSnaps(snaps);
-    snaps = filterHiddenSnaps(snaps);
-    return selectRelevantSnap(snaps);
+    return selectRelevantSnap();
   }
 
   isPointSelectionEvent(event)

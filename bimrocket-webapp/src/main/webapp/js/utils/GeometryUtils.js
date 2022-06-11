@@ -190,6 +190,20 @@ class GeometryUtils
     }
   }
 
+  static traverseBufferGeometryVertices(geometry, callback)
+  {
+    const position = this._vector1;
+    const positions = geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3)
+    {
+      position.x = positions[i];
+      position.y = positions[i + 1];
+      position.z = positions[i + 2];
+
+      callback(position);
+    }
+  }
+
   static getBufferGeometryVertices(geometry)
   {
     const positions = geometry.attributes.position.array;

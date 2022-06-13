@@ -5,7 +5,9 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
+import { PointSelector } from "../utils/PointSelector.js";
 import * as THREE from "../lib/three.module.js";
 
 class MoveTool extends Tool
@@ -15,19 +17,23 @@ class MoveTool extends Tool
     super(application);
     this.name = "move";
     this.label = "tool.move.label";
-    this.help = "tool.move.help";
     this.className = "move";
+    this.snapDistance = 0.1;
+    this.snapPercent = 0.3;
     this.setOptions(options);
 
     // internals
-    this.objects = [];
-    this.initialPoint = new THREE.Vector3();
-    this.initialPosition = new THREE.Vector3();
-    this.vector = new THREE.Vector3();
-    this.inverseMatrixWorld = new THREE.Matrix4();
+    this.stage = 0;
+    this.anchorPointWorld = new THREE.Vector3();
+    this.targetPointWorld = new THREE.Vector3();
+    this.offset = 0;
+
+    this.moveVectorWorld = new THREE.Vector3();
+    this.moveVector = new THREE.Vector3();
+    this.matrixPosition = new THREE.Vector3();
+    this.matrix = new THREE.Matrix4();
 
     this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerMove = this.onPointerMove.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
 
@@ -36,10 +42,37 @@ class MoveTool extends Tool
 
   createPanel()
   {
-    this.panel = this.application.createPanel(this.label, "left");
-    this.panel.preferredHeight = 120;
+    this.panel = this.application.createPanel(this.label, "left", "panel_move");
+    this.panel.preferredHeight = 140;
 
-    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
+    this.helpElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.helpElem);
+
+    this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
+      "move_offset", "label.offset", 0);
+    this.offsetInputElem.step = this.snapDistance;
+    this.offsetInputElem.addEventListener("change", event =>
+    {
+      this.offset = this.offsetInputElem.value;
+      this.previewOffset();
+    }, false);
+
+    this.buttonsPanel = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.buttonsPanel);
+
+    this.acceptButton = Controls.addButton(this.buttonsPanel,
+      "cancel_section", "button.accept", event =>
+    {
+      this.offset = this.offsetInputElem.value;
+      this.moveObjects();
+      this.setStage(0);
+    });
+
+    this.cancelButton = Controls.addButton(this.buttonsPanel,
+      "cancel_section", "button.cancel", event =>
+    {
+      this.setStage(0);
+    });
   }
 
   activate()
@@ -47,7 +80,9 @@ class MoveTool extends Tool
     this.panel.visible = true;
     const container = this.application.container;
     container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('pointerdown', this._onPointerDown, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
+    container.addEventListener('pointermove', this._onPointerMove, false);
+    this.setStage(this.stage);
   }
 
   deactivate()
@@ -55,89 +90,197 @@ class MoveTool extends Tool
     this.panel.visible = false;
     const container = this.application.container;
     container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('pointerdown', this._onPointerDown, false);
-  }
-
-  onPointerDown(event)
-  {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
-    const application = this.application;
-
-    this.objects = application.selection.roots;
-    if (this.objects.length > 0)
-    {
-      let pointerPosition = this.getEventPosition(event);
-      const scene = application.scene;
-      let intersect = this.intersect(pointerPosition, scene, true);
-      if (intersect !== null)
-      {
-        this.initialPoint.copy(intersect.point);
-        let object = this.objects[0];
-
-        this.initialPosition.copy(object.position);
-        const container = this.application.container;
-        container.addEventListener('pointermove', this._onPointerMove, false);
-        container.addEventListener('pointerup', this._onPointerUp, false);
-
-        object.parent.updateMatrix();
-        object.parent.updateMatrixWorld(true);
-        this.inverseMatrixWorld.copy(object.parent.matrixWorld).invert();
-      }
-    }
+    container.removeEventListener('pointerup', this._onPointerUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    this.application.pointSelector.deactivate();
   }
 
   onPointerMove(event)
   {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
-    const application = this.application;
-
-    const pointerPosition = this.getEventPosition(event);
-    const scene = application.scene;
-    let intersect = this.intersect(pointerPosition, scene, true);
-    if (intersect !== null)
+    if (this.stage === 1)
     {
-      let v0 = new THREE.Vector3();
-      v0.copy(this.initialPoint);
-      v0.applyMatrix4(this.inverseMatrixWorld);
+      const application = this.application;
+      const pointSelector = application.pointSelector;
+      if (!pointSelector.isPointSelectionEvent(event)) return;
 
-      let v1 = new THREE.Vector3();
-      v1.copy(intersect.point);
-      v1.applyMatrix4(this.inverseMatrixWorld);
+      event.preventDefault();
 
-      this.vector.subVectors(v1, v0);
-      for (let i = 0; i < this.objects.length; i++)
+      const snap = pointSelector.snap;
+      if (snap)
       {
-        let object = this.objects[i];
-        object.position.copy(this.initialPosition);
-        object.position.add(this.vector);
-        object.updateMatrix();
+        this.targetPointWorld.copy(snap.positionWorld);
+        const moveVectorWorld = this.moveVectorWorld;
+        moveVectorWorld.subVectors(this.targetPointWorld, this.anchorPointWorld);
+
+        this.offset = moveVectorWorld.length();
+        if (snap.type === PointSelector.GUIDE_SNAP)
+        {
+          let divisions = this.offset / this.snapDistance;
+          let intDivisions = Math.round(divisions);
+          let decimals = divisions - intDivisions;
+          if (decimals >= -this.snapPercent && decimals <= this.snapPercent)
+          {
+            const k = 1000000;
+            this.offset = Math.round(k * intDivisions * this.snapDistance) / k;
+          }
+        }
+        this.previewOffset();
+        this.offsetInputElem.value = this.offset;
       }
-      application.notifyObjectsChanged(this.objects, this);
+      else
+      {
+        const matrix = this.matrix.identity();
+        application.transformSelectionLines(matrix);
+        this.offsetInputElem.value = null;
+      }
     }
   }
 
   onPointerUp(event)
   {
-    if (!this.isCanvasEvent(event)) return;
+    const application = this.application;
+    const pointSelector = application.pointSelector;
+    if (!pointSelector.isPointSelectionEvent(event)) return;
 
-    this.object = null;
+    const snap = pointSelector.snap;
+    if (snap)
+    {
+      if (this.stage === 0)
+      {
+        this.anchorPointWorld.copy(snap.positionWorld);
 
-    var container = this.application.container;
-      container.removeEventListener('pointermove', this._onPointerMove, false);
-      container.removeEventListener('pointerup', this._onPointerUp, false);
+        if (snap.object)
+        {
+          let axisMatrixWorld = this.matrix;
+          if (snap.object)
+          {
+            axisMatrixWorld.copy(snap.object.matrixWorld);
+          }
+          else
+          {
+            axisMatrixWorld.identity();
+          }
+          axisMatrixWorld.setPosition(this.anchorPointWorld);
+          pointSelector.setAxisGuides(axisMatrixWorld, true);
+        }
+        this.setStage(1);
+      }
+      else if (this.stage === 1)
+      {
+        if (event.button === 0 || event.pointerType === "touch")
+        {
+          this.setStage(2);
+        }
+        else
+        {
+          this.moveObjects();
+          this.setStage(0);
+        }
+      }
+      else if (this.stage === 2)
+      {
+        this.moveObjects();
+        this.setStage(0);
+      }
+    }
+    else
+    {
+      this.setStage(0);
+    }
   }
 
   onContextMenu(event)
   {
-    if (!this.isCanvasEvent(event)) return;
+    const pointSelector = this.application.pointSelector;
+    if (!pointSelector.isPointSelectionEvent(event)) return;
 
     event.preventDefault();
+  }
+
+  setStage(stage)
+  {
+    this.stage = stage;
+
+    const application = this.application;
+
+    switch (stage)
+    {
+      case 0: // set anchor point
+        this.offset = 0;
+        application.pointSelector.clearAxisGuides();
+        const matrix = this.matrix.identity();
+        application.transformSelectionLines(matrix);
+        application.pointSelector.activate();
+        this.offsetInputElem.parentElement.style.display = "none";
+        this.buttonsPanel.style.display = "none";
+        I18N.set(this.helpElem, "innerHTML", "tool.move.select_anchor_point");
+        application.i18n.update(this.helpElem);
+        break;
+
+      case 1: // set destination point
+        application.pointSelector.activate();
+        this.offsetInputElem.parentElement.style.display = "";
+        this.offsetInputElem.disabled = true;
+        this.buttonsPanel.style.display = "none";
+        I18N.set(this.helpElem, "innerHTML", "tool.move.select_destination_point");
+        application.i18n.update(this.helpElem);
+        break;
+
+      case 2: // set distance
+        application.pointSelector.deactivate();
+        this.offsetInputElem.parentElement.style.display = "";
+        this.offsetInputElem.disabled = false;
+        this.buttonsPanel.style.display = "";
+        I18N.set(this.helpElem, "innerHTML", "tool.move.edit_offset");
+        application.i18n.update(this.helpElem);
+        break;
+    }
+  }
+
+  moveObjects()
+  {
+    const application = this.application;
+    const moveVectorWorld = this.moveVectorWorld;
+    const moveVector = this.moveVector;
+    const matrixPosition = this.matrixPosition;
+
+    moveVectorWorld.subVectors(this.targetPointWorld, this.anchorPointWorld);
+    moveVectorWorld.normalize();
+    moveVectorWorld.multiplyScalar(this.offset);
+
+    const roots = application.selection.roots;
+    const inverseMatrixWorld = this.matrix;
+    for (let object of roots)
+    {
+      object.parent.updateMatrix();
+      object.parent.updateMatrixWorld();
+
+      inverseMatrixWorld.copy(object.parent.matrixWorld).invert();
+
+      moveVector.copy(moveVectorWorld);
+      moveVector.applyMatrix4(inverseMatrixWorld);
+
+      matrixPosition.setFromMatrixPosition(inverseMatrixWorld);
+      moveVector.sub(matrixPosition);
+
+      object.position.add(moveVector);
+      object.updateMatrix();
+    }
+    application.notifyObjectsChanged(roots);
+  }
+
+  previewOffset()
+  {
+    const application = this.application;
+    const moveVectorWorld = this.moveVectorWorld;
+
+    moveVectorWorld.subVectors(this.targetPointWorld, this.anchorPointWorld);
+    moveVectorWorld.normalize();
+    moveVectorWorld.multiplyScalar(this.offset);
+
+    const matrix = this.matrix.makeTranslation(
+      moveVectorWorld.x, moveVectorWorld.y, moveVectorWorld.z);
+    application.transformSelectionLines(matrix);
   }
 }
 

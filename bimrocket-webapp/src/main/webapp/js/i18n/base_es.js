@@ -116,7 +116,9 @@ export const translations =
   "tool.paint.label" : "Pintar",
 
   "tool.move.label" : "Mover",
-  "tool.move.help" : "Arrastar con botón izquierdo del ratón para mover",
+  "tool.move.select_anchor_point" : "Selecciona punto de anclaje.",
+  "tool.move.select_destination_point" : "Selecciona punto de destino. Usa el botón derecho del ratón para mover.",
+  "tool.move.edit_offset" : "Edita desplazamiento o pulsa sobre la pantalla para mover.",
 
   "tool.rotate.label" : "Rotar",
   "tool.rotate.help" : "Arrastar con botón izquierdo del ratón para rotar",
@@ -273,6 +275,8 @@ export const translations =
 
   "label.section_color" : "Color de sección:",
   "label.smooth_angle" : "Ángulo de suavizado:",
+
+  "label.offset" : "Desplazamiento:",
 
   "label.name" : "Nombre:",
   "label.format" : "Formato:",

@@ -81,6 +81,8 @@ class Application
     this.selectionPaintMode = Application.EDGES_SELECTION;
     this._showDeepSelection = null;
     this._showLocalAxes = null;
+    this._selectionLines = null;
+    this._axisLines = null;
 
     this.clock = new THREE.Clock();
 
@@ -95,8 +97,6 @@ class Application
       animation : [],
       tool : []
     };
-    this._selectionLines = null;
-    this._axisLines = null;
 
     this.loadingManager = new THREE.LoadingManager();
     const loadingManager = this.loadingManager;
@@ -700,6 +700,17 @@ class Application
       }
       this._selectionLines = linesGroup;
       this.overlays.add(this._selectionLines);
+      this.repaint();
+    }
+  }
+
+  transformSelectionLines(matrix)
+  {
+    if (this._selectionLines !== null)
+    {
+      const lines = this._selectionLines;
+      matrix.decompose(lines.position, lines.quaternion, lines.scale);
+      lines.updateMatrix();
       this.repaint();
     }
   }

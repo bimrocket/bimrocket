@@ -116,7 +116,9 @@ export const translations =
   "tool.paint.label" : "Pinta",
 
   "tool.move.label" : "Mou",
-  "tool.move.help" : "Arrossega amb botó esquerre del ratolí per moure",
+  "tool.move.select_anchor_point" : "Selecciona punt d'ancoratge.",
+  "tool.move.select_destination_point" : "Selecciona punt de destinació. Utilitza el botó dret del ratolí per moure.",
+  "tool.move.edit_offset" : "Edita desplaçament o clica la pantalla per moure.",
 
   "tool.rotate.label" : "Rota",
   "tool.rotate.help" : "Arrossega amb botó esquerre del ratolí per rotar",
@@ -273,6 +275,8 @@ export const translations =
 
   "label.section_color" : "Color de secció:",
   "label.smooth_angle" : "Angle de suavitzat:",
+
+  "label.offset" : "Desplaçament:",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

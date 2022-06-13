@@ -121,7 +121,7 @@ class SectionTool extends Tool
     }, false);
 
     this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
-      "section_offset", "Offset:", 0);
+      "section_offset", "label.offset", 0);
     this.offsetElem = this.offsetInputElem.parentElement;
     this.offsetElem.style.display = "none";
 

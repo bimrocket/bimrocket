@@ -416,7 +416,7 @@ div.option_block input[name=decimals]
 
 .panel_section > .body > div
 {
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .panel_section input[name=section_color]
@@ -429,6 +429,17 @@ div.option_block input[name=decimals]
 {
   margin-left: 4px;
   width: 80px;
+}
+
+.panel_move > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_move input[name=move_offset]
+{
+  margin-left: 4px;
+  width: 150px;
 }
 
 .script_box

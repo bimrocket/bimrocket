@@ -24,6 +24,8 @@ class PointSelector
   {
     this.application = application;
 
+    this.activated = false;
+
     this.snapDistance = 16;
     this.snapSize = 8;
 
@@ -94,19 +96,27 @@ class PointSelector
 
   activate()
   {
-    const application = this.application;
-    const container = application.container;
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    container.addEventListener('pointerup', this._onPointerUp, false);
+    if (!this.activated)
+    {
+      const application = this.application;
+      const container = application.container;
+      container.addEventListener('pointermove', this._onPointerMove, false);
+      container.addEventListener('pointerup', this._onPointerUp, false);
+      this.activated = true;
+    }
   }
 
   deactivate()
   {
-    const application = this.application;
-    const container = application.container;
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-    this.snapElem.style.display = "none";
+    if (this.activated)
+    {
+      const application = this.application;
+      const container = application.container;
+      container.removeEventListener('pointermove', this._onPointerMove, false);
+      container.removeEventListener('pointerup', this._onPointerUp, false);
+      this.snapElem.style.display = "none";
+      this.activated = false;
+    }
   }
 
   onPointerUp(event)
@@ -177,18 +187,18 @@ class PointSelector
     const scale = axisMatrixWorld.getMaxScaleOnAxis();
     const factor = 1 / scale;
 
-    let scaleMatrix = new THREE.Matrix4();
-    scaleMatrix.makeScale(factor, factor, factor);
-    axisMatrixWorld.multiply(scaleMatrix);
+    let scaledAxisMatrixWorld = new THREE.Matrix4();
+    scaledAxisMatrixWorld.makeScale(factor, factor, factor);
+    scaledAxisMatrixWorld.premultiply(axisMatrixWorld);
 
     let k = 1000;
 
     for (let guide of this.axisGuides)
     {
       guide.startPoint.copy(guide.startLocal)
-        .multiplyScalar(k).applyMatrix4(axisMatrixWorld);
+        .multiplyScalar(k).applyMatrix4(scaledAxisMatrixWorld);
       guide.endPoint.copy(guide.endLocal)
-        .multiplyScalar(k).applyMatrix4(axisMatrixWorld);
+        .multiplyScalar(k).applyMatrix4(scaledAxisMatrixWorld);
     }
     this.axisGuidesEnabled = true;
 

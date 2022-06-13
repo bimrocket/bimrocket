@@ -116,7 +116,9 @@ export const translations =
   "tool.paint.label" : "Paint",
 
   "tool.move.label" : "Move",
-  "tool.move.help" : "Drag left mouse button to move",
+  "tool.move.select_anchor_point" : "Select anchor point.",
+  "tool.move.select_destination_point" : "Select destination point. Use mouse right button to move.",
+  "tool.move.edit_offset" : "Edit offset or tap on screen to move.",
 
   "tool.rotate.label" : "Rotate",
   "tool.rotate.help" : "Drag left mouse button to rotate",
@@ -273,6 +275,8 @@ export const translations =
 
   "label.section_color" : "Section color:",
   "label.smooth_angle" : "Smooth angle:",
+
+  "label.offset" : "Offset:",
 
   "label.name" : "Name:",
   "label.format" : "Format:",

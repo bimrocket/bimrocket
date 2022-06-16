@@ -174,20 +174,26 @@ class GeometryUtils
     return v21.multiplyScalar(t).add(v1);
   }
 
-  static orthogonalVector(vector)
+  static orthogonalVector(vector, orthoVector)
   {
+    if (!(orthoVector instanceof THREE.Vector3))
+    {
+      orthoVector = new THREE.Vector3();
+    }
+
     if (Math.abs(vector.x) > 0.1)
     {
-      return new THREE.Vector3(vector.y, -vector.x, vector.z);
+      orthoVector.set(vector.y, -vector.x, vector.z);
     }
     else if (Math.abs(vector.y) > 0.1)
     {
-      return new THREE.Vector3(-vector.y, vector.x, vector.z);
+      orthoVector.set(-vector.y, vector.x, vector.z);
     }
-    else // (0, 0, z)
+    else // (~0, ~0, z)
     {
-      return new THREE.Vector3(-vector.z, 0, 0);
+      orthoVector.set(-vector.z, vector.y, vector.x);
     }
+    return orthoVector.cross(vector);
   }
 
   static traverseBufferGeometryVertices(geometry, callback)

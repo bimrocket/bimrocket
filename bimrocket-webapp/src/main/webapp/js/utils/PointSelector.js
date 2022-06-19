@@ -40,6 +40,8 @@ class PointSelector
     this.touchPointerOffsetX = -40;
     this.touchPointerOffsetY = -40;
 
+    this.excludeSelection = false;
+
     this.axisGuides =
     [
       {
@@ -506,22 +508,35 @@ class PointSelector
 
     const addSceneSnaps = () =>
     {
-      baseObject.traverseVisible(object =>
+      const traverse = object =>
       {
-        if (rayIntersectsObject(object))
+        if (object.visible &&
+            (!this.excludeSelection
+            || !this.application.selection.contains(object)))
         {
-          if (object instanceof Solid && object.facesVisible)
+          if (rayIntersectsObject(object))
           {
-            addSolidVertexSnaps(object);
-            addSolidEdgeSnaps(object);
-            addSolidFaceSnaps(object);
+            if (object instanceof Solid && object.facesVisible)
+            {
+              addSolidVertexSnaps(object);
+              addSolidEdgeSnaps(object);
+              addSolidFaceSnaps(object);
+            }
+            else if (object.geometry instanceof THREE.BufferGeometry)
+            {
+              addBufferGeometrySnaps(object);
+            }
           }
-          else if (object.geometry instanceof THREE.BufferGeometry)
+          if (!(object instanceof Solid))
           {
-            addBufferGeometrySnaps(object);
+            for (let child of object.children)
+            {
+              traverse(child);
+            }
           }
         }
-      });
+      };
+      traverse(baseObject);
     };
 
     const addAuxiliaryPointSnaps = () =>

@@ -91,11 +91,21 @@ class Inspector extends Panel
     application.addEventListener("scene", event =>
     {
       if (event.type === "nodeChanged" &&
-        application.selection.size === 1 &&
+        event.objects.length === 1 &&
         event.objects.includes(application.selection.object) &&
         event.source !== this)
       {
-        this.showProperties(application.selection.object);
+        if (event.properties instanceof Array)
+        {
+          for (let propertyName of event.properties)
+          {
+            this.updateProperty(event.objects[0], propertyName);
+          }
+        }
+        else
+        {
+          this.showProperties(application.selection.object);
+        }
       }
     });
     this.title = "tool.inspector.label";
@@ -123,15 +133,14 @@ class Inspector extends Panel
       }
       // object
       let objListElem = this.createSection(this.objectSectionName, topListElem);
-      this.createReadOnlyProperty(objListElem, "id", object.id);
-      for (var propertyName in object)
+      this.createReadOnlyProperty(objListElem, object, "id", object);
+      for (let propertyName in object)
       {
         if (this.isSupportedProperty(propertyName))
         {
           if (this.isReadOnlyProperty(propertyName))
           {
-            this.createReadOnlyProperty(objListElem,
-              propertyName, object[propertyName]);
+            this.createReadOnlyProperty(objListElem, object, propertyName);
           }
           else
           {
@@ -166,9 +175,8 @@ class Inspector extends Panel
                 || material === Solid.EdgeMaterial
                 || material === Solid.FaceMaterial)
             {
-              let propertyValue = material[propertyName];
               this.createReadOnlyProperty(materialListElem,
-                propertyName, propertyValue);
+                material, propertyName);
             }
             else
             {
@@ -199,8 +207,8 @@ class Inspector extends Panel
       let builder = object.builder;
       if (builder)
       {
-        this.createReadOnlyProperty(builderListElem,
-           "type", builder.constructor.name);
+        this.createReadOnlyProperty(builderListElem, builder.constructor,
+          "type", builder.constructor.name);
 
         for (let propertyName in builder)
         {
@@ -240,27 +248,25 @@ class Inspector extends Panel
         let geomListElem = this.createSection(this.geometrySectionName,
           topListElem);
 
-        this.createReadOnlyProperty(geomListElem, "id", geometry.id);
-        this.createReadOnlyProperty(geomListElem, "uuid", geometry.uuid);
-        this.createReadOnlyProperty(geomListElem, "type", geometry.type);
+        this.createReadOnlyProperty(geomListElem, geometry, "id");
+        this.createReadOnlyProperty(geomListElem, geometry, "uuid");
+        this.createReadOnlyProperty(geomListElem, geometry, "type");
 
         if (geometry instanceof SolidGeometry)
         {
-          this.createReadOnlyProperty(geomListElem, "vertices",
+          this.createReadOnlyProperty(geomListElem, geometry, "vertices",
             geometry.vertices.length);
-          this.createReadOnlyProperty(geomListElem, "faces",
+          this.createReadOnlyProperty(geomListElem, geometry, "faces",
             geometry.faces.length);
-          this.createReadOnlyProperty(geomListElem, "isManifold",
-            geometry.isManifold);
-          this.createReadOnlyProperty(geomListElem, "smoothAngle",
-            geometry.smoothAngle);
+          this.createReadOnlyProperty(geomListElem, geometry, "isManifold");
+          this.createReadOnlyProperty(geomListElem, geometry, "smoothAngle");
         }
         else if (geometry instanceof THREE.BufferGeometry)
         {
           for (let name in geometry.attributes)
           {
-            this.createReadOnlyProperty(geomListElem, name,
-              geometry.attributes[name].array.length);
+            this.createReadOnlyProperty(geomListElem, geometry.attributes[name],
+              name, geometry.attributes[name].array.length);
           }
         }
       }
@@ -324,9 +330,9 @@ class Inspector extends Panel
             [this.createStartControllerAction(controller),
              this.createStopControllerAction(controller),
              this.createRemoveControllerAction(controller)]);
-          this.createReadOnlyProperty(controlListElem, "type",
+          this.createReadOnlyProperty(controlListElem, controller, "type",
             controller.constructor.name);
-          this.createReadOnlyProperty(controlListElem, "started",
+          this.createReadOnlyProperty(controlListElem, controller, "started",
             controller.isStarted());
 
           for (let propertyName in controller)
@@ -428,25 +434,33 @@ class Inspector extends Panel
     return listElem;
   }
 
-  createReadOnlyProperty(parentElem, propertyName, propertyValue)
+  createReadOnlyProperty(parentElem, object, propertyName,
+    propertyValue = object[propertyName])
   {
-    this.createProperty(parentElem, propertyName, propertyValue);
+    this.createProperty(parentElem, object, propertyName, propertyValue);
   }
 
   createWriteableProperty(parentElem, object, propertyName, renderer, editor)
   {
     let propertyValue = object[propertyName];
-    this.createProperty(parentElem, propertyName, propertyValue,
-      object, renderer, editor);
+
+    editor = editor || this.getEditor(propertyValue);
+
+    this.createProperty(parentElem, object, propertyName, propertyValue,
+      renderer, editor);
   };
 
-  createProperty(parentElem, propertyName, propertyValue,
-    object = null, renderer = null, editor = null)
+  createProperty(parentElem, object, propertyName, propertyValue,
+    renderer = null, editor = null)
   {
     renderer = renderer || this.getRenderer(propertyValue);
     if (renderer)
     {
       let propElem = document.createElement('li');
+      if (object instanceof THREE.Object3D)
+      {
+        propElem.id = "inspector_" + propertyName;
+      }
       propElem.className = "property " + renderer.getClassName(propertyValue);
       parentElem.appendChild(propElem);
 
@@ -455,15 +469,10 @@ class Inspector extends Panel
       labelElem.className = 'label';
       propElem.appendChild(labelElem);
 
-      if (object)
-      {
-        editor = editor || this.getEditor(propertyValue);
-      }
+      this.createValueElem(propElem, object, propertyName, propertyValue,
+        renderer, editor);
 
-      this.createValueElem(propElem, propertyValue, renderer, editor,
-        object, propertyName);
-
-      if (object && editor)
+      if (editor)
       {
         labelElem.addEventListener("click", event =>
           this.startEdition(propElem, object, propertyName, renderer, editor),
@@ -473,8 +482,8 @@ class Inspector extends Panel
     }
   }
 
-  createValueElem(propElem, propertyValue, renderer, editor,
-    object, propertyName)
+  createValueElem(propElem, object, propertyName, propertyValue,
+    renderer, editor)
   {
     let valueElem = renderer.render(propertyValue);
     if (valueElem)
@@ -680,8 +689,9 @@ class Inspector extends Panel
 
     let propertyValue = this.edition.object[this.edition.propertyName];
 
-    this.createValueElem(propElem, propertyValue, this.edition.renderer,
-      this.edition.editor, this.edition.object, this.edition.propertyName);
+    this.createValueElem(propElem, this.edition.object,
+      this.edition.propertyName, propertyValue,
+      this.edition.renderer, this.edition.editor);
 
     this.clearEdition();
   }
@@ -693,6 +703,22 @@ class Inspector extends Panel
     this.edition.renderer = null;
     this.edition.editor = null;
     this.edition.propElem = null;
+  }
+
+  updateProperty(object, propertyName, renderer)
+  {
+    let propElem = document.getElementById("inspector_" + propertyName);
+    if (propElem)
+    {
+      propElem.removeChild(propElem.lastChild);
+
+      let propertyValue = object[propertyName];
+
+      renderer = renderer || this.getRenderer(propertyValue);
+
+      this.createValueElem(propElem, object, propertyName, propertyValue,
+        renderer);
+    }
   }
 
   isSupportedProperty(propertyName)

@@ -1213,14 +1213,21 @@ class Application
     }
   }
 
-  notifyObjectsChanged(objects, source = this, type = "nodeChanged")
+  notifyObjectsChanged(objects, source = this, type = "nodeChanged",
+    properties = null) // properties: array of property names or null
   {
     if (objects instanceof THREE.Object3D)
     {
       objects = [objects];
     }
 
-    let sceneEvent = { type: type, objects: objects, source : source };
+    let sceneEvent =
+    {
+      type: type,
+      source : source,
+      objects: objects,
+      properties: properties
+    };
     this.notifyEventListeners("scene", sceneEvent);
   }
 

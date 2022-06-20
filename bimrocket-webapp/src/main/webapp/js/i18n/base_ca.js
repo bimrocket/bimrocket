@@ -116,12 +116,16 @@ export const translations =
   "tool.paint.label" : "Pinta",
 
   "tool.move.label" : "Mou",
-  "tool.move.select_anchor_point" : "Selecciona punt d'ancoratge.",
-  "tool.move.select_destination_point" : "Selecciona punt de destinació. Utilitza el botó dret del ratolí per moure.",
-  "tool.move.edit_offset" : "Edita desplaçament o clica la pantalla per moure.",
+  "tool.move.select_anchor_point" : "Selecciona el punt d'ancoratge.",
+  "tool.move.select_destination_point" : "Selecciona el punt de destinació.",
+  "tool.move.edit_offset" : "Edita desplaçament o selecciona nou punt d'ancoratge.",
 
   "tool.rotate.label" : "Rota",
-  "tool.rotate.help" : "Arrossega amb botó esquerre del ratolí per rotar",
+  "tool.rotate.select_first_point" : "Selecciona el primer punt de l'eix de rotació.",
+  "tool.rotate.select_second_point" : "Selecciona el segon punt de l'eix de rotació.",
+  "tool.rotate.select_anchor_point" : "Selecciona el punt d'ancoratge.",
+  "tool.rotate.select_destination_point" : "Selecciona el punt de destinació.",
+  "tool.rotate.edit_rotation" : "Edita la rotació o selecciona el primer punt de l'eix de rotació.",
 
   "tool.scale.label" : "Escala",
   "tool.scale.help" : "Arrossega amb botón esquerre del ratólí per escalar",
@@ -277,6 +281,7 @@ export const translations =
   "label.smooth_angle" : "Angle de suavitzat:",
 
   "label.offset" : "Desplaçament:",
+  "label.rotation" : "Rotació (graus):",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

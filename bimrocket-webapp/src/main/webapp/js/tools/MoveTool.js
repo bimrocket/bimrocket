@@ -12,6 +12,8 @@ import * as THREE from "../lib/three.module.js";
 
 class MoveTool extends Tool
 {
+  static CHANGED_PROPERTIES = ["position"];
+
   constructor(application, options)
   {
     super(application);
@@ -27,6 +29,7 @@ class MoveTool extends Tool
     this.anchorPointWorld = new THREE.Vector3();
     this.targetPointWorld = new THREE.Vector3();
     this.offset = 0;
+    this.objectPositions = new Map();
 
     this.moveVectorWorld = new THREE.Vector3();
     this.moveVector = new THREE.Vector3();
@@ -36,6 +39,15 @@ class MoveTool extends Tool
     this._onPointerUp = this.onPointerUp.bind(this);
     this._onPointerMove = this.onPointerMove.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
+
+    application.addEventListener("scene", event =>
+    {
+      if (event.type === "structureChanged"
+          && event.objects[0] instanceof THREE.Scene)
+      {
+        this.setStage(0);
+      }
+    });
 
     this.createPanel();
   }
@@ -54,7 +66,7 @@ class MoveTool extends Tool
     this.offsetInputElem.addEventListener("change", event =>
     {
       this.offset = this.offsetInputElem.value;
-      this.previewOffset();
+      this.moveObjects();
     }, false);
 
     this.buttonsPanel = document.createElement("div");
@@ -71,6 +83,8 @@ class MoveTool extends Tool
     this.cancelButton = Controls.addButton(this.buttonsPanel,
       "cancel_section", "button.cancel", event =>
     {
+      this.offset = 0;
+      this.moveObjects();
       this.setStage(0);
     });
   }
@@ -124,13 +138,11 @@ class MoveTool extends Tool
             this.offset = Math.round(k * intDivisions * this.snapDistance) / k;
           }
         }
-        this.previewOffset();
+        this.moveObjects();
         this.offsetInputElem.value = this.offset;
       }
       else
       {
-        const matrix = this.matrix.identity();
-        application.transformSelectionLines(matrix);
         this.offsetInputElem.value = null;
       }
     }
@@ -145,8 +157,9 @@ class MoveTool extends Tool
     const snap = pointSelector.snap;
     if (snap)
     {
-      if (this.stage === 0)
+      if (this.stage === 0 || this.stage === 2)
       {
+        this.objectPositions.clear();
         this.anchorPointWorld.copy(snap.positionWorld);
 
         if (snap.object)
@@ -167,20 +180,7 @@ class MoveTool extends Tool
       }
       else if (this.stage === 1)
       {
-        if (event.button === 0 || event.pointerType === "touch")
-        {
-          this.setStage(2);
-        }
-        else
-        {
-          this.moveObjects();
-          this.setStage(0);
-        }
-      }
-      else if (this.stage === 2)
-      {
-        this.moveObjects();
-        this.setStage(0);
+        this.setStage(2);
       }
     }
     else
@@ -208,8 +208,7 @@ class MoveTool extends Tool
       case 0: // set anchor point
         this.offset = 0;
         application.pointSelector.clearAxisGuides();
-        const matrix = this.matrix.identity();
-        application.transformSelectionLines(matrix);
+        application.pointSelector.excludeSelection = false;
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
@@ -219,6 +218,7 @@ class MoveTool extends Tool
 
       case 1: // set destination point
         application.pointSelector.activate();
+        application.pointSelector.excludeSelection = true;
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = true;
         this.buttonsPanel.style.display = "none";
@@ -227,7 +227,8 @@ class MoveTool extends Tool
         break;
 
       case 2: // set distance
-        application.pointSelector.deactivate();
+        application.pointSelector.activate();
+        application.pointSelector.excludeSelection = false;
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
@@ -263,24 +264,18 @@ class MoveTool extends Tool
       matrixPosition.setFromMatrixPosition(inverseMatrixWorld);
       moveVector.sub(matrixPosition);
 
-      object.position.add(moveVector);
+      let position = this.objectPositions.get(object);
+      if (position === undefined)
+      {
+        position = object.position.clone();
+        this.objectPositions.set(object, position);
+      }
+
+      object.position.copy(position).add(moveVector);
       object.updateMatrix();
     }
-    application.notifyObjectsChanged(roots);
-  }
-
-  previewOffset()
-  {
-    const application = this.application;
-    const moveVectorWorld = this.moveVectorWorld;
-
-    moveVectorWorld.subVectors(this.targetPointWorld, this.anchorPointWorld);
-    moveVectorWorld.normalize();
-    moveVectorWorld.multiplyScalar(this.offset);
-
-    const matrix = this.matrix.makeTranslation(
-      moveVectorWorld.x, moveVectorWorld.y, moveVectorWorld.z);
-    application.transformSelectionLines(matrix);
+    application.notifyObjectsChanged(roots, this, "nodeChanged",
+      MoveTool.CHANGED_PROPERTIES);
   }
 }
 

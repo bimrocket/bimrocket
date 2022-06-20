@@ -117,11 +117,15 @@ export const translations =
 
   "tool.move.label" : "Move",
   "tool.move.select_anchor_point" : "Select anchor point.",
-  "tool.move.select_destination_point" : "Select destination point. Use mouse right button to move.",
-  "tool.move.edit_offset" : "Edit offset or tap on screen to move.",
+  "tool.move.select_destination_point" : "Select destination point.",
+  "tool.move.edit_offset" : "Edit offset or select new anchor point.",
 
   "tool.rotate.label" : "Rotate",
-  "tool.rotate.help" : "Drag left mouse button to rotate",
+  "tool.rotate.select_first_point" : "Select the first point of rotation axis.",
+  "tool.rotate.select_second_point" : "Select the second point of rotation axis.",
+  "tool.rotate.select_anchor_point" : "Select anchor point.",
+  "tool.rotate.select_destination_point" : "Select destination point.",
+  "tool.rotate.edit_rotation" : "Edit rotation or select the first point of rotation axis.",
 
   "tool.scale.label" : "Scale",
   "tool.scale.help" : "Drag left mouse button to scale",
@@ -277,6 +281,7 @@ export const translations =
   "label.smooth_angle" : "Smooth angle:",
 
   "label.offset" : "Offset:",
+  "label.rotation" : "Rotation (degrees):",
 
   "label.name" : "Name:",
   "label.format" : "Format:",

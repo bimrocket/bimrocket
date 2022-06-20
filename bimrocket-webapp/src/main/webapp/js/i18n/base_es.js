@@ -116,12 +116,16 @@ export const translations =
   "tool.paint.label" : "Pintar",
 
   "tool.move.label" : "Mover",
-  "tool.move.select_anchor_point" : "Selecciona punto de anclaje.",
-  "tool.move.select_destination_point" : "Selecciona punto de destino. Usa el botón derecho del ratón para mover.",
-  "tool.move.edit_offset" : "Edita desplazamiento o pulsa sobre la pantalla para mover.",
+  "tool.move.select_anchor_point" : "Selecciona el punto de anclaje.",
+  "tool.move.select_destination_point" : "Selecciona el punto de destino.",
+  "tool.move.edit_offset" : "Edita desplazamiento o selecciona nuevo punto de anclaje.",
 
   "tool.rotate.label" : "Rotar",
-  "tool.rotate.help" : "Arrastar con botón izquierdo del ratón para rotar",
+  "tool.rotate.select_first_point" : "Selecciona el primer punto del eje de rotación.",
+  "tool.rotate.select_second_point" : "Selecciona el segundo punto del eje de rotación.",
+  "tool.rotate.select_anchor_point" : "Selecciona el punto anclaje.",
+  "tool.rotate.select_destination_point" : "Selecciona el punto de destino.",
+  "tool.rotate.edit_rotation" : "Edita la rotación o selecciona el primer punto del eje de rotación.",
 
   "tool.scale.label" : "Escalar",
   "tool.scale.help" : "Arrastar con botón izquierdo del ratón para escalar",
@@ -277,6 +281,7 @@ export const translations =
   "label.smooth_angle" : "Ángulo de suavizado:",
 
   "label.offset" : "Desplazamiento:",
+  "label.rotation" : "Rotación (grados):",
 
   "label.name" : "Nombre:",
   "label.format" : "Formato:",

@@ -442,6 +442,17 @@ div.option_block input[name=decimals]
   width: 150px;
 }
 
+.panel_rotate > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_rotate input[name=rotate_angle]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
 .script_box
 {
 }

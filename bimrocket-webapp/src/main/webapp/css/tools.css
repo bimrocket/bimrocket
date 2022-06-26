@@ -453,6 +453,29 @@ div.option_block input[name=decimals]
   width: 80px;
 }
 
+.panel_scale > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_scale input[name=scale_factor]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
+.panel_scale input[name=scale_length]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
+.panel_scale div > input[type=checkbox],
+.panel_scale div > label
+{
+  vertical-align: middle;
+}
+
 .script_box
 {
 }

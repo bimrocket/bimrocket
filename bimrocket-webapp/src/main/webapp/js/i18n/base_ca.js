@@ -116,19 +116,22 @@ export const translations =
   "tool.paint.label" : "Pinta",
 
   "tool.move.label" : "Mou",
-  "tool.move.select_anchor_point" : "Selecciona el punt d'ancoratge.",
-  "tool.move.select_destination_point" : "Selecciona el punt de destinació.",
-  "tool.move.edit_offset" : "Edita desplaçament o selecciona nou punt d'ancoratge.",
+  "tool.move.select_anchor_point" : "Selecciona punt d'ancoratge.",
+  "tool.move.select_destination_point" : "Selecciona punt de destinació.",
+  "tool.move.edit_offset" : "Edita desplaçament o selecciona punt d'ancoratge.",
 
   "tool.rotate.label" : "Rota",
   "tool.rotate.select_first_point" : "Selecciona el primer punt de l'eix de rotació.",
   "tool.rotate.select_second_point" : "Selecciona el segon punt de l'eix de rotació.",
-  "tool.rotate.select_anchor_point" : "Selecciona el punt d'ancoratge.",
-  "tool.rotate.select_destination_point" : "Selecciona el punt de destinació.",
-  "tool.rotate.edit_rotation" : "Edita la rotació o selecciona el primer punt de l'eix de rotació.",
+  "tool.rotate.select_anchor_point" : "Selecciona punt d'ancoratge.",
+  "tool.rotate.select_destination_point" : "Selecciona punt de destinació.",
+  "tool.rotate.edit_rotation" : "Edita la rotació o selecciona punt d'ancoratge.",
 
   "tool.scale.label" : "Escala",
-  "tool.scale.help" : "Arrossega amb botón esquerre del ratólí per escalar",
+  "tool.scale.select_first_point" : "Selecciona el punt origen.",
+  "tool.scale.select_anchor_point" : "Selecciona punt d'ancoratge.",
+  "tool.scale.select_destination_point" : "Selecciona punt de destinació.",
+  "tool.scale.edit_scale" : "Edita l'escala o selecciona punt d'ancoratge.",
 
   "tool.extrude.label" : "Extrusiona",
 
@@ -282,6 +285,9 @@ export const translations =
 
   "label.offset" : "Desplaçament:",
   "label.rotation" : "Rotació (graus):",
+  "label.length" : "Longitud:",
+  "label.scale_factor" : "Factor d'escala:",
+  "label.scale_keep_proportions" : "Manté proportions",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

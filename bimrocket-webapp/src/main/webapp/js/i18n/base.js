@@ -118,7 +118,7 @@ export const translations =
   "tool.move.label" : "Move",
   "tool.move.select_anchor_point" : "Select anchor point.",
   "tool.move.select_destination_point" : "Select destination point.",
-  "tool.move.edit_offset" : "Edit offset or select new anchor point.",
+  "tool.move.edit_offset" : "Edit offset or select anchor point.",
 
   "tool.rotate.label" : "Rotate",
   "tool.rotate.select_first_point" : "Select the first point of rotation axis.",
@@ -128,7 +128,10 @@ export const translations =
   "tool.rotate.edit_rotation" : "Edit rotation or select the first point of rotation axis.",
 
   "tool.scale.label" : "Scale",
-  "tool.scale.help" : "Drag left mouse button to scale",
+  "tool.scale.select_first_point" : "Select the origin point.",
+  "tool.scale.select_anchor_point" : "Select anchor point.",
+  "tool.scale.select_destination_point" : "Select destination point.",
+  "tool.scale.edit_scale" : "Edit scale or select anchor point.",
 
   "tool.extrude.label" : "Extrude",
 
@@ -282,6 +285,9 @@ export const translations =
 
   "label.offset" : "Offset:",
   "label.rotation" : "Rotation (degrees):",
+  "label.length" : "Length:",
+  "label.scale_factor" : "Scale factor:",
+  "label.scale_keep_proportions" : "Keep proportions",
 
   "label.name" : "Name:",
   "label.format" : "Format:",

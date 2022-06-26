@@ -4,13 +4,13 @@
  * @author realor
  */
 
-import { Tool } from "./Tool.js";
+import { TransformationTool } from "./TransformationTool.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import * as THREE from "../lib/three.module.js";
 
-class MoveTool extends Tool
+class MoveTool extends TransformationTool
 {
   static CHANGED_PROPERTIES = ["position"];
 
@@ -25,29 +25,10 @@ class MoveTool extends Tool
     this.setOptions(options);
 
     // internals
-    this.stage = 0;
     this.anchorPointWorld = new THREE.Vector3();
     this.targetPointWorld = new THREE.Vector3();
     this.offset = 0;
-    this.objectPositions = new Map();
-
     this.moveVectorWorld = new THREE.Vector3();
-    this.moveVector = new THREE.Vector3();
-    this.matrixPosition = new THREE.Vector3();
-    this.matrix = new THREE.Matrix4();
-
-    this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
-    this._onContextMenu = this.onContextMenu.bind(this);
-
-    application.addEventListener("scene", event =>
-    {
-      if (event.type === "structureChanged"
-          && event.objects[0] instanceof THREE.Scene)
-      {
-        this.setStage(0);
-      }
-    });
 
     this.createPanel();
   }
@@ -87,26 +68,6 @@ class MoveTool extends Tool
       this.moveObjects();
       this.setStage(0);
     });
-  }
-
-  activate()
-  {
-    this.panel.visible = true;
-    const container = this.application.container;
-    container.addEventListener('contextmenu', this._onContextMenu, false);
-    container.addEventListener('pointerup', this._onPointerUp, false);
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    this.setStage(this.stage);
-  }
-
-  deactivate()
-  {
-    this.panel.visible = false;
-    const container = this.application.container;
-    container.removeEventListener('contextmenu', this._onContextMenu, false);
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    this.application.pointSelector.deactivate();
   }
 
   onPointerMove(event)
@@ -157,14 +118,14 @@ class MoveTool extends Tool
     const snap = pointSelector.snap;
     if (snap)
     {
-      if (this.stage === 0 || this.stage === 2)
+      if (this.stage === 0 || this.stage === 2) // anchor point
       {
-        this.objectPositions.clear();
+        this.objectMatrices.clear();
         this.anchorPointWorld.copy(snap.positionWorld);
 
         if (snap.object)
         {
-          let axisMatrixWorld = this.matrix;
+          let axisMatrixWorld = this.axisMatrixWorld;
           if (snap.object)
           {
             axisMatrixWorld.copy(snap.object.matrixWorld);
@@ -174,11 +135,10 @@ class MoveTool extends Tool
             axisMatrixWorld.identity();
           }
           axisMatrixWorld.setPosition(this.anchorPointWorld);
-          pointSelector.setAxisGuides(axisMatrixWorld, true);
         }
         this.setStage(1);
       }
-      else if (this.stage === 1)
+      else if (this.stage === 1) // destination point
       {
         this.setStage(2);
       }
@@ -187,14 +147,6 @@ class MoveTool extends Tool
     {
       this.setStage(0);
     }
-  }
-
-  onContextMenu(event)
-  {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
-
-    event.preventDefault();
   }
 
   setStage(stage)
@@ -209,6 +161,7 @@ class MoveTool extends Tool
         this.offset = 0;
         application.pointSelector.clearAxisGuides();
         application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
@@ -217,8 +170,10 @@ class MoveTool extends Tool
         break;
 
       case 1: // set destination point
-        application.pointSelector.activate();
+        application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
         application.pointSelector.excludeSelection = true;
+        application.pointSelector.auxiliaryPoints = [];
+        application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = true;
         this.buttonsPanel.style.display = "none";
@@ -227,8 +182,10 @@ class MoveTool extends Tool
         break;
 
       case 2: // set distance
-        application.pointSelector.activate();
+        application.pointSelector.clearAxisGuides();
         application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = [];
+        application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
@@ -242,40 +199,20 @@ class MoveTool extends Tool
   {
     const application = this.application;
     const moveVectorWorld = this.moveVectorWorld;
-    const moveVector = this.moveVector;
-    const matrixPosition = this.matrixPosition;
-
     moveVectorWorld.subVectors(this.targetPointWorld, this.anchorPointWorld);
     moveVectorWorld.normalize();
     moveVectorWorld.multiplyScalar(this.offset);
 
-    const roots = application.selection.roots;
-    const inverseMatrixWorld = this.matrix;
-    for (let object of roots)
-    {
-      object.parent.updateMatrix();
-      object.parent.updateMatrixWorld();
+    const moveMatrixWorld = this._matrix1;
+    moveMatrixWorld.identity().setPosition(moveVectorWorld);
 
-      inverseMatrixWorld.copy(object.parent.matrixWorld).invert();
+    this.transformObjects(moveMatrixWorld, MoveTool.CHANGED_PROPERTIES);
+  }
 
-      moveVector.copy(moveVectorWorld);
-      moveVector.applyMatrix4(inverseMatrixWorld);
-
-      matrixPosition.setFromMatrixPosition(inverseMatrixWorld);
-      moveVector.sub(matrixPosition);
-
-      let position = this.objectPositions.get(object);
-      if (position === undefined)
-      {
-        position = object.position.clone();
-        this.objectPositions.set(object, position);
-      }
-
-      object.position.copy(position).add(moveVector);
-      object.updateMatrix();
-    }
-    application.notifyObjectsChanged(roots, this, "nodeChanged",
-      MoveTool.CHANGED_PROPERTIES);
+  resetTool()
+  {
+    super.resetTool();
+    this.offset = 0;
   }
 }
 

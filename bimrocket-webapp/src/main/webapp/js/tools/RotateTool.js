@@ -4,14 +4,14 @@
  * @author realor
  */
 
-import { Tool } from "./Tool.js";
+import { TransformationTool } from "./TransformationTool.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import * as THREE from "../lib/three.module.js";
 
-class RotateTool extends Tool
+class RotateTool extends TransformationTool
 {
   static CHANGED_PROPERTIES = ["position", "rotation"];
 
@@ -24,38 +24,20 @@ class RotateTool extends Tool
     this.setOptions(options);
 
     // internals
-    this.stage = 0;
     this.firstPointWorld = new THREE.Vector3();
     this.secondPointWorld = new THREE.Vector3();
     this.anchorPointWorld = new THREE.Vector3();
     this.rotation = 0;
-    this.objectMatrices = new Map();
 
-    this.rotationBaseMatrix = new THREE.Matrix4();
-    this.rotationBaseMatrixInverse = new THREE.Matrix4();
-    this._matrix1 = new THREE.Matrix4();
-    this._matrix2 = new THREE.Matrix4();
-    this._matrix3 = new THREE.Matrix4();
+    this.baseMatrixWorld = new THREE.Matrix4();
+    this.baseMatrixWorldInverse = new THREE.Matrix4();
     this._vector1 = new THREE.Vector3();
     this._vector2 = new THREE.Vector3();
 
-    this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
-    this._onContextMenu = this.onContextMenu.bind(this);
-
-    application.addEventListener("scene", event =>
-    {
-      if (event.type === "structureChanged"
-          && event.objects[0] instanceof THREE.Scene)
-      {
-        this.setStage(0);
-      }
-    });
-
-    this.createPanel();
-
     this.wheelPoints = [];
     this.wheel = this.createWheel();
+
+    this.createPanel();
   }
 
   createPanel()
@@ -68,7 +50,7 @@ class RotateTool extends Tool
 
     this.rotationInputElem = Controls.addNumberField(this.panel.bodyElem,
       "rotate_angle", "label.rotation", 0);
-    this.rotationInputElem.step = this.snapDistance;
+    this.rotationInputElem.step = 1;
     this.rotationInputElem.addEventListener("change", event =>
     {
       this.rotation = this.rotationInputElem.value;
@@ -95,26 +77,6 @@ class RotateTool extends Tool
     });
   }
 
-  activate()
-  {
-    this.panel.visible = true;
-    const container = this.application.container;
-    container.addEventListener('pointerup', this._onPointerUp, false);
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    container.addEventListener('contextmenu', this._onContextMenu, false);
-    this.setStage(this.stage);
-  }
-
-  deactivate()
-  {
-    this.panel.visible = false;
-    const container = this.application.container;
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    container.removeEventListener('contextmenu', this._onContextMenu, false);
-    this.application.pointSelector.deactivate();
-  }
-
   onPointerMove(event)
   {
     if (this.stage === 3)
@@ -130,12 +92,12 @@ class RotateTool extends Tool
       {
         let anchorPoint = this._vector1;
         anchorPoint.copy(this.anchorPointWorld);
-        anchorPoint.applyMatrix4(this.rotationBaseMatrixInverse);
+        anchorPoint.applyMatrix4(this.baseMatrixWorldInverse);
         anchorPoint.z = 0;
 
         let destinationPoint = this._vector2;
         destinationPoint.copy(snap.positionWorld);
-        destinationPoint.applyMatrix4(this.rotationBaseMatrixInverse);
+        destinationPoint.applyMatrix4(this.baseMatrixWorldInverse);
         destinationPoint.z = 0;
 
         let angleRad1 = Math.atan2(anchorPoint.y, anchorPoint.x);
@@ -145,6 +107,9 @@ class RotateTool extends Tool
         let angleDeg = THREE.MathUtils.radToDeg(angleRad);
         const k = 100000;
         angleDeg = Math.round(k * angleDeg) / k;
+        if (angleDeg > 180) angleDeg -= 360;
+        else if (angleDeg < -180) angleDeg += 360;
+
         this.rotation = angleDeg;
         this.rotateObjects();
 
@@ -160,16 +125,15 @@ class RotateTool extends Tool
     if (!pointSelector.isPointSelectionEvent(event)) return;
 
     const snap = pointSelector.snap;
-    if (this.stage === 0 || this.stage === 4)
+    if (this.stage === 0) // first axis point
     {
       if (snap)
       {
-        this.objectMatrices.clear();
         this.firstPointWorld.copy(snap.positionWorld);
 
         if (snap.object)
         {
-          let axisMatrixWorld = this._matrix1;
+          let axisMatrixWorld = this.axisMatrixWorld;
           if (snap.object)
           {
             axisMatrixWorld.copy(snap.object.matrixWorld);
@@ -179,7 +143,6 @@ class RotateTool extends Tool
             axisMatrixWorld.identity();
           }
           axisMatrixWorld.setPosition(this.firstPointWorld);
-          pointSelector.setAxisGuides(axisMatrixWorld, true);
         }
         this.setStage(1);
       }
@@ -189,14 +152,14 @@ class RotateTool extends Tool
       }
       application.overlays.remove(this.wheel);
     }
-    else if (this.stage === 1)
+    else if (this.stage === 1) // second axis point
     {
       if (snap)
       {
         if (!snap.positionWorld.equals(this.firstPointWorld))
         {
           this.secondPointWorld.copy(snap.positionWorld);
-          this.createRotationBaseMatrix();
+          this.createBaseMatrix();
           this.rotationInputElem.value = 0;
           this.setStage(2);
         }
@@ -206,8 +169,10 @@ class RotateTool extends Tool
         this.setStage(0);
       }
     }
-    else if (this.stage === 2)
+    else if (this.stage === 2 || this.stage === 4) // anchor point
     {
+      this.objectMatrices.clear();
+
       if (snap)
       {
         if (!snap.positionWorld.equals(this.firstPointWorld)
@@ -223,18 +188,10 @@ class RotateTool extends Tool
         this.setStage(0);
       }
     }
-    else if (this.stage === 3)
+    else if (this.stage === 3) // destination point
     {
       this.setStage(4);
     }
-  }
-
-  onContextMenu(event)
-  {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
-
-    event.preventDefault();
   }
 
   setStage(stage)
@@ -247,19 +204,22 @@ class RotateTool extends Tool
     {
       case 0: // set first point of rotation axis
         this.rotation = 0;
-        application.pointSelector.excludeSelection = false;
         application.pointSelector.clearAxisGuides();
+        application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
         I18N.set(this.helpElem, "innerHTML", "tool.rotate.select_first_point");
         application.i18n.update(this.helpElem);
         application.overlays.remove(this.wheel);
-        application.pointSelector.auxiliaryPoints = [];
         application.repaint();
         break;
 
       case 1: // set second point of rotation axis
+        application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
+        application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
@@ -269,6 +229,8 @@ class RotateTool extends Tool
 
       case 2: // set anchor point
         application.pointSelector.clearAxisGuides();
+        application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
@@ -279,6 +241,7 @@ class RotateTool extends Tool
       case 3: // set destination point
         application.pointSelector.clearAxisGuides();
         application.pointSelector.excludeSelection = true;
+        application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "";
         this.rotationInputElem.disabled = true;
@@ -290,8 +253,8 @@ class RotateTool extends Tool
       case 4: // edit rotation angle
         application.pointSelector.clearAxisGuides();
         application.pointSelector.excludeSelection = false;
+        application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
-        application.pointSelector.auxiliaryPoints = [];
         this.rotationInputElem.parentElement.style.display = "";
         this.rotationInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
@@ -301,7 +264,7 @@ class RotateTool extends Tool
     }
   }
 
-  createRotationBaseMatrix()
+  createBaseMatrix()
   {
     const rotationAxisWorld = this._vector1;
     rotationAxisWorld.subVectors(this.secondPointWorld, this.firstPointWorld);
@@ -311,15 +274,15 @@ class RotateTool extends Tool
     let xVector = new THREE.Vector3();
     xVector.crossVectors(yVector, rotationAxisWorld);
 
-    const rotationBaseMatrix = this.rotationBaseMatrix;
-    rotationBaseMatrix.makeBasis(xVector, yVector, rotationAxisWorld);
-    rotationBaseMatrix.setPosition(this.firstPointWorld);
+    const baseMatrixWorld = this.baseMatrixWorld;
+    baseMatrixWorld.makeBasis(xVector, yVector, rotationAxisWorld);
+    baseMatrixWorld.setPosition(this.firstPointWorld);
 
-    const rotationBaseMatrixInverse = this.rotationBaseMatrixInverse;
-    rotationBaseMatrixInverse.copy(rotationBaseMatrix).invert();
+    const baseMatrixWorldInverse = this.baseMatrixWorldInverse;
+    baseMatrixWorldInverse.copy(baseMatrixWorld).invert();
 
     const wheel = this.wheel;
-    rotationBaseMatrix.decompose(wheel.position, wheel.quaternion, wheel.scale);
+    baseMatrixWorld.decompose(wheel.position, wheel.quaternion, wheel.scale);
     wheel.updateMatrix();
 
     const application = this.application;
@@ -333,51 +296,33 @@ class RotateTool extends Tool
       let angle = i * angleIncr;
       let x = 0.5 * Math.cos(angle);
       let y = 0.5 * Math.sin(angle);
-      this.wheelPoints[i].set(x, y, 0).applyMatrix4(rotationBaseMatrix);
+      this.wheelPoints[i].set(x, y, 0).applyMatrix4(baseMatrixWorld);
     }
-    application.pointSelector.auxiliaryPoints = this.wheelPoints;
   }
 
   rotateObjects()
   {
     const application = this.application;
 
-    const rotationBaseMatrix = this.rotationBaseMatrix;
-    const rotationBaseMatrixInverse = this.rotationBaseMatrixInverse;
+    const baseMatrixWorld = this.baseMatrixWorld;
+    const baseMatrixWorldInverse = this.baseMatrixWorldInverse;
     const angleRad = THREE.MathUtils.degToRad(this.rotation);
-    const rotationMatrix = this._matrix1.makeRotationZ(angleRad);
+    const rotationMatrixWorld = this._matrix1.makeRotationZ(angleRad);
 
-    rotationMatrix.multiply(rotationBaseMatrixInverse);
-    rotationMatrix.premultiply(rotationBaseMatrix);
+    rotationMatrixWorld.multiply(baseMatrixWorldInverse);
+    rotationMatrixWorld.premultiply(baseMatrixWorld);
 
-    const roots = application.selection.roots;
-    const localRotationMatrix = this._matrix2;
-    const parentMatrixInverse = this._matrix3;
-    for (let object of roots)
-    {
-      let objectMatrix = this.objectMatrices.get(object);
-      if (objectMatrix === undefined)
-      {
-        objectMatrix = object.matrix.clone();
-        this.objectMatrices.set(object, objectMatrix);
-      }
+    this.transformObjects(rotationMatrixWorld, RotateTool.CHANGED_PROPERTIES);
+  }
 
-      object.parent.updateMatrix();
-      object.parent.updateMatrixWorld();
+  resetTool()
+  {
+    super.resetTool();
+    this.rotation = 0;
 
-      localRotationMatrix.copy(object.parent.matrixWorld);
-      localRotationMatrix.premultiply(rotationMatrix);
-      parentMatrixInverse.copy(object.parent.matrixWorld).invert();
-      localRotationMatrix.premultiply(parentMatrixInverse);
-      localRotationMatrix.multiply(objectMatrix);
-      localRotationMatrix.decompose(
-        object.position, object.quaternion, object.scale);
-
-      object.updateMatrix();
-      object.updateMatrixWorld();
-    }
-    application.notifyObjectsChanged(roots, this, "nodeChanged",
-      RotateTool.CHANGED_PROPERTIES);
+    const application = this.application;
+    application.overlays.remove(this.wheel);
+    application.repaint();
   }
 
   createWheel()
@@ -426,9 +371,9 @@ class RotateTool extends Tool
     const lines = new THREE.LineSegments(geometry,
       new THREE.LineBasicMaterial(
       { color : 0xff0000,
-        linewidth: 2,
+        linewidth: 1,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.8,
         depthTest: false }));
     lines.name = "RotationWheel";
     lines.raycast = function() {};

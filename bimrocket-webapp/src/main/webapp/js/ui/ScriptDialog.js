@@ -35,6 +35,8 @@ class ScriptDialog extends Dialog
     Profile,
     ProfileGeometry,
     Dialog,
+    MessageDialog,
+    ConfirmDialog,
     Controls,
     Toast
   };
@@ -90,6 +92,12 @@ class ScriptDialog extends Dialog
     {
       this.saveButton.disabled = this.nameField.value.trim().length === 0;
     });
+
+    // Make classes needed for scripting always global.
+    for (let name in ScriptDialog.GLOBALS)
+    {
+      window[name] = ScriptDialog.GLOBALS[name];
+    }
   }
 
   onShow()
@@ -177,27 +185,17 @@ class ScriptDialog extends Dialog
   {
     this.console = console;
 
-    console = {
+    window.console = {
       log : (...args) => this.log("info", ...args),
       info : (...args) => this.log("info", ...args),
       warn : (...args) => this.log("warn", ...args),
       error : (...args) => this.log("error", ...args)
     };
-
-    for (let name in ScriptDialog.GLOBALS)
-    {
-      window[name] = ScriptDialog.GLOBALS[name];
-    }
   }
 
   exitConsole()
   {
-    console = this.console;
-
-    for (let name in ScriptDialog.GLOBALS)
-    {
-      delete window[name];
-    }
+    window.console = this.console;
   }
 }
 

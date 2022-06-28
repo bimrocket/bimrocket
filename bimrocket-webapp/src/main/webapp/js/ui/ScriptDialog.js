@@ -5,6 +5,7 @@
  */
 
 import { Dialog } from "./Dialog.js";
+import { Controls } from "./Controls.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
@@ -33,6 +34,8 @@ class ScriptDialog extends Dialog
     CordGeometry,
     Profile,
     ProfileGeometry,
+    Dialog,
+    Controls,
     Toast
   };
 
@@ -122,11 +125,19 @@ class ScriptDialog extends Dialog
       this.consoleElem.innerHTML = "";
       const fn = new Function(this.scriptCode);
       let t0 = Date.now();
-      fn();
+      let result = fn();
       let t1 = Date.now();
-      this.log("info", "Execution completed in " + (t1 - t0) + " ms.");
-      Toast.create("message.script_executed")
-        .setI18N(this.application.i18n).show();
+      if (result instanceof Dialog)
+      {
+        result.show();
+      }
+      else
+      {
+        this.log("info", "Execution completed in " + (t1 - t0) + " ms.");
+        if (result !== undefined) this.log("info", "Result: " + result);
+        Toast.create("message.script_executed")
+          .setI18N(this.application.i18n).show();
+      }
     }
     catch (ex)
     {
@@ -167,10 +178,10 @@ class ScriptDialog extends Dialog
     this.console = console;
 
     console = {
-      log : (...args) => this.log("info", args),
-      info : (...args) => this.log("info", args),
-      warn : (...args) => this.log("warn", args),
-      error : (...args) => this.log("error", args)
+      log : (...args) => this.log("info", ...args),
+      info : (...args) => this.log("info", ...args),
+      warn : (...args) => this.log("warn", ...args),
+      error : (...args) => this.log("error", ...args)
     };
 
     for (let name in ScriptDialog.GLOBALS)

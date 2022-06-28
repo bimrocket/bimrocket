@@ -287,7 +287,7 @@ export const translations =
   "label.rotation" : "Rotació (graus):",
   "label.length" : "Longitud:",
   "label.scale_factor" : "Factor d'escala:",
-  "label.scale_keep_proportions" : "Manté proportions",
+  "label.scale_keep_proportions" : "Manté proporcions",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

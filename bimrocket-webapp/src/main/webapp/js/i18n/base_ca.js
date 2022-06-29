@@ -95,6 +95,8 @@ export const translations =
 
   "tool.select_by_property.label" : "Selec. per propietat",
 
+  "tool.select_by_qrcode.label" : "Selec. per codi QR",
+
   "tool.select_parent.label" : "Selecciona el pare",
 
   "tool.export_selection.label" : "Exporta selecció",
@@ -381,6 +383,7 @@ export const translations =
   "title.script_editor" : "Editor de codi",
   "title.object_builder" : "Constructor d'objecte",
   "title.select_by_property" : "Selecció per propietats",
+  "title.select_by_qrcode" : "Selecció per codi QR",
   "title.export_selection" : "Exporta selecció",
   "title.login" : "Identificació",
   "title.new_material" : "Nou material",
@@ -399,6 +402,7 @@ export const translations =
   "message.select_directory" : "Selecciona el directori on desar el fitxer.",
   "message.objects_selected_by_prop" : count => `${count} objecte${count === 1 ? '' : 's'} seleccionat${count === 1 ? '' : 's'}.`,
   "message.script_executed" : "Programa executat.",
+  "message.no_object_for_code" : code => `No s'ha trobat cap objecte amb el codi ${code}`,
 
   "message.file_saved" : "Fitxer desat.",
   "message.folder_created" : "Carpeta creada.",

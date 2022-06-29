@@ -14,6 +14,7 @@ import { SelectTool } from "../tools/SelectTool.js";
 import { SelectParentTool } from "../tools/SelectParentTool.js";
 import { SelectByNameTool } from "../tools/SelectByNameTool.js";
 import { SelectByPropertyTool } from "../tools/SelectByPropertyTool.js";
+import { SelectByQRCodeTool } from "../tools/SelectByQRCodeTool.js";
 import { ExportSelectionTool } from "../tools/ExportSelectionTool.js";
 import { OrbitTool } from "../tools/OrbitTool.js";
 import { FlyTool } from "../tools/FlyTool.js";
@@ -194,7 +195,7 @@ export function load(application)
       class : GLTFExporter,
       exportMethod : 1,
       options : { binary : true }
-    }  
+    }
   };
 
   // create tools
@@ -207,6 +208,7 @@ export function load(application)
   const selectTool = new SelectTool(application);
   const selectParentTool = new SelectParentTool(application);
   const selectByPropertyTool = new SelectByPropertyTool(application);
+  const selectByQRCodeTool = new SelectByQRCodeTool(application);
   const selectReprTool = new SelectByNameTool(application,
   { name : "IfcRepresentation", label: "IfcRepresentation",
     propertyName : "IfcRepresentation" });
@@ -358,6 +360,7 @@ export function load(application)
   application.addTool(selectParentTool);
   application.addTool(selectReprTool);
   application.addTool(selectByPropertyTool);
+  application.addTool(selectByQRCodeTool);
   application.addTool(exportSelectionTool);
   application.addTool(topViewTool);
   application.addTool(frontViewTool);
@@ -476,6 +479,7 @@ export function load(application)
   selectMenu.addMenuItem(selectParentTool);
   selectMenu.addMenuItem(selectReprTool);
   selectMenu.addMenuItem(selectByPropertyTool);
+  selectMenu.addMenuItem(selectByQRCodeTool);
   selectMenu.addMenuItem(exportSelectionTool);
 
   const designMenu = menuBar.addMenu("menu.design");
@@ -563,6 +567,7 @@ export function load(application)
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);
   toolBar.addToolButton(scaleTool);
+  toolBar.addToolButton(selectByQRCodeTool);
 
   // restore services
   application.restoreServices("model");

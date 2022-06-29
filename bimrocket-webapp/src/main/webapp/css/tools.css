@@ -365,6 +365,11 @@
   background-image: url(images/tools/section.svg);
 }
 
+.tool_button.select_by_qrcode
+{
+  background-image: url(images/tools/select_by_qrcode.svg);
+}
+
 div.row
 {
   margin-top:2px;

@@ -95,6 +95,8 @@ export const translations =
 
   "tool.select_by_property.label" : "Select by property",
 
+  "tool.select_by_qrcode.label" : "Select by QR code",
+
   "tool.select_parent.label" : "Select parent",
 
   "tool.export_selection.label" : "Export selection",
@@ -381,6 +383,7 @@ export const translations =
   "title.script_editor" : "Script editor",
   "title.object_builder" : "Object builder",
   "title.select_by_property" : "Selection by properties",
+  "title.select_by_qrcode" : "Selection by QR code",
   "title.export_selection" : "Export selection",
   "title.login" : "Login",
   "title.new_material" : "New material",
@@ -399,6 +402,7 @@ export const translations =
   "message.select_directory" : "Select directory to save file.",
   "message.objects_selected_by_prop" : count => `${count} object${count === 1 ? '' : 's'} selected.`,
   "message.script_executed" : "Script executed.",
+  "message.no_object_for_code" : code => `No object found for code ${code}`,
 
   "message.file_saved" : "File saved.",
   "message.folder_created" : "Folder created.",

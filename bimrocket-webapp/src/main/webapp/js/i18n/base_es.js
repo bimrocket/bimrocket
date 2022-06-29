@@ -95,6 +95,8 @@ export const translations =
 
   "tool.select_by_property.label" : "Selec. por propiedad",
 
+  "tool.select_by_qrcode.label" : "Selec. por código QR",
+
   "tool.select_parent.label" : "Seleccionar padre",
 
   "tool.export_selection.label" : "Exportar selección",
@@ -381,6 +383,7 @@ export const translations =
   "title.script_editor" : "Editor de código",
   "title.object_builder" : "Constructor de objeto",
   "title.select_by_property" : "Selección por propiedades",
+  "title.select_by_qrcode" : "Selección por código QR",
   "title.export_selection" : "Exportar selección",
   "title.login" : "Identificación",
   "title.new_material" : "Nuevo material",
@@ -399,6 +402,7 @@ export const translations =
   "message.select_directory" : "Selecciona el directorio donde guardar el fichero.",
   "message.objects_selected_by_prop" : count => `${count} objeto${count === 1 ? '' : 's'} seleccionado${count === 1 ? '' : 's'}.`,
   "message.script_executed" : "Programa ejecutado.",
+  "message.no_object_for_code" : code => `No se ha encontrado ningún objeto con el código ${code}`,
 
   "message.file_saved" : "Fichero guardado.",
   "message.folder_created" : "Carpeta creada.",

@@ -26,19 +26,6 @@
   <build>
     <pluginManagement>
       <plugins>
-      <plugin>
-		 <groupId>org.apache.tomcat.maven</groupId>
-		 <artifactId>tomcat7-maven-plugin</artifactId>
-		 <version>2.0</version>
-		 <configuration>
-		  <server>maven-tomcat-war-deployment-server</server>
-		  <username>war-deployer</username>
-		  <password>maven-tomcat-plugin</password>      		    
-		  <url>http://localhost:8090/manager/text</url>
-		  <path>/bimrocket</path>
-		 </configuration>
-		</plugin>
-      
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>

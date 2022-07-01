@@ -127,7 +127,7 @@
         <version>3.3.2</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
-          <warName>bimrocket-server-1.0</warName>
+          <warName>bimrocket-server</warName>
         </configuration>
       </plugin>
       <plugin>

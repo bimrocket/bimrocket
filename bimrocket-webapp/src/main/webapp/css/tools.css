@@ -305,6 +305,11 @@
   background-image: url(images/tools/print.svg);
 }
 
+.tool_button.svg_file
+{
+  background-image: url(images/tools/svg_file.svg);
+}
+
 .tool_button.zoom_all
 {
   background-image: url(images/tools/zoom_all.svg);

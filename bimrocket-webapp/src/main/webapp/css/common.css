@@ -48,11 +48,6 @@ button
   box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
 }
 
-select
-{
-  background-color: white;
-}
-
 button:disabled
 {
   outline: none;
@@ -74,6 +69,11 @@ button:active
 {
   box-shadow:none;
   outline: none;
+}
+
+select
+{
+  background-color: white;
 }
 
 input[readonly]

@@ -5,6 +5,8 @@
  */
 
 import { Tool } from "./Tool.js";
+import { ConfirmDialog } from "../ui/ConfirmDialog.js";
+
 
 class NewSceneTool extends Tool
 {
@@ -23,8 +25,15 @@ class NewSceneTool extends Tool
   {
     const application = this.application;
 
-    application.initScene();
-    application.useTool(null);
+    ConfirmDialog.create("tool.new_scene.label", "question.create_new_scene")
+      .setI18N(application.i18n)
+      .setAcceptLabel("button.yes")
+      .setCancelLabel("button.no")
+      .setAction(() =>
+    {
+      application.initScene();
+      application.useTool(null);
+    }).show();
   }
 }
 

@@ -249,7 +249,11 @@ class Application
           let updateSelection = false;
           for (let object of event.objects)
           {
-            if (event.source !== ObjectBuilder) object.needsRebuild = true;
+            if (event.source !== ObjectBuilder)
+            {
+              object.needsRebuild = true;
+            }
+
             if (object instanceof THREE.Camera &&
                 event.source instanceof Inspector)
             {
@@ -262,6 +266,7 @@ class Application
               updateSelection = true;
             }
           }
+
           if (updateSelection) this.updateSelection();
         }
         else if (event.type === "added" || event.type === "removed")
@@ -284,7 +289,7 @@ class Application
 
     window.addEventListener("beforeunload", event =>
     {
-      if (this.unsavedChanges)
+      if (this.baseObject.children.length > 0)
       {
         event.preventDefault();
         event.returnValue = "";
@@ -428,16 +433,17 @@ class Application
   {
     let root;
     const roots = this.selection.roots;
+    const baseObject = this.baseObject;
 
     if (roots.length === 0) // nothing selected
     {
-      if (this.baseObject.children.length === 1)
+      if (baseObject.children.length === 1)
       {
-        root = this.baseObject.children[0];
+        root = baseObject.children[0];
       }
       else
       {
-        root = this.baseObject;
+        root = baseObject;
       }
     }
     else if (roots.length === 1)
@@ -446,8 +452,8 @@ class Application
       if (!lowestRoot)
       {
         // find top root (under baseObject)
-        while (root.parent !== this.baseObject &&
-               root !== this.scene && root !== this.baseObject)
+        while (root.parent !== baseObject &&
+               root !== this.scene && root !== baseObject)
         {
           root = root.parent;
         }
@@ -455,7 +461,7 @@ class Application
     }
     else // multiple roots
     {
-      root = this.baseObject;
+      root = baseObject;
     }
     return root;
   }
@@ -1066,7 +1072,8 @@ class Application
     }
   }
 
-  addObject(object, parent = null, attach = false, select = false)
+  addObject(object, parent = null,
+    attach = false, select = false, source = this)
   {
     if (!(object instanceof THREE.Object3D)) return;
 
@@ -1099,8 +1106,13 @@ class Application
     }
     object.updateMatrix();
 
-    let addEvent = {type : "added", object : object, parent: parent,
-      source : this};
+    let addEvent =
+    {
+      type : "added",
+      object : object,
+      parent: parent,
+      source : source
+    };
     this.notifyEventListeners("scene", addEvent);
 
     if (select)
@@ -1110,7 +1122,7 @@ class Application
     return object;
   }
 
-  removeObject(object)
+  removeObject(object, source = this)
   {
     if (!(object instanceof THREE.Object3D))
     {
@@ -1126,8 +1138,13 @@ class Application
         parent.remove(object);
         ObjectUtils.dispose(object);
       }
-      let removeEvent = {type : "removed", object : object, parent : parent,
-        source : this};
+      let removeEvent =
+      {
+        type : "removed",
+        object : object,
+        parent : parent,
+        source : source
+      };
       this.notifyEventListeners("scene", removeEvent);
 
       this.selection.remove(object); // TODO: unselect child objects
@@ -1167,7 +1184,12 @@ class Application
     this._cutObjects = cutObjects;
     if (cutObjects.length > 0)
     {
-      let cutEvent = {type : "cut", objects : cutObjects, source : this};
+      let cutEvent =
+      {
+        type : "cut",
+        objects : cutObjects,
+        source : this
+      };
       this.notifyEventListeners("scene", cutEvent);
     }
   }
@@ -1194,17 +1216,32 @@ class Application
         {
           for (let cutObject of cutObjects)
           {
-            let removeEvent = {type : "removed", object : cutObject,
-              parent : cutObject.parent, source : this};
-            let addEvent = {type : "added", object : cutObject,
-              parent : parent, source : this};
+            let removeEvent =
+            {
+              type : "removed",
+              object : cutObject,
+              parent : cutObject.parent,
+              source : this
+            };
+            let addEvent =
+            {
+              type : "added",
+              object : cutObject,
+              parent : parent,
+              source : this
+            };
             parent.attach(cutObject);
             cutObject.updateMatrix();
             cutObject.updateMatrixWorld();
             this.notifyEventListeners("scene", removeEvent);
             this.notifyEventListeners("scene", addEvent);
           }
-          let pasteEvent = {type: "pasted", objects: cutObjects, source : this};
+          let pasteEvent =
+          {
+            type: "pasted",
+            objects: cutObjects,
+            source : this
+          };
           this.notifyEventListeners("scene", pasteEvent);
           this._cutObjects = [];
         }

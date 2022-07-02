@@ -486,10 +486,6 @@ div.option_block input[name=decimals]
   vertical-align: middle;
 }
 
-.script_box
-{
-}
-
 .script_box textarea
 {
   font-family: monospace;
@@ -540,6 +536,11 @@ div.option_block input[name=decimals]
 {
   display: inline-block;
   width: calc(100% - 80px);
+}
+
+.dialog .footer button
+{
+  min-width: 40px;
 }
 
 div.script_code

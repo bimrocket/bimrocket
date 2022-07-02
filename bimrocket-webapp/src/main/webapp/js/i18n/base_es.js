@@ -433,6 +433,7 @@ export const translations =
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
   "question.delete_file" : name => `Quieres borrar el fichero ${name}?`,
   "question.remove_controller" : name => `Quieres esborrar el controlador ${name}?`,
+  "question.create_new_scene" : "Quieres crear una nueva escena?",
 
   "controller.AutoPilotController" : "Conduce un objeto.",
   "controller.Brain4itPostController" : "Hace un POST a Brain4it.",

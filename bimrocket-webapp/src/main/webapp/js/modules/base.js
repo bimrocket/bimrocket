@@ -206,7 +206,7 @@ export function load(application)
   const saveLocalTool = new SaveLocalTool(application);
   const optionsTool = new OptionsTool(application);
   const printTool = new PrintTool(application);
-  const svgExportTool = new SVGExporterTool(application);
+  const svgExporterTool = new SVGExporterTool(application);
   const selectTool = new SelectTool(application);
   const selectParentTool = new SelectParentTool(application);
   const selectByPropertyTool = new SelectByPropertyTool(application);
@@ -358,7 +358,7 @@ export function load(application)
   application.addTool(saveLocalTool);
   application.addTool(optionsTool);
   application.addTool(printTool);
-  application.addTool(svgExportTool);
+  application.addTool(svgExporterTool);
   application.addTool(selectTool);
   application.addTool(selectParentTool);
   application.addTool(selectReprTool);
@@ -443,7 +443,7 @@ export function load(application)
   fileMenu.addMenuItem(openLocalTool);
   fileMenu.addMenuItem(saveLocalTool);
   fileMenu.addMenuItem(printTool);
-  fileMenu.addMenuItem(svgExportTool);
+  fileMenu.addMenuItem(svgExporterTool);
 
   const editMenu = menuBar.addMenu("menu.edit");
   editMenu.addMenuItem(cutTool);

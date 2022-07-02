@@ -29,6 +29,7 @@ export const translations =
   "button.rename" : "Renombrar",
   "button.apply" : "Aplicar",
   "button.print" : "Imprimir",
+  "button.export" : "Exportar",
   "button.preview" : "Probar",
   "button.view" : "Ver",
   "button.restore" : "Restaurar",
@@ -105,6 +106,8 @@ export const translations =
 
   "tool.print.label" : "Imprimir",
   "tool.print.help" : "Imprimir escena a pdf",
+
+  "tool.svg_exporter.label" : "Exportar SVG",
 
   "tool.draw_profile.label" : "Dibujar perfil",
 
@@ -310,6 +313,8 @@ export const translations =
 
   "label.print_title" : "Título:",
   "label.print_scale" : "Escala 1:",
+
+  "label.svg_exporter_title" : "Título:",
 
   "label.selection_by_properties" : "Propiedades:",
   "label.expression" : "Expresión:",

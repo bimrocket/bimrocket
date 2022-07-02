@@ -31,6 +31,7 @@ export const translations =
   "button.rename" : "Reanomena",
   "button.apply" : "Aplica",
   "button.print" : "Imprimeix",
+  "button.export" : "Exporta",
   "button.preview" : "Prova",
   "button.undo" : "Desfés",
   "button.redo" : "Refés",
@@ -105,6 +106,8 @@ export const translations =
 
   "tool.print.label" : "Imprimir",
   "tool.print.help" : "Imprimir escena a pdf",
+
+  "tool.svg_exporter.label" : "Exporta SVG",
 
   "tool.draw_profile.label" : "Dibuixa perfil",
 
@@ -310,6 +313,8 @@ export const translations =
 
   "label.print_title" : "Títol:",
   "label.print_scale" : "Escala 1:",
+
+  "label.svg_exporter_title" : "Títol:",
 
   "label.selection_by_properties" : "Propietats:",
   "label.expression" : "Expressió:",

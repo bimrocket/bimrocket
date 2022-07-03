@@ -133,7 +133,7 @@ class Inspector extends Panel
       }
       // object
       let objListElem = this.createSection(this.objectSectionName, topListElem);
-      this.createReadOnlyProperty(objListElem, object, "id", object);
+      this.createReadOnlyProperty(objListElem, object, "id");
       for (let propertyName in object)
       {
         if (this.isSupportedProperty(propertyName))
@@ -401,10 +401,11 @@ class Inspector extends Panel
     };
 
     let sectionElem = document.createElement("li");
-    sectionElem.className = 'section';
+    sectionElem.className = "section";
     parentElem.appendChild(sectionElem);
 
-    let labelElem = document.createElement('span');
+    let labelElem = document.createElement("a");
+    labelElem.href = "#";
     labelElem.id = 'section-' + name;
     labelElem.innerHTML = name;
     sectionElem.appendChild(labelElem);
@@ -414,14 +415,12 @@ class Inspector extends Panel
 
     if (actions instanceof Array)
     {
-      for (let k = 0; k < actions.length; k++)
+      for (let action of actions)
       {
-        let action = actions[k];
-        let actionElem = document.createElement('span');
+        let actionElem = document.createElement("button");
         actionElem.className = action.className;
         I18N.set(actionElem, "alt", action.label);
         I18N.set(actionElem, "title", action.label);
-        actionElem.setAttribute("role", "button");
         actionElem.addEventListener("click", action.listener);
         sectionElem.appendChild(actionElem);
       }
@@ -464,7 +463,8 @@ class Inspector extends Panel
       propElem.className = "property " + renderer.getClassName(propertyValue);
       parentElem.appendChild(propElem);
 
-      let labelElem = document.createElement('span');
+      let labelElem = document.createElement('a');
+      labelElem.href = '#';
       labelElem.innerHTML = propertyName + ':';
       labelElem.className = 'label';
       propElem.appendChild(labelElem);
@@ -475,8 +475,10 @@ class Inspector extends Panel
       if (editor)
       {
         labelElem.addEventListener("click", event =>
-          this.startEdition(propElem, object, propertyName, renderer, editor),
-          false);
+        {
+          event.preventDefault();
+          this.startEdition(propElem, object, propertyName, renderer, editor);
+        }, false);
         propElem.className += " editable";
       }
     }
@@ -485,7 +487,7 @@ class Inspector extends Panel
   createValueElem(propElem, object, propertyName, propertyValue,
     renderer, editor)
   {
-    let valueElem = renderer.render(propertyValue);
+    let valueElem = renderer.render(propertyValue, !Boolean(editor));
     if (valueElem)
     {
       propElem.appendChild(valueElem);
@@ -693,6 +695,8 @@ class Inspector extends Panel
       this.edition.propertyName, propertyValue,
       this.edition.renderer, this.edition.editor);
 
+    propElem.firstChild.focus();
+
     this.clearEdition();
   }
 
@@ -733,6 +737,9 @@ class Inspector extends Panel
     if (propertyName === 'id') return true;
     if (propertyName === 'uuid') return true;
     if (propertyName === 'type') return true;
+    if (propertyName === 'matrixWorldNeedsUpdate') return true;
+    if (propertyName === 'needsRebuild') return true;
+    if (propertyName === 'needsMarking') return true;
     if (propertyName.indexOf("is") === 0) return true;
 
     return false;
@@ -794,7 +801,7 @@ class PropertyRenderer
     return "";
   }
 
-  render(value) // returns elem
+  render(value, disabled) // returns elem
   {
     return null;
   }
@@ -817,10 +824,11 @@ class StringRenderer extends PropertyRenderer
     return "string";
   }
 
-  render(text)
+  render(text, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
     valueElem.innerHTML = text;
     return valueElem;
   }
@@ -843,10 +851,11 @@ class NumberRenderer extends PropertyRenderer
     return "number";
   }
 
-  render(number)
+  render(number, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
     valueElem.innerHTML = Math.round(number * 1000) / 1000;
     return valueElem;
   }
@@ -869,11 +878,16 @@ class BooleanRenderer extends PropertyRenderer
     return "boolean";
   }
 
-  render(value)
+  render(value, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-    valueElem.innerHTML = value;
+    let checkboxElem = document.createElement("input");
+    checkboxElem.type = "checkbox";
+    checkboxElem.checked = value;
+    checkboxElem.tabIndex = -1;
+    if (disabled) checkboxElem.disabled = true;
+    valueElem.appendChild(checkboxElem);
     return valueElem;
   }
 }
@@ -895,10 +909,12 @@ class VectorRenderer extends PropertyRenderer
     return "vector";
   }
 
-  render(vector)
+  render(vector, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
+
     let round = function(value)
     {
       var precision = 1000;
@@ -929,10 +945,12 @@ class EulerRenderer extends PropertyRenderer
     return "euler";
   }
 
-  render(euler)
+  render(euler, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
+
     let angle = function(value)
     {
       var precision = 1000;
@@ -964,10 +982,12 @@ class FormulaRenderer extends PropertyRenderer
     return "formula";
   }
 
-  render(formula)
+  render(formula, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
+
     valueElem.innerHTML = formula.expression;
     return valueElem;
   }
@@ -990,13 +1010,14 @@ class ColorRenderer extends PropertyRenderer
     return "color";
   }
 
-  render(color)
+  render(color, disabled)
   {
     const rgb = "rgb(" + Math.round(255 * color.r) +
       ", " + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
 
     let valueElem = document.createElement("span");
     valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
 
     let codeElem = document.createElement("span");
     codeElem.innerHTML = rgb;
@@ -1030,9 +1051,10 @@ class Object3DRenderer extends PropertyRenderer
     return "object3D";
   }
 
-  render(object)
+  render(object, disabled)
   {
     let valueElem = document.createElement("a");
+    valueElem.href = "#";
     valueElem.className = "value";
     valueElem.innerHTML = object.name || "object-" + object.id;
     valueElem.addEventListener("click",
@@ -1058,7 +1080,7 @@ class TextureRenderer extends PropertyRenderer
     return "texture";
   }
 
-  render(texture)
+  render(texture, disabled)
   {
     let valueElem = document.createElement("span");
     valueElem.className = "value";
@@ -1118,7 +1140,7 @@ class StringEditor extends PropertyEditor
     let valueElem = document.createElement("input");
     valueElem.className = "value";
     valueElem.value = text;
-    valueElem.addEventListener("keyup", event =>
+    valueElem.addEventListener("keydown", event =>
     {
       if (event.keyCode === 13)
       {
@@ -1152,7 +1174,7 @@ class NumberEditor extends PropertyEditor
     valueElem.className = "value";
     valueElem.value = "" + number;
     valueElem.type = "number";
-    valueElem.addEventListener("keyup", event =>
+    valueElem.addEventListener("keydown", event =>
     {
       if (event.keyCode === 13)
       {
@@ -1261,7 +1283,7 @@ class DimensionEditor extends PropertyEditor
       valueElem.className = "value";
       valueElem.value = this.formatValue(vector[dim]);
 
-      valueElem.addEventListener("keyup", keyListener, false);
+      valueElem.addEventListener("keydown", keyListener, false);
 
       itemElem.appendChild(labelElem);
       itemElem.appendChild(valueElem);
@@ -1465,7 +1487,7 @@ class TextureEditor extends PropertyEditor
     }
 
     valueElem.value = value;
-    valueElem.addEventListener("keyup", event =>
+    valueElem.addEventListener("keydown", event =>
     {
       if (event.keyCode === 13)
       {

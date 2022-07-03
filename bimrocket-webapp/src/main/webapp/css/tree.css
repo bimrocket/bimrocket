@@ -69,7 +69,6 @@ ul.tree li > button:focus
   outline-color: black;
   outline-offset: 1px;
   outline-width: 1px;
-  transition: all 0.4s ease;
 }
 
 ul.tree li a
@@ -86,7 +85,7 @@ ul.tree li a:hover
 {
   animation: item_hover 1s;
   background-color: #D0D0D0;
-  color:black;  
+  color:black;
 }
 
 ul.tree li a:focus
@@ -95,7 +94,6 @@ ul.tree li a:focus
   outline-color: black;
   outline-offset: 1px;
   outline-width: 1px;
-  transition: all 0.4s ease;
 }
 
 ul.tree li.collapsed > ul

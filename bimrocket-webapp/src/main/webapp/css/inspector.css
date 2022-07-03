@@ -37,7 +37,7 @@ ul.inspector ul.collapsed
 
 ul.inspector li.section
 {
-  padding-left: 0;
+  padding: 2px;
   margin-left: 0;
   color: #202020;
   white-space: nowrap;
@@ -60,7 +60,7 @@ ul.inspector li.section li.section:first-child
   border-top:none;
 }
 
-ul.inspector li.section > span
+ul.inspector li.section > a
 {
   display:inline-block;
   text-align: left;
@@ -69,48 +69,70 @@ ul.inspector li.section > span
   padding:1px 3px 1px 14px;
   background-repeat: no-repeat;
   background-position: 2px center;
+  text-decoration: none;
+  vertical-align: middle;
 }
 
-ul.inspector li.section > span.button
+ul.inspector li.section > a:focus
 {
-  display:inline-block;
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.section > a.collapse
+{
+  background-image:url(images/collapse.svg);
+}
+
+ul.inspector li.section > a.expand
+{
+  background-image:url(images/expand.svg);
+}
+
+ul.inspector li.section > button
+{
   padding: 0px;
-  width: 11px;
-  height:11px;
+  width: 15px;
+  height:15px;
   background-repeat: no-repeat;
   background-position: 0px center;
   vertical-align: middle;
   margin-left: 5px;
   margin-right: 5px;
-  background-size: 11px;
+  background-size: 15px;
+  border: none;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
-ul.inspector li.section > span.button:hover
+ul.inspector li.section > button:hover
 {
   box-shadow: 0px 0px 4px 0px #c0a0a0;
 }
 
-ul.inspector li.section > span.button.add
+ul.inspector li.section > button.add
 {
   background-image: url(images/add.svg);
 }
 
-ul.inspector li.section > span.button.edit
+ul.inspector li.section > button.edit
 {
   background-image: url(images/edit.svg);
 }
 
-ul.inspector li.section > span.button.remove
+ul.inspector li.section > button.remove
 {
   background-image: url(images/remove.svg);
 }
 
-ul.inspector li.section > span.button.start
+ul.inspector li.section > button.start
 {
   background-image: url(images/start.svg);
 }
 
-ul.inspector li.section > span.button.stop
+ul.inspector li.section > button.stop
 {
   background-image: url(images/stop.svg);
 }
@@ -119,16 +141,6 @@ ul.inspector li.section > span:hover
 {
   cursor:pointer;
   color: #802020;
-}
-
-ul.inspector li.section > span.collapse
-{
-  background-image:url(images/collapse.svg);
-}
-
-ul.inspector li.section > span.expand
-{
-  background-image:url(images/expand.svg);
 }
 
 ul.inspector li.property
@@ -140,39 +152,48 @@ ul.inspector li.property
   white-space:normal;
   margin-left: 12px;
   vertical-align: middle;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
-ul.inspector li.property > span.label
+ul.inspector li.property > .label
 {
   margin-left: 18px;
   text-align: left;
   color: #606060;
   font-size:12px;
   line-height: 18px;
-  padding-top: 1px;
-  padding-bottom: 1px;
   vertical-align: middle;
+  text-decoration: none;
 }
 
-ul.inspector li.property > span.value
+ul.inspector li.property > .label:focus
+{
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.property > .value
 {
   text-align: left;
   font-size:12px;
-  margin-left: 2px;
-  line-height: 18px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  margin-left: 4px;
   vertical-align: middle;
+  line-height: 0;
+}
+
+ul.inspector li.property > .value.disabled
+{
+  color: #606060;
 }
 
 ul.inspector li.property > a.value
 {
   text-align: left;
   font-size:12px;
-  margin-left: 2px;
-  line-height: 18px;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  margin-left: 4px;
   vertical-align: middle;
   color: #202080;
   text-decoration: none;
@@ -183,15 +204,30 @@ ul.inspector li.property > a.value:hover
   text-decoration: underline;
 }
 
-ul.inspector li.property.editable > span.label
+ul.inspector li.property > a.value:focus
+{
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.property > .value > input[type=checkbox]
+{
+  vertical-align: middle;
+  margin: 0;
+}
+
+ul.inspector li.property.editable > .label
 {
   cursor: pointer;
 }
 
-ul.inspector li.property.editable > span.value
+ul.inspector li.property.editable > .value
 {
   color: #202020;
   cursor: pointer;
+  line-height: 0;
 }
 
 ul.inspector li.property.string

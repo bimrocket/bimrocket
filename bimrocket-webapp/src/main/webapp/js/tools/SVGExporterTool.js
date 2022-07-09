@@ -13,7 +13,6 @@ import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
-
 class SVGExporterTool extends Tool
 {
   constructor(application, options)
@@ -33,13 +32,13 @@ class SVGExporterTool extends Tool
 
     this.titleElem = Controls.addTextField(this.panel.bodyElem,
       "svg_exporter_title", "label.svg_exporter_title", "", "row");
-    
+
     this.scaleElem = Controls.addTextField(this.panel.bodyElem,
-    	      "print_scale", "label.print_scale", "10", "row");
-    	    this.scaleElem.style.width = "60px";
+      "print_scale", "label.print_scale", "10", "row");
+      this.scaleElem.style.width = "60px";
 
     this.svgExportButton = Controls.addButton(this.panel.bodyElem,
-      "svg_exporter_button", "button.export", () => this.svg_exporter());
+      "svg_exporter_button", "button.export", () => this.exportSvg());
 
     this.openLink = document.createElement("a");
     I18N.set(this.openLink, "innerHTML", "button.open");
@@ -58,7 +57,7 @@ class SVGExporterTool extends Tool
     this.panel.visible = false;
   }
 
-  svg_exporter()
+  exportSvg()
   {
     this.svgExportButton.disabled = true;
     this.application.progressBar.progress = undefined;
@@ -73,7 +72,7 @@ class SVGExporterTool extends Tool
     const application = this.application;
     let scale = parseFloat(this.scaleElem.value);
     // assume units in meters
-    let factor = scale * 39.37007874 * 72; // dots per meter
+    let factor = 1 * 39.37007874 * 72; // dots per meter
     factor /= scale;
 
     let matrix = new THREE.Matrix4();
@@ -90,14 +89,12 @@ class SVGExporterTool extends Tool
       debug : { testIfcElement : undefined }
     };
 
-    let writeFromRootElement = svgExportSource.debug.testIfcElement === undefined
-    							&&
-    					this.application.selection.objects.length===0
-    
-    
+    let writeFromRootElement =
+      svgExportSource.debug.testIfcElement === undefined
+      && this.application.selection.objects.length === 0;
 
     this.generateSvgObject(application.baseObject, matrix, svgExportSource, 1,
-    		writeFromRootElement);
+      writeFromRootElement);
 
     this.svgExportButton.disabled = false;
     this.application.progressBar.visible = false;
@@ -126,9 +123,7 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
   </defs>
 <g id="root" transform="matrix(1,0,0,-1,0,0)">\n${svgExportSource.strOut}</g></svg>`;
 
-    const encodedUri = encodeURI(
-      "data:text/svg;charset=utf-8," +
-      content);
+    const encodedUri = encodeURI("data:text/svg;charset=utf-8," + content);
 
     // override out
     this.openLink.setAttribute("href", encodedUri);
@@ -139,8 +134,8 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
 
   indent(level)
   {
-    var str = "";
-    for (var i = 0; i < level; i++)
+    let str = "";
+    for (let i = 0; i < level; i++)
     {
       str += "\t";
     }
@@ -169,8 +164,8 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
 
         let p1 = new THREE.Vector3();
         let p2 = new THREE.Vector3();
-        
-        let repeat_points=[]
+
+        let drawnLines = new Set();
 
         // draw set of lines
         for (let i = 0; i < vertices.length; i += 2)
@@ -184,28 +179,26 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
           p2.applyMatrix4(matrix);
 
           // 1 point skip
-          if((p1.x == p2.x) && (p1.y == p2.y)){
-        	  continue;
+          if (p1.x === p2.x && p1.y === p2.y)
+          {
+            continue;
           }
 
-          
-          var id1=`(${p1.x},${p1.y},${p2.x},${p2.y})`;
-          var id2=`(${p2.x},${p2.y},${p1.x},${p1.y})`;
-          
+          let line1Id = `${p1.x},${p1.y},${p2.x},${p2.y}`;
+          let line2Id = `${p2.x},${p2.y},${p1.x},${p1.y}`;
+
           // write only lines that not overlap
-          if(repeat_points[id1]==undefined && repeat_points[id2]==undefined){
+          if (!drawnLines.has(line1Id) && !drawnLines.has(line2Id))
+          {
+            svgExportSource.strOut += this.indent(level + 1) +
+              `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />\n`;
 
-        	  svgExportSource.strOut += this.indent(level + 1) +
-        	  	`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />\n`;
-        	  
-        	  repeat_points[id1]=true;
-        	  
-              // update 2d bounding box
-              svgExportSource.bbox.expandByPoint(p1);
-              svgExportSource.bbox.expandByPoint(p2);
+            drawnLines.add(line1Id);
+
+            // update 2d bounding box
+            svgExportSource.bbox.expandByPoint(p1);
+            svgExportSource.bbox.expandByPoint(p2);
           }
-
-
         }
         return true;
       }
@@ -263,7 +256,6 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
     let uuid = THREE.MathUtils.generateUUID();
     let globalId = "unknow";
     let ifcClassName = "unknow";
-    
 
     if (object.userData.IFC)
     {
@@ -295,20 +287,21 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
 
     // drawable elements
     // object
-    
+
     if (svgExportSource.debug.testIfcElement)
     {
       if (globalId === svgExportSource.debug.testIfcElement)
       {
         _writeSvgShape = true;
       }
-    }else{
-    	
-        // do not process not selected objects...
-        if(this.application.selection.contains(object)==true){
-        	_writeSvgShape = true;
-        }
-
+    }
+    else
+    {
+      // do not process not selected objects...
+      if (this.application.selection.contains(object))
+      {
+        _writeSvgShape = true;
+      }
     }
 
     if (_writeSvgShape === true)

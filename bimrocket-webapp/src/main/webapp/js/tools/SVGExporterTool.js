@@ -21,6 +21,8 @@ class SVGExporterTool extends Tool
     this.name = "svg_exporter";
     this.label = "tool.svg_exporter.label";
     this.className = "svg_exporter";
+    this.decimals = 5;
+
     this.setOptions(options);
     this.createPanel();
   }
@@ -93,7 +95,7 @@ class SVGExporterTool extends Tool
       svgExportSource.debug.testIfcElement === undefined
       && this.application.selection.objects.length === 0;
 
-    this.generateSvgObject(application.baseObject, matrix, svgExportSource, 1,
+    this.generateSvgObject(application.baseObject, matrix, svgExportSource, 2,
       writeFromRootElement);
 
     this.svgExportButton.disabled = false;
@@ -107,21 +109,22 @@ class SVGExporterTool extends Tool
     const content = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
 version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
-<defs>
-    <style type="text/css"><![CDATA[
-       path {
-         stroke: black;
-         fill: none;
-         stroke-width: 2;
-       }
+	<defs>
+		<style type="text/css"><![CDATA[
+			path {
+				stroke: black;
+				fill: none;
+				stroke-width: 2;
+			}
 
-       line {
-         stroke: black;
-         stroke-width: 2;
-       }
-    ]]></style>
-  </defs>
-<g id="root" transform="matrix(1,0,0,-1,0,0)">\n${svgExportSource.strOut}</g></svg>`;
+			line {
+				stroke: black;
+				stroke-width: 2;
+			}
+			]]>
+		</style>
+	</defs>
+	<g id="root" transform="matrix(1,0,0,-1,0,0)">\n${svgExportSource.strOut}\t</g>\n</svg>`;
 
     const encodedUri = encodeURI("data:text/svg;charset=utf-8," + content);
 
@@ -178,22 +181,29 @@ version="1.1" viewBox="${boxX} ${boxY} ${boxWidth} ${boxHeight}">
           p2.applyMatrix4(object.matrixWorld);
           p2.applyMatrix4(matrix);
 
+          let decimals = this.decimals;
+
+          let p1x = p1.x.toFixed(decimals);
+          let p1y = p1.y.toFixed(decimals);
+          let p2x = p2.x.toFixed(decimals);
+          let p2y = p2.y.toFixed(decimals);
+
           // 1 point skip
-          if (p1.x === p2.x && p1.y === p2.y)
+          if (p1x === p2x && p1y === p2y)
           {
             continue;
           }
 
-          let line1Id = `${p1.x},${p1.y},${p2.x},${p2.y}`;
-          let line2Id = `${p2.x},${p2.y},${p1.x},${p1.y}`;
+          let lineId = `${p1x},${p1y},${p2x},${p2y}`;
+          let inverseLineId = `${p2x},${p2y},${p1x},${p1y}`;
 
           // write only lines that not overlap
-          if (!drawnLines.has(line1Id) && !drawnLines.has(line2Id))
+          if (!drawnLines.has(lineId) && !drawnLines.has(inverseLineId))
           {
             svgExportSource.strOut += this.indent(level + 1) +
-              `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" />\n`;
+              `<line x1="${p1x}" y1="${p1y}" x2="${p2x}" y2="${p2y}" />\n`;
 
-            drawnLines.add(line1Id);
+            drawnLines.add(lineId);
 
             // update 2d bounding box
             svgExportSource.bbox.expandByPoint(p1);

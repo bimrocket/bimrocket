@@ -6,7 +6,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
-   sodipodi:docname="add.svg"
+   sodipodi:docname="anchor.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="31.678384"
-     inkscape:cx="7.8602495"
-     inkscape:cy="9.1860747"
+     inkscape:cx="7.7971149"
+     inkscape:cy="9.5648818"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -45,7 +45,9 @@
        type="xygrid"
        id="grid1402"
        originx="0"
-       originy="0" />
+       originy="0"
+       spacingx="0.13229166"
+       spacingy="0.13229166" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -62,10 +64,23 @@
      inkscape:label="Capa 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.310335;stroke-linecap:square;stroke-linejoin:round;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect2976"
+       width="0.52916664"
+       height="2.2489581"
+       x="1.8520832"
+       y="1.4552083"
+       ry="0.30238098" />
     <path
-       id="rect1624"
-       style="fill:#4d4d4d;stroke:none;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:bevel;stroke-opacity:0.6;paint-order:markers fill stroke"
-       d="m 1.8520833,0.79375 0,1.0583333 -1.0583333,0 V 2.38125 l 1.0583333,0 0,1.0583333 H 2.38125 l 0,-1.0583333 1.0583333,0 V 1.8520833 l -1.0583333,0 0,-1.0583333 z"
-       sodipodi:nodetypes="ccccccccccccc" />
+       id="path3134"
+       style="color:#000000;fill:#4d4d4d;stroke-linecap:square;stroke-linejoin:round;paint-order:markers fill stroke"
+       d="m 0.54673658,2.1828124 c 0.16160822,0.7176701 0.80457442,1.256254 1.56993002,1.256254 0.7653556,0 1.4083218,-0.5385839 1.56993,-1.256254 H 3.2778361 C 3.127371,2.6815148 2.6658126,3.0427082 2.1166666,3.0427082 c -0.5491459,0 -1.0107043,-0.3611934 -1.16116944,-0.8598958 z" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.396875;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       id="path7695"
+       cx="2.1166666"
+       cy="1.190625"
+       r="0.39687496" />
   </g>
 </svg>

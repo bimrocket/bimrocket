@@ -1,5 +1,35 @@
 /* inspector.css */
 
+div.inspector_card
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+div.inspector_toolbar
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  border-bottom: 1px solid #b0b0b0;
+  overflow: hidden;
+}
+
+div.inspector_properties
+{
+  position: absolute;
+  top: 26px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+}
+
 ul.inspector
 {
   margin-top: 2px;
@@ -94,17 +124,62 @@ ul.inspector li.section > a.expand
 ul.inspector li.section > button
 {
   padding: 0px;
-  width: 15px;
-  height:15px;
+  width: 16px;
+  height:16px;
   background-repeat: no-repeat;
-  background-position: 0px center;
+  background-position: center center;
   vertical-align: middle;
-  margin-left: 5px;
-  margin-right: 5px;
-  background-size: 15px;
-  border: none;
+  margin: 5px;
+  background-size: 16px;
+  box-sizing: border-box;
   vertical-align: middle;
   cursor: pointer;
+}
+
+ul.inspector li.section a.anchored
+{
+  font-style: italic;
+  color: #800000;
+}
+
+div.inspector_toolbar > button
+{
+  padding: 0px;
+  width: 16px;
+  height:16px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  vertical-align: middle;
+  margin: 5px;
+  background-size: 16px;
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+div.inspector_toolbar > span
+{
+  vertical-align: middle;
+}
+
+div.inspector_toolbar > button.list
+{
+  background-image: url(images/list.svg);
+}
+
+div.inspector_toolbar > button.select
+{
+  background-image: url(images/select.svg);
+}
+
+div.inspector_toolbar > button.previous
+{
+  background-image: url(images/previous.svg);
+}
+
+div.inspector_toolbar > button.next
+{
+  background-image: url(images/next.svg);
 }
 
 ul.inspector li.section > button:hover
@@ -125,6 +200,11 @@ ul.inspector li.section > button.edit
 ul.inspector li.section > button.remove
 {
   background-image: url(images/remove.svg);
+}
+
+ul.inspector li.section > button.anchor
+{
+  background-image: url(images/anchor.svg);
 }
 
 ul.inspector li.section > button.start
@@ -270,15 +350,15 @@ ul.inspector li.property.texture
   background-image: url(images/inspector/texture.svg);
 }
 
-ul.inspector li.property.color > span.name
+
+ul.inspector li.property.color > span.value
 {
   margin-right: 2px;
   vertical-align: middle;
 }
 
-ul.inspector li.property.color > span.value
+ul.inspector li.property.color > span.value > span
 {
-  margin-right: 2px;
   vertical-align: middle;
 }
 

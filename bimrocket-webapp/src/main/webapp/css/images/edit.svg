@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="11"
-   height="11"
-   viewBox="0 0 2.9104166 2.9104166"
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333332 4.2333332"
    version="1.1"
    id="svg8"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
    sodipodi:docname="edit.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -24,24 +24,28 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="31.678384"
-     inkscape:cx="7.7497641"
-     inkscape:cy="4.4983355"
+     inkscape:cx="7.7971149"
+     inkscape:cy="10.890707"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="true"
      units="px"
      inkscape:window-width="1920"
-     inkscape:window-height="948"
+     inkscape:window-height="935"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:snap-global="true"
      inkscape:pagecheckerboard="0"
-     width="10px">
+     width="10px"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
     <inkscape:grid
        type="xygrid"
-       id="grid1402" />
+       id="grid1402"
+       originx="0"
+       originy="0" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -59,13 +63,8 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-variant-east-asian:normal;font-feature-settings:normal;font-variation-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;shape-margin:0;inline-size:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.125171;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:1.51181;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
-       d="M 0.572469,0.00846068 C 0.26207653,0.00934399 0.01057641,0.26107301 0.01039946,0.57262164 L 0.0093934,2.3439944 c -1.7695e-4,0.3115487 0.25167709,0.5650443 0.56206954,0.564161 L 2.3501206,2.9030938 C 2.6605132,2.9022104 2.9120132,2.6504814 2.9121902,2.3389328 l 0.00101,-1.77137283 C 2.9133732,0.25601136 2.6615193,0.00251571 2.3511266,0.00339901 Z m 0,0.12616258 1.7786576,-0.005062 C 2.5944637,0.12886911 2.78764,0.32331651 2.7875013,0.56755997 L 2.7864953,2.3389328 C 2.7863565,2.5831761 2.5934577,2.7762388 2.3501206,2.7769313 l -1.77865766,0.00506 C 0.32812586,2.7826854 0.13494956,2.5882378 0.13508828,2.3439944 l 0.001006,-1.77137276 C 0.13623306,0.32837819 0.32913194,0.13531574 0.572469,0.13462326 Z"
-       id="path844"
-       sodipodi:nodetypes="ssssssssssssssssss" />
-    <path
-       style="fill:none;stroke:#4d4d4d;stroke-width:0.264583;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 0.79375,2.1166667 0.5291667,0 L 2.38125,1.0583333 1.8520833,0.52916666 0.79375001,1.5875 l -1e-8,0.5291667"
+       style="fill:none;stroke:#4d4d4d;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0.99577941,3.2375539 H 1.8033376 L 3.4184538,1.6224378 2.6108956,0.81487987 0.99577941,2.4299958 v 0.8075581"
        id="path971"
        sodipodi:nodetypes="cccccc" />
   </g>

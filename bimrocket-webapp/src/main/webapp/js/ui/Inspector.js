@@ -12,6 +12,7 @@ import { Application } from "./Application.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Formula } from "../formula/Formula.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { FormulaDialog } from "./FormulaDialog.js";
 import { PropertiesDialog } from "./PropertiesDialog.js";
 import { PropertyDialog } from "./PropertyDialog.js";
@@ -32,10 +33,10 @@ class Inspector extends Panel
   constructor(application)
   {
     super(application);
-    this.id = "inspector";
     this.position = "right";
 
     this.object = null;
+    this.objects = null;
     this.state = {};
     this.objectSectionName = 'Object';
     this.materialSectionName = 'Material';
@@ -67,6 +68,69 @@ class Inspector extends Panel
     this.addEditor(ColorEditor);
     this.addEditor(TextureEditor);
 
+    this.objectPanelElem = document.createElement("div");
+    this.bodyElem.appendChild(this.objectPanelElem);
+    this.objectPanelElem.className = "inspector_card";
+
+    this.toolBarElem = document.createElement("div");
+    this.objectPanelElem.appendChild(this.toolBarElem);
+    this.toolBarElem.className = "inspector_toolbar";
+
+    this.listButton = Controls.addButton(this.toolBarElem,
+      "list", null, event =>
+    {
+      this.listPanelElem.style.display = "";
+      this.objectPanelElem.style.display = "none";
+    }, "list");
+    I18N.set(this.listButton, "title", "button.list");
+    I18N.set(this.listButton, "alt", "button.list");
+
+    this.previousButton = Controls.addButton(this.toolBarElem,
+      "previous", null, event =>
+    {
+      if (this.objectIndex > 0)
+      {
+        this.showProperties(this.objects[this.objectIndex - 1]);
+        this.centerObject();
+      }
+    }, "previous");
+    I18N.set(this.previousButton, "title", "button.previous");
+    I18N.set(this.previousButton, "alt", "button.previous");
+
+    this.indexElem = document.createElement("span");
+    this.toolBarElem.appendChild(this.indexElem);
+
+    this.nextButton = Controls.addButton(this.toolBarElem,
+      "next", null, event =>
+    {
+      if (this.objectIndex < this.objects.length - 1)
+      {
+        this.showProperties(this.objects[this.objectIndex + 1]);
+        this.centerObject();
+      }
+    }, "next");
+    I18N.set(this.nextButton, "title", "button.next");
+    I18N.set(this.nextButton, "alt", "button.next");
+
+    this.selectButton = Controls.addButton(this.toolBarElem,
+      "select", null, event =>
+    {
+      this.application.selection.set(this.object);
+    }, "select");
+    I18N.set(this.selectButton, "title", "button.select");
+    I18N.set(this.selectButton, "alt", "button.select");
+
+    this.propertiesElem = document.createElement("div");
+    this.objectPanelElem.appendChild(this.propertiesElem);
+    this.propertiesElem.className = "inspector_properties";
+
+    this.listPanelElem = document.createElement("div");
+    this.bodyElem.appendChild(this.listPanelElem);
+    this.listPanelElem.className = "inspector_card";
+
+    this.objectIndex = -1;
+    this.anchoredSectionName = null;
+
     this.edition =
     {
       object : null,
@@ -78,37 +142,68 @@ class Inspector extends Panel
 
     application.addEventListener("selection", event =>
     {
-      if (event.objects.length <= 1)
+      this.showSelectedObjects(event.objects);
+
+      if (event.objects.length === 1)
       {
         this.showProperties(event.objects[0]);
-      }
-      else
-      {
-        this.showSelectedObjects(event.objects);
       }
     });
 
     application.addEventListener("scene", event =>
     {
       if (event.type === "nodeChanged" &&
-        event.objects.length === 1 &&
-        event.objects.includes(application.selection.object) &&
-        event.source !== this)
+          this.object &&
+          event.objects.includes(this.object) &&
+          event.source !== this)
       {
         if (event.properties instanceof Array)
         {
           for (let propertyName of event.properties)
           {
-            this.updateProperty(event.objects[0], propertyName);
+            this.updateProperty(this.object, propertyName);
           }
         }
         else
         {
-          this.showProperties(application.selection.object);
+          this.showProperties(this.object);
         }
       }
     });
     this.title = "tool.inspector.label";
+  }
+
+  showSelectedObjects(objects)
+  {
+    this.listPanelElem.style.display = "";
+    this.objectPanelElem.style.display = "none";
+
+    this.propertiesElem.innerHTML = "";
+    this.listPanelElem.innerHTML = "";
+
+    this.objects = objects;
+    this.objectIndex = objects.length >= 0 ? 0 : -1;
+
+    const infoElem = document.createElement("div");
+    infoElem.className = "inspector_info";
+    I18N.set(infoElem, "innerHTML", "message.objects_selected", objects.length);
+    this.application.i18n.update(infoElem);
+    this.listPanelElem.appendChild(infoElem);
+
+    const selectionTree = new Tree(this.listPanelElem);
+
+    for (let i = 0; i < objects.length; i++)
+    {
+      let object = objects[i];
+      let label = object.name || object.id;
+      let className = this.getObjectClass(object);
+      selectionTree.addNode(label,
+        event =>
+        {
+          this.showProperties(object);
+          this.centerObject();
+        }, className);
+    }
   }
 
   showProperties(object)
@@ -119,20 +214,28 @@ class Inspector extends Panel
     }
 
     this.object = object;
-    this.bodyElem.innerHTML = "";
+    this.objectIndex = this.objects.indexOf(object);
+
+    this.updateToolBar();
+
+    this.propertiesElem.innerHTML = "";
+    this.objectPanelElem.style.display = "";
+    this.listPanelElem.style.display = "none";
+    let anchoredSectionElem = null;
 
     if (object)
     {
       let topListElem = document.createElement("ul");
       topListElem.className = "inspector";
-      this.bodyElem.appendChild(topListElem);
+      this.propertiesElem.appendChild(topListElem);
 
       if (this.state[this.objectSectionName] === undefined)
       {
         this.state[this.objectSectionName] = "expanded";
       }
       // object
-      let objListElem = this.createSection(this.objectSectionName, topListElem);
+      let objListElem = this.createSection(this.objectSectionName, topListElem,
+        [this.createClearAnchorSectionAction()]);
       this.createReadOnlyProperty(objListElem, object, "id");
       for (let propertyName in object)
       {
@@ -295,11 +398,16 @@ class Inspector extends Panel
           }
 
           let dictListElem = this.createSection(dictName, propListElem,
-            [this.createAddPropertyAction(object, dictionary)]);
+            [this.createAddPropertyAction(object, dictionary),
+            this.createAnchorSectionAction(object, dictName)]);
           for (let dictPropertyName in dictionary)
           {
             this.createWriteableProperty(dictListElem, dictionary,
               dictPropertyName);
+          }
+          if (dictName === this.anchoredSectionName)
+          {
+            anchoredSectionElem = dictListElem.parentElement;
           }
         }
         else
@@ -329,7 +437,8 @@ class Inspector extends Panel
           let controlListElem = this.createSection(name, controllersListElem,
             [this.createStartControllerAction(controller),
              this.createStopControllerAction(controller),
-             this.createRemoveControllerAction(controller)]);
+             this.createRemoveControllerAction(controller),
+             this.createAnchorSectionAction(object, name)]);
           this.createReadOnlyProperty(controlListElem, controller, "type",
             controller.constructor.name);
           this.createReadOnlyProperty(controlListElem, controller, "started",
@@ -344,9 +453,15 @@ class Inspector extends Panel
                 propertyName);
             }
           }
+          if (name === this.anchoredSectionName)
+          {
+            anchoredSectionElem = controlListElem.parentElement;
+          }
         }
       }
-      this.application.i18n.updateTree(this.bodyElem);
+      this.application.i18n.updateTree(this.objectPanelElem);
+
+      this.markAnchoredSection(anchoredSectionElem);
     }
   }
 
@@ -363,26 +478,39 @@ class Inspector extends Panel
     }
   }
 
-  showSelectedObjects(objects)
+  updateToolBar()
   {
-    this.bodyElem.innerHTML = "";
+    this.indexElem.innerHTML =
+      (this.objectIndex + 1) + " / " + this.objects.length;
 
-    const infoElem = document.createElement("div");
-    infoElem.className = "inspector_info";
-    I18N.set(infoElem, "innerHTML", "message.objects_selected", objects.length);
-    this.application.i18n.update(infoElem);
-    this.bodyElem.appendChild(infoElem);
-
-    const selectionTree = new Tree(this.bodyElem);
-
-    for (let i = 0; i < objects.length; i++)
+    const objectCount = this.objects.length;
+    if (objectCount < 2)
     {
-      let object = objects[i];
-      let label = object.name || object.id;
-      let className = this.getObjectClass(object);
-      selectionTree.addNode(label,
-        event => this.application.userSelectObjects([object], event),
-        className);
+      this.toolBarElem.style.display = "none";
+      this.propertiesElem.style.top = "0px";
+    }
+    else
+    {
+      this.toolBarElem.style.display = "";
+      this.propertiesElem.style.top = "";
+      this.previousButton.disabled = this.objectIndex <= 0;
+      this.nextButton.disabled = this.objectIndex >= objectCount - 1;
+    }
+  }
+
+  centerObject()
+  {
+    const application = this.application;
+    const object = this.object;
+    if (object)
+    {
+      const container = application.container;
+      const aspect = container.clientWidth / container.clientHeight;
+      const camera = application.camera;
+
+      ObjectUtils.zoomAll(camera, [object], aspect, true);
+
+      application.notifyObjectsChanged(camera, this);
     }
   }
 
@@ -403,6 +531,12 @@ class Inspector extends Panel
     let sectionElem = document.createElement("li");
     sectionElem.className = "section";
     parentElem.appendChild(sectionElem);
+
+    if (this.state[name] === "expanded"
+        && this.firstExpandedSectionElem === null)
+    {
+      this.firstExpandedSectionElem = sectionElem;
+    }
 
     let labelElem = document.createElement("a");
     labelElem.href = "#";
@@ -511,7 +645,7 @@ class Inspector extends Panel
 
     return {
       className: "button edit",
-      label: "label.change_material",
+      label: "button.change_material",
       listener : listener
     };
   }
@@ -526,7 +660,7 @@ class Inspector extends Panel
 
     return {
       className: "button edit",
-      label: "label.object_builder",
+      label: "button.object_builder",
       listener : listener
     };
   }
@@ -541,7 +675,7 @@ class Inspector extends Panel
 
     return {
       className: "button add",
-      label: "label.add_property",
+      label: "button.add_property",
       listener : listener
     };
   }
@@ -556,10 +690,41 @@ class Inspector extends Panel
 
     return {
       className: "button edit",
-      label: "label.edit_properties",
+      label: "button.edit_properties",
       listener : listener
     };
+  }
 
+  createClearAnchorSectionAction()
+  {
+    const listener = event =>
+    {
+      this.anchoredSectionName = null;
+      this.markAnchoredSection();
+    };
+
+    return {
+      className: "button anchor",
+      label: "button.anchor_section",
+      listener : listener
+    };
+  }
+
+  createAnchorSectionAction(object, dictName)
+  {
+    const listener = event =>
+    {
+      this.anchoredSectionName = dictName;
+
+      const elem = event.srcElement.parentElement;
+      this.markAnchoredSection(elem);
+    };
+
+    return {
+      className: "button anchor",
+      label: "button.anchor_section",
+      listener : listener
+    };
   }
 
   createAddFormulaAction(object)
@@ -572,7 +737,7 @@ class Inspector extends Panel
 
     return {
       className: "button add",
-      label: "label.add_formula",
+      label: "button.add_formula",
       listener : listener
     };
   }
@@ -587,7 +752,7 @@ class Inspector extends Panel
 
     return {
       className: "button add",
-      label: "label.add_controller",
+      label: "button.add_controller",
       listener : listener
     };
   }
@@ -608,7 +773,7 @@ class Inspector extends Panel
 
     return {
       className: "button remove",
-      label: "label.remove_controller",
+      label: "button.remove_controller",
       listener : listener
     };
   }
@@ -627,7 +792,7 @@ class Inspector extends Panel
 
     return {
       className: "button start",
-      label: "label.start_controller",
+      label: "button.start_controller",
       listener : listener
     };
   }
@@ -646,9 +811,29 @@ class Inspector extends Panel
 
     return {
       className: "button stop",
-      label: "label.stop_controller",
+      label: "button.stop_controller",
       listener : listener
     };
+  }
+
+  markAnchoredSection(sectionElem)
+  {
+    let anchored = this.propertiesElem.getElementsByClassName("anchored");
+    console.info(anchored);
+    for (let anchoredElem of anchored)
+    {
+      anchoredElem.classList.remove("anchored");
+    }
+
+    if (sectionElem)
+    {
+      sectionElem.firstChild.classList.add("anchored");
+      this.propertiesElem.scrollTo(0, sectionElem.offsetTop);
+    }
+    else
+    {
+      this.propertiesElem.scrollTo(0, 0);
+    }
   }
 
   startEdition(propElem, object, propertyName, renderer, editor)

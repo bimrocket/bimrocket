@@ -6,7 +6,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
-   sodipodi:docname="add.svg"
+   sodipodi:docname="select.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="31.678384"
-     inkscape:cx="7.8602495"
-     inkscape:cy="9.1860747"
+     inkscape:cx="7.8918167"
+     inkscape:cy="9.1860746"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -63,9 +63,18 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       id="rect1624"
-       style="fill:#4d4d4d;stroke:none;stroke-width:0.396875;stroke-linecap:round;stroke-linejoin:bevel;stroke-opacity:0.6;paint-order:markers fill stroke"
-       d="m 1.8520833,0.79375 0,1.0583333 -1.0583333,0 V 2.38125 l 1.0583333,0 0,1.0583333 H 2.38125 l 0,-1.0583333 1.0583333,0 V 1.8520833 l -1.0583333,0 0,-1.0583333 z"
-       sodipodi:nodetypes="ccccccccccccc" />
+       style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="M 2.1166667,0.79375 1.0583333,2.6458333 H 3.175 L 2.1166667,0.79375"
+       id="path800"
+       sodipodi:nodetypes="cccc" />
+    <rect
+       style="fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:0.264999;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:none;paint-order:markers fill stroke"
+       id="rect2517"
+       width="0.52916664"
+       height="0.79374999"
+       x="1.8520833"
+       y="2.6458333"
+       rx="2.4632568e-08"
+       ry="0.26073405" />
   </g>
 </svg>

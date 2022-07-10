@@ -53,6 +53,7 @@ button:disabled
   outline: none;
   color: #c0c0c0;
   border: 1px solid #ffc0c0;
+  opacity: 0.7;
 }
 
 button:disabled:hover

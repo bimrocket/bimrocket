@@ -54,6 +54,7 @@ export const translations =
   "button.select" : "Selecciona",
   "button.anchor_section" : "Ancora secció",
   "button.add_property" : "Afegeix propietat",
+  "button.edit_properties" : "Edita propietats",
   "button.add_formula" : "Afegeix fórmula",
   "button.add_controller" : "Afegeix controlador",
   "button.remove_controller" : "Esborra controlador",
@@ -320,7 +321,6 @@ export const translations =
   "label.property_type" : "Tipus de la propietat:",
   "label.property_value" : "Valor de la propietat:",
   "label.properties" : "Propietats (JSON):",
-  "label.edit_properties" : "Edita propietats",
 
   "label.formula.path" : "Propietat:",
   "label.formula.expression" : "Expressió:",

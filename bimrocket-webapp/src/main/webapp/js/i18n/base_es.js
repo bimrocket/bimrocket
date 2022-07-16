@@ -54,6 +54,7 @@ export const translations =
   "button.select" : "Seleccionar",
   "button.anchor_section" : "Anclar sección",
   "button.add_property" : "Añadir propiedad",
+  "button.edit_properties" : "Editar propietades",
   "button.add_formula" : "Añadir fórmula",
   "button.add_controller" : "Añadir controlador",
   "button.remove_controller" : "Borrar controlador",
@@ -320,7 +321,6 @@ export const translations =
   "label.property_type" : "Tipo de la propiedad:",
   "label.property_value" : "Valor de la propiedad:",
   "label.properties" : "Propiedades (JSON):",
-  "label.edit_properties" : "Editar propiedades",
 
   "label.formula.path" : "Propiedad:",
   "label.formula.expression" : "Expresión:",

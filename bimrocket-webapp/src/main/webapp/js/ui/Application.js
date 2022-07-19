@@ -1165,6 +1165,7 @@ class Application
         clone = new THREE.Object3D();
         clone.name = object.name + "_cloner";
         clone.builder = new Cloner(object);
+        clone.userData.selection = { "group" : true };
         ObjectBuilder.build(clone);
       }
       else

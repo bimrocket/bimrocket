@@ -27,23 +27,24 @@ class BooleanOperator extends SolidBuilder
   {
     const solids = [];
 
-    for (let i = 2; i < solid.children.length; i++)
-    {
-      let child = solid.children[i];
-      if (child instanceof Solid)
-      {
-        child.visible = false;
-        child.edgesVisible = false;
-        child.facesVisible = false;
-        solids.push(child);
-      }
-    }
+    this.findSolids(solid, solids);
+
     if (solids.length === 0) return true;
 
-    const createBSP = function(solid)
+    const matrix = new THREE.Matrix4();
+
+    const createBSP = child =>
     {
+      matrix.copy(child.matrix);
+
+      let parent = child.parent;
+      while (parent && parent !== solid)
+      {
+        matrix.premultiply(parent.matrix);
+        parent = parent.parent;
+      }
       const bsp = new BSP();
-      bsp.fromSolidGeometry(solid.geometry, solid.matrix);
+      bsp.fromSolidGeometry(child.geometry, matrix);
       return bsp;
     };
 
@@ -91,6 +92,27 @@ class BooleanOperator extends SolidBuilder
       }
     }
     return smoothAngle;
+  }
+
+  findSolids(object, solids)
+  {
+    const children = object.children;
+    const start = object instanceof Solid ? 2 : 0;
+    for (let i = start; i < children.length; i++)
+    {
+      let child = children[i];
+      if (child instanceof Solid)
+      {
+        child.visible = false;
+        child.edgesVisible = false;
+        child.facesVisible = false;
+        solids.push(child);
+      }
+      else
+      {
+        this.findSolids(child, solids);
+      }
+    }
   }
 }
 

@@ -32,33 +32,34 @@ class BooleanOperationTool extends Tool
   execute()
   {
     const application = this.application;
-    let objects = application.selection.roots;
-    let operands = [];
-    for (let object of objects)
-    {
-      if (object instanceof THREE.Mesh)
-      {
-        let solid = new Solid(object.geometry.clone());
-        object.matrixWorld.decompose(
-          solid.position, solid.rotation, solid.scale);
-        solid.updateMatrix();
-        solid.updateMatrixWorld();
-        operands.push(solid);
-      }
-      else if (object instanceof Solid)
-      {
-        operands.push(object);
-      }
-    }
+    let operands = application.selection.roots;
+//    let operands = [];
+//    for (let object of objects)
+//    {
+//      if (object instanceof THREE.Mesh)
+//      {
+//        let solid = new Solid(object.geometry.clone());
+//        object.matrixWorld.decompose(
+//          solid.position, solid.rotation, solid.scale);
+//        solid.updateMatrix();
+//        solid.updateMatrixWorld();
+//        operands.push(solid);
+//      }
+//      else if (object instanceof Solid)
+//      {
+//        operands.push(object);
+//      }
+//    }
     if (operands.length > 1)
     {
       const parent = operands[0].parent;
+
       let result = new Solid();
       result.name = this.operation;
       for (let operand of operands)
       {
-        let removeEvent = {type : "removed", object : operand,
-          parent : operand.parent, source : this};
+        let removeEvent = { type : "removed", object : operand,
+          parent : operand.parent, source : this };
 
         result.attach(operand);
         application.notifyEventListeners("scene", removeEvent);

@@ -160,8 +160,6 @@ class Outliner extends Panel
 
   populateObject(object, parentTreeNode)
   {
-    const objectClass = this.getNodeClass(object);
-
     let onClick = event =>
     {
       this.autoScroll = false;
@@ -171,11 +169,11 @@ class Outliner extends Panel
     let treeNode;
     if (parentTreeNode)
     {
-      treeNode = parentTreeNode.addNode(object, onClick, objectClass);
+      treeNode = parentTreeNode.addNode(object, onClick);
     }
     else
     {
-      treeNode = this.tree.addNode(object, onClick, objectClass);
+      treeNode = this.tree.addNode(object, onClick);
     }
     this.updateNodeStyle(treeNode);
     this.populateChildren(treeNode);
@@ -196,30 +194,41 @@ class Outliner extends Panel
     }
   }
 
-  getNodeClass(object)
+  getNodeClassNames(object)
   {
-    if (object.type === "Object3D" &&
-      object.userData.IFC && object.userData.IFC.ifcClassName)
+    let classList = [ object.type ];
+
+    if (object.userData.IFC && object.userData.IFC.ifcClassName)
     {
-      return object.userData.IFC.ifcClassName;
+      classList.push(object.userData.IFC.ifcClassName);
     }
-    else
+    if (object.builder)
     {
-      return object.type;
+      classList.push(object.builder.constructor.name);
     }
+    return classList.join(" ");
   }
 
   updateNodeStyle(treeNode)
   {
     const object = treeNode.value;
-    const classList = treeNode.linkElem.classList;
     if (object.visible)
     {
-      classList.remove("hidden");
+      treeNode.removeClass("hidden");
     }
     else
     {
-      classList.add("hidden");
+      treeNode.addClass("hidden");
+    }
+    let expanded = treeNode.isExpanded();
+    treeNode.itemElem.className = this.getNodeClassNames(object);
+    if (expanded)
+    {
+      treeNode.expand();
+    }
+    else
+    {
+      treeNode.collapse();
     }
   }
 

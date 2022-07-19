@@ -163,3 +163,8 @@ ul.tree li.OrthographicCamera
 {
   background-image: url(images/outliner/camera.svg);
 }
+
+ul.tree li.Cloner
+{
+  background-image: url(images/outliner/cloner.svg);
+}

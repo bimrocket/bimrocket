@@ -1077,10 +1077,11 @@ class Application
   {
     if (!(object instanceof THREE.Object3D)) return;
 
+    const scene = this.scene;
+
     if (parent === null)
     {
       parent = this.selection.object || this.baseObject;
-      const scene = this.scene;
       while (parent !== scene)
       {
         if (parent.type === "Object3D"
@@ -1096,6 +1097,12 @@ class Application
         }
       }
     }
+
+    if (parent === scene)
+    {
+      parent = this.baseObject;
+    }
+
     if (attach)
     {
       parent.attach(object);

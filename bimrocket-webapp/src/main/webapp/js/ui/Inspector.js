@@ -819,7 +819,6 @@ class Inspector extends Panel
   markAnchoredSection(sectionElem)
   {
     let anchored = this.propertiesElem.getElementsByClassName("anchored");
-    console.info(anchored);
     for (let anchoredElem of anchored)
     {
       anchoredElem.classList.remove("anchored");

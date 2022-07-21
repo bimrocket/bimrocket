@@ -28,9 +28,7 @@ class ProfileGeometry extends THREE.BufferGeometry
   {
     const path = this.path;
     const closed = path instanceof THREE.Shape;
-
     const points = path.getPoints(this.divisions);
-    const pointsHoles = closed ? path.getPointsHoles(this.divisions) : [];
     const positions = [];
 
     function addPoints(points)
@@ -46,9 +44,14 @@ class ProfileGeometry extends THREE.BufferGeometry
     }
 
     addPoints(points);
-    for (let pointsHole of pointsHoles)
+    if (closed)
     {
-      addPoints(pointsHole);
+      const pointsHoles = path.getPointsHoles(this.divisions);
+
+      for (let pointsHole of pointsHoles)
+      {
+        addPoints(pointsHole);
+      }
     }
 
     this.setAttribute('position',

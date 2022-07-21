@@ -28,7 +28,7 @@ class CordGeometry extends THREE.BufferGeometry
       for (let i = 0; i < length; i++)
       {
         let vertex = points[i];
-        let nextVertex = points[(i + 1) % points.length];
+        let nextVertex = points[i + 1];
         positions.push(vertex.x, vertex.y, vertex.z);
         positions.push(nextVertex.x, nextVertex.y, nextVertex.z);
       }

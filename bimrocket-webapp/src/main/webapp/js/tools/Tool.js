@@ -59,6 +59,7 @@ class Tool
     raycaster.setFromCamera(pointercc, camera);
     raycaster.far = Math.Infinity;
     raycaster.camera = camera;
+    raycaster.params.Line.threshold = 0.1;
 
     let intersects = raycaster.intersectObjects([baseObject], recursive);
     let i = 0;

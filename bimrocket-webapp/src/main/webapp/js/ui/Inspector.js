@@ -196,7 +196,7 @@ class Inspector extends Panel
     {
       let object = objects[i];
       let label = object.name || object.id;
-      let className = this.getObjectClass(object);
+      let className = this.getObjectClassNames(object);
       selectionTree.addNode(label,
         event =>
         {
@@ -465,17 +465,19 @@ class Inspector extends Panel
     }
   }
 
-  getObjectClass(object)
+  getObjectClassNames(object)
   {
-    if (object.type === "Object3D" &&
-       object.userData.IFC && object.userData.IFC.ifcClassName)
+    let classList = [ object.type ];
+
+    if (object.userData.IFC && object.userData.IFC.ifcClassName)
     {
-      return object.userData.IFC.ifcClassName;
+      classList.push(object.userData.IFC.ifcClassName);
     }
-    else
+    if (object.builder)
     {
-      return object.type;
+      classList.push(object.builder.constructor.name);
     }
+    return classList.join(" ");
   }
 
   updateToolBar()

@@ -194,7 +194,7 @@ class Outliner extends Panel
     }
   }
 
-  getNodeClassNames(object)
+  getObjectClassNames(object)
   {
     let classList = [ object.type ];
 
@@ -221,7 +221,7 @@ class Outliner extends Panel
       treeNode.addClass("hidden");
     }
     let expanded = treeNode.isExpanded();
-    treeNode.itemElem.className = this.getNodeClassNames(object);
+    treeNode.itemElem.className = this.getObjectClassNames(object);
     if (expanded)
     {
       treeNode.expand();

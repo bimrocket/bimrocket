@@ -168,3 +168,52 @@ ul.tree li.Cloner
 {
   background-image: url(images/outliner/cloner.svg);
 }
+
+ul.tree li.CircleBuilder,
+ul.tree li.CircleHollowBuilder
+{
+  background-image: url(images/outliner/circle.svg);
+}
+
+ul.tree li.RectangleBuilder,
+ul.tree li.RectangleHollowBuilder
+{
+  background-image: url(images/outliner/rectangle.svg);
+}
+
+ul.tree li.EllipseBuilder
+{
+  background-image: url(images/outliner/ellipse.svg);
+}
+
+ul.tree li.TrapeziumBuilder
+{
+  background-image: url(images/outliner/trapezium.svg);
+}
+
+ul.tree li.IProfileBuilder
+{
+  background-image: url(images/outliner/iprofile.svg);
+}
+
+ul.tree li.LProfileBuilder
+{
+  background-image: url(images/outliner/lprofile.svg);
+}
+
+ul.tree li.TProfileBuilder
+{
+  background-image: url(images/outliner/tprofile.svg);
+}
+
+ul.tree li.UProfileBuilder
+{
+  background-image: url(images/outliner/uprofile.svg);
+}
+
+ul.tree li.ZProfileBuilder
+{
+  background-image: url(images/outliner/zprofile.svg);
+}
+
+

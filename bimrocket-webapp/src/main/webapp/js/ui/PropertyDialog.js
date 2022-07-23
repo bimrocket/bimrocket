@@ -20,6 +20,7 @@ class PropertyDialog extends Dialog
 
     this.nameElem = this.addTextField("propertyName",
       "label.property_name", "");
+    this.nameElem.setAttribute("spellcheck", false);
     this.typeElem = this.addSelectField("propertyType",
       "label.property_type", ["string", "number", "boolean", "object"]);
     this.valueElem = this.addTextField("propertyValue",
@@ -27,9 +28,16 @@ class PropertyDialog extends Dialog
 
     this.acceptButton = this.addButton("accept", "button.accept",
       () => this.onAccept());
+    this.acceptButton.disabled = true;
 
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());
+
+    this.nameElem.addEventListener("input", () =>
+    {
+      this.nameElem.value = this.nameElem.value.replace(/\s/g, '');
+      this.acceptButton.disabled = this.nameElem.value.length === 0;
+    });
   }
 
   onShow()
@@ -39,11 +47,13 @@ class PropertyDialog extends Dialog
 
   onAccept()
   {
-    this.hide();
     const propertyName = this.nameElem.value;
     const propertyType = this.typeElem.value;
     const propertyValue = this.valueElem.value;
     const dictionary = this.dictionary;
+
+    this.hide();
+
     switch (propertyType)
     {
       case "string":

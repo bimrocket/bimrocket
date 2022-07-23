@@ -213,7 +213,16 @@ class Inspector extends Panel
       this.stopEdition();
     }
 
-    this.object = object;
+    let objectChanged;
+    if (this.object !== object)
+    {
+      this.object = object;
+      objectChanged = true;
+    }
+    else
+    {
+      objectChanged = false;
+    }
     this.objectIndex = this.objects.indexOf(object);
 
     this.updateToolBar();
@@ -461,7 +470,10 @@ class Inspector extends Panel
       }
       this.application.i18n.updateTree(this.objectPanelElem);
 
-      this.markAnchoredSection(anchoredSectionElem);
+      if (objectChanged)
+      {
+        this.markAnchoredSection(anchoredSectionElem);
+      }
     }
   }
 

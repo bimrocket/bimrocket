@@ -17,7 +17,10 @@ class AbstractMenuItem
     this.itemElement = document.createElement("li");
     this.anchorElement = document.createElement("a");
     this.anchorElement.href = "#";
-    I18N.set(this.anchorElement, "innerHTML", label || "menuitem");
+    this.labelElement = document.createElement("div");
+    this.labelElement.className = "label";
+    this.anchorElement.appendChild(this.labelElement);
+    I18N.set(this.labelElement, "innerHTML", label || "menuitem");
     this.itemElement.appendChild(this.anchorElement);
 
     this.anchorElement.addEventListener("pointerenter",
@@ -48,6 +51,17 @@ class MenuItem extends AbstractMenuItem
     {
       this.menuBar.focusMenuItem(this);
     });
+
+    const keyShortcut = tool.keyShortcut;
+    if (keyShortcut)
+    {
+      this.menuBar.keyShortcuts.set(keyShortcut, tool);
+      this.anchorElement.setAttribute("aria-keyshortcuts", keyShortcut);
+      this.keyElement = document.createElement("div");
+      this.keyElement.innerHTML = keyShortcut;
+      this.keyElement.className = "shortcut";
+      this.anchorElement.appendChild(this.keyElement);
+    }
   }
 }
 
@@ -155,6 +169,7 @@ class MenuBar
     this.menuItem = null;
     this.menus = [];
     this.armed = false;
+    this.keyShortcuts = new Map();
 
     this.navElement = document.createElement("nav");
     element.appendChild(this.navElement);
@@ -210,6 +225,11 @@ class MenuBar
         }
       }
     }, true);
+
+    document.addEventListener("keydown", event =>
+    {
+      this.processKey(event);
+    });
 
     window.addEventListener('resize', () => this.hideAllMenus(), false);
 
@@ -280,9 +300,9 @@ class MenuBar
         menu = this.menuItem.parentMenu;
         if (menu)
         {
-          for (var i = 0; i < menu.menuItems.length; i++)
+          for (let i = 0; i < menu.menuItems.length; i++)
           {
-            var sibling = menu.menuItems[i];
+            let sibling = menu.menuItems[i];
             if (sibling instanceof Menu)
             {
               sibling.hide(); // hide sibling menu
@@ -327,6 +347,32 @@ class MenuBar
     }
     this.menuItem = null;
     this.armed = false;
+  }
+
+  processKey(event)
+  {
+    if (event.srcElement.nodeName === "INPUT") return;
+
+    let keys = [];
+    if (event.altKey) keys.push("Alt");
+    if (event.ctrlKey) keys.push("Control");
+    if (event.shiftKey) keys.push("Shift");
+
+    let key = event.key;
+    if (key !== "Alt" && key !== "Control" && key !== "Shift")
+    {
+      if (key.length === 1) key = key.toUpperCase();
+      keys.push(key);
+    }
+
+    let keyShortcut = keys.join("+");
+
+    let tool = this.keyShortcuts.get(keyShortcut);
+    if (tool)
+    {
+      this.application.useTool(tool);
+      event.preventDefault();
+    }
   }
 }
 

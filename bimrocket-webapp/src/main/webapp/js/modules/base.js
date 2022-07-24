@@ -218,15 +218,25 @@ export function load(application)
   const orbitTool = new OrbitTool(application);
   const flyTool = new FlyTool(application);
   const topViewTool = new ViewTool(application,
-    { name : "top", label : "tool.view.top", x : 0, y : 0, z : 0 });
+    { name : "top", label : "tool.view.top", x : 0, y : 0, z : 0,
+      keyShortcut : "Shift+T"
+    });
   const frontViewTool = new ViewTool(application,
-    { name : "front", label : "tool.view.front", x : 90, y : 0, z : 0 });
+    { name : "front", label : "tool.view.front", x : 90, y : 0, z : 0,
+      keyShortcut : "Shift+F"
+    });
   const backViewTool = new ViewTool(application,
-    { name : "back", label : "tool.view.back", x : -90, y : 0, z : 180 });
+    { name : "back", label : "tool.view.back", x : -90, y : 0, z : 180,
+      keyShortcut : "Shift+B"
+    });
   const leftViewTool = new ViewTool(application,
-    { name : "left", label : "tool.view.left", x : 90, y : 90, z : 0 });
+    { name : "left", label : "tool.view.left", x : 90, y : 90, z : 0,
+      keyShortcut : "Shift+L"
+    });
   const rightViewTool = new ViewTool(application,
-    { name : "right", label : "tool.view.right", x : -90, y : -90, z : 180 });
+    { name : "right", label : "tool.view.right", x : -90, y : -90, z : 180,
+      keyShortcut : "Shift+R"
+    });
   const autoOrbitTool = new AutoOrbitTool(application);
   const sectionTool = new SectionTool(application);
   const inspectGeometryTool = new InspectGeometryTool(application);
@@ -256,10 +266,10 @@ export function load(application)
   const activateCameraTool = new ActivateCameraTool(application);
   const perspectiveTool = new CameraProjectionTool(application,
     { name : "perspective", label : "tool.perspective.label",
-      type : "perspective" });
+      type : "perspective", keyShortcut : "Shift+P" });
   const orthographicTool = new CameraProjectionTool(application,
     { name : "orthographic", label : "tool.orthographic.label",
-      type : "orthographic" });
+      type : "orthographic", keyShortcut : "Shift+O" });
   const addBoxTool = new AddObjectTool(application,
     { name : "add_box", label : "tool.add_box.label",
       objectType : "Box" });
@@ -309,13 +319,13 @@ export function load(application)
     { name : "add_sprite", label : "tool.add_sprite.label",
       objectType : "Sprite" });
 
-  const removeTool = new RemoveTool(application);
+  const removeTool = new RemoveTool(application, { keyShortcut : "Delete" });
   const cloneTool = new CloneTool(application);
   const clonerTool = new CloneTool(application,
     { name : "cloner", label : "tool.cloner.label", dynamic : true });
-  const cutTool = new CutTool(application);
-  const pasteTool = new PasteTool(application);
-  const zoomAllTool = new ZoomAllTool(application);
+  const cutTool = new CutTool(application, { keyShortcut : "Control+X" });
+  const pasteTool = new PasteTool(application, { keyShortcut : "Control+V" });
+  const zoomAllTool = new ZoomAllTool(application, { keyShortcut : "Shift+Z" });
   const fullscreenTool = new FullscreenTool(application);
   const centerSelectionTool = new CenterSelectionTool(application);
   const focusSelectionTool = new CenterSelectionTool(application,

@@ -2,6 +2,7 @@
 
 body
 {
+  --menuitem-width: 180px;
   --menuitem-height: 28px;
   --menuitem-background1: #254441;
   --menuitem-background2: #f0f0f0;
@@ -47,6 +48,27 @@ nav a:focus
   outline: none;
 }
 
+nav a div.label
+{
+}
+
+nav a div.shortcut
+{
+  text-align: right;
+  font-size: 11px;
+  position: absolute;
+  right: 4px;
+  color: gray;
+  top: 0;
+  height: var(--menuitem-height);
+}
+
+nav a:focus div.shortcut,
+nav a:hover div.shortcut
+{
+  color: black;
+}
+
 nav ul ul
 {
 	display: none;
@@ -67,7 +89,7 @@ nav ul li.drop > ul
 
 nav ul ul li
 {
-	width:170px;
+	width: var(--menuitem-width);
 	float:none;
 	display:list-item;
 	position: relative;
@@ -96,7 +118,7 @@ nav ul ul ul
 {
 	position: relative;
 	top: calc(var(--menuitem-height) * -1);
-	left: 170px;
+	left: var(--menuitem-width);
   height: 0;
 }
 
@@ -175,14 +197,15 @@ nav ul ul a.menu
     border-top: none;
   }
 
-  nav li > a:after { content:  ' +'; }
-  nav li.drop > a:after { content:  ' -'; }
-  nav li > a:only-child:after { content: ''; }
+  nav li > a.menu div.label:after { content: ' +'; }
+  nav li.drop > a div.label:after { content:  ' -'; }
+  nav li div.shortcut { display: none }
 
   nav a:hover,
   nav a:focus
   {
-    color: #F08080; background: transparent;
+    color: #F08080;
+    background: transparent;
   }
 
   nav > ul

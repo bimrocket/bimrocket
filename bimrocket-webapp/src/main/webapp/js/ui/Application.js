@@ -1084,10 +1084,7 @@ class Application
       parent = this.selection.object || this.baseObject;
       while (parent !== scene)
       {
-        if (parent.type === "Object3D"
-            || parent.type === "Group"
-            || (parent.type === "Solid" && object.type === "Profile")
-            || (parent.type === "Solid" && object.type === "Cord"))
+        if (parent.type === "Object3D" || parent.type === "Group")
         {
           break;
         }

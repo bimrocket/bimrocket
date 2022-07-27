@@ -50,7 +50,7 @@ class PointSelector
         endPoint: new THREE.Vector3(),
         startLocal : new THREE.Vector3(-1, 0, 0),
         endLocal : new THREE.Vector3(1, 0, 0),
-        material : new THREE.LineDashedMaterial(
+        material : new THREE.LineBasicMaterial(
          { color: new THREE.Color(1, 0, 0),
            transparent: true,
            opacity : 0.4

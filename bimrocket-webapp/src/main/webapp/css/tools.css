@@ -486,6 +486,17 @@ div.option_block input[name=decimals]
   vertical-align: middle;
 }
 
+.panel_extrude > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_extrude input[name=extrude_depth]
+{
+  margin-left: 4px;
+  width: 150px;
+}
+
 .script_box textarea
 {
   font-family: monospace;

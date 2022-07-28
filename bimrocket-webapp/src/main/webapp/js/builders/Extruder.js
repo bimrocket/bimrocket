@@ -36,10 +36,13 @@ class Extruder extends SolidBuilder
   performBuild(solid)
   {
     const direction = this.direction;
+    const depth = this.depth;
 
     let profile = this.findClosedProfile(solid);
     if (profile === undefined) return true;
     profile.visible = false;
+
+    const sign = Math.sign(depth) * Math.sign(direction.z);
 
     const shape = profile.geometry.path;
 
@@ -137,7 +140,7 @@ class Extruder extends SolidBuilder
       // extrude in direction vector
       extrudeVector = new THREE.Vector3();
       extrudeVector.copy(direction).normalize();
-      extrudeVector.multiplyScalar(this.depth * Math.sign(direction.z));
+      extrudeVector.multiplyScalar(Math.abs(depth) * Math.sign(direction.z));
 
       // create cordPoints from direction
       cordPoints = []; // Point3D[]
@@ -328,7 +331,7 @@ class Extruder extends SolidBuilder
       shearMatrix.elements[8] = a;
       shearMatrix.elements[9] = b;
 
-      if (direction.z < 0)
+      if (sign < 0)
       {
         const reverseMatrix = new THREE.Matrix4();
         extrudeVector.multiplyScalar(-1);

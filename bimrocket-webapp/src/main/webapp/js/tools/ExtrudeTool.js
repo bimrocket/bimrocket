@@ -27,14 +27,15 @@ class ExtrudeTool extends Tool
     this.setOptions(options);
 
     this.stage = 0;
-    this.matrixWorld = new THREE.Matrix4();
-    this.matrixWorldInverse = new THREE.Matrix4();
+    this.solid = null;
 
-    this.zAxisLine = new THREE.Line3(
+    this.extrudeLine = new THREE.Line3(
       new THREE.Vector3(0, 0, -100), new THREE.Vector3(0, 0, 100));
 
-    this.zAxisLineWorld = new THREE.Line3(
+    this.extrudeLineWorld = new THREE.Line3(
       new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0));
+
+    this.matrixWorldInverse = new THREE.Matrix4();
 
     this.line = null;
 
@@ -44,7 +45,7 @@ class ExtrudeTool extends Tool
     this._onSelection = this.onSelection.bind(this);
     this._onContextMenu = this.onContextMenu.bind(this);
 
-    this.zAxisMaterial = new THREE.LineBasicMaterial(
+    this.extrudeMaterial = new THREE.LineBasicMaterial(
     {
       color : new THREE.Color(0, 0, 1),
       transparent : true,
@@ -81,6 +82,7 @@ class ExtrudeTool extends Tool
     application.removeEventListener('selection', this._onSelection, false);
     application.pointSelector.deactivate();
     this.removeZAxis();
+    this.solid = null;
   }
 
   createPanel()
@@ -119,7 +121,7 @@ class ExtrudeTool extends Tool
     const pointSelector = application.pointSelector;
     if (!pointSelector.isPointSelectionEvent(event)) return;
 
-    if (this.depth !== 0)
+    if (this.stage === 0)
     {
       this.setStage(1);
     }
@@ -135,10 +137,13 @@ class ExtrudeTool extends Tool
       const snap = pointSelector.snap;
       if (snap)
       {
-        let localPoint = new THREE.Vector3();
-        localPoint.copy(snap.positionWorld)
-          .applyMatrix4(this.matrixWorldInverse);
-        this.depth = localPoint.z;
+        let vector = new THREE.Vector3();
+        vector.copy(snap.positionWorld).applyMatrix4(this.matrixWorldInverse);
+        let height = vector.z;
+
+        vector.copy(this.solid.builder.direction).normalize();
+        this.depth = height / vector.z;
+
         this.depthInputElem.value = this.depth;
         this.updateExtrusion();
       }
@@ -193,7 +198,7 @@ class ExtrudeTool extends Tool
         application.pointSelector.clearAxisGuides();
         application.pointSelector.excludeSelection = true;
         application.pointSelector.auxiliaryPoints = [];
-        application.pointSelector.auxiliaryLines = [this.zAxisLineWorld];
+        application.pointSelector.auxiliaryLines = [this.extrudeLineWorld];
         application.pointSelector.activate();
         this.depthLabelElem.style.display = "";
         this.depthInputElem.disabled = true;
@@ -219,33 +224,51 @@ class ExtrudeTool extends Tool
 
   prepareExtrusion()
   {
-    const object = this.application.selection.object;
-    this.depth = 0;
+    const application = this.application;
+    const object = application.selection.object;
+
+    let solid;
+
     if (object instanceof Profile
         && !(object.parent instanceof Solid))
     {
-      this.matrixWorld.copy(object.matrixWorld);
-      this.matrixWorldInverse.copy(object.matrixWorld).invert();
-      this.depth = this.extrudeProfile(object);
+      solid = this.extrudeProfile(object);
+    }
+    else if (object instanceof Profile
+             && object.parent instanceof Solid
+             && object.parent.builder instanceof Extruder
+             && object.parent.children.length === 3)
+    {
+      solid = object.parent;
     }
     else if (object instanceof Solid
              && object.builder instanceof Extruder
-             && object.children.length === 3)
+             && object.children.length === 3
+             && object.children[2] instanceof Profile)
     {
-      this.matrixWorld.copy(object.matrixWorld);
-      this.matrixWorldInverse.copy(object.matrixWorld).invert();
-      this.depth = object.builder.depth;
-      this.depthInputElem.value = this.depth;
-    }
-
-    this.depthInputElem.value = this.depth;
-    if (this.depth === 0)
-    {
-      this.setStage(2);
+      solid = object;
     }
     else
     {
+      solid = null;
+    }
+
+    this.solid = solid;
+
+    if (solid)
+    {
+      this.depth = solid.builder.depth;
+      this.depthInputElem.value = this.depth;
+      if (!application.selection.contains(solid))
+      {
+        application.selection.set(solid);
+      }
       this.setStage(0);
+    }
+    else
+    {
+      this.depth = 0;
+      this.setStage(2);
     }
   }
 
@@ -272,25 +295,23 @@ class ExtrudeTool extends Tool
     solid.add(profile);
     ObjectBuilder.build(solid);
     application.addObject(solid, parent, false, true);
-    application.selection.set(solid);
 
-    return depth;
+    return solid;
   }
 
   updateExtrusion()
   {
-    const application = this.application;
-    const object = application.selection.object;
-    if (object instanceof Solid && object.builder instanceof Extruder)
+    const solid = this.solid;
+    if (solid)
     {
-      let extruder = object.builder;
+      let extruder = solid.builder;
       if (this.depth !== extruder.depth
           && Math.abs(this.depth) >= this.minDepth)
       {
         extruder.depth = this.depth;
-        object.needsRebuild = true;
-        ObjectBuilder.build(object);
-        application.notifyObjectsChanged(object);
+        solid.needsRebuild = true;
+        ObjectBuilder.build(solid);
+        this.application.notifyObjectsChanged(solid);
       }
     }
   }
@@ -298,8 +319,17 @@ class ExtrudeTool extends Tool
   addZAxis()
   {
     const application = this.application;
+    const solid = this.solid;
 
-    this.zAxisLineWorld.copy(this.zAxisLine).applyMatrix4(this.matrixWorld);
+    let vector = new THREE.Vector3();
+    vector.copy(solid.builder.direction).normalize().multiplyScalar(1000);
+    this.extrudeLine.start.copy(vector);
+    vector.negate();
+    this.extrudeLine.end.copy(vector);
+
+    let matrixWorld = solid.matrixWorld;
+    this.extrudeLineWorld.copy(this.extrudeLine).applyMatrix4(matrixWorld);
+    this.matrixWorldInverse.copy(matrixWorld).invert();
 
     if (this.line)
     {
@@ -307,14 +337,14 @@ class ExtrudeTool extends Tool
     }
 
     let geometryPoints = [];
-    geometryPoints.push(this.zAxisLineWorld.start);
-    geometryPoints.push(this.zAxisLineWorld.end);
+    geometryPoints.push(this.extrudeLineWorld.start);
+    geometryPoints.push(this.extrudeLineWorld.end);
 
     let geometry = new THREE.BufferGeometry();
     geometry.setFromPoints(geometryPoints);
 
-    this.line = new THREE.Line(geometry, this.zAxisMaterial);
-    this.line.name = "zAxis";
+    this.line = new THREE.Line(geometry, this.extrudeMaterial);
+    this.line.name = "extrudeLine";
     this.line.raycast = function(){};
 
     application.overlays.add(this.line);

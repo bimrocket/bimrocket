@@ -127,11 +127,26 @@ class MeasureLengthTool extends Tool
 
   removeLastPoint()
   {
-    this.vertices.pop();
-    this.updateLineString();
     const pointSelector = this.application.pointSelector;
-    pointSelector.auxiliaryLines.pop();
-    pointSelector.clearAxisGuides();
+
+    if (this.vertices.length > 0)
+    {
+      this.vertices.pop();
+      this.updateLineString();
+
+      if (this.vertices.length > 0)
+      {
+        let lastVertex = this.vertices[this.vertices.length - 1];
+        pointSelector.auxiliaryLines.pop();
+        let axisMatrixWorld = new THREE.Matrix4();
+        axisMatrixWorld.setPosition(lastVertex);
+        pointSelector.setAxisGuides(axisMatrixWorld, true);
+      }
+      else
+      {
+        pointSelector.clearAxisGuides();
+      }
+    }
   }
 
   updateLineString()

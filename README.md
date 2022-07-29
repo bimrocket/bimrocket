@@ -17,15 +17,16 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Multiple selection of objects.
 - Edition of the model structure and the object properties.
 - Dynamic sectioning of models.
-- Vertex and egde snapping in measure and draw tools.
+- Shadow casting.
+- Vertex, egde and face snapping in the drawing, measurement and transformation tools.
 - Scripting tool.
 - Object controllers (programs that change the object state)
 - Load IFC files directly from local disk or the web server. Support for multiple IFC schemas (IFC2x3, IFC4, ...).
 - IFC Inventory tool to explore the types, classifications, groups and layers of the model.
 - IFC Layout tool to view the building layout easily.
 - Load/Export models in BRF format (JSON BimRocket format).
-- Load/Export models in STL, Wavefront OBJ and Collada formats.
-- Integrated with external services (some of them provided by bimrocket-server)
+- Load/Export models in STL, GLB, Wavefront OBJ and Collada formats.
+- Integrated with external services (some of them provided by bimrocke_t-server)
   - File service (Webdav implementation)
   - [BCF](https://en.wikipedia.org/wiki/BIM_Collaboration_Format) service (BIM Collaboration Service)
   - [WFS](https://en.wikipedia.org/wiki/Web_Feature_Service) service (Web Feature Service)

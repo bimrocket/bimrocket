@@ -1,5 +1,5 @@
 /**
- * Snap.js
+ * PointSelector.js
  *
  * @author realor
  */
@@ -8,6 +8,8 @@ import { Application } from "../ui/Application.js";
 import { GeometryUtils } from "./GeometryUtils.js";
 import { ObjectUtils } from "./ObjectUtils.js";
 import { Solid } from "../core/Solid.js";
+import { Profile } from "../core/Profile.js";
+import { Cord } from "../core/Cord.js";
 import { I18N } from "../i18n/I18N.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import * as THREE from "../lib/three.module.js";
@@ -494,6 +496,57 @@ class PointSelector
       }
     };
 
+    const addProfileSnaps = (object) =>
+    {
+      const path = object.geometry.path;
+      const points = path.getPoints(object.geometry.divisions);
+
+      let vertex1 = point1;
+      let vertex2 = point2;
+
+      for (let i = 0; i < points.length; i++)
+      {
+        let p1 = points[i];
+        let p2 = points[(i + 1) % points.length];
+
+        vertex1.x = p1.x;
+        vertex1.y = p1.y;
+        vertex1.z = 0;
+
+        vertex2.x = p2.x;
+        vertex2.y = p2.y;
+        vertex2.z = 0;
+
+        addVertexSnap(object, vertex1, "label.on_vertex",
+          PointSelector.VERTEX_SNAP);
+
+        addEdgeSnap(object, vertex1, vertex2, "label.on_edge",
+          PointSelector.EDGE_SNAP);
+      }
+    };
+
+    const addCordSnaps = (object) =>
+    {
+      const vertices = object.geometry.points;
+
+      let vertex1 = point1;
+      let vertex2 = point2;
+
+      for (let i = 0; i < vertices.length - 1; i++)
+      {
+        vertex1.copy(vertices[i]);
+        vertex2.copy(vertices[i + 1]);
+
+        addVertexSnap(object, vertex1, "label.on_vertex",
+          PointSelector.VERTEX_SNAP);
+
+        addEdgeSnap(object, vertex1, vertex2, "label.on_edge",
+          PointSelector.EDGE_SNAP);
+      }
+      addVertexSnap(object, vertices[vertices.length - 1], "label.on_vertex",
+        PointSelector.VERTEX_SNAP);
+    };
+
     const addBufferGeometrySnaps = (object) =>
     {
       const matrixWorld = object.matrixWorld;
@@ -516,11 +569,19 @@ class PointSelector
         {
           if (rayIntersectsObject(object))
           {
-            if (object instanceof Solid && object.facesVisible)
+            if (object instanceof Solid)
             {
               addSolidVertexSnaps(object);
               addSolidEdgeSnaps(object);
               addSolidFaceSnaps(object);
+            }
+            else if (object instanceof Profile)
+            {
+              addProfileSnaps(object);
+            }
+            else if (object instanceof Cord)
+            {
+              addCordSnaps(object);
             }
             else if (object.geometry instanceof THREE.BufferGeometry)
             {

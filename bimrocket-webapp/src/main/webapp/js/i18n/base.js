@@ -153,6 +153,9 @@ export const translations =
   "tool.scale.select_destination_point" : "Select destination point.",
   "tool.scale.edit_scale" : "Edit scale or select anchor point.",
 
+  "tool.place.label" : "Place",
+  "tool.place.help" : "Select a point to place the object.",
+
   "tool.extrude.label" : "Extrude",
   "tool.extrude.drag_pointer" : "Drag the pointer to extrude the selected object dinamically.",
   "tool.extrude.select_object" : "Select profile or solid to extrude.",
@@ -311,6 +314,7 @@ export const translations =
   "label.scale_factor" : "Scale factor:",
   "label.scale_keep_proportions" : "Keep proportions",
   "label.depth" : "Depth:",
+  "label.place_mode" : "Mode:",
 
   "label.name" : "Name:",
   "label.format" : "Format:",

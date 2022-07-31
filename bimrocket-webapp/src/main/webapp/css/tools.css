@@ -275,6 +275,11 @@
   background-image: url(images/tools/scale.svg);
 }
 
+.tool_button.place
+{
+  background-image: url(images/tools/place.svg);
+}
+
 .tool_button.options
 {
   background-image: url(images/tools/options.svg);
@@ -484,6 +489,16 @@ div.option_block input[name=decimals]
 .panel_scale div > label
 {
   vertical-align: middle;
+}
+
+.panel_place > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_place select[name=place_mode]
+{
+  margin-left: 4px;
 }
 
 .panel_extrude > .body > div

@@ -153,6 +153,9 @@ export const translations =
   "tool.scale.select_destination_point" : "Selecciona punt de destinació.",
   "tool.scale.edit_scale" : "Edita l'escala o selecciona punt d'ancoratge.",
 
+  "tool.place.label" : "Posiciona",
+  "tool.place.help" : "Selecciona un punt per posicionar l'objecte.",
+
   "tool.extrude.label" : "Extrusiona",
   "tool.extrude.drag_pointer" : "Arrossega el punter per extrusionar l'objecte seleccionat dinàmicament.",
   "tool.extrude.select_object" : "Selecciona el perfil o el sòlid que vols extrusionar.",
@@ -311,6 +314,7 @@ export const translations =
   "label.scale_factor" : "Factor d'escala:",
   "label.scale_keep_proportions" : "Manté proporcions",
   "label.depth" : "Profunditat:",
+  "label.place_mode" : "Mode:",
 
   "label.name" : "Nom:",
   "label.format" : "Format:",

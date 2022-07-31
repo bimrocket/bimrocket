@@ -29,6 +29,7 @@ import { RebuildTool } from "../tools/RebuildTool.js";
 import { MoveTool } from "../tools/MoveTool.js";
 import { RotateTool } from "../tools/RotateTool.js";
 import { ScaleTool } from "../tools/ScaleTool.js";
+import { PlaceTool } from "../tools/PlaceTool.js";
 import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
@@ -247,6 +248,7 @@ export function load(application)
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
   const scaleTool = new ScaleTool(application);
+  const placeTool = new PlaceTool(application);
   const extrudeTool = new ExtrudeTool(application);
   const unionTool = new BooleanOperationTool(application,
     { name : "union", label : "tool.union.label",
@@ -387,6 +389,7 @@ export function load(application)
   application.addTool(moveTool);
   application.addTool(rotateTool);
   application.addTool(scaleTool);
+  application.addTool(placeTool);
   application.addTool(extrudeTool);
   application.addTool(unionTool);
   application.addTool(intersectionTool);
@@ -522,6 +525,7 @@ export function load(application)
   transformMenu.addMenuItem(moveTool);
   transformMenu.addMenuItem(rotateTool);
   transformMenu.addMenuItem(scaleTool);
+  transformMenu.addMenuItem(placeTool);
   const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
@@ -581,6 +585,7 @@ export function load(application)
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);
   toolBar.addToolButton(scaleTool);
+  toolBar.addToolButton(placeTool);
   toolBar.addToolButton(selectByQRCodeTool);
 
   // restore services

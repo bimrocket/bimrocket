@@ -143,6 +143,10 @@ class RotateTool extends TransformationTool
             axisMatrixWorld.identity();
           }
           axisMatrixWorld.setPosition(this.firstPointWorld);
+          if (application.selection.isEmpty())
+          {
+            application.selection.set(snap.object);
+          }
         }
         this.setStage(1);
       }

@@ -47,11 +47,9 @@ class ExtrudeTool extends Tool
 
     this.extrudeMaterial = new THREE.LineBasicMaterial(
     {
-      color : new THREE.Color(0, 0, 1),
-      transparent : true,
+      color : new THREE.Color(1, 0, 0),
       depthTest : false,
-      linewidth: 2,
-      opacity : 0.4
+      linewidth: 1.5
     });
 
     this.createPanel();
@@ -81,7 +79,7 @@ class ExtrudeTool extends Tool
     container.removeEventListener('pointermove', this._onPointerMove, false);
     application.removeEventListener('selection', this._onSelection, false);
     application.pointSelector.deactivate();
-    this.removeZAxis();
+    this.removeExtrusionAxis();
     this.solid = null;
   }
 
@@ -191,7 +189,7 @@ class ExtrudeTool extends Tool
         this.applyButton.style.display = "";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
-        this.removeZAxis();
+        this.removeExtrusionAxis();
         break;
 
       case 1: // dynamic extrude
@@ -206,7 +204,7 @@ class ExtrudeTool extends Tool
         this.applyButton.style.display = "none";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
-        this.addZAxis();
+        this.addExtrusionAxis();
         break;
 
       case 2: // no object selected
@@ -217,7 +215,7 @@ class ExtrudeTool extends Tool
         this.applyButton.style.display = "none";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.select_object");
         application.i18n.update(this.helpElem);
-        this.removeZAxis();
+        this.removeExtrusionAxis();
         break;
     }
   }
@@ -316,7 +314,7 @@ class ExtrudeTool extends Tool
     }
   }
 
-  addZAxis()
+  addExtrusionAxis()
   {
     const application = this.application;
     const solid = this.solid;
@@ -346,12 +344,13 @@ class ExtrudeTool extends Tool
     this.line = new THREE.Line(geometry, this.extrudeMaterial);
     this.line.name = "extrudeLine";
     this.line.raycast = function(){};
+    this.line.renderOrder = 10;
 
     application.overlays.add(this.line);
     application.repaint();
   }
 
-  removeZAxis()
+  removeExtrusionAxis()
   {
     if (this.line)
     {

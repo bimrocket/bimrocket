@@ -69,7 +69,7 @@ class Profile extends THREE.LineSegments
             {
               distance : distance,
               object : this,
-              point : interSegment.clone().applyMatrix4(matrixWorld) // to world
+              point : interRay.clone().applyMatrix4(matrixWorld) // to world
             }
           );
         }

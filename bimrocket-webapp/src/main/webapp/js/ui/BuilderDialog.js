@@ -30,14 +30,14 @@ class BuilderDialog extends Dialog
     this.listElem = listElem;
     listElem.className = "controller_list";
     this.bodyElem.appendChild(listElem);
-    
+
     const classes = this.findBuilderClasses(this.object);
-    let currentClassName = this.object.builder ? 
+    let currentClassName = this.object.builder ?
       this.object.builder.constructor.name : "";
 
     let inputElem = this.addItem("None", listElem);
     inputElem.checked = true;
-    
+
     for (let builderClass of classes)
     {
       let inputElem = this.addItem(builderClass.name, listElem);
@@ -57,7 +57,7 @@ class BuilderDialog extends Dialog
       this.onCancel();
     });
   }
-  
+
   addItem(className, listElem)
   {
     let id = Controls.getNextId();
@@ -79,7 +79,7 @@ class BuilderDialog extends Dialog
     nameSpanElem.className = "type";
     nameSpanElem.innerHTML = className;
     labelElem.appendChild(nameSpanElem);
-    
+
     return inputElem;
   }
 
@@ -111,7 +111,7 @@ class BuilderDialog extends Dialog
   {
     this.hide();
   }
-  
+
   findBuilderClasses(object)
   {
     const classes = [];
@@ -146,6 +146,15 @@ class BuilderDialog extends Dialog
         classes.push(cls);
       }
     }
+    classes.sort((class1, class2) =>
+    {
+      let name1 = class1.name;
+      let name2 = class2.name;
+
+      if (name1 < name2) return -1;
+      else if (name1 > name2) return 1;
+      else return 0;
+    });
     return classes;
   }
 }

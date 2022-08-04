@@ -61,6 +61,16 @@ import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
 import { BooleanOperator } from "../builders/BooleanOperator.js";
 import { GeometryMerger } from "../builders/GeometryMerger.js";
+import { RectangleBuilder } from "../builders/RectangleBuilder.js";
+import { CircleBuilder } from "../builders/CircleBuilder.js";
+import { EllipseBuilder } from "../builders/EllipseBuilder.js";
+import { IProfileBuilder } from "../builders/IProfileBuilder.js";
+import { LProfileBuilder } from "../builders/LProfileBuilder.js";
+import { TProfileBuilder } from "../builders/TProfileBuilder.js";
+import { UProfileBuilder } from "../builders/UProfileBuilder.js";
+import { ZProfileBuilder } from "../builders/ZProfileBuilder.js";
+import { TrapeziumBuilder } from "../builders/TrapeziumBuilder.js";
+import { HelicoidBuilder } from "../builders/HelicoidBuilder.js";
 import { Brain4itPostController } from "../controllers/Brain4itPostController.js";
 import { Brain4itWatchController } from "../controllers/Brain4itWatchController.js";
 import { ColorController } from "../controllers/ColorController.js";
@@ -286,34 +296,34 @@ export function load(application)
       objectType : "Spring" });
   const addRectangleTool = new AddObjectTool(application,
     { name : "add_rectangle", label : "tool.add_rectangle.label",
-      objectType : "Rectangle" });
+      objectType : "Profile", builderClass : RectangleBuilder });
   const addCircleTool = new AddObjectTool(application,
     { name : "add_circle", label : "tool.add_circle.label",
-      objectType : "Circle" });
+      objectType : "Profile", builderClass : CircleBuilder });
   const addEllipseTool = new AddObjectTool(application,
     { name : "add_ellipse", label : "tool.add_ellipse.label",
-      objectType : "Ellipse" });
+      objectType : "Profile", builderClass : EllipseBuilder });
   const addTrapeziumTool = new AddObjectTool(application,
     { name : "add_trapezium", label : "tool.add_trapezium.label",
-      objectType : "Trapezium" });
+      objectType : "Profile", builderClass : TrapeziumBuilder });
   const addIProfileTool = new AddObjectTool(application,
     { name : "add_iprofile", label : "tool.add_iprofile.label",
-      objectType : "IProfile" });
+      objectType : "Profile", builderClass : IProfileBuilder });
   const addLProfileTool = new AddObjectTool(application,
     { name : "add_lprofile", label : "tool.add_lprofile.label",
-      objectType : "LProfile" });
+      objectType : "Profile", builderClass : LProfileBuilder });
   const addTProfileTool = new AddObjectTool(application,
     { name : "add_tprofile", label : "tool.add_tprofile.label",
-      objectType : "TProfile" });
+      objectType : "Profile", builderClass : TProfileBuilder });
   const addUProfileTool = new AddObjectTool(application,
     { name : "add_uprofile", label : "tool.add_uprofile.label",
-      objectType : "UProfile" });
+      objectType : "Profile", builderClass : UProfileBuilder });
   const addZProfileTool = new AddObjectTool(application,
     { name : "add_zprofile", label : "tool.add_zprofile.label",
-      objectType : "ZProfile" });
+      objectType : "Profile", builderClass : ZProfileBuilder });
   const addHelicoidTool = new AddObjectTool(application,
     { name : "add_helicoid", label : "tool.add_helicoid.label",
-      objectType : "Helicoid" });
+      objectType : "Cord", builderClass : HelicoidBuilder });
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "Group" });

@@ -29,6 +29,9 @@ class AddObjectTool extends Tool
     this.help = "tool.add_object.help";
     this.className = "add_object";
     this.immediate = true;
+    this.objectType = null;
+    this.builderClass = null;
+
     this.setOptions(options);
     this.counter = 0;
   }
@@ -58,50 +61,14 @@ class AddObjectTool extends Tool
       case "Logo":
         object = this.createLogo();
         break;
-      case "Rectangle":
-        object = this.createProfile("RectangleBuilder");
+      case "Profile":
+        object = this.createProfile(this.builderClass);
         break;
-      case "RectangleHollow":
-        object = this.createProfile("RectangleHollowBuilder");
-        break;
-      case "Circle":
-        object = this.createProfile("CircleBuilder");
-        break;
-      case "CircleHollow":
-        object = this.createProfile("CircleHollowBuilder");
-        break;
-      case "Ellipse":
-        object = this.createProfile("EllipseBuilder");
-        break;
-      case "Trapezium":
-        object = this.createProfile("TrapeziumBuilder");
-        break;
-      case "IProfile":
-        object = this.createProfile("IProfileBuilder");
-        break;
-      case "LProfile":
-        object = this.createProfile("LProfileBuilder");
-        break;
-      case "TProfile":
-        object = this.createProfile("TProfileBuilder");
-        break;
-      case "UProfile":
-        object = this.createProfile("UProfileBuilder");
-        break;
-      case "ZProfile":
-        object = this.createProfile("ZProfileBuilder");
-        break;
-      case "ZProfile":
-        object = this.createProfile("ZProfileBuilder");
-        break;
-      case "Helicoid":
-        object = this.createCord("HelicoidBuilder");
+      case "Cord":
+        object = this.createCord(this.builderClass);
         break;
       case "Sprite":
         object = this.createSprite();
-        break;
-      case "Test":
-        object = this.test();
         break;
     }
     if (object)
@@ -203,24 +170,18 @@ class AddObjectTool extends Tool
     return solid;
   }
 
-  createProfile(profileBuilderName)
+  createProfile(profileBuilderClass)
   {
-    const cls = ObjectBuilder.classes[profileBuilderName];
-    if (cls === undefined) return;
-
-    const builder = new cls();
+    const builder = new profileBuilderClass();
     const profile = new Profile();
     profile.builder = builder;
     ObjectBuilder.build(profile);
     return profile;
   }
 
-  createCord(cordBuilderName)
+  createCord(cordBuilderClass)
   {
-    const cls = ObjectBuilder.classes[cordBuilderName];
-    if (cls === undefined) return;
-
-    const builder = new cls();
+    const builder = new cordBuilderClass();
     const cord = new Cord();
     cord.builder = builder;
     ObjectBuilder.build(cord);
@@ -243,137 +204,6 @@ class AddObjectTool extends Tool
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(0.1, 0.1, 0.1);
     return sprite;
-  }
-
-  test()
-  {
-    const group = new THREE.Group();
-    group.add(this.test1());
-    group.add(this.test2());
-    group.add(this.test3());
-    group.add(this.test4());
-    group.add(this.test5());
-
-    group.updateMatrix();
-
-    return group;
-  }
-
-  test1()
-  {
-    const geometry = new SolidGeometry();
-    geometry.addFace(new THREE.Vector3(0, 0, 0),
-                     new THREE.Vector3(1, 0, 0),
-                     new THREE.Vector3(1, 1, 0),
-                     new THREE.Vector3(0.7, 0.7, 0),
-                     new THREE.Vector3(0.7, 0.3, 0),
-                     new THREE.Vector3(0.3, 0.3, 0),
-                    );
-
-    geometry.addFace(new THREE.Vector3(1, 1, 0),
-                     new THREE.Vector3(0, 1, 0),
-                     new THREE.Vector3(0, 0, 0));
-
-    const solid = new Solid(geometry);
-    solid.position.x = 0;
-    solid.updateMatrix();
-
-    return solid;
-  }
-
-  test2()
-  {
-    const geometry = new SolidGeometry();
-    geometry.addFace(new THREE.Vector3(0, 0, 0),
-                     new THREE.Vector3(1, 0, 0),
-                     new THREE.Vector3(1, 1, 0),
-                     new THREE.Vector3(0.7, 0.7, 0),
-                     new THREE.Vector3(0.7, 0.3, 0),
-                     new THREE.Vector3(0.3, 0.3, 0),
-                    );
-
-    geometry.addFace(new THREE.Vector3(1, 1, 0),
-                     new THREE.Vector3(0, 1, 0),
-                     new THREE.Vector3(0, 0, 0),
-                     new THREE.Vector3(0.3, 0.3, 0),
-                     new THREE.Vector3(0.3, 0.7, 0),
-                     new THREE.Vector3(0.7, 0.7, 0));
-
-    const solid = new Solid(geometry);
-    solid.position.x = 2;
-    solid.updateMatrix();
-
-    return solid;
-  }
-
-  test3()
-  {
-    const geometry = new SolidGeometry();
-    geometry.addFace(new THREE.Vector3(0, 0, 0),
-                     new THREE.Vector3(1, 0, 0),
-                     new THREE.Vector3(2, 0, 0),
-                     new THREE.Vector3(2, 1, 0),
-                     new THREE.Vector3(1, 0.00001, 0),
-                    );
-
-    const solid = new Solid(geometry);
-    solid.position.x = 3.5;
-    solid.updateMatrix();
-
-    return solid;
-  }
-
-  test4()
-  {
-    const geometry = new SolidGeometry();
-    let v0 = new THREE.Vector3(0, 0, 0);
-    let v1 = new THREE.Vector3(0.7, 0, 0);
-    let v2 = new THREE.Vector3(1, 0, 0);
-    let v3 = new THREE.Vector3(1, 0.7, 0);
-    let v4 = new THREE.Vector3(1, 1, 0);
-    let v5 = new THREE.Vector3(0.3, 1, 0);
-    let v6 = new THREE.Vector3(0, 1, 0);
-    let v7 = new THREE.Vector3(0, 0.3, 0);
-    let v8 = new THREE.Vector3(0.3, 0.3, 0);
-    let v9 = new THREE.Vector3(0.7, 0.3, 0);
-    let v10 = new THREE.Vector3(0.7, 0.7, 0);
-    let v11 = new THREE.Vector3(0.3, 0.7, 0);
-
-    geometry.addFace(v0, v1, v9, v7);
-//    geometry.addFace(v1, v2, v3, v10);
-    geometry.addFace(v10, v3, v2, v1);
-
-    geometry.addFace(v3, v4, v5, v11);
-    geometry.addFace(v5, v6, v7, v8);
-
-    const solid = new Solid(geometry);
-    solid.position.x = 6;
-    solid.updateMatrix();
-
-    return solid;
-  }
-
-  test5()
-  {
-    const geometry = new SolidGeometry();
-    let v0 = new THREE.Vector3(0, 0, 0);
-    let v1 = new THREE.Vector3(1, 0, 0);
-    let v2 = new THREE.Vector3(1, 1, 0);
-    let v3 = new THREE.Vector3(0, 1, 0);
-    let v4 = new THREE.Vector3(0.3, 0.3, 0);
-    let v5 = new THREE.Vector3(0.7, 0.7, 0);
-
-    geometry.addFace(v0, v1, v4);
-    geometry.addFace(v1, v5, v4);
-    geometry.addFace(v1, v2, v5);
-    geometry.addFace(v0, v2, v3);
-
-    const solid = new Solid(geometry);
-    solid.position.x = 0;
-    solid.position.y = 2;
-    solid.updateMatrix();
-
-    return solid;
   }
 }
 

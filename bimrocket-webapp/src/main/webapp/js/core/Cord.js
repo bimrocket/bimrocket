@@ -16,7 +16,8 @@ class Cord extends THREE.LineSegments
   {
     name: 'CordMaterial',
     color: 0x205030,
-    opacity : 0.5,
+    opacity : 0.8,
+    linewidth: 1.5,
     transparent : true
   });
 

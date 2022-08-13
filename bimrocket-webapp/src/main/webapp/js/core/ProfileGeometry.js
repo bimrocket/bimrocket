@@ -28,16 +28,16 @@ class ProfileGeometry extends THREE.BufferGeometry
   {
     const path = this.path;
     const closed = path instanceof THREE.Shape;
-    const points = path.getPoints(this.divisions);
+    const points = path.getPoints(this.divisions); // if closed, last === first
     const positions = [];
 
     function addPoints(points)
     {
-      let length = closed ? points.length : points.length - 1;
+      let length = points.length - 1;
       for (let i = 0; i < length; i++)
       {
         let vertex = points[i];
-        let nextVertex = points[(i + 1) % points.length];
+        let nextVertex = points[i + 1];
         positions.push(vertex.x, vertex.y, 0);
         positions.push(nextVertex.x, nextVertex.y, 0);
       }

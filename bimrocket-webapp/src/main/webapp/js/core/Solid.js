@@ -18,6 +18,8 @@ class Solid extends THREE.Object3D
     name: 'SolidFaceMaterial',
     color: 0xc0c0c0,
     side: THREE.DoubleSide,
+    polygonOffset : true,
+    polygonOffsetFactor : 1,
     shininess: 1,
     flatShading: false});
   static EdgeMaterial = new THREE.LineBasicMaterial({

@@ -16,7 +16,8 @@ class Profile extends THREE.LineSegments
   {
     name: 'ProfileMaterial',
     color: 0x0,
-    opacity : 0.5,
+    opacity : 0.8,
+    linewidth: 1.5,
     transparent : true
   });
 

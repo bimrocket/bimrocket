@@ -88,6 +88,34 @@ class GeometryUtils
     return -1;
   }
 
+  static centroid(vertexPositions, accessFn, centroid)
+  {
+    if (!(centroid instanceof THREE.Vector3)) centroid = new THREE.Vector3();
+    else centroid.set(0, 0, 0);
+
+    const count = vertexPositions.length;
+    let point;
+    for (let i = 0; i < count; i++)
+    {
+      if (accessFn)
+      {
+        point = accessFn(vertexPositions[i]);
+      }
+      else
+      {
+        point = vertexPositions[i];
+      }
+      centroid.x += point.x;
+      centroid.y += point.y;
+      centroid.z += point.z;
+    }
+    centroid.x /= count;
+    centroid.y /= count;
+    centroid.z /= count;
+
+    return centroid;
+  }
+
   static calculateNormal(vertexPositions, accessFn, normal)
   {
     if (!(normal instanceof THREE.Vector3)) normal = new THREE.Vector3();

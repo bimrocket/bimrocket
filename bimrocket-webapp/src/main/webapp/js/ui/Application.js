@@ -205,17 +205,15 @@ class Application
 
     this.selectionMaterial = new THREE.LineBasicMaterial(
       { color: selectionColor, linewidth: 1.5,
-        depthTest: true, depthWrite: true,
-        polygonOffset: true, polygonOffsetFactor: 2, transparent : true });
+        depthTest: true, depthWrite: true, transparent : true });
 
     this.deepSelectionMaterial = new THREE.LineBasicMaterial(
-      { color: selectionColor, linewidth: 1,
+      { color: selectionColor, linewidth: 1.5,
         depthTest: false, depthWrite: false, transparent : true });
 
     this.boxSelectionMaterial = new THREE.LineBasicMaterial(
       { color: selectionColor, linewidth: 1.5,
-        depthTest: true, depthWrite: true,
-        polygonOffset: true, polygonOffsetFactor: 2 });
+        depthTest: true, depthWrite: true });
 
     this.invisibleSelectionMaterial = new LineDashedShaderMaterial(
       { color: selectionColor, dashSize: 4, gapSize: 4,

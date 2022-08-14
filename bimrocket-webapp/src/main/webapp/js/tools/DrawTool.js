@@ -30,6 +30,8 @@ class DrawTool extends Tool
     this.index = -1;
     this.object = null; // Cord or Profile
     this.points = null; // THREE.Points
+    this.position1World = null; // THREE.Vector3
+    this.position2World = null; // THREE.Vector3
     this.inverseMatrixWorld = new THREE.Matrix4(); // object inverse matrixWorld
 
     this.addPointsMaterial = new THREE.PointsMaterial(
@@ -55,6 +57,14 @@ class DrawTool extends Tool
     this.panel.bodyElem.appendChild(this.helpElem);
     I18N.set(this.helpElem, "innerHTML", "tool.draw.help");
 
+    this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
+      "draw_offset", "label.offset", 0);
+    this.offsetInputElem.step = 0.1;
+    this.offsetInputElem.addEventListener("change", event =>
+    {
+      this.applyOffset();
+    }, false);
+
     this.buttonsElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.buttonsElem);
 
@@ -64,7 +74,7 @@ class DrawTool extends Tool
     this.profileButton = Controls.addButton(this.buttonsElem,
       "draw_make_profile", "button.make_profile", event => this.makeProfile());
 
-    this.updateHelp();
+    this.updatePanel();
   }
 
   activate()
@@ -76,7 +86,6 @@ class DrawTool extends Tool
     application.addEventListener('selection', this._onSelection, false);
     application.pointSelector.excludeSelection = false;
     application.pointSelector.activate();
-
     this.setObject(application.selection.object);
   }
 
@@ -122,21 +131,34 @@ class DrawTool extends Tool
           if (this.vertices.length === 1)
           {
             selection.clear();
+            this.position1World = null;
           }
+          else
+          {
+            this.position1World = this.position2World;
+          }
+          this.position2World = positionWorld;
         }
         else if (nextIndex === 0 && this.vertices.length >= 3) // close cord
         {
           this.makeProfile();
+          this.position1World = null;
+          this.position2World = null;
         }
         else // delete vertices
         {
           let deleted = this.vertices.length - nextIndex - 1;
           this.vertices.splice(nextIndex + 1, deleted);
           this.index = nextIndex;
+          this.position1World = null;
+          this.position2World = positionWorld;
         }
       }
       else // edit (mode === 1)
       {
+        this.position1World = null;
+        this.position2World = null;
+
         if (this.index !== -1) // vertex previously selected
         {
           if (nextIndex === -1)
@@ -191,6 +213,7 @@ class DrawTool extends Tool
               this.index = 0;
               this.object = null;
               this.vertices = [positionWorld];
+              this.position2World = positionWorld;
               selection.clear();
             }
           }
@@ -199,7 +222,7 @@ class DrawTool extends Tool
       this.updateObject();
       this.updatePoints();
       this.updateAxis(snap.object);
-      this.updateHelp();
+      this.updatePanel();
     }
     else
     {
@@ -221,6 +244,8 @@ class DrawTool extends Tool
       this.object = null;
       this.vertices = [];
       this.index = -1;
+      this.position1World = null;
+      this.position2World = null;
 
       if (object instanceof Cord)
       {
@@ -241,9 +266,10 @@ class DrawTool extends Tool
         this.mode = 1;
       }
     }
+
     this.updatePoints();
     this.updateAxis(object);
-    this.updateHelp();
+    this.updatePanel();
   }
 
   finish()
@@ -255,8 +281,11 @@ class DrawTool extends Tool
     this.vertices = [];
     this.index = -1;
     this.object = null;
+    this.position1World = null;
+    this.position2World = null;
 
     this.updatePoints();
+    this.updatePanel();
 
     pointSelector.clearAxisGuides();
     this.clearPoints();
@@ -419,7 +448,7 @@ class DrawTool extends Tool
     }
   }
 
-  updateHelp()
+  updatePanel()
   {
     if (this.mode === 0)
     {
@@ -444,6 +473,44 @@ class DrawTool extends Tool
       }
     }
     this.application.i18n.update(this.helpElem);
+
+    if (this.position1World && this.position2World)
+    {
+      let offset = this.position1World.distanceTo(this.position2World);
+      this.offsetInputElem.value = offset;
+      this.offsetInputElem.parentElement.style.display = "";
+    }
+    else
+    {
+      this.offsetInputElem.parentElement.style.display = "none";
+    }
+
+    if (this.object instanceof Cord && this.vertices.length >= 3)
+    {
+      this.profileButton.style.display = "";
+    }
+    else
+    {
+      this.profileButton.style.display = "none";
+    }
+  }
+
+  applyOffset()
+  {
+    let offset = parseFloat(this.offsetInputElem.value);
+    let positionWorld = new THREE.Vector3();
+    positionWorld.subVectors(this.position2World, this.position1World);
+    positionWorld.normalize();
+    positionWorld.multiplyScalar(offset);
+    positionWorld.add(this.position1World);
+
+    this.position2World = positionWorld;
+    let position = new THREE.Vector3();
+    this.transformVertex(positionWorld, position);
+    this.vertices[this.index] = position;
+    this.updateObject();
+    this.updatePoints();
+    this.updateAxis(this.object);
   }
 
   clearPoints()

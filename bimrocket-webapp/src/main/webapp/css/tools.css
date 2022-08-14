@@ -522,6 +522,12 @@ div.option_block input[name=decimals]
   margin-top: 6px;
 }
 
+.panel_draw input[name=draw_offset]
+{
+  margin-left: 4px;
+  width: 100px;
+}
+
 .script_box textarea
 {
   font-family: monospace;

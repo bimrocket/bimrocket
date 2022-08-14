@@ -63,6 +63,9 @@ export const translations =
   "button.object_builder" : "Constructor d'objecte",
   "button.change_material" : "Canvia material",
 
+  "button.finish" : "Finalitza",
+  "button.make_profile" : "Crea perfil",
+
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "TANCA",
 
@@ -124,7 +127,11 @@ export const translations =
 
   "tool.svg_exporter.label" : "Exporta SVG",
 
-  "tool.draw_profile.label" : "Dibuixa perfil",
+  "tool.draw.label" : "Dibuixa",
+  "tool.draw.add_vertex" : "Afegeix vèrtex a la corda.",
+  "tool.draw.first_vertex" : "Dibuixa el primer vèrtex de la corda.",
+  "tool.draw.select_vertex" : "Selecciona el vèrtex a moure o inserir.",
+  "tool.draw.vertex_destination" : "Selecciona la nova posició del vèrtex.",
 
   "tool.measure_length.label" : "Mesura longitud",
   "tool.measure_length.help" : "Mesura longitud",

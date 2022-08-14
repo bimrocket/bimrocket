@@ -35,7 +35,7 @@ import { ExtrudeTool } from "../tools/ExtrudeTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
-import { DrawProfileTool } from "../tools/DrawProfileTool.js";
+import { DrawTool } from "../tools/DrawTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
 import { ActivateCameraTool } from "../tools/ActivateCameraTool.js";
@@ -272,7 +272,7 @@ export function load(application)
   const meshToSolidTool = new MeshToSolidTool(application);
   const solidToMeshTool = new SolidToMeshTool(application);
   const mergeGeometriesTool = new MergeGeometriesTool(application);
-  const drawProfileTool = new DrawProfileTool(application);
+  const drawTool = new DrawTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
   const activateCameraTool = new ActivateCameraTool(application);
@@ -540,7 +540,7 @@ export function load(application)
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
   booleanOperationMenu.addMenuItem(subtractionTool);
-  designMenu.addMenuItem(drawProfileTool);
+  designMenu.addMenuItem(drawTool);
   designMenu.addMenuItem(extrudeTool);
   const geometryMenu = designMenu.addMenu("menu.design.geometry");
   geometryMenu.addMenuItem(inspectGeometryTool);
@@ -590,12 +590,13 @@ export function load(application)
   toolBar.addToolButton(sectionTool);
   toolBar.addToolButton(scriptTool);
   toolBar.addToolButton(measureLengthTool);
+  toolBar.addToolButton(drawTool);
   toolBar.addToolButton(paintTool);
-  toolBar.addToolButton(rebuildTool);
   toolBar.addToolButton(moveTool);
   toolBar.addToolButton(rotateTool);
   toolBar.addToolButton(scaleTool);
   toolBar.addToolButton(placeTool);
+  toolBar.addToolButton(rebuildTool);
   toolBar.addToolButton(selectByQRCodeTool);
 
   // restore services

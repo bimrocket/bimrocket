@@ -63,6 +63,9 @@ export const translations =
   "button.object_builder" : "Object builder",
   "button.change_material" : "Change material",
 
+  "button.finish" : "Finish",
+  "button.make_profile" : "Make profile",
+
   "button.menu_show" : "MENU",
   "button.menu_hide" : "CLOSE",
 
@@ -124,7 +127,11 @@ export const translations =
 
   "tool.svg_exporter.label" : "SVG Export",
 
-  "tool.draw_profile.label" : "Draw profile",
+  "tool.draw.label" : "Draw",
+  "tool.draw.add_vertex" : "Add vertex to the cord.",
+  "tool.draw.first_vertex" : "Draw the first vertex of the cord.",
+  "tool.draw.select_vertex" : "Select vertex to move or insert.",
+  "tool.draw.vertex_destination" : "Select new vertex position.",
 
   "tool.measure_length.label" : "Measure length",
   "tool.measure_length.help" : "Measure length",

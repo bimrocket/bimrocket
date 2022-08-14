@@ -5,6 +5,12 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Cord } from "../core/Cord.js";
+import { Profile } from "../core/Profile.js";
+import { Controls } from "../ui/Controls.js";
+import { PointSelector } from "../utils/PointSelector.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -19,462 +25,487 @@ class DrawTool extends Tool
     this.className = "draw";
     this.setOptions(options);
 
-    this.lastPointerPosition = new THREE.Vector2();
-    this.startPosition = null;
-    this.snapPoint = null;
-    this.brepSelector = new BrepSelector();
-    this.needsUpdate = false;
-    this.line = null;
-    this.point = null;
+    this.mode = 0; // 0: add, 1: edit
+    this.vertices = []; // Vector3[]
+    this.index = -1;
+    this.object = null; // Cord or Profile
+    this.points = null; // THREE.Points
+    this.inverseMatrixWorld = new THREE.Matrix4(); // object inverse matrixWorld
+
+    this.addPointsMaterial = new THREE.PointsMaterial(
+      { color : 0x00ff00, size : 4, sizeAttenuation : false,
+        depthTest : false, transparent : true });
+
+    this.editPointsMaterial = new THREE.PointsMaterial(
+      { color : 0, size : 4, sizeAttenuation : false,
+        depthTest : false, transparent : true });
 
     this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
-    this._onKeyUp = this.onKeyUp.bind(this);
-    this._animate = this.animate.bind(this);
-
-    this.lineMaterial = new THREE.LineBasicMaterial(
-      {color: 0x0000ff, linewidth: 1.5, depthTest: false});
-    this.onAxisXMaterial = new THREE.LineBasicMaterial(
-      {color: 0x800000, linewidth: 1.5, depthTest: false});
-    this.onAxisYMaterial = new THREE.LineBasicMaterial(
-      {color: 0x008000, linewidth: 1.5, depthTest: false});
-    this.onAxisZMaterial = new THREE.LineBasicMaterial(
-      {color: 0x000080, linewidth: 1.5, depthTest: false});
-
-    this.onVertexMaterial = new THREE.PointsMaterial(
-       {color: 0x0000ff, size: 8, sizeAttenuation: false, depthTest: false});
-    this.onLineMaterial = new THREE.PointsMaterial(
-       {color: 0x006000, size: 8, sizeAttenuation: false, depthTest: false});
-    this.onIntersectionMaterial = new THREE.PointsMaterial(
-       {color: 0x000000, size: 8, sizeAttenuation: false, depthTest: false});
-    this.onFaceMaterial = new THREE.PointsMaterial(
-       {color: 0xff0000, size: 8, sizeAttenuation: false, depthTest: false});
+    this._onSelection = this.onSelection.bind(this);
 
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(this.label, "left");
+    this.panel = this.application.createPanel(this.label, "left", "panel_draw");
+    this.panel.preferredHeight = 140;
 
-    const helpElem = document.createElement("div");
-    this.panel.bodyElem.appendChild(helpElem);
+    this.helpElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.helpElem);
+    I18N.set(this.helpElem, "innerHTML", "tool.draw.help");
 
-    this.posElem = document.createElement("div");
-    this.posElem.style.textAlign = "left";
-    this.posElem.style.padding = "50px";
+    this.buttonsElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.buttonsElem);
 
-    this.panel.bodyElem.appendChild(this.posElem);
+    this.finishButton = Controls.addButton(this.buttonsElem,
+      "draw_finish", "button.finish", event => this.finish());
+
+    this.profileButton = Controls.addButton(this.buttonsElem,
+      "draw_make_profile", "button.make_profile", event => this.makeProfile());
+
+    this.updateHelp();
   }
 
-  activate = function()
+  activate()
   {
-    const application = this.application;
     this.panel.visible = true;
-    this._createOverlays();
-
-    var container = application.container;
+    const application = this.application;
+    const container = application.container;
     container.addEventListener('pointerup', this._onPointerUp, false);
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    document.addEventListener('keyup', this._onKeyUp, false);
-    application.addEventListener('animation', this._animate);
+    application.addEventListener('selection', this._onSelection, false);
+    application.pointSelector.excludeSelection = false;
+    application.pointSelector.activate();
 
-    application.repaint();
-
-    application.hideSelectionLines();
+    this.setObject(application.selection.object);
   }
 
   deactivate()
   {
-    const application = this.application;
-
     this.panel.visible = false;
-    this._destroyOverlays();
-
-    this.point.visible = false;
-    this.line.visible = false;
-    application.repaint();
-
-    var container = application.container;
+    const application = this.application;
+    const container = application.container;
     container.removeEventListener('pointerup', this._onPointerUp, false);
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    document.removeEventListener('keyup', this._onKeyUp, false);
-    application.removeEventListener('animation', this._animate);
+    application.removeEventListener('selection', this._onSelection, false);
+    application.pointSelector.deactivate();
+    application.pointSelector.clearAxisGuides();
+    this.clearPoints();
+  }
 
-    application.showSelectionLines();
+  onSelection(event)
+  {
+    let object = event.objects.length > 0 ? event.objects[0] : null;
+    this.setObject(object);
   }
 
   onPointerUp(event)
   {
-    if (event.button === 0)
+    const pointSelector = this.application.pointSelector;
+    if (!pointSelector.isPointSelectionEvent(event)) return;
+
+    const selection = this.application.selection;
+
+    let snap = pointSelector.snap;
+    if (snap)
     {
-      this._enterVertex();
+      let positionWorld = snap.positionWorld;
+      let position = new THREE.Vector3();
+      this.transformVertex(positionWorld, position);
+      let nextIndex = this.findVertex(position);
+
+      if (this.mode === 0) // add to new object
+      {
+        if (nextIndex === -1) // add new vertex
+        {
+          this.vertices.push(position);
+          this.index = this.vertices.length - 1;
+          if (this.vertices.length === 1)
+          {
+            selection.clear();
+          }
+        }
+        else if (nextIndex === 0 && this.vertices.length >= 3) // close cord
+        {
+          this.makeProfile();
+        }
+        else // delete vertices
+        {
+          let deleted = this.vertices.length - nextIndex - 1;
+          this.vertices.splice(nextIndex + 1, deleted);
+          this.index = nextIndex;
+        }
+      }
+      else // edit (mode === 1)
+      {
+        if (this.index !== -1) // vertex previously selected
+        {
+          if (nextIndex === -1)
+          {
+            // move vertex
+            this.vertices[this.index] = position;
+          }
+          else if ((this.object instanceof Cord && this.vertices.length >= 3) &&
+                ((this.index === 0 && nextIndex === this.vertices.length - 1) ||
+                 (this.index === this.vertices.length - 1 && nextIndex === 0)))
+          {
+            this.makeProfile();
+          }
+          else if (this.object instanceof Profile &&
+                   (this.index === 0 && nextIndex === this.vertices.length - 1))
+          {
+            this.vertices.splice(0, 1);
+          }
+          else if (this.object instanceof Profile &&
+                   (this.index === this.vertices.length - 1 && nextIndex === 0))
+          {
+            this.vertices.splice(this.vertices.length - 1, 1);
+          }
+          else if (this.index === nextIndex + 1)
+          {
+            this.vertices.splice(this.index, 1);
+          }
+          else if (this.index === nextIndex - 1)
+          {
+            this.vertices.splice(nextIndex - 1, 1);
+          }
+          this.index = -1; // unselect vertex
+          this.object.builder = null;
+        }
+        else // no vertex previously selected
+        {
+          if (nextIndex !== -1) // on object vertex
+          {
+            this.index = nextIndex;
+          }
+          else
+          {
+            nextIndex = this.findVertexOnEdge(position);
+            if (nextIndex !== -1)
+            {
+              this.index = nextIndex;
+              this.vertices.splice(nextIndex, 0, position);
+            }
+            else
+            {
+              this.mode = 0;
+              this.index = 0;
+              this.object = null;
+              this.vertices = [positionWorld];
+              selection.clear();
+            }
+          }
+        }
+      }
+      this.updateObject();
+      this.updatePoints();
+      this.updateAxis(snap.object);
+      this.updateHelp();
+    }
+    else
+    {
+      this.finish();
     }
   }
 
-  onPointerMove(event)
+  setObject(object)
   {
-    this.lastPointerPosition = this.getEventPosition(event);
-    this.needsUpdate = true;
+    if (object &&
+        !ObjectUtils.isObjectDescendantOf(object, this.application.scene))
+    {
+      // object removed
+      object = null;
+    }
+
+    if (this.object !== object)
+    {
+      this.object = null;
+      this.vertices = [];
+      this.index = -1;
+
+      if (object instanceof Cord)
+      {
+        this.object = object;
+        this.vertices = [...this.object.geometry.points];
+        this.mode = 1;
+      }
+      else if (object instanceof Profile)
+      {
+        this.object = object;
+        let points2 = this.object.geometry.path.getPoints();
+        this.vertices = [];
+        for (let i = 0; i < points2.length - 1; i++)
+        {
+          let point2 = points2[i];
+          this.vertices.push(new THREE.Vector3(point2.x, point2.y, 0));
+        }
+        this.mode = 1;
+      }
+    }
+    this.updatePoints();
+    this.updateAxis(object);
+    this.updateHelp();
   }
 
-  onKeyUp(event)
+  finish()
   {
-    if (event.keyCode === 27) // ESC : cancel edge
-    {
-      this._cancelEdge();
-    }
-    else if (event.keyCode === 86) // V : enter vertex
-    {
-      this._enterVertex();
-    }
-    else if (event.keyCode === 68) // D : remove face, edge or vertex
-    {
-      this._remove();
-    }
-    else if (event.keyCode === 70) // F : findFaces
-    {
-      this._findFaces();
-    }
-    else if (event.keyCode === 73) // I : inspect
-    {
-      this._inspect();
-    }
-    else if (event.keyCode === 32) // SPACE : set edge length
-    {
-      this._setEdgeLength();
-    }
+    const application = this.application;
+    const pointSelector = application.pointSelector;
+
+    this.mode = 0; // add
+    this.vertices = [];
+    this.index = -1;
+    this.object = null;
+
+    this.updatePoints();
+
+    pointSelector.clearAxisGuides();
+    this.clearPoints();
+    application.selection.clear();
   }
 
-  animate(event)
+  makeProfile()
   {
-    if (false && this.needsUpdate)
+    if (this.object instanceof Cord && this.vertices.length >= 3)
     {
+      let parent = this.object.parent;
+      let index = parent.children.indexOf(this.object);
+
+      let object = new Profile();
+      object.matrix.copy(this.object.matrix);
+      this.flattenVertices(object);
+
+      parent.children[index] = object;
+      object.parent = parent;
+
+      this.mode = 1;
+      this.index = -1;
+
+      this.object = object;
+      this.updateObject();
+
       const application = this.application;
-      var snapPoints = [];
+      application.notifyObjectsChanged(parent, this, "structureChanged");
+      application.selection.set(object);
+    }
+  }
 
-      var container = this.application.container;
-      var x = (this.lastPointerPosition.x / container.clientWidth) * 2 - 1;
-      var y = -(this.lastPointerPosition.y / container.clientHeight) * 2 + 1;
-      var pixels = 20.0;
-      var snap = pixels / container.clientWidth;
+  flattenVertices(profile)
+  {
+    const vertices = this.vertices;
+    let zAxis = GeometryUtils.calculateNormal(vertices);
+    let yAxis = GeometryUtils.orthogonalVector(zAxis);
+    let xAxis = new THREE.Vector3();
+    xAxis.crossVectors(yAxis, zAxis);
+    let position = GeometryUtils.centroid(vertices);
+    let matrix = new THREE.Matrix4();
+    matrix.makeBasis(xAxis, yAxis, zAxis);
+    matrix.setPosition(position);
+    let inverseMatrix = new THREE.Matrix4();
+    inverseMatrix.copy(matrix).invert();
+    for (let vertex of vertices)
+    {
+      vertex.applyMatrix4(inverseMatrix);
+      vertex.z = 0;
+    }
+    matrix.premultiply(profile.matrix);
+    matrix.decompose(profile.position, profile.rotation, profile.scale);
+    profile.updateMatrix();
+  }
 
-      this.brepSelector.select(application.baseObject,
-        application.camera, x, y, snap, snapPoints);
+  updateObject()
+  {
+    const application = this.application;
+    const overlays = application.overlays;
 
-      // show point
-      if (snapPoints.length > 0)
+    if ((this.vertices.length < 2 && this.object instanceof Cord) ||
+        (this.vertices.length < 3 && this.object instanceof Profile))
+    {
+      application.removeObject(this.object);
+      this.mode = 0;
+      this.object = null;
+      this.index = -1;
+      this.vertices = [];
+    }
+    else
+    {
+      let geometry;
+      if (this.object)
       {
-        // update point vertex
-        this.snapPoint = snapPoints[0];
-        this.point.geometry.vertices[0].copy(this.snapPoint.position);
-        this.point.geometry.verticesNeedUpdate = true;
-
-        var position = this.snapPoint.position;
-        this.posElem.innerHTML =
-          position.x + "<br>" +
-          position.y + "<br>" +
-          position.z + "<br>" +
-          this.snapPoint.distance;
-
-        // update point material
-        var snapType = this.snapPoint.type;
-        switch (snapType)
+        if (this.object instanceof Cord)
         {
-          case VertexSnap:
-            this.point.material = this.onVertexMaterial;
-            this.point.visible = true;
-            break;
-          case LinesIntersectionSnap:
-          case FaceLineIntersectionSnap:
-            this.point.material = this.onIntersectionMaterial;
-            this.point.visible = true;
-            break;
-          case FaceSnap:
-            this.point.material = this.onFaceMaterial;
-            this.point.visible = true;
-            break;
-          case GroundSnap:
-            this.point.visible = false;
-            break;
-          default:
-            this.point.material = this.onLineMaterial;
-            this.point.visible = this.snapPoint.onAxis === null;
-        }
-      }
-      else // intersect with ground
-      {
-        this.posElem.innerHTML = "";
-        this.point.visible = false;
-        var groundIntersection = this.intersect(this.lastPointerPosition,
-          ground, false);
-        if (groundIntersection !== null)
-        {
-          this.snapPoint = new SnapPoint(
-             null, GroundSnap, groundIntersection.point);
-          this.snapPoint.distance = 0;
+          geometry = new CordGeometry(this.vertices);
         }
         else
         {
-          this.snapPoint = null;
+          let shape = new THREE.Shape();
+          for (let i = 0; i < this.vertices.length; i++)
+          {
+            let vertex = this.vertices[i];
+            vertex.z = 0;
+            if (i === 0)
+            {
+              shape.moveTo(vertex.x, vertex.y);
+            }
+            else
+            {
+              shape.lineTo(vertex.x, vertex.y);
+            }
+          }
+          shape.closePath();
+          geometry = new ProfileGeometry(shape);
         }
+        this.object.updateGeometry(geometry);
+        application.notifyObjectsChanged(this.object);
       }
-
-      // update line vertices
-      this.line.visible = false;
-      if (this.startPosition !== null && this.snapPoint !== null)
+      else if (this.vertices.length > 1) // create Cord by default
       {
-        this.line.geometry.vertices[0].copy(this.startPosition);
-        this.line.geometry.vertices[1].copy(this.snapPoint.position);
-        this.line.geometry.verticesNeedUpdate = true;
-        this.line.visible = true;
-
-        // update line material
-        if (this.snapPoint.onAxis === "X")
-        {
-          this.line.material = this.onAxisXMaterial;
-        }
-        else if (this.snapPoint.onAxis === "Y")
-        {
-          this.line.material = this.onAxisYMaterial;
-        }
-        else if (this.snapPoint.onAxis === "Z")
-        {
-          this.line.material = this.onAxisZMaterial;
-        }
-        else
-        {
-          this.line.material = this.lineMaterial;
-        }
+        geometry = new CordGeometry(this.vertices);
+        this.object = new Cord(geometry, this.lineMaterial);
+        application.addObject(this.object, null, false, true);
       }
-      this.needsUpdate = false;
+    }
+  }
+
+  updatePoints()
+  {
+    const application = this.application;
+    const overlays = application.overlays;
+
+    this.clearPoints();
+
+    if (this.vertices.length > 0)
+    {
+      let geometry = new THREE.BufferGeometry();
+      geometry.setFromPoints(this.vertices);
+
+      let material = this.mode === 0 ?
+        this.addPointsMaterial : this.editPointsMaterial;
+
+      this.points = new THREE.Points(geometry, material);
+      const points = this.points;
+      points.raycast = function(){};
+      if (this.object)
+      {
+        this.object.matrixWorld.decompose(
+          points.position, points.rotation, points.scale);
+        points.updateMatrix();
+      }
+      overlays.add(points);
       application.repaint();
     }
   }
 
-  _createOverlays()
+  updateAxis(object)
   {
-    // overlays
-    const application = this.application;
-    var overlays = application.overlays;
-
-    var lineGeometry = new THREE.Geometry();
-    lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    lineGeometry.vertices.push(new THREE.Vector3(1, 0, 0));
-    this.line = new THREE.Line(lineGeometry, this.lineMaterial, THREE.LineStrip);
-    this.line.name = "line";
-    this.line.matrixAutoUpdate = false;
-    this.line.visible = false;
-    overlays.add(this.line);
-
-    var pointGeometry = new THREE.Geometry();
-    pointGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-    this.point = new THREE.Points(pointGeometry, this.onVertexMaterial);
-    this.point.name = "point";
-    this.line.matrixAutoUpdate = false;
-    this.point.visible = false;
-    overlays.add(this.point);
-  }
-
-  _destroyOverlays = function()
-  {
-    const application = this.application;
-    var overlays = application.overlays;
-
-    overlays.remove(this.line);
-    overlays.remove(this.point);
-    application.repaint();
-  }
-
-  _addLine(endPosition)
-  {
-    console.info("=============================================");
-    var brep = this._getBrep();
-    var startLocal = new THREE.Vector3();
-    var endLocal = new THREE.Vector3();
-
-    startLocal.copy(this.startPosition);
-    endLocal.copy(endPosition);
-    brep.worldToLocal(startLocal);
-    brep.worldToLocal(endLocal);
-
-    var edges = brep.geometry.addLine(startLocal, endLocal);
-    for (var e = 0; e < edges.length; e++)
+    const pointSelector = this.application.pointSelector;
+    if (this.index === -1 || this.vertices.length === 0)
     {
-      brep.geometry.findFaces(edges[e]);
-    }
-    this.application.updateBrepGeometry(brep.geometry);
-
-    var vertex = brep.geometry.getVertex(endLocal);
-    if (vertex && vertex.edges.length === 1)
-    {
-      this.startPosition = endPosition.clone();
-      this.line.visible = true;
-      this.brepSelector.basePoint = endPosition.clone();
+      pointSelector.clearAxisGuides();
     }
     else
     {
-      this.startPosition = null;
-      this.line.visible = false;
-      this.brepSelector.basePoint = null;
-    }
-    this.needsUpdate = true;
-  }
+      let positionWorld = this.vertices[this.index].clone();
 
-  _remove()
-  {
-    const application = this.application;
-    var brep = this._getBrep();
-    if (this.snapPoint !== null && this.snapPoint.brep === brep)
-    {
-      if (this.snapPoint.face)
+      if (this.object) // positionWorld is local, convert to world
       {
-        brep.geometry.removeFace(this.snapPoint.face);
-        application.updateBrepGeometry(brep.geometry);
-        this.startPosition = null;
-        this.needsUpdate = true;
+        positionWorld.applyMatrix4(this.object.matrixWorld);
       }
-      else if (this.snapPoint.edge)
-      {
-        brep.geometry.removeEdge(this.snapPoint.edge);
-        application.updateBrepGeometry(brep.geometry);
-        this.startPosition = null;
-        this.needsUpdate = true;
-      }
-      else if (this.snapPoint.vertex)
-      {
-        var edges = this.snapPoint.vertex.edges.toArray();
-        for (var i = 0; i < edges.length; i++)
-        {
-          brep.geometry.removeEdge(edges[i]);
-        }
-        application.updateBrepGeometry(brep.geometry);
-        this.startPosition = null;
-        this.needsUpdate = true;
-      }
+
+      let axisMatrixWorld = object ?
+        object.matrixWorld.clone() : new THREE.Matrix4();
+
+      axisMatrixWorld.setPosition(positionWorld);
+      pointSelector.setAxisGuides(axisMatrixWorld, true);
     }
   }
 
-  _cancelEdge()
+  updateHelp()
   {
-    if (this.startPosition !== null)
+    if (this.mode === 0)
     {
-      this.startPosition = null;
-      this.brepSelector.basePoint = null;
-      this.needsUpdate = true;
-    }
-  }
-
-  _setEdgeLength()
-  {
-    if (this.startPosition !== null && this.snapPoint !== null)
-    {
-      var endPosition = this.snapPoint.position;
-      var distanceText = prompt("Enter edge length:");
-      if (distanceText === null)
+      if (this.vertices.length === 0)
       {
-        endPosition = null;
+        I18N.set(this.helpElem, "innerHTML", "tool.draw.first_vertex");
       }
       else
       {
-        var distance = parseFloat(distanceText);
-        if ("" + distance === "NaN")
-        {
-          endPosition = null;
-        }
-        else
-        {
-          var vector = new THREE.Vector3();
-          vector.subVectors(endPosition, this.startPosition);
-          vector.setLength(distance);
-          endPosition.copy(this.startPosition).add(vector);
-        }
+        I18N.set(this.helpElem, "innerHTML", "tool.draw.add_vertex");
       }
-      if (endPosition !== null)
+    }
+    else if (this.mode === 1)
+    {
+      if (this.index === -1)
       {
-        this._addLine(endPosition);
+        I18N.set(this.helpElem, "innerHTML", "tool.draw.select_vertex");
       }
+      else
+      {
+        I18N.set(this.helpElem, "innerHTML", "tool.draw.vertex_destination");
+      }
+    }
+    this.application.i18n.update(this.helpElem);
+  }
+
+  clearPoints()
+  {
+    if (this.points !== null)
+    {
+      this.application.removeObject(this.points);
+      this.points = null;
     }
   }
 
-  _enterVertex()
+  findVertex(position)
   {
-    if (this.snapPoint !== null)
+    for (let i = 0; i < this.vertices.length; i++)
     {
-      if (this.startPosition === null) // first point
-      {
-        this.startPosition = this.snapPoint.position.clone();
-        this.brepSelector.basePoint = this.startPosition.clone();
-      }
-      else // second point, add edge
-      {
-        this._addLine(this.snapPoint.position);
-      }
+      if (this.vertices[i].distanceToSquared(position) < 0.0001) return i;
     }
+    return -1;
   }
 
-  _findFaces()
+  findVertexOnEdge(position)
   {
-    if (this.snapPoint !== null && this.startPosition === null)
+    if (this.object instanceof Profile)
     {
-      var edge = this.snapPoint.edge;
-      if (edge !== null)
+      for (let i = 0; i < this.vertices.length; i++)
       {
-        var brep = this._getBrep();
-        if (this.snapPoint.brep === brep)
-        {
-          brep.geometry.findFaces(edge);
-          this.application.updateBrepGeometry(brep.geometry);
-          this.needsUpdate = true;
-        }
+        let p1 = this.vertices[i];
+        let p2 = this.vertices[(i + 1) % this.vertices.length];
+
+        if (GeometryUtils.isPointOnSegment(position, p1, p2)) return i + 1;
       }
     }
+    else
+    {
+      for (let i = 0; i < this.vertices.length - 1; i++)
+      {
+        let p1 = this.vertices[i];
+        let p2 = this.vertices[i + 1];
+
+        if (GeometryUtils.isPointOnSegment(position, p1, p2)) return i + 1;
+      }
+    }
+    return -1;
   }
 
-  _inspect()
+  transformVertex(pointWorld, point)
   {
-    if (this.snapPoint !== null && this.startPosition === null)
+    if (this.object)
     {
-      if (this.snapPoint.face)
+      // express pointWorld in object CS
+      this.inverseMatrixWorld.copy(this.object.matrixWorld).invert();
+      point.copy(pointWorld);
+      point.applyMatrix4(this.inverseMatrixWorld);
+      if (this.object instanceof Profile)
       {
-        console.info(this.snapPoint.face);
-      }
-      else if (this.snapPoint.edge)
-      {
-        console.info(this.snapPoint.edge);
-      }
-      else if (this.snapPoint.vertex)
-      {
-        console.info(this.snapPoint.vertex);
+        point.z = 0;
       }
     }
-  }
-
-  _createBrep()
-  {
-    const application = this.application;
-    var geometry = new BrepGeometry();
-    var brep = new Brep(geometry,
-      Brep.defaultEdgeMaterial, Brep.defaultFaceMaterial);
-    return brep;
-  }
-
-  _getBrep()
-  {
-    const application = this.application;
-    var brep = null;
-    var object = application.selection.object;
-    if (object instanceof Brep)
+    else
     {
-      brep = object;
+      point.copy(pointWorld);
     }
-    else // create new brep
-    {
-      brep = this._createBrep();
-      application.addObject(brep);
-    }
-    application.hideSelectionLines();
-    return brep;
   }
 }
 

@@ -45,6 +45,7 @@ export const translations =
   "button.list" : "Lista",
   "button.next" : "Siguiente",
   "button.previous" : "Anterior",
+  "button.end" : "Fin",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -62,6 +63,9 @@ export const translations =
   "button.stop_controller" : "Parar controlador",
   "button.object_builder" : "Constructor de objeto",
   "button.change_material" : "Cambiar material",
+
+  "button.finish" : "Finalizar",
+  "button.make_profile" : "Crear perfil",
 
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "CERRAR",
@@ -124,7 +128,11 @@ export const translations =
 
   "tool.svg_exporter.label" : "Exportar SVG",
 
-  "tool.draw_profile.label" : "Dibujar perfil",
+  "tool.draw.label" : "Dibujar",
+  "tool.draw.add_vertex" : "Añade vértice a la cuerda.",
+  "tool.draw.first_vertex" : "Dibuja el primer vértice de la cuerda.",
+  "tool.draw.select_vertex" : "Selecciona el vértice a mover o insertar.",
+  "tool.draw.vertex_destination" : "Selecciona la nueva posición del vértice.",
 
   "tool.measure_length.label" : "Medir longitud",
   "tool.measure_length.help" : "Medir longitud",

@@ -280,6 +280,11 @@
   background-image: url(images/tools/place.svg);
 }
 
+.tool_button.draw
+{
+  background-image: url(images/tools/draw.svg);
+}
+
 .tool_button.options
 {
   background-image: url(images/tools/options.svg);
@@ -510,6 +515,11 @@ div.option_block input[name=decimals]
 {
   margin-left: 4px;
   width: 150px;
+}
+
+.panel_draw > .body > div
+{
+  margin-top: 6px;
 }
 
 .script_box textarea

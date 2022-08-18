@@ -1556,6 +1556,7 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
       if (builder)
       {
         const profileDef = this.instance;
+        console.info(profileDef);
 
         const profile = new Profile();
 
@@ -1567,9 +1568,12 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
 
         ObjectBuilder.build(profile);
 
-        const profMat = profileDef.Position.helper.getMatrix();
-        profMat.decompose(profile.position, profile.quaternion, profile.scale);
-        profile.updateMatrix();
+        if (profileDef.Position)
+        {
+          const profMat = profileDef.Position.helper.getMatrix();
+          profMat.decompose(profile.position, profile.quaternion, profile.scale);
+          profile.updateMatrix();
+        }
 
         this.profile = profile;
       }

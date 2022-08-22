@@ -11,7 +11,7 @@ import * as THREE from "../lib/three.module.js";
 
 class CircleHollowBuilder extends CircleBuilder
 {
-  constructor(radius = 1, wallThickness = 0.1, segments = 16)
+  constructor(radius = 1, wallThickness = 0.1, segments = 32)
   {
     super();
     this.radius = radius;

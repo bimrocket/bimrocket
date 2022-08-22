@@ -11,7 +11,7 @@ import * as THREE from "../lib/three.module.js";
 
 class EllipseBuilder extends ProfileBuilder
 {
-  constructor(xradius = 1, yradius = 0.5, segments = 16)
+  constructor(xradius = 1, yradius = 0.5, segments = 32)
   {
     super();
     this.xradius = xradius;

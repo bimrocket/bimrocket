@@ -11,11 +11,11 @@ import * as THREE from "../lib/three.module.js";
 
 class CircleBuilder extends ProfileBuilder
 {
-  constructor(radius = 1, segments = 16)
+  constructor(radius = 1, segments = 32)
   {
     super();
     this.radius = radius;
-    this.segments = segments;
+    this.segments = segments; // segments per turn (360 degrees)
   }
 
   performBuild(profile)
@@ -29,13 +29,14 @@ class CircleBuilder extends ProfileBuilder
     return true;
   }
 
-  drawCircle(path, radius = 1, segments = 16)
+  drawCircle(path, radius = 1, segments = 32)
   {
     const incr = 2 * Math.PI / segments;
 
     path.moveTo(radius, 0);
-    for (let rad = incr; rad < 2 * Math.PI; rad += incr)
+    for (let i = 0; i < segments; i++)
     {
+      let rad = incr * i;
       path.lineTo(radius * Math.cos(rad), radius * Math.sin(rad));
     }
     path.closePath();

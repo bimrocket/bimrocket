@@ -15,7 +15,9 @@ import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { HelicoidBuilder } from "../builders/HelicoidBuilder.js";
 import { RectangleBuilder } from "../builders/RectangleBuilder.js";
 import { CircleBuilder } from "../builders/CircleBuilder.js";
+import { CircularSectorBuilder } from "../builders/CircularSectorBuilder.js";
 import { Extruder } from "../builders/Extruder.js";
+import { Revolver } from "../builders/Revolver.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -97,7 +99,7 @@ class AddObjectTool extends Tool
     const solid = new Solid();
     const profile = new Profile();
     profile.name = "Circle";
-    profile.builder = new CircleBuilder(0.5, 24);
+    profile.builder = new CircleBuilder(0.5, 32);
     solid.add(profile);
     solid.builder = new Extruder(1);
     solid.builder.smoothAngle = 20;
@@ -108,14 +110,18 @@ class AddObjectTool extends Tool
   createSphere()
   {
     const solid = new Solid();
-    const geometry = new THREE.SphereGeometry(0.5, 24, 24);
-    const rad = THREE.MathUtils.degToRad(90);
-    const matrix = new THREE.Matrix4().makeRotationX(rad);
-    geometry.applyMatrix4(matrix);
-    const solidGeometry = new SolidGeometry();
-    solidGeometry.copy(geometry);
-    solidGeometry.smoothAngle = 20;
-    solid.updateGeometry(solidGeometry, true);
+    const profile = new Profile();
+    profile.name = "CircularSector";
+    profile.builder = new CircularSectorBuilder(0.5, 180, 32);
+    solid.add(profile);
+    solid.builder = new Revolver(360);
+    solid.builder.axis.x = 1;
+    solid.builder.axis.y = 0;
+    solid.builder.stepAngle = 12;
+    solid.builder.smoothAngle = 20;
+    ObjectBuilder.build(solid);
+    solid.rotation.y = Math.PI / 2;
+
     return solid;
   }
 

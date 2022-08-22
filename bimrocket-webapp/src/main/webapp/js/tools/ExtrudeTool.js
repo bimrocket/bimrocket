@@ -1,5 +1,5 @@
 /*
- * ExtrudeSolidTool.js
+ * ExtrudeTool.js
  *
  * @author realor
  */

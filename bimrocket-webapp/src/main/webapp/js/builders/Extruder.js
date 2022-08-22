@@ -5,7 +5,7 @@
  */
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
-import { SolidBuilder } from "./SolidBuilder.js";
+import { SweptSolidBuilder } from "./SweptSolidBuilder.js";
 import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
@@ -13,11 +13,10 @@ import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import * as THREE from "../lib/three.module.js";
 
-class Extruder extends SolidBuilder
+class Extruder extends SweptSolidBuilder
 {
   depth = 1;
   direction = new THREE.Vector3(0, 0, 1);
-  minPointDistance = 0.0001;
   smoothAngle = 0;
 
   constructor(depth, direction)
@@ -40,67 +39,10 @@ class Extruder extends SolidBuilder
 
     let profile = this.findClosedProfile(solid);
     if (profile === undefined) return true;
-    profile.visible = false;
+
+    let [ outerRing, innerRings, stepVertexCount ] = this.prepareRings(profile);
 
     const sign = Math.sign(depth) * Math.sign(direction.z);
-
-    const shape = profile.geometry.path;
-
-    const points = shape.extractPoints(profile.geometry.divisions);
-    let outerRing = points.shape;
-    let innerRings = points.holes;
-
-    // prepare shape, orient rings and remove duplicated vertices
-
-    const removeDuplicatedVertices = ring =>
-    {
-      let i = 0;
-      for (let j = 1; j < ring.length; j++)
-      {
-        let point1 = ring[i];
-        let point2 = ring[j];
-        if (point1.distanceTo(point2) >= this.minPointDistance)
-        {
-          i++;
-          ring[i] = point2;
-        }
-      }
-      while (i < ring.length - 1)
-      {
-        ring.pop();
-      }
-
-      if (ring.length >= 2 &&
-          ring[0].distanceTo(ring[ring.length - 1]) < this.minPointDistance)
-      {
-        ring.pop();
-      }
-    };
-
-    removeDuplicatedVertices(outerRing);
-
-    if (outerRing.length < 3)
-    {
-      throw "Can't extrude an invalid profile";
-    }
-
-    innerRings.forEach(removeDuplicatedVertices);
-    innerRings = innerRings.filter(innerRing => innerRing.length >= 3);
-
-    if (THREE.ShapeUtils.isClockWise(outerRing))
-    {
-      outerRing = outerRing.reverse();
-    }
-
-    for (let h = 0; h < innerRings.length; h++)
-    {
-      let innerRing = innerRings[h];
-
-      if (THREE.ShapeUtils.isClockWise(innerRing))
-      {
-        innerRings[h] = innerRing.reverse();
-      }
-    }
 
     let cordPoints;
     let extrudeVector = null;
@@ -185,17 +127,6 @@ class Extruder extends SolidBuilder
 
     const geometry = new SolidGeometry();
 
-    const addVertices = ring =>
-    {
-      for (let i = 0; i < ring.length; i++)
-      {
-        let vertex2 = ring[i];
-        let vertex3 = new THREE.Vector3(vertex2.x, vertex2.y, 0);
-        vertex3.applyMatrix4(matrix);
-        geometry.vertices.push(vertex3);
-      }
-    };
-
     const getPlane = (v1, v2, point) =>
     {
       let normal = new THREE.Vector3();
@@ -218,40 +149,18 @@ class Extruder extends SolidBuilder
     };
 
     // add all ring vertices
+    this.addStepVertices(outerRing, innerRings, matrix, geometry);
 
-    addVertices(outerRing);
-    for (let h = 0; h < innerRings.length; h++)
-    {
-      let innerRing = innerRings[h];
-      addVertices(innerRing);
-    }
+    // add bottom face
+    this.addProfileFace(0, outerRing, innerRings, true, geometry);
 
-    // add bottom face (vertices1)
-    let offset = 0;
-    let indices = [];
-    for (let i = 0; i < outerRing.length; i++)
-    {
-      indices.push(offset++);
-    }
-    indices.reverse();
-    let bottomFace = geometry.addFace(...indices);
-    for (let innerRing of innerRings)
-    {
-      indices = [];
-      for (let i = 0; i < innerRing.length; i++)
-      {
-        indices.push(offset++);
-      }
-      indices.reverse();
-      bottomFace.addHole(...indices);
-    }
-
-    let stepVertexCount = geometry.vertices.length;
     let offset1 = 0;
     let offset2 = stepVertexCount;
+
     // create side faces
     for (let i = 1; i < cordPoints.length - 1; i++)
     {
+      // add new step vertices
       p1.copy(cordPoints[i - 1]);
       p2.copy(cordPoints[i]);
       p3.copy(cordPoints[i + 1]);
@@ -269,58 +178,15 @@ class Extruder extends SolidBuilder
         geometry.vertices.push(vertex);
       }
 
-      // add outer ring side faces
-      for (let i = 0; i < outerRing.length; i++)
-      {
-        let va1 = offset1 + i;
-        let vb1 = offset1 + (i + 1) % outerRing.length;
-
-        let va2 = offset2 + i;
-        let vb2 = offset2 + (i + 1) % outerRing.length;
-
-        geometry.addFace(va1, vb1, vb2, va2);
-      }
-
-      // add inner rings side faces
-
-      let innerRingOffset = outerRing.length;
-      for (let r = 0; r < innerRings.length; r++)
-      {
-        let innerRing = innerRings[r];
-
-        for (let i = 0; i < innerRing.length; i++)
-        {
-          let va1 = offset1 + innerRingOffset + i;
-          let vb1 = offset1 + innerRingOffset + (i + 1) % innerRing.length;
-
-          let va2 = offset2 + innerRingOffset + i;
-          let vb2 = offset2 + innerRingOffset + (i + 1) % innerRing.length;
-
-          geometry.addFace(vb1, va1, va2, vb2); // reverse face
-        }
-        innerRingOffset += innerRing.length;
-      }
+      this.addLateralFaces(offset1, offset2, outerRing, innerRings,
+        false, geometry);
 
       offset1 = offset2;
       offset2 += stepVertexCount;
     }
 
-    indices = [];
-    offset = offset1;
-    for (let i = 0; i < outerRing.length; i++)
-    {
-      indices.push(offset++);
-    }
-    let topFace = geometry.addFace(...indices);
-    for (let innerRing of innerRings)
-    {
-      indices = [];
-      for (let i = 0; i < innerRing.length; i++)
-      {
-        indices.push(offset++);
-      }
-      topFace.addHole(...indices);
-    }
+    // add top face
+    this.addProfileFace(offset1, outerRing, innerRings, false, geometry);
 
     if (extrudeVector)
     {
@@ -380,6 +246,8 @@ class Extruder extends SolidBuilder
   {
     this.depth = source.depth;
     this.direction.copy(source.direction);
+    this.smoothAngle = source.smothAngle; // degrees
+    this.minPointDistance = source.minPointDistance;
 
     return this;
   }
@@ -387,6 +255,6 @@ class Extruder extends SolidBuilder
 
 ObjectBuilder.addClass(Extruder);
 
-export { Extruder }
+export { Extruder };
 
 

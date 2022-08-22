@@ -15,6 +15,7 @@ import { SolidGeometry } from "../../core/SolidGeometry.js";
 import { ObjectBuilder } from "../../builders/ObjectBuilder.js";
 import { Cloner } from "../../builders/Cloner.js";
 import { Extruder } from "../../builders/Extruder.js";
+import { Revolver } from "../../builders/Revolver.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import { RectangleBuilder } from "../../builders/RectangleBuilder.js";
 import { RectangleHollowBuilder } from "../../builders/RectangleHollowBuilder.js";
@@ -1166,7 +1167,59 @@ class IfcPolygonalFaceSetHelper extends IfcGeometricRepresentationItemHelper
 registerIfcHelperClass(IfcPolygonalFaceSetHelper);
 
 
-class IfcExtrudedAreaSolidHelper extends IfcGeometricRepresentationItemHelper
+class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+  }
+
+  createSolid(builder)
+  {
+    const swept = this.instance;
+    const schema = this.instance.constructor.schema;
+    const profileDef = swept.SweptArea;
+
+    if (profileDef instanceof schema.IfcProfileDef)
+    {
+      let profile = profileDef.helper.getProfile();
+      if (profile)
+      {
+        try
+        {
+          if (profile.parent)
+          {
+            profile = profile.clone();
+          }
+          profile._ifc = profileDef;
+
+          let solid = new Solid();
+          solid.add(profile);
+          solid.builder = builder;
+          ObjectBuilder.build(solid);
+          solid._ifc = swept;
+
+          if (swept.Position)
+          {
+            const matrix = swept.Position.helper.getMatrix();
+            matrix.decompose(solid.position, solid.quaternion, solid.scale);
+            solid.updateMatrix();
+          }
+          this.object3D = solid;
+        }
+        catch (ex)
+        {
+          console.warn(ex);
+        }
+      }
+      else console.warn("Unsupported profile", profileDef);
+    }
+  }
+}
+registerIfcHelperClass(IfcSweptAreaSolidHelper);
+
+
+class IfcExtrudedAreaSolidHelper extends IfcSweptAreaSolidHelper
 {
   constructor(instance)
   {
@@ -1177,52 +1230,44 @@ class IfcExtrudedAreaSolidHelper extends IfcGeometricRepresentationItemHelper
   {
     if (this.object3D === null)
     {
-      const solid = this.instance;
-      const schema = this.instance.constructor.schema;
+      const swept = this.instance;
+      const direction = swept.ExtrudedDirection.helper.getDirection();
+      const depth = swept.Depth;
 
-      const profileDef = solid.SweptArea;
-      const matrix = solid.Position.helper.getMatrix();
-      const direction = solid.ExtrudedDirection.helper.getDirection();
-      const depth = solid.Depth;
-
-      if (profileDef instanceof schema.IfcProfileDef)
-      {
-        let profile = profileDef.helper.getProfile();
-        if (profile)
-        {
-          try
-          {
-            if (profile.parent)
-            {
-              profile = profile.clone();
-            }
-            profile._ifc = profileDef;
-
-            let solid = new Solid();
-            solid.add(profile);
-            solid.builder = new Extruder(depth, direction);
-            ObjectBuilder.build(solid);
-            solid._ifc = solid;
-
-            if (matrix)
-            {
-              matrix.decompose(solid.position, solid.quaternion, solid.scale);
-              solid.updateMatrix();
-            }
-            this.object3D = solid;
-          }
-          catch (ex)
-          {
-            console.warn(ex);
-          }
-        }
-        else console.warn("Unsupported profile", profileDef);
-      }
+      this.createSolid(new Extruder(depth, direction));
     }
     return this.object3D;
   }
 };
 registerIfcHelperClass(IfcExtrudedAreaSolidHelper);
+
+
+class IfcRevolvedAreaSolidHelper extends IfcSweptAreaSolidHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+  }
+
+  getObject3D()
+  {
+    if (this.object3D === null)
+    {
+      const swept = this.instance;
+      const location = swept.Axis.helper.getLocation();
+      const axis = swept.Axis.helper.getAxis();
+      const angle = THREE.MathUtils.radToDeg(swept.Angle);
+
+      const radius = location.length() + 10; // radius estimate
+
+      const segments = swept._loader.getCircleSegments(radius);
+
+      this.createSolid(new Revolver(angle, location, axis, segments));
+    }
+    return this.object3D;
+  }
+};
+registerIfcHelperClass(IfcRevolvedAreaSolidHelper);
 
 
 class IfcSurfaceCurveSweptAreaSolidHelper
@@ -1556,7 +1601,6 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
       if (builder)
       {
         const profileDef = this.instance;
-        console.info(profileDef);
 
         const profile = new Profile();
 

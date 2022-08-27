@@ -20,6 +20,7 @@ class Revolver extends SweptSolidBuilder
   axis = new THREE.Vector3(0, 1, 0);
   segments = 32; // segments per turn (360 degress)
   smoothAngle = 5; // degrees
+  optimize = true; // optimize geometry
 
   constructor(angle, location, axis, segments)
   {
@@ -127,7 +128,7 @@ class Revolver extends SweptSolidBuilder
     }
     geometry.isManifold = true;
     geometry.smoothAngle = this.smoothAngle;
-    solid.updateGeometry(geometry);
+    solid.updateGeometry(geometry, this.optimize);
 
     return true;
   }

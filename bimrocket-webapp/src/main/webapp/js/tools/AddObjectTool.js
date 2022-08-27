@@ -117,8 +117,8 @@ class AddObjectTool extends Tool
     solid.builder = new Revolver(360);
     solid.builder.axis.x = 1;
     solid.builder.axis.y = 0;
-    solid.builder.stepAngle = 12;
     solid.builder.smoothAngle = 20;
+    solid.builder.optimize = false;
     ObjectBuilder.build(solid);
     solid.rotation.y = Math.PI / 2;
 

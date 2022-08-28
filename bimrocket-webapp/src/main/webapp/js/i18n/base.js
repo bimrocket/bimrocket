@@ -65,6 +65,7 @@ export const translations =
 
   "button.finish" : "Finish",
   "button.make_profile" : "Make profile",
+  "button.change_axis" : "Change axis",
 
   "button.menu_show" : "MENU",
   "button.menu_hide" : "CLOSE",
@@ -148,11 +149,11 @@ export const translations =
   "tool.move.edit_offset" : "Edit offset or select anchor point.",
 
   "tool.rotate.label" : "Rotate",
-  "tool.rotate.select_first_point" : "Select the first point of rotation axis.",
-  "tool.rotate.select_second_point" : "Select the second point of rotation axis.",
+  "tool.rotate.select_first_point" : "Select the first point of the axis of rotation.",
+  "tool.rotate.select_second_point" : "Select the second point of the axis of rotation.",
   "tool.rotate.select_anchor_point" : "Select anchor point.",
   "tool.rotate.select_destination_point" : "Select destination point.",
-  "tool.rotate.edit_rotation" : "Edit rotation or select the first point of rotation axis.",
+  "tool.rotate.edit_rotation" : "Edit rotation or select anchor point.",
 
   "tool.scale.label" : "Scale",
   "tool.scale.select_first_point" : "Select the origin point.",
@@ -166,6 +167,12 @@ export const translations =
   "tool.extrude.label" : "Extrude",
   "tool.extrude.drag_pointer" : "Drag the pointer to extrude the selected object dinamically.",
   "tool.extrude.select_object" : "Select profile or solid to extrude.",
+
+  "tool.revolve.label" : "Revolve",
+  "tool.revolve.set_axis_first_point" : "Set the first point of the axis of revolution.",
+  "tool.revolve.set_axis_second_point" : "Set the second point of the axis of revolution.",
+  "tool.revolve.drag_pointer" : "Drag pointer to revolve the selected object dinamically.",
+  "tool.revolve.select_object" : "Select profile or solid to revolve.",
 
   "tool.union.label" : "Union",
 
@@ -446,6 +453,8 @@ export const translations =
   "message.invalid_credentials" : "Invalid credentials.",
   "message.access_denied" : "Access denied.",
   "message.action_denied" : "Action denied.",
+
+  "message.invalid_revolution_axis" : "Invalid axis of revolution. This axis can not be projected onto the plane of the profile.",
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

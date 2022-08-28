@@ -514,7 +514,18 @@ div.option_block input[name=decimals]
 .panel_extrude input[name=extrude_depth]
 {
   margin-left: 4px;
-  width: 150px;
+  width: 100px;
+}
+
+.panel_revolve > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel_revolve input[name=revolve_angle]
+{
+  margin-left: 4px;
+  width: 100px;
 }
 
 .panel_draw > .body > div

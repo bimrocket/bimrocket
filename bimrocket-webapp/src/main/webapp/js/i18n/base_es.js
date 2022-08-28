@@ -66,6 +66,7 @@ export const translations =
 
   "button.finish" : "Finalizar",
   "button.make_profile" : "Crear perfil",
+  "button.change_axis" : "Cambiar eje",
 
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "CERRAR",
@@ -167,6 +168,12 @@ export const translations =
   "tool.extrude.label" : "Extrusionar",
   "tool.extrude.drag_pointer" : "Arrastra el puntero para extrusionar el objecto seleccionado dinámicamente.",
   "tool.extrude.select_object" : "Selecciona el perfil o el sólido que quieres extrusionar.",
+
+  "tool.revolve.label" : "Revolucionar",
+  "tool.revolve.set_axis_first_point" : "Selecciona el primer punto del eje de revolución.",
+  "tool.revolve.set_axis_second_point" : "Selecciona el segundo punto del eje de revolución.",
+  "tool.revolve.drag_pointer" : "Arrastra el puntero para revolucionar el objecto seleccionado dinámicamente.",
+  "tool.revolve.select_object" : "Selecciona el perfil o el sólido que quieres revolucionar.",
 
   "tool.union.label" : "Unión",
 
@@ -447,6 +454,8 @@ export const translations =
   "message.invalid_credentials" : "Credenciales incorrectas.",
   "message.access_denied" : "Acceso denegado.",
   "message.action_denied" : "Acción denegada.",
+
+  "message.invalid_revolution_axis" : "Eje de revolución inválido. Este eje no se puede proyectar sobre el plano del perfil.",
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

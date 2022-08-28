@@ -65,6 +65,7 @@ export const translations =
 
   "button.finish" : "Finalitza",
   "button.make_profile" : "Crea perfil",
+  "button.change_axis" : "Canvia eix",
 
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "TANCA",
@@ -166,6 +167,12 @@ export const translations =
   "tool.extrude.label" : "Extrusiona",
   "tool.extrude.drag_pointer" : "Arrossega el punter per extrusionar l'objecte seleccionat dinàmicament.",
   "tool.extrude.select_object" : "Selecciona el perfil o el sòlid que vols extrusionar.",
+
+  "tool.revolve.label" : "Revoluciona",
+  "tool.revolve.set_axis_first_point" : "Selecciona el primer punt de l'eix de revolució.",
+  "tool.revolve.set_axis_second_point" : "Selecciona el segon punt de l'eix de revolució.",
+  "tool.revolve.drag_pointer" : "Arrossega el punter per revolucionar l'objecte seleccionat dinàmicament.",
+  "tool.revolve.select_object" : "Selecciona el perfil o el sòlid que vols revolucionar.",
 
   "tool.union.label" : "Unió",
 
@@ -446,6 +453,8 @@ export const translations =
   "message.invalid_credentials" : "Credencials incorrectes.",
   "message.access_denied" : "Accés denegat.",
   "message.action_denied" : "Acció denegada.",
+
+  "message.invalid_revolution_axis" : "Eix de revolució invàlid. Aquest eix no es pot projectar sobre el pla del perfil.",
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

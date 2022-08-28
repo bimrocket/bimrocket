@@ -32,6 +32,7 @@ import { ScaleTool } from "../tools/ScaleTool.js";
 import { PlaceTool } from "../tools/PlaceTool.js";
 import { BooleanOperationTool } from "../tools/BooleanOperationTool.js";
 import { ExtrudeTool } from "../tools/ExtrudeTool.js";
+import { RevolveTool } from "../tools/RevolveTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
@@ -260,6 +261,7 @@ export function load(application)
   const scaleTool = new ScaleTool(application);
   const placeTool = new PlaceTool(application);
   const extrudeTool = new ExtrudeTool(application);
+  const revolveTool = new RevolveTool(application);
   const unionTool = new BooleanOperationTool(application,
     { name : "union", label : "tool.union.label",
       operation : BooleanOperator.UNION });
@@ -401,6 +403,7 @@ export function load(application)
   application.addTool(scaleTool);
   application.addTool(placeTool);
   application.addTool(extrudeTool);
+  application.addTool(revolveTool);
   application.addTool(unionTool);
   application.addTool(intersectionTool);
   application.addTool(subtractionTool);
@@ -542,6 +545,7 @@ export function load(application)
   booleanOperationMenu.addMenuItem(subtractionTool);
   designMenu.addMenuItem(drawTool);
   designMenu.addMenuItem(extrudeTool);
+  designMenu.addMenuItem(revolveTool);
   const geometryMenu = designMenu.addMenu("menu.design.geometry");
   geometryMenu.addMenuItem(inspectGeometryTool);
   geometryMenu.addMenuItem(meshToSolidTool);

@@ -483,7 +483,8 @@ class BRFLoader extends THREE.Loader
     }
     else
     {
-      console.warn("Invalid value for property " + property + ": " + value);
+      console.warn("Invalid value for property [" + property + "]: " + value +
+        " (expect " + actualType + " but found " + type + ")");
     }
   }
 

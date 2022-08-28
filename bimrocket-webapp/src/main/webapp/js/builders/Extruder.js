@@ -73,16 +73,13 @@ class Extruder extends SweptSolidBuilder
     }
     else
     {
-      if (this.depth === 0)
-      {
-        solid.updateGeometry(new SolidGeometry());
-        return true;
-      }
-
       // extrude in direction vector
       extrudeVector = new THREE.Vector3();
       extrudeVector.copy(direction).normalize();
-      extrudeVector.multiplyScalar(Math.abs(depth) * Math.sign(direction.z));
+      if (depth !== 0)
+      {
+        extrudeVector.multiplyScalar(Math.abs(depth) * Math.sign(direction.z));
+      }
 
       // create cordPoints from direction
       cordPoints = []; // Point3D[]
@@ -150,6 +147,18 @@ class Extruder extends SweptSolidBuilder
 
     // add all ring vertices
     this.addStepVertices(outerRing, innerRings, matrix, geometry);
+
+    if (depth === 0) // special case
+    {
+      // add top face
+      this.addProfileFace(0, outerRing, innerRings, false, geometry);
+
+      geometry.isManifold = false;
+      geometry.smoothAngle = this.smoothAngle;
+
+      solid.updateGeometry(geometry);
+      return true;
+    }
 
     // add bottom face
     this.addProfileFace(0, outerRing, innerRings, true, geometry);

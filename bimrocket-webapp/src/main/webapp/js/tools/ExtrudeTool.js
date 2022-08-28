@@ -23,11 +23,11 @@ class ExtrudeTool extends Tool
     this.help = "tool.extrude.help";
     this.className = "extrude";
     this.depthStep = 0.1;
-    this.minDepth = 0.01;
     this.setOptions(options);
 
     this.stage = 0;
     this.solid = null;
+    this.depth = 0;
 
     this.extrudeLine = new THREE.Line3(
       new THREE.Vector3(0, 0, -100), new THREE.Vector3(0, 0, 100));
@@ -80,7 +80,6 @@ class ExtrudeTool extends Tool
     application.removeEventListener('selection', this._onSelection, false);
     application.pointSelector.deactivate();
     this.removeExtrusionAxis();
-    this.solid = null;
   }
 
   createPanel()
@@ -96,20 +95,26 @@ class ExtrudeTool extends Tool
     this.depthInputElem.step = this.depthStep;
     this.depthInputElem.addEventListener("change", event =>
     {
-      this.depth = this.depthInputElem.value;
+      this.depth = parseFloat(this.depthInputElem.value);
       this.updateExtrusion();
     }, false);
 
     this.depthLabelElem = this.depthInputElem.parentElement.firstChild;
 
-    this.buttonsPanel = document.createElement("div");
-    this.panel.bodyElem.appendChild(this.buttonsPanel);
+    this.buttonsElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.buttonsElem);
 
-    this.applyButton = Controls.addButton(this.buttonsPanel,
+    this.applyButton = Controls.addButton(this.buttonsElem,
       "extrude_apply", "button.apply", event =>
     {
-      this.depth = this.depthInputElem.value;
+      this.depth = parseFloat(this.depthInputElem.value);
       this.updateExtrusion();
+    });
+
+    this.finishButton = Controls.addButton(this.buttonsElem,
+      "revolve_finish", "button.finish", event =>
+    {
+      this.application.selection.clear();
     });
   }
 
@@ -142,7 +147,7 @@ class ExtrudeTool extends Tool
         vector.copy(this.solid.builder.direction).normalize();
         this.depth = height / vector.z;
 
-        this.depthInputElem.value = this.depth;
+        this.updateDepthInPanel();
         this.updateExtrusion();
       }
     }
@@ -187,6 +192,7 @@ class ExtrudeTool extends Tool
         this.depthInputElem.disabled = false;
         this.depthInputElem.style.display = "";
         this.applyButton.style.display = "";
+        this.finishButton.style.display = "";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
         this.removeExtrusionAxis();
@@ -202,6 +208,7 @@ class ExtrudeTool extends Tool
         this.depthInputElem.disabled = true;
         this.depthInputElem.style.display = "";
         this.applyButton.style.display = "none";
+        this.finishButton.style.display = "";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
         this.addExtrusionAxis();
@@ -213,6 +220,7 @@ class ExtrudeTool extends Tool
         this.depthLabelElem.style.display = "none";
         this.depthInputElem.style.display = "none";
         this.applyButton.style.display = "none";
+        this.finishButton.style.display = "none";
         I18N.set(this.helpElem, "innerHTML", "tool.extrude.select_object");
         application.i18n.update(this.helpElem);
         this.removeExtrusionAxis();
@@ -256,7 +264,7 @@ class ExtrudeTool extends Tool
     if (solid)
     {
       this.depth = solid.builder.depth;
-      this.depthInputElem.value = this.depth;
+      this.updateDepthInPanel();
       if (!application.selection.contains(solid))
       {
         application.selection.set(solid);
@@ -274,14 +282,11 @@ class ExtrudeTool extends Tool
   {
     const application = this.application;
 
-    profile.geometry.computeBoundingSphere();
-    const depth = profile.geometry.boundingSphere.radius.toFixed(0);
-
     const parent = profile.parent;
     application.removeObject(profile);
     const solid = new Solid();
     solid.name = "Extrude";
-    solid.builder = new Extruder(depth);
+    solid.builder = new Extruder(0);
     profile.matrix.decompose(solid.position, solid.rotation, solid.scale);
     solid.matrix.copy(profile.matrix);
 
@@ -303,8 +308,7 @@ class ExtrudeTool extends Tool
     if (solid)
     {
       let extruder = solid.builder;
-      if (this.depth !== extruder.depth
-          && Math.abs(this.depth) >= this.minDepth)
+      if (this.depth !== extruder.depth)
       {
         extruder.depth = this.depth;
         solid.needsRebuild = true;
@@ -312,6 +316,12 @@ class ExtrudeTool extends Tool
         this.application.notifyObjectsChanged(solid);
       }
     }
+  }
+
+  updateDepthInPanel()
+  {
+    const k = 10000000;
+    this.depthInputElem.value = Math.round(this.depth * k) / k;
   }
 
   addExtrusionAxis()

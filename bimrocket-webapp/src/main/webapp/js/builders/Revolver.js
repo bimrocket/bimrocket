@@ -66,11 +66,7 @@ class Revolver extends SweptSolidBuilder
     const baseMatrixInverse = new THREE.Matrix4();
     baseMatrixInverse.copy(baseMatrix).invert();
 
-    const rotationMatrix = new THREE.Matrix4();
-
     const geometry = new SolidGeometry();
-
-    const matrix = new THREE.Matrix4();
 
     let angle = Math.abs(this.angle);
     if (angle > 360) angle = 360;
@@ -78,7 +74,7 @@ class Revolver extends SweptSolidBuilder
 
     let steps = Math.ceil(this.segments * angle / 360);
     const angleRad = THREE.MathUtils.degToRad(angle);
-    let stepAngleRad = angleRad / steps;
+    let stepAngleRad = steps > 0 ? angleRad / steps : 0;
 
     if (reverse)
     {
@@ -87,6 +83,9 @@ class Revolver extends SweptSolidBuilder
 
     let offset1 = -1;
     let offset2 = 0;
+    const matrix = new THREE.Matrix4();
+    const rotationMatrix = new THREE.Matrix4();
+
     for (let i = 0; i <= steps; i++)
     {
       rotationMatrix.makeRotationY(stepAngleRad * i);
@@ -106,7 +105,7 @@ class Revolver extends SweptSolidBuilder
       }
 
       // add faces
-      if (i === 0 && angle < 360)
+      if (i === 0 && angle < 360 && steps > 0)
       {
         // first face
         this.addProfileFace(0, outerRing, innerRings, !reverse, geometry);
@@ -117,7 +116,7 @@ class Revolver extends SweptSolidBuilder
         this.addProfileFace(offset2, outerRing, innerRings, reverse, geometry);
       }
 
-      if (offset1 >= 0)
+      if (offset1 >= 0 && steps > 0)
       {
         this.addLateralFaces(offset1, offset2, outerRing, innerRings,
           reverse, geometry);
@@ -126,7 +125,7 @@ class Revolver extends SweptSolidBuilder
       offset1 = offset2;
       offset2 += stepVertexCount;
     }
-    geometry.isManifold = true;
+    geometry.isManifold = steps > 0;
     geometry.smoothAngle = this.smoothAngle;
     solid.updateGeometry(geometry, this.optimize);
 
@@ -138,8 +137,9 @@ class Revolver extends SweptSolidBuilder
     this.angle = source.angle;
     this.location.copy(source.location);
     this.axis.copy(source.axis);
-    this.stepAngle = source.stepAngle; // degress
+    this.segments = source.segments;
     this.smoothAngle = source.smothAngle; // degrees
+    this.optimize = source.optimize;
     this.minPointDistance = source.minPointDistance;
 
     return this;

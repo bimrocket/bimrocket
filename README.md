@@ -7,26 +7,27 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 ## features
 - Parametric design tool based on [CSG](https://en.wikipedia.org/wiki/Constructive_solid_geometry).
 - Supported primitives: solids, profiles (2d shapes) and cords (3d polylines).
+- Profile/cord creation and editing.
+- Extrusion and revolution of profiles to create solids.
 - Union, intersection and subtraction of solids.
-- Extrusion of profiles.
 - Object transformation (translation, rotation, scale).
 - Definition of formulas for object property values.
 - Measuring tools (length, area and volume).
 - Orbit-Pan-Zoom tool.
-- Fly tool (collision detection and ground distance control).
+- Fly tool (with collision detection and ground distance control).
 - Multiple selection of objects.
-- Edition of the model structure and the object properties.
+- Editing of model structure and object properties.
 - Dynamic sectioning of models.
 - Shadow casting.
 - Vertex, egde and face snapping in the drawing, measurement and transformation tools.
-- Scripting tool.
+- Scripting tool (using javascript language).
 - Object controllers (programs that change the object state)
-- Load IFC files directly from local disk or the web server. Support for multiple IFC schemas (IFC2x3, IFC4, ...).
+- Direct loading of IFC files from local disk or the web server. Support for multiple IFC schemas (IFC2x3, IFC4, ...).
 - IFC Inventory tool to explore the types, classifications, groups and layers of the model.
 - IFC Layout tool to view the building layout easily.
 - Load/Export models in BRF format (JSON BimRocket format).
 - Load/Export models in STL, GLB, Wavefront OBJ and Collada formats.
-- Integrated with external services (some of them provided by bimrocke_t-server)
+- Integrated with external services (some of them provided by bimrocket-server)
   - File service (Webdav implementation)
   - [BCF](https://en.wikipedia.org/wiki/BIM_Collaboration_Format) service (BIM Collaboration Service)
   - [WFS](https://en.wikipedia.org/wiki/Web_Feature_Service) service (Web Feature Service)

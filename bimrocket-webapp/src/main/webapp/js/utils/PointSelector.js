@@ -33,6 +33,7 @@ class PointSelector
 
     this.snapColors = ["black", "purple", "blue", "orange", "red"];
 
+    this.snaps = [];
     this.snap = null;
 
     this.auxiliaryPoints = []; // array of global Vector3
@@ -43,6 +44,7 @@ class PointSelector
     this.touchPointerOffsetY = -40;
 
     this.excludeSelection = false;
+    this.debug = false;
 
     this.axisGuides =
     [
@@ -151,7 +153,8 @@ class PointSelector
       pointerPosition.y += this.touchPointerOffsetY;
     }
 
-    let snap = this.findSnap(pointerPosition);
+    const snaps = this.findSnaps(pointerPosition);
+    const snap = this.selectRelevantSnap(snaps);
 
     if (snap)
     {
@@ -184,6 +187,8 @@ class PointSelector
       }
       this.snap = null;
     }
+
+    this.snaps = this.debug ? snaps : null;
   }
 
   setAxisGuides(axisMatrixWorld, visible = false)
@@ -246,7 +251,7 @@ class PointSelector
     this.axisGuidesEnabled = false;
   }
 
-  findSnap(pointerPosition)
+  findSnaps(pointerPosition)
   {
     const camera = this.application.camera;
     const container = this.application.container;
@@ -418,6 +423,7 @@ class PointSelector
             distanceScreen : 0,
             positionWorld : positionWorld.clone(),
             distanceWorld : positionWorld.distanceTo(camera.position),
+            normalWorld : GeometryUtils.calculateNormal(triangleWorld),
             face : face,
             triangle : [ triangleWorld[0].clone(),
               triangleWorld[1].clone(), triangleWorld[2].clone() ],
@@ -671,86 +677,86 @@ class PointSelector
       {
         for (let snap2 of snaps)
         {
-          if (snap1 !== snap2 &&
-              (snap1.object !== snap2.object
-              || snap1.object === null
-              || snap2.object === null))
+          if (snap1 === snap2
+             || (snap1.object === snap2.object && snap1.object))
+            continue;
+
+          if ((snap1.type === PointSelector.EDGE_SNAP
+              || snap1.type === PointSelector.GUIDE_SNAP)
+              && snap2.type === PointSelector.FACE_SNAP)
           {
-            if ((snap1.type === PointSelector.EDGE_SNAP
-                || snap1.type === PointSelector.GUIDE_SNAP)
-                && snap2.type === PointSelector.FACE_SNAP)
+            // edge/guide - face intersection
+            let edgeSnap = snap1;
+            let faceSnap = snap2;
+            let plane = faceSnap.plane;
+            if (plane.intersectsLine(edgeSnap.line))
             {
-              // edge/guide - face intersection
-              let edgeSnap = snap1;
-              let faceSnap = snap2;
-              let plane = faceSnap.plane;
-              if (plane.intersectsLine(edgeSnap.line))
+              vector.subVectors(edgeSnap.line.end, edgeSnap.line.start);
+              vector.normalize();
+              ray.set(edgeSnap.line.start, vector);
+
+              if (ray.intersectTriangle(
+                faceSnap.triangle[0],
+                faceSnap.triangle[1],
+                faceSnap.triangle[2],
+                false, positionWorld) !== null)
               {
-                vector.subVectors(edgeSnap.line.end, edgeSnap.line.start);
-                vector.normalize();
-                ray.set(edgeSnap.line.start, vector);
-
-                if (ray.intersectTriangle(
-                  faceSnap.triangle[0],
-                  faceSnap.triangle[1],
-                  faceSnap.triangle[2],
-                  false, positionWorld) !== null)
-                {
-                  worldToScreen(positionWorld, positionScreen);
-                  let distanceScreen = positionScreen.distanceTo(pointerPosition);
-                  if (distanceScreen < this.snapDistance)
-                  {
-                    let label = snap1.type === PointSelector.EDGE_SNAP ?
-                      "label.on_edge_face" :
-                      "label.on_guide_face";
-
-                    interSnaps.push({
-                      label :  label,
-                      type : PointSelector.INTERSECTION_SNAP,
-                      object : faceSnap.object || edgeSnap.object,
-                      positionScreen : positionScreen.clone(),
-                      distanceScreen : distanceScreen,
-                      positionWorld : positionWorld.clone(),
-                      distanceWorld : positionWorld.distanceTo(camera.position),
-                      snap1 : snap1,
-                      snap2 : snap2
-                    });
-                  }
-                }
-              }
-            }
-            else if ((snap1.type === PointSelector.EDGE_SNAP
-                     || snap1.type === PointSelector.GUIDE_SNAP)
-                     && snap2.type === PointSelector.EDGE_SNAP)
-            {
-              // guide - edge intersection
-
-              let distance = GeometryUtils.intersectLines(
-                snap1.line, snap2.line, point1, point2);
-
-              if (distance >= 0 && distance < 0.0001)
-              {
-                positionWorld.copy(point1).add(point2).multiplyScalar(0.5);
                 worldToScreen(positionWorld, positionScreen);
                 let distanceScreen = positionScreen.distanceTo(pointerPosition);
                 if (distanceScreen < this.snapDistance)
                 {
                   let label = snap1.type === PointSelector.EDGE_SNAP ?
-                    "label.on_edge_edge" :
-                    "label.on_guide_edge";
+                    "label.on_edge_face" :
+                    "label.on_guide_face";
 
                   interSnaps.push({
-                    label : label,
+                    label :  label,
                     type : PointSelector.INTERSECTION_SNAP,
-                    object : snap1.object || snap2.object,
+                    object : faceSnap.object || edgeSnap.object,
                     positionScreen : positionScreen.clone(),
                     distanceScreen : distanceScreen,
                     positionWorld : positionWorld.clone(),
                     distanceWorld : positionWorld.distanceTo(camera.position),
+                    normalWorld : snap2.normalWorld,
                     snap1 : snap1,
                     snap2 : snap2
                   });
                 }
+              }
+            }
+          }
+          else if ((snap1.type === PointSelector.EDGE_SNAP
+                  || snap1.type === PointSelector.GUIDE_SNAP)
+                  && snap2.type === PointSelector.EDGE_SNAP)
+          {
+            // guide - edge intersection
+
+            let distance = GeometryUtils.intersectLines(
+              snap1.line, snap2.line, point1, point2);
+
+            if (Math.abs(distance) < 0.0001)
+            {
+              positionWorld.copy(point1).add(point2).multiplyScalar(0.5);
+              worldToScreen(positionWorld, positionScreen);
+              let distanceScreen = positionScreen.distanceTo(pointerPosition);
+              if (distanceScreen < this.snapDistance)
+              {
+                let label = snap1.type === PointSelector.EDGE_SNAP ?
+                  "label.on_edge_edge" :
+                  "label.on_guide_edge";
+
+                interSnaps.push({
+                  label : label,
+                  type : PointSelector.INTERSECTION_SNAP,
+                  object : snap1.object || snap2.object,
+                  positionScreen : positionScreen.clone(),
+                  distanceScreen : distanceScreen,
+                  positionWorld : positionWorld.clone(),
+                  distanceWorld : positionWorld.distanceTo(camera.position),
+                  snap1 : snap1,
+                  snap2 : snap2
+                });
+                continue;
               }
             }
           }
@@ -759,19 +765,33 @@ class PointSelector
       snaps.push(...interSnaps);
     };
 
-    const selectRelevantSnap = () =>
+    const setSnapNormals = () =>
     {
-      let selectedSnap = snaps[0];
-      for (let snap of snaps)
+      for (let snap1 of snaps)
       {
-        if (snap.type < selectedSnap.type ||
-            (snap.type === selectedSnap.type &&
-            snap.distanceScreen < selectedSnap.distanceScreen))
+        if (snap1.type === PointSelector.FACE_SNAP)
         {
-          selectedSnap = snap;
+          for (let snap2 of snaps)
+          {
+            if (snap1.object === snap2.object)
+              continue;
+
+            if (snap2.type === PointSelector.VERTEX_SNAP
+                || snap2.type === PointSelector.EDGE_SNAP
+                || snap2.type === PointSelector.INTERSECTION_SNAP)
+            {
+              // does the face contains the vertex/egde ?
+              let plane = snap1.plane;
+              let distance = plane.distanceToPoint(snap2.positionWorld);
+              if (Math.abs(distance) < 0.000001)
+              {
+                // copy face normal to vertex/edge snap
+                snap2.normalWorld = snap1.normalWorld;
+              }
+            }
+          }
         }
       }
-      return selectedSnap;
     };
 
     addSceneSnaps();
@@ -780,8 +800,26 @@ class PointSelector
     addAxisGuideSnaps();
     addIntersectionSnaps();
     filterHiddenSnaps();
+    setSnapNormals();
 
-    return selectRelevantSnap();
+    return snaps;
+  }
+
+  selectRelevantSnap(snaps)
+  {
+    if (snaps.length === 0) return null;
+
+    let selectedSnap = snaps[0];
+    for (let snap of snaps)
+    {
+      if (snap.type < selectedSnap.type ||
+         (snap.type === selectedSnap.type &&
+          snap.distanceScreen < selectedSnap.distanceScreen))
+      {
+        selectedSnap = snap;
+      }
+    }
+    return selectedSnap;
   }
 
   isPointSelectionEvent(event)

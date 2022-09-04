@@ -174,7 +174,7 @@ class PlaceTool extends Tool
         break;
 
       case PlaceTool.PERPENDICULAR_MODE:
-        if (snap.face)
+        if (snap.normalWorld)
         {
           this.setPerpendicularMatrix(snap, axisMatrixWorld);
         }
@@ -202,21 +202,12 @@ class PlaceTool extends Tool
   {
     const objectMatrixWorld = snap.object.matrixWorld;
 
-    let xLocal = new THREE.Vector3();
-    let yLocal = new THREE.Vector3();
-    let zLocal = new THREE.Vector3();
-
-    xLocal.setFromMatrixColumn(objectMatrixWorld, 0);
-    yLocal.setFromMatrixColumn(objectMatrixWorld, 1);
-    zLocal.setFromMatrixColumn(objectMatrixWorld, 2);
-
     const xAxis = new THREE.Vector3();
     const yAxis = new THREE.Vector3();
     const zAxis = new THREE.Vector3();
     const upVector = new THREE.Vector3(0, 0, 1);
 
-    zAxis.copy(snap.face.normal);
-    this.vectorToGlobal(zAxis, objectMatrixWorld);
+    zAxis.copy(snap.normalWorld);
 
     if (Math.abs(upVector.dot(zAxis)) < 0.999)
     {

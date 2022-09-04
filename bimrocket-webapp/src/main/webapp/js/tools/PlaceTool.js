@@ -190,8 +190,7 @@ class PlaceTool extends Tool
     matrix.copy(object.parent.matrixWorld).invert();
     matrix.multiply(axisMatrixWorld);
 
-    matrix.decompose(object.position, object.rotation, object.scale);
-    if (object.rotation)
+    matrix.decompose(object.position, object.rotation, new THREE.Vector3());
     object.updateMatrix();
 
     application.notifyObjectsChanged(object, this, "nodeChanged",

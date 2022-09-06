@@ -381,6 +381,7 @@ export const translations =
   "label.on_x_axis" : "Sobre eje X",
   "label.on_y_axis" : "Sobre eje Y",
   "label.on_z_axis" : "Sobre eje Z",
+  "label.on_projected_vertex" : "Sobre vértice proyectado",
 
   "label.selection_mode" : "Modo de selección",
   "label.set_selection_mode" : "Establecer",

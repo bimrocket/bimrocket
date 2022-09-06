@@ -380,6 +380,7 @@ export const translations =
   "label.on_x_axis" : "On X axis",
   "label.on_y_axis" : "On Y axis",
   "label.on_z_axis" : "On Z axis",
+  "label.on_projected_vertex" : "On projected vertex",
 
   "label.selection_mode" : "Selection mode",
   "label.set_selection_mode" : "Set",

@@ -18,9 +18,10 @@ class PointSelector
 {
   static VERTEX_SNAP = 0;
   static INTERSECTION_SNAP = 1;
-  static EDGE_SNAP = 2;
-  static GUIDE_SNAP = 3;
-  static FACE_SNAP = 4;
+  static PROJECTION_SNAP = 2;
+  static EDGE_SNAP = 3;
+  static GUIDE_SNAP = 4;
+  static FACE_SNAP = 5;
 
   constructor(application)
   {
@@ -31,13 +32,13 @@ class PointSelector
     this.snapDistance = 16;
     this.snapSize = 8;
 
-    this.snapColors = ["black", "purple", "blue", "orange", "red"];
+    this.snapColors = ["black", "purple", "green", "blue", "orange", "red"];
 
     this.snaps = [];
     this.snap = null;
+    this.projectionSnap = null;
 
     this.auxiliaryPoints = []; // array of global Vector3
-
     this.auxiliaryLines = []; // array of global Line3
 
     this.touchPointerOffsetX = -40;
@@ -87,6 +88,8 @@ class PointSelector
     ];
 
     this.axisGuidesEnabled = false;
+    this.axisMatrixWorld = new THREE.Matrix4();
+    this.axisMatrixWorldInverse = new THREE.Matrix4();
 
     this.snapElem = document.createElement("div");
     const snapElem = this.snapElem;
@@ -95,6 +98,14 @@ class PointSelector
     snapElem.style.width = this.snapSize + "px";
     snapElem.style.height = this.snapSize + "px";
     application.container.appendChild(snapElem);
+
+    this.projectionSnapElem = document.createElement("div");
+    const projectionSnapElem = this.projectionSnapElem;
+    projectionSnapElem.style.position = "absolute";
+    projectionSnapElem.style.display = "none";
+    projectionSnapElem.style.width = this.snapSize + "px";
+    projectionSnapElem.style.height = this.snapSize + "px";
+    application.container.appendChild(projectionSnapElem);
 
     this._onPointerMove = this.onPointerMove.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
@@ -141,6 +152,8 @@ class PointSelector
     const application = this.application;
     const container = application.container;
     const snapElem = this.snapElem;
+    const projectionSnapElem = this.projectionSnapElem;
+    const projectionSnap = this.projectionSnap;
 
     let rect = container.getBoundingClientRect();
     const pointerPosition = new THREE.Vector2();
@@ -168,6 +181,34 @@ class PointSelector
       application.i18n.update(snapElem);
 
       this.snap = snap;
+      if (snap.type === PointSelector.VERTEX_SNAP
+          || snap.type === PointSelector.INTERSECTION_SNAP)
+      {
+        this.projectionSnap = snap;
+      }
+      else if (snap.type === PointSelector.PROJECTION_SNAP && projectionSnap)
+      {
+        const clientWidth = container.clientWidth;
+        const clientHeight = container.clientHeight;
+
+        let vector = new THREE.Vector3();
+        vector.copy(projectionSnap.positionWorld).project(application.camera);
+        let screenPosition = new THREE.Vector3();
+        screenPosition.x = 0.5 * clientWidth * (vector.x + 1);
+        screenPosition.y = 0.5 * clientHeight * (1 - vector.y);
+        projectionSnapElem.style.left =
+          (screenPosition.x - this.snapSize / 2) + "px";
+        projectionSnapElem.style.top =
+          (screenPosition.y - this.snapSize / 2) + "px";
+        projectionSnapElem.style.display = "";
+        projectionSnapElem.style.backgroundColor = "green";
+        projectionSnapElem.style.borderRadius = this.snapSize + "px";
+        projectionSnapElem.style.border = "1px solid white";
+      }
+      else
+      {
+        projectionSnapElem.style.display = "none";
+      }
     }
     else
     {
@@ -185,6 +226,7 @@ class PointSelector
       {
         snapElem.style.display = "none";
       }
+      projectionSnapElem.style.display = "none";
       this.snap = null;
     }
 
@@ -193,6 +235,10 @@ class PointSelector
 
   setAxisGuides(axisMatrixWorld, visible = false)
   {
+    this.axisGuidesEnabled = true;
+    this.axisMatrixWorld.copy(axisMatrixWorld);
+    this.axisMatrixWorldInverse.copy(axisMatrixWorld).invert();
+
     const scale = axisMatrixWorld.getMaxScaleOnAxis();
     const factor = 1 / scale;
 
@@ -209,7 +255,6 @@ class PointSelector
       guide.endPoint.copy(guide.endLocal)
         .multiplyScalar(k).applyMatrix4(scaledAxisMatrixWorld);
     }
-    this.axisGuidesEnabled = true;
 
     if (this.axisGroup)
     {
@@ -606,6 +651,50 @@ class PointSelector
       traverse(baseObject);
     };
 
+    const addProjectionSnaps = () =>
+    {
+      if (this.projectionSnap === null || !this.axisGuidesEnabled) return;
+
+      let axisMatrixWorld = this.axisMatrixWorld;
+      let axisMatrixWorldInverse = this.axisMatrixWorldInverse;
+
+      let snapPositionWorld = this.projectionSnap.positionWorld;
+      let snapPosition = new THREE.Vector3();
+      snapPosition.copy(snapPositionWorld).applyMatrix4(axisMatrixWorldInverse);
+
+      let point = new THREE.Vector3();
+
+      point.set(snapPosition.x, 0, 0);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+
+      point.set(0, snapPosition.y, 0);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+
+      point.set(0, 0, snapPosition.z);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+
+      point.set(0, snapPosition.y, snapPosition.z);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+
+      point.set(snapPosition.x, 0, snapPosition.z);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+
+      point.set(snapPosition.x, snapPosition.y, 0);
+      point.applyMatrix4(axisMatrixWorld);
+      addVertexSnap(null, point,
+        "label.on_projected_vertex", PointSelector.PROJECTION_SNAP);
+    };
+
     const addAuxiliaryPointSnaps = () =>
     {
       for (let auxiliaryPoint of this.auxiliaryPoints)
@@ -675,15 +764,17 @@ class PointSelector
 
       for (let snap1 of snaps)
       {
+        if (!(snap1.type === PointSelector.EDGE_SNAP
+              || snap1.type === PointSelector.GUIDE_SNAP))
+          continue;
+
         for (let snap2 of snaps)
         {
           if (snap1 === snap2
              || (snap1.object === snap2.object && snap1.object))
             continue;
 
-          if ((snap1.type === PointSelector.EDGE_SNAP
-              || snap1.type === PointSelector.GUIDE_SNAP)
-              && snap2.type === PointSelector.FACE_SNAP)
+          if (snap2.type === PointSelector.FACE_SNAP)
           {
             // edge/guide - face intersection
             let edgeSnap = snap1;
@@ -725,9 +816,7 @@ class PointSelector
               }
             }
           }
-          else if ((snap1.type === PointSelector.EDGE_SNAP
-                  || snap1.type === PointSelector.GUIDE_SNAP)
-                  && snap2.type === PointSelector.EDGE_SNAP)
+          else if (snap2.type === PointSelector.EDGE_SNAP)
           {
             // guide - edge intersection
 
@@ -795,6 +884,7 @@ class PointSelector
     };
 
     addSceneSnaps();
+    addProjectionSnaps();
     addAuxiliaryPointSnaps();
     addAuxiliaryLineSnaps();
     addAxisGuideSnaps();

@@ -37,6 +37,9 @@ class PointSelector
     this.snaps = [];
     this.snap = null;
     this.projectionSnap = null;
+    this.temporalSnap = null;
+    this.snapTimestamp = 0;
+    this.projectionSnapTime = 500; // 1/2 second to set the projection vertex
 
     this.auxiliaryPoints = []; // array of global Vector3
     this.auxiliaryLines = []; // array of global Line3
@@ -139,10 +142,9 @@ class PointSelector
   onPointerUp(event)
   {
     if (!this.isPointSelectionEvent(event)) return;
-    if (event.pointerType === "touch")
-    {
-      this.snapElem.style.display = "none";
-    }
+
+    this.snapElem.style.display = "none";
+    this.projectionSnapElem.style.display = "none";
   }
 
   onPointerMove(event)
@@ -169,6 +171,8 @@ class PointSelector
     const snaps = this.findSnaps(pointerPosition);
     const snap = this.selectRelevantSnap(snaps);
 
+    let updateTimestamp = true;
+
     if (snap)
     {
       snapElem.style.left = (snap.positionScreen.x - this.snapSize / 2) + "px";
@@ -180,11 +184,27 @@ class PointSelector
       I18N.set(snapElem, "title", snap.label);
       application.i18n.update(snapElem);
 
+      if (this.temporalSnap)
+      {
+        if (snap.positionScreen.equals(this.temporalSnap.positionScreen))
+        {
+          // do not update timestamp if the snap position does not change
+          updateTimestamp = false;
+        }
+
+        if (Date.now() - this.snapTimestamp > this.projectionSnapTime)
+        {
+          // if pointer is on snap for more than projectionSnapTime then
+          // save projectionSnap
+          this.projectionSnap = this.temporalSnap;
+        }
+      }
+
       this.snap = snap;
       if (snap.type === PointSelector.VERTEX_SNAP
           || snap.type === PointSelector.INTERSECTION_SNAP)
       {
-        this.projectionSnap = snap;
+        this.temporalSnap = snap;
       }
       else if (snap.type === PointSelector.PROJECTION_SNAP && projectionSnap)
       {
@@ -204,10 +224,12 @@ class PointSelector
         projectionSnapElem.style.backgroundColor = "green";
         projectionSnapElem.style.borderRadius = this.snapSize + "px";
         projectionSnapElem.style.border = "1px solid white";
+        this.temporalSnap = null;
       }
       else
       {
         projectionSnapElem.style.display = "none";
+        this.temporalSnap = null;
       }
     }
     else
@@ -228,7 +250,10 @@ class PointSelector
       }
       projectionSnapElem.style.display = "none";
       this.snap = null;
+      this.temporalSnap = null;
     }
+
+    if (updateTimestamp) this.snapTimestamp = Date.now();
 
     this.snaps = this.debug ? snaps : null;
   }

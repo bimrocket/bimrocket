@@ -13,7 +13,6 @@ import { MessageDialog } from "../ui/MessageDialog.js";
 import { Cord } from "../core/Cord.js";
 import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
-import { Cloner } from "../builders/Cloner.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
@@ -90,6 +89,7 @@ class Application
     this.needsRepaint = true;
 
     /* internal properties */
+    this._copyObjects = [];
     this._cutObjects = [];
     this._eventListeners = {
       scene : [],
@@ -407,6 +407,10 @@ class Application
     this.overlays = new THREE.Group();
     this.overlays.name = THREE.Object3D.HIDDEN_PREFIX + "overlays";
     this.scene.add(this.overlays);
+
+    // reset copy/cut arrays
+    this._copyObjects = [];
+    this._cutObjects = [];
 
     let sceneEvent = {type : "structureChanged",
       objects : [this.scene], source : this};
@@ -1153,29 +1157,22 @@ class Application
     }
   }
 
-  cloneObject(object, dynamic = false)
+  copyObjects()
   {
-    if (object === undefined)
+    let copyObjects = this.selection.roots;
+    copyObjects = copyObjects.filter(
+      root => root !== this.scene && root.parent !== this.scene);
+    this._copyObjects = copyObjects;
+    this._cutObjects = [];
+    if (copyObjects.length > 0)
     {
-      object = this.selection.object;
-    }
-    if (object && object !== this.baseObject)
-    {
-      let clone;
-      if (dynamic)
+      let copyEvent =
       {
-        clone = new THREE.Object3D();
-        clone.name = object.name + "_cloner";
-        clone.builder = new Cloner(object);
-        clone.userData.selection = { "group" : true };
-        ObjectBuilder.build(clone);
-      }
-      else
-      {
-        clone = object.clone(true);
-        clone.name = object.name + "_clone";
-      }
-      this.addObject(clone, object.parent);
+        type : "copy",
+        objects : copyObjects,
+        source : this
+      };
+      this.notifyEventListeners("scene", copyEvent);
     }
   }
 
@@ -1185,6 +1182,7 @@ class Application
     cutObjects = cutObjects.filter(
       root => root !== this.scene && root.parent !== this.scene);
     this._cutObjects = cutObjects;
+    this._copyObjects = [];
     if (cutObjects.length > 0)
     {
       let cutEvent =
@@ -1199,57 +1197,96 @@ class Application
 
   pasteObjects(parent)
   {
+    let copyObjects = this._copyObjects;
     let cutObjects = this._cutObjects;
-    if (cutObjects.length > 0)
+
+    if (copyObjects.length === 0 && cutObjects.length === 0) return;
+
+    if (parent === undefined)
     {
-      if (parent === undefined)
+      if (copyObjects.length > 0)
+      {
+        if (this.selection.object === copyObjects[0])
+        {
+          parent = this.selection.object.parent;
+        }
+        else
+        {
+          parent = this.selection.object;
+        }
+      }
+      else
       {
         parent = this.selection.object;
       }
-      if (parent instanceof THREE.Object3D)
+    }
+
+    let ancestor = parent;
+    while (ancestor &&
+           ancestor !== this.baseObject &&
+           cutObjects.indexOf(ancestor) === -1)
+    {
+      ancestor = ancestor.parent;
+    }
+
+    if (ancestor === this.baseObject) // paste only under baseObject
+    {
+      let pastedObjects;
+
+      if (copyObjects.length > 0)
       {
-        let object = parent;
-        while (object &&
-               object !== this.baseObject &&
-               cutObjects.indexOf(object) === -1)
+        pastedObjects = [];
+        for (let copyObject of copyObjects)
         {
-          object = object.parent;
+          let clonedObject = copyObject.clone(true);
+          parent.attach(clonedObject);
+          clonedObject.updateMatrix();
+          clonedObject.updateMatrixWorld();
+          pastedObjects.push(clonedObject);
         }
-        if (object === this.baseObject) // paste only under baseObject
+        this._copyObjects = [];
+      }
+      else // cutObjects.length > 0
+      {
+        for (let cutObject of cutObjects)
         {
-          for (let cutObject of cutObjects)
+          let removeEvent =
           {
-            let removeEvent =
-            {
-              type : "removed",
-              object : cutObject,
-              parent : cutObject.parent,
-              source : this
-            };
-            let addEvent =
-            {
-              type : "added",
-              object : cutObject,
-              parent : parent,
-              source : this
-            };
-            parent.attach(cutObject);
-            cutObject.updateMatrix();
-            cutObject.updateMatrixWorld();
-            this.notifyEventListeners("scene", removeEvent);
-            this.notifyEventListeners("scene", addEvent);
-          }
-          let pasteEvent =
-          {
-            type: "pasted",
-            objects: cutObjects,
+            type : "removed",
+            object : cutObject,
+            parent : cutObject.parent,
             source : this
           };
-          this.notifyEventListeners("scene", pasteEvent);
-          this._cutObjects = [];
+          parent.attach(cutObject);
+          cutObject.updateMatrix();
+          cutObject.updateMatrixWorld();
+          this.notifyEventListeners("scene", removeEvent);
         }
+        pastedObjects = cutObjects;
+        this._cutObjects = [];
       }
-      this.selection.set(parent);
+
+      for (let pastedObject of pastedObjects)
+      {
+        let addEvent =
+        {
+          type : "added",
+          object : pastedObject,
+          parent : parent,
+          source : this
+        };
+        this.notifyEventListeners("scene", addEvent);
+      }
+
+      let pasteEvent =
+      {
+        type: "pasted",
+        objects: pastedObjects,
+        source : this
+      };
+
+      this.notifyEventListeners("scene", pasteEvent);
+      this.selection.set(...pastedObjects);
     }
   }
 

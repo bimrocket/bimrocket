@@ -104,8 +104,19 @@ class Outliner extends Panel
         let treeNode = this.map.get(camera);
         if (treeNode) treeNode.addClass("active_camera");
       }
+      else if (event.type === "copy")
+      {
+        this.clearNodeStyle("copy");
+        this.clearNodeStyle("cut");
+        for (let object of event.objects)
+        {
+          let treeNode = this.map.get(object);
+          if (treeNode) treeNode.addClass("copy");
+        }
+      }
       else if (event.type === "cut")
       {
+        this.clearNodeStyle("copy");
         this.clearNodeStyle("cut");
         for (let object of event.objects)
         {
@@ -115,6 +126,7 @@ class Outliner extends Panel
       }
       else if (event.type === "pasted")
       {
+        this.clearNodeStyle("copy");
         this.clearNodeStyle("cut");
         for (let object of event.objects)
         {

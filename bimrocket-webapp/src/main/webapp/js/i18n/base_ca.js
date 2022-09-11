@@ -244,7 +244,7 @@ export const translations =
 
   "tool.remove.label" : "Esborra",
 
-  "tool.clone.label" : "Clona",
+  "tool.copy.label" : "Copia",
 
   "tool.cloner.label" : "Clonador",
 
@@ -325,6 +325,7 @@ export const translations =
   "label.offset" : "Desplaçament:",
   "label.rotation" : "Rotació (graus):",
   "label.length" : "Longitud:",
+  "label.angle" : "Angle (graus):",
   "label.scale_factor" : "Factor d'escala:",
   "label.scale_keep_proportions" : "Manté proporcions",
   "label.depth" : "Profunditat:",

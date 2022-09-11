@@ -5,6 +5,8 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Cloner } from "../builders/Cloner.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 
 class CloneTool extends Tool
 {
@@ -26,10 +28,26 @@ class CloneTool extends Tool
     let objects = application.selection.roots;
     for (let object of objects)
     {
-      application.cloneObject(object, this.dynamic);
+      if (object !== application.baseObject)
+      {
+        let clone;
+        if (this.dynamic)
+        {
+          clone = new THREE.Object3D();
+          clone.name = object.name + "_cloner";
+          clone.builder = new Cloner(object);
+          clone.userData.selection = { "group" : true };
+          ObjectBuilder.build(clone);
+        }
+        else
+        {
+          clone = object.clone(true);
+          clone.name = object.name + "_clone";
+        }
+        application.addObject(clone, object.parent);
+      }
     }
   }
 }
 
 export { CloneTool };
-

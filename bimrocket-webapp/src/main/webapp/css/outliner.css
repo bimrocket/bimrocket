@@ -42,20 +42,22 @@ ul.outliner a:hover
 ul.outliner a.selected,
 ul.outliner a.selected:hover
 {
-  background-color:#F0A0A0;
-  color:black;
+  background-color: #F0A0A0;
+  color: black;
   animation: none;
 }
 
-ul.outliner .cut
+ul.outliner .copy,
+ul.outliner .selected.copy
 {
-  color:blue;
+  color: blue;
   font-style: italic;
 }
 
+ul.outliner .cut,
 ul.outliner .selected.cut
 {
-  color:blue;
+  color: #C00000;
   font-style: italic;
 }
 

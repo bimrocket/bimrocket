@@ -434,7 +434,6 @@ class RevolveTool extends Tool
     if (this.angle > 180 && angle === 0) angle = 360;
 
     this.angle = angle;
-    console.info("angle", angle);
 
     this.updateAngleInPanel();
     this.updateRevolution();

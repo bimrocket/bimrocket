@@ -130,7 +130,7 @@ class Selection
 
   _notifyListeners()
   {
-    let selectionEvent = {type : "changed", objects : this.objects};
+    let selectionEvent = { type : "changed", objects : this.objects };
     this.application.notifyEventListeners("selection", selectionEvent);
   }
 }

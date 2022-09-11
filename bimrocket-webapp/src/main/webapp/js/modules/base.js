@@ -44,6 +44,7 @@ import { CameraProjectionTool } from "../tools/CameraProjectionTool.js";
 import { AddObjectTool } from "../tools/AddObjectTool.js";
 import { RemoveTool } from "../tools/RemoveTool.js";
 import { CloneTool } from "../tools/CloneTool.js";
+import { CopyTool } from "../tools/CopyTool.js";
 import { CutTool } from "../tools/CutTool.js";
 import { PasteTool } from "../tools/PasteTool.js";
 import { ZoomAllTool } from "../tools/ZoomAllTool.js";
@@ -334,9 +335,9 @@ export function load(application)
       objectType : "Sprite" });
 
   const removeTool = new RemoveTool(application, { keyShortcut : "Delete" });
-  const cloneTool = new CloneTool(application);
   const clonerTool = new CloneTool(application,
     { name : "cloner", label : "tool.cloner.label", dynamic : true });
+  const copyTool = new CopyTool(application, { keyShortcut : "Control+C" });
   const cutTool = new CutTool(application, { keyShortcut : "Control+X" });
   const pasteTool = new PasteTool(application, { keyShortcut : "Control+V" });
   const zoomAllTool = new ZoomAllTool(application, { keyShortcut : "Shift+Z" });
@@ -437,7 +438,7 @@ export function load(application)
   application.addTool(addSpriteTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
-  application.addTool(cloneTool);
+  application.addTool(copyTool);
   application.addTool(clonerTool);
   application.addTool(cutTool);
   application.addTool(pasteTool);
@@ -472,10 +473,10 @@ export function load(application)
   fileMenu.addMenuItem(svgExporterTool);
 
   const editMenu = menuBar.addMenu("menu.edit");
+  editMenu.addMenuItem(copyTool);
   editMenu.addMenuItem(cutTool);
   editMenu.addMenuItem(pasteTool);
   editMenu.addMenuItem(removeTool);
-  editMenu.addMenuItem(cloneTool);
   editMenu.addMenuItem(optionsTool);
 
   const viewMenu = menuBar.addMenu("menu.view");

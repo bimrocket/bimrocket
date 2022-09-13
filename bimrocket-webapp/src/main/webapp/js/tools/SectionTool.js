@@ -85,7 +85,7 @@ class SectionTool extends Tool
     });
     this.planeStencilMat = planeStencilMat;
 
-    let planeGeom = new THREE.PlaneBufferGeometry(100, 100);
+    let planeGeom = new THREE.PlaneGeometry(100, 100);
     let planeMesh = new THREE.Mesh(planeGeom, planeStencilMat);
     planeMesh.renderOrder = 1;
     planeMesh.raycast = () => {};

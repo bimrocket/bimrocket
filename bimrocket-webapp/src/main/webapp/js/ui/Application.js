@@ -1239,6 +1239,8 @@ class Application
         for (let copyObject of copyObjects)
         {
           let clonedObject = copyObject.clone(true);
+          // set the parent object so that the attach method works correctly
+          clonedObject.parent = copyObject.parent;
           parent.attach(clonedObject);
           clonedObject.updateMatrix();
           clonedObject.updateMatrixWorld();

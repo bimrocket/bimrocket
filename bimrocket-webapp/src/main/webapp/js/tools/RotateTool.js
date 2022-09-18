@@ -209,7 +209,7 @@ class RotateTool extends TransformationTool
       case 0: // set first point of rotation axis
         this.rotation = 0;
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
@@ -222,7 +222,7 @@ class RotateTool extends TransformationTool
 
       case 1: // set second point of rotation axis
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
@@ -233,7 +233,7 @@ class RotateTool extends TransformationTool
 
       case 2: // set anchor point
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
@@ -244,7 +244,7 @@ class RotateTool extends TransformationTool
 
       case 3: // set destination point
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "";
@@ -256,7 +256,7 @@ class RotateTool extends TransformationTool
 
       case 4: // edit rotation angle
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "";

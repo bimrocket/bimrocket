@@ -217,7 +217,7 @@ class ScaleTool extends TransformationTool
       case 0: // set origin
         this.scale = 1;
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.scaleInputElem.parentElement.style.display = "none";
@@ -230,7 +230,7 @@ class ScaleTool extends TransformationTool
 
       case 1: // set anchor point
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.scaleInputElem.parentElement.style.display = "none";
@@ -242,7 +242,7 @@ class ScaleTool extends TransformationTool
 
       case 2: // set destination point
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.scaleInputElem.parentElement.style.display = "";
@@ -258,7 +258,7 @@ class ScaleTool extends TransformationTool
 
       case 3: // edit scale factor/distance
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.scaleInputElem.parentElement.style.display = "";

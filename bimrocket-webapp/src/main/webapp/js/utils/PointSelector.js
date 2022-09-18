@@ -23,6 +23,34 @@ class PointSelector
   static GUIDE_SNAP = 4;
   static FACE_SNAP = 5;
 
+  // Object filter function for snap search that returns:
+  // 0: ignore object and descendants
+  // 1: explore object but not descendants
+  // 2: ignore object but not descendants
+  // 3: explore object and descendants
+
+  static ANY_FILTER = () => 3;
+
+  static VISIBLE_FILTER = object => object.visible ? 3 : 0;
+
+  static VISIBLE_SELECTED_FILTER = (object, application) =>
+    object.visible && application.selection.contains(object) ? 3 : 0;
+
+  static VISIBLE_UNSELECTED_FILTER = (object, application) =>
+    object.visible && !application.selection.contains(object) ? 3 : 0;
+
+  static NO_SELECTION_ANCESTORS_FILTER = (object, application) =>
+  {
+    let selectedObject = application.selection.object;
+    if (selectedObject)
+    {
+      if (object === selectedObject) return 1;
+
+      if (ObjectUtils.isObjectDescendantOf(selectedObject, object)) return 2;
+    }
+    return object.visible ? 3 : 0;
+  };
+
   constructor(application)
   {
     this.application = application;
@@ -47,8 +75,9 @@ class PointSelector
     this.touchPointerOffsetX = -40;
     this.touchPointerOffsetY = -40;
 
-    this.excludeSelection = false;
     this.debug = false;
+
+    this.filter = PointSelector.VISIBLE_FILTER;
 
     this.axisGuides =
     [
@@ -323,11 +352,12 @@ class PointSelector
 
   findSnaps(pointerPosition)
   {
-    const camera = this.application.camera;
-    const container = this.application.container;
+    const application = this.application;
+    const camera = application.camera;
+    const container = application.container;
     const clientWidth = container.clientWidth;
     const clientHeight = container.clientHeight;
-    const baseObject = this.application.baseObject;
+    const baseObject = application.baseObject;
 
     const raycaster = new THREE.Raycaster();
     const positionWorld = new THREE.Vector3();
@@ -639,9 +669,8 @@ class PointSelector
     {
       const traverse = object =>
       {
-        if (object.visible &&
-            (!this.excludeSelection
-            || !this.application.selection.contains(object)))
+        let filterResult = this.filter(object, application);
+        if ((filterResult & 1) === 1) // 1 or 3
         {
           if (rayIntersectsObject(object))
           {
@@ -664,12 +693,16 @@ class PointSelector
               addBufferGeometrySnaps(object);
             }
           }
-          if (!(object instanceof Solid))
+        }
+
+        // explore children
+        if ((filterResult & 2) === 2) // 2 or 3
+        {
+          let start = object instanceof Solid ? 2 : 0;
+
+          for (let i = start; i < object.children.length; i++)
           {
-            for (let child of object.children)
-            {
-              traverse(child);
-            }
+            traverse(object.children[i]);
           }
         }
       };

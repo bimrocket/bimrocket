@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
+import { PointSelector } from "../utils/PointSelector.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -74,7 +75,7 @@ class PlaceTool extends Tool
 
     application.pointSelector.auxiliaryLines = [];
     application.pointSelector.activate();
-    application.pointSelector.excludeSelection = true;
+    application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
     application.pointSelector.clearAxisGuides();
 
     this.preparePlacement();

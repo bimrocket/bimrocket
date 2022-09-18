@@ -9,6 +9,7 @@ import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Extruder } from "../builders/Extruder.js";
+import { PointSelector } from "../utils/PointSelector.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
@@ -200,7 +201,7 @@ class ExtrudeTool extends Tool
 
       case 1: // dynamic extrude
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.auxiliaryLines = [this.extrudeLineWorld];
         application.pointSelector.activate();

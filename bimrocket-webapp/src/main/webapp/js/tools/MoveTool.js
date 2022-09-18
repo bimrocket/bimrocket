@@ -164,7 +164,7 @@ class MoveTool extends TransformationTool
       case 0: // set anchor point
         this.offset = 0;
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "none";
@@ -175,7 +175,7 @@ class MoveTool extends TransformationTool
 
       case 1: // set destination point
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "";
@@ -187,7 +187,7 @@ class MoveTool extends TransformationTool
 
       case 2: // set distance
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "";

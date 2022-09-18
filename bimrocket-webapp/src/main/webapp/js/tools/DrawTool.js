@@ -84,7 +84,8 @@ class DrawTool extends Tool
     const container = application.container;
     container.addEventListener('pointerup', this._onPointerUp, false);
     application.addEventListener('selection', this._onSelection, false);
-    application.pointSelector.excludeSelection = false;
+    application.pointSelector.filter =
+      PointSelector.NO_SELECTION_ANCESTORS_FILTER;
     application.pointSelector.activate();
     this.setObject(application.selection.object);
   }

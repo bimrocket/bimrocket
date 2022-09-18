@@ -11,6 +11,7 @@ import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { CircleBuilder } from "../builders/CircleBuilder.js";
 import { Revolver } from "../builders/Revolver.js";
 import { Controls } from "../ui/Controls.js";
+import { PointSelector } from "../utils/PointSelector.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
@@ -246,7 +247,7 @@ class RevolveTool extends Tool
       case 0: // set revolve axis start point
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.auxiliaryLines = [];
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.clearAxisGuides();
         application.pointSelector.activate();
         this.angleLabelElem.style.display = "none";
@@ -263,7 +264,7 @@ class RevolveTool extends Tool
       case 1: // set revolve axis end point
         application.pointSelector.auxiliaryPoints = [];
         application.pointSelector.auxiliaryLines = [];
-        application.pointSelector.excludeSelection = false;
+        application.pointSelector.filter = PointSelector.VISIBLE_FILTER;
         application.pointSelector.setAxisGuides(this.axisMatrixWorld, true);
         application.pointSelector.activate();
         this.angleLabelElem.style.display = "none";
@@ -279,7 +280,7 @@ class RevolveTool extends Tool
 
       case 2: // dynamic revolve: pointer up
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.auxiliaryLines = [];
         application.pointSelector.activate();
@@ -296,7 +297,7 @@ class RevolveTool extends Tool
 
       case 3: // dynamic revolve: pointer down
         application.pointSelector.clearAxisGuides();
-        application.pointSelector.excludeSelection = true;
+        application.pointSelector.filter = PointSelector.VISIBLE_UNSELECTED_FILTER;
         application.pointSelector.auxiliaryPoints = this.wheelPoints;
         application.pointSelector.auxiliaryLines = [];
         application.pointSelector.activate();

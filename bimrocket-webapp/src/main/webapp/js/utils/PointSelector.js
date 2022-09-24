@@ -692,9 +692,15 @@ class PointSelector
           {
             if (object instanceof Solid)
             {
-              addSolidVertexSnaps(object);
-              addSolidEdgeSnaps(object);
-              addSolidFaceSnaps(object);
+              if (object.facesVisible || object.edgesVisible)
+              {
+                addSolidVertexSnaps(object);
+                addSolidEdgeSnaps(object);
+              }
+              if (object.facesVisible)
+              {
+                addSolidFaceSnaps(object);
+              }
             }
             else if (object instanceof Profile)
             {

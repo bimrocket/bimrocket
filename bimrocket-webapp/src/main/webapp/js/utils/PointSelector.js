@@ -19,9 +19,10 @@ class PointSelector
   static VERTEX_SNAP = 0;
   static INTERSECTION_SNAP = 1;
   static PROJECTION_SNAP = 2;
-  static EDGE_SNAP = 3;
-  static GUIDE_SNAP = 4;
-  static FACE_SNAP = 5;
+  static MIDDLE_POINT_SNAP = 3;
+  static EDGE_SNAP = 4;
+  static GUIDE_SNAP = 5;
+  static FACE_SNAP = 6;
 
   // Object filter function for snap search that returns:
   // 0: ignore object and descendants
@@ -60,7 +61,15 @@ class PointSelector
     this.snapDistance = 16;
     this.snapSize = 8;
 
-    this.snapColors = ["black", "purple", "green", "blue", "orange", "red"];
+    this.snapColors = [
+      "black", // vertex
+      "purple", // intersection
+      "green", // projection
+      "brown", // middle point
+      "blue", // edge
+      "orange", // axis
+      "red" // face
+    ];
 
     this.snaps = [];
     this.snap = null;
@@ -230,8 +239,9 @@ class PointSelector
       }
 
       this.snap = snap;
-      if (snap.type === PointSelector.VERTEX_SNAP
-          || snap.type === PointSelector.INTERSECTION_SNAP)
+      if (snap.type === PointSelector.VERTEX_SNAP ||
+          snap.type === PointSelector.INTERSECTION_SNAP ||
+          snap.type === PointSelector.MIDDLE_POINT_SNAP)
       {
         this.temporalSnap = snap;
       }
@@ -453,6 +463,12 @@ class PointSelector
 
     const addEdgeSnap = (object, vertex1, vertex2, label, type) =>
     {
+      const middlePoint = vector;
+      middlePoint.addVectors(vertex1, vertex2).multiplyScalar(0.5);
+
+      addVertexSnap(object, middlePoint, "label.on_middle_point",
+        PointSelector.MIDDLE_POINT_SNAP);
+
       point1.copy(vertex1);
       point2.copy(vertex2);
 

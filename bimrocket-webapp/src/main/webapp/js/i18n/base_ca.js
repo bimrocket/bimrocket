@@ -382,6 +382,7 @@ export const translations =
   "label.on_y_axis" : "Sobre eix Y",
   "label.on_z_axis" : "Sobre eix Z",
   "label.on_projected_vertex" : "Sobre vèrtex projectat",
+  "label.on_middle_point" : "Sobre punt mig",
 
   "label.selection_mode" : "Mode de selecció",
   "label.set_selection_mode" : "Estableix",

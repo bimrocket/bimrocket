@@ -57,6 +57,9 @@ class AddObjectTool extends Tool
       case "Sphere":
         object = this.createSphere();
         break;
+      case "Torus":
+        object = this.createTorus();
+        break;
       case "Spring":
         object = this.createSpring();
         break;
@@ -121,6 +124,28 @@ class AddObjectTool extends Tool
     solid.builder.optimize = false;
     ObjectBuilder.build(solid);
     solid.rotation.y = Math.PI / 2;
+
+    return solid;
+  }
+
+  createTorus()
+  {
+    const solid = new Solid();
+    const profile = new Profile();
+    profile.name = "Circle";
+    profile.builder = new CircleBuilder(0.5, 20);
+    profile.position.x = -1;
+    profile.updateMatrix();
+    solid.add(profile);
+    solid.builder = new Revolver(360);
+    solid.builder.axis.x = 0;
+    solid.builder.axis.y = 1;
+    solid.builder.smoothAngle = 20;
+    solid.builder.optimize = false;
+    solid.builder.segments = 20;
+
+    ObjectBuilder.build(solid);
+    solid.rotation.x = Math.PI / 2;
 
     return solid;
   }

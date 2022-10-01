@@ -223,6 +223,7 @@ export const translations =
   "tool.add_box.label" : "Caja",
   "tool.add_cylinder.label" : "Cilindro",
   "tool.add_sphere.label" : "Esfera",
+  "tool.add_torus.label" : "Toro",
   "tool.add_spring.label" : "Muelle",
   "tool.add_group.label" : "Grupo",
   "tool.add_rectangle.label" : "Rectángulo",

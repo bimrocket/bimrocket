@@ -294,6 +294,9 @@ export function load(application)
   const addSphereTool = new AddObjectTool(application,
     { name : "add_sphere", label : "tool.add_sphere.label",
       objectType : "Sphere" });
+  const addTorusTool = new AddObjectTool(application,
+    { name : "add_torus", label : "tool.add_torus.label",
+      objectType : "Torus" });
   const addSpringTool = new AddObjectTool(application,
     { name : "add_spring", label : "tool.add_spring.label",
       objectType : "Spring" });
@@ -424,6 +427,7 @@ export function load(application)
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
   application.addTool(addSphereTool);
+  application.addTool(addTorusTool);
   application.addTool(addSpringTool);
   application.addTool(addRectangleTool);
   application.addTool(addCircleTool);
@@ -519,6 +523,7 @@ export function load(application)
   addSolidMenu.addMenuItem(addBoxTool);
   addSolidMenu.addMenuItem(addCylinderTool);
   addSolidMenu.addMenuItem(addSphereTool);
+  addSolidMenu.addMenuItem(addTorusTool);
   addSolidMenu.addMenuItem(addSpringTool);
   const addProfileMenu = addMenu.addMenu("menu.design.add_profile");
   addProfileMenu.addMenuItem(addRectangleTool);

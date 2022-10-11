@@ -353,6 +353,8 @@ class MenuBar
   {
     if (event.target.nodeName === "INPUT") return;
 
+    if (event.target.classList.contains("cm-content")) return;
+
     let keys = [];
     if (event.altKey) keys.push("Alt");
     if (event.ctrlKey) keys.push("Control");

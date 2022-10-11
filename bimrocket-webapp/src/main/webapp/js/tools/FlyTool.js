@@ -335,8 +335,8 @@ class FlyTool extends Tool
 
   onKeyDown(event)
   {
-    if (event.srcElement.nodeName.toUpperCase() === "INPUT" ||
-        event.srcElement.classList.contains("cm-content")) return;
+    if (event.target.nodeName.toUpperCase() === "INPUT" ||
+        event.target.classList.contains("cm-content")) return;
 
     event.preventDefault();
 
@@ -352,7 +352,7 @@ class FlyTool extends Tool
 
   onKeyUp(event)
   {
-    if (event.srcElement.nodeName.toUpperCase() === "INPUT") return;
+    if (event.target.nodeName.toUpperCase() === "INPUT") return;
 
     event.preventDefault();
 

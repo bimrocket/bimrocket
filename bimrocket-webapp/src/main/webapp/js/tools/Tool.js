@@ -98,7 +98,7 @@ class Tool
   {
     if (this.application.menuBar.armed) return false;
 
-    const target = event.target || event.srcElement;
+    const target = event.target;
     return target.nodeName.toLowerCase() === "canvas";
   }
 }

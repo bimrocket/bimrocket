@@ -204,7 +204,7 @@ class MenuBar
         // click outside root menu element ?
         const rootMenuElement = this.navElement.parentElement;
 
-        let element = event.srcElement;
+        let element = event.target;
         while (element !== null && element !== rootMenuElement)
         {
           element = element.parentElement;
@@ -351,7 +351,7 @@ class MenuBar
 
   processKey(event)
   {
-    if (event.srcElement.nodeName === "INPUT") return;
+    if (event.target.nodeName === "INPUT") return;
 
     let keys = [];
     if (event.altKey) keys.push("Alt");

@@ -253,7 +253,7 @@ class Controls
       }
       radioElem.addEventListener("click", function(event)
       {
-        let elem = event.target || event.srcElement;
+        let elem = event.target;
         hiddenElem.value = elem.value;
         if (clickListener) clickListener(event);
       }, false);

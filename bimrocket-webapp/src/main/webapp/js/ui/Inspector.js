@@ -532,7 +532,7 @@ class Inspector extends Panel
   {
     let labelListener = event =>
     {
-      let labelElem = event.srcElement || event.target;
+      let labelElem = event.target;
       labelElem.className = (labelElem.className === 'expand') ?
         'collapse' : 'expand';
       let listElem = labelElem.parentNode.querySelector('ul');
@@ -730,7 +730,7 @@ class Inspector extends Panel
     {
       this.anchoredSectionName = dictName;
 
-      const elem = event.srcElement.parentElement;
+      const elem = event.target.parentElement;
       this.markAnchoredSection(elem);
     };
 
@@ -1643,7 +1643,7 @@ class ColorEditor extends PropertyEditor
 
     const pointerDownListener = event =>
     {
-      if (event.srcElement.parentNode !== groupElem) cancel();
+      if (event.target.parentNode !== groupElem) cancel();
     };
 
     document.body.addEventListener("keydown", keyDownListener);

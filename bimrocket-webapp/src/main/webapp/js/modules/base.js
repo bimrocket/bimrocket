@@ -336,6 +336,12 @@ export function load(application)
   const addSpriteTool = new AddObjectTool(application,
     { name : "add_sprite", label : "tool.add_sprite.label",
       objectType : "Sprite" });
+  const addPerspectiveCameraTool = new AddObjectTool(application,
+    { name : "add_perspective_camera", label : "tool.add_perspective_camera.label",
+      objectType : "PerspectiveCamera" });
+  const addOrthographicCameraTool = new AddObjectTool(application,
+    { name : "add_orthographic_camera", label : "tool.add_orthographic_camera.label",
+      objectType : "OrthographicCamera" });
 
   const removeTool = new RemoveTool(application, { keyShortcut : "Delete" });
   const clonerTool = new CloneTool(application,
@@ -440,6 +446,8 @@ export function load(application)
   application.addTool(addZProfileTool);
   application.addTool(addHelicoidTool);
   application.addTool(addSpriteTool);
+  application.addTool(addPerspectiveCameraTool);
+  application.addTool(addOrthographicCameraTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(copyTool);
@@ -537,6 +545,9 @@ export function load(application)
   addProfileMenu.addMenuItem(addZProfileTool);
   const addCordMenu = addMenu.addMenu("menu.design.add_cord");
   addCordMenu.addMenuItem(addHelicoidTool);
+  const addCameraMenu = addMenu.addMenu("menu.design.add_camera");
+  addCameraMenu.addMenuItem(addPerspectiveCameraTool);
+  addCameraMenu.addMenuItem(addOrthographicCameraTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
   addMenu.addMenuItem(addSpriteTool);

@@ -88,6 +88,7 @@ export const translations =
   "menu.design.add_solid" : "Solid",
   "menu.design.add_profile" : "Profile",
   "menu.design.add_cord" : "Cord",
+  "menu.design.add_camera" : "Camera",
   "menu.design.boolean_operation" : "Boolean operation",
   "menu.design.geometry" : "Geometry tools",
   "menu.design.transform" : "Transform",
@@ -236,6 +237,8 @@ export const translations =
   "tool.add_zprofile.label" : "Z Profile",
   "tool.add_helicoid.label" : "Helicoid",
   "tool.add_sprite.label" : "Sprite",
+  "tool.add_perspective_camera.label" : "Perspective",
+  "tool.add_orthographic_camera.label" : "Orthographic",
 
   "tool.view.top" : "Top",
   "tool.view.front" : "Front",

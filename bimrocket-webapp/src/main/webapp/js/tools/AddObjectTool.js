@@ -75,6 +75,12 @@ class AddObjectTool extends Tool
       case "Sprite":
         object = this.createSprite();
         break;
+      case "PerspectiveCamera":
+        object = this.createPerspectiveCamera();
+        break;
+      case "OrthographicCamera":
+        object = this.createOrthographicCamera();
+        break;
     }
     if (object)
     {
@@ -235,6 +241,23 @@ class AddObjectTool extends Tool
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(0.1, 0.1, 0.1);
     return sprite;
+  }
+
+  createPerspectiveCamera()
+  {
+    const container = this.application.container;
+    let camera = new THREE.PerspectiveCamera(60,
+      container.clientWidth / container.clientHeight, 0.1, 4000);
+    camera.name = "PerspectiveCamera";
+    return camera;
+  }
+
+  createOrthographicCamera()
+  {
+    const container = this.application.container;
+    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
+    camera.name = "OrthographicCamera";
+    return camera;
   }
 }
 

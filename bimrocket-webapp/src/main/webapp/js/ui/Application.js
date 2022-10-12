@@ -1563,6 +1563,7 @@ class Application
     const changeEvent = {type: "cameraActivated", object: camera,
       source : this};
     this.notifyEventListeners("scene", changeEvent);
+    this.updateSelection();
   }
 
   onResize()

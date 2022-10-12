@@ -289,6 +289,24 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.Sprite();
     }
+    else if (entry.type === "PerspectiveCamera")
+    {
+      object = new THREE.PerspectiveCamera(entry.fov, entry.aspect,
+        entry.near, entry.far);
+      if (typeof entry.zoom === "number")
+      {
+        object.zoom = entry.zoom;
+      }
+    }
+    else if (entry.type === "OrthographicCamera")
+    {
+      object = new THREE.OrthographicCamera(entry.left, entry.right,
+        entry.top, entry.bottom, entry.near, entry.far);
+      if (typeof entry.zoom === "number")
+      {
+        object.zoom = entry.zoom;
+      }
+    }
     else
     {
       object = new THREE.Object3D();

@@ -15,7 +15,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 4;
+  static VERSION = 5;
 
   constructor()
   {
@@ -89,8 +89,28 @@ class BRFExporter
       entry.edgesVisible = object.edgesVisible;
       entry.facesVisible = object.facesVisible;
     }
+    else if (object instanceof THREE.PerspectiveCamera)
+    {
+      let camera = object;
+      entry.fov = camera.fov;
+      entry.aspect = camera.aspect;
+      entry.near = camera.near;
+      entry.far = camera.far;
+      entry.zoom = camera.zoom;
+    }
+    else if (object instanceof THREE.OrthographicCamera)
+    {
+      let camera = object;
+      entry.left = camera.left;
+      entry.right = camera.right;
+      entry.top = camera.top;
+      entry.bottom = camera.bottom;
+      entry.near = camera.near;
+      entry.far = camera.far;
+      entry.zoom = camera.zoom;
+    }
 
-    let exportGeometry = !(object instanceof THREE.Sprite);
+    let exportGeometry = Boolean(object.geometry);
     let exportChildren = ObjectUtils.isExportableChildren(object);
     if (object.builder)
     {

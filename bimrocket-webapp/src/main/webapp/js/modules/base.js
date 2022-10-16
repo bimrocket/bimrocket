@@ -342,6 +342,22 @@ export function load(application)
   const addOrthographicCameraTool = new AddObjectTool(application,
     { name : "add_orthographic_camera", label : "tool.add_orthographic_camera.label",
       objectType : "OrthographicCamera" });
+  const addAmbientLightTool = new AddObjectTool(application,
+    { name : "add_ambient_light", label : "tool.add_ambient_light.label",
+      objectType : "AmbientLight" });
+  const addHemisphereLightTool = new AddObjectTool(application,
+    { name : "add_hemisphere_light", label : "tool.add_hemisphere_light.label",
+      objectType : "HemisphereLight" });
+  const addDirectionalLightTool = new AddObjectTool(application,
+    { name : "add_directional_light", label : "tool.add_directional_light.label",
+      objectType : "DirectionalLight" });
+  const addPointLightTool = new AddObjectTool(application,
+    { name : "add_point_light", label : "tool.add_point_light.label",
+      objectType : "PointLight" });
+  const addSpotLightTool = new AddObjectTool(application,
+    { name : "add_spot_light", label : "tool.add_spot_light.label",
+      objectType : "SpotLight" });
+
 
   const removeTool = new RemoveTool(application, { keyShortcut : "Delete" });
   const clonerTool = new CloneTool(application,
@@ -448,6 +464,11 @@ export function load(application)
   application.addTool(addSpriteTool);
   application.addTool(addPerspectiveCameraTool);
   application.addTool(addOrthographicCameraTool);
+  application.addTool(addAmbientLightTool);
+  application.addTool(addHemisphereLightTool);
+  application.addTool(addDirectionalLightTool);
+  application.addTool(addPointLightTool);
+  application.addTool(addSpotLightTool);
   application.addTool(scriptTool);
   application.addTool(removeTool);
   application.addTool(copyTool);
@@ -548,6 +569,13 @@ export function load(application)
   const addCameraMenu = addMenu.addMenu("menu.design.add_camera");
   addCameraMenu.addMenuItem(addPerspectiveCameraTool);
   addCameraMenu.addMenuItem(addOrthographicCameraTool);
+  const addLightMenu = addMenu.addMenu("menu.design.add_light");
+  addLightMenu.addMenuItem(addAmbientLightTool);
+  addLightMenu.addMenuItem(addHemisphereLightTool);
+  addLightMenu.addMenuItem(addDirectionalLightTool);
+  addLightMenu.addMenuItem(addPointLightTool);
+  addLightMenu.addMenuItem(addSpotLightTool);
+
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
   addMenu.addMenuItem(addSpriteTool);

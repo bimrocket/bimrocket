@@ -81,6 +81,21 @@ class AddObjectTool extends Tool
       case "OrthographicCamera":
         object = this.createOrthographicCamera();
         break;
+      case "AmbientLight":
+        object = this.createAmbientLight();
+        break;
+      case "HemisphereLight":
+        object = this.createHemisphereLight();
+        break;
+      case "DirectionalLight":
+        object = this.createDirectionalLight();
+        break;
+      case "PointLight":
+        object = this.createPointLight();
+        break;
+      case "SpotLight":
+        object = this.createSpotLight();
+        break;
     }
     if (object)
     {
@@ -258,6 +273,62 @@ class AddObjectTool extends Tool
     let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
     camera.name = "OrthographicCamera";
     return camera;
+  }
+
+  createAmbientLight()
+  {
+    const light = new THREE.AmbientLight(0xf0f0f0);
+    light.name = "AmbientLight";
+    return light;
+  }
+
+  createHemisphereLight()
+  {
+    const light = new THREE.HemisphereLight(0xf0f0f0, 0x808080, 1);
+    light.name = "HemisphereLight";
+    return light;
+  }
+
+  createDirectionalLight()
+  {
+    const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+    light.name = "DirectionalLight";
+    light.castShadow = true;
+    this.setupShadow(light);
+    return light;
+  }
+
+  createPointLight()
+  {
+    const light = new THREE.PointLight(0xf0f0f0, 1, 100);
+    light.name = "PointLight";
+    this.setupShadow(light);
+    return light;
+  }
+
+  createSpotLight()
+  {
+    const angle = 30; // degrees
+    const light = new THREE.SpotLight(0xf0f0f0, 1, 100,
+      THREE.MathUtils.degToRad(angle));
+    light.name = "SpotLight";
+    this.setupShadow(light);
+    return light;
+  }
+
+  setupShadow(light)
+  {
+    light.shadow.mapSize.width = 4096;
+    light.shadow.mapSize.height = 4096;
+    light.shadow.camera.left = -40;
+    light.shadow.camera.right = 40;
+    light.shadow.camera.top = 40;
+    light.shadow.camera.bottom = -40;
+    light.shadow.camera.far = 3000;
+    light.shadow.camera.near = 0.01;
+    light.shadow.camera.matrixAutoUpdate = true;
+    light.shadow.bias = -0.0001;
+    light.target = this.application.scene;
   }
 }
 

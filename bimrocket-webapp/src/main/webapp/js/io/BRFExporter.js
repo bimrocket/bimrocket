@@ -109,6 +109,43 @@ class BRFExporter
       entry.far = camera.far;
       entry.zoom = camera.zoom;
     }
+    else if (object instanceof THREE.AmbientLight)
+    {
+      let light = object;
+      entry.color = "#" + light.color.getHexString();
+      entry.intensity = light.intensity;
+    }
+    else if (object instanceof THREE.HemisphereLight)
+    {
+      let light = object;
+      entry.color = "#" + light.color.getHexString();
+      entry.groundColor = "#" + light.groundColor.getHexString();
+      entry.intensity = light.intensity;
+    }
+    else if (object instanceof THREE.DirectionalLight)
+    {
+      let light = object;
+      entry.color = "#" + light.color.getHexString();
+      entry.intensity = light.intensity;
+    }
+    else if (object instanceof THREE.PointLight)
+    {
+      let light = object;
+      entry.color = "#" + light.color.getHexString();
+      entry.intensity = light.intensity;
+      entry.distance = light.distance;
+      entry.decay = light.decay;
+    }
+    else if (object instanceof THREE.SpotLight)
+    {
+      let light = object;
+      entry.color = "#" + light.color.getHexString();
+      entry.intensity = light.intensity;
+      entry.distance = light.distance;
+      entry.angle = light.angle;
+      entry.penumbra = light.penumbra;
+      entry.decay = light.decay;
+    }
 
     let exportGeometry = Boolean(object.geometry);
     let exportChildren = ObjectUtils.isExportableChildren(object);

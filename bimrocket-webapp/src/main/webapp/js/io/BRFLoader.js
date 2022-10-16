@@ -307,6 +307,29 @@ class BRFLoader extends THREE.Loader
         object.zoom = entry.zoom;
       }
     }
+    else if (entry.type === "AmbientLight")
+    {
+      object = new THREE.AmbientLight(entry.color, entry.intensity);
+    }
+    else if (entry.type === "HemisphereLight")
+    {
+      object = new THREE.HemisphereLight(entry.color,
+        entry.groundColor, entry.intensity);
+    }
+    else if (entry.type === "DirectionalLight")
+    {
+      object = new THREE.DirectionalLight(entry.color, entry.intensity);
+    }
+    else if (entry.type === "PointLight")
+    {
+      object = new THREE.PointLight(entry.color, entry.intensity,
+        entry.distance, entry.decay);
+    }
+    else if (entry.type === "SpotLight")
+    {
+      object = new THREE.SpotLight(entry.color, entry.intensity,
+        entry.distance, entry.angle, entry.penumbra, entry.decay);
+    }
     else
     {
       object = new THREE.Object3D();

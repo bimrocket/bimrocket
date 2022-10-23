@@ -230,6 +230,28 @@ public class ExpressLoader
         skipUntil(SYMBOL, ";");
         attributeName = readIdentifier();
       }
+      if (skip(KEYWORD, "INVERSE"))
+      {
+        attributeName = readIdentifier();
+        while (attributeName != null)
+        {
+          ExpressInverseAttribute inverseAttribute =
+            new ExpressInverseAttribute(attributeName);
+          entity.getInverseAttributes().add(inverseAttribute);
+          if (skip(OPERATOR, ":"))
+          {
+            ExpressType type = readType();
+            inverseAttribute.setType(type);
+          }
+          if (skip(KEYWORD, "FOR"))
+          {
+            String forAttribute = readIdentifier();
+            inverseAttribute.setForAttribute(forAttribute);
+          }
+          skipUntil(SYMBOL, ";");
+          attributeName = readIdentifier();
+        }
+      }
     }
   }
 
@@ -452,6 +474,14 @@ public class ExpressLoader
         if (attribute.isOptional()) System.out.print(" OPTIONAL");
         if (attribute.getType() != null)
           System.out.print(" " + attribute.getType());
+        System.out.println();
+      }
+      for (ExpressInverseAttribute attribute : entity.getInverseAttributes())
+      {
+        System.out.print("-INVERSE " + attribute.getName());
+        if (attribute.getType() != null)
+          System.out.print(" " + attribute.getType());
+        System.out.print(" FOR " + attribute.getForAttribute());
         System.out.println();
       }
       System.out.println();

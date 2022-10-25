@@ -40,6 +40,9 @@ class InspectGeometryTool extends Tool
     this.setOptions(options);
 
     this.createPanel();
+
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onSelection = this.onSelection.bind(this);
   }
 
   createPanel()
@@ -119,9 +122,6 @@ class InspectGeometryTool extends Tool
     this.optimizeButton.style.display = "none";
 
     this.geometryTree = new Tree(geometryPanel);
-
-    this._onPointerDown = this.onPointerDown.bind(this);
-    this._onSelection = this.onSelection.bind(this);
   }
 
   activate()

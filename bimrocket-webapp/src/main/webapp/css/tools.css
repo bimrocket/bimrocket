@@ -210,6 +210,50 @@
   border: none;
 }
 
+.bim_inspector_panel .body
+{
+  padding: 4px;
+}
+
+.bim_inspector_panel .ifcClass
+{
+  font-weight: bold;
+  text-align: left;
+  padding-left: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.bim_inspector_panel .tree li.object > a
+{
+  color: #202060;
+}
+
+.bim_inspector_panel .tree li.object
+{
+  background-image: url(images/inspector/object.svg);
+}
+
+.bim_inspector_panel .tree li.array
+{
+  background-image: url(images/inspector/array.svg);
+}
+
+.bim_inspector_panel .tree li.string
+{
+  background-image: url(images/inspector/string.svg);
+}
+
+.bim_inspector_panel .tree li.number
+{
+  background-image: url(images/inspector/number.svg);
+}
+
+.bim_inspector_panel .tree li.boolean
+{
+  background-image: url(images/inspector/boolean.svg);
+}
+
 .tool_button.cloud_explorer
 {
   background-image: url(images/tools/cloud_explorer.svg);

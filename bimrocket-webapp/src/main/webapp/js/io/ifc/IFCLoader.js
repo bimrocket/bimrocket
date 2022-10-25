@@ -68,8 +68,6 @@ class IFCLoader extends THREE.Loader
 
     this.parseFile(ifcFile, text);
 
-    console.info(ifcFile);
-
     return this.buildModel(ifcFile, onCompleted, onProgress, onError);
   }
 
@@ -86,6 +84,7 @@ class IFCLoader extends THREE.Loader
     types.visible = false;
     types.userData.selection = { type : "none" };
     model.add(types);
+    model._ifcFile = ifcFile;
 
     this.modelFactor = 1.0;
     this.blockCount = 0;
@@ -96,9 +95,9 @@ class IFCLoader extends THREE.Loader
     /* process project info */
     const processProjectInfo = () =>
     {
-      if (ifcFile.entities.IfcProject)
+      if (ifcFile.entitiesByClass.IfcProject)
       {
-        let project = ifcFile.entities.IfcProject[0];
+        let project = ifcFile.entitiesByClass.IfcProject[0];
 
         model.name = project.Name || project.LongName || "IFC";
         model._ifc = project;
@@ -149,7 +148,7 @@ class IFCLoader extends THREE.Loader
     /* applyStyles */
     const applyStyles = () =>
     {
-      let styledItems = ifcFile.entities.IfcStyledItem;
+      let styledItems = ifcFile.entitiesByClass.IfcStyledItem;
       if (styledItems)
       {
         for (let i = 0; i < styledItems.length; i++)
@@ -203,7 +202,7 @@ class IFCLoader extends THREE.Loader
     /* process layer assigments */
     const processLayerAssignments = () =>
     {
-      let assignments = ifcFile.entities.IfcPresentationLayerAssignment;
+      let assignments = ifcFile.entitiesByClass.IfcPresentationLayerAssignment;
       if (assignments)
       {
         for (let assignment of assignments)
@@ -352,8 +351,7 @@ class IFCLoader extends THREE.Loader
         let object3D = product.helper.getObject3D();
         if (object3D && object3D.userData && object3D.userData.IFC)
         {
-          let reprObject3D = object3D.getObjectByName(
-            IFC.RepresentationName);
+          let reprObject3D = object3D.getObjectByName(IFC.RepresentationName);
           if (reprObject3D)
           {
             let ifcClassName = object3D.userData.IFC.ifcClassName;
@@ -403,7 +401,7 @@ class IFCLoader extends THREE.Loader
       groupObject(types);
 
       // group storeys
-      let storeys = ifcFile.entities.IfcBuildingStorey;
+      let storeys = ifcFile.entitiesByClass.IfcBuildingStorey;
       if (storeys)
       {
         for (let i = 0; i < storeys.length; i++)
@@ -675,6 +673,7 @@ class IfcProductHelper extends IfcHelper
           }
 
           reprObject3D.name =  IFC.RepresentationName;
+          reprObject3D._ifc = productRepr;
 
           let ifcClassName = null;
           if (reprObject3D.userData.IFC)
@@ -701,6 +700,7 @@ class IfcProductHelper extends IfcHelper
               voider.updateMatrix();
               voider.builder = new IFCVoider();
               voider.add(reprObject3D);
+              voider._ifc = productRepr;
               reprObject3D.name = "Unvoided";
               reprObject3D.visible = false;
               reprObject3D.facesVisible = false;
@@ -2764,8 +2764,11 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
     const rel = this.instance;
     const schema = this.instance.constructor.schema;
 
-    let objects = rel.RelatedObjects;
+    let relatedObjects = rel.RelatedObjects;
     let ifcType = rel.RelatingType;
+
+    ifcType._Types = [rel];
+
     const typeData = { ifcClassName: ifcType.constructor.name };
 
     for (let key in ifcType)
@@ -2780,11 +2783,13 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
       }
     }
 
-    for (let i = 0; i < objects.length; i++)
+    for (let relatedObject of relatedObjects)
     {
-      if (objects[i].helper.getObject3D)
+      relatedObject._IsTypedBy = [rel];
+
+      if (relatedObject.helper.getObject3D)
       {
-        let object3D = objects[i].helper.getObject3D();
+        let object3D = relatedObject.helper.getObject3D();
         object3D.userData["IFC_type"] = typeData;
       }
     }
@@ -2807,11 +2812,31 @@ class IfcRelAssociatesClassificationHelper extends IfcRelationshipHelper
 
     var ifcObjects = rel.RelatedObjects;
     var ifcClassifRef = rel.RelatingClassification;
+
     if (ifcClassifRef instanceof schema.IfcClassificationReference)
     {
+      if (ifcClassifRef._ClassificationRefForObjects instanceof Array)
+      {
+        ifcClassifRef._ClassificationRefForObjects.push(rel);
+      }
+      else
+      {
+        ifcClassifRef._ClassificationRefForObjects = rel;
+      }
+
       for (var i = 0; i < ifcObjects.length; i++)
       {
         var ifcObject = ifcObjects[i];
+
+        if (ifcObject._HasAssociations instanceof Array)
+        {
+          ifcObject._HasAssociations.push(rel);
+        }
+        else
+        {
+          ifcObject._HasAssociations = [rel];
+        }
+
         if (ifcObject.helper && ifcObject.helper.getObject3D)
         {
           let object3D = ifcObject.helper.getObject3D();
@@ -2861,10 +2886,20 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
     const rel = this.instance;
     const schema = this.instance.constructor.schema;
 
+    var ifcGroup = rel.RelatingGroup;
     var ifcObjects = rel.RelatedObjects;
     var ifcObjectsType = rel.RelatedObjectsType;
-    var ifcGroup = rel.RelatingGroup;
+
     let groupData = { ifcClassName: ifcGroup.constructor.name };
+
+    if (ifcGroup._IsGroupedBy instanceof Array)
+    {
+      ifcGroup._IsGroupedBy.push(rel);
+    }
+    else
+    {
+      ifcGroup._IsGroupedBy = [rel];
+    }
 
     for (let key in ifcGroup)
     {
@@ -2884,6 +2919,15 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
     for (let i = 0; i < ifcObjects.length; i++)
     {
       let ifcObject = ifcObjects[i];
+      if (ifcObject._HasAssigments instanceof Array)
+      {
+        ifcObject._HasAssigments.push(rel);
+      }
+      else
+      {
+        ifcObject._HasAssigments = [rel];
+      }
+
       if (ifcObject.helper && ifcObject.helper.getObject3D)
       {
         let object3D = ifcObject.helper.getObject3D();
@@ -2908,14 +2952,27 @@ class IfcRelAggregatesHelper extends IfcRelationshipHelper
     const schema = this.instance.constructor.schema;
 
     var ifcObject = rel.RelatingObject;
+    var relatedObjects = rel.RelatedObjects;
+
+    if (ifcObject._IsDecomposedBy instanceof Array)
+    {
+      ifcObject._IsDecomposedBy.push(rel);
+    }
+    else
+    {
+      ifcObject._IsDecomposedBy = [rel];
+    }
+
     if (ifcObject instanceof schema.IfcProduct)
     {
       var containerObject3D = ifcObject.helper.getObject3D();
       if (containerObject3D)
       {
-        for (var i = 0; i < rel.RelatedObjects.length; i++)
+        for (var i = 0; i < relatedObjects.length; i++)
         {
-          var ifcRelatedObject = rel.RelatedObjects[i];
+          var ifcRelatedObject = relatedObjects[i];
+          ifcRelatedObject._Decomposes = [rel];
+
           if (ifcRelatedObject instanceof schema.IfcProduct)
           {
             var object3D = ifcRelatedObject.helper.getObject3D();
@@ -2947,15 +3004,26 @@ class IfcRelContainedInSpatialStructureHelper extends IfcRelationshipHelper
     const rel = this.instance;
     const schema = this.instance.constructor.schema;
 
-    var ifcProduct = rel.RelatingStructure;
-    if (ifcProduct)
+    var ifcSpatialElement = rel.RelatingStructure;
+    if (ifcSpatialElement)
     {
-      var containerObject3D = ifcProduct.helper.getObject3D();
+      if (ifcSpatialElement._ContainsElements instanceof Array)
+      {
+        ifcSpatialElement._ContainsElements.push(rel);
+      }
+      else
+      {
+        ifcSpatialElement._ContainsElements = [rel];
+      }
+
+      var containerObject3D = ifcSpatialElement.helper.getObject3D();
       if (containerObject3D)
       {
         for (var i = 0; i < rel.RelatedElements.length; i++)
         {
           var ifcRelatedProduct = rel.RelatedElements[i];
+          ifcRelatedProduct._ContainedInStructure = [rel];
+
           if (ifcRelatedProduct instanceof schema.IfcProduct)
           {
             var object3D = ifcRelatedProduct.helper.getObject3D();
@@ -2997,6 +3065,16 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
     var opening = rel.RelatedOpeningElement;
     if (element && opening)
     {
+      opening._VoidsElement = rel;
+      if (element._HasOpenings instanceof Array)
+      {
+        element._HasOpenings.push(rel);
+      }
+      else
+      {
+        element._HasOpenings = [rel];
+      }
+
       var object3D = element.helper.getObject3D();
       if (object3D)
       {
@@ -3029,6 +3107,16 @@ class IfcRelFillsElementHelper extends IfcRelationshipHelper
     var element = rel.RelatedBuildingElement;
     if (element && opening)
     {
+      element._FillsVoids = [rel];
+      if (opening._HasFillings instanceof Array)
+      {
+        opening._HasFillings.push(rel);
+      }
+      else
+      {
+        opening._HasFillings = [rel];
+      }
+
       var object3D = element.helper.getObject3D();
       if (object3D)
       {
@@ -3059,8 +3147,27 @@ class IfcRelConnectsPortToElementHelper extends IfcRelationshipHelper
     var rel = this.instance;
     var port = rel.RelatingPort;
     var element = rel.RelatedElement;
+
     if (port && element)
     {
+      if (element._HasPorts instanceof Array)
+      {
+        element._HasPorts.push(rel);
+      }
+      else
+      {
+        element._HasPorts = [rel];
+      }
+
+      if (port._ContainedIn instanceof Array)
+      {
+        port._ContainedIn.push(rel);
+      }
+      else
+      {
+        port._ContainedIn = [rel];
+      }
+
       var object3D = element.helper.getObject3D();
       if (object3D)
       {
@@ -3092,20 +3199,50 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
     const schema = this.instance.constructor.schema;
 
     var propertySet = rel.RelatingPropertyDefinition;
+    var relatedObjects = rel.RelatedObjects;
+
+    if (propertySet._DefinesOccurrence instanceof Array)
+    {
+      propertySet._DefinesOccurrence.push(rel);
+    }
+    else
+    {
+      propertySet._DefinesOccurrence = [rel];
+    }
+
     if (propertySet instanceof schema.IfcPropertySet)
     {
       var psetName = propertySet.Name;
       var properties = propertySet.helper.getProperties();
-      var relatedObjects = rel.RelatedObjects;
       for (var i = 0; i < relatedObjects.length; i++)
       {
         var relatedObject = relatedObjects[i];
+        if (relatedObject._IsDefinedBy instanceof Array)
+        {
+          relatedObject._IsDefinedBy.push(rel);
+        }
+        else
+        {
+          relatedObject._IsDefinedBy = [rel];
+        }
+
         if (relatedObject instanceof schema.IfcProduct)
         {
           var object3D = relatedObject.helper.getObject3D();
           if (object3D)
           {
-            object3D.userData["IFC_" + psetName] = properties;
+            if (object3D.userData["IFC_" + psetName] instanceof Object)
+            {
+              // merge properties
+              for (var name in properties)
+              {
+                object3D.userData["IFC_" + psetName][name] = properties[name];
+              }
+            }
+            else
+            {
+              object3D.userData["IFC_" + psetName] = properties;
+            }
           }
         }
       }
@@ -3341,7 +3478,7 @@ class IfcPropertySetHelper extends IfcHelper
       const schema = this.instance.constructor.schema;
       const loader = pset._loader;
 
-      this.properties =  {};
+      this.properties =  { GlobalId : pset.GlobalId };
       for (var i = 0; i < pset.HasProperties.length; i++)
       {
         var prop = pset.HasProperties[i];

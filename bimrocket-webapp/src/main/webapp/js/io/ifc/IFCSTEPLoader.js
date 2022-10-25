@@ -15,7 +15,7 @@ class IFCSTEPLoader extends IFCLoader
     super(manager);
   }
 
-  parseFile(file, text)
+  parseFile(ifcFile, text)
   {
     let parser = new STEPParser();
     parser.schema = IFC_SCHEMAS.IFC4; // default schema
@@ -25,13 +25,13 @@ class IFCSTEPLoader extends IFCLoader
       console.info("schema: " + schemaName);
       let schema = IFC_SCHEMAS[schemaName] || IFC_SCHEMAS.IFC4;
       if (schema === undefined) throw "Unsupported schema " + schemaName;
-      file.schema = schema;
+      ifcFile.schema = schema;
       return schema;
     };
     parser.onEntityCreated = entity =>
     {
       entity._loader = this;
-      file.add(entity);
+      ifcFile.add(entity);
     };
     parser.parse(text);
   }

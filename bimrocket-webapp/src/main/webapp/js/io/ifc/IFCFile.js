@@ -11,7 +11,8 @@ class IFCFile
   constructor()
   {
     this.schema = IFC_SCHEMAS.IFC4;
-    this.entities = {};
+    this.entitiesByGlobalId = {};
+    this.entitiesByClass = {};
     this.products = [];
     this.typeProducts = [];
     this.relationships = [];
@@ -19,13 +20,16 @@ class IFCFile
 
   add(entity)
   {
-    let entities = this.entities;
+    // register entity by GlobalId
+    this.entitiesByGlobalId[entity.GlobalId] = entity;
+
+    // register entity by class
     let ifcClassName = entity.constructor.name;
-    let classEntities = entities[ifcClassName];
+    let classEntities = this.entitiesByClass[ifcClassName];
     if (classEntities === undefined)
     {
       classEntities = [];
-      entities[ifcClassName] = classEntities;
+      this.entitiesByClass[ifcClassName] = classEntities;
     }
     classEntities.push(entity);
 

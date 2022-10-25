@@ -40,6 +40,7 @@ import java.util.List;
 import org.bimrocket.express.ExpressAttribute;
 import org.bimrocket.express.ExpressDefinedType;
 import org.bimrocket.express.ExpressEntity;
+import org.bimrocket.express.ExpressInverseAttribute;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.ExpressType;
 import org.bimrocket.express.io.ExpressLoader;
@@ -152,6 +153,19 @@ public class IfcJavascriptClassesGenerator
         writer.println(attribute.getType());
       }
     }
+
+    List<ExpressInverseAttribute> inverseAttributes =
+      entity.getInverseAttributes();
+    if (!inverseAttributes.isEmpty())
+    {
+      for (ExpressInverseAttribute inverseAttribute : inverseAttributes)
+      {
+        writer.print("  _" + inverseAttribute.getName() + " = null; // ");
+        writer.print(inverseAttribute.getType());
+        writer.println(" FOR " + inverseAttribute.getForAttribute());
+      }
+    }
+
     writer.println("};");
     writer.println("registerIfcClass(" + entity.getName() + ");");
     writer.println();

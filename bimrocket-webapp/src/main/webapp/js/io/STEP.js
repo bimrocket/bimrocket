@@ -261,7 +261,8 @@ class STEPBuilder
       if (cls)
       {
         this.instance = new cls();
-        this.properties = Object.getOwnPropertyNames(this.instance);
+        this.properties = Object.getOwnPropertyNames(this.instance)
+          .filter(property => !property.startsWith("_"));
       }
       else
       {

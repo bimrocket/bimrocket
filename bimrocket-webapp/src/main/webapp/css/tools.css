@@ -254,6 +254,11 @@
   background-image: url(images/inspector/boolean.svg);
 }
 
+.bim_inspector_panel .tree li > a.previous
+{
+  background-color: #e0e0e0;
+}
+
 .tool_button.cloud_explorer
 {
   background-image: url(images/tools/cloud_explorer.svg);

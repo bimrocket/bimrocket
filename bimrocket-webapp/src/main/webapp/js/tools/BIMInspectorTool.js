@@ -24,6 +24,7 @@ class BIMInspectorTool extends Tool
     this.createPanel();
 
     this.returnStack = [];
+    this.ifcData = null;
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onSelection = this.onSelection.bind(this);
@@ -110,6 +111,7 @@ class BIMInspectorTool extends Tool
 
   exploreObject(object)
   {
+    this.ifcData = null;
     this.returnStack = [];
 
     const application = this.application;
@@ -131,8 +133,10 @@ class BIMInspectorTool extends Tool
 
   populateTree(ifcData)
   {
-    this.returnStack.push(ifcData);
-    this.backButton.disabled = this.returnStack.length <= 1;
+    let prevIfcData = this.ifcData;
+    this.ifcData = ifcData;
+
+    this.backButton.disabled = this.returnStack.length === 0;
 
     this.typeElem.innerHTML = ifcData.constructor.name;
 
@@ -145,7 +149,7 @@ class BIMInspectorTool extends Tool
     for (let propertyName of propertyNames)
     {
       let value = ifcData[propertyName];
-      this.populateProperty(tree, propertyName, value);
+      this.populateProperty(tree, propertyName, value, prevIfcData);
     }
 
     propertyNames = Object.getOwnPropertyNames(ifcData)
@@ -155,11 +159,11 @@ class BIMInspectorTool extends Tool
     for (let propertyName of propertyNames)
     {
       let value = ifcData[propertyName];
-      this.populateProperty(tree, propertyName, value);
+      this.populateProperty(tree, propertyName, value, prevIfcData);
     }
   }
 
-  populateProperty(node, name, value)
+  populateProperty(node, name, value, prevIfcData)
   {
     if (value instanceof Array)
     {
@@ -168,13 +172,20 @@ class BIMInspectorTool extends Tool
       for (let i = 0; i < value.length; i++)
       {
         let itemValue = value[i];
-        this.populateProperty(arrayNode, "#" + i, itemValue);
+        this.populateProperty(arrayNode, "#" + i, itemValue, prevIfcData);
       }
     }
     else if (value instanceof Object)
     {
-      node.addNode(name + ": #" + value.constructor.name,
-        event => this.populateTree(value), "object");
+      let nextIfcData = value;
+      let childNode = node.addNode(name + ": #" + value.constructor.name,
+        event => this.followLink(nextIfcData), "object");
+
+      if (value === prevIfcData)
+      {
+        childNode.expandAncestors();
+        childNode.addClass("previous");
+      }
     }
     else if (typeof value === "string")
     {
@@ -192,12 +203,19 @@ class BIMInspectorTool extends Tool
 
   goBack()
   {
-    if (this.returnStack.length >= 2)
+    if (this.returnStack.length > 0)
     {
-      this.returnStack.pop();
       let ifcData = this.returnStack.pop();
+
       this.populateTree(ifcData);
     }
+  }
+
+  followLink(ifcData)
+  {
+    this.returnStack.push(this.ifcData);
+
+    this.populateTree(ifcData);
   }
 }
 

@@ -51,6 +51,8 @@ class Revolver extends SweptSolidBuilder
     let profile = this.findClosedProfile(solid);
     if (profile === undefined) return true;
 
+    profile.updateMatrix();
+
     let [ outerRing, innerRings, stepVertexCount ] = this.prepareRings(profile);
 
     const yAxis = new THREE.Vector3();

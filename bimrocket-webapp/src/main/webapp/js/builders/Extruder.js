@@ -40,6 +40,8 @@ class Extruder extends SweptSolidBuilder
     let profile = this.findClosedProfile(solid);
     if (profile === undefined) return true;
 
+    profile.updateMatrix();
+
     let [ outerRing, innerRings, stepVertexCount ] = this.prepareRings(profile);
 
     const sign = Math.sign(depth) * Math.sign(direction.z);

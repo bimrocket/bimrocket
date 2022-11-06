@@ -15,9 +15,11 @@ import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { HelicoidBuilder } from "../builders/HelicoidBuilder.js";
 import { RectangleBuilder } from "../builders/RectangleBuilder.js";
 import { CircleBuilder } from "../builders/CircleBuilder.js";
+import { TrapeziumBuilder } from "../builders/TrapeziumBuilder.js";
 import { CircularSectorBuilder } from "../builders/CircularSectorBuilder.js";
 import { Extruder } from "../builders/Extruder.js";
 import { Revolver } from "../builders/Revolver.js";
+import { Formula } from "../formula/Formula.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -53,6 +55,9 @@ class AddObjectTool extends Tool
         break;
       case "Cylinder":
         object = this.createCylinder();
+        break;
+      case "Cone":
+        object = this.createCone();
         break;
       case "Sphere":
         object = this.createSphere();
@@ -128,6 +133,29 @@ class AddObjectTool extends Tool
     solid.builder = new Extruder(1);
     solid.builder.smoothAngle = 20;
     ObjectBuilder.build(solid);
+    return solid;
+  }
+
+  createCone()
+  {
+    const solid = new Solid();
+    const profile = new Profile();
+    profile.name = "Trapezium";
+    profile.builder = new TrapeziumBuilder(0.5, 1, 0, 0);
+    profile.position.x = 0.25;
+    Formula.create(profile, "position.x", "builder.bottomXDim / 2");
+    profile.updateMatrix();
+    solid.add(profile);
+    solid.builder = new Revolver(360);
+    solid.builder.axis.x = 0;
+    solid.builder.axis.y = -1;
+    solid.builder.smoothAngle = 20;
+    solid.builder.optimize = false;
+    solid.builder.segments = 20;
+
+    ObjectBuilder.build(solid);
+    solid.rotation.x = Math.PI / 2;
+
     return solid;
   }
 

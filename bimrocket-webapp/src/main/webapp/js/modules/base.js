@@ -291,6 +291,9 @@ export function load(application)
   const addCylinderTool = new AddObjectTool(application,
     { name : "add_cylinder", label : "tool.add_cylinder.label",
       objectType : "Cylinder" });
+  const addConeTool = new AddObjectTool(application,
+    { name : "add_cone", label : "tool.add_cone.label",
+      objectType : "Cone" });
   const addSphereTool = new AddObjectTool(application,
     { name : "add_sphere", label : "tool.add_sphere.label",
       objectType : "Sphere" });
@@ -448,6 +451,7 @@ export function load(application)
   application.addTool(addGroupTool);
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
+  application.addTool(addConeTool);
   application.addTool(addSphereTool);
   application.addTool(addTorusTool);
   application.addTool(addSpringTool);
@@ -551,6 +555,7 @@ export function load(application)
   const addSolidMenu = addMenu.addMenu("menu.design.add_solid");
   addSolidMenu.addMenuItem(addBoxTool);
   addSolidMenu.addMenuItem(addCylinderTool);
+  addSolidMenu.addMenuItem(addConeTool);
   addSolidMenu.addMenuItem(addSphereTool);
   addSolidMenu.addMenuItem(addTorusTool);
   addSolidMenu.addMenuItem(addSpringTool);

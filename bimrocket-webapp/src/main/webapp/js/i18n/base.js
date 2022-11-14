@@ -182,6 +182,8 @@ export const translations =
 
   "tool.subtraction.label" : "Subtraction",
 
+  "tool.decompose.label" : "Decompose",
+
   "tool.mesh_to_solid.label" : "Mesh to Solid",
   "tool.solid_to_mesh.label" : "Solid to Mesh",
   "tool.merge_geometries.label" : "Merge geometries",

@@ -183,6 +183,8 @@ export const translations =
 
   "tool.subtraction.label" : "Substracción",
 
+  "tool.decompose.label" : "Descomponer",
+
   "tool.mesh_to_solid.label" : "Malla a Sólido",
   "tool.solid_to_mesh.label" : "Sólido a Malla",
   "tool.merge_geometries.label" : "Fusiona geometrías",

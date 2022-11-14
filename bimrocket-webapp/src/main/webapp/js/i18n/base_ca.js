@@ -182,6 +182,8 @@ export const translations =
 
   "tool.subtraction.label" : "Substracció",
 
+  "tool.decompose.label" : "Descomposa",
+
   "tool.mesh_to_solid.label" : "Malla a Sòlid",
   "tool.solid_to_mesh.label" : "Sòlid a Malla",
   "tool.merge_geometries.label" : "Fusiona geometries",

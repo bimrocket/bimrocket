@@ -3359,9 +3359,17 @@ class IfcPresentationLayerAssignmentHelper extends IfcHelper
         let items = assignedItem.Items;
         for (let item of items)
         {
+          if (item._LayerAssignment instanceof Array)
+          {
+            item._LayerAssignment.push(assignment);
+          }
+          else
+          {
+            item._LayerAssignment = [assignment];
+          }
+
           if (item.helper.getObject3D)
           {
-            try {
             let object = item.helper.getObject3D();
             if (object)
             {
@@ -3372,7 +3380,6 @@ class IfcPresentationLayerAssignmentHelper extends IfcHelper
                 Identifier : identifier
               };
             }
-            } catch (ex) { console.info(ex); console.info(item.helper); }
           }
         }
       }
@@ -3399,11 +3406,21 @@ class IfcStyledItemHelper extends IfcHelper
     var styles = styledItem.Styles; // style to apply
     if (item === null || styles === null) return;
 
+    if (item._StyledByItem instanceof Array)
+    {
+      item._StyledByItem.push(styledItem);
+    }
+    else
+    {
+      item._StyledByItem = [styledItem];
+    }
+
     var style = styles[0]; // apply only first style
     if (style instanceof schema.IfcPresentationStyleAssignment)
     {
       style = style.Styles[0];
     }
+
     if (style instanceof schema.IfcSurfaceStyle)
     {
       const material = style.helper.getMaterial();

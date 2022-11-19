@@ -518,7 +518,8 @@ class ObjectUtils
     }
   }
 
-  static getBoundingBoxFromView(objects, viewMatrixWorld, all = false)
+  static getBoundingBoxFromView(objects, viewMatrixWorld,
+    includeInvisible = false)
   {
     const box = new THREE.Box3(); // empty box
     const vertex = new THREE.Vector3();
@@ -562,14 +563,23 @@ class ObjectUtils
 
     function traverse(object)
     {
-      if (object.visible || all)
+      if (object.visible || includeInvisible)
       {
-        extendBox(object);
-
-        if (!(object instanceof Solid
-             || object instanceof Cord
-             || object instanceof Profile))
+        if (object instanceof Solid)
         {
+          if (object.facesVisible || object.edgesVisible || includeInvisible)
+          {
+            extendBox(object);
+          }
+        }
+        else if (object instanceof Cord || object instanceof Profile)
+        {
+          extendBox(object);
+        }
+        else
+        {
+          extendBox(object);
+
           for (let child of object.children)
           {
             traverse(child);

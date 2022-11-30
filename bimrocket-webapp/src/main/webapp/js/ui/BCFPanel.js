@@ -329,10 +329,7 @@ class BCFPanel extends Panel
     this.searchPanelElem.style.display = "";
     this.detailPanelElem.style.display = "none";
     this.setupPanelElem.style.display = "none";
-    if (this.topics === null)
-    {
-      this.searchTopics();
-    }
+    this.searchTopics();
   }
 
   showTopic(topic = null, index = -1)
@@ -385,6 +382,15 @@ class BCFPanel extends Panel
       Controls.setSelectValue(this.topicStatusElem, topic.topic_status);
       Controls.setSelectValue(this.stageElem, topic.stage);
       Controls.setSelectValue(this.assignedToElem, topic.assigned_to);
+
+      this.tabbedPane.paneElem.style.display = "";
+
+      if (index !== -1)
+      {
+        this.loadComments(false,
+          () => this.loadViewpoints(false,
+          () => this.loadDocumentReferences(false)));
+      }
     }
     else
     {
@@ -406,17 +412,6 @@ class BCFPanel extends Panel
       Controls.setSelectValue(this.assignedToElem, null);
     }
 
-    if (topic)
-    {
-      this.tabbedPane.paneElem.style.display = "";
-
-      if (index !== -1)
-      {
-        this.loadComments(false,
-          () => this.loadViewpoints(false,
-          () => this.loadDocumentReferences(false)));
-      }
-    }
     this.commentGuid = null;
     this.commentElem.value = null;
     this.docRefGuid = null;
@@ -494,9 +489,13 @@ class BCFPanel extends Panel
 
     const onCompleted = topic =>
     {
+      console.info(topic);
       this.hideProgressBar();
-      this.showTopic(topic);
-      this.topics = null;
+      this.showTopic(topic, this.index);
+      if (this.topics && this.index >= 0)
+      {
+        this.topics[this.index] = topic;
+      }
       Toast.create("bim|message.topic_saved")
         .setI18N(application.i18n).show();
     };

@@ -313,6 +313,7 @@ public class BcfService
       topic.setAssignedTo(topicUpdate.getAssignedTo());
       String dateString = getDateString();
       topic.setModifyDate(dateString);
+      topic.setModifyAuthor(topicUpdate.getModifyAuthor());
       return dao.update(topic);
     }
   }

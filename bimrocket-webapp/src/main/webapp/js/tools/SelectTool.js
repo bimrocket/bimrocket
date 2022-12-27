@@ -18,10 +18,27 @@ class SelectTool extends Tool
     this.label = "tool.select.label";
     this.help = "tool.select.help";
     this.className = "select";
+    this.pointerSize = 8;
+    this.touchPointerOffsetX = -40;
+    this.touchPointerOffsetY = -40;
     this.setOptions(options);
 
     this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    this._onPointerMove = this.onPointerMove.bind(this);
+
     this.createPanel();
+
+    this.pointerElem = document.createElement("div");
+    const pointerElem = this.pointerElem;
+    pointerElem.style.position = "absolute";
+    pointerElem.style.display = "none";
+    pointerElem.style.width = this.pointerSize + "px";
+    pointerElem.style.height = this.pointerSize + "px";
+    pointerElem.style.border = "1px solid black";
+    pointerElem.style.borderRadius = this.pointerSize + "px";
+    pointerElem.style.backgroundColor = "transparent";
+    application.container.appendChild(pointerElem);
   }
 
   createPanel()
@@ -53,39 +70,55 @@ class SelectTool extends Tool
   activate()
   {
     this.panel.visible = true;
-    var container = this.application.container;
+    const container = this.application.container;
     container.addEventListener('pointerdown', this._onPointerDown, false);
+    container.addEventListener('pointerup', this._onPointerUp, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
-    var container = this.application.container;
+    const container = this.application.container;
     container.removeEventListener('pointerdown', this._onPointerDown, false);
+    container.removeEventListener('pointerup', this._onPointerUp, false);
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+    this.pointerElem.style.display = "none";
   }
 
   onPointerDown(event)
   {
-    if (!this.isCanvasEvent(event)) return;
+    const container = this.application.container;
+    container.addEventListener('pointermove', this._onPointerMove, false);
+  }
+
+  onPointerUp(event)
+  {
+    const container = this.application.container;
+    container.removeEventListener('pointermove', this._onPointerMove, false);
+
+    const pointerElem = this.pointerElem;
+    pointerElem.style.display = "none";
+
+    if (!this.isPointSelectionEvent(event)) return;
 
     const application = this.application;
     const scene = application.scene;
     const selection = application.selection;
 
-    var pointerPosition = this.getEventPosition(event);
-    var intersect = this.intersect(pointerPosition, scene, true);
+    let pointerPosition = this.getPointerPosition(event);
+    let intersect = this.intersect(pointerPosition, scene, true);
     if (intersect)
     {
-      var point = intersect.point;
-      var xpos = Math.round(point.x * 1000) / 1000;
-      var ypos = Math.round(point.y * 1000) / 1000;
-      var zpos = Math.round(point.z * 1000) / 1000;
+      let point = intersect.point;
+      let xpos = Math.round(point.x * 1000) / 1000;
+      let ypos = Math.round(point.y * 1000) / 1000;
+      let zpos = Math.round(point.z * 1000) / 1000;
       this.posElem.innerHTML = "(x, y ,z) = (" +
         xpos + ", " + ypos + ", " + zpos + ")";
 
-      var object = intersect.object;
+      let object = intersect.object;
 
-      var parent = object;
+      let parent = object;
       while (parent && !parent.userData.selection)
       {
         parent = parent.parent;
@@ -100,6 +133,52 @@ class SelectTool extends Tool
     {
       selection.clear();
     }
+  }
+
+  onPointerMove(event)
+  {
+    const pointerElem = this.pointerElem;
+
+    if (!this.isPointSelectionEvent(event))
+    {
+      pointerElem.style.display = "none";
+      return;
+    }
+
+    let pointerPosition = this.getPointerPosition(event);
+
+    pointerElem.style.left =
+      (pointerPosition.x - this.pointerSize / 2) + "px";
+    pointerElem.style.top =
+      (pointerPosition.y - this.pointerSize / 2) + "px";
+    pointerElem.style.display = "";
+  }
+
+  getPointerPosition(event)
+  {
+    const container = this.application.container;
+    let rect = container.getBoundingClientRect();
+    const pointerPosition = new THREE.Vector2();
+    pointerPosition.x = event.clientX - rect.left;
+    pointerPosition.y = event.clientY - rect.top;
+
+    if (event.pointerType === "touch")
+    {
+      pointerPosition.x += this.touchPointerOffsetX;
+      pointerPosition.y += this.touchPointerOffsetY;
+    }
+
+    return pointerPosition;
+  }
+
+  isPointSelectionEvent(event)
+  {
+    if (this.application.menuBar.armed) return false;
+
+    const target = event.target;
+    const pointerElem = this.pointerElem;
+
+    return target.nodeName.toLowerCase() === "canvas" || target === pointerElem;
   }
 }
 

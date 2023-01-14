@@ -34,7 +34,7 @@ class PushPullTool extends Tool
     this.posElem.style.padding = "50px";
 
     this.panel.bodyElem.appendChild(this.posElem);
-    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
+    I18N.set(this.panel.bodyElem, "textContent", this.help);
   }
 
   activate()

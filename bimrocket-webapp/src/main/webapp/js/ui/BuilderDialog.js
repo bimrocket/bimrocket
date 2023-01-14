@@ -77,7 +77,7 @@ class BuilderDialog extends Dialog
 
     let nameSpanElem = document.createElement("span");
     nameSpanElem.className = "type";
-    nameSpanElem.innerHTML = className;
+    nameSpanElem.textContent = className;
     labelElem.appendChild(nameSpanElem);
 
     return inputElem;

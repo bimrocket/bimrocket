@@ -43,7 +43,7 @@ class SVGExporterTool extends Tool
       "svg_exporter_button", "button.export", () => this.exportSvg());
 
     this.openLink = document.createElement("a");
-    I18N.set(this.openLink, "innerHTML", "button.open");
+    I18N.set(this.openLink, "textContent", "button.open");
     this.openLink.target = "_blank";
     this.openLink.style.display = "none";
     this.panel.bodyElem.appendChild(this.openLink);

@@ -176,7 +176,7 @@ class ScriptDialog extends Dialog
     {
       let message = document.createElement("div");
       message.className = className;
-      message.innerHTML = String(arg);
+      message.textContent = String(arg);
       this.consoleElem.appendChild(message);
     }
   }

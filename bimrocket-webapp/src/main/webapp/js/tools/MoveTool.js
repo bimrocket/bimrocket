@@ -169,7 +169,7 @@ class MoveTool extends TransformationTool
         application.pointSelector.activate();
         this.offsetInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.move.select_anchor_point");
+        I18N.set(this.helpElem, "textContent", "tool.move.select_anchor_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -181,7 +181,7 @@ class MoveTool extends TransformationTool
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = true;
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.move.select_destination_point");
+        I18N.set(this.helpElem, "textContent", "tool.move.select_destination_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -193,7 +193,7 @@ class MoveTool extends TransformationTool
         this.offsetInputElem.parentElement.style.display = "";
         this.offsetInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.move.edit_offset");
+        I18N.set(this.helpElem, "textContent", "tool.move.edit_offset");
         application.i18n.update(this.helpElem);
         break;
     }

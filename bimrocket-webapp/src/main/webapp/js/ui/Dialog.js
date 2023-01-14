@@ -21,7 +21,7 @@ class Dialog
     this.dialogElem.className = "dialog";
 
     this.headerElem = document.createElement("div");
-    I18N.set(this.headerElem, "innerHTML", title);
+    I18N.set(this.headerElem, "textContent", title);
     this.headerElem.className = "header";
     this.dialogElem.appendChild(this.headerElem);
 

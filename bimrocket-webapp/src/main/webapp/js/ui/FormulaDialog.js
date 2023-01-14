@@ -71,7 +71,7 @@ class FormulaDialog extends Dialog
         }
         catch (ex)
         {
-          this.errorElem.innerHTML = String(ex);
+          this.errorElem.textContent = String(ex);
         }
       }
       else

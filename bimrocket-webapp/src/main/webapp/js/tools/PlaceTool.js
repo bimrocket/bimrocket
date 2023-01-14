@@ -48,7 +48,7 @@ class PlaceTool extends Tool
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);
-    I18N.set(this.helpElem, "innerHTML", "tool.place.help");
+    I18N.set(this.helpElem, "textContent", "tool.place.help");
 
     this.modeElem = Controls.addSelectField(this.panel.bodyElem,
       "place_mode", "label.place_mode",

@@ -92,7 +92,7 @@ class PaintTool extends Tool
 
     this.opacityLabel = document.createElement("label");
     this.opacityLabel.htmlFor = "material_opacity";
-    I18N.set(this.opacityLabel, "innerHTML", "label.opacity", 50);
+    I18N.set(this.opacityLabel, "textContent", "label.opacity", 50);
     this.application.i18n.update(this.opacityLabel);
     this.opacityElem.appendChild(this.opacityLabel);
 
@@ -112,7 +112,7 @@ class PaintTool extends Tool
     this.opacityRange.addEventListener("input", () =>
     {
       let opacity = this.opacityRange.value;
-      I18N.set(this.opacityLabel, "innerHTML", "label.opacity", opacity);
+      I18N.set(this.opacityLabel, "textContent", "label.opacity", opacity);
       application.i18n.update(this.opacityLabel);
       let material = this.getSelectedMaterial();
       material.opacity = opacity / 100;
@@ -156,7 +156,7 @@ class PaintTool extends Tool
     this.panel.bodyElem.appendChild(this.applyElem);
 
     this.applyMessageElem = document.createElement("div");
-    I18N.set(this.applyMessageElem, "innerHTML", "label.material_on_selection");
+    I18N.set(this.applyMessageElem, "textContent", "label.material_on_selection");
     this.applyElem.appendChild(this.applyMessageElem);
 
     this.previewMaterialButton = Controls.addButton(this.applyElem,
@@ -217,7 +217,7 @@ class PaintTool extends Tool
       this.depthWriteCheckBox.checked = material.depthWrite;
 
       let opacity = Math.round(material.opacity * 100);
-      I18N.set(this.opacityLabel, "innerHTML", "label.opacity", opacity);
+      I18N.set(this.opacityLabel, "textContent", "label.opacity", opacity);
       this.application.i18n.update(this.opacityLabel);
       this.opacityRange.value = opacity;
     }
@@ -282,7 +282,7 @@ class PaintTool extends Tool
       let optionElem = document.createElement("option");
       let materialId = String(material.id);
       optionElem.value = materialId;
-      optionElem.innerHTML = this.getMaterialLabel(material);
+      optionElem.textContent = this.getMaterialLabel(material);
       this.materialListElem.appendChild(optionElem);
       this.materialListElem.value = materialId;
       this.materials.set(materialId, material);
@@ -303,7 +303,7 @@ class PaintTool extends Tool
       {
         material.name = name;
         let index = this.materialListElem.selectedIndex;
-        this.materialListElem.options[index].innerHTML =
+        this.materialListElem.options[index].textContent =
           this.getMaterialLabel(material);
         dialog.hide();
       };

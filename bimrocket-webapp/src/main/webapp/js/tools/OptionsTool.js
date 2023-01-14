@@ -68,14 +68,14 @@ class OptionsTool extends Tool
     frdElem.appendChild(frdValueDiv);
 
     const frdLabel = document.createElement("label");
-    I18N.set(frdLabel, "innerHTML", "label.fr_divisor");
+    I18N.set(frdLabel, "textContent", "label.fr_divisor");
     frdLabel.htmlFor = "frd_range";
     frdValueDiv.appendChild(frdLabel);
 
     this.frdValue = document.createElement("span");
     this.frdValue.innerHTML = "";
     this.frdValue.id = "frd_value";
-    this.frdValue.innerHTML = application.frameRateDivisor;
+    this.frdValue.textContent = application.frameRateDivisor;
     this.frdValue.style.marginLeft = "4px";
     frdValueDiv.appendChild(this.frdValue);
 
@@ -93,7 +93,7 @@ class OptionsTool extends Tool
     frdElem.appendChild(this.frdRange);
 
     this.frdRange.addEventListener("input",
-      () => this.frdValue.innerHTML = this.frdRange.value, false);
+      () => this.frdValue.textContent = this.frdRange.value, false);
 
     this.frdRange.addEventListener("change",
       () => application.frameRateDivisor = parseInt(this.frdRange.value),
@@ -229,7 +229,7 @@ class OptionsTool extends Tool
     this.languageSelect.value = userLanguage;
     this.unitsSelect.value = application.units;
     this.decimalsElem.value = application.decimals;
-    this.frdValue.innerHTML = application.frameRateDivisor;
+    this.frdValue.textContent = application.frameRateDivisor;
     this.frdRange.value = application.frameRateDivisor;
     this.selPaintModeSelect.value = application.selectionPaintMode;
     this.deepSelCheckBox.checked = application.showDeepSelection;

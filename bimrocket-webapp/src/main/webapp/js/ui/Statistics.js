@@ -12,7 +12,7 @@ class Statistics extends Panel
   {
     super(application);
     this.id = "statistics";
-    this.title = "Statistics";
+    this.title = "tool.statistics.label";
     this.position = "right";
     this.preferredHeight = 80;
 

@@ -186,7 +186,7 @@ class Inspector extends Panel
 
     const infoElem = document.createElement("div");
     infoElem.className = "inspector_info";
-    I18N.set(infoElem, "innerHTML", "message.objects_selected", objects.length);
+    I18N.set(infoElem, "textContent", "message.objects_selected", objects.length);
     this.application.i18n.update(infoElem);
     this.listPanelElem.appendChild(infoElem);
 
@@ -494,7 +494,7 @@ class Inspector extends Panel
 
   updateToolBar()
   {
-    this.indexElem.innerHTML =
+    this.indexElem.textContent =
       (this.objectIndex + 1) + " / " + this.objects.length;
 
     const objectCount = this.objects.length;
@@ -555,7 +555,7 @@ class Inspector extends Panel
     let labelElem = document.createElement("a");
     labelElem.href = "#";
     labelElem.id = 'section-' + name;
-    labelElem.innerHTML = name;
+    labelElem.textContent = name;
     sectionElem.appendChild(labelElem);
     labelElem.className = this.state[name] === 'collapsed' ?
       'expand' : 'collapse';
@@ -613,7 +613,7 @@ class Inspector extends Panel
 
       let labelElem = document.createElement('a');
       labelElem.href = '#';
-      labelElem.innerHTML = propertyName + ':';
+      labelElem.textContent = propertyName + ':';
       labelElem.className = 'label';
       propElem.appendChild(labelElem);
 
@@ -1027,7 +1027,7 @@ class StringRenderer extends PropertyRenderer
     let valueElem = document.createElement("span");
     valueElem.className = "value";
     if (disabled) valueElem.classList.add("disabled");
-    valueElem.innerHTML = text;
+    valueElem.textContent = text;
     return valueElem;
   }
 }
@@ -1054,7 +1054,7 @@ class NumberRenderer extends PropertyRenderer
     let valueElem = document.createElement("span");
     valueElem.className = "value";
     if (disabled) valueElem.classList.add("disabled");
-    valueElem.innerHTML = Math.round(number * 1000) / 1000;
+    valueElem.textContent = Math.round(number * 1000) / 1000;
     return valueElem;
   }
 }
@@ -1121,7 +1121,7 @@ class VectorRenderer extends PropertyRenderer
     let out = '(' + round(vector.x) + ', ' +
       round(vector.y) + ', ' +
       round(vector.z) + ')';
-    valueElem.innerHTML = out;
+    valueElem.textContent = out;
     return valueElem;
   }
 }
@@ -1158,7 +1158,7 @@ class EulerRenderer extends PropertyRenderer
     let out = '(' + angle(euler.x) + 'º, ' +
       angle(euler.y) + 'º, ' +
       angle(euler.z) + 'º)';
-    valueElem.innerHTML = out;
+    valueElem.textContent = out;
     return valueElem;
   }
 }
@@ -1186,7 +1186,7 @@ class FormulaRenderer extends PropertyRenderer
     valueElem.className = "value";
     if (disabled) valueElem.classList.add("disabled");
 
-    valueElem.innerHTML = formula.expression;
+    valueElem.textContent = formula.expression;
     return valueElem;
   }
 };
@@ -1218,7 +1218,7 @@ class ColorRenderer extends PropertyRenderer
     if (disabled) valueElem.classList.add("disabled");
 
     let codeElem = document.createElement("span");
-    codeElem.innerHTML = rgb;
+    codeElem.textContent = rgb;
     valueElem.appendChild(codeElem);
 
     let colorElem = document.createElement("span");
@@ -1254,7 +1254,7 @@ class Object3DRenderer extends PropertyRenderer
     let valueElem = document.createElement("a");
     valueElem.href = "#";
     valueElem.className = "value";
-    valueElem.innerHTML = object.name || "object-" + object.id;
+    valueElem.textContent = object.name || "object-" + object.id;
     valueElem.addEventListener("click",
       () => this.inspector.application.selection.set(object));
     return valueElem;
@@ -1286,15 +1286,15 @@ class TextureRenderer extends PropertyRenderer
     {
       if (texture.name)
       {
-        valueElem.innerHTML = texture.name;
+        valueElem.textContent = texture.name;
       }
       else if (texture.image)
       {
-        valueElem.innerHTML = texture.image.src;
+        valueElem.textContent = texture.image.src;
       }
       else
       {
-        valueElem.innerHTML = "";
+        valueElem.textContent = "";
       }
     }
     return valueElem;
@@ -1472,7 +1472,7 @@ class DimensionEditor extends PropertyEditor
       let itemElem = document.createElement("li");
 
       let labelElem = document.createElement("label");
-      labelElem.innerHTML = dim + ":";
+      labelElem.textContent = dim + ":";
       labelElem.htmlFor = dimId + dim;
 
       let valueElem = document.createElement("input");
@@ -1594,7 +1594,7 @@ class ColorEditor extends PropertyEditor
       ", " + Math.round(255 * color.g) + ", " + Math.round(255 * color.b) + ")";
 
     let codeElem = document.createElement("span");
-    codeElem.innerHTML = rgb;
+    codeElem.textContent = rgb;
     codeElem.style.color = "#6060c0";
     codeElem.addEventListener("click",
       () => { colorElem.focus(); colorElem.click(); });

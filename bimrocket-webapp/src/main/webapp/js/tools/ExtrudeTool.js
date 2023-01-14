@@ -194,7 +194,7 @@ class ExtrudeTool extends Tool
         this.depthInputElem.style.display = "";
         this.applyButton.style.display = "";
         this.finishButton.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
+        I18N.set(this.helpElem, "textContent", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
         this.removeExtrusionAxis();
         break;
@@ -210,7 +210,7 @@ class ExtrudeTool extends Tool
         this.depthInputElem.style.display = "";
         this.applyButton.style.display = "none";
         this.finishButton.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.extrude.drag_pointer");
+        I18N.set(this.helpElem, "textContent", "tool.extrude.drag_pointer");
         application.i18n.update(this.helpElem);
         this.addExtrusionAxis();
         break;
@@ -222,7 +222,7 @@ class ExtrudeTool extends Tool
         this.depthInputElem.style.display = "none";
         this.applyButton.style.display = "none";
         this.finishButton.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.extrude.select_object");
+        I18N.set(this.helpElem, "textContent", "tool.extrude.select_object");
         application.i18n.update(this.helpElem);
         this.removeExtrusionAxis();
         break;

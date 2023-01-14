@@ -55,7 +55,7 @@ class DrawTool extends Tool
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);
-    I18N.set(this.helpElem, "innerHTML", "tool.draw.help");
+    I18N.set(this.helpElem, "textContent", "tool.draw.help");
 
     this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
       "draw_offset", "label.offset", 0);
@@ -455,22 +455,22 @@ class DrawTool extends Tool
     {
       if (this.vertices.length === 0)
       {
-        I18N.set(this.helpElem, "innerHTML", "tool.draw.first_vertex");
+        I18N.set(this.helpElem, "textContent", "tool.draw.first_vertex");
       }
       else
       {
-        I18N.set(this.helpElem, "innerHTML", "tool.draw.add_vertex");
+        I18N.set(this.helpElem, "textContent", "tool.draw.add_vertex");
       }
     }
     else if (this.mode === 1)
     {
       if (this.index === -1)
       {
-        I18N.set(this.helpElem, "innerHTML", "tool.draw.select_vertex");
+        I18N.set(this.helpElem, "textContent", "tool.draw.select_vertex");
       }
       else
       {
-        I18N.set(this.helpElem, "innerHTML", "tool.draw.vertex_destination");
+        I18N.set(this.helpElem, "textContent", "tool.draw.vertex_destination");
       }
     }
     this.application.i18n.update(this.helpElem);

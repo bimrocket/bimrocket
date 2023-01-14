@@ -20,7 +20,7 @@ class PropertySelectorDialog extends Dialog
     this.setSize(700, 600);
 
     this.treeLabel = document.createElement("div");
-    I18N.set(this.treeLabel, "innerHTML", options.treeLabel ||
+    I18N.set(this.treeLabel, "textContent", options.treeLabel ||
       "label.selection_by_properties");
     this.bodyElem.appendChild(this.treeLabel);
 

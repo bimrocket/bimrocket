@@ -65,7 +65,7 @@ class PushButtonController extends PanelController
   update()
   {
     this.panel.title = this.title || "";
-    this.buttonElem.innerHTML = this.label || 'PUSH';
+    this.buttonElem.textContent = this.label || 'PUSH';
     this.buttonElem.className = this.buttonClass || "rounded_button";
     let output = this._pressed ? this.valueDown : this.valueUp;
     if (output !== this.output)

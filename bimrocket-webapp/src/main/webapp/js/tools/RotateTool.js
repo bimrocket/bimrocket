@@ -214,7 +214,7 @@ class RotateTool extends TransformationTool
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.rotate.select_first_point");
+        I18N.set(this.helpElem, "textContent", "tool.rotate.select_first_point");
         application.i18n.update(this.helpElem);
         application.overlays.remove(this.wheel);
         application.repaint();
@@ -227,7 +227,7 @@ class RotateTool extends TransformationTool
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.rotate.select_second_point");
+        I18N.set(this.helpElem, "textContent", "tool.rotate.select_second_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -238,7 +238,7 @@ class RotateTool extends TransformationTool
         application.pointSelector.activate();
         this.rotationInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.rotate.select_anchor_point");
+        I18N.set(this.helpElem, "textContent", "tool.rotate.select_anchor_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -250,7 +250,7 @@ class RotateTool extends TransformationTool
         this.rotationInputElem.parentElement.style.display = "";
         this.rotationInputElem.disabled = true;
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.rotate.select_destination_point");
+        I18N.set(this.helpElem, "textContent", "tool.rotate.select_destination_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -262,7 +262,7 @@ class RotateTool extends TransformationTool
         this.rotationInputElem.parentElement.style.display = "";
         this.rotationInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.rotate.edit_rotation");
+        I18N.set(this.helpElem, "textContent", "tool.rotate.edit_rotation");
         application.i18n.update(this.helpElem);
         break;
     }

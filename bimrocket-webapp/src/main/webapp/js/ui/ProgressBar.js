@@ -63,7 +63,7 @@ class ProgressBar
       this.element.classList.remove("undeterminate");
       this.progressElem.style.width = progress + "%";
       this.percentElem.style.display = "block";
-      this.percentElem.innerHTML = progress + "%";
+      this.percentElem.textContent = progress + "%";
     }
   }
 
@@ -75,7 +75,7 @@ class ProgressBar
   set message(message)
   {
     this._message = message;
-    this.messageElem.innerHTML = message ? message : "";
+    this.messageElem.textContent = message ? message : "";
   }
 }
 

@@ -256,7 +256,7 @@ class RevolveTool extends Tool
         this.applyButton.style.display = "none";
         this.changeAxisButton.style.display = "none";
         this.finishButton.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.revolve.set_axis_first_point");
+        I18N.set(this.helpElem, "textContent", "tool.revolve.set_axis_first_point");
         application.i18n.update(this.helpElem);
         this.removeWheel();
         break;
@@ -273,7 +273,7 @@ class RevolveTool extends Tool
         this.applyButton.style.display = "none";
         this.finishButton.style.display = "";
         this.changeAxisButton.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.revolve.set_axis_second_point");
+        I18N.set(this.helpElem, "textContent", "tool.revolve.set_axis_second_point");
         application.i18n.update(this.helpElem);
         this.removeWheel();
         break;
@@ -290,7 +290,7 @@ class RevolveTool extends Tool
         this.applyButton.style.display = "";
         this.finishButton.style.display = "";
         this.changeAxisButton.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.revolve.drag_pointer");
+        I18N.set(this.helpElem, "textContent", "tool.revolve.drag_pointer");
         application.i18n.update(this.helpElem);
         this.addWheel();
         break;
@@ -307,7 +307,7 @@ class RevolveTool extends Tool
         this.applyButton.style.display = "none";
         this.changeAxisButton.style.display = "none";
         this.finishButton.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.revolve.drag_pointer");
+        I18N.set(this.helpElem, "textContent", "tool.revolve.drag_pointer");
         application.i18n.update(this.helpElem);
         this.addWheel();
         break;
@@ -321,7 +321,7 @@ class RevolveTool extends Tool
         this.applyButton.style.display = "none";
         this.changeAxisButton.style.display = "none";
         this.finishButton.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.revolve.select_object");
+        I18N.set(this.helpElem, "textContent", "tool.revolve.select_object");
         application.i18n.update(this.helpElem);
         this.removeWheel();
         break;

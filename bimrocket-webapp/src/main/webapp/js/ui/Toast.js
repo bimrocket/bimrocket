@@ -19,7 +19,7 @@ class Toast
     this.toastElem.style.left = "50%";
     this.toastElem.style.opacity = 0;
     this.toastElem.className = "toast";
-    I18N.set(this.toastElem, "innerHTML", message, ...args);
+    I18N.set(this.toastElem, "textContent", message, ...args);
 
     this.setSize(180, 32);
     this.setTop(80);

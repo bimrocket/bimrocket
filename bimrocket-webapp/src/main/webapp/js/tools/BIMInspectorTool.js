@@ -117,15 +117,15 @@ class BIMInspectorTool extends Tool
     const application = this.application;
     if (object && object._ifc)
     {
-      I18N.set(this.helpElem, "innerHTML", "");
+      I18N.set(this.helpElem, "textContent", "");
       application.i18n.update(this.helpElem);
       this.populateTree(object._ifc);
     }
     else
     {
-      I18N.set(this.helpElem, "innerHTML", "bim|message.no_bim_object_selected");
+      I18N.set(this.helpElem, "textContent", "bim|message.no_bim_object_selected");
       application.i18n.update(this.helpElem);
-      this.typeElem.innerHTML = "";
+      this.typeElem.textContent = "";
       this.backButton.disabled = true;
       this.tree.clear();
     }
@@ -138,7 +138,7 @@ class BIMInspectorTool extends Tool
 
     this.backButton.disabled = this.returnStack.length === 0;
 
-    this.typeElem.innerHTML = ifcData.constructor.name;
+    this.typeElem.textContent = ifcData.constructor.name;
 
     const tree = this.tree;
     tree.clear();

@@ -41,13 +41,13 @@ class ConfirmDialog extends Dialog
 
   setAcceptLabel(label)
   {
-    I18N.set(this.acceptButton, "innerHTML", label);
+    I18N.set(this.acceptButton, "textContent", label);
     return this;
   }
 
   setCancelLabel(label)
   {
-    I18N.set(this.cancelButton, "innerHTML", label);
+    I18N.set(this.cancelButton, "textContent", label);
     return this;
   }
 

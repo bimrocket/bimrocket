@@ -47,7 +47,7 @@ class SelectTool extends Tool
     this.panel.preferredHeight = 140;
 
     const helpElem = document.createElement("div");
-    I18N.set(helpElem, "innerHTML", this.help);
+    I18N.set(helpElem, "textContent", this.help);
     helpElem.style.marginBottom = "4px";
     this.panel.bodyElem.appendChild(helpElem);
 
@@ -113,7 +113,7 @@ class SelectTool extends Tool
       let xpos = Math.round(point.x * 1000) / 1000;
       let ypos = Math.round(point.y * 1000) / 1000;
       let zpos = Math.round(point.z * 1000) / 1000;
-      this.posElem.innerHTML = "(x, y ,z) = (" +
+      this.posElem.textContent = "(x, y ,z) = (" +
         xpos + ", " + ypos + ", " + zpos + ")";
 
       let object = intersect.object;

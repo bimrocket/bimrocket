@@ -133,7 +133,7 @@ class TreeNode
 
   updateLabel()
   {
-    this.linkElem.innerHTML = this.tree.getNodeLabel(this._value);
+    this.linkElem.textContent = this.tree.getNodeLabel(this._value);
   }
 
   isExpanded()

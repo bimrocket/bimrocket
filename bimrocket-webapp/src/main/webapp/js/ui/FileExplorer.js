@@ -485,7 +485,7 @@ class FileExplorer extends Panel
     this.basePath = "/";
     const COLLECTION = Metadata.COLLECTION;
 
-    this.directoryElem.innerHTML = "/";
+    this.directoryElem.textContent = "/";
     this.entriesElem.innerHTML = "";
     let firstLink = null;
     for (let serviceName in application.services[this.group])
@@ -496,7 +496,7 @@ class FileExplorer extends Panel
       entryElem.entryName = service.name;
       let linkElem = document.createElement("a");
       linkElem.href = "#";
-      linkElem.innerHTML = service.description || service.name;
+      linkElem.textContent = service.description || service.name;
       linkElem.addEventListener("click",
         event => this.onEntry(service.name, COLLECTION));
       linkElem.addEventListener("dblclick", event => this.openEntry());
@@ -519,11 +519,11 @@ class FileExplorer extends Panel
 
     if (path === "/") // service home
     {
-      this.directoryElem.innerHTML = service.description || service.name;
+      this.directoryElem.textContent = service.description || service.name;
     }
     else
     {
-      this.directoryElem.innerHTML = result.metadata.name;
+      this.directoryElem.textContent = result.metadata.name;
     }
     let entries = result.entries;
     entries.sort(this.entryComparator);

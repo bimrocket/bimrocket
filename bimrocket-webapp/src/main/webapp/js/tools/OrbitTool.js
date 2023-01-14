@@ -91,7 +91,7 @@ class OrbitTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    I18N.set(this.panel.bodyElem, "innerHTML", this.help);
+    I18N.set(this.panel.bodyElem, "textContent", this.help);
   }
 
   activate()

@@ -21,7 +21,7 @@ class DisplayController extends PanelController
     this.detailUrl = "";
     this.detailTarget = "_blank";
     this.detailLabel = "Show more";
-    this.displayClass = "default";    
+    this.displayClass = "default";
   }
 
   createPanel()
@@ -55,18 +55,18 @@ class DisplayController extends PanelController
     this.panel.title = this.title || "";
     let value = this.input;
     const language = this.application.i18n.userLanguages[0];
-    const nf = new Intl.NumberFormat(language, 
+    const nf = new Intl.NumberFormat(language,
     {
-      maximumFractionDigits: this.decimals, 
-      minimumFractionDigits: this.decimals 
+      maximumFractionDigits: this.decimals,
+      minimumFractionDigits: this.decimals
     });
     let num = nf.format(parseFloat(value));
     let units = this.units || "";
-    this.displayElem.innerHTML = "" + num + " " + units;
+    this.displayElem.textContent = "" + num + " " + units;
     if (this.detailUrl.length > 0)
     {
       this.detailButton.style.display = "";
-      I18N.set(this.detailButton, "innerHTML", this.detailLabel);
+      I18N.set(this.detailButton, "textContent", this.detailLabel);
     }
   }
 

@@ -66,12 +66,12 @@ class ControllerDialog extends Dialog
 
     let nameSpanElem = document.createElement("span");
     nameSpanElem.className = "type";
-    nameSpanElem.innerHTML = className;
+    nameSpanElem.textContent = className;
     labelElem.appendChild(nameSpanElem);
 
     const controllerClass = Controller.classes[className];
     let descSpanElem = document.createElement("span");
-    I18N.set(descSpanElem, "innerHTML", controllerClass.getDescription());
+    I18N.set(descSpanElem, "textContent", controllerClass.getDescription());
     labelElem.appendChild(descSpanElem);
 
     return inputElem;

@@ -31,7 +31,7 @@ class TabbedPane
     {
       const tabSelectorElem = document.createElement("a");
       tabSelectorElem.href = "#";
-      I18N.set(tabSelectorElem, "innerHTML", label || name);
+      I18N.set(tabSelectorElem, "textContent", label || name);
       tabSelectorElem.addEventListener("click", () => this.showTab(name));
       tabSelectorElem.addEventListener("pointerdown", () => this.showTab(name));
       tabSelectorElem.className = "selector";
@@ -97,7 +97,7 @@ class TabbedPane
     let tabElems = this.tabs.get(name);
     if (tabElems)
     {
-      tabElems.selector.innerHTML = label;
+      tabElems.selector.textContent = label;
     }
   }
 

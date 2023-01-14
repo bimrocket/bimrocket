@@ -96,7 +96,7 @@ class InspectGeometryTool extends Tool
     this.messageElem = document.createElement("div");
     this.messageElem.style.padding = "4px";
     geometryPanel.appendChild(this.messageElem);
-    I18N.set(this.messageElem, "innerHTML", "tool.inspect_geometry.help");
+    I18N.set(this.messageElem, "textContent", "tool.inspect_geometry.help");
 
     this.listElem = document.createElement("ul");
     this.listElem.className = "summary";
@@ -210,15 +210,15 @@ class InspectGeometryTool extends Tool
     const formatter = new Intl.NumberFormat();
 
     this.listElem.style.display = "";
-    I18N.set(this.objectNameElem, "innerHTML", "message.object_name",
+    I18N.set(this.objectNameElem, "textContent", "message.object_name",
       solid.name);
-    I18N.set(this.geometryIdElem, "innerHTML", "message.geometry_id",
+    I18N.set(this.geometryIdElem, "textContent", "message.geometry_id",
       solid.geometry.id);
-    I18N.set(this.faceCountElem, "innerHTML", "message.face_count",
+    I18N.set(this.faceCountElem, "textContent", "message.face_count",
       formatter.format(solid.geometry.faces.length));
-    I18N.set(this.vertexCountElem, "innerHTML", "message.vertex_count",
+    I18N.set(this.vertexCountElem, "textContent", "message.vertex_count",
       formatter.format(solid.geometry.vertices.length));
-    I18N.set(this.isManifoldElem, "innerHTML", "message.is_manifold",
+    I18N.set(this.isManifoldElem, "textContent", "message.is_manifold",
       solid.geometry.isManifold);
     this.application.i18n.updateTree(this.listElem);
 
@@ -430,14 +430,14 @@ class InspectGeometryTool extends Tool
     const formatter = new Intl.NumberFormat();
 
     this.listInvElem.style.display = "";
-    I18N.set(this.geometryCountElem, "innerHTML",
+    I18N.set(this.geometryCountElem, "textContent",
       "message.geometry_count", formatter.format(entries.length));
-    I18N.set(this.instanceCountElem, "innerHTML",
+    I18N.set(this.instanceCountElem, "textContent",
       "message.instance_count", formatter.format(instanceCount));
-    I18N.set(this.modeledTriangleCountElem, "innerHTML",
+    I18N.set(this.modeledTriangleCountElem, "textContent",
       "message.modeled_triangle_count",
       formatter.format(modeledTriangleCount));
-    I18N.set(this.renderedTriangleCountElem, "innerHTML",
+    I18N.set(this.renderedTriangleCountElem, "textContent",
       "message.rendered_triangle_count",
       formatter.format(renderedTriangleCount));
     this.application.i18n.updateTree(this.listInvElem);
@@ -451,14 +451,14 @@ class InspectGeometryTool extends Tool
     {
       let entry = entries[i];
       let rowElem = Controls.addTableRow(this.geometryTable);
-      rowElem.children[0].innerHTML = entry.geometry.id;
+      rowElem.children[0].textContent = entry.geometry.id;
       let instanceLink = document.createElement("a");
       instanceLink.href = "#";
-      instanceLink.innerHTML = "" + formatter.format(entry.instances.length);
+      instanceLink.textContent = "" + formatter.format(entry.instances.length);
       instanceLink.addEventListener("click", () => this.showInstances(entry));
       rowElem.children[1].appendChild(instanceLink);
-      rowElem.children[2].innerHTML = formatter.format(entry.triangleCount);
-      rowElem.children[3].innerHTML =
+      rowElem.children[2].textContent = formatter.format(entry.triangleCount);
+      rowElem.children[3].textContent =
         formatter.format(entry.triangleCount * entry.instances.length);
     }
     this.geometryTable.style.display = "";

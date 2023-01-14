@@ -20,7 +20,7 @@ class AbstractMenuItem
     this.labelElement = document.createElement("div");
     this.labelElement.className = "label";
     this.anchorElement.appendChild(this.labelElement);
-    I18N.set(this.labelElement, "innerHTML", label || "menuitem");
+    I18N.set(this.labelElement, "textContent", label || "menuitem");
     this.itemElement.appendChild(this.anchorElement);
 
     this.anchorElement.addEventListener("pointerenter",
@@ -58,7 +58,7 @@ class MenuItem extends AbstractMenuItem
       this.menuBar.keyShortcuts.set(keyShortcut, tool);
       this.anchorElement.setAttribute("aria-keyshortcuts", keyShortcut);
       this.keyElement = document.createElement("div");
-      this.keyElement.innerHTML = keyShortcut;
+      this.keyElement.textContent = keyShortcut;
       this.keyElement.className = "shortcut";
       this.anchorElement.appendChild(this.keyElement);
     }
@@ -179,7 +179,7 @@ class MenuBar
 
     const menuBar = this;
     this.dropButtonElement = document.createElement("a");
-    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_show");
+    I18N.set(this.dropButtonElement, "textContent", "button.menu_show");
     this.dropButtonElement.className = "menu_button";
     this.dropButtonElement.setAttribute("role", "button");
     this.dropButtonElement.setAttribute("aria-pressed", "false");
@@ -270,7 +270,7 @@ class MenuBar
   drop()
   {
     this.listElement.className = "menu_drop";
-    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_hide");
+    I18N.set(this.dropButtonElement, "textContent", "button.menu_hide");
     this.application.i18n.update(this.dropButtonElement);
     this.dropButtonElement.setAttribute("aria-pressed", "true");
   }
@@ -278,7 +278,7 @@ class MenuBar
   hide()
   {
     this.listElement.className = "menu_hide";
-    I18N.set(this.dropButtonElement, "innerHTML", "button.menu_show");
+    I18N.set(this.dropButtonElement, "textContent", "button.menu_show");
     this.application.i18n.update(this.dropButtonElement);
     this.dropButtonElement.setAttribute("aria-pressed", "false");
     this.armed = false;

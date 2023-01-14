@@ -82,8 +82,8 @@ class Panel
 
   set title(title)
   {
-    this.titleElem.innerHTML = title;
-    I18N.set(this.titleElem, "innerHTML", title);
+    this.titleElem.textContent = title;
+    I18N.set(this.titleElem, "textContent", title);
   }
 
   get position()

@@ -223,7 +223,7 @@ class ScaleTool extends TransformationTool
         this.scaleInputElem.parentElement.style.display = "none";
         this.lengthInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.scale.select_first_point");
+        I18N.set(this.helpElem, "textContent", "tool.scale.select_first_point");
         application.i18n.update(this.helpElem);
         application.repaint();
         break;
@@ -236,7 +236,7 @@ class ScaleTool extends TransformationTool
         this.scaleInputElem.parentElement.style.display = "none";
         this.lengthInputElem.parentElement.style.display = "none";
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.scale.select_anchor_point");
+        I18N.set(this.helpElem, "textContent", "tool.scale.select_anchor_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -252,7 +252,7 @@ class ScaleTool extends TransformationTool
         this.scaleInputElem.value = 1;
         this.lengthInputElem.value = this.scaleToLength(1);
         this.buttonsPanel.style.display = "none";
-        I18N.set(this.helpElem, "innerHTML", "tool.scale.select_destination_point");
+        I18N.set(this.helpElem, "textContent", "tool.scale.select_destination_point");
         application.i18n.update(this.helpElem);
         break;
 
@@ -266,7 +266,7 @@ class ScaleTool extends TransformationTool
         this.scaleInputElem.disabled = false;
         this.lengthInputElem.disabled = false;
         this.buttonsPanel.style.display = "";
-        I18N.set(this.helpElem, "innerHTML", "tool.scale.edit_scale");
+        I18N.set(this.helpElem, "textContent", "tool.scale.edit_scale");
         application.i18n.update(this.helpElem);
         break;
     }

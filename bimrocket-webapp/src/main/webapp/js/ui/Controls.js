@@ -14,7 +14,7 @@ class Controls
   static addText(parent, text, className)
   {
     const textElem = document.createElement("span");
-    I18N.set(textElem, "innerHTML", text);
+    I18N.set(textElem, "textContent", text);
     if (className) textElem.className = className;
 
     parent.appendChild(textElem);
@@ -24,7 +24,7 @@ class Controls
   static addTextWithArgs(parent, text, args = [], className)
   {
     const textElem = document.createElement("span");
-    I18N.set(textElem, "innerHTML", text, ...args);
+    I18N.set(textElem, "textContent", text, ...args);
     if (className) textElem.className = className;
 
     parent.appendChild(textElem);
@@ -34,7 +34,7 @@ class Controls
   static addCode(parent, text, className)
   {
     const textElem = document.createElement("pre");
-    textElem.innerHTML = text;
+    textElem.textContent = text;
     if (className) textElem.className = className;
 
     parent.appendChild(textElem);
@@ -47,7 +47,7 @@ class Controls
     parent.appendChild(linkElem);
 
     if (className) linkElem.className = className;
-    if (label) I18N.set(linkElem, "innerHTML", label);
+    if (label) I18N.set(linkElem, "textContent", label);
     if (url) linkElem.href = url;
     if (title)
     {
@@ -171,12 +171,12 @@ class Controls
         if (option instanceof Array)
         {
           optionElem.value = option[0];
-          I18N.set(optionElem, "innerHTML", option[1]);
+          I18N.set(optionElem, "textContent", option[1]);
         }
         else
         {
           optionElem.value = option;
-          I18N.set(optionElem, "innerHTML", option);
+          I18N.set(optionElem, "textContent", option);
         }
         selectElem.appendChild(optionElem);
       }
@@ -206,7 +206,7 @@ class Controls
     {
       let optionElem = document.createElement("option");
       optionElem.value = value;
-      optionElem.innerHTML = value;
+      optionElem.textContent = value;
       selectElem.appendChild(optionElem);
       selectElem.value = value;
     }
@@ -228,7 +228,7 @@ class Controls
     {
       const legendElem = document.createElement("legend");
       groupElem.appendChild(legendElem);
-      I18N.set(legendElem, "innerHTML",label);
+      I18N.set(legendElem, "textContent",label);
     }
 
     const id = this.getNextId();
@@ -261,7 +261,7 @@ class Controls
       let labelElem = document.createElement("label");
       let spanElem = document.createElement("span");
 
-      I18N.set(spanElem, "innerHTML",
+      I18N.set(spanElem, "textContent",
         option instanceof Array ? option[1] : option);
       labelElem.htmlFor = radioElem.id;
 
@@ -276,7 +276,7 @@ class Controls
   {
     const buttonElem = document.createElement("button");
     buttonElem.name = name;
-    I18N.set(buttonElem, "innerHTML", label);
+    I18N.set(buttonElem, "textContent", label);
     if (className) buttonElem.className = className;
     buttonElem.addEventListener("click", event => action(event), false);
     parent.appendChild(buttonElem);
@@ -407,7 +407,7 @@ class Controls
 
     const labelElem = document.createElement("label");
     labelElem.htmlFor = id;
-    I18N.set(labelElem, "innerHTML", label);
+    I18N.set(labelElem, "textContent", label);
     groupElem.appendChild(labelElem);
 
     return groupElem;
@@ -438,7 +438,7 @@ class Controls
       {
         const headColElem = document.createElement("th");
         headRowElem.appendChild(headColElem);
-        I18N.set(headColElem, "innerHTML",  columns[i]);
+        I18N.set(headColElem, "textContent",  columns[i]);
         headColElem.className = "col_" + i;
       }
     }

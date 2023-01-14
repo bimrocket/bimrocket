@@ -139,7 +139,7 @@ class SectionTool extends Tool
         this.updateOffsetLabel();
         this.application.repaint();
       });
-    I18N.set(helpElem, "innerHTML", this.help);
+    I18N.set(helpElem, "textContent", this.help);
   }
 
   activate()

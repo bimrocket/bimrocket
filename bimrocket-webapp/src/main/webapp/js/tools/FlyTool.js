@@ -204,7 +204,7 @@ class FlyTool extends Tool
           text = "";
         }
       }
-      button.innerHTML = text;
+      button.textContent = text;
       button.className = action.name;
       I18N.set(button, "title", "tool.fly." + action.name);
       I18N.set(button, "alt", "tool.fly." + action.name);
@@ -418,7 +418,7 @@ class FlyTool extends Tool
       });
 
       const unitsText = document.createElement("span");
-      unitsText.innerHTML = this.application.units;
+      unitsText.textContent = this.application.units;
       groundDistanceElem.parentElement.appendChild(unitsText);
 
       groundDistanceElem.disabled = !this.groundDistanceControlEnabled;

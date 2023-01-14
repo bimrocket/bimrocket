@@ -352,14 +352,14 @@ class BCFPanel extends Panel
 
     if (this.topics && index !== -1)
     {
-      this.topicSearchIndexElem.innerHTML =
+      this.topicSearchIndexElem.textContent =
         (index + 1) + " / " + this.topics.length;
       this.previousTopicButton.disabled = index === 0;
       this.nextTopicButton.disabled = index === this.topics.length - 1;
     }
     else
     {
-      this.topicSearchIndexElem.innerHTML = "?";
+      this.topicSearchIndexElem.textContent = "?";
       this.previousTopicButton.disabled = true;
       this.nextTopicButton.disabled = true;
     }
@@ -1162,7 +1162,7 @@ class BCFPanel extends Panel
         openTopic);
       Controls.addLink(rowElem.children[1], topic.title, "#", null, null,
         openTopic);
-      rowElem.children[2].innerHTML = topic.topic_status;
+      rowElem.children[2].textContent = topic.topic_status;
     }
   }
 
@@ -1225,7 +1225,7 @@ class BCFPanel extends Panel
       let linkElem = document.createElement("a");
       linkElem.href = docRef.url;
       linkElem.target = "_blank";
-      linkElem.innerHTML = docRef.description;
+      linkElem.textContent = docRef.description;
       itemListElem.appendChild(linkElem);
 
       Controls.addButton(itemListElem, "updateDocRef", "button.edit",

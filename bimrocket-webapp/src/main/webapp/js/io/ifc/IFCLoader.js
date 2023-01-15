@@ -102,11 +102,10 @@ class IFCLoader extends THREE.Loader
         model.name = project.Name || project.LongName || "IFC";
         model._ifc = project;
         model.userData.IFC = {
-          ifcClassName : "IfcProject",
-          GlobalId : project.GlobalId,
-          Name: this.unBox(project.Name),
-          Description : this.unBox(project.Description)
+          ifcClassName : "IfcProject"
         };
+        this.setIFCProperties(model.userData.IFC, project);
+
         let contextUnits = project.UnitsInContext;
         if (contextUnits)
         {
@@ -455,6 +454,29 @@ class IFCLoader extends THREE.Loader
     return model;
   }
 
+  setIFCProperties(ifcProperties, ifcObject)
+  {
+    let names = Object.keys(ifcObject);
+    for (let name of names)
+    {
+      let value = ifcObject[name];
+      if (value && value.Value !== undefined)
+      {
+        // unbox
+        value = value.Value;
+      }
+
+      if (typeof value === "string")
+      {
+        ifcProperties[name] = value;
+      }
+      else if (typeof value === "number")
+      {
+        ifcProperties[name] = value;
+      }
+    }
+  }
+
   unBox(value)
   {
     return value && value.Value !== undefined ? value.Value : value;
@@ -643,12 +665,13 @@ class IfcProductHelper extends IfcHelper
       }
 
       object3D.name = name;
+
       object3D.userData.IFC = {
-        ifcClassName : product.constructor.name,
-        GlobalId : product.GlobalId,
-        Name: loader.unBox(product.Name),
-        Description : loader.unBox(product.Description)
+        ifcClassName : product.constructor.name
       };
+
+      loader.setIFCProperties(object3D.userData.IFC, product);
+
       object3D._ifc = product;
 
       let objectPlacement = product.ObjectPlacement;

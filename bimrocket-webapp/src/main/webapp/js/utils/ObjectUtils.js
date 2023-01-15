@@ -518,13 +518,23 @@ class ObjectUtils
     }
   }
 
-  static getBoundingBoxFromView(objects, viewMatrixWorld,
+  static getBoundingBox(objects, includeInvisible)
+  {
+    return this.getBoundingBoxFromView(objects, null, includeInvisible);
+  }
+
+  static getBoundingBoxFromView(objects, viewMatrixWorld = null,
     includeInvisible = false)
   {
     const box = new THREE.Box3(); // empty box
     const vertex = new THREE.Vector3();
-    const inverseMatrix = new THREE.Matrix4();
-    inverseMatrix.copy(viewMatrixWorld).invert();
+    let inverseMatrix = null;
+
+    if (viewMatrixWorld instanceof THREE.Matrix4)
+    {
+      inverseMatrix = new THREE.Matrix4();
+      inverseMatrix.copy(viewMatrixWorld).invert();
+    }
 
     function extendBox(object)
     {
@@ -539,7 +549,7 @@ class ObjectUtils
           {
             vertex.copy(vertices[j]);
             vertex.applyMatrix4(object.matrixWorld); // world CS
-            vertex.applyMatrix4(inverseMatrix); // view CS
+            if (inverseMatrix) vertex.applyMatrix4(inverseMatrix); // view CS
             box.expandByPoint(vertex);
           }
         }
@@ -553,7 +563,7 @@ class ObjectUtils
             {
               vertex.set(positions[j], positions[j + 1], positions[j + 2]);
               vertex.applyMatrix4(object.matrixWorld); // world CS
-              vertex.applyMatrix4(inverseMatrix); // view CS
+              if (inverseMatrix) vertex.applyMatrix4(inverseMatrix); // view CS
               box.expandByPoint(vertex);
             }
           }
@@ -588,9 +598,16 @@ class ObjectUtils
       }
     };
 
-    for (let object of objects)
+    if (objects instanceof THREE.Object3D)
     {
-      traverse(object);
+      traverse(objects);
+    }
+    else if (objects instanceof Array)
+    {
+      for (let object of objects)
+      {
+        traverse(object);
+      }
     }
     return box;
   }

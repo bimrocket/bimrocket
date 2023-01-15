@@ -219,7 +219,12 @@ export const translations =
   "tool.view.label" : "Veure",
 
   "tool.section.label" : "Secció",
-  "tool.section.help" : "Toca una cara per seleccionar el pla de secció. Arrossega el punter o gira la roda per desplaçar el pla de secció.",
+  "tool.section.select_plane" : "Toca una cara per seleccionar el pla de secció o selecciona un pla predefinit.",
+  "tool.section.offset_plane" : "Arrossega el punter o gira la roda per desplaçar el pla de secció.",
+  "tool.section.z_max" : "Z màxima",
+  "tool.section.z_min" : "Z mínima",
+  "tool.section.x_center" : "X central",
+  "tool.section.y_center" : "Y central",
 
   "tool.add_object.label" : "Afegeix objecte",
 
@@ -383,6 +388,7 @@ export const translations =
   "label.opacity" : opacity => `Opacitat: ${opacity}%`,
   "label.material_name" : "Nom:",
   "label.material_on_selection" : "Sobre la selecció",
+  "label.plane" : "Pla:",
 
   "label.on_vertex" : "Sobre vèrtex",
   "label.on_edge" : "Sobre aresta",

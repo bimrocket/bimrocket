@@ -220,7 +220,12 @@ export const translations =
   "tool.view.label" : "Ver",
 
   "tool.section.label" : "Sección",
-  "tool.section.help" : "Toca una cara para seleccionar el plano de sección. Arrastra el puntero o gira la rueda para desplazar el plano de sección.",
+  "tool.section.select_plane" : "Toca una cara para seleccionar el plano de sección o selecciona un plano predefinido.",
+  "tool.section.offset_plane" : "Arrastra el puntero o gira la rueda para desplazar el plano de sección.",
+  "tool.section.z_max" : "Z máxima",
+  "tool.section.z_min" : "Z mínima",
+  "tool.section.x_center" : "X central",
+  "tool.section.y_center" : "Y central",
 
   "tool.add_object.label" : "Añadir objeto",
 
@@ -384,6 +389,7 @@ export const translations =
   "label.opacity" : opacity => `Opacidad: ${opacity}%`,
   "label.material_name" : "Nombre:",
   "label.material_on_selection" : "Sobre la selección",
+  "label.plane" : "Plano:",
 
   "label.on_vertex" : "Sobre vértice",
   "label.on_edge" : "Sobre arista",

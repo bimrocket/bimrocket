@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { GestureHandler } from "../ui/GestureHandler.js";
 import { I18N } from "../i18n/I18N.js";
@@ -19,16 +20,19 @@ class SectionTool extends Tool
     super(application);
     this.name = "section";
     this.label = "tool.section.label";
-    this.help = "tool.section.help";
     this.className = "section";
     this.setOptions(options);
 
-    var plane = new THREE.Plane();
+    // section plane parameters
+    this.basePoint = new THREE.Vector3(0, 0, 0);
+    this.normal = new THREE.Vector3(0, 0, 1);
+    this.offset = 0;
+
+    // internal properties
+    const plane = new THREE.Plane();
     this.plane = plane;
     this.planes = [this.plane];
     this.noPlanes = [];
-    this.basePoint = null;
-    this.offset = 0;
     this.meshes = [];
 
     let backFaceStencilMat = new THREE.MeshBasicMaterial();
@@ -107,8 +111,22 @@ class SectionTool extends Tool
     this.panel = application.createPanel(this.label, "left", "panel_section");
     this.panel.preferredHeight = 160;
 
-    const helpElem = document.createElement("div");
-    this.panel.bodyElem.appendChild(helpElem);
+    this.helpElem = document.createElement("div");
+    this.panel.bodyElem.appendChild(this.helpElem);
+
+    this.planeTypeSelectElem = Controls.addSelectField(this.panel.bodyElem,
+      "section_planes", "label.plane",
+      [["z_min", "tool.section.z_min"],
+       ["z_max", "tool.section.z_max"],
+       ["x_center", "tool.section.x_center"],
+       ["y_center", "tool.section.y_center"]]);
+    this.planeTypeSelectElem.style.marginLeft = "2px";
+
+    this.planeSelectButton = document.createElement("button");
+    this.planeTypeSelectElem.parentElement.appendChild(this.planeSelectButton);
+    I18N.set(this.planeSelectButton, "textContent", "button.apply");
+    this.planeSelectButton.addEventListener("click",
+      event => this.onPlaneSelect());
 
     this.sectionColorElem = Controls.addColorField(this.panel.bodyElem,
       "section_color", "label.section_color");
@@ -122,6 +140,7 @@ class SectionTool extends Tool
 
     this.offsetInputElem = Controls.addNumberField(this.panel.bodyElem,
       "section_offset", "label.offset", 0);
+    this.offsetInputElem.step = 0.1;
     this.offsetElem = this.offsetInputElem.parentElement;
     this.offsetElem.style.display = "none";
 
@@ -134,12 +153,13 @@ class SectionTool extends Tool
 
     this.cancelButton = Controls.addButton(this.offsetElem,
       "cancel_section", "button.cancel", event =>
-      {
-        this.disableClipping();
-        this.updateOffsetLabel();
-        this.application.repaint();
-      });
-    I18N.set(helpElem, "textContent", this.help);
+    {
+      this.disableClipping();
+      this.updatePanel();
+      this.application.repaint();
+    });
+
+    this.updatePanel();
   }
 
   activate()
@@ -167,15 +187,14 @@ class SectionTool extends Tool
     if (intersect)
     {
       const object = intersect.object;
-      this.basePoint = intersect.point; // world
       let v1 = new THREE.Vector3(0, 0, 0); // local
       let v2 = intersect.face.normal.clone(); // local
 
       v1.applyMatrix4(object.matrixWorld);
       v2.applyMatrix4(object.matrixWorld);
 
-      const normal = new THREE.Vector3().subVectors(v1, v2).normalize();
-      this.plane.normal = normal;
+      this.basePoint.copy(intersect.point); // world
+      this.normal.subVectors(v1, v2).normalize(); // world
       this.offset = 0;
       this.updatePlane();
 
@@ -185,7 +204,7 @@ class SectionTool extends Tool
     {
       this.disableClipping();
     }
-    this.updateOffsetLabel();
+    this.updatePanel();
     application.repaint();
   }
 
@@ -202,7 +221,7 @@ class SectionTool extends Tool
     this.offset = Math.round(1000 * this.offset) / 1000;
 
     this.updatePlane();
-    this.updateOffsetLabel();
+    this.updatePanel();
 
     application.repaint();
   }
@@ -229,9 +248,45 @@ class SectionTool extends Tool
     this.offset = Math.round(1000 * this.offset) / 1000;
 
     this.updatePlane();
-    this.updateOffsetLabel();
+    this.updatePanel();
 
     application.repaint();
+  }
+
+  onPlaneSelect()
+  {
+    const application = this.application;
+    const camera = application.camera;
+    const objects = application.baseObject;
+
+    const box = ObjectUtils.getBoundingBox(objects);
+    console.info(box);
+
+    let planeType = this.planeTypeSelectElem.value;
+    switch (planeType)
+    {
+      case "z_min":
+        this.basePoint.set(0, 0, box.min.z);
+        this.normal.set(0, 0, -1);
+        break;
+      case "z_max":
+        this.basePoint.set(0, 0, box.max.z);
+        this.normal.set(0, 0, -1);
+        break;
+      case "x_center":
+        this.basePoint.set(0.5 * (box.min.x + box.max.x), 0, 0);
+        this.normal.set(1, 0, 0);
+        break;
+      case "y_center":
+        this.basePoint.set(0, 0.5 * (box.min.y + box.max.y), 0);
+        this.normal.set(0, 1, 0);
+        break;
+    }
+    this.offset = 0;
+    this.updatePlane();
+    this.enableClipping();
+    this.updatePanel();
+    this.application.repaint();
   }
 
   enableClipping()
@@ -319,17 +374,19 @@ class SectionTool extends Tool
     });
 
     this.meshes = [];
-    this.basePoint = null;
 
     application.renderer.localClippingEnabled = false;
   }
 
   updatePlane()
   {
-    let planeMesh = this.planeMesh;
-    let normal = this.plane.normal;
+    // build section plane from basePoint, normal and offset
 
-    let position = this.basePoint.clone().addScaledVector(normal, this.offset);
+    let basePoint = this.basePoint;
+    let normal = this.normal;
+    let offset = this.offset;
+
+    let position = basePoint.clone().addScaledVector(normal, offset);
     this.plane.setFromNormalAndCoplanarPoint(normal, position);
 
     let vz = normal;
@@ -345,22 +402,30 @@ class SectionTool extends Tool
       vx.z, vy.z, vz.z, position.z,
           0,   0,    0,     1);
 
+    let planeMesh = this.planeMesh;
+
     matrix.decompose(planeMesh.position, planeMesh.quaternion, planeMesh.scale);
 
     planeMesh.updateMatrix();
   }
 
-  updateOffsetLabel()
+  updatePanel()
   {
-    if (this.application.renderer.localClippingEnabled)
+    const application = this.application;
+    if (application.renderer.localClippingEnabled)
     {
       this.offsetElem.style.display = "block";
       this.offsetInputElem.value = this.offset.toFixed(3);
+      this.planeTypeSelectElem.parentElement.style.display = "none";
+      I18N.set(this.helpElem, "textContent", "tool.section.offset_plane");
     }
     else
     {
       this.offsetElem.style.display = "none";
+      this.planeTypeSelectElem.parentElement.style.display = "";
+      I18N.set(this.helpElem, "textContent", "tool.section.select_plane");
     }
+    application.i18n.update(this.helpElem);
   }
 }
 

@@ -219,7 +219,12 @@ export const translations =
   "tool.view.label" : "View",
 
   "tool.section.label" : "Section",
-  "tool.section.help" : "Tap face to select the clipping plane. Drag the pointer or spin the wheel to offset the clipping plane.",
+  "tool.section.select_plane" : "Tap face to select the clipping plane or select a predefined plane.",
+  "tool.section.offset_plane" : "Drag the pointer or spin the wheel to offset the clipping plane.",
+  "tool.section.z_max" : "Maximum Z",
+  "tool.section.z_min" : "Minimum Z",
+  "tool.section.x_center" : "Center X",
+  "tool.section.y_center" : "Center Y",
 
   "tool.add_object.label" : "Add object",
 
@@ -383,6 +388,7 @@ export const translations =
   "label.opacity" : opacity => `Opacity: ${opacity}%`,
   "label.material_name" : "Name:",
   "label.material_on_selection" : "On selection",
+  "label.plane" : "Plane:",
 
   "label.on_vertex" : "On vertex",
   "label.on_edge" : "On edge",

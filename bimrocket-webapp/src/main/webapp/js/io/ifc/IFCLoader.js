@@ -42,7 +42,8 @@ class IFCLoader extends THREE.Loader
     units : "m", // default model units
     minCircleSegments : 16, // minimum circle segments
     circleSegmentsByRadius : 64, // circle segments by meter of radius
-    halfSpaceSize : 30 // half space size in meters
+    halfSpaceSize : 30, // half space size in meters
+    unvoidableClasses : new Set(["IfcDoor", "IfcWindow"])
   };
 
   constructor(manager)
@@ -3083,9 +3084,10 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
 
   relate()
   {
-    var rel = this.instance;
-    var element = rel.RelatingBuildingElement;
-    var opening = rel.RelatedOpeningElement;
+    let rel = this.instance;
+    let loader = rel._loader;
+    let element = rel.RelatingBuildingElement;
+    let opening = rel.RelatedOpeningElement;
     if (element && opening)
     {
       opening._VoidsElement = rel;
@@ -3098,15 +3100,23 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
         element._HasOpenings = [rel];
       }
 
-      var object3D = element.helper.getObject3D();
+      let object3D = element.helper.getObject3D();
       if (object3D)
       {
-        var openingObject3D = opening.helper.getObject3D();
-        if (openingObject3D)
+        let className = object3D.userData.IFC.ifcClassName;
+        if (loader.options.unvoidableClasses.has(className))
         {
-          if (object3D !== openingObject3D.parent)
+          console.warn(`Unsupported voiding of ${className} element`, object3D);
+        }
+        else
+        {
+          let openingObject3D = opening.helper.getObject3D();
+          if (openingObject3D)
           {
-            object3D.attach(openingObject3D);
+            if (object3D !== openingObject3D.parent)
+            {
+              object3D.attach(openingObject3D);
+            }
           }
         }
       }

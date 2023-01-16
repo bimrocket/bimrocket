@@ -436,7 +436,7 @@ class ObjectUtils
     return changed;
   }
 
-  static zoomAll(camera, objects, aspect, all)
+  static zoomAll(camera, objects, aspect, includeInvisible, offsetFactor = 1.1)
   {
     if (objects instanceof THREE.Object3D)
     {
@@ -444,14 +444,14 @@ class ObjectUtils
     }
 
     let box = ObjectUtils.getBoundingBoxFromView(
-      objects, camera.matrixWorld, all); // box in camera CS
+      objects, camera.matrixWorld, includeInvisible); // box in camera CS
 
     if (box.isEmpty()) return;
 
     let center = new THREE.Vector3();
     center = box.getCenter(center); // center in camera CS
     let matrix = camera.matrix;
-    center.applyMatrix4(camera.matrix); // center in camera parent CS
+    center.applyMatrix4(matrix); // center in camera parent CS
 
     let boxWidth = box.max.x - box.min.x;
     let boxHeight = box.max.y - box.min.y;
@@ -466,17 +466,17 @@ class ObjectUtils
       let yoffset = boxHeight * camera.near / (2 * ymax);
       let xoffset = boxWidth * camera.near / (2 * xmax);
 
-      offset = Math.max(xoffset, yoffset) + 0.5 * boxDepth;
+      offset = offsetFactor * (Math.max(xoffset, yoffset) + 0.5 * boxDepth);
     }
     else // Ortho camera
     {
-      let factor = 0.5 * 1.1; // 10% extra space
+      let factor = 0.5 * offsetFactor;
       camera.left = -factor * boxWidth;
       camera.right = factor * boxWidth;
       camera.top = factor * boxHeight;
       camera.bottom = -factor * boxHeight;
 
-      offset = camera.far - boxDepth;
+      offset = camera.far - boxDepth * offsetFactor;
     }
     let v = new THREE.Vector3();
     v.setFromMatrixColumn(matrix, 2); // view vector (zaxis) in parent CS

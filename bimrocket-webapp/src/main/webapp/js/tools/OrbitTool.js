@@ -447,7 +447,7 @@ class OrbitTool extends Tool
 
     event.preventDefault();
 
-    var delta = 0;
+    let delta = 0;
 
     if (event.wheelDelta)
     { // WebKit / Opera / Explorer 9

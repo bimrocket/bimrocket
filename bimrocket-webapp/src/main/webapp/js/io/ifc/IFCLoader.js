@@ -3103,15 +3103,17 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
       let object3D = element.helper.getObject3D();
       if (object3D)
       {
-        let className = object3D.userData.IFC.ifcClassName;
-        if (loader.options.unvoidableClasses.has(className))
+        let openingObject3D = opening.helper.getObject3D();
+        if (openingObject3D)
         {
-          console.warn(`Unsupported voiding of ${className} element`, object3D);
-        }
-        else
-        {
-          let openingObject3D = opening.helper.getObject3D();
-          if (openingObject3D)
+          let className = object3D.userData.IFC.ifcClassName;
+          if (loader.options.unvoidableClasses.has(className))
+          {
+            console.warn(`Unsupported voiding of ${className} element`,
+              object3D, openingObject3D);
+            openingObject3D.parent.remove(openingObject3D);
+          }
+          else
           {
             if (object3D !== openingObject3D.parent)
             {

@@ -260,25 +260,25 @@ class SectionTool extends Tool
     const objects = application.baseObject;
 
     const box = ObjectUtils.getBoundingBox(objects);
-    console.info(box);
+    box.getCenter(this.basePoint);
 
     let planeType = this.planeTypeSelectElem.value;
     switch (planeType)
     {
       case "z_min":
-        this.basePoint.set(0, 0, box.min.z);
+        this.basePoint.z = box.min.z;
         this.normal.set(0, 0, -1);
         break;
       case "z_max":
-        this.basePoint.set(0, 0, box.max.z);
+        this.basePoint.z = box.max.z;
         this.normal.set(0, 0, -1);
         break;
       case "x_center":
-        this.basePoint.set(0.5 * (box.min.x + box.max.x), 0, 0);
+        this.basePoint.x = 0.5 * (box.min.x + box.max.x);
         this.normal.set(1, 0, 0);
         break;
       case "y_center":
-        this.basePoint.set(0, 0.5 * (box.min.y + box.max.y), 0);
+        this.basePoint.y = 0.5 * (box.min.y + box.max.y);
         this.normal.set(0, 1, 0);
         break;
     }

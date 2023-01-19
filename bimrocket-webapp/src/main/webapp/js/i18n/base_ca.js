@@ -194,7 +194,7 @@ export const translations =
   "tool.script.name" : "Programa:",
 
   "tool.orbit.label" : "Orbita",
-  "tool.orbit.help" : "Rotació: arrossega amb butó esquerre, Desplaça: arrossega amb botó dret o 2 punters, Zoom: gira roda, arrossega amb botó central o zoom amb 2 punters.",
+  "tool.orbit.help" : "Rotació: arrossega amb botó esquerre, Desplaça: arrossega amb botó dret o 2 punters, Zoom: gira roda, arrossega amb botó central o zoom amb 2 punters.",
 
   "tool.auto_orbit.label" : "Auto orbita",
   "tool.auto_orbit.help" : "Auto orbita",
@@ -493,7 +493,7 @@ export const translations =
   "controller.LightController" : "Il·lumina un objecte.",
   "controller.LoadController" : "Carrega un model a l'escena.",
   "controller.ProximityController" : "Detecta proximitat a objectes.",
-  "controller.PushButtonController" : "Mostra un butó.",
+  "controller.PushButtonController" : "Mostra un botó.",
   "controller.RotationController" : "Rota un objecte.",
   "controller.ToggleButtonController" : "Mostra un interruptor.",
   "controller.TranslationController" : "Desplaça un objecte."

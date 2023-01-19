@@ -54,6 +54,7 @@ export const translations =
   "label.zoom_image" : "Amplia imatge",
   "label.doc_ref_url" : "Url del document:",
   "label.doc_ref_description" : "Descripció:",
+  "label.link_models" : "Enllaça models",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",

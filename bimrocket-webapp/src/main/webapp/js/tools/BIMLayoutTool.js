@@ -52,6 +52,9 @@ class BIMLayoutTool extends Tool
     this.showAllButton = Controls.addButton(this.layoutPanelElem,
       "show_all", "bim|button.show_all", () => this.showAll());
 
+    this.linkModelsCheckbox = Controls.addCheckBoxField(this.layoutPanelElem,
+      "link_models", "bim|label.link_models", false, "option_block");
+
     this.layoutTree = new Tree(this.layoutPanelElem);
   }
 
@@ -278,11 +281,11 @@ class BIMLayoutTool extends Tool
 
     if (event.wheelDelta)
     { // WebKit / Opera / Explorer 9
-      delta = event.wheelDelta * 0.0005;
+      delta = event.wheelDelta * 0.001;
     }
     else if (event.detail)
     { // Firefox
-      delta = -0.02 * event.detail;
+      delta = -0.05 * event.detail;
     }
 
     if (delta !== 0)
@@ -352,32 +355,46 @@ class BIMLayoutTool extends Tool
       application.notifyObjectsChanged(siteRepr, this);
     }
 
-    // search object of ifcClassName class
-    let parentObject = object;
-    while (parentObject)
-    {
-      if (parentObject.userData.IFC &&
-          parentObject.userData.IFC.ifcClassName === ifcClassName) break;
-      else parentObject = parentObject.parent;
-    }
+    let linkedObjects;
 
-    application.baseObject.traverse(obj =>
+    if (this.linkModelsCheckbox.checked)
     {
-      let ifcData = obj.userData.IFC;
+      linkedObjects = [];
+
+      application.baseObject.traverse(currObj =>
+      {
+        if (currObj.name === object.name ||
+            currObj.userData?.IFC?.GlobalId === object.userData?.IFC?.GlobalId ||
+            currObj.userData?.IFC?.Elevation === object.userData?.IFC?.Elevation)
+        {
+          linkedObjects.push(currObj);
+        }
+      });
+    }
+    else linkedObjects = [object];
+
+    application.baseObject.traverse(currObj =>
+    {
+      let ifcData = currObj.userData.IFC;
       if (ifcData)
       {
         let ifcClassName = ifcData.ifcClassName;
         if (ifcClassName === "IfcSite" || ifcClassName === "IfcBuilding" ||
             ifcClassName === "IfcBuildingStorey" || ifcClassName === "IfcSpace")
         {
-          let oldVisibility = obj.visible;
-          obj.visible = obj === object ||
-            ObjectUtils.isObjectDescendantOf(obj, parentObject) ||
-            ObjectUtils.isObjectDescendantOf(object, obj);
+          let oldVisibility = currObj.visible;
+          currObj.visible = false;
 
-          if (oldVisibility !== obj.visible)
+          for (let linkedObject of linkedObjects)
           {
-            application.notifyObjectsChanged(obj, this);
+            currObj.visible ||= currObj === linkedObject ||
+              ObjectUtils.isObjectDescendantOf(currObj, linkedObject) ||
+              ObjectUtils.isObjectDescendantOf(linkedObject, currObj);
+          }
+
+          if (oldVisibility !== currObj.visible)
+          {
+            application.notifyObjectsChanged(currObj, this);
           }
         }
       }

@@ -444,8 +444,8 @@ export const translations =
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,
-  "message.solids_area" : (area, units) => `Àrea: ${area} ${units}&sup2;`,
-  "message.solids_volume" : (volume, units) => `Volum: ${volume} ${units}&sup3;`,
+  "message.solids_area" : (area, units) => `Àrea: ${area} ${units}2`,
+  "message.solids_volume" : (volume, units) => `Volum: ${volume} ${units}3`,
   "message.solids_area_volume" : ratio => `Àrea/Volum: ${ratio}`,
 
   "message.invalid_service" : service => `Servei no vàlid: [${service}].`,

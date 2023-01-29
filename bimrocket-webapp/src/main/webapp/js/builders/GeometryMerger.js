@@ -101,7 +101,7 @@ class GeometryMerger extends ObjectBuilder
     {
       const solid = object;
 
-      if (solid.facesVisible)
+      if (solid.facesVisible && solid.geometry && solid.geometry.faces)
       {
         const vertices = solid.geometry.vertices;
         for (let face of solid.geometry.faces)
@@ -125,7 +125,7 @@ class GeometryMerger extends ObjectBuilder
         }
       }
 
-      if (solid.edgesVisible)
+      if (solid.edgesVisible && solid.edgesGeometry.attributes?.position)
       {
         const array = solid.edgesGeometry.attributes.position.array;
         for (let i = 0; i < array.length; i += 3)

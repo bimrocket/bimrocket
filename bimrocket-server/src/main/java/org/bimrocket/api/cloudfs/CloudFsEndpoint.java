@@ -499,6 +499,8 @@ public class CloudFsEndpoint
     if (extension.equals("3mf")) return "model/3mf";
     if (extension.equals("ifc")) return "application/x-step";
     if (extension.equals("ifcxml")) return "application/xml";
+    if (extension.equals("gltf")) return "model/gltf+json";
+    if (extension.equals("glb")) return "model/gltf-binary";
 
     return "application/octet-stream";
   }

@@ -26,7 +26,7 @@ class Inspector extends Panel
 {
   static mainMaterialProperties = ["id", "uuid", "type", "name", "color",
     "specular", "emissive", "shininess", "opacity", "transparent", "side",
-    "emissiveIntensity", "fog", "depthTest", "depthWrite",
+    "emissiveIntensity", "fog", "depthTest", "depthWrite", "flatShading",
     "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
     "sizeAttenuation", "map"];
 
@@ -377,8 +377,15 @@ class Inspector extends Panel
         {
           for (let name in geometry.attributes)
           {
-            this.createReadOnlyProperty(geomListElem, geometry.attributes[name],
-              name, geometry.attributes[name].array.length);
+            let attribute = geometry.attributes[name];
+            this.createReadOnlyProperty(geomListElem, attribute,
+              name, attribute.array.length + " / " + attribute.itemSize);
+          }
+          if (geometry.getIndex())
+          {
+            let attribute = geometry.getIndex();
+            this.createReadOnlyProperty(geomListElem, attribute,
+              "index", attribute.array.length + " / " + attribute.itemSize);
           }
         }
       }

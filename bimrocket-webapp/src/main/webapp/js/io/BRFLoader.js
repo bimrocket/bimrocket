@@ -240,7 +240,15 @@ class BRFLoader extends THREE.Loader
         }
         let bufferAttribute =
           new THREE.BufferAttribute(typedArray, itemSize, normalized);
-        geometry.setAttribute(name, bufferAttribute);
+
+        if (name === "index")
+        {
+          geometry.setIndex(bufferAttribute);
+        }
+        else
+        {
+          geometry.setAttribute(name, bufferAttribute);
+        }
       }
     }
     return geometry;

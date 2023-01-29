@@ -289,10 +289,24 @@ class BRFExporter
         entry.type = "BufferGeometry";
         entry.attributes = {};
         const attributes = geometry.attributes;
+
         for (let name in attributes)
         {
           let attribute = attributes[name];
+
           entry.attributes[name] =
+          {
+            type : attribute.constructor.name,
+            arrayType : attribute.array.constructor.name,
+            itemSize : attribute.itemSize,
+            normalized : attribute.normalized,
+            array: this.exportBufferAttributeArray(attribute)
+          };
+        }
+        if (geometry.getIndex())
+        {
+          let attribute = geometry.getIndex();
+          entry.attributes["index"] =
           {
             type : attribute.constructor.name,
             arrayType : attribute.array.constructor.name,
@@ -328,6 +342,11 @@ class BRFExporter
       if (material.color)
       {
         entry.color = "#" + material.color.getHexString();
+      }
+
+      if (typeof material.flatShading === "boolean")
+      {
+        entry.flatShading = material.flatShading;
       }
 
       if (material instanceof THREE.MeshPhongMaterial)
@@ -425,7 +444,9 @@ class BRFExporter
 
   exportBufferAttributeArray(attribute)
   {
-    const compress = attribute.name !== "index" &&
+    const itemSize = attribute.itemSize;
+
+    const compress = itemSize > 1 &&
       (this.options.enableBufferGeometryCompression === undefined
       || this.options.enableBufferGeometryCompression === true);
 
@@ -435,7 +456,6 @@ class BRFExporter
     if (compress)
     {
       const compressedArray = [];
-      const itemSize = attribute.itemSize;
       const map = new Map();
 
       for (let i = 0; i < array.length; i += itemSize)

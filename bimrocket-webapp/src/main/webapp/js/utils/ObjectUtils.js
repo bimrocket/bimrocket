@@ -717,8 +717,8 @@ class ObjectUtils
     {
       array.push(object);
     }
-    var children = object.children;
-    for (var i = 0; i < children.length; i++)
+    const children = object.children;
+    for (let i = 0; i < children.length; i++)
     {
       this.findCameras(children[i], array);
     }
@@ -728,20 +728,35 @@ class ObjectUtils
   static findMaterials(object, array)
   {
     if (array === undefined) array = [];
-    var materialMap = {};
-    object.traverse(function(object)
+    let materialMap = new Map();
+
+    object.traverse(obj =>
     {
-      var material = object.material;
+      let material = obj.material;
       if (material)
       {
-        if (materialMap[material.uuid] === undefined)
+        if (!materialMap.has(material.uuid))
         {
-          materialMap[material.uuid] = material;
+          materialMap.set(material.uuid, material);
           array.push(material);
         }
       }
     });
     return array;
+  }
+
+  static setChildAtIndex(object, index, child)
+  {
+    if (child.parent === object)
+      throw "Can't add object to its current parent.";
+
+    let previousChild = object.children[index];
+    previousChild.parent = null;
+
+    child.removeFromParent();
+
+    object.children[index] = child;
+    child.parent = object;
   }
 
   static isObjectDescendantOf(object, parent)

@@ -20,24 +20,24 @@ class IFCVoider extends SolidBuilder
 
   traverseDependencies(productRepr, action)
   {
+    // productRepr nust be a Solid with a Solid child
+
     if (!(productRepr instanceof Solid)
         || productRepr.children.length < 3) return;
 
-    action(productRepr.parent);
-
     const unvoidedRepr = productRepr.children[2];
+    if (!unvoidedRepr instanceof Solid) return;
+
+    let productObject3D = this.findIfcProduct(productRepr);
+    if (productObject3D === null) return;
+
     action(unvoidedRepr);
 
-    let productObject3D = productRepr.parent;
-    if (productObject3D.userData.IFC &&
-        productObject3D.userData.IFC.ifcClassName === "IfcBuildingElementPart")
-    {
-      productObject3D = productObject3D.parent;
-    }
+    action(productObject3D);
 
     for (let child of productObject3D.children)
     {
-      if (child !== productRepr)
+      if (child.userData.IFC?.ifcClassName === "IfcOpeningElement")
       {
         action(child);
       }
@@ -46,24 +46,22 @@ class IFCVoider extends SolidBuilder
 
   performBuild(productRepr)
   {
-    if (productRepr.children.length < 3) return true;
+    // productRepr nust be a Solid with a Solid child
+
+    if (!(productRepr instanceof Solid)
+        || productRepr.children.length < 3) return true;
 
     const unvoidedRepr = productRepr.children[2];
     if (!unvoidedRepr instanceof Solid) return true;
 
-    const openingReprs = [];
+    let productObject3D = this.findIfcProduct(productRepr);
+    if (productObject3D === null) return true;
 
-    let productObject3D = productRepr.parent;
-    if (productObject3D.userData.IFC &&
-        productObject3D.userData.IFC.ifcClassName === "IfcBuildingElementPart")
-    {
-      productObject3D = productObject3D.parent;
-    }
+    const openingReprs = [];
 
     for (let child of productObject3D.children)
     {
-      let userData = child.userData;
-      if (userData.IFC && userData.IFC.ifcClassName === "IfcOpeningElement")
+      if (child.userData.IFC?.ifcClassName === "IfcOpeningElement")
       {
         let openingRepr = child.getObjectByName(IFC.RepresentationName);
         if (openingRepr instanceof Solid)
@@ -96,6 +94,7 @@ class IFCVoider extends SolidBuilder
     };
 
     let resultBSP = createBSP(unvoidedRepr);
+
     for (let openingRepr of openingReprs)
     {
       if (openingRepr.isValid())
@@ -113,6 +112,23 @@ class IFCVoider extends SolidBuilder
     productRepr.updateGeometry(geometry, true);
 
     return true;
+  }
+
+  findIfcProduct(object)
+  {
+    // find the nearest ancestor object with GlobalId (IfcProduct) that is not
+    // and IfcBuildingElementPart
+
+    while (object)
+    {
+      let ifcClassName = object.userData.IFC?.ifcClassName;
+      let globalId = object.userData.IFC?.GlobalId;
+
+      if (globalId && ifcClassName !== "IfcBuildingElementPart") return object;
+
+      object = object.parent;
+    }
+    return null;
   }
 };
 

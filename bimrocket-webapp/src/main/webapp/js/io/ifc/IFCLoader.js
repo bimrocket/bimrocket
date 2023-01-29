@@ -32,6 +32,7 @@ import { IFCVoider } from "../../builders/IFCVoider.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
+import { BIMUtils } from "../../utils/BIMUtils.js";
 import { registerIfcHelperClass } from "./BaseEntity.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -43,7 +44,7 @@ class IFCLoader extends THREE.Loader
     minCircleSegments : 16, // minimum circle segments
     circleSegmentsByRadius : 64, // circle segments by meter of radius
     halfSpaceSize : 30, // half space size in meters
-    unvoidableClasses : new Set(["IfcDoor", "IfcWindow"])
+    unvoidableClasses : new Set(["IfcDoor", "IfcWindow", "IfcOpeningElement"])
   };
 
   constructor(manager)
@@ -220,12 +221,11 @@ class IFCLoader extends THREE.Loader
       let productObject3D = product.helper.getObject3D();
       if (productObject3D)
       {
-        let productRepr =
-          productObject3D.getObjectByName(IFC.RepresentationName);
-
-        if (productRepr && productRepr.builder instanceof IFCVoider)
+        if (BIMUtils.createVoidings(productObject3D))
         {
-          ObjectBuilder.build(productRepr);
+          let reprObject3D =
+            productObject3D.getObjectByName(IFC.RepresentationName);
+          ObjectBuilder.build(reprObject3D);
         }
       }
     };
@@ -667,8 +667,10 @@ class IfcProductHelper extends IfcHelper
 
       object3D.name = name;
 
+      let ifcClassName = product.constructor.name;
+
       object3D.userData.IFC = {
-        ifcClassName : product.constructor.name
+        ifcClassName : ifcClassName
       };
 
       loader.setIFCProperties(object3D.userData.IFC, product);
@@ -688,64 +690,20 @@ class IfcProductHelper extends IfcHelper
       let productRepr = product.Representation;
       if (productRepr instanceof schema.IfcProductRepresentation)
       {
+        // add object representation as first child
+
         let reprObject3D = productRepr.helper.getObject3D("Body");
         if (reprObject3D)
         {
           if (reprObject3D.parent)
           {
+            // representation already added to scene, clone it.
             reprObject3D = loader.cloneObject3D(reprObject3D, true);
           }
-
-          reprObject3D.name =  IFC.RepresentationName;
+          reprObject3D.name = IFC.RepresentationName;
           reprObject3D._ifc = productRepr;
 
-          let ifcClassName = null;
-          if (reprObject3D.userData.IFC)
-          {
-            ifcClassName = reprObject3D.userData.IFC.ifcClassName;
-          }
-
-          if (product instanceof schema.IfcElement
-              && !(product instanceof schema.IfcOpeningElement)
-              && (ifcClassName === "IfcExtrudedAreaSolid"
-                  || ifcClassName === "IfcBooleanResult"
-                  || ifcClassName === "IfcBooleanClippingResult"))
-          {
-            // set IFCVoider representation
-            if (reprObject3D instanceof Solid)
-            {
-              let voider = new Solid();
-              voider.name = IFC.RepresentationName;
-              voider.material = reprObject3D.material;
-              voider.userData = reprObject3D.userData;
-              voider.position.copy(reprObject3D.position);
-              voider.rotation.copy(reprObject3D.rotation);
-              voider.scale.copy(reprObject3D.scale);
-              voider.updateMatrix();
-              voider.builder = new IFCVoider();
-              voider.add(reprObject3D);
-              voider._ifc = productRepr;
-              reprObject3D.name = "Unvoided";
-              reprObject3D.visible = false;
-              reprObject3D.facesVisible = false;
-              reprObject3D.edgesVisible = false;
-              reprObject3D.position.set(0, 0, 0);
-              reprObject3D.rotation.set(0, 0, 0);
-              reprObject3D.scale.set(1, 1, 1);
-              reprObject3D.updateMatrix();
-              object3D.add(voider);
-            }
-            else if (reprObject3D instanceof THREE.Group)
-            {
-              reprObject3D.builder = new IFCVoider();
-              object3D.add(reprObject3D);
-            }
-            else throw "Unexpected representacion object";
-          }
-          else
-          {
-            object3D.add(reprObject3D);
-          }
+          object3D.add(reprObject3D);
         }
       }
       this.object3D = object3D;

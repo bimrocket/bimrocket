@@ -48,6 +48,7 @@ class Application
   static SET_SELECTION_MODE = "set";
   static ADD_SELECTION_MODE = "add";
   static REMOVE_SELECTION_MODE = "remove";
+  static LARGE_MESH_SIZE = 100000;
 
   constructor(element = document.body)
   {
@@ -794,16 +795,40 @@ class Application
     }
     else if (object instanceof THREE.Mesh)
     {
-      object.updateMatrixWorld();
-      let edgesGeometry = new THREE.EdgesGeometry(object.geometry);
+      let mesh = object;
 
-      let lines = new THREE.LineSegments(edgesGeometry, material);
-      lines.raycast = function(){};
-      lines.name = "OuterLines";
-      object.matrixWorld.decompose(
-        lines.position, lines.rotation, lines.scale);
-      lines.updateMatrix();
-      linesGroup.add(lines);
+      if (mesh.geometry.attributes?.position?.array?.length >
+          Application.LARGE_MESH_SIZE)
+      {
+        let box = ObjectUtils.getLocalBoundingBox(mesh, true);
+        if (!box.isEmpty())
+        {
+          let geometry = ObjectUtils.getBoxGeometry(box);
+
+          let lines = new THREE.LineSegments(geometry, mesh.visible ?
+            this.boxSelectionMaterial : material);
+          lines.raycast = function(){};
+
+          mesh.updateMatrixWorld();
+          mesh.matrixWorld.decompose(
+            lines.position, lines.rotation, lines.scale);
+          lines.updateMatrix();
+          linesGroup.add(lines);
+        }
+      }
+      else
+      {
+        mesh.updateMatrixWorld();
+        let edgesGeometry = new THREE.EdgesGeometry(mesh.geometry);
+
+        let lines = new THREE.LineSegments(edgesGeometry, material);
+        lines.raycast = function(){};
+        lines.name = "OuterLines";
+        mesh.matrixWorld.decompose(
+          lines.position, lines.rotation, lines.scale);
+        lines.updateMatrix();
+        linesGroup.add(lines);
+      }
     }
     else if (object instanceof Cord)
     {

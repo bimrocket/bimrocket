@@ -235,6 +235,9 @@ class BRFLoader extends THREE.Loader
           case "Uint16Array" :
             typedArray = new Uint16Array(array);
             break;
+          case "Uint8Array" :
+            typedArray = new Uint8Array(array);
+            break;
           default:
             throw "Unsupported TypedArray: " + attribute.arrayType;
         }

@@ -290,9 +290,16 @@ class BRFExporter
         entry.attributes = {};
         const attributes = geometry.attributes;
 
+        const compressionEnabled =
+          this.options.enableBufferGeometryCompression === undefined
+          || this.options.enableBufferGeometryCompression === true;
+
         for (let name in attributes)
         {
           let attribute = attributes[name];
+
+          let compress = compressionEnabled && attribute.itemSize > 1 &&
+            geometry.getIndex() === undefined;
 
           entry.attributes[name] =
           {
@@ -300,7 +307,7 @@ class BRFExporter
             arrayType : attribute.array.constructor.name,
             itemSize : attribute.itemSize,
             normalized : attribute.normalized,
-            array: this.exportBufferAttributeArray(attribute)
+            array: this.exportBufferAttributeArray(attribute, compress)
           };
         }
         if (geometry.getIndex())
@@ -442,13 +449,9 @@ class BRFExporter
     return "#" + color.getHexString();
   }
 
-  exportBufferAttributeArray(attribute)
+  exportBufferAttributeArray(attribute, compress = false)
   {
     const itemSize = attribute.itemSize;
-
-    const compress = itemSize > 1 &&
-      (this.options.enableBufferGeometryCompression === undefined
-      || this.options.enableBufferGeometryCompression === true);
 
     const array = attribute.array;
     const precision7 = array instanceof Float32Array;

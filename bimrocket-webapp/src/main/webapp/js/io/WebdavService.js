@@ -4,6 +4,7 @@
  * @author realor
  */
 
+import { IOManager } from "./IOManager.js";
 import { FileService, Metadata, Result } from "./FileService.js";
 import { ServiceManager } from "./ServiceManager.js";
 import { WebUtils } from "../utils/WebUtils.js";
@@ -108,6 +109,10 @@ class WebdavService extends FileService
           {
             let request = new XMLHttpRequest();
             request.open("GET", url, true);
+            let formatInfo = IOManager.getFormatInfo(metadata.name);
+            let dataType = formatInfo?.loader?.dataType || "";
+            request.responseType = dataType;
+
             request.onload = () =>
             {
               if (request.status === 200)

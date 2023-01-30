@@ -179,7 +179,7 @@ export function load(application)
   {
     description : "GL Transmission Format (*.gltf)",
     extensions: ["gltf"],
-    mimeType : "model/gltf-json",
+    mimeType : "model/gltf+json",
     loader :
     {
       class : GLTFLoader,

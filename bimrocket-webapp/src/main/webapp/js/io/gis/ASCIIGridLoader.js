@@ -3,9 +3,9 @@
  *
  * @author realor
  */
-import { ObjectBuilder } from "../../builders/ObjectBuilder.js";
 import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
+import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import * as THREE from "../../lib/three.module.js";
 
@@ -21,11 +21,10 @@ class ASCIIGridLoader extends THREE.Loader
     this.cellSize = 0;
     this.noDataValue = 0;
     this.grid = [];
-    this.groupSize = 100;
 
-    this.material = new THREE.MeshPhongMaterial({color: 0x808030});
-
-    this.options = {};
+    this.options = { tileType: "Mesh", groupSize : 100,
+      material: new THREE.MeshPhongMaterial(
+      { color: 0x505020, side : THREE.FrontSide }) };
   }
 
   load(url, onLoad, onProgress, onError)
@@ -67,10 +66,11 @@ class ASCIIGridLoader extends THREE.Loader
       nrows : this.nrows,
       xcenter : this.xcenter,
       ycenter : this.ycenter,
+      cellsize : this.cellsize,
       noDataValue : this.noDataValue
     };
 
-    const groupSize = this.groupSize;
+    const groupSize = this.options.groupSize || 100;
     let xsize = Math.ceil(this.ncols / groupSize);
     let ysize = Math.ceil(this.nrows / groupSize);
     let tileCount = xsize * ysize;
@@ -80,23 +80,20 @@ class ASCIIGridLoader extends THREE.Loader
       let i = tileIndex % xsize;
       let j = Math.floor(tileIndex / xsize);
 
-      let solid = this.createTileGeometry(groupSize * i, groupSize * j);
-      solid.name = "cell-" + i + "-" + j;
-      solid.edgesVisible = false;
-      terrain.add(solid);
+      let tile = this.createTileObject(groupSize * i, groupSize * j);
+      tile.name = "tile-" + i + "-" + j;
+      terrain.add(tile);
     };
 
     if (onCompleted)
     {
       WebUtils.executeTasks([
-        { run : () => this.parseGrid(text), message : "Parsing file..." },
         { run : createTile, message : "Creating tiles...",
           iterations : () => tileCount }],
         () => onCompleted(terrain), onProgress, error => onError(error), 100, 10);
     }
     else
     {
-      this.parseGrid(text);
       for (let tileIndex = 0; tileIndex < tileCount; tileIndex++)
       {
         createTile(tileIndex);
@@ -123,11 +120,13 @@ class ASCIIGridLoader extends THREE.Loader
         {
           // grid row
           let row = line.split(" ");
+          const ymax = this.cellSize * this.nrows;
+
           for (let col = 0; col < row.length; col++)
           {
             let point = new THREE.Vector3();
             point.x = dataRow.length * this.cellSize;
-            point.y = this.grid.length * this.cellSize;
+            point.y = ymax - this.grid.length * this.cellSize;
             point.z = parseFloat(row[col]);
             dataRow.push(point);
           }
@@ -141,16 +140,82 @@ class ASCIIGridLoader extends THREE.Loader
     }
   }
 
-  createTileGeometry(ox, oy)
+  createTileObject(tx, ty)
   {
-    const groupSize = this.groupSize;
-    let geometry = new SolidGeometry();
-    let dimx = Math.min(this.ncols - ox, groupSize + 1);
-    let dimy = Math.min(this.nrows - oy, groupSize + 1);
-
-    for (let j = oy; j < (oy + dimy); j++)
+    if (this.options.tileType === "Solid")
     {
-      for (let i = ox; i < (ox + dimx); i++)
+      return this.createSolidTile(tx, ty);
+    }
+    else
+    {
+      return this.createMeshTile(tx, ty);
+    }
+  }
+
+  createMeshTile(tx, ty)
+  {
+    const indices = [];
+    const vertices = [];
+    const normals = [];
+
+    const groupSize = this.options.groupSize || 100;
+    let dimx = Math.min(this.ncols - tx, groupSize + 1);
+    let dimy = Math.min(this.nrows - ty, groupSize + 1);
+
+    const normal = new THREE.Vector3();
+    for (let j = ty; j < (ty + dimy); j++)
+    {
+      for (let i = tx; i < (tx + dimx); i++)
+      {
+        let point = this.grid[j][i];
+        vertices.push(point.x, point.y, point.z);
+        this.getNormal(i, j, normal);
+        normals.push(normal.x, normal.y, normal.z);
+      }
+    }
+
+    for (let j = 0; j < dimy - 1; j++)
+    {
+      for (let i = 0; i < dimx - 1; i++)
+      {
+        // a---b
+        // | / |
+        // c---d
+
+        let a = j * dimx + i;
+        let b = j * dimx + (i + 1);
+        let c = (j + 1) * dimx + i;
+        let d = (j + 1) * dimx + (i + 1);
+
+        indices.push(a, c, b);
+        indices.push(b, c, d);
+      }
+    }
+
+    let geometry = new THREE.BufferGeometry();
+
+    geometry.setIndex(indices);
+    geometry.setAttribute("position",
+      new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute("normal",
+      new THREE.Float32BufferAttribute(normals, 3));
+
+    let mesh = new THREE.Mesh(geometry, this.options.material);
+
+    return mesh;
+  }
+
+  createSolidTile(tx, ty)
+  {
+    const groupSize = this.options.groupSize || 100;
+
+    let geometry = new SolidGeometry();
+    let dimx = Math.min(this.ncols - tx, groupSize + 1);
+    let dimy = Math.min(this.nrows - ty, groupSize + 1);
+
+    for (let j = ty; j < (ty + dimy); j++)
+    {
+      for (let i = tx; i < (tx + dimx); i++)
       {
         geometry.vertices.push(this.grid[j][i]);
       }
@@ -160,21 +225,68 @@ class ASCIIGridLoader extends THREE.Loader
     {
       for (let i = 0; i < dimx - 1; i++)
       {
-        geometry.addFace(j * dimx + i,
-          j * dimx + (i + 1),
-          (j + 1) * dimx + i);
+        // a---b
+        // | / |
+        // c---d
 
-        geometry.addFace(j * dimx + (i + 1),
-          (j + 1) * dimx + (i + 1),
-          (j + 1) * dimx + i);
+        let a = j * dimx + i;
+        let b = j * dimx + (i + 1);
+        let c = (j + 1) * dimx + i;
+        let d = (j + 1) * dimx + (i + 1);
+
+        geometry.addFace(a, c, b);
+        geometry.addFace(b, c, d);
       }
     }
 
     let solid = new Solid();
-    solid.material = this.material;
+    solid.material = this.options.material;
+    solid.edgesVisible = false;
+
     solid.updateGeometry(geometry, false);
 
     return solid;
+  }
+
+  getNormal(i, j, normal)
+  {
+    const vertices = [];
+
+    if (i > 0 && j > 0)
+    {
+      vertices.push(this.grid[j - 1][i - 1]);
+    }
+    if (i > 0)
+    {
+      vertices.push(this.grid[j][i - 1]);
+    }
+    if (i > 0 && j < this.nrows - 1)
+    {
+      vertices.push(this.grid[j + 1][i - 1]);
+    }
+
+    if (j < this.nrows - 1)
+    {
+      vertices.push(this.grid[j + 1][i]);
+    }
+    if (i < this.ncols - 1 && j < this.nrows - 1)
+    {
+      vertices.push(this.grid[j + 1][i + 1]);
+    }
+    if (i < this.ncols - 1)
+    {
+      vertices.push(this.grid[j][i + 1]);
+    }
+    if (i < this.ncols - 1 && j > 0)
+    {
+      vertices.push(this.grid[j - 1][i + 1]);
+    }
+    if (j > 0)
+    {
+      vertices.push(this.grid[j - 1][i]);
+    }
+
+    return GeometryUtils.calculateNormal(vertices, null, normal);
   }
 
   readField(line)

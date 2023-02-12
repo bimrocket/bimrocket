@@ -150,9 +150,16 @@ class ObjectBuilder
       ObjectBuilder.build(dep, built);
     });
 
-    if (builder.performBuild(object))
+    try
     {
-      if (built) built.push(object);
+      if (builder.performBuild(object))
+      {
+        if (built) built.push(object);
+      }
+    }
+    catch (ex)
+    {
+      console.error(ex);
     }
   }
 

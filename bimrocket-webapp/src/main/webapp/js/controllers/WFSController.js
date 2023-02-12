@@ -10,10 +10,14 @@ import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { GeometryMerger } from "../builders/GeometryMerger.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 class WFSController extends Controller
 {
+  static FEATURES_NAME = "features";
+  static REPRESENTATION_NAME = "representation";
+
   constructor(object, name)
   {
     super(object, name);
@@ -45,28 +49,66 @@ class WFSController extends Controller
   {
   }
 
-  onLoad(featureGroup)
+  onLoad(group)
   {
-    console.info("Feature " + this.layer + " loaded.");
-    const oldFeatureGroup = this.object.getObjectByName("features");
+    group.name = this.layer;
+
+    // remove previous feature group
+    const oldFeatureGroup =
+      this.object.getObjectByName(WFSController.FEATURES_NAME);
     if (oldFeatureGroup)
     {
       ObjectUtils.dispose(oldFeatureGroup);
       this.object.remove(oldFeatureGroup);
     }
-    featureGroup.updateMatrix();
+
+    const representation =
+      this.object.getObjectByName(WFSController.REPRESENTATION_NAME);
+
+    // create new feature group
+    let featureGroup;
+
+    if (representation)
+    {
+      featureGroup = new THREE.Group();
+      featureGroup.name = this.layer;
+
+      const features = [...group.children];
+      group.clear();
+
+      for (let feature of features)
+      {
+        let featureRepr = representation.clone();
+        featureRepr.name = feature.name;
+        featureRepr.userData = feature.userData;
+        featureRepr.add(feature);
+        featureRepr.visible = true;
+        featureGroup.add(featureRepr);
+        feature.userData = {};
+      }
+    }
+    else
+    {
+      featureGroup = group;
+    }
+
     if (this.mergeGeometries)
     {
       const mergeGroup = new THREE.Group();
       mergeGroup.builder = new GeometryMerger();
       mergeGroup.add(featureGroup);
-      ObjectBuilder.build(mergeGroup);
       featureGroup = mergeGroup;
       featureGroup.updateMatrix();
     }
 
     this.object.add(featureGroup);
-    featureGroup.name = "features";
+    featureGroup.name = WFSController.FEATURES_NAME;
+    featureGroup.updateMatrix();
+
+    Formula.updateTree(featureGroup);
+
+    ObjectBuilder.build(featureGroup);
+
     if (featureGroup.userData.export === undefined)
     {
       featureGroup.userData.export = {};
@@ -75,6 +117,7 @@ class WFSController extends Controller
     featureGroup.userData.export.exportChildren = false;
 
     this.application.notifyObjectsChanged(this.object, this, "structureChanged");
+    console.info("Feature " + this.layer + " loaded.");
   }
 
   onProgress()
@@ -144,6 +187,7 @@ class WFSController extends Controller
       representation: this.object.getObjectByName("representation")
     };
 
+    console.info("Loading feature " + this.layer + "...");
     loader.load(url, this._onLoad, this._onProgress, this._onError);
   }
 

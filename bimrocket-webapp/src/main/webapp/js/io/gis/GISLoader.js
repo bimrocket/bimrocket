@@ -4,17 +4,10 @@
  * @author realor
  */
 
-import { ObjectBuilder } from "../../builders/ObjectBuilder.js";
-import { Solid } from "../../core/Solid.js";
-import { SolidGeometry } from "../../core/SolidGeometry.js";
 import { Profile } from "../../core/Profile.js";
-import { CircleBuilder } from "../../builders/CircleBuilder.js";
 import { ProfileGeometry } from "../../core/ProfileGeometry.js";
 import { Cord } from "../../core/Cord.js";
 import { CordGeometry } from "../../core/CordGeometry.js";
-import { Extruder } from "../../builders/Extruder.js";
-import { Formula } from "../../formula/Formula.js";
-import { ColladaLoader } from "../ColladaLoader.js";
 import * as THREE from "../../lib/three.module.js";
 
 class GISLoader extends THREE.Loader
@@ -25,9 +18,10 @@ class GISLoader extends THREE.Loader
     this.options = {};
     this.mimeType = mimeType;
     this.origin = new THREE.Vector3();
-    this.materials = new Map();
     /* default material for Cords and Profiles */
     this.lineMaterial = new THREE.LineBasicMaterial({ color: 0x0 });
+    this.pointGeometry = null;
+    this.pointSize = 1;
   }
 
   load(url, onLoad, onProgress, onError)
@@ -126,38 +120,31 @@ class GISLoader extends THREE.Loader
 
   createPoint(name, coordinates, properties, parent)
   {
-    let object = null;
-    if (this.representation instanceof THREE.Object3D)
+    if (this.pointGeometry === null)
     {
-      object = this.representation.clone();
-      object.userData.selection = { "group" : true };
+      const path = new THREE.Path();
+      const radius = 0.5 * this.pointSize;
+
+      path.moveTo(-radius, 0);
+      path.lineTo(0, radius);
+      path.lineTo(radius, 0);
+      path.lineTo(0, -radius);
+      path.closePath();
+      this.pointGeometry = new ProfileGeometry(path);
     }
-    else
-    {
-      // default shape: cylinder
-      let profile = new Profile();
-      profile.builder = new CircleBuilder(0.5);
-      profile.name = "Profile";
-      let solid = new Solid();
-      solid.add(profile);
-      solid.builder = new Extruder(1);
-      ObjectBuilder.build(solid);
-      object = solid;
-    }
-    object.visible = true;
 
-    object.position.x = coordinates[0];
-    object.position.y = coordinates[1];
-    object.position.z = coordinates.length === 3 ? coordinates[2] : 0;
-    object.position.sub(this.origin);
+    let profile = new Profile(this.pointGeometry, this.lineMaterial);
+    profile.name = "Point";
+    profile.visible = true;
+    profile.position.x = coordinates[0];
+    profile.position.y = coordinates[1];
+    profile.position.z = coordinates.length === 3 ? coordinates[2] : 0;
+    profile.position.sub(this.origin);
 
-    this.setObjectProperties(object, name, properties);
-    parent.add(object);
+    this.setObjectProperties(profile, name, properties);
+    parent.add(profile);
 
-    Formula.updateTree(object);
-
-    ObjectBuilder.build(object);
-    object.updateMatrix();
+    profile.updateMatrix();
   }
 
   createMultiPoint(name, coordinates, properties, parent)
@@ -190,24 +177,12 @@ class GISLoader extends THREE.Loader
 
     let geometry = new CordGeometry(vertices);
     let cord = new Cord(geometry, this.lineMaterial);
-    let solid = null;
 
-    if (this.representation instanceof Solid)
-    {
-      solid = this.representation.clone();
-      solid.add(cord);
-      cord.visible = false;
-    }
+    cord.visible = true;
+    this.setObjectProperties(cord, name, properties);
+    parent.add(cord);
 
-    const object = solid || cord;
-    object.visible = true;
-    this.setObjectProperties(object, name, properties);
-    parent.add(object);
-
-    Formula.updateTree(object);
-
-    ObjectBuilder.build(object);
-    object.updateMatrix();
+    cord.updateMatrix();
   }
 
   createMultiLineString(name, coordinates, properties, parent)
@@ -237,6 +212,7 @@ class GISLoader extends THREE.Loader
     }
 
     let shape = new THREE.Shape(pts);
+    shape.closePath();
 
     // holes
     let holes = shape.holes;
@@ -251,29 +227,19 @@ class GISLoader extends THREE.Loader
         v.sub(this.origin);
         pts.push(v);
       }
-      holes.push(new THREE.Shape(pts));
+      let hole = new THREE.Shape(pts);
+      hole.closePath();
+      holes.push(hole);
     }
 
     let geometry = new ProfileGeometry(shape);
     let profile = new Profile(geometry, this.lineMaterial);
-    let solid = null;
 
-    if (this.representation instanceof Solid)
-    {
-      solid = this.representation.clone();
-      solid.add(profile);
-      profile.visible = false;
-    }
+    profile.visible = true;
+    this.setObjectProperties(profile, name, properties);
+    parent.add(profile);
 
-    let object = solid || profile;
-    object.visible = true;
-    this.setObjectProperties(object, name, properties);
-    parent.add(object);
-
-    Formula.updateTree(object);
-
-    ObjectBuilder.build(object);
-    object.updateMatrix();
+    profile.updateMatrix();
   }
 
   createMultiPolygon(name, coordinates, properties, parent)

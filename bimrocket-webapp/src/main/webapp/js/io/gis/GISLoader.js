@@ -27,7 +27,6 @@ class GISLoader extends THREE.Loader
   load(url, onLoad, onProgress, onError)
   {
     const options = this.options;
-    this.representation = options.representation;
     if (options.origin)
     {
       this.origin.copy(options.origin);

@@ -18,6 +18,9 @@ class WFSController extends Controller
   static FEATURES_NAME = "features";
   static REPRESENTATION_NAME = "representation";
 
+  static ADD_OBJECT_REPR_MODE = 0; // add gis object to representation
+  static COPY_POSITION_REPR_MODE = 1; // copy gis object position to representation
+
   constructor(object, name)
   {
     super(object, name);
@@ -31,6 +34,7 @@ class WFSController extends Controller
     this.cqlFilter = "";
     this.count = 0;
     this.srsName = "";
+    this.representationMode = WFSController.ADD_OBJECT_REPR_MODE;
     this.mergeGeometries = false;
     this.origin = new THREE.Vector3(420878, 4582247, 0);
     this.autoStart = false;
@@ -52,6 +56,7 @@ class WFSController extends Controller
   onLoad(group)
   {
     group.name = this.layer;
+    let featureCount = group.children.length;
 
     // remove previous feature group
     const oldFeatureGroup =
@@ -73,18 +78,32 @@ class WFSController extends Controller
       featureGroup = new THREE.Group();
       featureGroup.name = this.layer;
 
-      const features = [...group.children];
+      const features = [...group.children]; // explode group
       group.clear();
 
       for (let feature of features)
       {
-        let featureRepr = representation.clone();
-        featureRepr.name = feature.name;
-        featureRepr.userData = feature.userData;
-        featureRepr.add(feature);
-        featureRepr.visible = true;
-        featureGroup.add(featureRepr);
-        feature.userData = {};
+        if (feature instanceof THREE.Group) // multi geometry
+        {
+          let multiGroup = new THREE.Group();
+          const children = [...feature.children]; // explode group
+          feature.clear();
+          for (let child of children)
+          {
+            let featureRepr = this.createFeatureRepr(child, representation);
+            multiGroup.add(featureRepr);
+          }
+          multiGroup.name = feature.name;
+          multiGroup.userData = feature.userData;
+          featureGroup.add(multiGroup);
+        }
+        else // single geometry
+        {
+          let featureRepr = this.createFeatureRepr(feature, representation);
+          featureRepr.userData = feature.userData;
+          featureGroup.add(featureRepr);
+          feature.userData = {};
+        }
       }
     }
     else
@@ -117,7 +136,28 @@ class WFSController extends Controller
     featureGroup.userData.export.exportChildren = false;
 
     this.application.notifyObjectsChanged(this.object, this, "structureChanged");
-    console.info("Feature " + this.layer + " loaded.");
+    console.info("Feature " + this.layer + " loaded (" + featureCount + ").");
+  }
+
+  createFeatureRepr(feature, representation)
+  {
+    let featureRepr = representation.clone();
+    featureRepr.name = feature.name;
+    featureRepr.visible = true;
+
+    switch (this.representationMode)
+    {
+      case WFSController.COPY_POSITION_REPR_MODE:
+        featureRepr.position.copy(feature.position);
+        featureRepr.updateMatrix();
+        break;
+
+      case WFSController.ADD_OBJECT_REPR_MODE:
+        featureRepr.add(feature);
+        feature.visible = false;
+        break;
+    }
+    return featureRepr;
   }
 
   onProgress()

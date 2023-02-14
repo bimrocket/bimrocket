@@ -1692,6 +1692,7 @@ class Application
       {
         application.addObject(object);
         application.progressBar.visible = false;
+        application.initControllers(object);
         application.initTasks(params);
       },
       onError : error =>

@@ -17,9 +17,10 @@ class OnTerrainExtruder extends SweptSolidBuilder
 {
   terrainObject = null;
   depth = 1;
+  offset = 0;
   flatProfile = true;
 
-  constructor(terrainObject, depth, flatProfile)
+  constructor(terrainObject, depth, offset, flatProfile)
   {
     super();
     if (terrainObject instanceof THREE.Object3D)
@@ -29,6 +30,10 @@ class OnTerrainExtruder extends SweptSolidBuilder
     if (typeof depth === "number")
     {
       this.depth = depth;
+    }
+    if (typeof offset === "number")
+    {
+      this.offset = offset;
     }
     if (typeof flatProfile === "boolean")
     {
@@ -96,7 +101,7 @@ class OnTerrainExtruder extends SweptSolidBuilder
       geometry.isManifold = true;
 
       solid.updateGeometry(geometry);
-      solid.position.z = minZ;
+      solid.position.z = minZ + this.offset;
       solid.updateMatrix();
     }
     else
@@ -114,9 +119,12 @@ class OnTerrainExtruder extends SweptSolidBuilder
         vertex.z = z;
         verticesBottom.push(vertex);
       }
+      if (minZ === Infinity) minZ = 0;
+
       for (let vertex of verticesBottom)
       {
-        if (vertex.z === -Infinity) vertex.z = minZ;
+        if (vertex.z === -Infinity) vertex.z = minZ + this.offset;
+        else vertex.z += this.offset;
 
         let vertexTop = vertex.clone();
         vertexTop.z += this.depth;
@@ -130,7 +138,8 @@ class OnTerrainExtruder extends SweptSolidBuilder
           let vertex = new THREE.Vector3();
           vertex.set(point.x, point.y, 0).applyMatrix4(profile.matrixWorld);
           vertex.z = elevationMap.getElevation(vertex.x, vertex.y);
-          if (vertex.z === -Infinity) vertex.z = minZ;
+          if (vertex.z === -Infinity) vertex.z = minZ + this.offset;
+          else vertex.z += this.offset;
           verticesBottom.push(vertex);
 
           let vertexTop = vertex.clone();
@@ -177,6 +186,7 @@ class OnTerrainExtruder extends SweptSolidBuilder
   {
     this.terrainObject = source.terrainObject;
     this.depth = source.depth;
+    this.offset = source.offset;
     this.flatProfile = source.flatProfile;
     this.minPointDistance = source.minPointDistance;
 

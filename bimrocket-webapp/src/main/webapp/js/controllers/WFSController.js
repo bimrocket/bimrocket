@@ -145,6 +145,16 @@ class WFSController extends Controller
     featureRepr.name = feature.name;
     featureRepr.visible = true;
 
+    if (featureRepr instanceof THREE.Group)
+    {
+      // clone builder & formulas for Groups
+
+      featureRepr.builder =
+        representation.builder ? representation.builder.clone() : null;
+
+      Formula.copy(featureRepr, representation);
+    }
+
     switch (this.representationMode)
     {
       case WFSController.COPY_POSITION_REPR_MODE:

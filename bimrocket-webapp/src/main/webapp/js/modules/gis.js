@@ -6,6 +6,7 @@
 
 import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
 import { ASCIIGridLoader } from "../io/gis/ASCIIGridLoader.js";
+import { OnTerrainPositioner } from "../builders/OnTerrainPositioner.js";
 import { OnTerrainExtruder } from "../builders/OnTerrainExtruder.js";
 import { IOManager } from "../io/IOManager.js";
 import { WFSController } from "../controllers/WFSController.js";

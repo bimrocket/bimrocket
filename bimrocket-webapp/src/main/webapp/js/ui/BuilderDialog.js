@@ -118,7 +118,14 @@ class BuilderDialog extends Dialog
     for (let className in ObjectBuilder.classes)
     {
       let cls =  ObjectBuilder.classes[className];
-      if (object instanceof Cord)
+
+      if (!(cls.prototype instanceof CordBuilder)
+            && !(cls.prototype instanceof ProfileBuilder)
+            && !(cls.prototype instanceof SolidBuilder))
+      {
+        classes.push(cls);
+      }
+      else if (object instanceof Cord)
       {
         if (cls.prototype instanceof CordBuilder)
         {
@@ -138,12 +145,6 @@ class BuilderDialog extends Dialog
         {
           classes.push(cls);
         }
-      }
-      else if (!(cls.prototype instanceof CordBuilder)
-              && !(cls.prototype instanceof ProfileBuilder)
-              && !(cls.prototype instanceof SolidBuilder))
-      {
-        classes.push(cls);
       }
     }
     classes.sort((class1, class2) =>

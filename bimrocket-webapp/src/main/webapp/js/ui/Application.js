@@ -114,8 +114,8 @@ class Application
       this.repaint();
     };
 
-   	THREE.Object3D.DefaultMatrixAutoUpdate = false;
-   	THREE.Object3D.DefaultUp = new THREE.Vector3(0, 0, 1);
+   	THREE.Object3D.DEFAULT_MATRIX_AUTO_UPDATE = false;
+   	THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
     THREE.Object3D.HIDDEN_PREFIX = ".";
 
     /* create sub elements */

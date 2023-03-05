@@ -35,6 +35,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
@@ -80,66 +81,37 @@ public class ProxyEndpoint
       if (!isValidUrl(url))
         throw new SecurityException("Access forbidden to " + url);
 
-      StringBuilder buffer = new StringBuilder(url);
-      boolean firstParam = true;
+      HttpURLConnection conn = connect("GET", url, info, headers);
 
-      MultivaluedMap<String, String> queryParams = info.getQueryParameters();
-      for (String name : queryParams.keySet())
+      return getResponse(conn);
+    }
+    catch (Exception ex)
+    {
+      return Response.serverError().entity(ex.toString()).build();
+    }
+  }
+
+  @POST
+  @PermitAll
+  public Response doPost(@QueryParam("url") String url,
+    @Context UriInfo info, @Context HttpHeaders headers, InputStream body)
+  {
+    if (url == null) return Response.ok().build();
+
+    try
+    {
+      if (!isValidUrl(url))
+        throw new SecurityException("Access forbidden to " + url);
+
+      HttpURLConnection conn = connect("POST", url, info, headers);
+      conn.setDoOutput(true);
+
+      try (OutputStream outputStream = conn.getOutputStream())
       {
-        if (!name.equals("url"))
-        {
-          List<String> values = queryParams.get(name);
-          for (String value : values)
-          {
-            if (firstParam)
-            {
-              buffer.append("?");
-              firstParam = false;
-            }
-            else
-            {
-              buffer.append("&");
-            }
-            String encodedValue = URLEncoder.encode(value, "UTF-8");
-            buffer.append(name).append("=").append(encodedValue);
-          }
-        }
+        IOUtils.copy(body, outputStream);
       }
 
-      URL targetUrl = new URL(buffer.toString());
-      System.out.println("Connecting to " + targetUrl);
-      HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
-      conn.setRequestProperty("X-Forwarded-For",
-        httpServletRequest.getRemoteAddr());
-
-      conn.connect();
-
-      InputStream responseStream;
-      try
-      {
-        responseStream = conn.getInputStream();
-      }
-      catch (IOException ex)
-      {
-        responseStream = conn.getErrorStream();
-      }
-      InputStream is = responseStream;
-
-      StreamingOutput output = (OutputStream out) ->
-      {
-        IOUtils.copy(is, out);
-      };
-
-      Response.ResponseBuilder response = Response.ok(output);
-      Map<String, List<String>> responseHeaders = conn.getHeaderFields();
-      for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet())
-      {
-        if (entry.getKey() != null)
-        {
-          response.header(entry.getKey(), entry.getValue().get(0));
-        }
-      }
-      return response.build();
+      return getResponse(conn);
     }
     catch (Exception ex)
     {
@@ -159,5 +131,85 @@ public class ProxyEndpoint
       }
     }
     return false;
+  }
+
+  private HttpURLConnection connect(String method,
+    String url, UriInfo info, HttpHeaders headers)
+    throws IOException
+  {
+    StringBuilder buffer = new StringBuilder(url);
+    boolean firstParam = true;
+
+    MultivaluedMap<String, String> queryParams = info.getQueryParameters();
+    for (String name : queryParams.keySet())
+    {
+      if (!name.equals("url"))
+      {
+        List<String> values = queryParams.get(name);
+        for (String value : values)
+        {
+          if (firstParam)
+          {
+            buffer.append("?");
+            firstParam = false;
+          }
+          else
+          {
+            buffer.append("&");
+          }
+          String encodedValue = URLEncoder.encode(value, "UTF-8");
+          buffer.append(name).append("=").append(encodedValue);
+        }
+      }
+    }
+    URL targetUrl = new URL(buffer.toString());
+
+    System.out.println("Connecting to " + targetUrl);
+    HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
+    setHttpHeaders(conn, headers);
+    conn.setRequestProperty("X-Forwarded-For",
+      httpServletRequest.getRemoteAddr());
+    conn.setRequestMethod(method);
+    return conn;
+  }
+
+  private void setHttpHeaders(HttpURLConnection conn, HttpHeaders headers)
+  {
+    MultivaluedMap<String, String> map = headers.getRequestHeaders();
+    for (String name : map.keySet())
+    {
+      conn.setRequestProperty(name, map.getFirst(name));
+    }
+  }
+
+  private Response getResponse(HttpURLConnection conn)
+  {
+    InputStream responseStream;
+    try
+    {
+      responseStream = conn.getInputStream();
+    }
+    catch (IOException ex)
+    {
+      responseStream = conn.getErrorStream();
+    }
+    InputStream is = responseStream;
+
+    StreamingOutput output = (OutputStream out) ->
+    {
+      IOUtils.copy(is, out);
+    };
+
+    Response.ResponseBuilder response = Response.ok(output);
+    Map<String, List<String>> responseHeaders = conn.getHeaderFields();
+    for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet())
+    {
+      if (entry.getKey() != null &&
+          !entry.getKey().equalsIgnoreCase("Transfer-Encoding"))
+      {
+        response.header(entry.getKey(), entry.getValue().get(0));
+      }
+    }
+    return response.build();
   }
 }

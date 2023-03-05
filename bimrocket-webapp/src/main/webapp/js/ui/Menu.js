@@ -351,7 +351,8 @@ class MenuBar
 
   processKey(event)
   {
-    if (event.target.nodeName === "INPUT") return;
+    if (event.target.nodeName === "INPUT" ||
+        event.target.nodeName === "TEXTAREA") return;
 
     if (event.target.classList.contains("cm-content")) return;
 

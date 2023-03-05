@@ -45,6 +45,7 @@ export const translations =
   "button.list" : "Llista",
   "button.next" : "Següent",
   "button.previous" : "Anterior",
+  "button.send" : "Envia",
 
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
@@ -302,6 +303,8 @@ export const translations =
 
   "tool.smooth_edges.label" : "Suavitza arestes",
 
+  "tool.chatgpt.label" : "ChatGPT",
+
   "tool.start_controllers.label" : "Inicia controladors",
 
   "tool.stop_controllers.label" : "Atura controladors",
@@ -416,6 +419,8 @@ export const translations =
   "label.geometry_triangles" : "Triangles",
   "label.geometry_total_triangles" : "Total",
 
+  "label.chatgpt_setup" : "Configuració (JSON):",
+
   "option.edges" : "Arestes",
   "option.faces" : "Cares",
   "option.solid" : "Sòlid",
@@ -441,6 +446,8 @@ export const translations =
   "title.login" : "Identificació",
   "title.new_material" : "Nou material",
   "title.rename_material" : "Reanomena material",
+  "title.delete_conversation" : "Esborra conversa",
+  "title.chatgpt_setup" : "Configuració de ChatGPT",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sòlids: ${count}`,
@@ -484,6 +491,7 @@ export const translations =
   "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`,
   "question.remove_controller" : name => `Vols esborrar el controlador ${name}?`,
   "question.create_new_scene" : "Vols crear una nova escena?",
+  "question.delete_conversation" : "Vols esborrar la conversa?",
 
   "controller.AutoPilotController" : "Condueix un objecte.",
   "controller.Brain4itPostController" : "Fa un POST a Brain4it.",

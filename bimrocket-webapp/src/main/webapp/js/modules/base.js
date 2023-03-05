@@ -62,6 +62,7 @@ import { StopControllersTool } from "../tools/StopControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
+import { ChatGPTTool } from "../tools/ChatGPTTool.js";
 import { BooleanOperator } from "../builders/BooleanOperator.js";
 import { GeometryMerger } from "../builders/GeometryMerger.js";
 import { RectangleBuilder } from "../builders/RectangleBuilder.js";
@@ -396,6 +397,7 @@ export function load(application)
     { name : "hidden_style", label : "tool.hidden_style.label",
       edgesVisible : false, facesVisible : false });
   const paintTool = new PaintTool(application);
+  const chatGPTTool = new ChatGPTTool(application);
 
   const outlinerTool = new OutlinerTool(application);
   const inspectorTool = new InspectorTool(application);
@@ -500,6 +502,7 @@ export function load(application)
   application.addTool(stopControllersTool);
   application.addTool(aboutTool);
   application.addTool(githubTool);
+  application.addTool(chatGPTTool);
 
   // create menus
   const menuBar = application.menuBar;
@@ -610,6 +613,7 @@ export function load(application)
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
+  designMenu.addMenuItem(chatGPTTool);
 
   const measureMenu = menuBar.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
@@ -656,6 +660,7 @@ export function load(application)
   toolBar.addToolButton(placeTool);
   toolBar.addToolButton(rebuildTool);
   toolBar.addToolButton(selectByQRCodeTool);
+  toolBar.addToolButton(chatGPTTool);
 
   // restore services
   application.restoreServices("model");

@@ -409,6 +409,11 @@
   background-image: url(images/tools/new_scene.svg);
 }
 
+.tool_button.chatgpt
+{
+  background-image: url(images/tools/openai.svg);
+}
+
 .tool_button.outliner
 {
   background-image: url(images/tools/outliner.svg);
@@ -981,3 +986,83 @@ div.script_code
 {
   min-width: 24px;
 }
+
+.panel_chatgpt .body
+{
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.panel_chatgpt .body .conversation
+{
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-end;
+  overflow-y: auto;
+}
+
+.panel_chatgpt .body .conversation .scroll
+{
+  display: block;
+  overflow-y: auto;
+}
+
+.panel_chatgpt .body .conversation .scroll .input
+{
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  color: #606060;
+  user-select: text;
+}
+
+.panel_chatgpt .body .conversation .scroll .output
+{
+  text-align: left;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  color: #404080;
+  user-select: text;
+}
+
+.panel_chatgpt .body .conversation .scroll .output.error
+{
+  color: #c00000;
+}
+
+.panel_chatgpt .body .prompt
+{
+  height: 100px;
+  min-height: 40px;
+  flex-grow: 0;
+  resize: none;
+}
+
+.panel_chatgpt .body .footer
+{
+  flex-grow: 0;
+}
+
+.ellipsis_loading
+{
+  padding: 0;
+  text-align: left;
+}
+
+.ellipsis_loading:after
+{
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  animation: ellipsis steps(4, end) 1000ms infinite;
+  content: "\2026"; /* ascii code for the ellipsis character */
+  width: 0px;
+}
+
+@keyframes ellipsis
+{
+  to { width: 24px; }
+}
+

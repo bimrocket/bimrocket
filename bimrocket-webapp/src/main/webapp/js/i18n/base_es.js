@@ -45,7 +45,7 @@ export const translations =
   "button.list" : "Lista",
   "button.next" : "Siguiente",
   "button.previous" : "Anterior",
-  "button.end" : "Fin",
+  "button.send" : "Enviar",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -303,6 +303,8 @@ export const translations =
 
   "tool.smooth_edges.label" : "Suavizar aristas",
 
+  "tool.chatgpt.label" : "ChatGPT",
+
   "tool.start_controllers.label" : "Iniciar controlad.",
 
   "tool.stop_controllers.label" : "Parar controladores",
@@ -417,6 +419,8 @@ export const translations =
   "label.geometry_triangles" : "Triángulos",
   "label.geometry_total_triangles" : "Total",
 
+  "label.chatgpt_setup" : "Configuración (JSON):",
+
   "option.edges" : "Aristas",
   "option.faces" : "Caras",
   "option.solid" : "Sólido",
@@ -442,6 +446,8 @@ export const translations =
   "title.login" : "Identificación",
   "title.new_material" : "Nuevo material",
   "title.rename_material" : "Renombrar material",
+  "title.delete_conversation" : "Borrar conversación",
+  "title.chatgpt_setup" : "Configuración de ChatGPT",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.solids_count" : count => `Sólidos: ${count}`,
@@ -485,6 +491,7 @@ export const translations =
   "question.delete_file" : name => `Quieres borrar el fichero ${name}?`,
   "question.remove_controller" : name => `Quieres esborrar el controlador ${name}?`,
   "question.create_new_scene" : "Quieres crear una nueva escena?",
+  "question.delete_conversation" : "Quieres borrar la conversación?",
 
   "controller.AutoPilotController" : "Conduce un objeto.",
   "controller.Brain4itPostController" : "Hace un POST a Brain4it.",

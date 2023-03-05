@@ -45,6 +45,7 @@ export const translations =
   "button.list" : "List",
   "button.next" : "Next",
   "button.previous" : "Previous",
+  "button.send" : "Send",
 
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
@@ -302,6 +303,8 @@ export const translations =
 
   "tool.smooth_edges.label" : "Smooth edges",
 
+  "tool.chatgpt.label" : "ChatGPT",
+
   "tool.start_controllers.label" : "Start controllers",
 
   "tool.stop_controllers.label" : "Stop controllers",
@@ -416,6 +419,8 @@ export const translations =
   "label.geometry_triangles" : "Triangles",
   "label.geometry_total_triangles" : "Total",
 
+  "label.chatgpt_setup" : "Setup (JSON):",
+
   "option.edges" : "Edges",
   "option.faces" : "Faces",
   "option.solid" : "Solid",
@@ -441,6 +446,8 @@ export const translations =
   "title.login" : "Login",
   "title.new_material" : "New material",
   "title.rename_material" : "Rename material",
+  "title.delete_conversation" : "Delete conversation",
+  "title.chatgpt_setup" : "ChatGPT setup",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.solids_count" : count => `Solids: ${count}`,
@@ -484,6 +491,7 @@ export const translations =
   "question.delete_file" : name => `Do you want to delete the ${name} file?`,
   "question.remove_controller" : name => `Remove controller ${name}?`,
   "question.create_new_scene" : "Do you want to create a new scene?",
+  "question.delete_conversation" : "Do you want to delete the conversation?",
 
   "controller.AutoPilotController" : "Drives an object.",
   "controller.Brain4itPostController" : "Posts a value to Brain4it.",

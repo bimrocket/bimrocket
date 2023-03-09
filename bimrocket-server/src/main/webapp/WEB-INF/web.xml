@@ -74,7 +74,24 @@
 
   <context-param>
     <param-name>proxy.validDomains</param-name>
-    <param-value>https://gis.santfeliu.cat/</param-value>
+    <param-value>https://gis.santfeliu.cat/,https://api.openai.com/</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>proxy.chatgpt.url</param-name>
+    <param-value>https://api.openai.com/v1/completions</param-value>
+  </context-param>
+
+<!--
+  <context-param>
+    <param-name>proxy.chatgpt.ipfilter</param-name>
+    <param-value>10.</param-value>
+  </context-param>
+-->
+
+  <context-param>
+    <param-name>proxy.chatgpt.authorization</param-name>
+    <param-value>your_api_key</param-value>
   </context-param>
 
   <context-param>

@@ -78,9 +78,6 @@ public class ProxyEndpoint
 
     try
     {
-      if (!isValidUrl(url))
-        throw new SecurityException("Access forbidden to " + url);
-
       HttpURLConnection conn = connect("GET", url, info, headers);
 
       return getResponse(conn);
@@ -100,9 +97,6 @@ public class ProxyEndpoint
 
     try
     {
-      if (!isValidUrl(url))
-        throw new SecurityException("Access forbidden to " + url);
-
       HttpURLConnection conn = connect("POST", url, info, headers);
       conn.setDoOutput(true);
 
@@ -137,6 +131,29 @@ public class ProxyEndpoint
     String url, UriInfo info, HttpHeaders headers)
     throws IOException
   {
+    String alias;
+
+    if (url.startsWith("@"))
+    {
+      alias = url.substring(1);
+
+      url = servletContext.getInitParameter("proxy." + alias + ".url");
+      if (url == null) throw new IOException("Invalid url alias: " + alias);
+
+      String ipFilterKey = "proxy." + alias + ".ipfilter";
+      String ipFilter = servletContext.getInitParameter(ipFilterKey);
+      String addr = httpServletRequest.getRemoteAddr();
+      if (ipFilter != null && !addr.startsWith(ipFilter))
+        throw new SecurityException("Not authorized remote ip: " + addr);
+    }
+    else
+    {
+      alias = null;
+
+      if (!isValidUrl(url))
+        throw new SecurityException("Access forbidden to " + url);
+    }
+
     StringBuilder buffer = new StringBuilder(url);
     boolean firstParam = true;
 
@@ -166,19 +183,36 @@ public class ProxyEndpoint
 
     System.out.println("Connecting to " + targetUrl);
     HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
-    setHttpHeaders(conn, headers);
+    setHttpHeaders(conn, headers, alias);
     conn.setRequestProperty("X-Forwarded-For",
       httpServletRequest.getRemoteAddr());
     conn.setRequestMethod(method);
     return conn;
   }
 
-  private void setHttpHeaders(HttpURLConnection conn, HttpHeaders headers)
+  private void setHttpHeaders(HttpURLConnection conn,
+    HttpHeaders headers, String alias)
   {
     MultivaluedMap<String, String> map = headers.getRequestHeaders();
     for (String name : map.keySet())
     {
-      conn.setRequestProperty(name, map.getFirst(name));
+      String value = map.getFirst(name);
+
+      if (alias != null &&
+          name.equalsIgnoreCase("Authorization") &&
+          "Bearer implicit".equals(value))
+      {
+        String authoKey = "proxy." + alias + ".authorization";
+        String autho = servletContext.getInitParameter(authoKey);
+        if (autho != null)
+        {
+          conn.setRequestProperty("Authorization", autho);
+        }
+      }
+      else
+      {
+        conn.setRequestProperty(name, value);
+      }
     }
   }
 

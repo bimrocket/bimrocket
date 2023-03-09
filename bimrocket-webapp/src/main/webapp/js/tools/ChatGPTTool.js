@@ -12,7 +12,7 @@ import * as THREE from "../lib/three.module.js";
 
 class ChatGPTTool extends Tool
 {
-  static API_ENDPOINT = 'https://api.openai.com/v1/completions';
+  static API_ENDPOINT = "https://api.openai.com/v1/completions";
   static STORAGE_KEY = "chatgpt";
   static HUMAN_STOP = "Human: ";
   static AI_STOP = "AI: ";
@@ -85,7 +85,8 @@ class ChatGPTTool extends Tool
     {
       this.setup =
       {
-        api_key: "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",
+        api_url: "/bimrocket-server/api/proxy?url=@chatgpt",
+        api_key: "implicit",
         model: "text-davinci-003",
         temperature: 0.7,
         max_tokens: 256,
@@ -149,7 +150,7 @@ class ChatGPTTool extends Tool
 
   async generateResponse(prompt)
   {
-    const response = await fetch(ChatGPTTool.API_ENDPOINT,
+    const response = await fetch(this.setup.api_url || ChatGPTTool.API_ENDPOINT,
     {
       method: "POST",
       headers:
@@ -167,7 +168,17 @@ class ChatGPTTool extends Tool
       })
     });
 
-    const json = await response.json();
+    const text = await response.text();
+    let json;
+    try
+    {
+      json = JSON.parse(text);
+    }
+    catch (ex)
+    {
+      // not a json response
+      throw text;
+    }
     if (json.error) throw json.error.message;
 
     return json.choices[0].text.trim();

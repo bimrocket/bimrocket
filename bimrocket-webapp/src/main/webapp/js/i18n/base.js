@@ -140,6 +140,11 @@ export const translations =
   "tool.measure_length.label" : "Measure length",
   "tool.measure_length.help" : "Measure length",
 
+  "tool.measure_angle.label" : "Measure angle",
+  "tool.measure_angle.select_first_point" : "Select first point.",
+  "tool.measure_angle.select_second_point" : "Select second point.",
+  "tool.measure_angle.select_third_point" : "Select third point.",
+
   "tool.measure_selection.label" : "Measure selection",
 
   "tool.rebuild.label" : "Rebuild",
@@ -450,6 +455,8 @@ export const translations =
   "title.chatgpt_setup" : "ChatGPT setup",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
+  "message.measure_angle" : angle => `Angle: ${angle} degrees`,
+
   "message.solids_count" : count => `Solids: ${count}`,
   "message.solids_area" : (area, units) => `Area: ${area} ${units}2`,
   "message.solids_volume" : (volume, units) => `Volume: ${volume} ${units}3`,

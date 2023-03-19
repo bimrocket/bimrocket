@@ -39,6 +39,7 @@ import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
 import { DrawTool } from "../tools/DrawTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
+import { MeasureAngleTool } from "../tools/MeasureAngleTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
 import { ActivateCameraTool } from "../tools/ActivateCameraTool.js";
 import { CameraProjectionTool } from "../tools/CameraProjectionTool.js";
@@ -280,6 +281,7 @@ export function load(application)
   const mergeGeometriesTool = new MergeGeometriesTool(application);
   const drawTool = new DrawTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
+  const measureAngleTool = new MeasureAngleTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
   const activateCameraTool = new ActivateCameraTool(application);
   const perspectiveTool = new CameraProjectionTool(application,
@@ -446,6 +448,7 @@ export function load(application)
   application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
   application.addTool(measureLengthTool);
+  application.addTool(measureAngleTool);
   application.addTool(measureSelectionTool);
   application.addTool(activateCameraTool);
   application.addTool(perspectiveTool);
@@ -617,6 +620,7 @@ export function load(application)
 
   const measureMenu = menuBar.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
+  measureMenu.addMenuItem(measureAngleTool);
   measureMenu.addMenuItem(measureSelectionTool);
 
   const controlMenu = menuBar.addMenu("menu.control");

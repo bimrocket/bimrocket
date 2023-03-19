@@ -138,7 +138,7 @@ export const translations =
   "tool.draw.vertex_destination" : "Selecciona la nueva posición del vértice.",
 
   "tool.measure_length.label" : "Medir longitud",
-  "tool.measure_length.help" : "Medir longitud",
+  "tool.measure_length.help" : "Dibuja la linia a medir.",
 
   "tool.measure_angle.label" : "Medir ángulo",
   "tool.measure_angle.select_first_point" : "Selecciona primer punto.",

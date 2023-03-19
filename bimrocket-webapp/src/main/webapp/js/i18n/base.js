@@ -138,7 +138,7 @@ export const translations =
   "tool.draw.vertex_destination" : "Select new vertex position.",
 
   "tool.measure_length.label" : "Measure length",
-  "tool.measure_length.help" : "Measure length",
+  "tool.measure_length.help" : "Draw the line to measure.",
 
   "tool.measure_angle.label" : "Measure angle",
   "tool.measure_angle.select_first_point" : "Select first point.",

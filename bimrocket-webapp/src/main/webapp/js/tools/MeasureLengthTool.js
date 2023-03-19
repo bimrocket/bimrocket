@@ -43,8 +43,11 @@ class MeasureLengthTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    const helpElem = document.createElement("div");
-    this.panel.bodyElem.appendChild(helpElem);
+    this.helpElem = document.createElement("div");
+    this.helpElem.style.padding = "8px";
+    this.panel.bodyElem.appendChild(this.helpElem);
+
+    I18N.set(this.helpElem, "textContent", "tool.measure_length.help");
 
     const resetButton = Controls.addButton(this.panel.bodyElem,
       "clear_linestring", "button.clear", () => this.clearLineString());
@@ -53,8 +56,7 @@ class MeasureLengthTool extends Tool
       "undo_last", "button.undo", () => this.removeLastPoint());
 
     this.distElem = document.createElement("div");
-    this.distElem.style.textAlign = "left";
-    this.distElem.style.padding = "10px";
+    this.distElem.style.padding = "8px";
 
     this.panel.bodyElem.appendChild(this.distElem);
   }

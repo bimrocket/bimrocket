@@ -74,7 +74,7 @@
 
   <context-param>
     <param-name>proxy.validDomains</param-name>
-    <param-value>https://gis.santfeliu.cat/,https://api.openai.com/</param-value>
+    <param-value>http://gis.santfeliu.cat/,https://gis.santfeliu.cat/,https://api.openai.com/</param-value>
   </context-param>
 
   <context-param>

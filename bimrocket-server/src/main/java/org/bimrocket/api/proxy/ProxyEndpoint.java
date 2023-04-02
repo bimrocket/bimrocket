@@ -52,6 +52,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -63,6 +65,8 @@ import org.apache.commons.io.IOUtils;
 @Tag(name="Proxy", description="HTTP Proxy service")
 public class ProxyEndpoint
 {
+  private static Logger LOGGER = Logger.getLogger("Proxy");
+
   @Context
   HttpServletRequest httpServletRequest;
 
@@ -181,7 +185,6 @@ public class ProxyEndpoint
     }
     URL targetUrl = new URL(buffer.toString());
 
-    System.out.println("Connecting to " + targetUrl);
     HttpURLConnection conn = (HttpURLConnection)targetUrl.openConnection();
     setHttpHeaders(conn, headers, alias);
     conn.setRequestProperty("X-Forwarded-For",
@@ -216,25 +219,40 @@ public class ProxyEndpoint
     }
   }
 
-  private Response getResponse(HttpURLConnection conn)
+  private Response getResponse(HttpURLConnection conn) throws Exception
   {
-    InputStream responseStream;
+    String targetUrl = conn.getURL().toString();
+    Response.ResponseBuilder response;
     try
     {
-      responseStream = conn.getInputStream();
+      InputStream inputStream = conn.getInputStream();
+      LOGGER.log(Level.INFO, "Connected to {0}", targetUrl);
+      StreamingOutput output = (OutputStream out) ->
+      {
+        IOUtils.copy(inputStream, out);
+      };
+      response = Response.ok(output);
     }
     catch (IOException ex)
     {
-      responseStream = conn.getErrorStream();
+      LOGGER.log(Level.WARNING, "Error connecting to {0}: {1}",
+        new Object[]{ targetUrl, ex });
+      int status = conn.getResponseCode();
+      InputStream errorStream = conn.getErrorStream();
+      if (errorStream == null)
+      {
+        response = Response.status(status, ex.toString());
+      }
+      else
+      {
+        StreamingOutput output = (OutputStream out) ->
+        {
+          IOUtils.copy(errorStream, out);
+        };
+        response = Response.status(status).entity(output);
+      }
     }
-    InputStream is = responseStream;
 
-    StreamingOutput output = (OutputStream out) ->
-    {
-      IOUtils.copy(is, out);
-    };
-
-    Response.ResponseBuilder response = Response.ok(output);
     Map<String, List<String>> responseHeaders = conn.getHeaderFields();
     for (Map.Entry<String, List<String>> entry : responseHeaders.entrySet())
     {

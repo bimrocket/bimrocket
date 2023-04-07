@@ -616,7 +616,6 @@ export function load(application)
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
-  designMenu.addMenuItem(chatGPTTool);
 
   const measureMenu = menuBar.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
@@ -631,6 +630,7 @@ export function load(application)
   panelsMenu.addMenuItem(outlinerTool);
   panelsMenu.addMenuItem(inspectorTool);
   panelsMenu.addMenuItem(statisticsTool);
+  panelsMenu.addMenuItem(chatGPTTool);
 
   const helpMenu = menuBar.addMenu("menu.help");
   helpMenu.addMenuItem(aboutTool);

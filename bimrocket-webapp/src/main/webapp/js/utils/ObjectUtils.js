@@ -463,10 +463,14 @@ class ObjectUtils
       let ymax = camera.near * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5));
   		let xmax = ymax * camera.aspect;
 
-      let yoffset = boxHeight * camera.near / (2 * ymax);
-      let xoffset = boxWidth * camera.near / (2 * xmax);
+      let yoffset = 0.5 * offsetFactor * boxHeight * camera.near / ymax;
+      let xoffset = 0.5 * offsetFactor * boxWidth * camera.near / xmax;
 
-      offset = offsetFactor * (Math.max(xoffset, yoffset) + 0.5 * boxDepth);
+      offset = Math.max(xoffset, yoffset) + 0.5 * boxDepth;
+
+      const requiredFar = offset + 0.5 * boxDepth;
+
+      camera.far = requiredFar < 4000 ? 4000 : requiredFar;
     }
     else // Ortho camera
     {
@@ -476,7 +480,7 @@ class ObjectUtils
       camera.top = factor * boxHeight;
       camera.bottom = -factor * boxHeight;
 
-      offset = camera.far - boxDepth * offsetFactor;
+      offset = 0.5 * camera.far;
     }
     let v = new THREE.Vector3();
     v.setFromMatrixColumn(matrix, 2); // view vector (zaxis) in parent CS

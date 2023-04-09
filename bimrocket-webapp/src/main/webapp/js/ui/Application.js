@@ -365,7 +365,7 @@ class Application
     sunLight.updateMatrix();
 
     // initial camera
-    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
+    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 4000);
     camera.position.set(0, -30, 2);
     camera.name = "Orthographic";
     camera.updateProjectionMatrix();

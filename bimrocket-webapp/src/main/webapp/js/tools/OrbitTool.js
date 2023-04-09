@@ -146,6 +146,7 @@ class OrbitTool extends Tool
       }
       camera.zoom = this.orthoZoom;
       camera.updateProjectionMatrix();
+      this.radius = 0.5 * camera.far;
     }
     else if (camera instanceof THREE.PerspectiveCamera)
     {

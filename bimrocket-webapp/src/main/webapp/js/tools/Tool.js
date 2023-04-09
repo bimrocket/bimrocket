@@ -57,7 +57,6 @@ class Tool
     pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
 
     raycaster.setFromCamera(pointercc, camera);
-    raycaster.far = Math.Infinity;
     raycaster.camera = camera;
     raycaster.params.Line.threshold = 0.1;
 

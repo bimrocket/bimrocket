@@ -298,7 +298,7 @@ class AddObjectTool extends Tool
   createOrthographicCamera()
   {
     const container = this.application.container;
-    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, -2000, 2000);
+    let camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 4000);
     camera.name = "OrthographicCamera";
     return camera;
   }

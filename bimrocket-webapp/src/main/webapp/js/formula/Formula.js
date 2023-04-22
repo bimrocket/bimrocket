@@ -135,7 +135,9 @@ class Formula
           updated = oldValue !== newValue;
         }
       }
+      if (updated) object.updateMatrix();
     }
+
     return updated;
   }
 

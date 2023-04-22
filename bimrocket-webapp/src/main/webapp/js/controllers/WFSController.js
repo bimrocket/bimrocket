@@ -116,6 +116,7 @@ class WFSController extends Controller
       const mergeGroup = new THREE.Group();
       mergeGroup.builder = new GeometryMerger();
       mergeGroup.add(featureGroup);
+      ObjectUtils.setSelectionEnabled(featureGroup, true);
       featureGroup = mergeGroup;
       featureGroup.updateMatrix();
     }

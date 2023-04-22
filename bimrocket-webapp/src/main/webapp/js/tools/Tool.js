@@ -70,20 +70,45 @@ class Tool
       if (application.clippingPlane === null ||
           application.clippingPlane.distanceToPoint(intersect.point) > 0)
       {
-        if (this.isPathVisible(object)) firstIntersect = intersect;
+        if (this.isSelectableObject(object)) firstIntersect = intersect;
       }
       i++;
     }
     return firstIntersect;
   }
 
-  isPathVisible(object)
+  isSelectableObject(object)
   {
-    while (object !== null && object.visible)
+    while (object !== null)
     {
+      let selectionEnabled = ObjectUtils.getSelectionEnabled(object);
+      if (selectionEnabled === false)
+      {
+        return false;
+      }
+      else if (selectionEnabled !== true && !object.visible)
+      {
+        return false;
+      }
+
       object = object.parent;
     }
-    return object === null;
+    return true;
+  }
+
+  findActualSelectedObject(object)
+  {
+    let parent = object;
+    while (parent)
+    {
+      let selectionGroup = ObjectUtils.getSelectionGroup(parent);
+      if (selectionGroup === true)
+      {
+        return parent;
+      }
+      parent = parent.parent;
+    }
+    return object;
   }
 
   getEventPosition(event)

@@ -65,6 +65,7 @@ class GeometryMerger extends ObjectBuilder
     mesh = new THREE.Mesh(meshGeometry, this._material);
     mesh.name = GeometryMerger.MESHES_NAME;
     mesh.raycast = function(){};
+    ObjectUtils.setSelectionHighlight(mesh, ObjectUtils.HIGHLIGHT_NONE);
 
     object.add(mesh);
 
@@ -77,6 +78,7 @@ class GeometryMerger extends ObjectBuilder
     lines = new THREE.LineSegments(linesGeometry, Solid.EdgeMaterial);
     lines.name = GeometryMerger.LINES_NAME;
     lines.raycast = function(){};
+    ObjectUtils.setSelectionHighlight(lines, ObjectUtils.HIGHLIGHT_NONE);
 
     object.add(lines);
 

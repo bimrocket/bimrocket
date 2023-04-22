@@ -60,7 +60,7 @@ class ASCIIGridLoader extends THREE.Loader
 
     let terrain = new THREE.Group();
     terrain.name = "Terrain";
-    terrain.userData.selection = { "type" : "none" };
+    ObjectUtils.setSelectionHighlight(terrain, ObjectUtils.HIGHLIGHT_NONE);
     terrain.userData.grid = {
       ncols : this.ncols,
       nrows : this.nrows,

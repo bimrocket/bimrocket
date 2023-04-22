@@ -335,7 +335,7 @@ class Application
 
     this.scene = new THREE.Scene();
     const scene = this.scene;
-    scene.userData.selection = { "type" : "none" };
+    ObjectUtils.setSelectionHighlight(scene, ObjectUtils.HIGHLIGHT_NONE);
     scene.name = "Scene";
 
     // Add lights
@@ -393,7 +393,7 @@ class Application
     this.baseObject = new THREE.Group();
     const baseObject = this.baseObject;
     baseObject.name = "Base";
-    baseObject.userData.selection = {type : "none"};
+    ObjectUtils.setSelectionHighlight(baseObject, ObjectUtils.HIGHLIGHT_NONE);
 
     baseObject.updateMatrix();
 
@@ -726,6 +726,10 @@ class Application
 
   collectLines(object, linesGroup)
   {
+    const highlight = ObjectUtils.getSelectionHighlight(object)
+          || ObjectUtils.HIGHLIGHT_EDGES;
+    if (highlight === ObjectUtils.HIGHLIGHT_NONE) return;
+
     let material = this.getSelectionMaterial(object);
 
     if (object instanceof Solid)
@@ -858,11 +862,7 @@ class Application
     {
       object.updateMatrixWorld();
 
-      let selectionProperties = object.userData.selection;
-      let selectionType = selectionProperties && selectionProperties.type ?
-        selectionProperties.type : "edges";
-
-      if (selectionType === "edges")
+      if (highlight === ObjectUtils.HIGHLIGHT_EDGES)
       {
         let children = object.children;
         for (let i = 0; i < children.length; i++)
@@ -871,7 +871,7 @@ class Application
           this.collectLines(child, linesGroup);
         }
       }
-      else if (selectionType === "box")
+      else if (highlight === ObjectUtils.HIGHLIGHT_BOX)
       {
         let box = ObjectUtils.getLocalBoundingBox(object, true);
         if (!box.isEmpty())

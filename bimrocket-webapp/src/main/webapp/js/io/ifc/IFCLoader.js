@@ -84,7 +84,7 @@ class IFCLoader extends THREE.Loader
     const types = new THREE.Group();
     types.name = "Types";
     types.visible = false;
-    types.userData.selection = { type : "none" };
+    ObjectUtils.setSelectionHighlight(types, ObjectUtils.HIGHLIGHT_NONE);
     model.add(types);
     model._ifcFile = ifcFile;
 
@@ -300,7 +300,7 @@ class IFCLoader extends THREE.Loader
             ifcClassName === "IfcBuilding" ||
             ifcClassName === "IfcBuildingStorey")
           {
-            object.userData.selection.type = "box";
+            ObjectUtils.setSelectionHighlight(object, ObjectUtils.HIGHLIGHT_BOX);
           }
           else if (ifcClassName === "IfcDoor")
           {
@@ -654,8 +654,8 @@ class IfcProductHelper extends IfcHelper
       const schema = this.instance.constructor.schema;
       const loader = product._loader;
 
-      var object3D = new THREE.Object3D();
-      object3D.userData.selection = { group: true };
+      let object3D = new THREE.Object3D();
+      ObjectUtils.setSelectionGroup(object3D, true);
 
       let name = product.Name ?
         product.Name : product.constructor.name;

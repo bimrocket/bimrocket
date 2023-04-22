@@ -91,16 +91,8 @@ class BIMInspectorTool extends Tool
     const intersect = this.intersect(pointerPosition, baseObject, true);
     if (intersect)
     {
-      let object = intersect.object;
-      var parent = object;
-      while (parent && !parent.userData.selection)
-      {
-        parent = parent.parent;
-      }
-      if (parent && parent.userData.selection.group)
-      {
-        object = parent;
-      }
+      let object = this.findActualSelectedObject(intersect.object);
+
       application.selection.set(object);
     }
     else

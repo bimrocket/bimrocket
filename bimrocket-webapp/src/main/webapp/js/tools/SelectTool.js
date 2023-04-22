@@ -116,17 +116,8 @@ class SelectTool extends Tool
       this.posElem.textContent = "(x, y ,z) = (" +
         xpos + ", " + ypos + ", " + zpos + ")";
 
-      let object = intersect.object;
+      let object = this.findActualSelectedObject(intersect.object);
 
-      let parent = object;
-      while (parent && !parent.userData.selection)
-      {
-        parent = parent.parent;
-      }
-      if (parent && parent.userData.selection.group)
-      {
-        object = parent;
-      }
       application.userSelectObjects([object], event);
     }
     else

@@ -156,7 +156,7 @@ class GISLoader extends THREE.Loader
       let pointCoords = coordinates[i];
       this.createPoint(name + "_" + i, pointCoords, null, group);
     }
-    group.userData.selection = { "group" : true };
+    ObjectUtils.setSelectionGroup(group, true);
     parent.add(group);
   }
 

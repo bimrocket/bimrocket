@@ -14,6 +14,10 @@ class ObjectUtils
 {
   static ORIGINAL_MATERIAL = "originalMaterial";
 
+  static HIGHLIGHT_BOX = "box";
+  static HIGHLIGHT_EDGES = "edges";
+  static HIGHLIGHT_NONE = "none";
+
   static METER_CONVERSION_FACTORS =
   {
     "km" : 0.001,
@@ -773,6 +777,48 @@ class ObjectUtils
     return object === parent;
   }
 
+  static setSelectionEnabled(object, value)
+  {
+    this.getSelectionOptions(object, true).enabled = value;
+  }
+
+  static getSelectionEnabled(object)
+  {
+    return this.getSelectionOptions(object)?.enabled;
+  }
+
+  static setSelectionGroup(object, value /* boolean || undefined */)
+  {
+    this.getSelectionOptions(object, true).group = value;
+  }
+
+  static getSelectionGroup(object)
+  {
+    return this.getSelectionOptions(object)?.group;
+  }
+
+  static setSelectionHighlight(object, value)
+  {
+    this.getSelectionOptions(object, true).highlight = value;
+  }
+
+  static getSelectionHighlight(object)
+  {
+    const options = this.getSelectionOptions(object);
+    return options?.highlight || options?.type;
+  }
+
+  static getSelectionOptions(object, create = false)
+  {
+    let options = object.userData.selection;
+    if (typeof options !== "object" && create)
+    {
+      options = {};
+      object.userData.selection = options;
+    }
+    return options;
+  }
+  
   static isExportable(object)
   {
     if (object.name && object.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))

@@ -36,7 +36,7 @@ class CloneTool extends Tool
           clone = new THREE.Object3D();
           clone.name = object.name + "_cloner";
           clone.builder = new Cloner(object);
-          clone.userData.selection = { "group" : true };
+          ObjectUtils.setSelectionGroup(clone, true)
           ObjectBuilder.build(clone);
         }
         else

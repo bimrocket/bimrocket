@@ -85,6 +85,7 @@ import { LoadController } from "../controllers/LoadController.js";
 import { ProximityController } from "../controllers/ProximityController.js";
 import { PushButtonController } from "../controllers/PushButtonController.js";
 import { RotationController } from "../controllers/RotationController.js";
+import { ScriptController } from "../controllers/ScriptController.js";
 import { ToggleButtonController } from "../controllers/ToggleButtonController.js";
 import { TranslationController } from "../controllers/TranslationController.js";
 import { BRFLoader } from "../io/BRFLoader.js";
@@ -100,6 +101,23 @@ import { GLTFExporter } from "../io/GLTFExporter.js";
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
+import { Controls } from "../ui/Controls.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
+import { ModuleLoader } from "../utils/ModuleLoader.js";
+import { Solid } from "../core/Solid.js";
+import { SolidGeometry } from "../core/SolidGeometry.js";
+import { Cord } from "../core/Cord.js";
+import { CordGeometry } from "../core/CordGeometry.js";
+import { Profile } from "../core/Profile.js";
+import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { Dialog } from "../ui/Dialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+import { ConfirmDialog } from "../ui/ConfirmDialog.js";
+import { Toast } from "../ui/Toast.js";
+import { ObjectBuilder } from "../builders/ObjectBuilder.js";
+import { Controller } from "../controllers/Controller.js";
+import { Formula } from "../formula/Formula.js";
 import * as THREE from "../lib/three.module.js";
 
 export function load(application)
@@ -695,5 +713,30 @@ export function load(application)
   application.selection.set(application.baseObject);
 
   // globals
-  window.THREE = THREE;
+  const GLOBALS =
+  {
+    THREE,
+    ObjectUtils,
+    GeometryUtils,
+    ModuleLoader,
+    Solid,
+    SolidGeometry,
+    Cord,
+    CordGeometry,
+    Profile,
+    ProfileGeometry,
+    Dialog,
+    MessageDialog,
+    ConfirmDialog,
+    Controls,
+    Toast,
+    ObjectBuilder,
+    Controller,
+    Formula
+  };
+
+  for (let name in GLOBALS)
+  {
+    window[name] = GLOBALS[name];
+  }
 }

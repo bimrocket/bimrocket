@@ -5,6 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
+import { Controls } from "../ui/Controls.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { ChatGPTDialog } from "../ui/ChatGPTDialog.js";

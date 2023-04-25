@@ -5,42 +5,11 @@
  */
 
 import { Dialog } from "./Dialog.js";
-import { Controls } from "./Controls.js";
-import { GeometryUtils } from "../utils/GeometryUtils.js";
-import { ObjectUtils } from "../utils/ObjectUtils.js";
-import { MessageDialog } from "../ui/MessageDialog.js";
-import { ConfirmDialog } from "../ui/ConfirmDialog.js";
 import { Toast } from "../ui/Toast.js";
-import { Solid } from "../core/Solid.js";
-import { SolidGeometry } from "../core/SolidGeometry.js";
-import { Cord } from "../core/Cord.js";
-import { CordGeometry } from "../core/CordGeometry.js";
-import { Profile } from "../core/Profile.js";
-import { ProfileGeometry } from "../core/ProfileGeometry.js";
-import { I18N } from "../i18n/I18N.js";
-import { Metadata, Result } from "../io/FileService.js";
 import * as THREE from "../lib/three.module.js";
 
 class ScriptDialog extends Dialog
 {
-  static GLOBALS =
-  {
-    THREE,
-    ObjectUtils,
-    GeometryUtils,
-    Solid,
-    SolidGeometry,
-    Cord,
-    CordGeometry,
-    Profile,
-    ProfileGeometry,
-    Dialog,
-    MessageDialog,
-    ConfirmDialog,
-    Controls,
-    Toast
-  };
-
   constructor(application, saveAction)
   {
     super("title.script_editor");
@@ -92,12 +61,6 @@ class ScriptDialog extends Dialog
     {
       this.saveButton.disabled = this.nameField.value.trim().length === 0;
     });
-
-    // Make classes needed for scripting always global.
-    for (let name in ScriptDialog.GLOBALS)
-    {
-      window[name] = ScriptDialog.GLOBALS[name];
-    }
   }
 
   onShow()

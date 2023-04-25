@@ -94,13 +94,13 @@ class WFSController extends Controller
             multiGroup.add(featureRepr);
           }
           multiGroup.name = feature.name;
-          multiGroup.userData = feature.userData;
+          Object.assign(multiGroup.userData, feature.userData);
           featureGroup.add(multiGroup);
         }
         else // single geometry
         {
           let featureRepr = this.createFeatureRepr(feature, representation);
-          featureRepr.userData = feature.userData;
+          Object.assign(featureRepr.userData, feature.userData);
           featureGroup.add(featureRepr);
           feature.userData = {};
         }

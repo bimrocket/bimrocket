@@ -296,6 +296,14 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.Mesh();
     }
+    else if (entry.type === "Line")
+    {
+      object = new THREE.Line();
+    }
+    else if (entry.type === "LineSegments")
+    {
+      object = new THREE.LineSegments();
+    }
     else if (entry.type === "Sprite")
     {
       object = new THREE.Sprite();

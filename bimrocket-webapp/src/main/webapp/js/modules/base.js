@@ -115,6 +115,8 @@ import { Dialog } from "../ui/Dialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { ConfirmDialog } from "../ui/ConfirmDialog.js";
 import { Toast } from "../ui/Toast.js";
+import { Tree } from "../ui/Tree.js";
+import { TabbedPane } from "../ui/TabbedPane.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Controller } from "../controllers/Controller.js";
 import { Formula } from "../formula/Formula.js";
@@ -730,6 +732,8 @@ export function load(application)
     ConfirmDialog,
     Controls,
     Toast,
+    Tree,
+    TabbedPane,
     ObjectBuilder,
     Controller,
     Formula

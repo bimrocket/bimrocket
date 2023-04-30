@@ -252,6 +252,7 @@ class OrbitTool extends Tool
     else if (camera instanceof THREE.OrthographicCamera)
     {
       this.orthoZoom = camera.zoom;
+      this.radius = 0.5 * camera.far;
     }
     this.center.x = camera.position.x - this.radius * vz.x;
     this.center.y = camera.position.y - this.radius * vz.y;

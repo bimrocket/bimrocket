@@ -140,7 +140,7 @@ class Revolver extends SweptSolidBuilder
     this.location.copy(source.location);
     this.axis.copy(source.axis);
     this.segments = source.segments;
-    this.smoothAngle = source.smothAngle; // degrees
+    this.smoothAngle = source.smoothAngle; // degrees
     this.optimize = source.optimize;
     this.minPointDistance = source.minPointDistance;
 

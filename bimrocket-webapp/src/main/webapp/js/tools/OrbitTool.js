@@ -19,7 +19,6 @@ class OrbitTool extends Tool
     this.label = "tool.orbit.label";
     this.help = "tool.orbit.help";
     this.className = "orbit";
-    this.setOptions(options);
 
     this.theta = Math.PI;
     this.phi = Math.PI / 2.1;
@@ -43,6 +42,9 @@ class OrbitTool extends Tool
     this.orthoZoom = 1;
     this.minOrthoZoom = 0.01;
     this.maxOrthoZoom = Infinity;
+    this.selectionEnabled = true;
+
+    this.setOptions(options);
 
     this.updateCamera = true;
 
@@ -237,7 +239,7 @@ class OrbitTool extends Tool
     }
     else
     {
-      var vx = new THREE.Vector3();
+      let vx = new THREE.Vector3();
       vx.x = me[0];
       vx.y = me[1];
       vx.z = me[2];
@@ -381,6 +383,25 @@ class OrbitTool extends Tool
     this.sphere.scale.set(scale, scale, scale);
     this.sphere.updateMatrix();
     application.notifyObjectsChanged(this.sphere, this);
+  }
+
+  onTap(position, button)
+  {
+    if (this.selectionEnabled)
+    {
+      const application = this.application;
+
+      let intersect = this.intersect(position, application.baseObject);
+      if (intersect)
+      {
+        let object = this.findActualSelectedObject(intersect.object);
+        application.selection.set(object);
+      }
+      else
+      {
+        application.selection.clear();
+      }
+    }
   }
 
   onDrag(position, direction, pointerCount, button)

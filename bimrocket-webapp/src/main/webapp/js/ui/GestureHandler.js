@@ -109,10 +109,21 @@ class GestureHandler
         previous : new THREE.Vector2(),
         delta : new THREE.Vector2(),
         button : event.button,
-        dragLength : 0
+        dragLength : 0,
+        tapEnabled : true
       };
       pointers.set(pointerId, pointerData);
       container.setPointerCapture(pointerId);
+      if (pointers.size > 1)
+      {
+        for (let otherPointerData of pointers.values())
+        {
+          if (otherPointerData)
+          {
+            otherPointerData.tapEnabled = false;
+          }
+        }
+      }
     }
     const x = event.offsetX || event.layerX;
     const y = event.offsetY || event.layerY;
@@ -179,7 +190,7 @@ class GestureHandler
     let pointerData = pointers.get(pointerId);
     if (pointerData)
     {
-      if (pointerData.dragLength < 3)
+      if (pointerData.dragLength < 3 && pointerData.tapEnabled)
       {
         this.onTap(pointerData.position, pointerData.button);
       }

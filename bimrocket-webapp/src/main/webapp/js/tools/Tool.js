@@ -38,7 +38,7 @@ class Tool
   {
     if (options)
     {
-      for (var option in options)
+      for (let option in options)
       {
         this[option] = options[option];
       }

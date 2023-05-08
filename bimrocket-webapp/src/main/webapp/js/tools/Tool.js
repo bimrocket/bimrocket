@@ -123,7 +123,8 @@ class Tool
     if (this.application.menuBar.armed) return false;
 
     const target = event.target;
-    return target.nodeName.toLowerCase() === "canvas";
+    return target.nodeName.toLowerCase() === "canvas" &&
+      target.parentElement.id === "container";
   }
 }
 

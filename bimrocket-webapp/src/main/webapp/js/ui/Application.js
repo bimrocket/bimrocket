@@ -149,6 +149,7 @@ class Application
     element.appendChild(toolBarElem);
 
     const container = document.createElement("div");
+    container.id = "container";
     container.className = "container";
     container.style.touchAction = "none";
     this.container = container;

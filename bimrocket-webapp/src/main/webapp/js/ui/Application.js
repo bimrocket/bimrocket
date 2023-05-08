@@ -132,7 +132,9 @@ class Application
     logoPanelElem.appendChild(bigLogoImage);
 
     const headerElem = document.createElement("header");
+    this.headerElem = headerElem;
     element.appendChild(headerElem);
+
     const logoLink = document.createElement("a");
     logoLink.className = "logo_link";
     logoLink.addEventListener("click", event => this.showLogo());
@@ -145,6 +147,7 @@ class Application
     logoLink.appendChild(logoImage);
 
     const toolBarElem = document.createElement("div");
+    this.toolBarElem = toolBarElem;
     toolBarElem.className = "toolbar";
     element.appendChild(toolBarElem);
 
@@ -1657,6 +1660,22 @@ class Application
   {
     this.logoPanel.classList.add("hidden");
     this.logoPanel.classList.remove("visible");
+  }
+
+  enterPresentationMode()
+  {
+    this.headerElem.style.display = "none";
+    this.toolBarElem.style.display = "none";
+    this.container.style.top = "0px";
+    this.panelManager.updateLayout();
+  }
+
+  exitPresentationMode()
+  {
+    this.headerElem.style.display = "";
+    this.toolBarElem.style.display = "";
+    this.container.style.top = "";
+    this.panelManager.updateLayout();
   }
 
   fullscreen()

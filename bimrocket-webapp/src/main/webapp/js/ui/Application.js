@@ -1668,6 +1668,7 @@ class Application
     this.toolBarElem.style.display = "none";
     this.container.style.top = "0px";
     this.panelManager.updateLayout();
+    this.onResize();
   }
 
   exitPresentationMode()
@@ -1676,6 +1677,7 @@ class Application
     this.toolBarElem.style.display = "";
     this.container.style.top = "";
     this.panelManager.updateLayout();
+    this.onResize();
   }
 
   fullscreen()

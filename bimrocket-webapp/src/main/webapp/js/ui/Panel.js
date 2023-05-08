@@ -95,7 +95,7 @@ class Panel
   {
     if (position !== this._position)
     {
-      var element = this.element;
+      let element = this.element;
       if (this._position)
       {
         element.classList.remove(this._position);
@@ -104,6 +104,16 @@ class Panel
       element.classList.add(position);
       if (this.panelManager) this.panelManager.updateLayout();
     }
+  }
+
+  get closeable()
+  {
+    return this.closeButtonElem.style.display !== "none";
+  }
+
+  set closeable(closeable)
+  {
+    this.closeButtonElem.style.display = closeable ? "" : "none";
   }
 
   get visible()

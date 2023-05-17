@@ -26,9 +26,9 @@
 
 @keyframes text_fade
 {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }
 
 .logo_panel
@@ -79,9 +79,11 @@
   justify-content: center;
   align-items: center;
   height: 100%;
+  flex-direction: column;
+  color: white;
 }
 
-.splash_panel > div
+.splash_panel > div.fade
 {
   color: white;
   font-size: 20px;

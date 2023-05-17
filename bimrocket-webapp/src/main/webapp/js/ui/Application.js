@@ -137,16 +137,22 @@ class Application
     const splash = this.params["splash"];
     if (splash)
     {
-      document.title = splash;
-
       const splashPanelElem = document.createElement("div");
       this.splashPanel = splashPanelElem;
       splashPanelElem.className = "splash_panel";
       element.appendChild(splashPanelElem);
 
-      const splashTextElem = document.createElement("div");
-      splashTextElem.textContent = splash;
-      splashPanelElem.appendChild(splashTextElem);
+      if (splash.startsWith("url:"))
+      {
+        this.loadSplashContent(splash.substring(4), splashPanelElem);
+      }
+      else
+      {
+        const splashContentElem = document.createElement("div");
+        splashContentElem.textContent = splash;
+        splashContentElem.className = "fade";
+        splashPanelElem.appendChild(splashContentElem);
+      }
     }
 
     const headerElem = document.createElement("header");
@@ -1696,6 +1702,13 @@ class Application
     this.container.style.top = "";
     this.panelManager.updateLayout();
     this.onResize();
+  }
+
+  async loadSplashContent(url, element)
+  {
+    const response = await fetch(url);
+    const content = await response.text();
+    element.innerHTML = content;
   }
 
   fullscreen()

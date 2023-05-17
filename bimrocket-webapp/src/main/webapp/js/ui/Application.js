@@ -99,6 +99,8 @@ class Application
       tool : []
     };
 
+    this.params = WebUtils.getQueryParams();
+
     this.loadingManager = new THREE.LoadingManager();
     const loadingManager = this.loadingManager;
     loadingManager.onStart = (url, itemsLoaded, itemsTotal) =>
@@ -119,10 +121,11 @@ class Application
     THREE.Object3D.HIDDEN_PREFIX = ".";
 
     /* create sub elements */
+
     const logoPanelElem = document.createElement("div");
+    this.logoPanel = logoPanelElem;
     logoPanelElem.className = "logo_panel";
     logoPanelElem.addEventListener("click", () => this.hideLogo());
-    this.logoPanel = logoPanelElem;
     element.appendChild(logoPanelElem);
 
     const bigLogoImage = document.createElement("img");
@@ -130,6 +133,21 @@ class Application
     bigLogoImage.title = Application.NAME;
     bigLogoImage.alt = Application.NAME;
     logoPanelElem.appendChild(bigLogoImage);
+
+    const splash = this.params["splash"];
+    if (splash)
+    {
+      document.title = splash;
+
+      const splashPanelElem = document.createElement("div");
+      this.splashPanel = splashPanelElem;
+      splashPanelElem.className = "splash_panel";
+      element.appendChild(splashPanelElem);
+
+      const splashTextElem = document.createElement("div");
+      splashTextElem.textContent = splash;
+      splashPanelElem.appendChild(splashTextElem);
+    }
 
     const headerElem = document.createElement("header");
     this.headerElem = headerElem;
@@ -1696,8 +1714,7 @@ class Application
 
   loadModelFromUrl()
   {
-    const params = WebUtils.getQueryParams();
-
+    const params = this.params;
     const url = params["url"];
     if (url === undefined) return;
 
@@ -1715,7 +1732,7 @@ class Application
         application.addObject(object);
         application.progressBar.visible = false;
         application.initControllers(object);
-        application.initTasks(params);
+        application.initTasks();
       },
       onError : error =>
       {
@@ -1753,8 +1770,9 @@ class Application
     }
   }
 
-  initTasks(params)
+  initTasks()
   {
+    const params = this.params;
     const toolName = params["tool"];
     if (toolName)
     {

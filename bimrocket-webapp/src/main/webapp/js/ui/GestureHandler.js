@@ -62,11 +62,11 @@ class GestureHandler
     }
   }
 
-  onDrag(position, direction, pointerCount, button)
+  onDrag(position, direction, pointerCount, button, pointerType)
   {
     if (this.tool.onDrag)
     {
-      this.tool.onDrag(position, direction, pointerCount, button);
+      this.tool.onDrag(position, direction, pointerCount, button, pointerType);
     }
   }
 
@@ -108,6 +108,7 @@ class GestureHandler
         position : new THREE.Vector2(),
         previous : new THREE.Vector2(),
         delta : new THREE.Vector2(),
+        pointerType : event.pointerType,
         button : event.button,
         dragLength : 0,
         tapEnabled : true
@@ -150,8 +151,8 @@ class GestureHandler
     {
       const [pointerData] = pointers.values();
       pointerData.dragLength += pointerData.delta.length();
-      this.onDrag(pointerData.previous, pointerData.delta,
-        1, pointerData.button);
+      this.onDrag(pointerData.previous, pointerData.delta, 1,
+        pointerData.button, pointerData.pointerType);
     }
     else if (pointers.size === 2)
     {
@@ -169,7 +170,8 @@ class GestureHandler
         direction.addVectors(pointer1Data.delta, pointer2Data.delta);
         direction.x *= 0.25;
         direction.y *= 0.25;
-        this.onDrag(center, direction, 2, pointer1Data.button);
+        this.onDrag(center, direction, 2,
+          pointer1Data.button, pointer1Data.pointerType);
       }
       else
       {

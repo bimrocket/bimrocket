@@ -404,9 +404,10 @@ class OrbitTool extends Tool
     }
   }
 
-  onDrag(position, direction, pointerCount, button)
+  onDrag(position, direction, pointerCount, button, pointerType)
   {
-    if (button === this.panButton || pointerCount === 2)
+    if ((pointerType === "mouse" && button === this.panButton) ||
+         pointerCount === 2)
     {
       const camera = this.application.camera;
       const container = this.application.container;
@@ -434,14 +435,15 @@ class OrbitTool extends Tool
       this.panLeft(vectorcc.x);
       this.panDown(vectorcc.y);
     }
-    else if (button === this.rotateButton)
+    else if ((pointerType === "mouse" && button === this.rotateButton) ||
+             (pointerType !== "mouse" && pointerCount === 1))
     {
       this.rotateLeft(2 * Math.PI * direction.x /
         this.PIXELS_PER_ROUND * this.userRotateSpeed);
       this.rotateUp(2 * Math.PI * direction.y /
         this.PIXELS_PER_ROUND * this.userRotateSpeed);
     }
-    else if (button === this.zoomButton)
+    else if (pointerType === "mouse" && button === this.zoomButton)
     {
       if (direction.y !== 0)
       {
@@ -483,7 +485,7 @@ class OrbitTool extends Tool
 
     if (delta !== 0)
     {
-      this.zoomIn(delta);
+      this.zoomOut(delta);
     }
   }
 

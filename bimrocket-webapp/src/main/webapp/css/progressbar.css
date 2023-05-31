@@ -8,6 +8,12 @@
   height: 44px;
 }
 
+.progress_bar.splash
+{
+  bottom: 50px;
+  z-index: 2000;
+}
+
 .progress_bar .message
 {
   color: black;

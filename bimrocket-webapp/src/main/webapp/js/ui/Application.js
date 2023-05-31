@@ -1731,6 +1731,12 @@ class Application
     const url = params["url"];
     if (url === undefined) return;
 
+    const splash = this.params["splash"];
+    if (splash)
+    {
+      this.progressBar.element.classList.add("splash");
+    }
+
     const application = this;
     const intent =
     {
@@ -1742,6 +1748,7 @@ class Application
       },
       onCompleted : object =>
       {
+        application.progressBar.element.classList.remove("splash");
         application.addObject(object);
         application.progressBar.visible = false;
         application.initControllers(object);
@@ -1749,6 +1756,7 @@ class Application
       },
       onError : error =>
       {
+        application.progressBar.element.classList.remove("splash");
         application.progressBar.visible = false;
         MessageDialog.create("ERROR", error)
           .setClassName("error")

@@ -1089,6 +1089,7 @@ class BooleanRenderer extends PropertyRenderer
     valueElem.className = "value";
     let checkboxElem = document.createElement("input");
     checkboxElem.type = "checkbox";
+    checkboxElem.name = "bv";
     checkboxElem.checked = value;
     checkboxElem.tabIndex = -1;
     if (disabled) checkboxElem.disabled = true;

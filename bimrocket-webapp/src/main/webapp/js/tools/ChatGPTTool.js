@@ -48,6 +48,7 @@ class ChatGPTTool extends Tool
     this.ellipsisElem.textContent = "AI: ";
 
     this.promptElem = document.createElement("textarea");
+    this.promptElem.name = "chatgpt_prompt";
     this.promptElem.addEventListener("focus", () => this.scrollDown());
     this.promptElem.classList.add("prompt");
     this.promptElem.spellcheck = false;

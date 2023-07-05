@@ -300,8 +300,13 @@ class Controls
 
   static addCodeEditor(parent, name, label, value = "", options = {})
   {
-    const id = this.getNextId();
-    const groupElem = Controls.addField(parent, id, label, "code_editor");
+    const groupElem = document.createElement("div");
+    groupElem.className = "code_editor";
+    parent.appendChild(groupElem);
+
+    const labelElem = document.createElement("span");
+    I18N.set(labelElem, "textContent", label);
+    groupElem.appendChild(labelElem);
 
     if (options.height)
     {
@@ -309,7 +314,6 @@ class Controls
     }
 
     const editorElem = document.createElement("div");
-    editorElem.id = id;
     editorElem.className = "cm-editor-holder";
     groupElem.appendChild(editorElem);
 

@@ -55,6 +55,7 @@ export const translations =
   "label.doc_ref_url" : "Url del documento:",
   "label.doc_ref_description" : "Descripción:",
   "label.link_models" : "Enlazar modelos",
+  "label.keep_pov" : "Mantener punto de vista",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",

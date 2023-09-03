@@ -55,6 +55,7 @@ export const translations =
   "label.doc_ref_url" : "Document url:",
   "label.doc_ref_description" : "Description:",
   "label.link_models" : "Link models",
+  "label.keep_pov" : "Keep point of view",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",

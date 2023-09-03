@@ -9,6 +9,7 @@ import { Tree } from "../ui/Tree.js";
 import { IFC } from "../io/ifc/IFC.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Controls } from "../ui/Controls.js";
+import { GestureHandler } from "../ui/GestureHandler.js";
 import * as THREE from "../lib/three.module.js";
 
 class BIMLayoutTool extends Tool
@@ -22,22 +23,22 @@ class BIMLayoutTool extends Tool
     this.className = "bim_layout";
     this.setOptions(options);
 
-    this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerDown = this.onPointerDown.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
     this._onWheel = this.onWheel.bind(this);
     this._animate = this.animate.bind(this);
 
-    this.rotateStart = new THREE.Vector2();
-    this.rotateEnd = new THREE.Vector2();
-    this.rotateVector = new THREE.Vector2();
-
     this.phi = 0;
     this.theta = 0;
-    this.offsetFactor = 1;
+    this.offsetFactors = {
+      "IfcSite" : 1,
+      "IfcBuilding" : 1,
+      "IfcBuildingStorey": 1,
+      "IfcSpace" : 1
+    };
 
     this.selectedObject = null;
     this.createPanel();
+
+    this.gestureHandler = new GestureHandler(this);
   }
 
   createPanel()
@@ -55,6 +56,9 @@ class BIMLayoutTool extends Tool
     this.linkModelsCheckbox = Controls.addCheckBoxField(this.layoutPanelElem,
       "link_models", "bim|label.link_models", false, "option_block");
 
+    this.keepPointOfViewCheckbox = Controls.addCheckBoxField(this.layoutPanelElem,
+      "keep_pov", "bim|label.keep_pov", false, "option_block");
+
     this.layoutTree = new Tree(this.layoutPanelElem);
   }
 
@@ -70,7 +74,7 @@ class BIMLayoutTool extends Tool
     const application = this.application;
     const container = application.container;
 
-    container.addEventListener('pointerdown', this._onPointerDown, false);
+    this.gestureHandler.enable();
     container.addEventListener('wheel', this._onWheel, false);
     application.addEventListener('animation', this._animate);
 
@@ -136,15 +140,15 @@ class BIMLayoutTool extends Tool
       site = sites[s];
 
       const siteTreeNode = layoutTree.addNode(site.object.name, event =>
-        this.focusOnObject(event, site.object, "IfcSite", "front"), "IfcSite");
+        this.focusOnObject(event, site.object, "front"), "IfcSite");
 
       for (let b = 0; b < site.buildings.length; b++)
       {
         let building = site.buildings[b];
 
         const buildingTreeNode = siteTreeNode.addNode(building.object.name,
-          event => this.focusOnObject(event, building.object, "IfcBuilding",
-          "front"), "IfcBuilding");
+          event => this.focusOnObject(event, building.object, "front"),
+          "IfcBuilding");
 
         // sort storeys
         building.storeys.sort((s1, s2) =>
@@ -164,8 +168,8 @@ class BIMLayoutTool extends Tool
           let storey = building.storeys[st];
 
           const storeyTreeNode = buildingTreeNode.addNode(storey.object.name,
-            event => this.focusOnObject(event, storey.object,
-            "IfcBuildingStorey", "top"), "IfcBuildingStorey");
+            event => this.focusOnObject(event, storey.object, "top"),
+            "IfcBuildingStorey");
 
           // sort spaces
           storey.spaces.sort((s1, s2) =>
@@ -185,8 +189,8 @@ class BIMLayoutTool extends Tool
             let space = storey.spaces[sp];
 
             const spaceTreeNode = storeyTreeNode.addNode(space.object.name,
-              event => this.focusOnObject(event, space.object,
-              "IfcSpace", "top"), "IfcSpace");
+              event => this.focusOnObject(event, space.object, "top"),
+              "IfcSpace");
           }
         }
       }
@@ -200,7 +204,8 @@ class BIMLayoutTool extends Tool
 
     const application = this.application;
     const container = application.container;
-    container.removeEventListener('pointerdown', this._onPointerDown, false);
+
+    this.gestureHandler.disable();
     container.removeEventListener('wheel', this._onWheel, false);
     application.removeEventListener('animation', this._animate);
   }
@@ -225,50 +230,28 @@ class BIMLayoutTool extends Tool
 
       application.scene.updateMatrixWorld(true);
       ObjectUtils.zoomAll(camera, this.selectedObject, aspect,
-        this.selectedObject !== application.baseObject, this.offsetFactor);
+        this.selectedObject !== application.baseObject, this.getOffsetFactor());
       application.notifyObjectsChanged(camera, this);
 
       this.updateCamera = false;
     }
   }
 
-  onPointerDown(event)
+  onDrag(position, direction, pointerCount, button, pointerType)
   {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
-    const container = this.application.container;
-    container.addEventListener('pointermove', this._onPointerMove, false);
-    container.addEventListener('pointerup', this._onPointerUp, false);
-
-    this.rotateStart = this.getEventPosition(event);
-  }
-
-  onPointerMove(event)
-  {
-    if (!this.isCanvasEvent(event)) return;
-
-    event.preventDefault();
-
-    let pointerPosition = this.getEventPosition(event);
-
-    this.rotateEnd.copy(pointerPosition);
-    this.rotateVector.subVectors(this.rotateEnd, this.rotateStart);
-    this.rotateStart.copy(this.rotateEnd);
-
-    this.theta -= 0.005 * this.rotateVector.x;
-    this.phi -= 0.005 * this.rotateVector.y;
+    this.theta -= 0.005 * direction.x;
+    this.phi -= 0.005 * direction.y;
     if (this.phi < 0) this.phi = 0;
     else if (this.phi > Math.PI) this.phi = Math.PI;
     this.updateCamera = true;
   }
 
-  onPointerUp(event)
+  onZoom(position, delta)
   {
-    const container = this.application.container;
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    container.removeEventListener('pointerup', this._onPointerUp, false);
+    delta *= 0.005;
+    let factor = this.getOffsetFactor();
+    this.setOffsetFactor(factor + delta);
+    this.updateCamera = true;
   }
 
   onWheel(event)
@@ -281,18 +264,34 @@ class BIMLayoutTool extends Tool
 
     if (event.wheelDelta)
     { // WebKit / Opera / Explorer 9
-      delta = event.wheelDelta * 0.001;
+      delta = -event.wheelDelta * 0.001;
     }
     else if (event.detail)
     { // Firefox
-      delta = -0.05 * event.detail;
+      delta = 0.05 * event.detail;
     }
 
     if (delta !== 0)
     {
-      this.offsetFactor += delta;
+      let factor = this.getOffsetFactor();
+      this.setOffsetFactor(factor + delta);
       this.updateCamera = true;
     }
+  }
+
+  setOffsetFactor(factor)
+  {
+    let ifcClassName = this.selectedObject?.userData.IFC?.ifcClassName;
+    if (ifcClassName)
+    {
+      this.offsetFactors[ifcClassName] = factor;
+    }
+  }
+
+  getOffsetFactor()
+  {
+    let ifcClassName = this.selectedObject?.userData.IFC?.ifcClassName;
+    return ifcClassName ? this.offsetFactors[ifcClassName] : 1;
   }
 
   showAll()
@@ -334,7 +333,7 @@ class BIMLayoutTool extends Tool
     application.selection.set(application.baseObject);
   }
 
-  focusOnObject(event, object, ifcClassName, view)
+  focusOnObject(event, object, view)
   {
     event.preventDefault();
     const application = this.application;
@@ -363,9 +362,7 @@ class BIMLayoutTool extends Tool
 
       application.baseObject.traverse(currObj =>
       {
-        if (currObj.name === object.name ||
-            currObj.userData?.IFC?.GlobalId === object.userData?.IFC?.GlobalId ||
-            currObj.userData?.IFC?.Elevation === object.userData?.IFC?.Elevation)
+        if (this.isObjectRelatedTo(currObj, object))
         {
           linkedObjects.push(currObj);
         }
@@ -387,9 +384,13 @@ class BIMLayoutTool extends Tool
 
           for (let linkedObject of linkedObjects)
           {
-            currObj.visible ||= currObj === linkedObject ||
+            if (currObj === linkedObject ||
               ObjectUtils.isObjectDescendantOf(currObj, linkedObject) ||
-              ObjectUtils.isObjectDescendantOf(linkedObject, currObj);
+              ObjectUtils.isObjectDescendantOf(linkedObject, currObj))
+            {
+              currObj.visible = true;
+              break;
+            }
           }
 
           if (oldVisibility !== currObj.visible)
@@ -408,13 +409,20 @@ class BIMLayoutTool extends Tool
       angle = THREE.MathUtils.radToDeg(euler.z);
     }
 
-    if (view === 'top')
+    if (this.keepPointOfViewCheckbox.checked)
     {
-      this.pointCamera(0, angle);
+      this.updateCamera = true;
     }
-    else if (view === 'front')
+    else
     {
-      this.pointCamera(90, angle);
+      if (view === 'top')
+      {
+        this.pointCamera(0, angle);
+      }
+      else if (view === 'front')
+      {
+        this.pointCamera(90, angle);
+      }
     }
     this.selectedObject = object;
     application.selection.set(object);
@@ -425,6 +433,24 @@ class BIMLayoutTool extends Tool
     this.phi = THREE.MathUtils.degToRad(phiDeg);
     this.theta = THREE.MathUtils.degToRad(tethaDeg);
     this.updateCamera = true;
+  }
+
+  isObjectRelatedTo(object1, object2)
+  {
+    if (object1.userData.IFC && object2.userData.IFC)
+    {
+      const IFC1 = object1.userData.IFC;
+      const IFC2 = object2.userData.IFC;
+
+      if (IFC1.Name === IFC2.Name) return true;
+
+      if (IFC1.GlobalId !== undefined && IFC1.GlobalId === IFC2.GlobalId)
+        return true;
+
+      if (IFC1.Elevation !== undefined && IFC1.Elevation === IFC2.Elevation)
+        return true;
+    }
+    return false;
   }
 }
 

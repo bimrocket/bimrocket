@@ -27,9 +27,8 @@
         margin:0;
         background: #fafafa;
       }
-      .topbar {display: none;}
-      .scheme-container {display: none;}
-      
+      .topbar { display: none; }
+
     </style>
   </head>
 
@@ -44,6 +43,7 @@
       const ui = SwaggerUIBundle({
         url: "../openapi.json",
         dom_id: '#swagger-ui',
+        docExpansion: "none",
         deepLinking: true,
         presets: [
           SwaggerUIBundle.presets.apis,
@@ -55,7 +55,6 @@
         layout: "StandaloneLayout",
         onComplete: function() {
          // "basicAuth" is the key name of the security scheme in securityDefinitions
-          ui.preauthorizeBasic("basicAuth", "username", "password");
         }
       });
       // End Swagger UI call region

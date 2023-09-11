@@ -13,5 +13,12 @@
     },
     "version": "1.0"
   },
-  "servers" : [{ "url" : "api" }]
+  "servers" : [{ "url" : "api" }],
+  "components" :
+  {
+    "securitySchemes" : {
+      "basicAuth" : { "type" : "http", "scheme" : "basic" }
+    }
+  },
+  "security" : [{ "basicAuth" : [] }]
 }

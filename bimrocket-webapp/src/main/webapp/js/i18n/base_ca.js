@@ -199,6 +199,10 @@ export const translations =
   "tool.script.label" : "Programes",
   "tool.script.name" : "Programa:",
 
+  "tool.report.label" : "Informes",
+  "tool.report.name" : "Informe:",
+  "tool.report.rules" : "Regles:",
+
   "tool.orbit.label" : "Orbita",
   "tool.orbit.help" : "Rotació: arrossega amb botó esquerre, Desplaça: arrossega amb botó dret o 2 punters, Zoom: gira roda, arrossega amb botó central o zoom amb 2 punters.",
 
@@ -444,6 +448,7 @@ export const translations =
   "title.remove_controller" : "Esborra controlador",
   "title.properties" : "Propietats",
   "title.script_editor" : "Editor de codi",
+  "title.report_editor" : "Editor d'informes",
   "title.object_builder" : "Constructor d'objecte",
   "title.select_by_property" : "Selecció per propietats",
   "title.select_by_qrcode" : "Selecció per codi QR",
@@ -485,6 +490,7 @@ export const translations =
   "message.instance_count" : count => `Instàncies: ${count}`,
   "message.modeled_triangle_count" : count => `Triangles modelitzats: ${count}`,
   "message.rendered_triangle_count" : count => `Triangles renderitzats: ${count}`,
+  "message.report_summary" : (errors, warnings) => `Errors: ${errors}, avisos: ${warnings}`,
 
   "message.invalid_credentials" : "Credencials incorrectes.",
   "message.access_denied" : "Accés denegat.",

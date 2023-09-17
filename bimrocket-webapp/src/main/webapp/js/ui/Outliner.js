@@ -6,6 +6,8 @@
 
 import { Panel } from "./Panel.js";
 import { Tree } from "./Tree.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
+
 import * as THREE from "../lib/three.module.js";
 
 class Outliner extends Panel
@@ -206,21 +208,6 @@ class Outliner extends Panel
     }
   }
 
-  getObjectClassNames(object)
-  {
-    let classList = [ object.type ];
-
-    if (object.userData.IFC && object.userData.IFC.ifcClassName)
-    {
-      classList.push(object.userData.IFC.ifcClassName);
-    }
-    if (object.builder)
-    {
-      classList.push(object.builder.constructor.name);
-    }
-    return classList.join(" ");
-  }
-
   updateNodeStyle(treeNode)
   {
     const object = treeNode.value;
@@ -233,7 +220,7 @@ class Outliner extends Panel
       treeNode.addClass("hidden");
     }
     let expanded = treeNode.isExpanded();
-    treeNode.itemElem.className = this.getObjectClassNames(object);
+    treeNode.itemElem.className = ObjectUtils.getObjectClassNames(object);
     if (expanded)
     {
       treeNode.expand();

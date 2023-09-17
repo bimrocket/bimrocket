@@ -61,6 +61,7 @@ import { StatisticsTool } from "../tools/StatisticsTool.js";
 import { StartControllersTool } from "../tools/StartControllersTool.js";
 import { StopControllersTool } from "../tools/StopControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
+import { ReportTool } from "../tools/ReportTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
 import { ChatGPTTool } from "../tools/ChatGPTTool.js";
@@ -279,6 +280,7 @@ export function load(application)
   const resetMatrixTool = new ResetMatrixTool(application);
   const smoothEdgesTool = new SmoothEdgesTool(application);
   const scriptTool = new ScriptTool(application);
+  const reportTool = new ReportTool(application);
   const rebuildTool = new RebuildTool(application);
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
@@ -502,6 +504,7 @@ export function load(application)
   application.addTool(addPointLightTool);
   application.addTool(addSpotLightTool);
   application.addTool(scriptTool);
+  application.addTool(reportTool);
   application.addTool(removeTool);
   application.addTool(copyTool);
   application.addTool(clonerTool);
@@ -636,6 +639,7 @@ export function load(application)
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
+  designMenu.addMenuItem(reportTool);
 
   const measureMenu = menuBar.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
@@ -675,6 +679,7 @@ export function load(application)
   toolBar.addToolButton(focusSelectionTool);
   toolBar.addToolButton(sectionTool);
   toolBar.addToolButton(scriptTool);
+  toolBar.addToolButton(reportTool);
   toolBar.addToolButton(measureLengthTool);
   toolBar.addToolButton(drawTool);
   toolBar.addToolButton(paintTool);
@@ -689,6 +694,7 @@ export function load(application)
   // restore services
   application.restoreServices("model");
   application.restoreServices("script");
+  application.restoreServices("report");
 
   // create default services
   if (application.services.model === undefined)
@@ -703,6 +709,13 @@ export function load(application)
     const cloudfs = new WebdavService("scripts",
       "Scripts", "/bimrocket-server/api/cloudfs/scripts");
     application.addService(cloudfs, "script", false);
+  }
+
+  if (application.services.report === undefined)
+  {
+    const cloudfs = new WebdavService("reports",
+      "Reports", "/bimrocket-server/api/cloudfs/reports");
+    application.addService(cloudfs, "report", false);
   }
 
   // register bundles and locales

@@ -232,6 +232,21 @@ class ObjectUtils
     return changed;
   }
 
+  static getObjectClassNames(object)
+  {
+    let classList = [ object.type ];
+
+    if (object.userData.IFC && object.userData.IFC.ifcClassName)
+    {
+      classList.push(object.userData.IFC.ifcClassName);
+    }
+    if (object.builder)
+    {
+      classList.push(object.builder.constructor.name);
+    }
+    return classList.join(" ");
+  }
+
   static findObjects(condition, baseObject, nested = false)
   {
     const objects = [];
@@ -818,7 +833,7 @@ class ObjectUtils
     }
     return options;
   }
-  
+
   static isExportable(object)
   {
     if (object.name && object.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))

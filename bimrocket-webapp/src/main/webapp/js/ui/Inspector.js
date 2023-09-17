@@ -196,7 +196,7 @@ class Inspector extends Panel
     {
       let object = objects[i];
       let label = object.name || object.id;
-      let className = this.getObjectClassNames(object);
+      let className = ObjectUtils.getObjectClassNames(object);
       selectionTree.addNode(label,
         event =>
         {
@@ -482,21 +482,6 @@ class Inspector extends Panel
         this.markAnchoredSection(anchoredSectionElem);
       }
     }
-  }
-
-  getObjectClassNames(object)
-  {
-    let classList = [ object.type ];
-
-    if (object.userData.IFC && object.userData.IFC.ifcClassName)
-    {
-      classList.push(object.userData.IFC.ifcClassName);
-    }
-    if (object.builder)
-    {
-      classList.push(object.builder.constructor.name);
-    }
-    return classList.join(" ");
   }
 
   updateToolBar()

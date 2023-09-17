@@ -259,6 +259,32 @@
   background-color: #e0e0e0;
 }
 
+.report_panel
+{
+  padding: 2px;
+  text-align: left;
+}
+
+.report_panel .tree li.ok
+{
+  background-image: url(images/report/ok.svg);
+}
+
+.report_panel .tree li.error
+{
+  background-image: url(images/report/error.svg);
+}
+
+.report_panel .tree li.warn
+{
+  background-image: url(images/report/warn.svg);
+}
+
+.report_panel .tree li.info
+{
+  background-image: url(images/report/info.svg);
+}
+
 .tool_button.cloud_explorer
 {
   background-image: url(images/tools/cloud_explorer.svg);
@@ -352,6 +378,11 @@
 .tool_button.script
 {
   background-image: url(images/tools/script.svg);
+}
+
+.tool_button.report
+{
+  background-image: url(images/tools/report.svg);
 }
 
 .tool_button.measure_length
@@ -640,6 +671,18 @@ div.option_block input[name=decimals]
 }
 
 .dialog .body div.script_name > input[type=text]
+{
+  display: inline-block;
+  width: calc(100% - 80px);
+}
+
+.dialog .body div.report_name > label
+{
+  display: inline-block;
+  width: 80px;
+}
+
+.dialog .body div.report_name > input[type=text]
 {
   display: inline-block;
   width: calc(100% - 80px);

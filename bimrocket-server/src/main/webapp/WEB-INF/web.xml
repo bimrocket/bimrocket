@@ -60,7 +60,7 @@
   </context-param>
   <context-param>
     <param-name>cloudfs.directories</param-name>
-    <param-value>models,scripts</param-value>
+    <param-value>models,scripts,reports</param-value>
   </context-param>
 
   <context-param>

@@ -199,6 +199,10 @@ export const translations =
   "tool.script.label" : "Scripts",
   "tool.script.name" : "Script:",
 
+  "tool.report.label" : "Reports",
+  "tool.report.name" : "Report:",
+  "tool.report.rules" : "Rules:",
+
   "tool.orbit.label" : "Orbit",
   "tool.orbit.help" : "Rotate: drag with left button, Pan: drag with right button or 2 pointers, Zoom: spin wheel, drag with middle button or zoom with 2 pointers.",
 
@@ -444,6 +448,7 @@ export const translations =
   "title.remove_controller" : "Remove controller",
   "title.properties" : "Properties",
   "title.script_editor" : "Script editor",
+  "title.report_editor" : "Report editor",
   "title.object_builder" : "Object builder",
   "title.select_by_property" : "Selection by properties",
   "title.select_by_qrcode" : "Selection by QR code",
@@ -485,6 +490,7 @@ export const translations =
   "message.instance_count" : count => `Instances: ${count}`,
   "message.modeled_triangle_count" : count => `Modeled triangles: ${count}`,
   "message.rendered_triangle_count" : count => `Rendered triangles: ${count}`,
+  "message.report_summary" : (errors, warnings) => `Errors: ${errors}, warnings: ${warnings}`,
 
   "message.invalid_credentials" : "Invalid credentials.",
   "message.access_denied" : "Access denied.",

@@ -5,11 +5,10 @@
 
 .service_panel
 {
-  position:absolute;
-  top:4px;
-  left:4px;
-  right:4px;
-  bottom:4px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height:100%;
   -webkit-user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
@@ -18,23 +17,21 @@
 
 .service_panel .header
 {
-  width:100%;
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:22px;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: row;
+  margin:2px;
+  margin-bottom: 0;
+  align-items: center;
+  column-gap: 2px;
 }
 
 .service_panel > .header > .image_button
 {
-  position:absolute;
-  top:0;
-  bottom:0;
+  flex-grow: 0;
   width: 20px;
   height: 20px;
   margin: 0px;
-  padding:0;
   background-repeat: no-repeat;
   background-size: 16px 16px;
   background-position: center center;
@@ -69,11 +66,7 @@
 
 .service_panel > .header > .directory
 {
-  position:absolute;
-  left:48px;
-  right:0;
-  top:0;
-  bottom:0;
+  flex-grow: 1;
   font-size:13px;
   font-weight:normal;
   text-align: left;
@@ -87,15 +80,10 @@
 
 .service_panel > .path_entries
 {
+  flex-grow: 1;
   padding-left: 0;
-  position: absolute;
-  top:24px;
-  left:0;
-  right:0;
-  bottom:52px;
   overflow-y: auto;
-  margin-top:0;
-  margin-bottom:0;
+  margin:2px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
@@ -105,20 +93,12 @@
 
 .service_panel > .footer
 {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:50px;
+  width:100%;
+  flex-grow: 0;
 }
 
 .service_panel > .footer > .buttons_panel
 {
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:0;
-  right:0;
   text-align: center;
 }
 

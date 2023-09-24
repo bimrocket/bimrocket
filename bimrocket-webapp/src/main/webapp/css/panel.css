@@ -132,6 +132,7 @@ div.panel > .body
 {
   flex-grow: 1;
   overflow: auto;
+  height: 100%;
 }
 
 div.panel > .body.center
@@ -169,7 +170,7 @@ div.resizer:hover
 {
   div.panel.show
   {
-    display:block;
+    display:flex;
     left: 0;
     right: 0;
     width: auto;

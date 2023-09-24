@@ -46,10 +46,13 @@ class Panel
     I18N.set(this.maximizeButtonElem, "title", "button.maximize");
     this.headerElem.appendChild(this.maximizeButtonElem);
 
-    this.titleElem = document.createElement("a");
+    this.titleElem = document.createElement("div");
     this.titleElem.className = "title";
-    this.titleElem.href = "#";
     this.headerElem.appendChild(this.titleElem);
+
+    this.titleLinkElem = document.createElement("a");
+    this.titleLinkElem.href = "#";
+    this.titleElem.appendChild(this.titleLinkElem);
 
     this.closeButtonElem = document.createElement("button");
     this.closeButtonElem.className = "close";
@@ -58,7 +61,7 @@ class Panel
     I18N.set(this.closeButtonElem, "title", "button.close");
     this.headerElem.appendChild(this.closeButtonElem);
 
-    this.titleElem.addEventListener("click", event =>
+    this.titleLinkElem.addEventListener("click", event =>
       { event.preventDefault(); this.zoom(); }, false);
 
     this.minimizeButtonElem.addEventListener("click", event =>
@@ -77,13 +80,13 @@ class Panel
 
   get title()
   {
-    return this.titleElem.innerHTML;
+    return this.titleLinkElem.innerHTML;
   }
 
   set title(title)
   {
-    this.titleElem.textContent = title;
-    I18N.set(this.titleElem, "textContent", title);
+    this.titleLinkElem.textContent = title;
+    I18N.set(this.titleLinkElem, "textContent", title);
   }
 
   get position()

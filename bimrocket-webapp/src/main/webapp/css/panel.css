@@ -1,7 +1,10 @@
 div.panel
 {
+  display: flex;
+  flex-direction: column;
   text-align: center;
   border: 1px solid #a0a0a0;
+  padding: 1px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
@@ -30,7 +33,7 @@ div.panel.right
 
 div.panel.show
 {
-  display:block;
+  display:flex;
 }
 
 div.panel.show > .header > button.maximize
@@ -40,7 +43,7 @@ div.panel.show > .header > button.maximize
 
 div.panel.show > .header > button.minimize
 {
-  display: block;
+  display: flex;
 }
 
 div.panel.show.minimized > .header > button.minimize
@@ -50,30 +53,33 @@ div.panel.show.minimized > .header > button.minimize
 
 div.panel.show.minimized > .header > button.maximize
 {
-  display: block;
+  display: flex;
 }
 
 div.panel > .header
 {
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:24px;
+  flex-grow: 0;
+  align-items: center;
   border-bottom: 1px solid #e0e0e0;
-  line-height: 24px;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 div.panel > .header > .title
 {
-  line-height: 24px;
+  flex-grow: 1;
+}
+
+div.panel > .header > .title > a
+{
   font-weight: bold;
   text-decoration: none;
   color:#404040;
 }
 
-div.panel > .header > .title:focus
+div.panel > .header > .title > a:focus
 {
   outline:1px dotted black;
   outline-offset: 2px;
@@ -81,9 +87,7 @@ div.panel > .header > .title:focus
 
 div.panel > .header > button
 {
-  position:absolute;
-  top:0;
-  bottom:0;  
+  flex-grow: 0;
   width: 16px;
   height: 16px;
   margin: 4px;
@@ -101,25 +105,22 @@ div.panel > .header > button
 
 div.panel > .header > button.minimize
 {
-  left:0;
   background-image: url(images/minimize.svg);
 }
 
 div.panel > .header > button.maximize
 {
-  left:0;
   background-image: url(images/maximize.svg);
 }
 
 div.panel > .header > button.close
 {
-  right:0;
   background-image: url(images/close.svg);
 }
 
 div.panel > .header > button:hover
 {
-  background-color: #ffb0b0; 
+  background-color: #ffb0b0;
 }
 
 div.panel > .header > button:focus
@@ -129,11 +130,7 @@ div.panel > .header > button:focus
 
 div.panel > .body
 {
-  position:absolute;
-  top:25px;
-  left:0;
-  right:0;
-  bottom:0;
+  flex-grow: 1;
   overflow: auto;
 }
 
@@ -141,7 +138,7 @@ div.panel > .body.center
 {
   display: flex;
   justify-content: center;
-  align-items: center;  
+  align-items: center;
 }
 
 div.panel > .body.padding
@@ -165,7 +162,7 @@ div.resizer
 
 div.resizer:hover
 {
-  cursor: col-resize;  
+  cursor: col-resize;
 }
 
 @media all and (max-width : 768px)

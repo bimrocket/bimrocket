@@ -2,31 +2,16 @@
 
 div.inspector_card
 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
 }
 
 div.inspector_toolbar
 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 26px;
   border-bottom: 1px solid #b0b0b0;
   overflow: hidden;
 }
 
 div.inspector_properties
 {
-  position: absolute;
-  top: 26px;
-  left: 0;
-  right: 0;
-  bottom: 0;
   overflow: auto;
 }
 

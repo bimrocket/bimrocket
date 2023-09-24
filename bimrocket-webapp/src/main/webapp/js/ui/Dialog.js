@@ -61,13 +61,13 @@ class Dialog
     this.footerElem.className = "footer";
     this.dialogElem.appendChild(this.footerElem);
 
-    this.minimizeButtonElem.addEventListener("click",
+    this.minimizeButtonElem.addEventListener("pointerdown",
       () => this.maximized = false);
 
-    this.maximizeButtonElem.addEventListener("click",
+    this.maximizeButtonElem.addEventListener("pointerdown",
       () => this.maximized = true);
 
-    this.closeButtonElem.addEventListener("click",
+    this.closeButtonElem.addEventListener("pointerdown",
       () => this.hide());
 
     this.setSize(300, 200);

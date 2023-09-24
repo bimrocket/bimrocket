@@ -46,6 +46,11 @@ div.panel.show > .header > button.minimize
   display: flex;
 }
 
+div.panel.show.minimized > .header
+{
+  border-bottom: none;
+}
+
 div.panel.show.minimized > .header > button.minimize
 {
   display: none;

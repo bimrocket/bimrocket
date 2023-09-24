@@ -962,6 +962,7 @@ div.script_code
   border: 1px solid #c0c0c0;
   border-radius: 2px;
   padding: 4px;
+  height: 50%;
 }
 
 .property_selector .property_toolbar

@@ -43,7 +43,7 @@ class PropertySelectorDialog extends Dialog
     this.editorView = Controls.addCodeEditor(this.mainElem, "prop_sel_editor",
       "label.expression", "", {
         "language" : "javascript",
-        "height" : "80px"
+        "height" : "50%"
       });
 
     this.selectValues = options.selectValues === true;

@@ -11,13 +11,38 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  max-width: 98%;
-  max-height: 98%;
-  animation: fade_in_dialog;
+  max-width: calc(100% - 8px);
+  max-height: calc(100% - 8px);
+  animation-name: fade_in_dialog;
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog.maximized
+{
+  top: 4px;
+  left: 4px;
+  transform: none;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+}
+
+div.dialog.maximized > .header > button.maximize
+{
+  display: none;
+}
+
+div.dialog.maximized > .header > button.minimize
+{
+  display: block;
+}
+
+div.dialog > .header > button.minimize
+{
+  display: none;
 }
 
 .dialog_curtain
@@ -44,16 +69,14 @@
 
 .dialog > .header
 {
-  position: absolute;
-  top:0;
-  left:0;
-  right:0;
-  height: 24px;
+  flex-grow: 0;
+  padding: 1px;
+  flex-wrap: wrap;
   background-color: white;
   border-bottom: 1px solid #e0e0e0;
-  line-height: 24px;
   font-weight: bold;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   -webkit-user-select: none;
@@ -64,22 +87,16 @@
 
 .dialog .body
 {
-  position: absolute;
-  top:25px;
-  left:0;
-  right:0;
-  bottom:32px;
+  flex-grow: 1;
   overflow:auto;
   padding: 6px;
 }
 
 .dialog > .footer
 {
-  position: absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height: 32px;
+  flex-grow: 0;
+  flex-wrap: wrap;
+  padding: 4px;
   display: flex;
   border-top: 1px solid #e0e0e0;
   align-items: center;
@@ -88,6 +105,50 @@
   -moz-user-select: none;
   -khtml-user-select: none;
   -ms-user-select: none;
+}
+
+div.dialog > .header > .title
+{
+  flex-grow: 1;
+  text-align: center;
+}
+
+div.dialog > .header > button
+{
+  flex-grow: 0;
+  width: 16px;
+  height: 16px;
+  margin: 4px;
+  padding:0;
+  background-image: url(images/close.svg);
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  background-position: center center;
+  cursor: pointer;
+  border-radius: 2px;
+  background-color: #f6f6f6;
+  border:none;
+  box-shadow: none;
+}
+
+div.dialog > .header > button.minimize
+{
+  background-image: url(images/minimize.svg);
+}
+
+div.dialog > .header > button.maximize
+{
+  background-image: url(images/maximize.svg);
+}
+
+div.dialog > .header > button:hover
+{
+  background-color: #ffb0b0;
+}
+
+div.dialog > .header > button:focus
+{
+  outline:1px dotted black;
 }
 
 .dialog .body > div
@@ -266,3 +327,4 @@
   0% {opacity: 0; visibility: visible; }
   100% {opacity: 0.4; }
 }
+

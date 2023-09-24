@@ -13,6 +13,9 @@ class Dialog
   {
     this.title = title;
     this.i18n = null;
+    this._maximized = false;
+    this._width = 300;
+    this._height = 200;
 
     this.curtainElem = document.createElement("div");
     this.curtainElem.className = "dialog_curtain";
@@ -21,9 +24,34 @@ class Dialog
     this.dialogElem.className = "dialog";
 
     this.headerElem = document.createElement("div");
-    I18N.set(this.headerElem, "textContent", title);
     this.headerElem.className = "header";
     this.dialogElem.appendChild(this.headerElem);
+
+    this.minimizeButtonElem = document.createElement("button");
+    this.minimizeButtonElem.className = "minimize";
+    I18N.set(this.minimizeButtonElem, "aria-label", "button.minimize");
+    I18N.set(this.minimizeButtonElem, "alt", "button.minimize");
+    I18N.set(this.minimizeButtonElem, "title", "button.minimize");
+    this.headerElem.appendChild(this.minimizeButtonElem);
+
+    this.maximizeButtonElem = document.createElement("button");
+    this.maximizeButtonElem.className = "maximize";
+    I18N.set(this.maximizeButtonElem, "aria-label", "button.maximize");
+    I18N.set(this.maximizeButtonElem, "alt", "button.maximize");
+    I18N.set(this.maximizeButtonElem, "title", "button.maximize");
+    this.headerElem.appendChild(this.maximizeButtonElem);
+
+    this.titleElem = document.createElement("div");
+    this.titleElem.className = "title";
+    I18N.set(this.titleElem, "textContent", title);
+    this.headerElem.appendChild(this.titleElem);
+
+    this.closeButtonElem = document.createElement("button");
+    this.closeButtonElem.className = "close";
+    I18N.set(this.closeButtonElem, "aria-label", "button.close");
+    I18N.set(this.closeButtonElem, "alt", "button.close");
+    I18N.set(this.closeButtonElem, "title", "button.close");
+    this.headerElem.appendChild(this.closeButtonElem);
 
     this.bodyElem = document.createElement("div");
     this.bodyElem.className = "body";
@@ -33,13 +61,23 @@ class Dialog
     this.footerElem.className = "footer";
     this.dialogElem.appendChild(this.footerElem);
 
+    this.minimizeButtonElem.addEventListener("click",
+      () => this.maximized = false);
+
+    this.maximizeButtonElem.addEventListener("click",
+      () => this.maximized = true);
+
+    this.closeButtonElem.addEventListener("click",
+      () => this.hide());
+
     this.setSize(300, 200);
   }
 
   setSize(width, height)
   {
-    this.dialogElem.style.width = width + "px";
-    this.dialogElem.style.height = height + "px";
+    this._width = width;
+    this._height = height;
+    this.updateLayout();
     return this;
   }
 
@@ -81,6 +119,34 @@ class Dialog
       if (this.onHide) this.onHide();
     }
     return this;
+  }
+
+  get maximized()
+  {
+    this._maximized;
+    this.updateLayout();
+  }
+
+  set maximized(maximized)
+  {
+    this._maximized = maximized;
+    this.updateLayout();
+  }
+
+  updateLayout()
+  {
+    if (this._maximized)
+    {
+      this.dialogElem.classList.add("maximized");
+      this.dialogElem.style.width = this.dialogElem.style.maxWidth;
+      this.dialogElem.style.height = this.dialogElem.style.maxHeight;
+    }
+    else
+    {
+      this.dialogElem.classList.remove("maximized");
+      this.dialogElem.style.width = this._width + "px";
+      this.dialogElem.style.height = this._height + "px";
+    }
   }
 
   addText(text, className)

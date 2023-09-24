@@ -942,67 +942,85 @@ div.script_code
   background-color: #e0e0e0;
 }
 
-.property_selector_scroll
+.property_selector
 {
-  height: 40%;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 8px);
+  row-gap: 4px;
+}
+
+.property_selector .label
+{
+  flex-grow: 0;
+}
+
+.property_selector .scroll
+{
+  flex-grow: 1;
   overflow: auto;
   border: 1px solid #c0c0c0;
   border-radius: 2px;
   padding: 4px;
 }
 
-.property_selector_tree .selected
+.property_selector .property_toolbar
 {
+  flex-grow: 0;
+  text-align: center;
+}
+
+.property_selector .property_toolbar button
+{
+  min-width: 24px;
+}
+
+.property_selector .tree .selected
+{
+  flex-grow: 1;
   background-color: #F0A0A0;
 }
 
-.property_selector_tree li.property_set
+.property_selector .tree li.property_set
 {
   background-image: url(images/collection.svg);
 }
 
-.property_selector_tree li.string
+.property_selector .tree li.string
 {
   background-image: url(images/inspector/string.svg);
   color: blue;
 }
 
-.property_selector_tree li.boolean
+.property_selector .tree li.boolean
 {
   background-image: url(images/inspector/boolean.svg);
   color: #008000;
 }
 
-.property_selector_tree li.number
+.property_selector .tree li.number
 {
   background-image: url(images/inspector/number.svg);
 }
 
-.property_selector_tree li.string a
+.property_selector .tree li.string a
 {
   color: #0000ff;
 }
 
-.property_selector_tree li.boolean a
+.property_selector .tree li.boolean a
 {
   color: #008080;
 }
 
-.property_selector_tree li.number a
+.property_selector .tree li.number a
 {
   color: #404040;
 }
 
-.property_selector_toolbar
+.property_selector .code_editor
 {
-  height: 30px;
-  min-height: 30px;
-  text-align: center;
-}
-
-.property_selector_toolbar button
-{
-  min-width: 24px;
+  flex-grow: 1;
 }
 
 .panel_chatgpt .body

@@ -19,26 +19,32 @@ class PropertySelectorDialog extends Dialog
 
     this.setSize(700, 600);
 
+    this.mainElem = document.createElement("div");
+    this.mainElem.className = "property_selector";
+    this.bodyElem.appendChild(this.mainElem);
+
     this.treeLabel = document.createElement("div");
+    this.treeLabel.className = "label";
     I18N.set(this.treeLabel, "textContent", options.treeLabel ||
       "label.selection_by_properties");
-    this.bodyElem.appendChild(this.treeLabel);
+    this.mainElem.appendChild(this.treeLabel);
 
     this.treeScrollElem = document.createElement("div");
-    this.treeScrollElem.className = "property_selector_scroll";
-    this.bodyElem.appendChild(this.treeScrollElem);
+    this.treeScrollElem.className = "scroll";
+    this.mainElem.appendChild(this.treeScrollElem);
 
     this.propertyTree = new Tree(this.treeScrollElem);
-    this.propertyTree.rootsElem.classList.add("property_selector_tree");
+    this.propertyTree.rootsElem.classList.add("tree");
 
     this.toolBarElem = document.createElement("div");
-    this.toolBarElem.className = "property_selector_toolbar";
-    this.bodyElem.appendChild(this.toolBarElem);
+    this.toolBarElem.className = "property_toolbar";
+    this.mainElem.appendChild(this.toolBarElem);
 
-    this.editorView = this.addCodeEditor("prop_sel_editor",
-      "label.expression", "",
-      { "language" : "javascript",
-        "height" : "40%" });
+    this.editorView = Controls.addCodeEditor(this.mainElem, "prop_sel_editor",
+      "label.expression", "", {
+        "language" : "javascript",
+        "height" : "80px"
+      });
 
     this.selectValues = options.selectValues === true;
     this.findPropertiesOnSelection = options.findPropertiesOnSelection || false;

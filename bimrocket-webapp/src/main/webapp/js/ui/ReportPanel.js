@@ -38,7 +38,7 @@ class ReportPanel extends Panel
       let fn = new Function(code + "; return rules;");
       let rules = fn();
 
-      let output = [];
+      let outputs = [];
 
       for (let rule of rules)
       {
@@ -46,7 +46,7 @@ class ReportPanel extends Panel
         let issues = application.findObjects(
           $ => rule.selectExpression($) && rule.checkExpression($));
 
-        output.push({
+        outputs.push({
           "rule" : rule,
           "summary": rule.summary ? rule.summary(issues) : "count: " + issues.length,
           "issues" : issues,
@@ -64,34 +64,35 @@ class ReportPanel extends Panel
       let infoCount = 0;
       let warnCount = 0;
       let errorCount = 0;
-      for (let item of output)
+      for (let output of outputs)
       {
-        let className = item.rule.severity !== "info" &&
-                        item.issues.length === 0 ?
-                        "ok" : item.rule.severity;
+        let className = output.rule.severity !== "info" &&
+                        output.issues.length === 0 ?
+                        "ok" : output.rule.severity;
 
-        let ruleNode = tree.addNode(item.rule.code,
-          () => this.selectIssues(item.issues), className);
+        let ruleNode = tree.addNode(output.rule.code,
+          () => this.highlightIssues(output), className);
 
-        for (let i = 0; i < item.issues.length; i++)
+        for (let i = 0; i < output.issues.length; i++)
         {
-          let issue = item.issues[i];
-          let msg = (i + 1) + ": " + item.rule.message(issue);
+          let issue = output.issues[i];
+          let msg = (i + 1) + ": " + output.rule.message(issue);
           let classNames = ObjectUtils.getObjectClassNames(issue);
           let issueNode = ruleNode.addNode(msg,
-            () => this.selectIssues([issue]), classNames);
+            () => this.highlightIssues(output, i), classNames);
 
           issueNode.linkElem.title = msg;
 
-          if (item.rule.severity === "warn") warnCount++;
-          else if (item.rule.severity === "error") errorCount++;
+          if (output.rule.severity === "warn") warnCount++;
+          else if (output.rule.severity === "error") errorCount++;
           else infoCount++;
         }
-        let perc = Math.round(100 * item.issues.length / item.count);
-        let text = item.rule.code;
-        if (item.count > 0)
+        let perc = Math.round(100 * output.issues.length / output.count);
+        let text = output.rule.code;
+        if (output.count > 0)
         {
-          text += " (" + item.issues.length + " / " + item.count + ") " + perc + "%";
+          text += " (" + output.issues.length + " / " +
+                         output.count + ") " + perc + "%";
         }
         ruleNode.value = text;
       }
@@ -105,11 +106,25 @@ class ReportPanel extends Panel
     }
   }
 
-  selectIssues(issues)
+  highlightIssues(output, issueIndex = -1)
   {
+    const issues = issueIndex === -1 ?
+      output.issues : [output.issues[issueIndex]];
+
     const application = this.application;
     application.selection.set(...issues);
-    application.useTool("center_selection");
+
+    const rule = output.rule;
+
+    if (typeof rule.highlight === "function")
+    {
+      rule.highlight();
+    }
+    else
+    {
+      // default highlight
+      application.useTool("center_selection");
+    }
   };
 }
 

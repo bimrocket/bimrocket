@@ -19,7 +19,7 @@ class Brain4itWatchController extends Controller
     this.module = "your_module";
     this.accessKey = "access_key";
     this.func = "@function_to_call";
-    this.output = 0;
+    this.output = null;
     this.autoStart = false;
 
     this._monitor = null;
@@ -78,6 +78,7 @@ class Brain4itWatchController extends Controller
       if (monitor === undefined)
       {
         monitor = new Brain4it.Monitor(url, module, accessKey);
+        monitor.connectionDelay = 1000;
         Brain4it.monitors[moduleKey] = monitor;
       }
 

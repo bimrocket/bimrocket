@@ -469,17 +469,34 @@ class BRFLoader extends THREE.Loader
   setPropertyValue(element, property, value, model)
   {
     let type = typeof value;
-    if (type === "object" && value)
+    if (type === "object")
     {
-      type = value.type;
-      if (type === undefined)
+      if (value)
       {
-        type = typeof value.z === "number" ? "Vector3" : "Vector2";
+        type = value.type;
+        if (type === undefined)
+        {
+          // when type is undefined assume Vector3/Vector2
+          type = typeof value.z === "number" ? "Vector3" : "Vector2";
+        }
       }
+      else type = null;
     }
 
     let actualValue = element[property];
     let actualType = typeof actualValue;
+    if (actualType === "object")
+    {
+      if (actualValue === null || actualValue === undefined)
+      {
+        actualType = null;
+      }
+      else
+      {
+        actualType = actualValue.constructor.name;
+      }
+    }
+
     if (actualType === "string" && type === "string")
     {
       element[property] = value;
@@ -492,19 +509,19 @@ class BRFLoader extends THREE.Loader
     {
       element[property] = value;
     }
-    else if (actualValue instanceof THREE.Vector3 && type === "Vector3")
+    else if (actualType === "Vector3" && type === "Vector3")
     {
       element[property].set(value.x, value.y, value.z);
     }
-    else if (actualValue instanceof THREE.Vector2 && type === "Vector2")
+    else if (actualType === "Vector2" && type === "Vector2")
     {
       element[property].set(value.x, value.y);
     }
-    else if (actualValue instanceof THREE.Euler && type === "Euler")
+    else if (actualType === "Euler" && type === "Euler")
     {
       element[property].set(value.x, value.y, value.z);
     }
-    else if (actualValue instanceof THREE.Color)
+    else if (actualType === "Color")
     {
       if (type === "string")
       {
@@ -540,6 +557,10 @@ class BRFLoader extends THREE.Loader
     else if (value === null)
     {
       element[property] = null;
+    }
+    else if (actualType === null)
+    {
+      element[property] = value;
     }
     else
     {

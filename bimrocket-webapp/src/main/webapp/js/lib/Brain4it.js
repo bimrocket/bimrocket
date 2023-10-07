@@ -1928,7 +1928,13 @@ Brain4it.Monitor.prototype =
         }
       }
     }
-    this.sendWatchRequest();
+    var scope = this;
+    if (this.timerId !== null) // delayed start
+    {
+      clearTimeout(this.timerId);
+    }
+    this.timerId = setTimeout(function(){scope.sendWatchRequest();},
+      this.connectionDelay);
   },
 
   unwatchAll : function(sync)

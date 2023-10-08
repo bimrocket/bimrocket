@@ -259,7 +259,17 @@ class BRFLoader extends THREE.Loader
 
   parseMaterial(entry)
   {
-    let material = new THREE[entry.type];
+    let material = null;
+
+    try
+    {
+      material = new THREE[entry.type];
+    }
+    catch (ex)
+    {
+      console.warn("Unsupported material type: " + entry.type);
+      return null;
+    }
 
     this.setProperties(material, entry);
 
@@ -534,18 +544,27 @@ class BRFLoader extends THREE.Loader
     }
     else if (type === "#object")
     {
-      if (model.objects[value.id])
-        element[property] = model.objects[value.id]._object;
+      let entry = model.objects[value.id];
+      if (entry && entry._object)
+      {
+        element[property] = entry._object;
+      }
     }
     else if (type === "#geometry")
     {
-      if (model.geometries[value.id])
-        element[property] = model.geometries[value.id]._geometry;
+      let entry = model.geometries[value.id];
+      if (entry && entry._geometry)
+      {
+        element[property] = entry._geometry;
+      }
     }
     else if (type === "#material")
     {
-      if (model.materials[value.id])
-        element[property] = model.materials[value.id]._material;
+      let entry = model.materials[value.id];
+      if (entry && entry._material)
+      {
+        element[property] = entry._material;
+      }
     }
     else if (type === "Texture" && element instanceof THREE.Material)
     {

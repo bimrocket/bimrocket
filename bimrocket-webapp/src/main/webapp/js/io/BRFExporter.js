@@ -177,7 +177,7 @@ class BRFExporter
     }
 
     let material = object.material;
-    if (material)
+    if (material && material.type)
     {
       this.exportMaterial(material, model);
       entry.material = { type : "#material", id : String(material.id) };

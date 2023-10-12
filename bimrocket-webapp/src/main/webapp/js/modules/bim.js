@@ -12,7 +12,7 @@ import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { BCFService } from "../io/BCFService.js";
 import { IOManager } from "../io/IOManager.js";
 import { BundleManager } from "../i18n/BundleManager.js";
-import "../io/ifc/schemas/IFC2x3.js";
+import "../io/ifc/schemas/IFC2X3.js";
 import "../io/ifc/schemas/IFC4.js";
 
 export function load(application)

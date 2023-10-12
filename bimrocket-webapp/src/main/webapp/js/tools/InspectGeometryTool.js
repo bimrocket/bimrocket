@@ -22,6 +22,7 @@ class InspectGeometryTool extends Tool
     this.name = "inspect_geometry";
     this.label = "tool.inspect_geometry.label";
     this.className = "inspect_geometry";
+    this.immediate = true;
 
     this.object = null;
     this.selectedNode = null;
@@ -41,13 +42,15 @@ class InspectGeometryTool extends Tool
 
     this.createPanel();
 
-    this._onPointerDown = this.onPointerDown.bind(this);
     this._onSelection = this.onSelection.bind(this);
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(this.label, "left");
+    const application = this.application;
+    const container = application.container;
+
+    this.panel = application.createPanel(this.label, "left");
     this.panel.bodyElem.classList.add("padding");
 
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
@@ -122,14 +125,22 @@ class InspectGeometryTool extends Tool
     this.optimizeButton.style.display = "none";
 
     this.geometryTree = new Tree(geometryPanel);
+
+    this.panel.onShow = () =>
+    {
+      application.addEventListener('selection', this._onSelection, false);
+    };
+
+    this.panel.onHide = () =>
+    {
+      application.removeEventListener('selection', this._onSelection, false);
+      this.clearHighlight();
+    };
   }
 
-  activate()
+  execute()
   {
     const application = this.application;
-    const container = application.container;
-    container.addEventListener('pointerdown', this._onPointerDown, false);
-    application.addEventListener('selection', this._onSelection, false);
 
     if (this.sceneUuid !== application.scene.uuid)
     {
@@ -143,44 +154,13 @@ class InspectGeometryTool extends Tool
     let object = application.selection.object;
     if (object instanceof Solid)
     {
-      if (object !== this.object)
-      {
-        this.showSolid(object);
-      }
-    }
-    else
-    {
-      this.clear();
-    }
-  }
-
-  deactivate()
-  {
-    const application = this.application;
-    const container = application.container;
-    container.removeEventListener('pointerdown', this._onPointerDown, false);
-    application.removeEventListener('selection', this._onSelection, false);
-
-    this.panel.visible = false;
-  }
-
-  onPointerDown(event)
-  {
-    if (!this.isCanvasEvent(event)) return;
-
-    const application = this.application;
-    const pointerPosition = this.getEventPosition(event);
-    const baseObject = application.baseObject;
-    const intersect = this.intersect(pointerPosition, baseObject, true);
-    if (intersect)
-    {
-      let object = intersect.object;
-      application.selection.set(object);
+      this.showSolid(object);
       this.tabbedPane.showTab("geom_detail");
     }
     else
     {
-      application.selection.clear();
+      this.clear();
+      this.tabbedPane.showTab("geom_inventory");
     }
   }
 
@@ -194,6 +174,7 @@ class InspectGeometryTool extends Tool
       {
         this.showSolid(object);
       }
+      this.tabbedPane.showTab("geom_detail");
     }
     else
     {

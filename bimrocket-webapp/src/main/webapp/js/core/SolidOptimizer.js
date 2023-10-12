@@ -21,10 +21,10 @@ class SolidOptimizer
     this.vertexMap = new Map();
     this.vectorMap = new Map();
     this.polygons = new Set();
-    this.statistics = { edges3Faces : 0, unmergedFaces : 0 };
+    this.errors = { edgesWith3Faces : 0, invalidFaces : 0 };
     this.vertexFactor = 10000;
     this.vectorFactor = 1000;
-    this.normalLimit = 0.999;
+    this.normalLimit = 0.999999;
     this.vertexDistance = 0.0001;
     this.edgeDistance = 0.0001;
     this.minFaceArea = 0.00000001;
@@ -56,51 +56,52 @@ class SolidOptimizer
     for (let f = 0; f < faces.length; f++)
     {
       let face = faces[f];
-      if (face.getArea() > this.minFaceArea)
+
+      if (face.getArea() < this.minFaceArea) continue; // discard small faces
+
+      let faceEdges = [];
+      this.processLoop(face.outerLoop, faceEdges);
+      for (let hole of face.holes)
       {
-        let faceEdges = [];
-        this.processLoop(face.outerLoop, faceEdges);
-        for (let hole of face.holes)
+        this.processLoop(hole, faceEdges);
+      }
+
+      if (faceEdges.length < 3) continue; // discard faces with < 3 edges
+
+      let polygon = new Polygon(f, face);
+      polygons.add(polygon);
+
+      for (let edge of faceEdges)
+      {
+        let edge2 = edgeMap.get(edge.key);
+        if (edge2 === undefined) // new edge
         {
-          this.processLoop(hole, faceEdges);
+          edge.polygon1 = polygon;
+          edgeMap.set(edge.key, edge);
         }
-
-        if (faceEdges.length >= 3)
+        else // edge already exists
         {
-          let polygon = new Polygon(f, face);
-          polygons.add(polygon);
-
-          for (let edge of faceEdges)
+          if (edge2.polygon2 === null)
           {
-            let edge2 = edgeMap.get(edge.key);
-            if (edge2 === undefined) // new edge
+            if (edge2.polygon1 === polygon)
             {
-              edge.polygon1 = polygon;
-              edgeMap.set(edge.key, edge);
+              // unnecessary edge: edge(v1, v2) -> edge(v2, v1)
+              edgeMap.delete(edge.key);
             }
-            else // edge already exists
+            else
             {
-              if (edge2.polygon2 === null)
-              {
-                if (edge2.polygon1 === polygon)
-                {
-                  // unnecessary edge
-                  edgeMap.delete(edge.key);
-                }
-                else
-                {
-                  edge2.polygon2 = polygon;
-                }
-              }
-              else if (edge2.polygon2 === polygon)
-              {
-                edge2.polygon2 = null;
-              }
-              else
-              {
-                this.statistics.edges3Faces++;
-              }
+              // normal case: edge with 2 adjacent polygons
+              edge2.polygon2 = polygon;
             }
+          }
+          else if (edge2.polygon2 === polygon)
+          {
+            // edge not adjacent to polygon: edge(v1, v2) -> edge(v2, v1)
+            edge2.polygon2 = null;
+          }
+          else
+          {
+            this.errors.edgesWith3Faces++;
           }
         }
       }
@@ -191,6 +192,7 @@ class SolidOptimizer
 
   createVectorMap()
   {
+    // the vectorMap contains the list of vertices aligned with a 3d line.
     const vertices = this.vertices;
     const vectorMap = this.vectorMap;
     const borderEdges = this.borderEdges;
@@ -287,12 +289,14 @@ class SolidOptimizer
     const limit = this.normalLimit;
     const vertices = this.vertices;
 
+    // add edges to each polygon
     for (let edge of edgeMap.values())
     {
       edge.polygon1.edges.push(edge);
       if (edge.polygon2) edge.polygon2.edges.push(edge);
     }
 
+    // merge 2 adjacent polygons if they are coplanar
     for (let edge of edgeMap.values())
     {
       if (edge.polygon2 !== null && edge.polygon1 !== edge.polygon2)
@@ -309,6 +313,7 @@ class SolidOptimizer
 
   createVertexMap()
   {
+    // creates a vertexMap with all adjacent polygons
     const edgeMap = this.edgeMap;
     const vertexMap = this.vertexMap;
     const vertices = this.vertices;
@@ -361,7 +366,7 @@ class SolidOptimizer
     const segments = new Map();
     let rings = [];
 
-    // create segments Map
+    // create segments Map: segments.get(v) => [v_adj1, v_adj2]
     for (let edge of polygon.edges)
     {
       if (edge.polygon2 === null ||
@@ -471,7 +476,8 @@ class SolidOptimizer
     }
     else
     {
-      // invalid rings, add original faces
+      // Invalid rings, add original faces and continue creating faces
+      this.errors.invalidFaces++;
 
       const inputVertices = this.inputGeometry.vertices;
       for (let originalFace of polygon.faces)
@@ -486,7 +492,6 @@ class SolidOptimizer
           face.addHole(...points);
         }
       }
-      this.statistics.unmergedFaces++;
       outputGeometry.isManifold = false;
     }
   }
@@ -615,13 +620,17 @@ class Polygon
 
   merge(polygon)
   {
+    // update edge.polygon references
     for (let edge of polygon.edges)
     {
       if (edge.polygon1 === polygon) edge.polygon1 = this;
       else if (edge.polygon2 === polygon) edge.polygon2 = this;
     }
+    // add polygon edges and faces to this polygon
     this.edges.push(...polygon.edges);
     this.faces.push(...polygon.faces);
+
+    // clean up polygon
     polygon.edges = [];
     polygon.faces = [];
   }

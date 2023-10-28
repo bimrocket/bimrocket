@@ -46,6 +46,8 @@ export const translations =
   "button.next" : "Next",
   "button.previous" : "Previous",
   "button.send" : "Send",
+  "button.update" : "Update",
+  "button.reset" : "Reset",
 
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
@@ -94,6 +96,7 @@ export const translations =
   "menu.design.boolean_operation" : "Boolean operation",
   "menu.design.geometry" : "Geometry tools",
   "menu.design.transform" : "Transform",
+  "menu.analysis" : "Analysis",
   "menu.measure" : "Measure",
   "menu.control" : "Control",
   "menu.panels" : "Panels",
@@ -136,6 +139,12 @@ export const translations =
   "tool.draw.first_vertex" : "Draw the first vertex of the cord.",
   "tool.draw.select_vertex" : "Select vertex to move or insert.",
   "tool.draw.vertex_destination" : "Select new vertex position.",
+
+  "tool.report.label" : "Reports",
+  "tool.report.name" : "Report:",
+  "tool.report.rules" : "Rules:",
+
+  "tool.histogram.label" : "Histogram",
 
   "tool.measure_length.label" : "Measure length",
   "tool.measure_length.help" : "Draw the line to measure.",
@@ -198,10 +207,6 @@ export const translations =
 
   "tool.script.label" : "Scripts",
   "tool.script.name" : "Script:",
-
-  "tool.report.label" : "Reports",
-  "tool.report.name" : "Report:",
-  "tool.report.rules" : "Rules:",
 
   "tool.orbit.label" : "Orbit",
   "tool.orbit.help" : "Rotate: drag with left button, Pan: drag with right button or 2 pointers, Zoom: spin wheel, drag with middle button or zoom with 2 pointers.",
@@ -429,6 +434,22 @@ export const translations =
   "label.geometry_total_triangles" : "Total",
 
   "label.chatgpt_setup" : "Setup (JSON):",
+
+  "label.property_set" : "Property set:",
+  "label.property" : "Property:",
+  "label.group_by" : "Group by:",
+  "label.order_by" : "Order by:",
+  "label.highlight" : "Highlight:",
+  "label.show_undefined" : "Show undefined",
+  "label.undefined" : "Undefined",
+  "option.no_groups" : "Without groups",
+  "option.value_asc" : "Value (ascending)",
+  "option.value_desc" : "Value (descending)",
+  "option.occurrences_asc" : "Occurrences (ascending)",
+  "option.occurrences_desc" : "Occurrences (descending)",
+  "option.highlight_disabled" : "Disabled",
+  "option.highlight_random_colors" : "Random colors",
+  "option.highlight_color_grading" : "Color grading",
 
   "option.edges" : "Edges",
   "option.faces" : "Faces",

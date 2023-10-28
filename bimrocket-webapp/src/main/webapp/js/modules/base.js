@@ -38,6 +38,8 @@ import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
 import { DrawTool } from "../tools/DrawTool.js";
+import { ReportTool } from "../tools/ReportTool.js";
+import { HistogramTool } from "../tools/HistogramTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureAngleTool } from "../tools/MeasureAngleTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
@@ -61,7 +63,6 @@ import { StatisticsTool } from "../tools/StatisticsTool.js";
 import { StartControllersTool } from "../tools/StartControllersTool.js";
 import { StopControllersTool } from "../tools/StopControllersTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
-import { ReportTool } from "../tools/ReportTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
 import { ChatGPTTool } from "../tools/ChatGPTTool.js";
@@ -280,7 +281,6 @@ export function load(application)
   const resetMatrixTool = new ResetMatrixTool(application);
   const smoothEdgesTool = new SmoothEdgesTool(application);
   const scriptTool = new ScriptTool(application);
-  const reportTool = new ReportTool(application);
   const rebuildTool = new RebuildTool(application);
   const moveTool = new MoveTool(application);
   const rotateTool = new RotateTool(application);
@@ -302,6 +302,8 @@ export function load(application)
   const solidToMeshTool = new SolidToMeshTool(application);
   const mergeGeometriesTool = new MergeGeometriesTool(application);
   const drawTool = new DrawTool(application);
+  const reportTool = new ReportTool(application);
+  const histogramTool = new HistogramTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureAngleTool = new MeasureAngleTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
@@ -469,6 +471,8 @@ export function load(application)
   application.addTool(mergeGeometriesTool);
   application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
+  application.addTool(reportTool);
+  application.addTool(histogramTool);
   application.addTool(measureLengthTool);
   application.addTool(measureAngleTool);
   application.addTool(measureSelectionTool);
@@ -504,7 +508,6 @@ export function load(application)
   application.addTool(addPointLightTool);
   application.addTool(addSpotLightTool);
   application.addTool(scriptTool);
-  application.addTool(reportTool);
   application.addTool(removeTool);
   application.addTool(copyTool);
   application.addTool(clonerTool);
@@ -612,7 +615,6 @@ export function load(application)
   addLightMenu.addMenuItem(addDirectionalLightTool);
   addLightMenu.addMenuItem(addPointLightTool);
   addLightMenu.addMenuItem(addSpotLightTool);
-
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
   addMenu.addMenuItem(addSpriteTool);
@@ -639,9 +641,12 @@ export function load(application)
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);
-  designMenu.addMenuItem(reportTool);
 
-  const measureMenu = menuBar.addMenu("menu.measure");
+  const analysisMenu = menuBar.addMenu("menu.analysis");
+  analysisMenu.addMenuItem(reportTool);
+  analysisMenu.addMenuItem(histogramTool);
+
+  const measureMenu = analysisMenu.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
   measureMenu.addMenuItem(measureAngleTool);
   measureMenu.addMenuItem(measureSelectionTool);

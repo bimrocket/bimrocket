@@ -46,6 +46,8 @@ export const translations =
   "button.next" : "Següent",
   "button.previous" : "Anterior",
   "button.send" : "Envia",
+  "button.update" : "Actualitza",
+  "button.reset" : "Restableix",
 
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
@@ -94,6 +96,7 @@ export const translations =
   "menu.design.geometry" : "Geometria",
   "menu.design.boolean_operation" : "Operació booleana",
   "menu.design.transform" : "Transformació",
+  "menu.analysis" : "Anàlisi",
   "menu.measure" : "Mesurament",
   "menu.control" : "Control",
   "menu.panels" : "Panells",
@@ -136,6 +139,12 @@ export const translations =
   "tool.draw.first_vertex" : "Dibuixa el primer vèrtex de la corda.",
   "tool.draw.select_vertex" : "Selecciona el vèrtex a moure o inserir.",
   "tool.draw.vertex_destination" : "Selecciona la nova posició del vèrtex.",
+
+  "tool.report.label" : "Informes",
+  "tool.report.name" : "Informe:",
+  "tool.report.rules" : "Regles:",
+
+  "tool.histogram.label" : "Histograma",
 
   "tool.measure_length.label" : "Mesura longitud",
   "tool.measure_length.help" : "Dibuixa la linia a mesurar.",
@@ -198,10 +207,6 @@ export const translations =
 
   "tool.script.label" : "Programes",
   "tool.script.name" : "Programa:",
-
-  "tool.report.label" : "Informes",
-  "tool.report.name" : "Informe:",
-  "tool.report.rules" : "Regles:",
 
   "tool.orbit.label" : "Orbita",
   "tool.orbit.help" : "Rotació: arrossega amb botó esquerre, Desplaça: arrossega amb botó dret o 2 punters, Zoom: gira roda, arrossega amb botó central o zoom amb 2 punters.",
@@ -429,6 +434,22 @@ export const translations =
   "label.geometry_total_triangles" : "Total",
 
   "label.chatgpt_setup" : "Configuració (JSON):",
+
+  "label.property_set" : "Conjunt de propietats:",
+  "label.property" : "Propietat:",
+  "label.group_by" : "Agrupa per:",
+  "label.order_by" : "Ordena per:",
+  "label.highlight" : "Ressaltat:",
+  "label.show_undefined" : "Mostra indefinit",
+  "label.undefined" : "Indefinit",
+  "option.no_groups" : "Sense agrupacions",
+  "option.value_asc" : "Valor (ascendent)",
+  "option.value_desc" : "Valor (descendent)",
+  "option.occurrences_asc" : "Ocurrències (ascendent)",
+  "option.occurrences_desc" : "Ocurrències (descendent)",
+  "option.highlight_disabled" : "Deshabilitat",
+  "option.highlight_random_colors" : "Colors aleatoris",
+  "option.highlight_color_grading" : "Gradació de colors",
 
   "option.edges" : "Arestes",
   "option.faces" : "Cares",

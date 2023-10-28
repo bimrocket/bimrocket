@@ -46,6 +46,8 @@ export const translations =
   "button.next" : "Siguiente",
   "button.previous" : "Anterior",
   "button.send" : "Enviar",
+  "button.update" : "Actualizar",
+  "button.reset" : "Restablecer",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -94,6 +96,7 @@ export const translations =
   "menu.design.geometry" : "Geometría",
   "menu.design.boolean_operation" : "Operación booleana",
   "menu.design.transform" : "Transformar",
+  "menu.analysis" : "Análisis",
   "menu.measure" : "Medición",
   "menu.control" : "Control",
   "menu.panels" : "Paneles",
@@ -136,6 +139,12 @@ export const translations =
   "tool.draw.first_vertex" : "Dibuja el primer vértice de la cuerda.",
   "tool.draw.select_vertex" : "Selecciona el vértice a mover o insertar.",
   "tool.draw.vertex_destination" : "Selecciona la nueva posición del vértice.",
+
+  "tool.report.label" : "Informes",
+  "tool.report.name" : "Informe:",
+  "tool.report.rules" : "Reglas:",
+
+  "tool.histogram.label" : "Histograma",
 
   "tool.measure_length.label" : "Medir longitud",
   "tool.measure_length.help" : "Dibuja la linia a medir.",
@@ -198,10 +207,6 @@ export const translations =
 
   "tool.script.label" : "Programas",
   "tool.script.name" : "Programa:",
-
-  "tool.report.label" : "Informes",
-  "tool.report.name" : "Informe:",
-  "tool.report.rules" : "Reglas:",
 
   "tool.orbit.label" : "Orbitar",
   "tool.orbit.help" : "Rotación: arrastrar con botón izquierdo, Desplazar: arrastrar con botón derecho o 2 punteros, Zoom: girar rueda, arrastrar con botón central o zoom con 2 punteros.",
@@ -429,6 +434,22 @@ export const translations =
   "label.geometry_total_triangles" : "Total",
 
   "label.chatgpt_setup" : "Configuración (JSON):",
+
+  "label.property_set" : "Conjunto de propiedades:",
+  "label.property" : "Propiedad:",
+  "label.group_by" : "Agrupar por:",
+  "label.order_by" : "Ordenar por:",
+  "label.highlight" : "Resaltado:",
+  "label.show_undefined" : "Mostrar indefinido",
+  "label.undefined" : "Indefinido",
+  "option.no_groups" : "Sin agrupaciones",
+  "option.value_asc" : "Valor (ascendente)",
+  "option.value_desc" : "Valor (descendente)",
+  "option.occurrences_asc" : "Ocurrencias (ascendente)",
+  "option.occurrences_desc" : "Ocurrencias (descendente)",
+  "option.highlight_disabled" : "Deshabilitado",
+  "option.highlight_random_colors" : "Colores aleatorios",
+  "option.highlight_color_grading" : "Gradación de colores",
 
   "option.edges" : "Aristas",
   "option.faces" : "Caras",

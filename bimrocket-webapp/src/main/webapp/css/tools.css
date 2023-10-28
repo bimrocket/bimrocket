@@ -1082,6 +1082,97 @@ div.script_code
   flex-grow: 0;
 }
 
+.panel_histogram .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel_histogram .body select
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.panel_histogram .body .buttons_bar
+{
+  text-align: center;
+}
+
+.panel_histogram .body ul
+{
+  padding-left: 0px;
+}
+
+.panel_histogram .body li
+{
+  padding-top: 0px;
+  padding-bottom: 6px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.panel_histogram .body li .item_bullet
+{
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  width: 16px;
+  min-width: 16px;
+  flex-grow: 0;
+}
+
+.panel_histogram .body li .item_cnt
+{
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 2px;
+  flex-grow: 1;
+}
+
+.panel_histogram .body li .item_cnt a
+{
+  text-decoration: none;
+  color: #606060;
+}
+
+.panel_histogram .body li .item_cnt a .undefined
+{
+  font-style: italic;
+  color: #404040;
+}
+
+.panel_histogram .body li .item_cnt a .string
+{
+  color: #404080;
+}
+
+.panel_histogram .body li .item_cnt a .number
+{
+  color: #505050;
+}
+
+.panel_histogram .body li .item_cnt a .boolean
+{
+  color: #707030;
+}
+
+.panel_histogram .body li .item_cnt .bar
+{
+  height: 8px;
+  background: white;
+  border: 1px solid #c0c0c0;
+  padding-right: 2px;
+}
+
+.panel_histogram .body li .bar div
+{
+  background-color: #008000;
+  height: 100%;
+}
+
 .ellipsis_loading
 {
   padding: 0;

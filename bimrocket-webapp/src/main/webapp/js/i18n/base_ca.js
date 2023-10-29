@@ -145,6 +145,7 @@ export const translations =
   "tool.report.rules" : "Regles:",
 
   "tool.histogram.label" : "Histograma",
+  "tool.search.label" : "Cerca",
 
   "tool.measure_length.label" : "Mesura longitud",
   "tool.measure_length.help" : "Dibuixa la linia a mesurar.",
@@ -442,6 +443,12 @@ export const translations =
   "label.highlight" : "Ressaltat:",
   "label.show_undefined" : "Mostra indefinit",
   "label.undefined" : "Indefinit",
+
+  "label.text_to_find" : "Text a cercar:",
+  "label.search_by_name" : "Cerca per nom de propietat",
+  "label.search_by_value" : "Cerca per valor de propietat",
+  "label.case_sensitive" : "Distingueix majúscules/minúscules",
+
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
   "option.value_desc" : "Valor (descendent)",
@@ -501,6 +508,10 @@ export const translations =
   "message.folder_created" : "Carpeta creada.",
   "message.file_deleted" : "Fitxer esborrat.",
   "message.folder_deleted" : "Carpeta esborrada.",
+
+  "message.no_matches" : "Cap coincidència trobada.",
+  "message.one_match" : "1 coincidència trobada.",
+  "message.matches_count" : count => `${count} coincidències trobades.`,
 
   "message.object_name" : objectName => `Objecte: ${objectName}`,
   "message.geometry_id" : id => `Id de geometria: ${id}`,

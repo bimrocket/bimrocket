@@ -145,6 +145,7 @@ export const translations =
   "tool.report.rules" : "Reglas:",
 
   "tool.histogram.label" : "Histograma",
+  "tool.search.label" : "Búsqueda",
 
   "tool.measure_length.label" : "Medir longitud",
   "tool.measure_length.help" : "Dibuja la linia a medir.",
@@ -442,6 +443,12 @@ export const translations =
   "label.highlight" : "Resaltado:",
   "label.show_undefined" : "Mostrar indefinido",
   "label.undefined" : "Indefinido",
+
+  "label.text_to_find" : "Texto a buscar:",
+  "label.search_by_name" : "Buscar por nombre de propiedad",
+  "label.search_by_value" : "Buscar por valor de propiedad",
+  "label.case_sensitive" : "Distinguir mayúsculas/minúsculas",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -501,6 +508,10 @@ export const translations =
   "message.folder_created" : "Carpeta creada.",
   "message.file_deleted" : "Fichero borrado.",
   "message.folder_deleted" : "Carpeta borrada.",
+
+  "message.no_matches" : "Ninguna coincidencia encontrada.",
+  "message.one_match" : "1 coincidencia encontrada.",
+  "message.matches_count" : count => `${count} coincidencias encontradas.`,
 
   "message.object_name" : objectName => `Objeto: ${objectName}`,
   "message.geometry_id" : id => `Id de geometría: ${id}`,

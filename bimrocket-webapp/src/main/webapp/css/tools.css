@@ -1173,6 +1173,63 @@ div.script_code
   height: 100%;
 }
 
+.panel_search .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel_search .body input[type=text]
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.panel_search .body .buttons_bar
+{
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.panel_search .body .matchings
+{
+  margin-top: 4px;
+  overflow: auto;
+  border: 1px solid #c0c0c0;
+}
+
+.panel_search .body .tree .match
+{
+  background-color: #ffff00;
+}
+
+.panel_search .body ul.tree li.value
+{
+  background-image: url(images/inspector/default.svg);
+}
+
+.panel_search .body ul.tree li.object
+{
+  background-image: url(images/inspector/object.svg);
+}
+
+.panel_search .body ul.tree li.string
+{
+  background-image: url(images/inspector/string.svg);
+}
+
+.panel_search .body ul.tree li.number
+{
+  background-image: url(images/inspector/number.svg);
+}
+
+.panel_search .body ul.tree li.boolean
+{
+  background-image: url(images/inspector/boolean.svg);
+}
+
 .ellipsis_loading
 {
   padding: 0;

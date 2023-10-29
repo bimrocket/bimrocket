@@ -12,6 +12,7 @@ class Tree
     element.appendChild(this.rootsElem);
     this.rootsElem.className = "tree";
     this.roots = [];
+    this.formattedLabels = false;
   }
 
   addNode(object, action, className)
@@ -25,7 +26,7 @@ class Tree
 
   getNodeLabel(value)
   {
-    return value;
+    return String(value);
   }
 
   clear()
@@ -133,7 +134,16 @@ class TreeNode
 
   updateLabel()
   {
-    this.linkElem.textContent = this.tree.getNodeLabel(this._value);
+    let label = this.tree.getNodeLabel(this._value);
+
+    if (this.tree.formattedLabels)
+    {
+      this.linkElem.innerHTML = label;
+    }
+    else
+    {
+      this.linkElem.textContent = label;
+    }
   }
 
   isExpanded()
@@ -202,7 +212,7 @@ class TreeNode
     }
     if (makeVisible)
     {
-      this.linkElem.scrollIntoView({block: "center", inline: "nearest"});
+      this.linkElem.scrollIntoView({ block: "center", inline: "nearest"});
     }
   }
 

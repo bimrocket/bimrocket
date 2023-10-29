@@ -40,6 +40,7 @@ import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
 import { DrawTool } from "../tools/DrawTool.js";
 import { ReportTool } from "../tools/ReportTool.js";
 import { HistogramTool } from "../tools/HistogramTool.js";
+import { SearchTool } from "../tools/SearchTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
 import { MeasureAngleTool } from "../tools/MeasureAngleTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
@@ -304,6 +305,7 @@ export function load(application)
   const drawTool = new DrawTool(application);
   const reportTool = new ReportTool(application);
   const histogramTool = new HistogramTool(application);
+  const searchTool = new SearchTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
   const measureAngleTool = new MeasureAngleTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
@@ -473,6 +475,7 @@ export function load(application)
   application.addTool(sectionTool);
   application.addTool(reportTool);
   application.addTool(histogramTool);
+  application.addTool(searchTool);
   application.addTool(measureLengthTool);
   application.addTool(measureAngleTool);
   application.addTool(measureSelectionTool);
@@ -645,6 +648,7 @@ export function load(application)
   const analysisMenu = menuBar.addMenu("menu.analysis");
   analysisMenu.addMenuItem(reportTool);
   analysisMenu.addMenuItem(histogramTool);
+  analysisMenu.addMenuItem(searchTool);
 
   const measureMenu = analysisMenu.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);

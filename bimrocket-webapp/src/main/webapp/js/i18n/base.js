@@ -145,6 +145,7 @@ export const translations =
   "tool.report.rules" : "Rules:",
 
   "tool.histogram.label" : "Histogram",
+  "tool.search.label" : "Search",
 
   "tool.measure_length.label" : "Measure length",
   "tool.measure_length.help" : "Draw the line to measure.",
@@ -442,6 +443,12 @@ export const translations =
   "label.highlight" : "Highlight:",
   "label.show_undefined" : "Show undefined",
   "label.undefined" : "Undefined",
+
+  "label.text_to_find" : "Text to find:",
+  "label.search_by_name" : "Search by property name",
+  "label.search_by_value" : "Search by property value",
+  "label.case_sensitive" : "Case sensitive",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -501,6 +508,10 @@ export const translations =
   "message.folder_created" : "Folder created.",
   "message.file_deleted" : "File deleted.",
   "message.folder_deleted" : "Folder deleted.",
+
+  "message.no_matches" : "No matches found.",
+  "message.one_match" : "1 match found.",
+  "message.matches_count" : count => `${count} matches found.`,
 
   "message.object_name" : objectName => `Object: ${objectName}`,
   "message.geometry_id" : id => `Geometry id: ${id}`,

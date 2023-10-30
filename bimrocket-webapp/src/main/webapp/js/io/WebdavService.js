@@ -68,6 +68,9 @@ class WebdavService extends FileService
             {
               let hrefNode = responseNode.querySelector("href");
               let hrefValue = hrefNode.textContent;
+              if (hrefValue.endsWith("/"))
+                hrefValue = hrefValue.substring(0, hrefValue.length - 1);
+
               let fileName = hrefValue.substring(baseUri.length);
               let isCollectionNode = responseNode.querySelector(
                 "propstat prop resourcetype collection") !== null;

@@ -12,7 +12,7 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Union, intersection and subtraction of solids.
 - Object transformation (translation, rotation, scale).
 - Definition of formulas for object property values.
-- Measuring tools (length, area and volume).
+- Measuring tools (length, angle, area and volume).
 - Orbit-Pan-Zoom tool.
 - Fly tool (with collision detection and ground distance control).
 - Multiple selection of objects.
@@ -21,10 +21,13 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Shadow casting.
 - Vertex, egde and face snapping in the drawing, measurement and transformation tools.
 - Scripting tool (using javascript language).
-- Object controllers (programs that change the object state)
-- Direct loading of IFC files from local disk or the web server. Support for multiple IFC schemas (IFC2x3, IFC4, ...).
+- Reporting tool to check conditions on model objects.
+- Object controllers (a Controller is a program that changes the state of an object when a certain event occurs).
+- Direct loading of IFC files from local disk or the web server. Support for multiple IFC schemas (IFC2X3, IFC4, ...).
 - IFC Inventory tool to explore the types, classifications, groups and layers of the model.
 - IFC Layout tool to view the building layout easily.
+- Search tool to find model properties by name or value.
+- Histogram tool to visualize the distribution of values ​​for a given property.
 - Load/Export models in BRF format (JSON BimRocket format).
 - Load/Export models in STL, GLB, Wavefront OBJ and Collada formats.
 - Integrated with external services (some of them provided by bimrocket-server)
@@ -45,8 +48,8 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 ![Facility interior](/docs/images/screenshot2.png?raw=true "Facility interior")
 
 ## Installation
-Both the bimrocket web application and the bimrocket server are currently distributed as Java war files. A Jakarta EE 9 web container (like [Apache Tomcat 10](https://tomcat.apache.org/download-10.cgi)) is required to deploy these applications.
+Both the bimrocket web application and the bimrocket server are currently distributed as Java war files. A Jakarta EE 10 web container (like [Apache Tomcat 10.1](https://tomcat.apache.org/download-10.cgi)) and JDK11+ is required to deploy these applications.
 
-An [OrientDB](https://orientdb.org/) database is also required to work with the BCF and the IFC services.
+An [OrientDB](https://orientdb.org/) database is also required to work with the BCF and the IFC services (tested with OrientDB version 3.1.11).
 
 Try it: https://bim.santfeliu.cat

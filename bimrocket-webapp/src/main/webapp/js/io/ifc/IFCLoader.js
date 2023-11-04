@@ -100,6 +100,7 @@ class IFCLoader extends THREE.Loader
       if (ifcFile.entitiesByClass.IfcProject)
       {
         let project = ifcFile.entitiesByClass.IfcProject[0];
+        project._model = model;
 
         model.name = project.Name || project.LongName || "IFC";
         model._ifc = project;
@@ -244,30 +245,18 @@ class IFCLoader extends THREE.Loader
       let typeProducts = ifcFile.typeProducts;
       for (let typeProduct of typeProducts)
       {
+        let typeGroup = typeProduct.helper.getObject3D();
+        types.add(typeGroup);
+
         if (typeProduct.RepresentationMaps &&
             typeProduct.RepresentationMaps.length > 0)
         {
+          // add typeProduct representation
           const reprMap = typeProduct.RepresentationMaps[0];
           const mappedObject3D = reprMap.helper.getObject3D();
           if (mappedObject3D && mappedObject3D.parent === null)
           {
-            let typeName = typeProduct.Name || typeProduct.GlobalId;
-            if (typeName.startsWith(THREE.Object3D.HIDDEN_PREFIX))
-            {
-              typeName = typeName.substring(1);
-            }
-            let typeGroup = new THREE.Group();
-            typeGroup.name = typeName;
-            typeGroup._ifc = typeProduct;
             typeGroup.add(mappedObject3D);
-            typeGroup.userData.IFC =
-            {
-              ifcClassName: typeProduct.constructor.name,
-              GlobalId : typeProduct.GlobalId,
-              Name : this.unBox(typeProduct.Name)
-            };
-            types.add(typeGroup);
-
             this.blocks.delete(mappedObject3D);
           }
         }
@@ -636,6 +625,67 @@ class IfcHelper
   }
 };
 registerIfcHelperClass(IfcHelper);
+
+
+class IfcTypeProductHelper extends IfcHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+    this.object3D = null;
+  }
+
+  getObject3D()
+  {
+    if (this.object3D === null)
+    {
+      const typeProduct = this.instance;
+      const loader = typeProduct._loader;
+
+      let typeName = typeProduct.Name || typeProduct.GlobalId;
+      if (typeName.startsWith(THREE.Object3D.HIDDEN_PREFIX))
+      {
+        typeName = typeName.substring(1);
+      }
+      let typeGroup = new THREE.Group();
+      typeGroup.name = typeName;
+      typeGroup._ifc = typeProduct;
+
+      let typeData = { ifcClassName: typeProduct.constructor.name };
+
+      for (let key in typeProduct)
+      {
+        let value = typeProduct[key];
+        let valueType = typeof value;
+        if (valueType === "string"
+            || valueType === "number"
+            || valueType === "boolean")
+        {
+          typeData[key] = loader.unBox(value);
+        }
+      }
+
+      typeGroup.userData.selection = { "highlight" : "none" };
+      typeGroup.userData.IFC = typeData;
+
+      const propertySets = typeProduct.HasPropertySets;
+      if (propertySets instanceof Array)
+      {
+        for (let propertySet of propertySets)
+        {
+          if (propertySet.helper?.getProperties)
+          {
+            typeGroup.userData["IFC_" + propertySet.Name] =
+              propertySet.helper.getProperties();
+          }
+        }
+      }
+      this.object3D = typeGroup;
+    }
+    return this.object3D;
+  }
+};
+registerIfcHelperClass(IfcTypeProductHelper);
 
 
 class IfcProductHelper extends IfcHelper
@@ -2751,19 +2801,9 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
 
     ifcType._Types = [rel];
 
-    const typeData = { ifcClassName: ifcType.constructor.name };
+    const typeGroup = ifcType.helper?.getObject3D();
 
-    for (let key in ifcType)
-    {
-      let value = ifcType[key];
-      let valueType = typeof value;
-      if (valueType === "string"
-          || valueType === "number"
-          || valueType === "boolean")
-      {
-        typeData[key] = value;
-      }
-    }
+    const typeData = typeGroup?.userData.IFC;
 
     for (let relatedObject of relatedObjects)
     {
@@ -2772,7 +2812,11 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
       if (relatedObject.helper.getObject3D)
       {
         let object3D = relatedObject.helper.getObject3D();
-        object3D.userData["IFC_type"] = typeData;
+
+        if (typeData)
+        {
+          object3D.userData["IFC_type"] = typeData;
+        }
       }
     }
   }
@@ -3191,8 +3235,8 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
     const rel = this.instance;
     const schema = this.instance.constructor.schema;
 
-    var propertySet = rel.RelatingPropertyDefinition;
-    var relatedObjects = rel.RelatedObjects;
+    let propertySet = rel.RelatingPropertyDefinition;
+    let relatedObjects = rel.RelatedObjects;
 
     if (propertySet._DefinesOccurrence instanceof Array)
     {
@@ -3205,11 +3249,10 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
 
     if (propertySet instanceof schema.IfcPropertySet)
     {
-      var psetName = propertySet.Name;
-      var properties = propertySet.helper.getProperties();
-      for (var i = 0; i < relatedObjects.length; i++)
+      let psetName = propertySet.Name;
+      let properties = propertySet.helper.getProperties();
+      for (let relatedObject of relatedObjects)
       {
-        var relatedObject = relatedObjects[i];
         if (relatedObject._IsDefinedBy instanceof Array)
         {
           relatedObject._IsDefinedBy.push(rel);
@@ -3221,7 +3264,7 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
 
         if (relatedObject instanceof schema.IfcProduct)
         {
-          var object3D = relatedObject.helper.getObject3D();
+          let object3D = relatedObject.helper.getObject3D();
           if (object3D)
           {
             if (object3D.userData["IFC_" + psetName] instanceof Object)
@@ -3237,6 +3280,11 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
               object3D.userData["IFC_" + psetName] = properties;
             }
           }
+        }
+        else if (relatedObject instanceof schema.IfcProject)
+        {
+          const project = relatedObject;
+          project._model.userData["IFC_" + psetName] = properties;
         }
       }
     }

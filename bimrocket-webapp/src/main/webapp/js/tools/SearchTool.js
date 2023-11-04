@@ -111,8 +111,6 @@ class SearchTool extends Tool
 
   execute()
   {
-    const application = this.application;
-    const container = application.container;
     this.panel.visible = true;
   }
 

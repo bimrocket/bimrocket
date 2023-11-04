@@ -20,19 +20,16 @@ class ClipTool extends Tool
     this.className = "clip";
     this.setOptions(options);
     this.immediate = true;
-
-    this.material = new THREE.MeshPhongMaterial(
-      {color : 0x4040ff, side : THREE.DoubleSide});
   }
 
   execute()
   {
     const application = this.application;
-    var objects = application.selection.roots;
-    var operands = [];
-    for (var i = 0; i < objects.length && operands.length < 2; i++)
+    let objects = application.selection.roots;
+    let operands = [];
+    for (let i = 0; i < objects.length && operands.length < 2; i++)
     {
-      var object = objects[i];
+      let object = objects[i];
       if (object instanceof Solid)
       {
         operands.push(object);

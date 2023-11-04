@@ -99,6 +99,10 @@ class BRFLoader extends THREE.Loader
       {
         this.parseControllers(entry, model);
       }
+      if (entry.links)
+      {
+        this.parseLinks(entry, model);
+      }
     }
 
     // restore formulas
@@ -457,6 +461,20 @@ class BRFLoader extends THREE.Loader
           object.controllers[name] = controller;
           this.setProperties(controller, controllerEntry, model);
         }
+      }
+    }
+  }
+
+  parseLinks(entry, model)
+  {
+    let linkEntries = entry.links;
+    if (linkEntries)
+    {
+      const object = entry._object;
+      object.links = {};
+      for (let name in linkEntries)
+      {
+        this.setPropertyValue(object.links, name, linkEntries[name], model);
       }
     }
   }

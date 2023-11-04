@@ -1230,6 +1230,27 @@ div.script_code
   background-image: url(images/inspector/boolean.svg);
 }
 
+
+.panel_link .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel_link .body input[type=text]
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.panel_link .body .buttons_bar
+{
+  text-align: center;
+  margin-bottom: 2px;
+}
+
 .ellipsis_loading
 {
   padding: 0;

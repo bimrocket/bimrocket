@@ -45,6 +45,7 @@ class Inspector extends Panel
     this.geometrySectionName = 'Geometry';
     this.propertiesSectionName = "Properties";
     this.controllersSectionName = "Controllers";
+    this.linksSectionName = "Links";
 
     this.renderers = {};
     this.editors = {};
@@ -475,6 +476,23 @@ class Inspector extends Panel
           }
         }
       }
+
+      // links
+      let links = object.links;
+      if (this.state[this.linksSectionName] === undefined)
+      {
+        this.state[this.linksSectionName] = "expanded";
+      }
+      let linksListElem =
+        this.createSection(this.linksSectionName, topListElem);
+      if (links)
+      {
+        for (let name in links)
+        {
+          this.createReadOnlyProperty(linksListElem, links, name);
+        }
+      }
+
       this.application.i18n.updateTree(this.objectPanelElem);
 
       if (objectChanged)

@@ -52,6 +52,7 @@ import { CloneTool } from "../tools/CloneTool.js";
 import { CopyTool } from "../tools/CopyTool.js";
 import { CutTool } from "../tools/CutTool.js";
 import { PasteTool } from "../tools/PasteTool.js";
+import { LinkTool } from "../tools/LinkTool.js";
 import { ZoomAllTool } from "../tools/ZoomAllTool.js";
 import { FullscreenTool } from "../tools/FullscreenTool.js";
 import { CenterSelectionTool } from "../tools/CenterSelectionTool.js";
@@ -399,6 +400,8 @@ export function load(application)
   const copyTool = new CopyTool(application, { keyShortcut : "Control+C" });
   const cutTool = new CutTool(application, { keyShortcut : "Control+X" });
   const pasteTool = new PasteTool(application, { keyShortcut : "Control+V" });
+  const linkTool = new LinkTool(application);
+
   const zoomAllTool = new ZoomAllTool(application, { keyShortcut : "Shift+Z" });
   const fullscreenTool = new FullscreenTool(application);
   const centerSelectionTool = new CenterSelectionTool(application);
@@ -516,6 +519,7 @@ export function load(application)
   application.addTool(clonerTool);
   application.addTool(cutTool);
   application.addTool(pasteTool);
+  application.addTool(linkTool);
   application.addTool(zoomAllTool);
   application.addTool(fullscreenTool);
   application.addTool(centerSelectionTool);
@@ -552,6 +556,7 @@ export function load(application)
   editMenu.addMenuItem(cutTool);
   editMenu.addMenuItem(pasteTool);
   editMenu.addMenuItem(removeTool);
+  editMenu.addMenuItem(linkTool);
   editMenu.addMenuItem(optionsTool);
 
   const viewMenu = menuBar.addMenu("menu.view");

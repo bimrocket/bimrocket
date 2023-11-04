@@ -114,6 +114,7 @@ class ObjectUtils
    *
    * Examples:
    *   ObjectUtils.createEvalFunction('$("IFC", "ifcClassName") === "IfcBeam"')
+   *   ObjectUtils.createEvalFunction('position.x > 0')
    *   ObjectUtils.createEvalFunction($ => $("IFC", "Name") === "House")
    *
    */
@@ -122,7 +123,7 @@ class ObjectUtils
     if (typeof expression === "string")
     {
       let fn = new Function("object", "position", "rotation", "scale",
-        "material", "userData", "builder", "controllers", "$",
+        "material", "userData", "builder", "controllers", "links", "$",
         "return " + expression + ";");
 
       return object =>
@@ -132,7 +133,7 @@ class ObjectUtils
 
         return fn(object, object.position, object.rotation, object.scale,
           object.material, object.userData, object.builder,
-          object.controllers, $);
+          object.controllers, object.links, $);
       };
     }
     else if (typeof expression === "function")

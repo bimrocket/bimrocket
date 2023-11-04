@@ -48,6 +48,7 @@ export const translations =
   "button.send" : "Enviar",
   "button.update" : "Actualizar",
   "button.reset" : "Restablecer",
+  "button.link" : "Enlazar",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -286,6 +287,8 @@ export const translations =
 
   "tool.paste.label" : "Pegar",
 
+  "tool.link.label" : "Enlazar",
+
   "tool.show.label" : "Mostrar",
 
   "tool.hide.label" : "Ocultar",
@@ -449,6 +452,8 @@ export const translations =
   "label.search_by_value" : "Buscar por valor de propiedad",
   "label.case_sensitive" : "Distinguir mayúsculas/minúsculas",
 
+  "label.link_name" : "Nombre del enlace:",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -529,6 +534,12 @@ export const translations =
   "message.action_denied" : "Acción denegada.",
 
   "message.invalid_revolution_axis" : "Eje de revolución inválido. Este eje no se puede proyectar sobre el plano del perfil.",
+
+  "message.select_source_object" : "Selecciona el objeto origen, introduce el nombre del enlace y pulsa el botón [Siguiente].",
+  "message.select_target_object" : "Selecciona el objeto destino y pulsa el botón [Enlazar].",
+  "message.select_an_object" : "Selecciona un objeto para crear el enlace.",
+  "message.enter_link_name" : "Introduce el nombre del enlace.",
+  "message.link_created" : "Enlace creado.",
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

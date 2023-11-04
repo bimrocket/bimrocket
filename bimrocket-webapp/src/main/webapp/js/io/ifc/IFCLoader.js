@@ -2813,6 +2813,12 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
       {
         let object3D = relatedObject.helper.getObject3D();
 
+        if (object3D.links === undefined)
+        {
+          object3D.links = {};
+        }
+        object3D.links.ifcType = typeGroup;
+
         if (typeData)
         {
           object3D.userData["IFC_type"] = typeData;

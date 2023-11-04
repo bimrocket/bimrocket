@@ -15,7 +15,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BRFExporter
 {
-  static VERSION = 5;
+  static VERSION = 6;
 
   constructor()
   {
@@ -167,6 +167,13 @@ class BRFExporter
         let controller = controllers[key];
         entry.controllers[key] = this.exportController(controller);
       }
+    }
+
+    let links = object.links;
+    if (links)
+    {
+      entry.links = {};
+      this.exportProperties(links, entry.links);
     }
 
     let geometry = object.geometry;

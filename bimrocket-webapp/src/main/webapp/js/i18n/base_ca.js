@@ -48,6 +48,7 @@ export const translations =
   "button.send" : "Envia",
   "button.update" : "Actualitza",
   "button.reset" : "Restableix",
+  "button.link" : "Enllaça",
 
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
@@ -286,6 +287,8 @@ export const translations =
 
   "tool.paste.label" : "Enganxa",
 
+  "tool.link.label" : "Enllaça",
+
   "tool.show.label" : "Mostra",
 
   "tool.hide.label" : "Oculta",
@@ -449,6 +452,8 @@ export const translations =
   "label.search_by_value" : "Cerca per valor de propietat",
   "label.case_sensitive" : "Distingueix majúscules/minúscules",
 
+  "label.link_name" : "Nom de l'enllaç:",
+
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
   "option.value_desc" : "Valor (descendent)",
@@ -529,6 +534,12 @@ export const translations =
   "message.action_denied" : "Acció denegada.",
 
   "message.invalid_revolution_axis" : "Eix de revolució invàlid. Aquest eix no es pot projectar sobre el pla del perfil.",
+
+  "message.select_source_object" : "Selecciona l'objecte origen, introdueix el nom de l'enllaç i prem el botó [Següent].",
+  "message.select_target_object" : "Selecciona l'objecte destí i prem el botó [Enllaça].",
+  "message.select_an_object" : "Selecciona un objecte per crear l'enllaç.",
+  "message.enter_link_name" : "Introdueix el nom de l'enllaç.",
+  "message.link_created" : "Enllaç creat.",
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

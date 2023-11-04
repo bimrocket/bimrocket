@@ -48,6 +48,7 @@ export const translations =
   "button.send" : "Send",
   "button.update" : "Update",
   "button.reset" : "Reset",
+  "button.link" : "Link",
 
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
@@ -286,6 +287,8 @@ export const translations =
 
   "tool.paste.label" : "Paste",
 
+  "tool.link.label" : "Link",
+
   "tool.show.label" : "Show",
 
   "tool.hide.label" : "Hide",
@@ -449,6 +452,8 @@ export const translations =
   "label.search_by_value" : "Search by property value",
   "label.case_sensitive" : "Case sensitive",
 
+  "label.link_name" : "Link name:",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -529,6 +534,12 @@ export const translations =
   "message.action_denied" : "Action denied.",
 
   "message.invalid_revolution_axis" : "Invalid axis of revolution. This axis can not be projected onto the plane of the profile.",
+
+  "message.select_source_object" : "Select the source object, enter the link name and press the [Next] button.",
+  "message.select_target_object" : "Select the target object and press the [Link] button.",
+  "message.select_an_object" : "Select an object to make the link.",
+  "message.enter_link_name" : "Enter the link name.",
+  "message.link_created" : "Link created.",
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

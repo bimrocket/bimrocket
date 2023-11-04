@@ -274,12 +274,6 @@ class BIMInventoryTool extends Tool
     for (let typeName of typeNames)
     {
       let type = this.types[typeName];
-      let objects = type.objects;
-      let label = type.name + " (" + objects.length + ")";
-      let className = typeName;
-      let node = this.typesTree.addNode(label, event =>
-        this.application.userSelectObjects(objects, event), className);
-
       let subTypes = [];
       for (let typeId in type.subTypes)
       {
@@ -291,6 +285,15 @@ class BIMInventoryTool extends Tool
         if (typeA.name > typeB.name) return 1;
         return 0;
       });
+
+      let objects = type.objects;
+      let label = type.name + " (" + subTypes.length +
+        "/" + objects.length + ")";
+      let className = typeName;
+
+      let node = this.typesTree.addNode(label, event =>
+        this.application.userSelectObjects(objects, event), className);
+
       if (subTypes.length > 1 || subTypes[0].name !== "Others")
       {
         for (let subType of subTypes)

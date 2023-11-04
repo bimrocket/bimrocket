@@ -17,7 +17,7 @@ class SaveDialog extends Dialog
 
     this.setSize(250, 200);
 
-    if (name === "")
+    if (name === undefined || name === null || name === "")
     {
       name = "scene";
     }

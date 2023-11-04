@@ -19,19 +19,23 @@ class SaveLocalTool extends Tool
     this.help = "tool.savelocal.help";
     this.className = "savelocal";
     this.url = null;
-    this.defaultFileName = "scene.brf";
     this.setOptions(options);
   }
 
   activate()
   {
-    let dialog = new SaveDialog(this.label, this.defaultFileName);
+    const application = this.application;
+    const object = application.getModelRoot(false);
+    let filename = object && object !== application.baseObject ?
+      IOManager.normalizeFilename(object.name) : "";
+
+    let dialog = new SaveDialog(this.label, filename);
     dialog.setI18N(this.application.i18n);
     dialog.onSave = (name, format, onlySelection) =>
     {
       this.onSave(name, format, onlySelection);
     };
-    dialog.onCancel = () => { dialog.hide(); this.application.useTool(null); };
+    dialog.onCancel = () => { dialog.hide(); application.useTool(null); };
     dialog.show();
   }
 

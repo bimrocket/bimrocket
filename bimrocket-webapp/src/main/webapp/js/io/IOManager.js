@@ -311,6 +311,25 @@ class IOManager
     }
     return extensions;
   }
+
+  static normalizeFilename(filename)
+  {
+    let buffer = "";
+    for (let ch of filename)
+    {
+      let uch = ch.toUpperCase();
+      if ((uch >= 'A' && uch <= 'Z') ||
+          (uch >= '0' && uch <= '9') || uch === "_")
+      {
+        buffer += ch;
+      }
+      else if (uch === " " || uch === "-" || uch === ":")
+      {
+        buffer += "_";
+      }
+    }
+    return buffer;
+  }
 }
 
 export { IOManager };

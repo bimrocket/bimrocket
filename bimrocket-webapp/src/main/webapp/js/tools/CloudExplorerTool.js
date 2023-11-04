@@ -101,9 +101,18 @@ class CloudExplorerTool extends Tool
 
   showSaveDialog()
   {
+    const application = this.application;
     const panel = this.panel;
 
-    let dialog = new SaveDialog("title.save_to_cloud", panel.entryName);
+    let filename = panel.entryName;
+    if (filename === null || filename.length === 0)
+    {
+      const object = application.getModelRoot(false);
+      filename = object && object !== application.baseObject ?
+        IOManager.normalizeFilename(object.name) : "";
+    }
+
+    let dialog = new SaveDialog("title.save_to_cloud", filename);
     dialog.setI18N(this.application.i18n);
     dialog.onSave = (name, format, onlySelection) =>
     {

@@ -563,5 +563,6 @@ export const translations =
   "controller.RotationController" : "Rota un objecte.",
   "controller.ToggleButtonController" : "Mostra un interruptor.",
   "controller.TranslationController" : "Desplaça un objecte.",
-  "controller.ScriptController" : "Executa un programa en llenguatge JavaScript."
+  "controller.ScriptController" : "Executa un programa en llenguatge JavaScript.",
+  "controller.RestPollController" : "Crida un servei REST periòdicament."
 };

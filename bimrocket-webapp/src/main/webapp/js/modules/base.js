@@ -92,6 +92,7 @@ import { RotationController } from "../controllers/RotationController.js";
 import { ScriptController } from "../controllers/ScriptController.js";
 import { ToggleButtonController } from "../controllers/ToggleButtonController.js";
 import { TranslationController } from "../controllers/TranslationController.js";
+import { RestPollController } from "../controllers/RestPollController.js";
 import { BRFLoader } from "../io/BRFLoader.js";
 import { BRFExporter } from "../io/BRFExporter.js";
 import { ColladaLoader } from "../io/ColladaLoader.js";

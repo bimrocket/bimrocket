@@ -609,33 +609,55 @@ div.option_block input[name=decimals]
   height: 300px;
 }
 
-.controller_list li
+.controller_dialog
+{
+  display: flex;
+  flex-direction: column;
+  height: 100px;
+}
+
+.controller_dialog > div
+{
+  flex-grow: 0;
+}
+
+.controller_dialog > ul
+{
+  flex-grow: 1;
+  overflow: auto;
+  padding: 4px;
+  margin:0;
+  margin-top: 4px;
+  border: 1px solid #c0c0c0;
+}
+
+.controller_dialog > ul li
 {
   list-style-type: none;
   margin:6px 3px 6px 3px;
 }
 
-.controller_list li label
+.controller_dialog > ul li label
 {
   display: block;
   vertical-align: middle;
 }
 
-.controller_list li input
+.controller_dialog > ul li input
 {
   display: inline-block;
   vertical-align: text-bottom;
 }
 
-.controller_list li span
+.controller_dialog > ul li span
 {
   display: inline-block;
   vertical-align: middle;
 }
 
-.controller_list li span.type
+.controller_dialog > ul li span.type
 {
-  color: #806060;
+  color: #606080;
   margin-right: 4px;
 }
 

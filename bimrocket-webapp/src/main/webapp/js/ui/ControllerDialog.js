@@ -20,10 +20,15 @@ class ControllerDialog extends Dialog
 
     this.setSize(500, 420);
 
+    this.bodyElem.classList.add("controller_dialog");
+
     this.nameElem = this.addTextField("controller_name", "label.name");
 
+    this.typeElem = document.createElement("div");
+    I18N.set(this.typeElem, "textContent", "label.controller_type");
+    this.bodyElem.appendChild(this.typeElem);
+
     let listElem = document.createElement("ul");
-    listElem.className = "controller_list";
     this.bodyElem.appendChild(listElem);
     let first = true;
     for (let className in Controller.classes)
@@ -66,7 +71,7 @@ class ControllerDialog extends Dialog
 
     let nameSpanElem = document.createElement("span");
     nameSpanElem.className = "type";
-    nameSpanElem.textContent = className;
+    nameSpanElem.textContent = className + ":";
     labelElem.appendChild(nameSpanElem);
 
     const controllerClass = Controller.classes[className];

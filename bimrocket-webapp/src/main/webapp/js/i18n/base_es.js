@@ -454,6 +454,8 @@ export const translations =
 
   "label.link_name" : "Nombre del enlace:",
 
+  "label.controller_type" : "Tipo de controlador:",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -560,5 +562,6 @@ export const translations =
   "controller.PushButtonController" : "Muestra un pulsador.",
   "controller.RotationController" : "Rota un objeto.",
   "controller.ToggleButtonController" : "Muestra un interruptor.",
-  "controller.TranslationController" : "Desplaza un objeto."
+  "controller.TranslationController" : "Desplaza un objeto.",
+  "controller.ScriptController" : "Ejecuta un programa en lenguaje JavaScript."
 };

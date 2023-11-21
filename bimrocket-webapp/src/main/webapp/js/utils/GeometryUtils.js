@@ -145,6 +145,52 @@ class GeometryUtils
     return normal;
   }
 
+  /* Returns the offset vector that should be subtracted from the given point
+   * to avoid lost of precision when its coordinates are represented with float32.
+   *
+   * @param {Vector2 | Vector3} point
+   * @returns {Vector3} the offsetVector
+   */
+  static getOffsetVectorForFloat32(point)
+  {
+    const maxCoord = 10000;
+    let offsetVector = null;
+
+    let xOverflow = Math.abs(point.x) > maxCoord;
+    let yOverflow = Math.abs(point.y) > maxCoord;
+    let zOverflow = point.isVector3 && Math.abs(point.z) > maxCoord;
+
+    if (xOverflow || yOverflow || zOverflow)
+    {
+      offsetVector = new THREE.Vector3();
+      if (xOverflow) offsetVector.x = point.x;
+      if (yOverflow) offsetVector.y = point.y;
+      if (zOverflow) offsetVector.z = point.z;
+    }
+    return offsetVector;
+  }
+
+  /**
+   * Subtracts offsetVector from the points of the given rings.
+   *
+   * @param {Vector3} offsetVector
+   * @param {Vector2[] | Vector3[]} rings
+   */
+  static offsetRings(offsetVector, ...rings)
+  {
+    for (let ring of rings)
+    {
+      for (let i = 0; i < ring.length - 1; i++)
+      {
+        ring[i].sub(offsetVector);
+      }
+      if (ring[0] !== ring[ring.length - 1])
+      {
+        ring[ring.length - 1].sub(offsetVector);
+      }
+    }
+  }
+
   /* triangulate a 3D face */
   static triangulateFace(vertices, holes, normal)
   {

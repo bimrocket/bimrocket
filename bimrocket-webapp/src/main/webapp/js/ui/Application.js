@@ -1210,6 +1210,89 @@ class Application
     }
   }
 
+  /**
+   * Adds a Line and/or a Points object inside the application.overlay group.
+   *
+   * @param {Vector3[]} vertices: the Line/Points vertices represented in global CS.
+   * @param {boolean} isLineSegments: when true the vertices represent segments
+   *        of two points. When false vertices represent a sequence of connected points.
+   * @param {LineMaterial} lineMaterial: the Line object material.
+   *        If lineMaterial is null no Line object will be created.
+   * @param {PointsMaterial} pointsMaterial: the Points object material.
+   *        If pointsMaterial is null no Points object will be created.
+   * @param {Group} the optional group to add the objects to.
+   *        When null, the created objects will the added to the overlay group.
+   */
+  addOverlay(vertices, isLineSegments,
+    lineMaterial = null, pointsMaterial = null, group = null)
+  {
+    let line = null;
+    let points = null;
+
+    if (vertices.length > 0)
+    {
+      let geometry = new THREE.BufferGeometry();
+
+      let firstPoint = vertices[0];
+      let offsetVector = GeometryUtils.getOffsetVectorForFloat32(firstPoint);
+      if (offsetVector)
+      {
+        let transformedVertices = [];
+        for (let vertex of vertices)
+        {
+          let transformedVertex = new THREE.Vector3();
+          transformedVertex.copy(vertex);
+          transformedVertices.push(transformedVertex);
+        }
+        GeometryUtils.offsetRings(offsetVector, transformedVertices);
+        geometry.setFromPoints(transformedVertices);
+      }
+      else
+      {
+        geometry.setFromPoints(vertices);
+      }
+
+      if (lineMaterial && vertices.length >= 2)
+      {
+        if (isLineSegments)
+        {
+          line = new THREE.LineSegments(geometry, lineMaterial);
+        }
+        else
+        {
+          line = new THREE.Line(geometry, lineMaterial);
+        }
+        line.raycast = function(){};
+        if (offsetVector)
+        {
+          line.position.add(offsetVector);
+          line.updateMatrix();
+        }
+        if (group) group.add(line);
+        else this.overlays.add(line);
+      }
+
+      if (pointsMaterial)
+      {
+        points = new THREE.Points(geometry, pointsMaterial);
+        points.raycast = function(){};
+        if (offsetVector)
+        {
+          points.position.add(offsetVector);
+          points.updateMatrix();
+        }
+        if (group) group.add(points);
+        else this.overlays.add(points);
+      }
+
+      if (group && group.parent !== this.overlays)
+      {
+        this.overlays.add(group);
+      }
+    }
+    return { line, points };
+  }
+
   copyObjects()
   {
     let copyObjects = this.selection.roots;

@@ -35,7 +35,7 @@ class DrawTool extends Tool
     this.inverseMatrixWorld = new THREE.Matrix4(); // object inverse matrixWorld
 
     this.addPointsMaterial = new THREE.PointsMaterial(
-      { color : 0x00ff00, size : 4, sizeAttenuation : false,
+      { color : 0x008000, size : 4, sizeAttenuation : false,
         depthTest : false, transparent : true });
 
     this.editPointsMaterial = new THREE.PointsMaterial(
@@ -345,7 +345,6 @@ class DrawTool extends Tool
   updateObject()
   {
     const application = this.application;
-    const overlays = application.overlays;
 
     if ((this.vertices.length < 2 && this.object instanceof Cord) ||
         (this.vertices.length < 3 && this.object instanceof Profile))
@@ -387,10 +386,21 @@ class DrawTool extends Tool
         this.object.updateGeometry(geometry);
         application.notifyObjectsChanged(this.object);
       }
-      else if (this.vertices.length > 1) // create Cord by default
+      else if (this.vertices.length >= 2) // create Cord by default
       {
+        let firstPoint = this.vertices[0];
+        let offsetVector = GeometryUtils.getOffsetVectorForFloat32(firstPoint);
+        if (offsetVector)
+        {
+          GeometryUtils.offsetRings(offsetVector, this.vertices);
+        }
         geometry = new CordGeometry(this.vertices);
         this.object = new Cord(geometry, this.lineMaterial);
+        if (offsetVector)
+        {
+          this.object.position.add(offsetVector);
+          this.object.updateMatrix();
+        }
         application.addObject(this.object, null, false, true);
       }
     }
@@ -399,30 +409,34 @@ class DrawTool extends Tool
   updatePoints()
   {
     const application = this.application;
-    const overlays = application.overlays;
 
     this.clearPoints();
 
-    if (this.vertices.length > 0)
+    let material = this.mode === 0 ?
+      this.addPointsMaterial : this.editPointsMaterial;
+
+    console.info(this.object, this.vertices);
+
+    let transformedVertices;
+    if (this.object)
     {
-      let geometry = new THREE.BufferGeometry();
-      geometry.setFromPoints(this.vertices);
-
-      let material = this.mode === 0 ?
-        this.addPointsMaterial : this.editPointsMaterial;
-
-      this.points = new THREE.Points(geometry, material);
-      const points = this.points;
-      points.raycast = function(){};
-      if (this.object)
+      // vertices are in object CS, transform to world CS
+      transformedVertices = [];
+      for (let vertex of this.vertices)
       {
-        this.object.matrixWorld.decompose(
-          points.position, points.rotation, points.scale);
-        points.updateMatrix();
+        transformedVertices.push(
+          vertex.clone().applyMatrix4(this.object.matrixWorld));
       }
-      overlays.add(points);
-      application.repaint();
     }
+    else
+    {
+      // vertices are in world CS
+      transformedVertices = this.vertices;
+    }
+
+    this.points = application.addOverlay(transformedVertices, false, null,
+      material).points;
+    application.repaint();
   }
 
   updateAxis(object)

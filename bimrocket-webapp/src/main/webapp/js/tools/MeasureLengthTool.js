@@ -154,34 +154,22 @@ class MeasureLengthTool extends Tool
   updateLineString()
   {
     const application = this.application;
-    const overlays = application.overlays;
 
     if (this.line !== null)
     {
       application.removeObject(this.line);
-      this.line = null;
     }
 
     if (this.points !== null)
     {
       application.removeObject(this.points);
-      this.points = null;
     }
 
-    if (this.vertices.length > 0)
-    {
-      let geometry = new THREE.BufferGeometry();
-      geometry.setFromPoints(this.vertices);
+    const overlayedObjects = application.addOverlay(this.vertices, false,
+      this.lineMaterial, this.pointsMaterial);
 
-      this.line = new THREE.Line(geometry, this.lineMaterial,
-        THREE.LineStrip);
-      this.line.raycast = function(){};
-      overlays.add(this.line);
-
-      this.points = new THREE.Points(geometry, this.pointsMaterial);
-      this.points.raycast = function(){};
-      overlays.add(this.points);
-    }
+    this.line = overlayedObjects.line;
+    this.points = overlayedObjects.points;
 
     application.repaint();
 

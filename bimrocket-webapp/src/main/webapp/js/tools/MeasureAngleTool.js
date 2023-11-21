@@ -120,50 +120,33 @@ class MeasureAngleTool extends Tool
   updateAngle()
   {
     const application = this.application;
-    const overlays = application.overlays;
 
     if (this.line !== null)
     {
       application.removeObject(this.line);
-      this.line = null;
     }
 
     if (this.points !== null)
     {
       application.removeObject(this.points);
-      this.points = null;
     }
 
-    if (this.vertices.length > 0)
+    if (this.vertices.length === 3)
     {
-      const geometry = new THREE.BufferGeometry();
-      geometry.setFromPoints(this.vertices);
-
-      this.points = new THREE.Points(geometry, this.pointsMaterial);
-      this.points.raycast = function(){};
-      overlays.add(this.points);
-
-      if (this.vertices.length === 2)
-      {
-        this.line = new THREE.LineSegments(geometry, this.lineMaterial);
-        this.line.raycast = function(){};
-        overlays.add(this.line);
-      }
-      else if (this.vertices.length === 3)
-      {
-        const segmentsGeometry = new THREE.BufferGeometry();
-
-        let segments = [];
-        segments.push(this.vertices[0], this.vertices[1]);
-        segments.push(this.vertices[0], this.vertices[2]);
-        this.addCurveSegments(segments);
-
-        segmentsGeometry.setFromPoints(segments);
-
-        this.line = new THREE.LineSegments(segmentsGeometry, this.lineMaterial);
-        this.line.raycast = function(){};
-        overlays.add(this.line);
-      }
+      let segments = [];
+      segments.push(this.vertices[0], this.vertices[1]);
+      segments.push(this.vertices[0], this.vertices[2]);
+      this.addCurveSegments(segments);
+      this.line = application.addOverlay(segments, true, this.lineMaterial).line;
+      this.points = application.addOverlay(this.vertices, false, null,
+        this.pointsMaterial).points;
+    }
+    else
+    {
+      const overlayedObjects = application.addOverlay(this.vertices,
+        false, this.lineMaterial, this.pointsMaterial);
+      this.line = overlayedObjects.line;
+      this.points = overlayedObjects.points;
     }
 
     application.repaint();

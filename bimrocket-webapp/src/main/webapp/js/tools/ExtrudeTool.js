@@ -349,15 +349,10 @@ class ExtrudeTool extends Tool
     geometryPoints.push(this.extrudeLineWorld.start);
     geometryPoints.push(this.extrudeLineWorld.end);
 
-    let geometry = new THREE.BufferGeometry();
-    geometry.setFromPoints(geometryPoints);
-
-    this.line = new THREE.Line(geometry, this.extrudeMaterial);
-    this.line.name = "extrudeLine";
-    this.line.raycast = function(){};
+    this.line = application.addOverlay(geometryPoints, false,
+      this.extrudeMaterial).line;
     this.line.renderOrder = 10;
 
-    application.overlays.add(this.line);
     application.repaint();
   }
 

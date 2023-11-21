@@ -284,16 +284,8 @@ class InspectGeometryTool extends Tool
         .applyMatrix4(matrixWorld));
     }
 
-    let geometry = new THREE.BufferGeometry();
-    geometry.setFromPoints(vertices);
-
-    let lines = new THREE.Line(geometry, this.lineMaterial);
-    lines.raycast = function() {};
-    this.highlightGroup.add(lines);
-
-    let points = new THREE.Points(geometry, this.pointsMaterial);
-    points.raycast = function() {};
-    this.highlightGroup.add(points);
+    this.application.addOverlay(vertices, false,
+      this.lineMaterial, this.pointsMaterial, this.highlightGroup);
   }
 
   highlight(node, solid, loops, vertex)
@@ -310,6 +302,7 @@ class InspectGeometryTool extends Tool
       this.application.removeObject(this.highlightGroup);
     }
     this.highlightGroup = new THREE.Group();
+    this.highlightGroup.name = "geometryHighlight";
     this.highlightGroup.renderOrder = 2;
 
     for (let loop of loops)
@@ -319,11 +312,9 @@ class InspectGeometryTool extends Tool
 
     if (vertex)
     {
-      let geometry = new THREE.BufferGeometry();
-      geometry.setFromPoints([vertex.clone().applyMatrix4(solid.matrixWorld)]);
-      let points = new THREE.Points(geometry, this.vertexMaterial);
-      points.raycast = function() {};
-      this.highlightGroup.add(points);
+      this.application.addOverlay(
+        [vertex.clone().applyMatrix4(solid.matrixWorld)],
+        false, null, this.vertexMaterial, this.highlightGroup);
     }
 
     this.application.addObject(this.highlightGroup, this.application.overlays);

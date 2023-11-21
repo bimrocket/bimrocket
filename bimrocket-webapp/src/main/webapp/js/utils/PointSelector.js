@@ -100,7 +100,8 @@ class PointSelector
          { color: new THREE.Color(1, 0, 0),
            transparent: true,
            opacity : 0.4
-         })
+         }),
+        geometry: null
       },
       {
         label: "label.on_y_axis",
@@ -112,7 +113,8 @@ class PointSelector
          { color: new THREE.Color(0, 1, 0),
            transparent: true,
            opacity : 0.4
-         })
+         }),
+        geometry: null
       },
       {
         label: "label.on_z_axis",
@@ -124,7 +126,8 @@ class PointSelector
          { color: new THREE.Color(0, 0, 1),
            transparent: true,
            opacity : 0.4
-         })
+         }),
+        geometry: null
       }
     ];
 
@@ -303,21 +306,20 @@ class PointSelector
     this.axisMatrixWorld.copy(axisMatrixWorld);
     this.axisMatrixWorldInverse.copy(axisMatrixWorld).invert();
 
+    const axisLength = 1000;
     const scale = axisMatrixWorld.getMaxScaleOnAxis();
-    const factor = 1 / scale;
+    const factor = axisLength / scale;
 
     let scaledAxisMatrixWorld = new THREE.Matrix4();
     scaledAxisMatrixWorld.makeScale(factor, factor, factor);
     scaledAxisMatrixWorld.premultiply(axisMatrixWorld);
 
-    let k = 1000;
-
     for (let guide of this.axisGuides)
     {
       guide.startPoint.copy(guide.startLocal)
-        .multiplyScalar(k).applyMatrix4(scaledAxisMatrixWorld);
+        .applyMatrix4(scaledAxisMatrixWorld);
       guide.endPoint.copy(guide.endLocal)
-        .multiplyScalar(k).applyMatrix4(scaledAxisMatrixWorld);
+        .applyMatrix4(scaledAxisMatrixWorld);
     }
 
     if (this.axisGroup)
@@ -333,14 +335,15 @@ class PointSelector
 
       for (let guide of this.axisGuides)
       {
-        let geometryPoints = [];
-        geometryPoints.push(guide.startPoint);
-        geometryPoints.push(guide.endPoint);
-
-        let geometry = new THREE.BufferGeometry();
-        geometry.setFromPoints(geometryPoints);
-
-        let line = new THREE.Line(geometry, guide.material);
+        if (guide.geometry === null)
+        {
+          let geometry = new THREE.BufferGeometry();
+          geometry.setFromPoints([guide.startLocal, guide.endLocal]);
+          guide.geometry = geometry;
+        }
+        let line = new THREE.Line(guide.geometry, guide.material);
+        scaledAxisMatrixWorld.decompose(line.position, line.rotation, line.scale);
+        line.updateMatrix();
         line.name = guide.label;
         line.raycast = function(){};
 

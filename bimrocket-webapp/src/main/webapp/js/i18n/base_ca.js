@@ -204,6 +204,7 @@ export const translations =
   "tool.mesh_to_solid.label" : "Malla a Sòlid",
   "tool.solid_to_mesh.label" : "Sòlid a Malla",
   "tool.merge_geometries.label" : "Fusiona geometries",
+  "tool.offset_geometries.label" : "Desplaça geometries",
 
   "tool.clip.label" : "Retalla",
 

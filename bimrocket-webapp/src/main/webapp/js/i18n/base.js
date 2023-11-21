@@ -204,6 +204,7 @@ export const translations =
   "tool.mesh_to_solid.label" : "Mesh to Solid",
   "tool.solid_to_mesh.label" : "Solid to Mesh",
   "tool.merge_geometries.label" : "Merge geometries",
+  "tool.offset_geometries.label" : "Offset geometries",
 
   "tool.clip.label" : "Clip",
 

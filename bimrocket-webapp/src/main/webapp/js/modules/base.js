@@ -37,6 +37,7 @@ import { RevolveTool } from "../tools/RevolveTool.js";
 import { MeshToSolidTool } from "../tools/MeshToSolidTool.js";
 import { SolidToMeshTool } from "../tools/SolidToMeshTool.js";
 import { MergeGeometriesTool } from "../tools/MergeGeometriesTool.js";
+import { OffsetGeometriesTool } from "../tools/OffsetGeometriesTool.js";
 import { DrawTool } from "../tools/DrawTool.js";
 import { ReportTool } from "../tools/ReportTool.js";
 import { HistogramTool } from "../tools/HistogramTool.js";
@@ -304,6 +305,7 @@ export function load(application)
   const meshToSolidTool = new MeshToSolidTool(application);
   const solidToMeshTool = new SolidToMeshTool(application);
   const mergeGeometriesTool = new MergeGeometriesTool(application);
+  const offsetGeometriesTool = new OffsetGeometriesTool(application);
   const drawTool = new DrawTool(application);
   const reportTool = new ReportTool(application);
   const histogramTool = new HistogramTool(application);
@@ -475,6 +477,7 @@ export function load(application)
   application.addTool(decomposeTool);
   application.addTool(meshToSolidTool);
   application.addTool(mergeGeometriesTool);
+  application.addTool(offsetGeometriesTool);
   application.addTool(solidToMeshTool);
   application.addTool(sectionTool);
   application.addTool(reportTool);
@@ -645,6 +648,7 @@ export function load(application)
   geometryMenu.addMenuItem(meshToSolidTool);
   geometryMenu.addMenuItem(solidToMeshTool);
   geometryMenu.addMenuItem(mergeGeometriesTool);
+  geometryMenu.addMenuItem(offsetGeometriesTool);
   geometryMenu.addMenuItem(resetMatrixTool);
   geometryMenu.addMenuItem(smoothEdgesTool);
   designMenu.addMenuItem(paintTool);

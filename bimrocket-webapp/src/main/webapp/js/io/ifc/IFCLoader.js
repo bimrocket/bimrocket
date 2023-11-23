@@ -2570,17 +2570,33 @@ class IfcCartesianTransformationOperatorHelper extends IfcHelper
 
   getMatrix()
   {
-    // TODO: process all parameters
     if (this.matrix === null)
     {
-      var operator = this.instance;
+      const operator = this.instance;
 
       this.matrix = new THREE.Matrix4();
-      var origin = operator.LocalOrigin;
-      if (origin)
+      const origin = operator.LocalOrigin.helper.getPoint();
+      const axis1 = operator.Axis1?.helper.getDirection();
+      const axis2 = operator.Axis2?.helper.getDirection();
+      const scale = operator.Scale;
+
+      if (axis1 && axis2)
       {
-        var point = origin.helper.getPoint();
-        this.matrix.makeTranslation(point.x, point.y, point.z);
+        axis1.normalize();
+        axis2.normalize();
+
+        const axis3 = new THREE.Vector3();
+        axis3.crossVectors(axis1, axis2);
+        this.matrix.makeBasis(axis1, axis2, axis3);
+        if (typeof scale === "number")
+        {
+          this.matrix.scale(new THREE.Vector3(scale, scale, scale));
+        }
+        this.matrix.setPosition(origin);
+      }
+      else
+      {
+        this.matrix.makeTranslation(origin.x, origin.y, origin.z);
       }
     }
     return this.matrix;

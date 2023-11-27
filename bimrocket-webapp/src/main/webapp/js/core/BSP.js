@@ -22,34 +22,17 @@ class BSP
   {
     let vertices = geometry.vertices;
     let faces = geometry.faces;
-    for (let face of faces)
+    if (faces instanceof Array)
     {
-      if (face.holes.length === 0 && face.isConvex())
+      for (let face of faces)
       {
-        // convex polygon without holes, direct copy
-        let polygon = new Polygon();
-        for (let v of face.indices)
+        if (face.holes.length === 0 && face.isConvex())
         {
-          let vertex = vertices[v].clone();
-          if (matrix)
-          {
-            vertex.applyMatrix4(matrix);
-          }
-          polygon.vertices.push(vertex);
-        }
-        polygon.updateNormal();
-        this.addPolygon(polygon);
-      }
-      else
-      {
-        // take triangulation for other cases
-        let triangles = face.getTriangles();
-        for (let triangle of triangles)
-        {
+          // convex polygon without holes, direct copy
           let polygon = new Polygon();
-          for (let n = 0; n < 3; n++)
+          for (let v of face.indices)
           {
-            let vertex = vertices[triangle[n]].clone();
+            let vertex = vertices[v].clone();
             if (matrix)
             {
               vertex.applyMatrix4(matrix);
@@ -58,6 +41,26 @@ class BSP
           }
           polygon.updateNormal();
           this.addPolygon(polygon);
+        }
+        else
+        {
+          // take triangulation for other cases
+          let triangles = face.getTriangles();
+          for (let triangle of triangles)
+          {
+            let polygon = new Polygon();
+            for (let n = 0; n < 3; n++)
+            {
+              let vertex = vertices[triangle[n]].clone();
+              if (matrix)
+              {
+                vertex.applyMatrix4(matrix);
+              }
+              polygon.vertices.push(vertex);
+            }
+            polygon.updateNormal();
+            this.addPolygon(polygon);
+          }
         }
       }
     }

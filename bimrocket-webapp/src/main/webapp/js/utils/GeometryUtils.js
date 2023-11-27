@@ -191,6 +191,25 @@ class GeometryUtils
     }
   }
 
+  /**
+   * Clones an array of Vector2 or Vector3
+   *
+   * @param {Vector2[] | Vector3[]} ring the array of vectors
+   * @returns {Vector2[] | Vector3} the cloned ring
+   */
+  static cloneRing(ring)
+  {
+    if (!(ring instanceof Array)) return ring;
+
+    const clonedRing = [];
+
+    for (let vector of ring)
+    {
+      clonedRing.push(vector.clone());
+    }
+    return clonedRing;
+  }
+
   /* triangulate a 3D face */
   static triangulateFace(vertices, holes, normal)
   {

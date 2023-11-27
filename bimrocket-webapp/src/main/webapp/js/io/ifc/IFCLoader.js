@@ -1121,7 +1121,8 @@ class IfcTriangulatedFaceSetHelper extends IfcGeometricRepresentationItemHelper
 
       let geometry = new SolidGeometry();
 
-      geometry.vertices = faceSet.Coordinates.helper.getPoints();
+      geometry.vertices =
+        GeometryUtils.cloneRing(faceSet.Coordinates.helper.getPoints());
 
       let coordIndex = faceSet.CoordIndex;
       for (let t = 0; t < coordIndex.length; t++)
@@ -1158,7 +1159,8 @@ class IfcPolygonalFaceSetHelper extends IfcGeometricRepresentationItemHelper
 
       let geometry = new SolidGeometry();
 
-      geometry.vertices = faceSet.Coordinates.helper.getPoints();
+      geometry.vertices =
+        GeometryUtils.cloneRing(faceSet.Coordinates.helper.getPoints());
 
       let faces = faceSet.Faces;
       for (let f = 0; f < faces.length; f++)
@@ -1323,7 +1325,7 @@ class IfcSurfaceCurveSweptAreaSolidHelper
       const endParam = swept.EndParam; // IfcParameterValue : number
       const surface = swept.ReferenceSurface; // IfcSurface: ignored
 
-      const cordPoints = directrix.helper.getPoints();
+      const cordPoints = GeometryUtils.cloneRing(directrix.helper.getPoints());
       if (cordPoints)
       {
         const profile = profileDef.helper.getProfile();
@@ -1410,7 +1412,7 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
         }
         object3D.add(profile);
 
-        const cordPoints = directrix.helper.getPoints();
+        const cordPoints = GeometryUtils.cloneRing(directrix.helper.getPoints());
         const cord = new Cord(new CordGeometry(cordPoints));
         object3D.add(cord);
 
@@ -2337,7 +2339,7 @@ class IfcConnectedFaceSetHelper extends IfcHelper
           let bound = bounds[b]; // IfcFaceBound
           let loop = bound.Bound; // IfcLoop:
           // (IfcPolyLoop, IfcEdgeLoop, IfcVertexLoop)
-          let loopVertices = loop.helper.getPoints();
+          let loopVertices = GeometryUtils.cloneRing(loop.helper.getPoints());
           let loopOrientation = bound.Orientation;
           if (loopOrientation === ".F.")
           {

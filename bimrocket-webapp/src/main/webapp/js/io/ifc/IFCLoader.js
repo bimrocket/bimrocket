@@ -2032,8 +2032,33 @@ class IfcIndexedPolyCurveHelper extends IfcCurveHelper
 
   getPoints()
   {
-    const polyCurve = this.instance;
-    return polyCurve.Points.helper.getPoints();
+    if (this.points === null)
+    {
+      const polyCurve = this.instance;
+      const segments = polyCurve.Segments;
+      const schema = this.instance.constructor.schema;
+      let points = polyCurve.Points.helper.getPoints();
+      this.points = [];
+      for (let segment of segments)
+      {
+        if (segment instanceof schema.IfcLineIndex)
+        {
+          for (let index of segment.Value)
+          {
+            this.points.push(points[index - 1]);
+          }
+        }
+        else if (segment instanceof schema.IfcArcIndex)
+        {
+          // TODO: make arc segments
+          for (let index of segment.Value)
+          {
+            this.points.push(points[index - 1]);
+          }
+        }
+      }
+    }
+    return this.points;
   }
 };
 registerIfcHelperClass(IfcIndexedPolyCurveHelper);

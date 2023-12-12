@@ -1214,39 +1214,85 @@ class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
     const schema = this.instance.constructor.schema;
     const profileDef = swept.SweptArea;
 
-    if (profileDef instanceof schema.IfcProfileDef)
+    let profiles = []; // Profile[]
+
+    if (profileDef instanceof schema.IfcCompositeProfileDef)
     {
-      let profile = profileDef.helper.getProfile();
-      if (profile)
+      const compositeProfileDef = profileDef;
+      const profileDefs = compositeProfileDef.Profiles;
+      for (let subProfileDef of profileDefs)
       {
-        try
+        let profile = subProfileDef.helper.getProfile();
+        if (profile)
         {
-          if (profile.parent)
-          {
-            profile = profile.clone();
-          }
-          profile._ifc = profileDef;
-
-          let solid = new Solid();
-          solid.add(profile);
-          solid.builder = builder;
-          ObjectBuilder.build(solid);
-          solid._ifc = swept;
-
-          if (swept.Position)
-          {
-            const matrix = swept.Position.helper.getMatrix();
-            matrix.decompose(solid.position, solid.quaternion, solid.scale);
-            solid.updateMatrix();
-          }
-          this.object3D = solid;
+          profiles.push(profile);
         }
-        catch (ex)
+        else
         {
-          console.warn(ex);
+          console.warn("Unsupported profile", profileDef);
         }
       }
+    }
+    else if (profileDef instanceof schema.IfcProfileDef)
+    {
+      let profile = profileDef.helper.getProfile();
+      if (profile) profiles.push(profile);
       else console.warn("Unsupported profile", profileDef);
+    }
+
+    let solids = [];
+
+    for (let profile of profiles)
+    {
+      try
+      {
+        if (profile.parent)
+        {
+          const ifc = profile._ifc;
+          profile = profile.clone();
+          profile._ifc = ifc;
+        }
+
+        let solid = new Solid();
+        solid.add(profile);
+        solid.builder = builder;
+        ObjectBuilder.build(solid);
+        solid._ifc = swept;
+
+        if (swept.Position)
+        {
+          const matrix = swept.Position.helper.getMatrix();
+          matrix.decompose(solid.position, solid.quaternion, solid.scale);
+          solid.updateMatrix();
+        }
+        solids.push(solid);
+      }
+      catch (ex)
+      {
+        console.warn(ex);
+      }
+    }
+    if (solids.length === 0)
+    {
+      this.object3D = new Solid();
+      this.object3D = swept;
+    }
+    else if (solids.length === 1)
+    {
+      this.object3D = solids[0];
+    }
+    else if (solids.length > 1)
+    {
+      const union = new Solid();
+      union.name = "Composite";
+      union.builder = new BooleanOperator(BooleanOperator.UNION);
+      union._ifc = profileDef;
+      for (let solid of solids)
+      {
+        union.add(solid);
+      }
+      ObjectBuilder.build(union);
+      this.object3D = union;
     }
   }
 }
@@ -1637,6 +1683,7 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
         const profileDef = this.instance;
 
         const profile = new Profile();
+        profile._ifc = profileDef;
 
         let name = builder.constructor.name;
         let index = name.indexOf("Builder");
@@ -1911,6 +1958,7 @@ class IfcArbitraryClosedProfileDefHelper extends IfcProfileDefHelper
         const shape = new THREE.Shape();
         this.addPointsToPath(shape, curvePoints);
         this.profile = new Profile(new ProfileGeometry(shape));
+        this.profile._ifc = profileDef;
       }
       else
       {
@@ -1970,6 +2018,7 @@ class IfcArbitraryProfileDefWithVoidsHelper
           }
         }
         this.profile = new Profile(new ProfileGeometry(shape));
+        this.profile._ifc = profileDef;
       }
     }
     return this.profile;
@@ -2038,24 +2087,31 @@ class IfcIndexedPolyCurveHelper extends IfcCurveHelper
       const segments = polyCurve.Segments;
       const schema = this.instance.constructor.schema;
       let points = polyCurve.Points.helper.getPoints();
-      this.points = [];
-      for (let segment of segments)
+      if (segments)
       {
-        if (segment instanceof schema.IfcLineIndex)
+        this.points = [];
+        for (let segment of segments)
         {
-          for (let index of segment.Value)
+          if (segment instanceof schema.IfcLineIndex)
           {
-            this.points.push(points[index - 1]);
+            for (let index of segment.Value)
+            {
+              this.points.push(points[index - 1]);
+            }
+          }
+          else if (segment instanceof schema.IfcArcIndex)
+          {
+            // TODO: make arc segments
+            for (let index of segment.Value)
+            {
+              this.points.push(points[index - 1]);
+            }
           }
         }
-        else if (segment instanceof schema.IfcArcIndex)
-        {
-          // TODO: make arc segments
-          for (let index of segment.Value)
-          {
-            this.points.push(points[index - 1]);
-          }
-        }
+      }
+      else
+      {
+        this.points = points;
       }
     }
     return this.points;

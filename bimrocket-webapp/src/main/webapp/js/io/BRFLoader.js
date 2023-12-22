@@ -322,6 +322,10 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.Sprite();
     }
+    else if (entry.type === "Points")
+    {
+      object = new THREE.Points();
+    }
     else if (entry.type === "PerspectiveCamera")
     {
       object = new THREE.PerspectiveCamera(entry.fov, entry.aspect,

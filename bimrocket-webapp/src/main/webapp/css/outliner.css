@@ -150,6 +150,11 @@ ul.tree li.Mesh
   background-image: url(images/outliner/mesh.svg)
 }
 
+ul.tree li.Points
+{
+  background-image: url(images/outliner/points.svg)
+}
+
 ul.tree li.AmbientLight,
 ul.tree li.DirectionalLight,
 ul.tree li.PointLight,

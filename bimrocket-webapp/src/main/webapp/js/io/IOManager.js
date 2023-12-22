@@ -222,9 +222,10 @@ class IOManager
         loader.parse(data, path,
           result => loadCompleted(result.scene), onError);
       }
-      else // general case: BRFLoader, STLLoader, OBJLoader...
+      else // general case: BRFLoader, STLLoader, PCDLoader, OBJLoader...
       {
         let result = loader.parse(data);
+        console.info("result", result);
         let object = this.createObject(result);
         loadCompleted(object);
       }

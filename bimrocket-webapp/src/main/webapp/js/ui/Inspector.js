@@ -28,7 +28,7 @@ class Inspector extends Panel
     "specular", "emissive", "shininess", "opacity", "transparent", "side",
     "emissiveIntensity", "fog", "depthTest", "depthWrite", "flatShading",
     "polygonOffset", "polygonOffsetFactor", "polygonOffsetUnits",
-    "sizeAttenuation", "map"];
+    "sizeAttenuation", "size", "map"];
 
   constructor(application)
   {

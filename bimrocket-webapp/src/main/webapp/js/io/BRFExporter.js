@@ -376,6 +376,16 @@ class BRFExporter
         entry.sizeAttenuation = material.sizeAttenuation;
       }
 
+      if (typeof material.size === "number")
+      {
+        entry.size = material.size;
+      }
+
+      if (typeof material.sizeAttenuation === "boolean")
+      {
+        entry.sizeAttenuation = material.sizeAttenuation;
+      }
+
       if (material.map)
       {
         entry.map = { "type" : "Texture", "image" : material.map.name };

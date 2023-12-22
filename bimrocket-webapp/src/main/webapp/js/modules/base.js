@@ -100,6 +100,7 @@ import { ColladaLoader } from "../io/ColladaLoader.js";
 import { ColladaExporter } from "../io/ColladaExporter.js";
 import { OBJLoader } from "../io/OBJLoader.js";
 import { OBJExporter } from "../io/OBJExporter.js";
+import { PCDLoader } from "../io/PCDLoader.js";
 import { STLLoader } from "../io/STLLoader.js";
 import { STLExporter } from "../io/STLExporter.js";
 import { GLTFLoader } from "../io/GLTFLoader.js";
@@ -182,6 +183,19 @@ export function load(application)
     {
       class : OBJExporter,
       exportMethod : 0
+    }
+  };
+
+  IOManager.formats["pcd"] =
+  {
+    description: "Point cloud data (*.pcd)",
+    extensions: ["pcd"],
+    mimeType : "application/octet-stream",
+    loader :
+    {
+      class : PCDLoader,
+      loadMethod : 0,
+      dataType : "arraybuffer"
     }
   };
 

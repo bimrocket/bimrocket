@@ -370,6 +370,7 @@ class Application
     const hemisphereLight = new THREE.HemisphereLight(0xf0f0f0, 0x808080, 1);
     hemisphereLight.name = "HemisphereLight";
     hemisphereLight.updateMatrix();
+    hemisphereLight.intensity = 3;
     scene.add(hemisphereLight);
 
     const sunLight = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -378,6 +379,7 @@ class Application
     sunLight.position.z = 80;
     sunLight.name = "SunLight";
     sunLight.castShadow = true;
+    sunLight.intensity = 3;
     sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.mapSize.height = 4096;
     sunLight.shadow.camera.left = -40;
@@ -862,6 +864,25 @@ class Application
         linesGroup.add(lines);
       }
     }
+    else if (object instanceof THREE.Points)
+    {
+      object.updateMatrixWorld();
+
+      let box = ObjectUtils.getLocalBoundingBox(object, true);
+      if (!box.isEmpty())
+      {
+        let geometry = ObjectUtils.getBoxGeometry(box);
+
+        let lines = new THREE.LineSegments(geometry, object.visible ?
+          this.boxSelectionMaterial : material);
+        lines.raycast = function(){};
+
+        object.matrixWorld.decompose(
+          lines.position, lines.rotation, lines.scale);
+        lines.updateMatrix();
+        linesGroup.add(lines);
+      }
+    }
     else if (object instanceof Cord)
     {
       object.updateMatrixWorld();
@@ -910,7 +931,6 @@ class Application
             this.boxSelectionMaterial : material);
           lines.raycast = function(){};
 
-          object.updateMatrixWorld();
           object.matrixWorld.decompose(
             lines.position, lines.rotation, lines.scale);
           lines.updateMatrix();

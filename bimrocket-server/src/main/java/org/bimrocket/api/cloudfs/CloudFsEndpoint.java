@@ -488,6 +488,8 @@ public class CloudFsEndpoint
       extension = filename;
     }
     extension = extension.toLowerCase();
+    if (extension.equals("js")) return "text/javascript";
+    if (extension.equals("mjs")) return "text/javascript";
     if (extension.equals("txt")) return "text/plain";
     if (extension.equals("json")) return "application/json";
     if (extension.equals("properties")) return "text/plain";

@@ -8,20 +8,25 @@ class ModuleLoader
 {
   static load(path)
   {
-    let fullPath;
-    if (path.startsWith("http:") || path.startsWith("https:"))
-    {
-      fullPath = path;
-    }
-    else
-    {
-      let pathname = window.location.pathname;
-      let index = pathname.lastIndexOf("/");
-      let basePath = pathname.substring(0, index) + "/js/";
+    let fullPath = this.isAbsolutePath(path) ? path : this.getBasePath() + path;
 
-      fullPath = basePath + path;
-    }
+    if (fullPath.indexOf(".") === -1) fullPath += ".js";
+
     return import(fullPath);
+  }
+
+  static getBasePath()
+  {
+    let pathname = window.location.pathname;
+    let index = pathname.lastIndexOf("/");
+    return pathname.substring(0, index) + "/js/";
+  }
+
+  static isAbsolutePath(path)
+  {
+    return path.startsWith("http:")
+      || path.startsWith("https:")
+      || path.startsWith("/");
   }
 }
 

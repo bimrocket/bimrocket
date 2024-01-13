@@ -349,6 +349,7 @@ class Application
     };
 
     animate();
+    this.loadModules();
   }
 
   initScene()
@@ -1744,36 +1745,59 @@ class Application
     return panel;
   }
 
-  loadModules(...modulePaths)
+  loadModules()
   {
-    const pendent = [];
+    let modulePaths;
+
+    this.loadedModules = [];
+
+    const modulesParam = this.params.modules;
+    if (modulesParam)
+    {
+      modulePaths = modulesParam.split(",");
+    }
+    else
+    {
+      modulePaths = ["base", "bim", "gis"];
+    }
+    modulePaths.reverse();
 
     const loadNextModule = () =>
     {
-      if (pendent.length > 0)
+      if (modulePaths.length > 0)
       {
-        let modulePath = pendent.pop();
+        let modulePath = modulePaths.pop();
+
+        if (!ModuleLoader.isAbsolutePath(modulePath))
+        {
+          modulePath = "modules/" + modulePath;
+        }
+
         ModuleLoader.load(modulePath).then(
           module =>
           {
-            console.info("module " + modulePath + " completed.");
-            module.load(this);
+            try
+            {
+              module.load(this);
+              this.loadedModules.push(modulePath);
+              console.info(`module ${modulePath} completed.`);
+            }
+            catch (ex)
+            {
+              console.error(`module ${modulePath} failed: ${ex}`);
+            }
           },
           error =>
           {
-            console.info(`module " + modulePath + " failed: ${error}`);
+            console.error(`module ${modulePath} failed: ${error}`);
           }).finally(() => loadNextModule());
       }
       else
       {
-        setTimeout(() => { this.hideLogo(); this.loadModelFromUrl(); }, 1000);
+        this.hideLogo();
+        this.loadModelFromUrl();
       };
     };
-
-    for (let i = modulePaths.length - 1; i >= 0; i--)
-    {
-      pendent.push(modulePaths[i]);
-    }
     loadNextModule();
   }
 

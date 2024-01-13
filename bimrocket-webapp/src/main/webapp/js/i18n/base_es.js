@@ -457,6 +457,9 @@ export const translations =
 
   "label.controller_type" : "Tipo de controlador:",
 
+  "label.about_properties" : "Propiedades",
+  "label.modules" : "Módulos",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",

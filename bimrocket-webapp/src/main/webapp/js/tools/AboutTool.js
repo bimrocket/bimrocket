@@ -30,6 +30,7 @@ class AboutTool extends Tool
     let report = [];
     report.push([appName + " version", appVersion]);
     report.push(["ThreeJS revision", THREE.REVISION]);
+    report.push(["User agent", navigator.userAgent]);
     if (!window.WebGLRenderingContext)
     {
       report.push(["WebGL status", "Not supported"]);
@@ -67,20 +68,40 @@ class AboutTool extends Tool
         report.push(["WebGL status", "ERROR"]);
       }
     }
+
+    const dialog = new Dialog(this.label);
+    dialog.setSize(400, 400);
+    dialog.setI18N(application.i18n);
+
+    const tabbedPane = new TabbedPane(dialog.bodyElem);
+
+    const propsElem =
+      tabbedPane.addTab("properties", "label.about_properties");
+
     let text = '<table style="text-align:left;">';
     for (let i = 0; i < report.length; i++)
     {
-      text += '<tr>';
-      text += '<td style="width:40%;vertical-align:top">' +
-        report[i][0] + ':</td><td style="width:60%">' + report[i][1] + '</td>';
-      text += '</tr>';
+      text += `<tr>
+                 <td style="width:40%;vertical-align:top">${report[i][0]}:</td>
+                 <td style="width:60%">${report[i][1]}</td>
+               </tr>`;
     }
     text += '</table>';
 
-    const dialog = new Dialog(this.label);
-    dialog.setSize(340, 300);
-    dialog.setI18N(application.i18n);
-    dialog.bodyElem.innerHTML = text;
+    propsElem.innerHTML = text;
+
+    const modulesElem =
+      tabbedPane.addTab("modules", "label.modules");
+
+    text = '<ul style="padding:0;padding-left:16px">';
+    for (let loadedModule of application.loadedModules)
+    {
+      text += `<li>
+                 <div>${loadedModule}</div>
+               </li>`;
+    }
+    text += '</ul>';
+    modulesElem.innerHTML = text;
 
     let button = dialog.addButton("accept", "button.accept",
       () => dialog.hide());

@@ -314,7 +314,7 @@ class BIMLayoutTool extends Tool
 
           if (ifcClassName === "IfcSite")
           {
-            let siteRepr = obj.getObjectByName(IFC.RepresentationName);
+            let siteRepr = IFC.getRepresentation(obj);
             if (siteRepr)
             {
               if (!siteRepr.visible)
@@ -347,7 +347,7 @@ class BIMLayoutTool extends Tool
       else siteObject = siteObject.parent;
     }
 
-    let siteRepr = siteObject.getObjectByName(IFC.RepresentationName);
+    let siteRepr = IFC.getRepresentation(siteObject);
     if (siteRepr)
     {
       siteRepr.visible = object === siteObject;

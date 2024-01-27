@@ -27,6 +27,11 @@ class IFC
     ".FEMTO." : { symbol : "f", factor : 10e-16 },
     ".ATTO." : { symbol : "a", factor : 10e-19 }
   };
+
+  static getRepresentation(object)
+  {
+    return object.children.find(child => child.name === IFC.RepresentationName);
+  }
 }
 
 export { IFC };

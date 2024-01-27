@@ -28,7 +28,7 @@ class BIMUtils
         let ifcClassName = child.userData.IFC?.ifcClassName;
         if (ifcClassName === "IfcBuildingElementPart")
         {
-          let reprObject3D = child.getObjectByName(IFC.RepresentationName);
+          let reprObject3D = IFC.getRepresentation(child);
           if (reprObject3D)
           {
             reprObjects.push(reprObject3D);

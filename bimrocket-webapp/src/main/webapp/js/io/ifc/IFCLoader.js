@@ -224,8 +224,7 @@ class IFCLoader extends THREE.Loader
       {
         if (BIMUtils.createVoidings(productObject3D))
         {
-          let reprObject3D =
-            productObject3D.getObjectByName(IFC.RepresentationName);
+          let reprObject3D = IFC.getRepresentation(productObject3D);
           ObjectBuilder.build(reprObject3D);
         }
       }
@@ -275,14 +274,14 @@ class IFCLoader extends THREE.Loader
       {
         if (object.userData.IFC)
         {
-          var ifcClassName = object.userData.IFC.ifcClassName;
+          let ifcClassName = object.userData.IFC.ifcClassName;
           if (ifcClassName === "IfcOpeningElement" ||
               ifcClassName === "IfcSpace")
           {
-            object = object.getObjectByName(IFC.RepresentationName);
-            if (object)
+            let repr = IFC.getRepresentation(object);
+            if (repr)
             {
-              ObjectUtils.updateStyle(object, false, false);
+              ObjectUtils.updateStyle(repr, false, false);
             }
           }
           else if (ifcClassName === "IfcSite" ||
@@ -340,7 +339,7 @@ class IFCLoader extends THREE.Loader
         let object3D = product.helper.getObject3D();
         if (object3D && object3D.userData && object3D.userData.IFC)
         {
-          let reprObject3D = object3D.getObjectByName(IFC.RepresentationName);
+          let reprObject3D = IFC.getRepresentation(object3D);
           if (reprObject3D)
           {
             let ifcClassName = object3D.userData.IFC.ifcClassName;

@@ -63,7 +63,7 @@ class IFCVoider extends SolidBuilder
     {
       if (child.userData.IFC?.ifcClassName === "IfcOpeningElement")
       {
-        let openingRepr = child.getObjectByName(IFC.RepresentationName);
+        let openingRepr = IFC.getRepresentation(child);
         if (openingRepr instanceof Solid)
         {
           openingReprs.push(openingRepr);

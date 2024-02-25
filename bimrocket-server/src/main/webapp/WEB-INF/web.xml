@@ -41,6 +41,19 @@
   </context-param>
 
   <context-param>
+    <param-name>ifc.db.url</param-name>
+    <param-value>remote:localhost</param-value>
+  </context-param>
+  <context-param>
+    <param-name>ifc.db.username</param-name>
+    <param-value>root</param-value>
+  </context-param>
+  <context-param>
+    <param-name>ifc.db.password</param-name>
+    <param-value>orientdb</param-value>
+  </context-param>
+
+  <context-param>
     <param-name>bcf.mail.createTopic.subject</param-name>
     <param-value>${project.name}#${index}: ${title} [${priority}]</param-value>
   </context-param>

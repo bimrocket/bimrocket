@@ -225,7 +225,14 @@ class IFCLoader extends THREE.Loader
         if (BIMUtils.createVoidings(productObject3D))
         {
           let reprObject3D = IFC.getRepresentation(productObject3D);
-          ObjectBuilder.build(reprObject3D);
+          if (reprObject3D)
+          {
+            ObjectBuilder.build(reprObject3D);
+          }
+          else
+          {
+            ObjectBuilder.build(productObject3D);
+          }
         }
       }
     };

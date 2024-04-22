@@ -197,6 +197,7 @@ class Application
       renderer = new THREE.WebGLRenderer(
       {
         antialias : true,
+        stencil : true,
         alpha : true,
         preserveDrawingBuffer : true
       });

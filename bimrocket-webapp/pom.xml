@@ -44,6 +44,21 @@
         <version>1.2.1</version>
         <executions>
           <execution>
+            <id>IFC4X3_ADD2_classes_generation</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
+              <arguments>
+                <argument>schema:IFC4X3_ADD2</argument>
+                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC4X3_ADD2.js</argument>
+                <argument>-v:IFC4X3_ADD2</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
             <id>IFC4_classes_generation</id>
             <phase>generate-sources</phase>
             <goals>

@@ -6,6 +6,7 @@
 
 const IFC_SCHEMAS = {};
 const IFC_HELPERS = {};
+const DEFAULT_IFC_SCHEMA_NAME = "IFC4";
 
 class BaseEntity
 {
@@ -67,7 +68,24 @@ function registerIfcHelperClass(ifcHelperClass)
   IFC_HELPERS[ifcHelperClass.name] = ifcHelperClass;
 }
 
-export { IFC_SCHEMAS, IFC_HELPERS,
-  BaseEntity, registerIfcClass, registerIfcHelperClass };
+function findBestIfcSchema(schemaName)
+{
+  if (IFC_SCHEMAS[schemaName]) return schemaName;
+
+  let index = schemaName.indexOf("_");
+  if (index !== -1) schemaName = schemaName.substring(0, index);
+
+  const availableSchemaNames = Object.keys(IFC_SCHEMAS).sort();
+
+  for (let availableSchemaName of availableSchemaNames)
+  {
+    if (schemaName <= availableSchemaName) return availableSchemaName;
+  }
+
+  return DEFAULT_IFC_SCHEMA_NAME;
+}
+
+export { IFC_SCHEMAS, IFC_HELPERS, DEFAULT_IFC_SCHEMA_NAME,
+  BaseEntity, registerIfcClass, registerIfcHelperClass, findBestIfcSchema };
 
 

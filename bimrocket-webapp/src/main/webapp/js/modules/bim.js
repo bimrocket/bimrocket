@@ -14,6 +14,7 @@ import { IOManager } from "../io/IOManager.js";
 import { BundleManager } from "../i18n/BundleManager.js";
 import "../io/ifc/schemas/IFC2X3.js";
 import "../io/ifc/schemas/IFC4.js";
+import "../io/ifc/schemas/IFC4X3_ADD2.js";
 
 export function load(application)
 {

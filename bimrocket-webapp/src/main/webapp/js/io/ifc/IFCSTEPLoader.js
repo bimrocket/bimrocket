@@ -5,7 +5,7 @@
  */
 
 import { IFCLoader } from "./IFCLoader.js";
-import { IFC_SCHEMAS } from "./BaseEntity.js";
+import { IFC_SCHEMAS, DEFAULT_IFC_SCHEMA_NAME, findBestIfcSchema } from "./BaseEntity.js";
 import { STEPParser, STEPFile } from "../STEP.js";
 
 class IFCSTEPLoader extends IFCLoader
@@ -18,16 +18,27 @@ class IFCSTEPLoader extends IFCLoader
   parseFile(ifcFile, text)
   {
     let parser = new STEPParser();
-    parser.schema = IFC_SCHEMAS.IFC4; // default schema
+    // set default schema
+    parser.schema = IFC_SCHEMAS[DEFAULT_IFC_SCHEMA_NAME];
+
     parser.getSchemaTypes = schemaName =>
     {
       schemaName = schemaName.toUpperCase();
-      console.info("schema: " + schemaName);
-      let schema = IFC_SCHEMAS[schemaName] || IFC_SCHEMAS.IFC4;
-      if (schema === undefined) throw "Unsupported schema " + schemaName;
+      console.info("Model schema: " + schemaName);
+
+      let parseSchemaName = findBestIfcSchema(schemaName);
+
+      if (schemaName !== parseSchemaName)
+      {
+        console.warn("Using schema " + parseSchemaName);
+      }
+
+      let schema = IFC_SCHEMAS[parseSchemaName];
+
       ifcFile.schema = schema;
       return schema;
     };
+
     parser.onEntityCreated = entity =>
     {
       entity._loader = this;

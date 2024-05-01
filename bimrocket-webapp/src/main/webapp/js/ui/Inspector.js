@@ -209,10 +209,7 @@ class Inspector extends Panel
 
   showProperties(object)
   {
-    if (this.edition.object) // edition in progress
-    {
-      this.stopEdition();
-    }
+    if (this.edition.object) return; // edition in progress
 
     let objectChanged;
     if (this.object !== object)

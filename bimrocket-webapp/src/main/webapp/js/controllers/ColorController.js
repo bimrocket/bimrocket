@@ -19,10 +19,13 @@ class ColorController extends Controller
     this.minValue = 0;
     this.maxValue = 1;
     this.emissive = 0;
+    this.opacity = 1;
 
     this._material = new THREE.MeshPhongMaterial({
+      name: "ColorControllerMaterial",
       color: new THREE.Color(0.5, 0.5, 0.5),
-      emissive: 0xFFFFFF, emissiveIntensity : 0.0,
+      emissive: 0xFFFFFF, emissiveIntensity: 0.0,
+      transparent: false, opacity: 1,
       side: THREE.DoubleSide});
 
     this._materialMap = new Map();
@@ -32,7 +35,7 @@ class ColorController extends Controller
   onStart()
   {
     this.replaceMaterial();
-    this.updateColor(this.input, true);
+    this.updateColor(true);
     this.application.addEventListener("scene", this._onNodeChanged);
   }
 
@@ -47,17 +50,25 @@ class ColorController extends Controller
   {
     if (event.type === "nodeChanged" && this.hasChanged(event))
     {
-      this.updateColor(this.input, false);
+      this.updateColor(false);
     }
   }
 
-  updateColor(value, force)
+  updateColor(force)
   {
+    if (typeof this.input !== "number")
+    {
+      this.input = this.minValue;
+    }
+
+    let value = this.input;
+
     let color = null;
     let minValue = this.minValue;
     let maxValue = this.maxValue;
     let minColor = this.minColor;
     let maxColor = this.maxColor;
+    let opacity = this.opacity;
 
     let factor;
     if (value <= minValue)
@@ -77,10 +88,13 @@ class ColorController extends Controller
       color.lerp(maxColor, factor);
     }
 
-    if (force || this._material.color.getHex() !== color.getHex())
+    if (force || this._material.color.getHex() !== color.getHex()
+              || this._material.opacity !== opacity)
     {
       this._material.color.copy(color);
       this._material.emissiveIntensity = factor * this.emissive;
+      this._material.opacity = opacity;
+      this._material.transparent = opacity < 1;
       this.application.notifyObjectsChanged(this.object, this);
     }
   }

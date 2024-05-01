@@ -18,7 +18,6 @@ class Brain4itPostController extends Controller
     this.accessKey = "access_key";
     this.func = "@function_to_call";
     this.input = 0;
-    this.autoStart = false;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
     this._value = null;

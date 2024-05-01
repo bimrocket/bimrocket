@@ -20,7 +20,6 @@ class Brain4itWatchController extends Controller
     this.accessKey = "access_key";
     this.func = "@function_to_call";
     this.output = null;
-    this.autoStart = false;
 
     this._monitor = null;
     this._functionKey = null;

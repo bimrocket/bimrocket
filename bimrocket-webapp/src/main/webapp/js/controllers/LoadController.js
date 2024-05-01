@@ -16,7 +16,6 @@ class LoadController extends Controller
     super(object, name);
 
     this.url = "https://your_server.com/model.brf";
-    this.autoStart = false;
 
     this._url = null; // last url loaded
     this._onLoad = this.onLoad.bind(this);

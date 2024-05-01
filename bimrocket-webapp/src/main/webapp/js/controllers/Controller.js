@@ -16,7 +16,7 @@ class Controller
     this.object = object;
     this.name = name || "controller";
     this._started = false;
-    this.autoStart = true;
+    this.autoStart = false;
   }
 
   init(application)

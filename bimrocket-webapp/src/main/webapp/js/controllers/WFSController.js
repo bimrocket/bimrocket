@@ -37,7 +37,6 @@ class WFSController extends Controller
     this.representationMode = WFSController.ADD_OBJECT_REPR_MODE;
     this.mergeGeometries = false;
     this.origin = new THREE.Vector3(420878, 4582247, 0);
-    this.autoStart = false;
 
     this._onLoad = this.onLoad.bind(this);
     this._onProgress = this.onProgress.bind(this);

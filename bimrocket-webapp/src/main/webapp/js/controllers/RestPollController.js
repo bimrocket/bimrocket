@@ -16,8 +16,10 @@ class RestPollController extends Controller
     this.method = "GET";
     this.authorizationHeader = ""; // Ex: Authorization : Basic ....
     this.pollInterval = 10; // seconds
-    this.output = "{}"; // JSON string
-    this.autoStart = false;
+    this.searchParams = ""; // JSON string
+    this.body = ""; // JSON string
+    this.output = ""; // JSON string
+    this.jsonOutput = {}; // JSON output
     this._timeoutId = null;
   }
 
@@ -40,6 +42,8 @@ class RestPollController extends Controller
 
   poll()
   {
+    this.updateFormulas();
+
     this.connect();
 
     if (this.isStarted())
@@ -52,16 +56,29 @@ class RestPollController extends Controller
     }
   }
 
-  connect()
+  async connect()
   {
     const headers = new Headers();
 
-    const parameters = {
+    const options = {
       method: this.method,
       headers: headers,
       mode: "cors",
-      cache: "default"
+      cache: "no-cache"
     };
+
+    let url = this.url;
+
+    if (this.searchParams?.length > 0)
+    {
+      url += "?" + new URLSearchParams(JSON.parse(this.searchParams));
+    }
+
+    if (this.body?.length > 0 && this.method !== "GET")
+    {
+      headers.set("Content-Type", "application/json;charset=utf-8");
+      options.body = this.body;
+    }
 
     const authorizationHeader = this.authorizationHeader;
     if (typeof authorizationHeader === "string"
@@ -76,16 +93,21 @@ class RestPollController extends Controller
       }
     }
 
-    const request = new Request(this.url, parameters);
+    const request = new Request(url, options);
 
-    fetch(request)
-      .then(response => response.json()).then(json =>
-        {
-          console.info("RestPollController", json);
-          this.output = JSON.stringify(json);
-          this.application.notifyObjectsChanged(this.object, this);
-        })
-      .catch(error => console.error("RestPollController: " + error));
+    let response = await fetch(request);
+    this.output = await response.text();
+    try
+    {
+      this.jsonOutput = JSON.parse(this.output);
+      console.info("RestPollController", this.jsonOutput);
+    }
+    catch (ex)
+    {
+      console.error("Invalid JSON response: " + ex);
+    }
+
+    this.application.notifyObjectsChanged(this.object, this);
   }
 }
 

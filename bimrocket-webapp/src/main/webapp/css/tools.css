@@ -661,6 +661,33 @@ div.option_block input[name=decimals]
   margin-right: 4px;
 }
 
+.builder_dialog > ul
+{
+  flex-grow: 1;
+  overflow: auto;
+  padding: 4px;
+  margin:0;
+  margin-top: 4px;
+}
+
+.builder_dialog > ul li
+{
+  list-style-type: none;
+  margin:6px 3px 6px 3px;
+}
+
+.builder_dialog > ul li label
+{
+  display: block;
+  vertical-align: middle;
+}
+
+.builder_dialog > ul li input
+{
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
 .dialog .body div.script_name > label
 {
   display: inline-block;

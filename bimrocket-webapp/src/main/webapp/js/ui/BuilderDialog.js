@@ -26,9 +26,10 @@ class BuilderDialog extends Dialog
 
     this.setSize(300, 400);
 
+    this.bodyElem.classList.add("builder_dialog");
+
     const listElem = document.createElement("ul");
     this.listElem = listElem;
-    listElem.className = "controller_list";
     this.bodyElem.appendChild(listElem);
 
     const classes = this.findBuilderClasses(this.object);

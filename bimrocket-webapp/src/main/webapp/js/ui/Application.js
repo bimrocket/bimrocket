@@ -25,6 +25,7 @@ import { WEBGL } from "../utils/WebGL.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { LineDashedShaderMaterial } from "../materials/LineDashedShaderMaterial.js";
 import { Inspector } from "../ui/Inspector.js";
+import { CSS2DRenderer } from "../renderers/CSS2DRenderer.js";
 import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { Formula } from "../formula/Formula.js";
 import { LoginDialog } from "./LoginDialog.js";
@@ -217,6 +218,16 @@ class Application
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
+    let cssRenderer = new CSS2DRenderer();
+    cssRenderer.setSize(container.clientWidth, container.clientHeight);
+    cssRenderer.domElement.style.position = "absolute";
+    cssRenderer.domElement.style.top = "0";
+    cssRenderer.domElement.style.bottom = "0";
+    cssRenderer.domElement.style.left = "0";
+    cssRenderer.domElement.style.right = "0";
+    this.cssRenderer = cssRenderer;
+    container.appendChild(cssRenderer.domElement);
+
     // panelManager
     this.panelManager = new PanelManager(container);
 
@@ -299,7 +310,12 @@ class Application
         }
         else if (event.type === "added" || event.type === "removed")
         {
+          this.cssRenderer.cssObjects = -1; // force css rendering
           event.parent.needsRebuild = true;
+        }
+        else if (event.type === "structureChange")
+        {
+          this.cssRenderer.cssObjects = -1; // force css rendering
         }
         this.repaint();
       }
@@ -455,6 +471,7 @@ class Application
   render()
   {
     this.renderer.render(this.scene, this.camera);
+    this.cssRenderer.render(this.scene, this.camera);
     this.needsRepaint = false;
   }
 
@@ -1021,6 +1038,32 @@ class Application
     {
       listener(event);
     }
+  }
+
+  isCanvasEvent(event)
+  {
+    if (this.menuBar.armed) return false;
+
+    let elem = event.target;
+
+    while (elem !== this.container)
+    {
+      if (elem.classList.contains("panel") ||
+          elem.classList.contains("resizer")) return false;
+      elem = elem.parentElement;
+    }
+    return true;
+  }
+
+  getPointerPosition(event)
+  {
+    const container = this.container;
+    let rect = container.getBoundingClientRect();
+    const pointerPosition = new THREE.Vector2();
+    pointerPosition.x = event.clientX - rect.left;
+    pointerPosition.y = event.clientY - rect.top;
+
+    return pointerPosition;
   }
 
   addService(service, group, save = true)
@@ -1730,6 +1773,8 @@ class Application
     const container = this.container;
     const renderer = this.renderer;
     renderer.setSize(container.clientWidth, container.clientHeight);
+    const cssRenderer = this.cssRenderer;
+    cssRenderer.setSize(container.clientWidth, container.clientHeight);
     this.repaint();
   }
 

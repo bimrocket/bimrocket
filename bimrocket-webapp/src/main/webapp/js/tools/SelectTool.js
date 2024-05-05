@@ -93,20 +93,20 @@ class SelectTool extends Tool
 
   onPointerUp(event)
   {
-    const container = this.application.container;
+    const application = this.application;
+    const container = application.container;
     container.removeEventListener('pointermove', this._onPointerMove, false);
 
     const pointerElem = this.pointerElem;
     pointerElem.style.display = "none";
 
-    if (!this.isPointSelectionEvent(event)) return;
+    if (!application.isCanvasEvent(event)) return;
 
-    const application = this.application;
     const scene = application.scene;
     const selection = application.selection;
 
     let pointerPosition = this.getPointerPosition(event);
-    let intersect = this.intersect(pointerPosition, scene, true);
+    let intersect = this.intersect(pointerPosition, scene);
     if (intersect)
     {
       let point = intersect.point;
@@ -130,7 +130,9 @@ class SelectTool extends Tool
   {
     const pointerElem = this.pointerElem;
 
-    if (!this.isPointSelectionEvent(event))
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event))
     {
       pointerElem.style.display = "none";
       return;
@@ -147,29 +149,14 @@ class SelectTool extends Tool
 
   getPointerPosition(event)
   {
-    const container = this.application.container;
-    let rect = container.getBoundingClientRect();
-    const pointerPosition = new THREE.Vector2();
-    pointerPosition.x = event.clientX - rect.left;
-    pointerPosition.y = event.clientY - rect.top;
+    const pointerPosition = this.application.getPointerPosition(event);
 
     if (event.pointerType === "touch")
     {
       pointerPosition.x += this.touchPointerOffsetX;
       pointerPosition.y += this.touchPointerOffsetY;
     }
-
     return pointerPosition;
-  }
-
-  isPointSelectionEvent(event)
-  {
-    if (this.application.menuBar.armed) return false;
-
-    const target = event.target;
-    const pointerElem = this.pointerElem;
-
-    return target.nodeName.toLowerCase() === "canvas" || target === pointerElem;
   }
 }
 

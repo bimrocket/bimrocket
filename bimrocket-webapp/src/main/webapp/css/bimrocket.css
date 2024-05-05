@@ -33,7 +33,7 @@
 
 .logo_panel
 {
-  z-index: 1000;
+  z-index: 20000;
   background: black;
   position:absolute;
   top:0;
@@ -68,7 +68,7 @@
 
 .splash_panel
 {
-  z-index: 1001;
+  z-index: 20000;
   background: black;
   position:absolute;
   top:0;

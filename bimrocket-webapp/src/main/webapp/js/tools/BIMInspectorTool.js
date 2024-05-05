@@ -83,10 +83,11 @@ class BIMInspectorTool extends Tool
 
   onPointerDown(event)
   {
-    if (!this.isCanvasEvent(event)) return;
-
     const application = this.application;
-    const pointerPosition = this.getEventPosition(event);
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointerPosition = application.getPointerPosition(event);
     const baseObject = application.baseObject;
     const intersect = this.intersect(pointerPosition, baseObject, true);
     if (intersect)

@@ -110,22 +110,6 @@ class Tool
     }
     return object;
   }
-
-  getEventPosition(event)
-  {
-    const x = event.offsetX || event.layerX;
-    const y = event.offsetY || event.layerY;
-    return new THREE.Vector2(x, y);
-  }
-
-  isCanvasEvent(event)
-  {
-    if (this.application.menuBar.armed) return false;
-
-    const target = event.target;
-    return target.nodeName.toLowerCase() === "canvas" &&
-      target.parentElement.id === "container";
-  }
 }
 
 export { Tool };

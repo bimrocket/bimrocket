@@ -141,6 +141,7 @@ class PointSelector
     snapElem.style.display = "none";
     snapElem.style.width = this.snapSize + "px";
     snapElem.style.height = this.snapSize + "px";
+    snapElem.style.zIndex = 10000;
     application.container.appendChild(snapElem);
 
     this.projectionSnapElem = document.createElement("div");
@@ -182,7 +183,9 @@ class PointSelector
 
   onPointerUp(event)
   {
-    if (!this.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     this.snapElem.style.display = "none";
     this.projectionSnapElem.style.display = "none";
@@ -190,9 +193,10 @@ class PointSelector
 
   onPointerMove(event)
   {
-    if (!this.isPointSelectionEvent(event)) return;
-
     const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
     const container = application.container;
     const snapElem = this.snapElem;
     const projectionSnapElem = this.projectionSnapElem;
@@ -993,16 +997,6 @@ class PointSelector
       }
     }
     return selectedSnap;
-  }
-
-  isPointSelectionEvent(event)
-  {
-    if (this.application.menuBar.armed) return false;
-
-    const target = event.target;
-    const snapElem = this.snapElem;
-
-    return target.nodeName.toLowerCase() === "canvas" || target === snapElem;
   }
 }
 

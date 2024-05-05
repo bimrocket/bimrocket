@@ -96,8 +96,11 @@ class PlaceTool extends Tool
 
   onPointerDown(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     event.preventDefault();
 
@@ -112,8 +115,11 @@ class PlaceTool extends Tool
   {
     if (this.stage === 0) return;
 
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     event.preventDefault();
 
@@ -133,8 +139,9 @@ class PlaceTool extends Tool
 
   onContextMenu(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     event.preventDefault();
   }

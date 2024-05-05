@@ -82,8 +82,10 @@ class RotateTool extends TransformationTool
     if (this.stage === 3)
     {
       const application = this.application;
+
+      if (!application.isCanvasEvent(event)) return;
+
       const pointSelector = application.pointSelector;
-      if (!pointSelector.isPointSelectionEvent(event)) return;
 
       event.preventDefault();
 
@@ -121,8 +123,10 @@ class RotateTool extends TransformationTool
   onPointerUp(event)
   {
     const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
     const pointSelector = application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
 
     const snap = pointSelector.snap;
     if (this.stage === 0) // first axis point

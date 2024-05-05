@@ -8,6 +8,7 @@ import { Cord } from "../core/Cord.js";
 import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
+import { CSS2DObject } from "../renderers/CSS2DRenderer.js";
 import * as THREE from "../lib/three.module.js";
 
 class ObjectUtils
@@ -154,22 +155,36 @@ class ObjectUtils
 
   static dispose(root, geometries = true, materials = true)
   {
+    const cssObjects = [];
+
     root.traverse(object =>
     {
-      if (geometries && object.geometry)
+      if (object instanceof CSS2DObject)
       {
-        const geometry = object.geometry;
-        if (geometry.dispose)
+        cssObjects.push(object);
+      }
+      else
+      {
+        if (geometries && object.geometry)
         {
-          geometry.dispose();
+          const geometry = object.geometry;
+          if (geometry.dispose)
+          {
+            geometry.dispose();
+          }
+        }
+
+        if (materials && object.material)
+        {
+          this.disposeMaterial(object.material);
         }
       }
-
-      if (materials && object.material)
-      {
-        this.disposeMaterial(object.material);
-      }
     });
+
+    for (let cssObject of cssObjects)
+    {
+      cssObject.removeFromParent();
+    }
   }
 
   static disposeMaterial(material)

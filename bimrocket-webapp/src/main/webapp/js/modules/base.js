@@ -385,6 +385,9 @@ export function load(application)
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "Group" });
+  const addTextTool = new AddObjectTool(application,
+    { name : "add_text", label : "tool.add_text.label",
+      objectType : "Text" });
   const addSpriteTool = new AddObjectTool(application,
     { name : "add_sprite", label : "tool.add_sprite.label",
       objectType : "Sprite" });
@@ -409,7 +412,6 @@ export function load(application)
   const addSpotLightTool = new AddObjectTool(application,
     { name : "add_spot_light", label : "tool.add_spot_light.label",
       objectType : "SpotLight" });
-
 
   const removeTool = new RemoveTool(application, { keyShortcut : "Delete" });
   const clonerTool = new CloneTool(application,
@@ -454,7 +456,7 @@ export function load(application)
   const stopControllersTool = new StopControllersTool(application);
   const aboutTool = new AboutTool(application);
   const githubTool = new OpenLinkTool(application,
-  { name : "gihub", label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
+  { name : "github", label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
     target : "_blank"});
 
   application.addTool(newSceneTool);
@@ -523,6 +525,7 @@ export function load(application)
   application.addTool(addUProfileTool);
   application.addTool(addZProfileTool);
   application.addTool(addHelicoidTool);
+  application.addTool(addTextTool);
   application.addTool(addSpriteTool);
   application.addTool(addPerspectiveCameraTool);
   application.addTool(addOrthographicCameraTool);
@@ -643,6 +646,7 @@ export function load(application)
   addLightMenu.addMenuItem(addSpotLightTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
+  addMenu.addMenuItem(addTextTool);
   addMenu.addMenuItem(addSpriteTool);
   const transformMenu = designMenu.addMenu("menu.design.transform");
   transformMenu.addMenuItem(moveTool);

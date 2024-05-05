@@ -90,8 +90,9 @@ class TransformationTool extends Tool
 
   onContextMenu(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     event.preventDefault();
   }

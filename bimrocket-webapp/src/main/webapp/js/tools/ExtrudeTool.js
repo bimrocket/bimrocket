@@ -122,8 +122,8 @@ class ExtrudeTool extends Tool
   onPointerDown(event)
   {
     const application = this.application;
-    const pointSelector = application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+
+    if (!application.isCanvasEvent(event)) return;
 
     if (this.stage === 0)
     {
@@ -133,8 +133,11 @@ class ExtrudeTool extends Tool
 
   onPointerMove(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     if (this.stage === 1)
     {
@@ -156,8 +159,9 @@ class ExtrudeTool extends Tool
 
   onPointerUp(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     if (this.stage === 1)
     {
@@ -172,8 +176,9 @@ class ExtrudeTool extends Tool
 
   onContextMenu(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     event.preventDefault();
   }

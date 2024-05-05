@@ -110,10 +110,12 @@ class DrawTool extends Tool
 
   onPointerUp(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
 
-    const selection = this.application.selection;
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
+    const selection = application.selection;
 
     let snap = pointSelector.snap;
     if (snap)
@@ -414,8 +416,6 @@ class DrawTool extends Tool
 
     let material = this.mode === 0 ?
       this.addPointsMaterial : this.editPointsMaterial;
-
-    console.info(this.object, this.vertices);
 
     let transformedVertices;
     if (this.object)

@@ -75,8 +75,10 @@ class MoveTool extends TransformationTool
     if (this.stage === 1)
     {
       const application = this.application;
+
+      if (!application.isCanvasEvent(event)) return;
+
       const pointSelector = application.pointSelector;
-      if (!pointSelector.isPointSelectionEvent(event)) return;
 
       event.preventDefault();
 
@@ -112,8 +114,10 @@ class MoveTool extends TransformationTool
   onPointerUp(event)
   {
     const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
     const pointSelector = application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
 
     const snap = pointSelector.snap;
     if (snap)

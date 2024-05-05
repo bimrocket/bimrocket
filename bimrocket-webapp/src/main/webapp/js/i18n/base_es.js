@@ -263,6 +263,7 @@ export const translations =
   "tool.add_uprofile.label" : "Perfil U",
   "tool.add_zprofile.label" : "Perfil Z",
   "tool.add_helicoid.label" : "Helicoide",
+  "tool.add_text.label" : "Texto 2D",
   "tool.add_sprite.label" : "Sprite",
   "tool.add_perspective_camera.label" : "Perspectiva",
   "tool.add_orthographic_camera.label" : "Ortográfica",

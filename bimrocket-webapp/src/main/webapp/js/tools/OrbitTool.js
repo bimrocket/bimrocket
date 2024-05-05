@@ -468,7 +468,9 @@ class OrbitTool extends Tool
 
   onWheel(event)
   {
-    if (!this.isCanvasEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     event.preventDefault();
 

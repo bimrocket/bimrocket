@@ -10,6 +10,7 @@ import { Dialog } from "./Dialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Application } from "./Application.js";
 import { Solid } from "../core/Solid.js";
+import { Text } from "../core/Text.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Formula } from "../formula/Formula.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
@@ -53,7 +54,8 @@ class Inspector extends Panel
     this.addRenderer(StringRenderer);
     this.addRenderer(NumberRenderer);
     this.addRenderer(BooleanRenderer);
-    this.addRenderer(VectorRenderer);
+    this.addRenderer(Vector2Renderer);
+    this.addRenderer(Vector3Renderer);
     this.addRenderer(EulerRenderer);
     this.addRenderer(FormulaRenderer);
     this.addRenderer(ColorRenderer);
@@ -63,7 +65,8 @@ class Inspector extends Panel
     this.addEditor(StringEditor);
     this.addEditor(NumberEditor);
     this.addEditor(BooleanEditor);
-    this.addEditor(VectorEditor);
+    this.addEditor(Vector2Editor);
+    this.addEditor(Vector3Editor);
     this.addEditor(EulerEditor);
     this.addEditor(FormulaEditor);
     this.addEditor(ColorEditor);
@@ -264,6 +267,15 @@ class Inspector extends Panel
         this.createWriteableProperty(objListElem, object, "facesVisible");
         this.createWriteableProperty(objListElem, object, "castShadow");
         this.createWriteableProperty(objListElem, object, "receiveShadow");
+      }
+
+      if (object instanceof Text)
+      {
+        this.createWriteableProperty(objListElem, object, "text");
+        this.createWriteableProperty(objListElem, object, "fontSize");
+        this.createWriteableProperty(objListElem, object, "color");
+        this.createWriteableProperty(objListElem, object, "backgroundColor");
+        this.createWriteableProperty(objListElem, object, "maxWidth");
       }
 
       let material = object.material;
@@ -1098,7 +1110,42 @@ class BooleanRenderer extends PropertyRenderer
   }
 }
 
-class VectorRenderer extends PropertyRenderer
+class Vector2Renderer extends PropertyRenderer
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Vector2;
+  }
+
+  getClassName(value)
+  {
+    return "vector";
+  }
+
+  render(vector, disabled)
+  {
+    let valueElem = document.createElement("span");
+    valueElem.className = "value";
+    if (disabled) valueElem.classList.add("disabled");
+
+    let round = function(value)
+    {
+      var precision = 1000;
+      return Math.round(precision * value) / precision;
+    };
+    let out = '(' + round(vector.x) + ', ' +
+      round(vector.y) + ')';
+    valueElem.textContent = out;
+    return valueElem;
+  }
+}
+
+class Vector3Renderer extends PropertyRenderer
 {
   constructor(inspector)
   {
@@ -1426,6 +1473,7 @@ class DimensionEditor extends PropertyEditor
   constructor(inspector)
   {
     super(inspector);
+    this.dimensions = ["x", "y", "z"];
   }
 
   formatValue(value)
@@ -1433,14 +1481,14 @@ class DimensionEditor extends PropertyEditor
     return value;
   }
 
-  createInstance(x, y, z)
+  createInstance(values)
   {
-    return {"x": x, "y": y, "z": z};
+    return {"x": values[0], "y": values[1], "z": values[2]};
   }
 
   edit(object, propertyName, vector)
   {
-    let dimId = "dim_edit_";
+    const dimId = "dim_edit_";
 
     const parseDimension = dim =>
     {
@@ -1452,10 +1500,12 @@ class DimensionEditor extends PropertyEditor
 
     const endEdition = () =>
     {
-      let x = parseDimension("x");
-      let y = parseDimension("y");
-      let z = parseDimension("z");
-      object[propertyName].copy(this.createInstance(x, y, z));
+      let values = [];
+      for (let dim of this.dimensions)
+      {
+        values.push(parseDimension(dim));
+      }
+      object[propertyName].copy(this.createInstance(values));
       if (object instanceof THREE.Object3D)
       {
         object.updateMatrix();
@@ -1499,17 +1549,37 @@ class DimensionEditor extends PropertyEditor
 
     let listElem = document.createElement("ul");
     listElem.className = "list_3";
-    listElem.appendChild(createDimensionEditor(vector, "x"));
-    listElem.appendChild(createDimensionEditor(vector, "y"));
-    listElem.appendChild(createDimensionEditor(vector, "z"));
-
-    listElem.focus = () => document.getElementById(dimId + "x").focus();
+    for (let dim of this.dimensions)
+    {
+      listElem.appendChild(createDimensionEditor(vector, dim));
+    }
+    let firstDim = this.dimensions[0];
+    listElem.focus = () => document.getElementById(dimId + firstDim).focus();
 
     return listElem;
   }
 }
 
-class VectorEditor extends DimensionEditor
+class Vector2Editor extends DimensionEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+    this.dimensions = ["x", "y"];
+  }
+
+  isSupported(value)
+  {
+    return value instanceof THREE.Vector2;
+  }
+
+  createInstance(values)
+  {
+    return new THREE.Vector2(values[0], values[1]);
+  }
+}
+
+class Vector3Editor extends DimensionEditor
 {
   constructor(inspector)
   {
@@ -1521,9 +1591,9 @@ class VectorEditor extends DimensionEditor
     return value instanceof THREE.Vector3;
   }
 
-  createInstance(x, y, z)
+  createInstance(values)
   {
-    return new THREE.Vector3(x, y, z);
+    return new THREE.Vector3(values[0], values[1], values[2]);
   }
 }
 
@@ -1545,11 +1615,11 @@ class EulerEditor extends DimensionEditor
     return Math.round(precision * THREE.MathUtils.radToDeg(value)) / precision;
   }
 
-  createInstance(x, y, z)
+  createInstance(values)
   {
-    let xrad = THREE.MathUtils.degToRad(x);
-    let yrad = THREE.MathUtils.degToRad(y);
-    let zrad = THREE.MathUtils.degToRad(z);
+    let xrad = THREE.MathUtils.degToRad(values[0]);
+    let yrad = THREE.MathUtils.degToRad(values[1]);
+    let zrad = THREE.MathUtils.degToRad(values[2]);
 
     return new THREE.Euler(xrad, yrad, zrad, "XYZ");
   }

@@ -13,6 +13,7 @@ div.panel
   display:none;
   box-shadow: 2px 2px 10px 0px rgba(50, 50, 50, 0.3);
   backdrop-filter: blur(6px);
+  z-index: 5000;
 }
 
 div.panel.left
@@ -163,7 +164,7 @@ div.resizer
   position: absolute;
   bottom: 0;
   background: transparent;
-  z-index: 10;
+  z-index: 5001;
 }
 
 div.resizer:hover

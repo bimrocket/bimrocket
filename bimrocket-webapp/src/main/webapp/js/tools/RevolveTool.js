@@ -132,8 +132,10 @@ class RevolveTool extends Tool
   onPointerDown(event)
   {
     const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
     const pointSelector = application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
 
     if (this.stage === 2)
     {
@@ -143,8 +145,11 @@ class RevolveTool extends Tool
 
   onPointerMove(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     let snap = pointSelector.snap;
 
@@ -159,8 +164,11 @@ class RevolveTool extends Tool
 
   onPointerUp(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     const snap = pointSelector.snap;
     if (snap)
@@ -230,8 +238,9 @@ class RevolveTool extends Tool
 
   onContextMenu(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
 
     event.preventDefault();
   }

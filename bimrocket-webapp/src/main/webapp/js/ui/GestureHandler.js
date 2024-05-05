@@ -88,9 +88,11 @@ class GestureHandler
 
   onPointerDown(event)
   {
-    if (!this.tool.isCanvasEvent(event)) return;
+    const application = this.tool.application;
 
-    const container = this.tool.application.container;
+    if (!application.isCanvasEvent(event)) return;
+
+    const container = application.container;
     let pointers = this.pointers;
     if (pointers.size === 0)
     {
@@ -126,10 +128,9 @@ class GestureHandler
         }
       }
     }
-    const x = event.offsetX || event.layerX;
-    const y = event.offsetY || event.layerY;
-    pointerData.position.set(x, y);
-    pointerData.previous.copy(pointerData.position);
+    const pointerPosition = this.tool.application.getPointerPosition(event);
+    pointerData.position.copy(pointerPosition);
+    pointerData.previous.copy(pointerPosition);
     pointerData.delta.set(0, 0);
   }
 

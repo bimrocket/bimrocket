@@ -81,8 +81,11 @@ class MeasureAngleTool extends Tool
 
   onPointerUp(event)
   {
-    const pointSelector = this.application.pointSelector;
-    if (!pointSelector.isPointSelectionEvent(event)) return;
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    const pointSelector = application.pointSelector;
 
     let snap = pointSelector.snap;
     if (snap)

@@ -13,7 +13,7 @@ import * as THREE from "../lib/three.module.js";
 
 class ChatGPTTool extends Tool
 {
-  static API_ENDPOINT = "https://api.openai.com/v1/completions";
+  static API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
   static STORAGE_KEY = "chatgpt";
   static HUMAN_STOP = "Human: ";
   static AI_STOP = "AI: ";
@@ -27,6 +27,7 @@ class ChatGPTTool extends Tool
     this.setOptions(options);
     this.createPanel();
     this.immediate = true;
+    this.messages = [];
 
     this.init();
   }
@@ -89,11 +90,11 @@ class ChatGPTTool extends Tool
       {
         api_url: "/bimrocket-server/api/proxy?url=@chatgpt",
         api_key: "implicit",
-        model: "text-davinci-003",
+        model: "gpt-4-turbo",
         temperature: 0.7,
         max_tokens: 256,
         training: [
-          ["How are you?", "I'm fine."],
+          ["You are translating natural language instructions to commands. Next are some translation examples.", "Ok."],
           ["Draw a line.", "@d .moveTo(0,0) .lineTo(1, 3)"],
           ["Draw a square.", "@d .moveTo(0,0) .lineTo(1, 0) .lineTo(1,1) .lineTo(0,1) .lineTo(0,0)"],
           ["Zoom all.", "@c zoom_all"],
@@ -118,7 +119,7 @@ class ChatGPTTool extends Tool
 
     this.appendInput(prompt);
 
-    this.generateResponse(this.conversation)
+    this.generateResponse()
       .then(response => this.processResponse(response))
       .catch(error => this.appendError(error));
   }
@@ -129,13 +130,19 @@ class ChatGPTTool extends Tool
 
     this.scrollElem.innerHTML = "";
 
-    this.conversation = "";
-    for (let pair of this.setup.training)
+    this.messages = [];
+    const messages = this.messages;
+
+    for (const pair of this.setup.training)
     {
-      this.conversation += ChatGPTTool.HUMAN_STOP + pair[0];
-      this.conversation += "\n";
-      this.conversation += ChatGPTTool.AI_STOP + pair[1];
-      this.conversation += "\n";
+      messages.push({
+        "role": "user",
+        "content": pair[0]
+      });
+      messages.push({
+        "role": "system",
+        "content": pair[1]
+      });
     }
   }
 
@@ -150,7 +157,7 @@ class ChatGPTTool extends Tool
     dialog.show();
   }
 
-  async generateResponse(prompt)
+  async generateResponse()
   {
     const response = await fetch(this.setup.api_url || ChatGPTTool.API_ENDPOINT,
     {
@@ -163,10 +170,9 @@ class ChatGPTTool extends Tool
       body: JSON.stringify(
       {
         "model": this.setup.model,
-        "prompt": prompt,
+        "messages": this.messages,
         "max_tokens": this.setup.max_tokens || 256,
-        "temperature" : this.setup.temperature || 0.7,
-        "stop": [" " + ChatGPTTool.HUMAN_STOP, " " + ChatGPTTool.AI_STOP]
+        "temperature" : this.setup.temperature || 0.7
       })
     });
 
@@ -183,21 +189,22 @@ class ChatGPTTool extends Tool
     }
     if (json.error) throw json.error.message;
 
-    return json.choices[0].text.trim();
+    const message = json.choices[0].message;
+
+    this.messages.push(message);
+
+    return message.content;
   }
 
   processResponse(response)
   {
     this.appendOutput(response);
 
-    if (response.startsWith(ChatGPTTool.AI_STOP))
-    {
-      response = response.substring(ChatGPTTool.AI_STOP.length);
-    }
+    let index = response.indexOf("@d ");
 
-    if (response.startsWith("@d"))
+    if (index !== -1)
     {
-      let command = response.substring(2);
+      let command = response.substring(index + 2);
       command = "path" + command;
 
       let path = new THREE.Shape();
@@ -207,13 +214,18 @@ class ChatGPTTool extends Tool
       let profile = new Profile(geometry);
       this.application.addObject(profile, null, false, true, this);
     }
-    else if (response.startsWith("@c"))
+    else
     {
-      let command = response.substring(2).trim();
-      const tool = this.application.tools[command];
-      if (tool)
+      index = response.indexOf("@c ");
+
+      if (index !== -1)
       {
-        this.application.useTool(tool);
+        let command = response.substring(index + 2).trim();
+        const tool = this.application.tools[command];
+        if (tool)
+        {
+          this.application.useTool(tool);
+        }
       }
     }
   }
@@ -221,7 +233,7 @@ class ChatGPTTool extends Tool
   appendInput(input)
   {
     const inputElem = document.createElement("div");
-    inputElem.textContent = input;
+    inputElem.textContent = ChatGPTTool.HUMAN_STOP + input;
     inputElem.classList.add("input");
 
     this.scrollElem.appendChild(inputElem);
@@ -230,7 +242,10 @@ class ChatGPTTool extends Tool
 
     this.scrollDown();
 
-    this.conversation += ChatGPTTool.HUMAN_STOP + input + "\n";
+    this.messages.push({
+      "role" : "user",
+      "content" : input
+    });
   }
 
   appendOutput(output)
@@ -242,17 +257,8 @@ class ChatGPTTool extends Tool
 
     const outputElem = document.createElement("div");
     outputElem.classList.add("output");
+    outputElem.textContent = ChatGPTTool.AI_STOP + output;
 
-    if (output.startsWith(ChatGPTTool.AI_STOP))
-    {
-      this.conversation += output + "\n";
-      outputElem.textContent = output;
-    }
-    else
-    {
-      this.conversation += ChatGPTTool.AI_STOP + output + "\n";
-      outputElem.textContent = ChatGPTTool.AI_STOP + output;
-    }
     this.scrollElem.appendChild(outputElem);
     this.scrollDown();
   }

@@ -92,7 +92,7 @@
 
   <context-param>
     <param-name>proxy.chatgpt.url</param-name>
-    <param-value>https://api.openai.com/v1/completions</param-value>
+    <param-value>https://api.openai.com/v1/chat/completions</param-value>
   </context-param>
 
 <!--

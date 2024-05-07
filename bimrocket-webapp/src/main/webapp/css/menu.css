@@ -37,6 +37,8 @@ nav a
   cursor: pointer;
   line-height: var(--menuitem-height);
   user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
 }
 
 nav a:hover,

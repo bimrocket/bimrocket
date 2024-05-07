@@ -10,7 +10,7 @@ import { Dialog } from "./Dialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Application } from "./Application.js";
 import { Solid } from "../core/Solid.js";
-import { Text } from "../core/Text.js";
+import { Text2D } from "../core/Text2D.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Formula } from "../formula/Formula.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
@@ -269,7 +269,7 @@ class Inspector extends Panel
         this.createWriteableProperty(objListElem, object, "receiveShadow");
       }
 
-      if (object instanceof Text)
+      if (object instanceof Text2D)
       {
         this.createWriteableProperty(objListElem, object, "text");
         this.createWriteableProperty(objListElem, object, "fontSize");

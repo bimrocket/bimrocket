@@ -155,9 +155,9 @@ ul.tree li.Points
   background-image: url(images/outliner/points.svg)
 }
 
-ul.tree li.Text
+ul.tree li.Text2D
 {
-  background-image: url(images/outliner/text.svg)
+  background-image: url(images/outliner/text2D.svg)
 }
 
 ul.tree li.AmbientLight,

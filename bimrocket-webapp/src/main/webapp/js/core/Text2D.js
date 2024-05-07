@@ -1,5 +1,5 @@
 /*
- * Text.js
+ * Text2D.js
  *
  * @author realor
  */
@@ -7,12 +7,12 @@
 import { CSS2DObject } from "../renderers/CSS2DRenderer.js";
 import * as THREE from "../lib/three.module.js";
 
-class Text extends CSS2DObject
+class Text2D extends CSS2DObject
 {
   constructor()
   {
     super();
-    this.type = "Text";
+    this.type = "Text2D";
     this.text = "Text";
     this.element.style.color = "rgb(0,0,0)";
     this.element.style.padding = "1px";
@@ -70,4 +70,4 @@ class Text extends CSS2DObject
   }
 }
 
-export { Text };
+export { Text2D };

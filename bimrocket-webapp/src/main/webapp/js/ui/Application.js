@@ -225,6 +225,7 @@ class Application
     cssRenderer.domElement.style.bottom = "0";
     cssRenderer.domElement.style.left = "0";
     cssRenderer.domElement.style.right = "0";
+    cssRenderer.domElement.style.right = "0";
     this.cssRenderer = cssRenderer;
     container.appendChild(cssRenderer.domElement);
 

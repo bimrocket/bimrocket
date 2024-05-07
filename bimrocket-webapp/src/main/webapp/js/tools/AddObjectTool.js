@@ -10,7 +10,7 @@ import { CordGeometry } from "../core/CordGeometry.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Solid } from "../core/Solid.js";
-import { Text } from "../core/Text.js";
+import { Text2D } from "../core/Text2D.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { HelicoidBuilder } from "../builders/HelicoidBuilder.js";
@@ -78,8 +78,8 @@ class AddObjectTool extends Tool
       case "Cord":
         object = this.createCord(this.builderClass);
         break;
-      case "Text":
-        object = this.createText();
+      case "Text2D":
+        object = this.createText2D();
         break;
       case "Sprite":
         object = this.createSprite();
@@ -203,9 +203,9 @@ class AddObjectTool extends Tool
     return solid;
   }
 
-  createText()
+  createText2D()
   {
-    const text = new Text();
+    const text = new Text2D();
     text.position.set(0, 0, 0);
     text.updateMatrix();
     return text;

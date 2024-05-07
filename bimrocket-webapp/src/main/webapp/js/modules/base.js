@@ -118,6 +118,7 @@ import { Cord } from "../core/Cord.js";
 import { CordGeometry } from "../core/CordGeometry.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
+import { Text2D } from "../core/Text2D.js";
 import { Dialog } from "../ui/Dialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { ConfirmDialog } from "../ui/ConfirmDialog.js";
@@ -385,9 +386,9 @@ export function load(application)
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "Group" });
-  const addTextTool = new AddObjectTool(application,
-    { name : "add_text", label : "tool.add_text.label",
-      objectType : "Text" });
+  const addText2DTool = new AddObjectTool(application,
+    { name : "add_text2D", label : "tool.add_text2D.label",
+      objectType : "Text2D" });
   const addSpriteTool = new AddObjectTool(application,
     { name : "add_sprite", label : "tool.add_sprite.label",
       objectType : "Sprite" });
@@ -525,7 +526,7 @@ export function load(application)
   application.addTool(addUProfileTool);
   application.addTool(addZProfileTool);
   application.addTool(addHelicoidTool);
-  application.addTool(addTextTool);
+  application.addTool(addText2DTool);
   application.addTool(addSpriteTool);
   application.addTool(addPerspectiveCameraTool);
   application.addTool(addOrthographicCameraTool);
@@ -646,7 +647,7 @@ export function load(application)
   addLightMenu.addMenuItem(addSpotLightTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
-  addMenu.addMenuItem(addTextTool);
+  addMenu.addMenuItem(addText2DTool);
   addMenu.addMenuItem(addSpriteTool);
   const transformMenu = designMenu.addMenu("menu.design.transform");
   transformMenu.addMenuItem(moveTool);
@@ -777,6 +778,7 @@ export function load(application)
     CordGeometry,
     Profile,
     ProfileGeometry,
+    Text2D,
     Dialog,
     MessageDialog,
     ConfirmDialog,

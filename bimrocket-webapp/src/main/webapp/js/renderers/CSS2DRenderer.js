@@ -102,7 +102,7 @@ class CSS2DRenderer {
 			_viewMatrix.copy( camera.matrixWorldInverse );
 			_viewProjectionMatrix.multiplyMatrices( camera.projectionMatrix, _viewMatrix );
 
-			renderObject( scene, scene, camera );
+			renderObject( scene, scene, camera, true );
 			zOrder( scene );
 
 		};
@@ -120,7 +120,9 @@ class CSS2DRenderer {
 
 		};
 
-		function renderObject( object, scene, camera ) {
+		function renderObject( object, scene, camera, visible ) { // bimrocket
+
+			visible &&= object.visible; // bimrocket
 
 			if ( object.isCSS2DObject ) {
 
@@ -129,7 +131,7 @@ class CSS2DRenderer {
 				_vector.setFromMatrixPosition( object.matrixWorld );
 				_vector.applyMatrix4( _viewProjectionMatrix );
 
-				const visible = ( object.visible === true ) && ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true );
+				visible &&= ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true ); // bimrocket
 				object.element.style.display = ( visible === true ) ? '' : 'none';
 
 				if ( visible === true ) {
@@ -160,7 +162,7 @@ class CSS2DRenderer {
 
 			for ( let i = 0, l = object.children.length; i < l; i ++ ) {
 
-				renderObject( object.children[ i ], scene, camera );
+				renderObject( object.children[ i ], scene, camera, visible ); // bimrocket
 
 			}
 

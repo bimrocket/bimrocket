@@ -11,9 +11,14 @@ import { WebUtils } from "../utils/WebUtils.js";
 
 class WebdavService extends FileService
 {
+  static PROXY_URI = "/bimrocket-server/api/proxy?url=";
+
   constructor(name, description, url, username, password)
   {
     super(name, description, url, username, password);
+    this.useProxy = false;
+    this.proxyUsername = null;
+    this.proxyPassword = null;
   }
 
   open(path, readyCallback, progressCallback)
@@ -68,6 +73,14 @@ class WebdavService extends FileService
             {
               let hrefNode = responseNode.querySelector("href");
               let hrefValue = hrefNode.textContent;
+
+              if (hrefValue.startsWith("http:") ||
+                  hrefValue.startsWith("https:"))
+              {
+                let resUrl = new URL(hrefValue);
+                hrefValue = resUrl.pathname;
+              }
+
               if (hrefValue.endsWith("/"))
                 hrefValue = hrefValue.substring(0, hrefValue.length - 1);
 
@@ -90,19 +103,20 @@ class WebdavService extends FileService
               {
                 let index = hrefValue.lastIndexOf("/");
                 metadata.name = hrefValue.substring(index + 1);
-                metadata.description = metadata.name;
+                metadata.description = decodeURI(metadata.name);
                 metadata.type = isCollectionNode ? COLLECTION : FILE;
                 metadata.size = fileSize;
                 metadata.lastModified = lastModified;
               }
               else
               {
-                let entry = new Metadata(fileName, fileName,
+                let entry = new Metadata(fileName, decodeURI(fileName),
                   isCollectionNode ? COLLECTION : FILE, fileSize, lastModified);
                 entries.push(entry);
               }
             }
           }
+
           if (metadata.type === COLLECTION)
           {
             readyCallback(
@@ -111,7 +125,6 @@ class WebdavService extends FileService
           else // download file
           {
             let request = new XMLHttpRequest();
-            request.open("GET", url, true);
             let formatInfo = IOManager.getFormatInfo(metadata.name);
             let dataType = formatInfo?.loader?.dataType || "";
             request.responseType = dataType;
@@ -144,8 +157,7 @@ class WebdavService extends FileService
                 progressCallback({progress : progress, message : message});
               };
             }
-            WebUtils.setBasicAuthorization(request,
-              this.username, this.password);
+            this.openRequest("GET", url, request);
             request.send();
           }
         }
@@ -159,9 +171,8 @@ class WebdavService extends FileService
         readyCallback(this.createError("Can't open", request.status));
       }
     };
-    request.open("PROPFIND", url, true);
+    this.openRequest("PROPFIND", url, request);
     request.setRequestHeader("depth", "1");
-    WebUtils.setBasicAuthorization(request, this.username, this.password);
     request.send();
   }
 
@@ -179,7 +190,7 @@ class WebdavService extends FileService
     };
     request.onload = () =>
     {
-      if (request.status === 200)
+      if (request.status === 200 || request.status === 201)
       {
         readyCallback(new Result(OK));
       }
@@ -198,8 +209,7 @@ class WebdavService extends FileService
         progressCallback({progress : progress, message : message});
       };
     }
-    request.open("PUT", url, true);
-    WebUtils.setBasicAuthorization(request, this.username, this.password);
+    this.openRequest("PUT", url, request);
     request.send(data);
   }
 
@@ -226,8 +236,7 @@ class WebdavService extends FileService
         readyCallback(this.createError("Delete failed", request.status));
       }
     };
-    request.open("DELETE", url, true);
-    WebUtils.setBasicAuthorization(request, this.username, this.password);
+    this.openRequest("DELETE", url, request);
     request.send();
   }
 
@@ -254,9 +263,31 @@ class WebdavService extends FileService
           "Folder creation failed", request.status));
       }
     };
-    request.open("MKCOL", url, true);
-    WebUtils.setBasicAuthorization(request, this.username, this.password);
+    this.openRequest("MKCOL", url, request);
     request.send();
+  }
+
+  openRequest(method, url, request)
+  {
+    if (this.useProxy)
+    {
+      url = WebdavService.PROXY_URI + url;
+    }
+    request.open(method, url, true);
+
+    if (this.useProxy)
+    {
+      WebUtils.setBasicAuthorization(request, this.proxyUsername, this.proxyPassword);
+      if (this.username && this.password)
+      {
+        const userPass = this.username + ":" + this.password;
+        request.setRequestHeader("Forwarded-Authorization", "Basic " + btoa(userPass));
+      }
+    }
+    else
+    {
+      WebUtils.setBasicAuthorization(request, this.username, this.password);
+    }
   }
 
   createError(message, status)

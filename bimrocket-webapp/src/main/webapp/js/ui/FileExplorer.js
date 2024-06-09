@@ -152,17 +152,16 @@ class FileExplorer extends Panel
   {
     const serviceTypes = ServiceManager.getTypesOf(FileService);
     let dialog = new ServiceDialog("title.add_cloud_service", serviceTypes);
+    this.addProxyFields(dialog);
+
     dialog.setI18N(this.application.i18n);
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
       const service = new ServiceManager.classes[serviceType];
       service.name = name;
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
-      this.application.addService(service, this.group);
-      this.showServices();
+
+      this.setServiceParameters(service, dialog,
+        name, description, url, username, password);
     };
     dialog.show();
   }
@@ -175,19 +174,31 @@ class FileExplorer extends Panel
     let dialog = new ServiceDialog("title.edit_cloud_service",
       serviceTypes, service.constructor.type, service.name, service.description,
       service.url, service.username, service.password);
+    this.addProxyFields(dialog, service);
+
     dialog.setI18N(this.application.i18n);
     dialog.serviceTypeSelect.disabled = true;
     dialog.nameElem.readOnly = true;
     dialog.onSave = (serviceType, name, description, url, username, password) =>
     {
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
-      this.application.addService(service, this.group);
-      this.showServices();
+      this.setServiceParameters(service, dialog,
+        name, description, url, username, password);
     };
     dialog.show();
+  }
+
+  setServiceParameters(service, dialog,
+    name, description, url, username, password)
+  {
+    service.description = description;
+    service.url = url;
+    service.username = username;
+    service.password = password;
+    service.useProxy = dialog.useProxyElem.checked;
+    service.proxyUsername = dialog.proxyUsernameElem.value;
+    service.proxyPassword = dialog.proxyPasswordElem.value;
+    this.application.addService(service, this.group);
+    this.showServices();
   }
 
   showDeleteDialog()
@@ -523,7 +534,7 @@ class FileExplorer extends Panel
     }
     else
     {
-      this.directoryElem.textContent = result.metadata.name;
+      this.directoryElem.textContent = result.metadata.description;
     }
     let entries = result.entries;
     entries.sort(this.entryComparator);
@@ -741,6 +752,16 @@ class FileExplorer extends Panel
       if (onFailed) onFailed();
     };
     loginDialog.show();
+  }
+
+  addProxyFields(dialog, service)
+  {
+    dialog.useProxyElem = dialog.addCheckBoxField("useProxy",
+      "label.use_proxy", service?.useProxy === true);
+    dialog.proxyUsernameElem = dialog.addTextField("proxyUsername",
+      "label.proxy_user", service?.proxyUsername);
+    dialog.proxyPasswordElem = dialog.addPasswordField("proxyPassword",
+      "label.proxy_pass", service?.proxyPassword);
   }
 };
 

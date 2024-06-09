@@ -44,8 +44,7 @@ class WebUtils
 
   static setBasicAuthorization(request, username, password)
   {
-    if (username !== null && username.length > 0
-        && password !== null && password.length > 0)
+    if (username && password)
     {
       const userPass = username + ":" + password;
       request.setRequestHeader("Authorization", "Basic " + btoa(userPass));

@@ -379,6 +379,10 @@ export const translations =
   "label.username" : "Usuari:",
   "label.password" : "Paraula de pas:",
 
+  "label.use_proxy" : "Utilitza proxy",
+  "label.proxy_user" : "Usuari del proxy:",
+  "label.proxy_pass" : "Paraula de pas del proxy:",
+
   "label.folder_name" : "Nom de la carpeta:",
   "label.property_name" : "Nom de la propietat:",
   "label.property_type" : "Tipus de la propietat:",

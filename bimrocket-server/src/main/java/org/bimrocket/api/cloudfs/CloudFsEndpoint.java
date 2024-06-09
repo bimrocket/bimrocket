@@ -78,6 +78,7 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import java.util.Date;
+import org.bimrocket.util.URIEncoder;
 
 /**
  *
@@ -378,7 +379,9 @@ public class CloudFsEndpoint
         writer.flush();
       }
     };
-    return Response.ok(output).header("Content-Type", TEXT_XML)
+    return Response.ok(output)
+			.header("DAV", "1,2")
+			.header("Content-Type", TEXT_XML)
       .status(207).build();
   }
 
@@ -387,7 +390,7 @@ public class CloudFsEndpoint
   {
     if (!depth.contains("noroot"))
     {
-      writer.write("<D:response><D:href>" + uri + "</D:href>");
+      writer.write("<D:response><D:href>" + URIEncoder.encode(uri) + "</D:href>");
       writer.write("<D:propstat>");
       writer.write("<D:prop>");
       FileSystem fileSystem = FileSystems.getDefault();

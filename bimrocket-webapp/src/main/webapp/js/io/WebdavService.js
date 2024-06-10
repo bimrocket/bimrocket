@@ -83,6 +83,8 @@ class WebdavService extends FileService
 
               if (hrefValue.endsWith("/"))
                 hrefValue = hrefValue.substring(0, hrefValue.length - 1);
+              
+              hrefValue = decodeURI(hrefValue);
 
               let fileName = hrefValue.substring(baseUri.length);
               let isCollectionNode = responseNode.querySelector(
@@ -103,14 +105,14 @@ class WebdavService extends FileService
               {
                 let index = hrefValue.lastIndexOf("/");
                 metadata.name = hrefValue.substring(index + 1);
-                metadata.description = decodeURI(metadata.name);
+                metadata.description = metadata.name;
                 metadata.type = isCollectionNode ? COLLECTION : FILE;
                 metadata.size = fileSize;
                 metadata.lastModified = lastModified;
               }
               else
               {
-                let entry = new Metadata(fileName, decodeURI(fileName),
+                let entry = new Metadata(fileName, fileName,
                   isCollectionNode ? COLLECTION : FILE, fileSize, lastModified);
                 entries.push(entry);
               }
@@ -273,7 +275,7 @@ class WebdavService extends FileService
     {
       url = WebdavService.PROXY_URI + url;
     }
-    request.open(method, url, true);
+    request.open(method, encodeURI(url), true);
 
     if (this.useProxy)
     {

@@ -1,17 +1,17 @@
 .progress_bar
 {
   position: absolute;
-  --hbw: min(50%, 200px);
+  --hbw: min(50%, 200px) + 16px;
   left: calc(50% - var(--hbw));
   right: calc(50% - var(--hbw));
   bottom: 50%;
   height: 44px;
+  z-index: 10001;
 }
 
 .progress_bar.splash
 {
   bottom: 50px;
-  z-index: 2000;
 }
 
 .progress_bar .message

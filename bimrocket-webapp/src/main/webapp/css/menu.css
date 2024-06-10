@@ -11,29 +11,29 @@ body
 
 nav ul
 {
-	float: left;
-	padding:0;
-	margin:0;
-	list-style: none;
-	position: relative;
-  z-index: 15000;
+  float: left;
+  padding:0;
+  margin:0;
+  list-style: none;
+  position: relative;
+  z-index: 8000;
 }
 
 nav ul li
 {
-	margin: 0px;
-	display:inline-block;
-	float: left;
-	background-color: var(--menuitem-background1);
+  margin: 0px;
+  display:inline-block;
+  float: left;
+  background-color: var(--menuitem-background1);
 }
 
 nav a
 {
-	display:block;
-	padding:0 10px;
-	color:white;
-	font-size:14px;
-	text-decoration:none;
+  display:block;
+  padding:0 10px;
+  color:white;
+  font-size:14px;
+  text-decoration:none;
   cursor: pointer;
   line-height: var(--menuitem-height);
   user-select: none;
@@ -44,7 +44,7 @@ nav a
 nav a:hover,
 nav a:focus
 {
-	background-color: var(--focused-menuitem-background);
+  background-color: var(--focused-menuitem-background);
   color: #202020;
   border:none;
   outline: none;
@@ -73,9 +73,9 @@ nav a:hover div.shortcut
 
 nav ul ul
 {
-	display: none;
-	position: absolute;
-	top: var(--menuitem-height);
+  display: none;
+  position: absolute;
+  top: var(--menuitem-height);
 }
 
 nav ul ul ul
@@ -85,16 +85,16 @@ nav ul ul ul
 
 nav ul li.drop > ul
 {
-	display:inherit;
+  display:inherit;
   animation: fade_in 0.3s;
 }
 
 nav ul ul li
 {
-	width: var(--menuitem-width);
-	float:none;
-	display:list-item;
-	position: relative;
+  width: var(--menuitem-width);
+  float:none;
+  display:list-item;
+  position: relative;
   box-shadow: 0px 8px 6px -6px rgba(50, 50, 50, 0.3);
   background-color: var(--menuitem-background2);
   border-left: 1px solid gray;
@@ -113,14 +113,14 @@ nav ul ul li:last-child
 
 nav ul ul li a
 {
- color: #404040;
+  color: #404040;
 }
 
 nav ul ul ul
 {
-	position: relative;
-	top: calc(var(--menuitem-height) * -1);
-	left: var(--menuitem-width);
+  position: relative;
+  top: calc(var(--menuitem-height) * -1);
+  left: var(--menuitem-width);
   height: 0;
 }
 
@@ -138,9 +138,9 @@ nav ul ul a.menu
 
 @media all and (max-width : 950px)
 {
-	nav
+  nav
   {
-		margin: 0;
+    margin: 0;
     bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -153,18 +153,18 @@ nav ul ul a.menu
     height: 0px;
   }
 
-	nav ul ul,
+  nav ul ul,
   nav ul ul ul li
   {
-		float: none;
-		position:static;
-	}
+    float: none;
+    position:static;
+  }
 
   nav ul ul ul
   {
     height: inherit;
-  	top:inherit;
-	  left:inherit;
+    top:inherit;
+    left:inherit;
   }
 
   nav ul ul li:last-child
@@ -172,19 +172,19 @@ nav ul ul a.menu
     border-bottom: none;
   }
 
-	nav ul li,
+  nav ul li,
   nav ul ul li,
-	nav ul li.drop > ul,
+  nav ul li.drop > ul,
   nav ul ul li.drop > ul
   {
-		display: block;
-		width: 100%;
+    display: block;
+    width: 100%;
     background-color: var(--menuitem-background1);
   }
 
-	nav ul li.drop > ul
+  nav ul li.drop > ul
   {
-		padding:4px 30px;
+    padding:4px 30px;
   }
 
   nav ul li a,
@@ -199,9 +199,15 @@ nav ul ul a.menu
     border-top: none;
   }
 
-  nav li > a.menu div.label:after { content: ' +'; }
-  nav li.drop > a div.label:after { content:  ' -'; }
-  nav li div.shortcut { display: none }
+  nav li > a.menu div.label:after {
+    content: ' +';
+  }
+  nav li.drop > a div.label:after {
+    content:  ' -';
+  }
+  nav li div.shortcut {
+    display: none
+  }
 
   nav a:hover,
   nav a:focus

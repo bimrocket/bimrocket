@@ -1,5 +1,7 @@
 .tabbed_pane
 {
+  display: flex;
+  flex-direction: column;
 }
 
 .tabbed_pane > .header
@@ -14,19 +16,25 @@
   border: 1px solid transparent;
   text-decoration: none;
   color: gray;
-}
-
-.tabbed_pane > .header > a.selected
-{
-  color: #202020;
-  border-color: #c0c0c0;
-  border-bottom: 3px solid #ffb0b0;
+  user-select: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .tabbed_pane > .header > a:focus
 {
   outline: none;
   box-shadow: none;
+  border: 1px dashed #a0a0a0;
+}
+
+.tabbed_pane > .header > a.selected
+{
+  color: #202020;
+  border-color: #c0c0c0;
+  border-style: solid;
+  border-bottom: 3px solid #ffb0b0;
 }
 
 .tabbed_pane > .body
@@ -34,12 +42,15 @@
   border: 1px solid #c0c0c0;
   min-height: 100px;
   margin-top: -1px;
+  flex-grow: 1;
 }
 
 .tabbed_pane > .body > .tab_panel
 {
   display: none;
   overflow: auto;
+  box-sizing: border-box;
+  height: 100%;
 }
 
 .tabbed_pane > .body > .tab_panel.selected

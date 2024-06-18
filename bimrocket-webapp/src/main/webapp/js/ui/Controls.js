@@ -317,6 +317,20 @@ class Controls
     editorElem.className = "cm-editor-holder";
     groupElem.appendChild(editorElem);
 
+    const { EditorView } = CM["@codemirror/view"];
+
+    const editorView = new EditorView(
+    {
+      parent: editorElem
+    });
+
+    this.setCodeEditorDocument(editorView, value, options);
+
+    return editorView;
+  }
+
+  static setCodeEditorDocument(editorView, value = "", options)
+  {
     const { basicSetup } = CM["@codemirror/basic-setup"];
     const { keymap, highlightSpecialChars, highlightActiveLine,
       drawSelection, EditorView } = CM["@codemirror/view"];
@@ -365,11 +379,6 @@ class Controls
       }
     });
 
-    this.editorView = new EditorView(
-    {
-      parent: editorElem
-    });
-
     const extensions = [
       lineNumbers(),
       highlightActiveLineGutter(),
@@ -392,15 +401,15 @@ class Controls
       options.language === "javascript" ? javascript() : json(),
       theme];
 
-    let editorState = EditorState.create(
+    const editorState = EditorState.create(
     {
       doc: value || "",
       extensions : extensions
     });
 
-    this.editorView.setState(editorState);
+    editorView.setState(editorState);
 
-    return this.editorView;
+    return editorView;
   }
 
   static addField(parent, id, label, className)

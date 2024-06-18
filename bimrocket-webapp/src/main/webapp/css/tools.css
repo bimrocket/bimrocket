@@ -494,6 +494,26 @@ div.option_block input[name=decimals]
   width: 60px;
 }
 
+div.field_flex
+{
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+div.field_flex > label
+{
+  flex-grow: 0;
+  margin-right: 2px;
+}
+
+div.field_flex > input,
+div.field_flex > select
+{
+  flex-grow: 1;
+  min-width: 10px;
+}
+
 .panel_section > .body > div
 {
   margin-top: 6px;

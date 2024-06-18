@@ -116,7 +116,7 @@ header > a.logo_link
   text-align: center;
   cursor: pointer;
   position: absolute;
-  z-index: 1;
+  z-index: 8000;
   left: 0;
   top: 0;
   user-select: none;

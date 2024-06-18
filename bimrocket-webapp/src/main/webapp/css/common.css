@@ -261,6 +261,79 @@ table.data > tbody > tr:hover
   background-color: #f0f0f0;
 }
 
+/* general styles */
+
+.text_left
+{
+  text-align: left;
+}
+
+.text_center
+{
+  text-align: center;
+}
+
+.text_right
+{
+  text-align: right;
+}
+
+.p_2
+{
+  padding: 2px;
+}
+
+.p_4
+{
+  padding: 4px;
+}
+
+.mt_2
+{
+  margin-top: 2px;
+}
+
+.mb_2
+{
+  margin-bottom: 2px;
+}
+
+.mt_4
+{
+  margin-top: 4px;
+}
+
+.mb_4
+{
+  margin-bottom: 4px;
+}
+
+.flex
+{
+  display: flex;
+}
+
+.flex_column
+{
+  flex-direction: column;
+}
+
+.border_box
+{
+  box-sizing: border-box;
+}
+
+.w_full
+{
+  width: 100%;
+}
+
+.h_full
+{
+  height: 100%;
+}
+
+
 /* animation */
 
 @keyframes item_hover

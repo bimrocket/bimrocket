@@ -19,16 +19,19 @@ import {
 
 class ColladaExporter {
 
-	parse( object, onDone, options = {} ) {
-
-		options = Object.assign( {
+  // bimrocket
+  static options = {
 			version: '1.4.1',
 			author: null,
 			textureDirectory: '',
 			upAxis: 'Z_UP', // bimrocket: Z_UP
 			unitName: null,
-			unitMeter: null,
-		}, options );
+			unitMeter: null
+  }
+
+	parse( object, onDone, options = {} ) {
+
+		options = Object.assign( {}, ColladaExporter.options, options );
 
 		if ( options.upAxis.match( /^[XYZ]_UP$/ ) === null ) {
 

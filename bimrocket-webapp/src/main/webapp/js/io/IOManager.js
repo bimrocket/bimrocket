@@ -36,9 +36,57 @@ class IOManager
   {
     let formatName = this.getFormat(fileName);
     let formatInfo = formatName ?
-      IOManager.formats[formatName] :
-      IOManager.formats[fileName];
+      this.formats[formatName] :
+      this.formats[fileName];
     return formatInfo || null;
+  }
+
+  static getLoaderOptions(formatName, factoryDefault = false)
+  {
+    let formatInfo = this.formats[formatName];
+    if (!formatInfo?.loader) "Unsupported format: " + formatName;
+
+    let options;
+    let value = window.localStorage.getItem("bimrocket.io.loader." + formatName);
+    if (factoryDefault || !value)
+    {
+      options = formatInfo.loader.class.options || {};
+    }
+    else
+    {
+      options = JSON.parse(value);
+    }
+    return options;
+  }
+
+  static setLoaderOptions(formatName, options)
+  {
+    const value = JSON.stringify(options);
+    window.localStorage.setItem("bimrocket.io.loader." + formatName, value);
+  }
+
+  static getExporterOptions(formatName, factoryDefault = false)
+  {
+    let formatInfo = this.formats[formatName];
+    if (!formatInfo?.exporter) "Unsupported format: " + formatName;
+
+    let options;
+    let value = window.localStorage.getItem("bimrocket.io.exporter." + formatName);
+    if (factoryDefault || !value)
+    {
+      options = formatInfo.exporter.class.options || {};
+    }
+    else
+    {
+      options = JSON.parse(value);
+    }
+    return options;
+  }
+
+  static setExporterOptions(formatName, options)
+  {
+    const value = JSON.stringify(options);
+    window.localStorage.setItem("bimrocket.io.exporter." + formatName, value);
   }
 
   static load(intent)
@@ -61,18 +109,17 @@ class IOManager
       }
       if (!formatName) throw "Can't determinate format";
 
-      let formatInfo = IOManager.formats[formatName];
+      let formatInfo = this.formats[formatName];
 
       let loader;
-      if (formatInfo && formatInfo.loader)
+      if (formatInfo?.loader)
       {
         loader = new formatInfo.loader.class(manager);
         loader.loadMethod = formatInfo.loader.loadMethod || 0;
       }
       else throw "Unsupported format: " + formatName;
 
-      const options = Object.assign({},
-        formatInfo.loader.options, intent.options);
+      const options = this.getLoaderOptions(formatName);
 
       if (data)
       {
@@ -171,10 +218,10 @@ class IOManager
 
       if (!formatName) throw "Can't determinate format";
 
-      let formatInfo = IOManager.formats[formatName];
+      let formatInfo = this.formats[formatName];
 
       let exporter;
-      if (formatInfo && formatInfo.exporter)
+      if (formatInfo?.exporter)
       {
         exporter = new formatInfo.exporter.class();
         exporter.exportMethod = formatInfo.exporter.exportMethod || 0;
@@ -182,8 +229,7 @@ class IOManager
       }
       else throw "Unsupported format: " + formatName;
 
-      const options = Object.assign({},
-        formatInfo.exporter.options, intent.options);
+      const options = this.getExporterOptions(formatName);
 
       this.parseObject(exporter, object,
         onCompleted, onProgress, onError, options);
@@ -304,7 +350,7 @@ class IOManager
   static getSupportedLoaderExtensions()
   {
     const extensions = [];
-    const formats = IOManager.formats;
+    const formats = this.formats;
     for (let formatName in formats)
     {
       let formatInfo = formats[formatName];
@@ -332,6 +378,8 @@ class IOManager
     return buffer;
   }
 }
+
+window.IOManager = IOManager;
 
 export { IOManager };
 

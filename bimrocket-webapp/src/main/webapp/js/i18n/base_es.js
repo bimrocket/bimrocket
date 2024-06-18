@@ -129,6 +129,11 @@ export const translations =
   "tool.export_selection.label" : "Exportar selección",
 
   "tool.options.label" : "Opciones",
+  "tool.options.ui" : "Interfaz de usuario",
+  "tool.options.import" : "Importación",
+  "tool.options.export" : "Exportación",
+  "tool.options.format" : "Formato:",
+  "tool.options.options" : "Options (JSON):",
 
   "tool.print.label" : "Imprimir",
   "tool.print.help" : "Imprimir escena a pdf",
@@ -528,6 +533,9 @@ export const translations =
   "message.no_matches" : "Ninguna coincidencia encontrada.",
   "message.one_match" : "1 coincidencia encontrada.",
   "message.matches_count" : count => `${count} coincidencias encontradas.`,
+
+  "message.options_saved" : "Opciones guardadas.",
+  "message.options_restored" : "Opciones restauradas.",
 
   "message.object_name" : objectName => `Objeto: ${objectName}`,
   "message.geometry_id" : id => `Id de geometría: ${id}`,

@@ -129,6 +129,11 @@ export const translations =
   "tool.export_selection.label" : "Export selection",
 
   "tool.options.label" : "Options",
+  "tool.options.ui" : "User interface",
+  "tool.options.import" : "Import",
+  "tool.options.export" : "Export",
+  "tool.options.format" : "Format:",
+  "tool.options.options" : "Options (JSON):",
 
   "tool.print.label" : "Print",
   "tool.print.help" : "Print scene to pdf",
@@ -528,6 +533,9 @@ export const translations =
   "message.no_matches" : "No matches found.",
   "message.one_match" : "1 match found.",
   "message.matches_count" : count => `${count} matches found.`,
+
+  "message.options_saved" : "Options saved.",
+  "message.options_restored" : "Options restored.",
 
   "message.object_name" : objectName => `Object: ${objectName}`,
   "message.geometry_id" : id => `Geometry id: ${id}`,

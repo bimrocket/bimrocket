@@ -7,6 +7,10 @@
 import { Tool } from "./Tool.js";
 import { Application } from "../ui/Application.js";
 import { Controls } from "../ui/Controls.js";
+import { TabbedPane } from "../ui/TabbedPane.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
+import { Toast } from "../ui/Toast.js";
+import { IOManager } from "../io/IOManager.js";
 import { I18N } from "../i18n/I18N.js";
 
 class OptionsTool extends Tool
@@ -27,10 +31,29 @@ class OptionsTool extends Tool
     const application = this.application;
 
     this.panel = application.createPanel(this.label, "left", "panel_options");
+    this.panel.bodyElem.classList.add("p_4");
+
+    this.tabbedPane = new TabbedPane(this.panel.bodyElem);
+    this.tabbedPane.paneElem.style.height = "100%";
+
+    const uiOptionsPanel =
+      this.tabbedPane.addTab("ui_options", "tool.options.ui");
+
+    const importPanel = this.tabbedPane.addTab("loaders_options",
+      "tool.options.import");
+    const loaderOptionsPanel = document.createElement("div");
+    importPanel.appendChild(loaderOptionsPanel);
+    loaderOptionsPanel.className = "p_4 text_left flex flex_column border_box h_full";
+
+    const exportPanel = this.tabbedPane.addTab("exporters_options",
+      "tool.options.export");
+    const exporterOptionsPanel = document.createElement("div");
+    exportPanel.appendChild(exporterOptionsPanel);
+    exporterOptionsPanel.className = "p_4 text_left flex flex_column border_box h_full";
 
     // Language
     const i18n = this.application.i18n;
-    this.languageSelect = Controls.addSelectField(this.panel.bodyElem,
+    this.languageSelect = Controls.addSelectField(uiOptionsPanel,
       "language", "label.language");
     this.languageSelect.parentElement.className = "option_block inline";
     this.languageSelect.addEventListener("change", () =>
@@ -42,7 +65,7 @@ class OptionsTool extends Tool
     });
 
     // Units
-    this.unitsSelect = Controls.addSelectField(this.panel.bodyElem, "units",
+    this.unitsSelect = Controls.addSelectField(uiOptionsPanel, "units",
     "label.units", Application.UNITS);
     this.unitsSelect.parentElement.className = "option_block inline";
 
@@ -50,7 +73,7 @@ class OptionsTool extends Tool
       application.units = this.unitsSelect.value);
 
     // Decimals
-    this.decimalsElem = Controls.addNumberField(this.panel.bodyElem, "decimals",
+    this.decimalsElem = Controls.addNumberField(uiOptionsPanel, "decimals",
     "label.decimals");
     this.decimalsElem.parentElement.className = "option_block inline";
     this.decimalsElem.min = 0;
@@ -62,7 +85,7 @@ class OptionsTool extends Tool
 
     const frdElem = document.createElement("div");
     frdElem.className = "option_block";
-    this.panel.bodyElem.appendChild(frdElem);
+    uiOptionsPanel.appendChild(frdElem);
 
     const frdValueDiv = document.createElement("div");
     frdElem.appendChild(frdValueDiv);
@@ -101,7 +124,7 @@ class OptionsTool extends Tool
 
     // Selection Paint mode
 
-    this.selPaintModeSelect = Controls.addSelectField(this.panel.bodyElem,
+    this.selPaintModeSelect = Controls.addSelectField(uiOptionsPanel,
       "selpaint_mode", "label.sel_paint_mode",
       [[Application.EDGES_SELECTION, "option.edges"],
        [Application.FACES_SELECTION, "option.faces"]], null,
@@ -115,28 +138,28 @@ class OptionsTool extends Tool
 
     // Enable/disable deep selection visualization
 
-    this.deepSelCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+    this.deepSelCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "deep_sel", "label.show_deep_sel", false, "option_block");
     this.deepSelCheckBox.addEventListener("change", event =>
       application.showDeepSelection = this.deepSelCheckBox.checked);
 
     // Enable/disable local axes visualization
 
-    this.localAxesCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+    this.localAxesCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "local_axes", "label.show_local_axes", false, "option_block");
     this.localAxesCheckBox.addEventListener("change", event =>
       application.showLocalAxes = this.localAxesCheckBox.checked);
 
     // Enable/disable shadows
 
-    this.shadowsCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+    this.shadowsCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "shadows", "label.cast_shadows", false, "option_block");
     this.shadowsCheckBox.addEventListener("change", event =>
       application.shadowsEnabled = this.shadowsCheckBox.checked);
 
     // Background color
 
-    this.backSelect = Controls.addSelectField(this.panel.bodyElem,
+    this.backSelect = Controls.addSelectField(uiOptionsPanel,
       "backcolor_sel", "label.background_color",
       [["solid", "option.solid"], ["gradient", "option.gradient"]],
       null, "option_block stack");
@@ -184,7 +207,7 @@ class OptionsTool extends Tool
     this.backColorInput2.addEventListener("input", event =>
       application.backgroundColor2 = this.backColorInput2.value, false);
 
-    this.panelOpacityRange = Controls.addInputField(this.panel.bodyElem,
+    this.panelOpacityRange = Controls.addInputField(uiOptionsPanel,
       "range", "panelopac_range", "label.panel_opacity",
       null, "option_block stack");
     this.panelOpacityRange.min = 1;
@@ -198,6 +221,113 @@ class OptionsTool extends Tool
     this.panelOpacityRange.addEventListener("input", () =>
       application.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value),
       false);
+
+    this.loaderSelect = Controls.addSelectField(loaderOptionsPanel,
+      "loader_sel", "tool.options.format", [], null, "field_flex mb_4");
+    this.loaderSelect.addEventListener("change", () => this.loadOptions("loader"));
+
+    this.loaderOptionsView = Controls.addCodeEditor(loaderOptionsPanel,
+      "loader_editor", "tool.options.options", "",
+      { "language" : "json", "height" : "200px" });
+
+    const loaderButtonsPanel = document.createElement("div");
+    loaderButtonsPanel.className = "text_center";
+    loaderOptionsPanel.appendChild(loaderButtonsPanel);
+    Controls.addButton(loaderButtonsPanel, "loader_save", "button.save",
+    () => this.saveOptions("loader", false));
+    Controls.addButton(loaderButtonsPanel, "loader_restore", "button.restore",
+    () => this.saveOptions("loader", true));
+
+    this.exporterSelect = Controls.addSelectField(exporterOptionsPanel,
+      "loader_sel", "tool.options.format", [], null, "field_flex mb_4");
+    this.exporterSelect.addEventListener("change", () => this.loadOptions("exporter"));
+
+    this.exporterOptionsView = Controls.addCodeEditor(exporterOptionsPanel,
+      "exporter_editor", "tool.options.options", "",
+      { "language" : "json", "height" : "200px" });
+
+    const exporterButtonsPanel = document.createElement("div");
+    exporterButtonsPanel.className = "text_center";
+    exporterOptionsPanel.appendChild(exporterButtonsPanel);
+    Controls.addButton(exporterButtonsPanel, "exporter_save", "button.save",
+    () => this.saveOptions("exporter", false));
+    Controls.addButton(exporterButtonsPanel, "exporter_restore", "button.restore",
+    () => this.saveOptions("exporter", true));
+
+    let elems = this.panel.bodyElem.getElementsByClassName("code_editor");
+    for (let elem of elems)
+    {
+      elem.style.flexGrow = "1";
+    }
+  }
+
+  loadOptions(type = "loader")
+  {
+    let formatName, options, editorView;
+    if (type === "loader")
+    {
+      formatName = this.loaderSelect.value;
+      options = IOManager.getLoaderOptions(formatName);
+      editorView = this.loaderOptionsView;
+    }
+    else
+    {
+      formatName = this.exporterSelect.value;
+      options = IOManager.getExporterOptions(formatName);
+      editorView = this.exporterOptionsView;
+    }
+    const json = JSON.stringify(options, null, 2);
+    Controls.setCodeEditorDocument(editorView, json, { "language" : "json" });
+  }
+
+  saveOptions(type = "loader", restore = false)
+  {
+    let formatName, options, editorView, setOptions;
+    if (type === "loader")
+    {
+      formatName = this.loaderSelect.value;
+      options = IOManager.getLoaderOptions(formatName, restore);
+      editorView = this.loaderOptionsView;
+      setOptions = IOManager.setLoaderOptions;
+    }
+    else
+    {
+      formatName = this.exporterSelect.value;
+      options = IOManager.getExporterOptions(formatName, restore);
+      editorView = this.exporterOptionsView;
+      setOptions = IOManager.setExporterOptions;
+    }
+
+    try
+    {
+      if (restore)
+      {
+        editorView.dispatch({
+          changes: {
+            from: 0,
+            to: editorView.state.doc.length,
+            insert: JSON.stringify(options, null, 2)
+          }
+        });
+        setOptions(formatName, options);
+        Toast.create("message.options_restored")
+          .setI18N(this.application.i18n).show();
+      }
+      else
+      {
+        let json = editorView.state.doc.toString();
+        options = JSON.parse(json);
+        setOptions(formatName, options);
+        Toast.create("message.options_saved")
+          .setI18N(this.application.i18n).show();
+      }
+    }
+    catch (ex)
+    {
+      MessageDialog.create("ERROR", ex)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
   }
 
   activate()
@@ -236,6 +366,26 @@ class OptionsTool extends Tool
     this.localAxesCheckBox.checked = application.showLocalAxes;
     this.shadowsCheckBox.checked = application.shadowsEnabled;
     this.panelOpacityRange.value = 100 * application.panelOpacity;
+
+    let loaders = [];
+    let exporters = [];
+    for (let formatName in IOManager.formats)
+    {
+      let formatInfo = IOManager.formats[formatName];
+      if (formatInfo.loader)
+      {
+        loaders.push([formatName, formatInfo.description]);
+      }
+      if (formatInfo.exporter)
+      {
+        exporters.push([formatName, formatInfo.description]);
+      }
+    }
+    Controls.setSelectOptions(this.loaderSelect, loaders);
+    Controls.setSelectOptions(this.exporterSelect, exporters);
+
+    this.loadOptions("loader");
+    this.loadOptions("exporter");
   }
 
   deactivate()

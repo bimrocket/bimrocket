@@ -28,7 +28,6 @@ import { TProfileBuilder } from "../../builders/TProfileBuilder.js";
 import { UProfileBuilder } from "../../builders/UProfileBuilder.js";
 import { ZProfileBuilder } from "../../builders/ZProfileBuilder.js";
 import { TrapeziumBuilder } from "../../builders/TrapeziumBuilder.js";
-import { IFCVoider } from "../../builders/IFCVoider.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
@@ -38,13 +37,28 @@ import * as THREE from "../../lib/three.module.js";
 
 class IFCLoader extends THREE.Loader
 {
+  static VOIDING_MODE_ALL = "all";
+  static VOIDING_MODE_NONE = "none";
+  static VOIDING_MODE_PARAMETRIC = "parametric";
+
+  static PARAMETRIC_REPRESENTATIONS = [
+    "IfcExtrudedAreaSolid",
+    "IfcBooleanResult",
+    "IfcBooleanClippingResult"
+  ];
+
   static options =
   {
     units : "m", // default model units
     minCircleSegments : 16, // minimum circle segments
     circleSegmentsByRadius : 64, // circle segments by meter of radius
     halfSpaceSize : 30, // half space size in meters
-    unvoidableClasses : new Set(["IfcDoor", "IfcWindow", "IfcOpeningElement"])
+    unvoidableClasses : [
+      "IfcDoor",
+      "IfcWindow",
+      "IfcOpeningElement"
+    ],
+    voidingMode: this.VOIDING_MODE_ALL
   };
 
   constructor(manager)
@@ -218,11 +232,17 @@ class IFCLoader extends THREE.Loader
     /* voiding objects */
     const voidObject = index =>
     {
+      const voidingMode = this.options.voidingMode;
+      if (voidingMode === IFCLoader.VOIDING_MODE_NONE) return;
+
+      const voidingFilter = voidingMode === IFCLoader.VOIDING_MODE_PARAMETRIC ?
+        IFCLoader.PARAMETRIC_REPRESENTATIONS : [];
+
       let product = ifcFile.products[index];
       let productObject3D = product.helper.getObject3D();
       if (productObject3D)
       {
-        if (BIMUtils.createVoidings(productObject3D))
+        if (BIMUtils.createVoidings(productObject3D, voidingFilter))
         {
           let reprObject3D = IFC.getRepresentation(productObject3D);
           if (reprObject3D)
@@ -3220,7 +3240,7 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
         if (openingObject3D)
         {
           let className = object3D.userData.IFC.ifcClassName;
-          if (loader.options.unvoidableClasses.has(className))
+          if (loader.options.unvoidableClasses.includes(className))
           {
             console.warn(`Unsupported voiding of ${className} element`,
               object3D, openingObject3D);

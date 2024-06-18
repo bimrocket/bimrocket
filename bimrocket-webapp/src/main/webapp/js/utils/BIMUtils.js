@@ -11,7 +11,7 @@ import * as THREE from "../lib/three.module.js";
 
 class BIMUtils
 {
-  static createVoidings(productObject3D)
+  static createVoidings(productObject3D, voidingFilter = [])
   {
     let openingCount = 0;
 
@@ -50,7 +50,7 @@ class BIMUtils
     {
       if (reprObject3D instanceof Solid)
       {
-        changed = this.createVoidedSolidFor(reprObject3D);
+        changed = this.createVoidedSolidFor(reprObject3D, voidingFilter);
       }
       else if (reprObject3D instanceof THREE.Group)
       {
@@ -60,7 +60,10 @@ class BIMUtils
           {
             if (reprPartObject3D instanceof Solid)
             {
-              if (this.createVoidedSolidFor(reprPartObject3D)) changed = true;
+              if (this.createVoidedSolidFor(reprPartObject3D, voidingFilter))
+              {
+                changed = true;
+              }
             }
           }
         }
@@ -69,17 +72,14 @@ class BIMUtils
     return changed;
   }
 
-  static createVoidedSolidFor(reprObject3D)
+  static createVoidedSolidFor(reprObject3D, voidingFilter = [])
   {
     if (reprObject3D.builder instanceof IFCVoider) return false;
 
     let ifcClassName = reprObject3D.userData.IFC?.ifcClassName;
 
-    // only perform voiding for parametric solids (exclude meshes)
-
-    if (ifcClassName === "IfcExtrudedAreaSolid"
-        || ifcClassName === "IfcBooleanResult"
-        || ifcClassName === "IfcBooleanClippingResult")
+    if (voidingFilter.length === 0 ||
+        voidingFilter.includes(ifcClassName))
     {
       let parent = reprObject3D.parent;
       let index = parent.children.indexOf(reprObject3D);

@@ -2955,6 +2955,114 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
 registerIfcHelperClass(IfcRelDefinesByTypeHelper);
 
 
+class IfcRelAssociatesMaterialHelper extends IfcRelationshipHelper
+{
+  constructor(instance)
+  {
+    super(instance);
+  }
+
+  relate()
+  {
+    const rel = this.instance;
+    const schema = this.instance.constructor.schema;
+
+    let ifcObjects = rel.RelatedObjects;
+    let materialSelect = rel.RelatingMaterial;
+
+    let layerSetData;
+    const materialLayerDataArray = [];
+
+    const processLayerSet = (layerSet) =>
+    {
+      layerSetData = {
+        "LayerSetName" : layerSet.LayerSetName || ""
+      };
+      if (layerSet.Description)
+        layerSetData.Description = layerSet.Description;
+
+      for (let materialLayer of layerSet.MaterialLayers)
+      {
+        let materialLayerData = {
+          Material: materialLayer.Material.Name || "",
+          LayerThickness: materialLayer.LayerThickness || 0
+        };
+
+        if (materialLayer.IsVentilated)
+          materialLayerData.IsVentilated = materialLayer.IsVentilated;
+
+        if (materialLayer.Name)
+          materialLayerData.Name = materialLayer.Name;
+
+        if (materialLayer.Description)
+          materialLayerData.Description = materialLayer.Description;
+
+        if (materialLayer.Category)
+          materialLayerData.Category = materialLayer.Category;
+
+        if (materialLayer.Priority)
+          materialLayerData.Priority = materialLayer.Priority;
+
+        materialLayerDataArray.push(materialLayerData);
+      }
+    };
+
+
+    if (materialSelect instanceof schema.IfcMaterialLayerSetUsage)
+    {
+      const layerSet = materialSelect.ForLayerSet;
+      processLayerSet(layerSet);
+    }
+    else if (materialSelect instanceof schema.IfcMaterialLayerSet)
+    {
+      const layerSet = materialSelect;
+      processLayerSet(layerSet);
+    }
+    else if (materialSelect instanceof schema.IfcMaterialList)
+    {
+      const materials = materialSelect.Materials;
+      for (let material of materials)
+      {
+        let materialLayerData = {
+          Material: material.Name
+        };
+        materialLayerDataArray.push(materialLayerData);
+      }
+    }
+    else if (materialSelect instanceof schema.IfcMaterial)
+    {
+      const material = materialSelect;
+      let materialLayerData = {
+        Material: material.Name
+      };
+      materialLayerDataArray.push(materialLayerData);
+    }
+
+    // set material properties to ifcObjects
+    if (ifcObjects instanceof Array)
+    {
+      for (let ifcObject of ifcObjects)
+      {
+        if (ifcObject.helper && ifcObject.helper.getObject3D)
+        {
+          let object3D = ifcObject.helper.getObject3D();
+          if (layerSetData)
+          {
+            object3D.userData["IFC_material_layerset"] = layerSetData;
+          }
+          for (let i = 0; i < materialLayerDataArray.length; i++)
+          {
+            let materialLayerData = materialLayerDataArray[i];
+            object3D.userData["IFC_material_layer_" + i] = materialLayerData;
+          }
+        }
+      }
+    }
+  }
+}
+registerIfcHelperClass(IfcRelAssociatesMaterialHelper);
+
+
 class IfcRelAssociatesClassificationHelper extends IfcRelationshipHelper
 {
   constructor(instance)

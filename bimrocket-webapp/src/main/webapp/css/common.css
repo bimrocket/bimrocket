@@ -233,6 +233,16 @@ div.code_editor > .cm-editor-holder
   box-sizing: border-box;
 }
 
+div.code_editor > .cm-editor-holder > .cm-editor
+{
+  height: 100%;
+}
+
+div.code_editor > .cm-editor-holder > .cm-editor .cm-line
+{
+  tab-size: 2;
+}
+
 table.data
 {
   padding: 0;

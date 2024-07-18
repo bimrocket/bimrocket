@@ -5,6 +5,7 @@
  */
 
 import "../lib/codemirror.js";
+import htm from "../lib/htm.js"
 import { I18N } from "../i18n/I18N.js";
 
 class Controls
@@ -331,17 +332,10 @@ class Controls
 
   static setCodeEditorDocument(editorView, value = "", options)
   {
-    const { basicSetup } = CM["@codemirror/basic-setup"];
+    const { basicSetup } = CM["codemirror"];
     const { keymap, highlightSpecialChars, highlightActiveLine,
-      drawSelection, EditorView } = CM["@codemirror/view"];
-    const { lineNumbers, highlightActiveLineGutter} = CM["@codemirror/gutter"];
-    const { history, historyKeymap } = CM["@codemirror/history"];
+            drawSelection, EditorView } = CM["@codemirror/view"];
     const { defaultKeymap } = CM["@codemirror/commands"];
-    const { bracketMatching } = CM["@codemirror/matchbrackets"];
-    const { foldGutter, foldKeymap } = CM["@codemirror/fold"];
-    const { javascript, javascriptLanguage } = CM["@codemirror/lang-javascript"];
-    const { json, jsonLanguage } = CM["@codemirror/lang-json"];
-    const { defaultHighlightStyle } = CM["@codemirror/highlight"];
     const { searchKeymap, highlightSelectionMatches } = CM["@codemirror/search"];
     const { indentOnInput } = CM["@codemirror/language"];
     const { EditorState } = CM["@codemirror/state"];
@@ -352,24 +346,21 @@ class Controls
         borderLeftWidth: "2px"
       },
       "&.cm-focused .cm-matchingBracket" : {
-        "backgroundColor" : "yellow",
+        "backgroundColor" : "#e0e040",
         "color" : "black"
       },
-      "& .ͼa" : {
+      "& .ͼb" : {
         "color" : "#444",
         "fontWeight" : "bold"
       },
-      "& .ͼl" : {
+      "& .ͼm" : {
         "color" : "#808080"
       },
       "& .ͼf" : {
         "color" : "#8080e0"
       },
-      "& .ͼd" : {
+      "& .ͼe" : {
         "color" : "#2020ff"
-      },
-      "& .ͼb" : {
-        "color" : "#008000"
       },
       "& .cm-wrap" : {
         "height" : "100%"
@@ -380,26 +371,33 @@ class Controls
     });
 
     const extensions = [
-      lineNumbers(),
-      highlightActiveLineGutter(),
+      basicSetup,
       highlightSpecialChars(),
-      history(),
-      foldGutter(),
       drawSelection(),
       EditorState.allowMultipleSelections.of(true),
       indentOnInput(),
-      defaultHighlightStyle.fallback,
-      bracketMatching(),
       highlightActiveLine(),
       highlightSelectionMatches(),
-      keymap.of([
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-      ]),
-      options.language === "javascript" ? javascript() : json(),
       theme];
+
+    const language = options.language || "json";
+    switch (language)
+    {
+      case "json":
+        const { json } = CM["@codemirror/lang-json"];
+        extensions.push(json());
+        break;
+
+      case "javascript":
+        const { javascript } = CM["@codemirror/lang-javascript"];
+        extensions.push(javascript());
+        break;
+
+      case "xml":
+        const { xml } = CM["@codemirror/lang-xml"];
+        extensions.push(xml({ autoCloseTags : true }));
+        break;
+    }
 
     const editorState = EditorState.create(
     {
@@ -477,6 +475,75 @@ class Controls
   static getNextId()
   {
     return "f" + this.nextId++;
+  }
+
+  static createComponent(type, props, ...children)
+  {
+    let element;
+    if (typeof type === "string")
+    {
+      element = document.createElement(type);
+
+      for (let name in props)
+      {
+        if (name.startsWith("on"))
+        {
+          let value = props[name];
+          if (typeof value === "function")
+          {
+            let eventType = name.substring(2).toLowerCase();
+            element.addEventListener(eventType, props[name]);
+          }
+          else
+          {
+            element.setAttribute(name, value);
+          }
+        }
+        else
+        {
+          element.setAttribute(name, props[name]);
+        }
+      }
+
+      for (let child of children)
+      {
+        if (child instanceof Array)
+        {
+          for (let subchild of child)
+          {
+            element.appendChild(subchild);
+          }
+        }
+        else if (typeof child === "object")
+        {
+          element.appendChild(child);
+        }
+        else
+        {
+          element.innerHTML = child;
+        }
+      }
+      return element;
+    }
+    else if (typeof type === "function")
+    {
+      let component = new type();
+      element = component.element;
+    }
+    return element;
+  }
+
+/**
+ * const html = Controls.template():
+ *
+ * const element = html`<div><h1>HOLA</h1></div>`;
+ *
+ * @param {function} fn
+ * @returns {html components}
+ */
+  static template(fn = Controls.createComponent)
+  {
+    return htm.bind(fn);
   }
 }
 

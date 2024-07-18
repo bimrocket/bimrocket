@@ -5,8 +5,11 @@
  */
 
 import { Tool } from "./Tool.js";
+import { ReportType } from "../reports/ReportType.js";
 import { FileExplorer } from "../ui/FileExplorer.js";
 import { ReportPanel } from "../ui/ReportPanel.js";
+import { ReportDialog } from "../ui/ReportDialog.js";
+import { ReportTypeDialog } from "../ui/ReportTypeDialog.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
@@ -19,7 +22,6 @@ import { CordGeometry } from "../core/CordGeometry.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
-import { ReportDialog } from "../ui/ReportDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "../lib/three.module.js";
 
@@ -48,9 +50,9 @@ class ReportTool extends Tool
       (name, code) => this.onSave(name, code));
     this.dialog = dialog;
 
-    panel.openFile = (url, code) =>
+    panel.openFile = (url, source) =>
     {
-      this.setReport(url, code);
+      this.setReport(url, source);
     };
 
     panel.addContextButton("open", "button.open",
@@ -66,7 +68,7 @@ class ReportTool extends Tool
       () => panel.isDirectoryList() && panel.isEntrySelected());
 
     panel.addContextButton("new", "button.new",
-      () => { this.edit = true; this.setReport("", ""); },
+      () => this.createReport(),
       () => true);
 
     panel.addCommonContextButtons();
@@ -115,24 +117,44 @@ class ReportTool extends Tool
     }
   }
 
-  setReport(url, code)
+  createReport()
   {
-    const index = url.lastIndexOf("/");
-    let name = url.substring(index + 1);
+    const typeDialog = new ReportTypeDialog(this.application, reportTypeName =>
+    {
+      const reportType = ReportType.types[reportTypeName];
+      const source = reportType.getDefaultSource();
+      this.edit = true;
+      this.setReport("", source, reportTypeName);
+    });
+    typeDialog.show();
+  }
+
+  setReport(url, source, reportTypeName = null)
+  {
+    let index = url.lastIndexOf("/");
+    let reportName = index === -1 ? url : url.substring(index + 1);
+
+    if (reportTypeName === null)
+    {
+      index = reportName.lastIndexOf(".");
+      reportTypeName = index === -1 ?
+        ReportType.getDefaultReportTypeName() :
+        reportName.substring(index + 1).toLowerCase();
+    }
 
     if (this.edit)
     {
       this.edit = false;
-
       const dialog = this.dialog;
-      dialog.reportName = name;
-      dialog.reportCode = code;
+      dialog.reportName = reportName;
+      dialog.reportSource = source;
+      dialog.reportTypeName = reportTypeName;
       dialog.saved = true;
       dialog.show();
     }
     else
     {
-      this.reportPanel.execute(name, code);
+      this.reportPanel.execute(reportName, source, reportTypeName);
     }
   }
 }

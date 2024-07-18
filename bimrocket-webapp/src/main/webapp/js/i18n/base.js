@@ -147,7 +147,7 @@ export const translations =
   "tool.draw.vertex_destination" : "Select new vertex position.",
 
   "tool.report.label" : "Reports",
-  "tool.report.name" : "Report:",
+  "tool.report.name" : "Report name:",
   "tool.report.rules" : "Rules:",
 
   "tool.histogram.label" : "Histogram",
@@ -470,6 +470,8 @@ export const translations =
   "label.about_properties" : "Properties",
   "label.modules" : "Modules",
 
+  "label.report_type": "Report type:",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -498,6 +500,7 @@ export const translations =
   "title.properties" : "Properties",
   "title.script_editor" : "Script editor",
   "title.report_editor" : "Report editor",
+  "title.report_type" : "New report",
   "title.object_builder" : "Object builder",
   "title.select_by_property" : "Selection by properties",
   "title.select_by_qrcode" : "Selection by QR code",

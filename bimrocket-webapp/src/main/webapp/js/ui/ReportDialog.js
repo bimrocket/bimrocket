@@ -6,6 +6,8 @@
 
 import { Dialog } from "./Dialog.js";
 import { Toast } from "../ui/Toast.js";
+import { Report } from "../reports/Report.js";
+import { ReportType } from "../reports/ReportType.js";
 import * as THREE from "../lib/three.module.js";
 
 class ReportDialog extends Dialog
@@ -16,17 +18,18 @@ class ReportDialog extends Dialog
     this.application = application;
     this.setI18N(this.application.i18n);
     this.reportName = "";
-    this.reportCode = "";
+    this.reportSource = "";
+    this.reportTypeName = ReportType.getDefaultReportTypeName();
 
     this.setSize(760, 600);
 
     this.nameField = this.addTextField("name", "tool.report.name", "",
       "report_name");
+    this.nameField.setAttribute("spellcheck", "false");
 
     this.editorView = this.addCodeEditor("editor",
       "tool.report.rules", "",
-      { "language" : "javascript",
-        "height" : "calc(100% - 38px)" });
+      { "height" : "calc(100% - 38px)" });
 
     this.saveButton = this.addButton("save", "button.save", () =>
     {
@@ -34,7 +37,8 @@ class ReportDialog extends Dialog
 
       if (this.validate())
       {
-        saveAction(this.reportName, this.reportCode);
+        this.addExtension();
+        saveAction(this.reportName, this.reportSource);
       }
     });
 
@@ -55,10 +59,11 @@ class ReportDialog extends Dialog
   onShow()
   {
     this.nameField.value = this.reportName;
-    const state = this.editorView.state;
-    const tx = state.update(
-      { changes: { from: 0, to: state.doc.length, insert: this.reportCode } });
-    this.editorView.dispatch(tx);
+
+    const reportType = ReportType.getReportType(this.reportTypeName);
+
+    Controls.setCodeEditorDocument(this.editorView, this.reportSource,
+      { "language" : reportType?.getSourceLanguage() });
 
     this.saveButton.disabled = this.nameField.value.trim().length === 0;
     if (this.reportName === "")
@@ -75,8 +80,11 @@ class ReportDialog extends Dialog
   {
     try
     {
-      const fn = new Function(this.reportCode);
-      fn();
+      const reportType = ReportType.getReportType(this.reportTypeName);
+      if (reportType)
+      {
+        reportType.parse(this.reportSource);
+      }
       return true;
     }
     catch (ex)
@@ -92,12 +100,28 @@ class ReportDialog extends Dialog
   endEdition()
   {
     this.reportName = this.nameField.value;
-    let code = this.editorView.state.doc.toString();
-    if (code !== this.reportCode)
+    let source = this.editorView.state.doc.toString();
+    if (source !== this.reportSource)
     {
-      this.reportCode = code;
+      this.reportSource = source;
     }
-  };
+  }
+
+  addExtension()
+  {
+    const defaultReportTypeName = ReportType.getDefaultReportTypeName();
+    const reportTypeName = this.reportTypeName;
+    const reportName = this.reportName.toLowerCase();
+
+    if (reportTypeName !== defaultReportTypeName
+        || reportName.includes("."))
+    {
+      if (!reportName.endsWith("." + reportTypeName))
+      {
+        this.reportName += "." + reportTypeName;
+      }
+    }
+  }
 }
 
 export { ReportDialog };

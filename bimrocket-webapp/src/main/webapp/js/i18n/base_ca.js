@@ -147,7 +147,7 @@ export const translations =
   "tool.draw.vertex_destination" : "Selecciona la nova posició del vèrtex.",
 
   "tool.report.label" : "Informes",
-  "tool.report.name" : "Informe:",
+  "tool.report.name" : "Nom de l'informe:",
   "tool.report.rules" : "Regles:",
 
   "tool.histogram.label" : "Histograma",
@@ -470,6 +470,8 @@ export const translations =
   "label.about_properties" : "Propietats",
   "label.modules" : "Mòduls",
 
+  "label.report_type": "Tipus d'informe:",
+
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
   "option.value_desc" : "Valor (descendent)",
@@ -498,6 +500,7 @@ export const translations =
   "title.properties" : "Propietats",
   "title.script_editor" : "Editor de codi",
   "title.report_editor" : "Editor d'informes",
+  "title.report_type" : "Nou informe",
   "title.object_builder" : "Constructor d'objecte",
   "title.select_by_property" : "Selecció per propietats",
   "title.select_by_qrcode" : "Selecció per codi QR",

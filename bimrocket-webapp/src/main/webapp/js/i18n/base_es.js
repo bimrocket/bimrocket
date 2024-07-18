@@ -147,7 +147,7 @@ export const translations =
   "tool.draw.vertex_destination" : "Selecciona la nueva posición del vértice.",
 
   "tool.report.label" : "Informes",
-  "tool.report.name" : "Informe:",
+  "tool.report.name" : "Nombre del informe:",
   "tool.report.rules" : "Reglas:",
 
   "tool.histogram.label" : "Histograma",
@@ -470,6 +470,8 @@ export const translations =
   "label.about_properties" : "Propiedades",
   "label.modules" : "Módulos",
 
+  "label.report_type": "Tipo de informe:",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -498,6 +500,7 @@ export const translations =
   "title.properties" : "Propiedades",
   "title.script_editor" : "Editor de código",
   "title.report_editor" : "Editor de informes",
+  "title.report_type" : "Nuevo informe",
   "title.object_builder" : "Constructor de objeto",
   "title.select_by_property" : "Selección por propiedades",
   "title.select_by_qrcode" : "Selección por código QR",

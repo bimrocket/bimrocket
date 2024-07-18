@@ -128,6 +128,7 @@ import { TabbedPane } from "../ui/TabbedPane.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Controller } from "../controllers/Controller.js";
 import { Formula } from "../formula/Formula.js";
+import { BRSReportType } from "../reports/BRSReportType.js";
 import * as THREE from "../lib/three.module.js";
 
 export function load(application)

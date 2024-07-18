@@ -720,16 +720,22 @@ div.field_flex > select
   width: calc(100% - 80px);
 }
 
+.dialog .body div.report_name
+{
+  display: flex;
+  align-items: center;
+}
+
 .dialog .body div.report_name > label
 {
-  display: inline-block;
-  width: 80px;
+  flex-grow: 0;
+  white-space: nowrap;
+  margin-right: 4px;
 }
 
 .dialog .body div.report_name > input[type=text]
 {
-  display: inline-block;
-  width: calc(100% - 80px);
+  flex-grow: 1;
 }
 
 .dialog .footer button

@@ -34,6 +34,8 @@ class ReportPanel extends Panel
     const application = this.application;
     const reportElem = this.reportElem;
     reportElem.innerHTML = "";
+    if (!this.visible) this.visible = true;
+    else this.minimized = false;
 
     try
     {

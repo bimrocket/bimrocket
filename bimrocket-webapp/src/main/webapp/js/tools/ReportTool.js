@@ -85,8 +85,6 @@ class ReportTool extends Tool
     {
       this.panel.goHome();
     }
-
-    this.reportPanel.visible = true;
   }
 
   deactivate()

@@ -117,7 +117,7 @@ class WebUtils
     var postTask = function(i, j)
     {
       var task = tasks[i];
-      var iterations = task.iterations ? task.iterations() : 1;
+      var iterations = task.iterations !== undefined ? task.iterations() : 1;
       var message = task.message;
       if (iterations > 1)
       {
@@ -134,19 +134,22 @@ class WebUtils
 
       setTimeout(function() {
 
-        var t0 = Date.now();
-        do
+        if (iterations > 0)
         {
-          try
+          var t0 = Date.now();
+          do
           {
-            task.run(j++);
-          }
-          catch (ex)
-          {
-            if (onError) onError(ex);
-            return;
-          }
-        } while (j < iterations && Date.now() - t0 < notifyMillis)
+            try
+            {
+              task.run(j++);
+            }
+            catch (ex)
+            {
+              if (onError) onError(ex);
+              return;
+            }
+          } while (j < iterations && Date.now() - t0 < notifyMillis)
+        }
 
         if (j < iterations)
         {

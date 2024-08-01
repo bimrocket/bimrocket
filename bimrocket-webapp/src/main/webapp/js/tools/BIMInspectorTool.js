@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { Tree } from "../ui/Tree.js";
+import { Constant } from "../io/ifc/IFC.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 
@@ -24,7 +25,8 @@ class BIMInspectorTool extends Tool
     this.createPanel();
 
     this.returnStack = [];
-    this.ifcData = null;
+    this.ifcFile = null;
+    this.ifcEntity = null;
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onSelection = this.onSelection.bind(this);
@@ -104,15 +106,47 @@ class BIMInspectorTool extends Tool
 
   exploreObject(object)
   {
-    this.ifcData = null;
+    const application = this.application;
+
+    this.ifcFile = null;
+    this.ifcEntity = null;
     this.returnStack = [];
 
-    const application = this.application;
-    if (object && object._ifc)
+    let ifcRoot = null;
+
+    if (object)
+    {
+      let rootObject = null;
+      let current = object;
+
+      while (current.parent && current !== application.baseObject)
+      {
+        if (rootObject === null && current.userData.IFC?.GlobalId) // is IfcRoot?
+        {
+          rootObject = current;
+        }
+
+        if (current._ifcFile)
+        {
+          this.ifcFile = current._ifcFile;
+          break;
+        }
+
+        current = current.parent;
+      }
+
+      if (this.ifcFile && rootObject)
+      {
+        const globalId = rootObject.userData.IFC.GlobalId;
+        ifcRoot = this.ifcFile.entitiesByGlobalId.get(globalId);
+      }
+    }
+
+    if (ifcRoot)
     {
       I18N.set(this.helpElem, "textContent", "");
       application.i18n.update(this.helpElem);
-      this.populateTree(object._ifc);
+      this.populateTree(ifcRoot);
     }
     else
     {
@@ -124,63 +158,45 @@ class BIMInspectorTool extends Tool
     }
   }
 
-  populateTree(ifcData)
+  populateTree(ifcEntity)
   {
-    let prevIfcData = this.ifcData;
-    this.ifcData = ifcData;
+    let prevIfcData = this.ifcEntity;
+    this.ifcEntity = ifcEntity;
 
     this.backButton.disabled = this.returnStack.length === 0;
 
-    this.typeElem.textContent = ifcData.constructor.name;
+    this.typeElem.textContent = ifcEntity.constructor.name;
 
     const tree = this.tree;
     tree.clear();
 
-    let propertyNames = Object.getOwnPropertyNames(ifcData)
+    this.populateNode(tree, ifcEntity, prevIfcData, true);
+  }
+
+  populateNode(node, ifcEntity, prevIfcData, recursive)
+  {
+    let propertyNames = Object.getOwnPropertyNames(ifcEntity)
       .filter(property => !property.startsWith("_"));
 
     for (let propertyName of propertyNames)
     {
-      let value = ifcData[propertyName];
-      this.populateProperty(tree, propertyName, value, prevIfcData);
+      let value = ifcEntity[propertyName];
+      this.populateProperty(node, propertyName, value, prevIfcData, recursive);
     }
 
-    propertyNames = Object.getOwnPropertyNames(ifcData)
-      .filter(property => property.startsWith("_") &&
-      property !== "_loader" && property !== "_helper");
+    propertyNames = Object.getOwnPropertyNames(ifcEntity)
+      .filter(property => property.startsWith("_"));
 
     for (let propertyName of propertyNames)
     {
-      let value = ifcData[propertyName];
-      this.populateProperty(tree, propertyName, value, prevIfcData);
+      let value = ifcEntity[propertyName];
+      this.populateProperty(node, propertyName, value, prevIfcData, false);
     }
   }
 
-  populateProperty(node, name, value, prevIfcData)
+  populateProperty(node, name, value, prevIfcData, recursive)
   {
-    if (value instanceof Array)
-    {
-      let arrayNode = node.addNode(name +
-        ": [ " + value.length + " ]", null, "array");
-      for (let i = 0; i < value.length; i++)
-      {
-        let itemValue = value[i];
-        this.populateProperty(arrayNode, "#" + i, itemValue, prevIfcData);
-      }
-    }
-    else if (value instanceof Object)
-    {
-      let nextIfcData = value;
-      let childNode = node.addNode(name + ": #" + value.constructor.name,
-        event => this.followLink(nextIfcData), "object");
-
-      if (value === prevIfcData)
-      {
-        childNode.expandAncestors();
-        childNode.addClass("previous");
-      }
-    }
-    else if (typeof value === "string")
+    if (typeof value === "string")
     {
       node.addNode(name + ": " + value, null, "string");
     }
@@ -192,23 +208,58 @@ class BIMInspectorTool extends Tool
     {
       node.addNode(name + ": " + value, null, "boolean");
     }
+    else if (value === undefined)
+    {
+      node.addNode(name + ": undefined", null, "object");
+    }
+    else if (value instanceof Constant)
+    {
+      node.addNode(name + ": " + value.value, null, "constant");
+    }
+    else if (value instanceof Array)
+    {
+      let arrayNode = node.addNode(name +
+        ": [ " + value.length + " ]", null, "array");
+      for (let i = 0; i < value.length; i++)
+      {
+        let itemValue = value[i];
+        this.populateProperty(arrayNode, "[ " + i+ " ]", itemValue, prevIfcData, recursive);
+      }
+    }
+    else if (value instanceof Object)
+    {
+      let nextIfcData = value;
+      let childNode = node.addNode(name + ": #" + value.constructor.name,
+        event => this.followLink(nextIfcData), "object");
+
+      if (!value.GlobalId && recursive) // no ifcroot, no inverse
+      {
+        this.populateNode(childNode, value, prevIfcData, recursive);
+      }
+
+      if (value === prevIfcData)
+      {
+        childNode.expandAncestors();
+        childNode.addClass("previous");
+      }
+    }
   }
 
   goBack()
   {
     if (this.returnStack.length > 0)
     {
-      let ifcData = this.returnStack.pop();
+      let ifcEntity = this.returnStack.pop();
 
-      this.populateTree(ifcData);
+      this.populateTree(ifcEntity);
     }
   }
 
-  followLink(ifcData)
+  followLink(ifcEntity)
   {
-    this.returnStack.push(this.ifcData);
+    this.returnStack.push(this.ifcEntity);
 
-    this.populateTree(ifcData);
+    this.populateTree(ifcEntity);
   }
 }
 

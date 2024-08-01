@@ -9,6 +9,7 @@ import { BIMLayoutTool } from "../tools/BIMLayoutTool.js";
 import { BIMInspectorTool } from "../tools/BIMInspectorTool.js";
 import { BCFTool } from "../tools/BCFTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
+import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
 import { IOManager } from "../io/IOManager.js";
 import { IDSReportType } from "../reports/IDSReportType.js";
@@ -23,12 +24,17 @@ export function load(application)
   IOManager.formats["ifc"] =
   {
     description : "Industry foundation classes (*.ifc)",
-    extensions: ["ifc"],
+    extensions : ["ifc"],
     mimeType : "application/x-step",
     loader :
     {
       class : IFCSTEPLoader,
       loadMethod : 2,
+      dataType : "text"
+    },
+    exporter :
+    {
+      class : IFCSTEPExporter,
       dataType : "text"
     }
   };

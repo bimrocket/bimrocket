@@ -1,12 +1,13 @@
 /**
- * IFCStepLoader
+ * IFCSTEPLoader
  *
  * @author realor
  */
 
 import { IFCLoader } from "./IFCLoader.js";
-import { IFC_SCHEMAS, DEFAULT_IFC_SCHEMA_NAME, findBestIfcSchema } from "./BaseEntity.js";
-import { STEPParser, STEPFile } from "../STEP.js";
+import { IFCFile } from "./IFCFile.js";
+import { STEPParser, HEADER_SCHEMA } from "../STEP.js";
+import { IFC, Constant } from "./IFC.js";
 
 class IFCSTEPLoader extends IFCLoader
 {
@@ -15,36 +16,59 @@ class IFCSTEPLoader extends IFCLoader
     super(manager);
   }
 
-  parseFile(ifcFile, text)
+  parseFile(text)
   {
-    let parser = new STEPParser();
-    // set default schema
-    parser.schema = IFC_SCHEMAS[DEFAULT_IFC_SCHEMA_NAME];
+    const ifcFile = new IFCFile();
 
-    parser.getSchemaTypes = schemaName =>
+    const parser = new class IFCSTEPParser extends STEPParser
     {
-      schemaName = schemaName.toUpperCase();
-      console.info("Model schema: " + schemaName);
-
-      let parseSchemaName = findBestIfcSchema(schemaName);
-
-      if (schemaName !== parseSchemaName)
+      constructor()
       {
-        console.warn("Using schema " + parseSchemaName);
+        super();
+        // set default schema
+        this.schema = IFC.SCHEMAS[IFC.DEFAULT_SCHEMA_NAME];
+        this.constantClass = Constant;
       }
 
-      let schema = IFC_SCHEMAS[parseSchemaName];
+      getSchemaTypes(schemaName)
+      {
+        schemaName = schemaName.toUpperCase();
+        console.info("Model schema: " + schemaName);
 
-      ifcFile.schema = schema;
-      return schema;
+        let parseSchemaName = IFC.findBestIfcSchemaName(schemaName);
+
+        if (schemaName !== parseSchemaName)
+        {
+          console.warn("Using schema " + parseSchemaName);
+        }
+
+        let schema = IFC.SCHEMAS[parseSchemaName];
+
+        ifcFile.schema = schema;
+        return schema;
+      }
+
+      setHeader(entity)
+      {
+        if (entity instanceof HEADER_SCHEMA.FILE_NAME)
+        {
+          ifcFile.filename = entity;
+        }
+        else if (entity instanceof HEADER_SCHEMA.FILE_DESCRIPTION)
+        {
+          ifcFile.description = entity;
+        }
+      }
+
+      addEntity(entity)
+      {
+        ifcFile.add(entity);
+      }
     };
 
-    parser.onEntityCreated = entity =>
-    {
-      entity._loader = this;
-      ifcFile.add(entity);
-    };
     parser.parse(text);
+
+    return ifcFile;
   }
 };
 

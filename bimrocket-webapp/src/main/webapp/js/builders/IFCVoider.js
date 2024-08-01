@@ -46,7 +46,7 @@ class IFCVoider extends SolidBuilder
 
   performBuild(productRepr)
   {
-    // productRepr nust be a Solid with a Solid child
+    // productRepr must be a Solid with a Solid child
 
     if (!(productRepr instanceof Solid)
         || productRepr.children.length < 3) return true;
@@ -117,7 +117,7 @@ class IFCVoider extends SolidBuilder
   findIfcProduct(object)
   {
     // find the nearest ancestor object with GlobalId (IfcProduct) that is not
-    // and IfcBuildingElementPart
+    // an IfcBuildingElementPart
 
     while (object)
     {

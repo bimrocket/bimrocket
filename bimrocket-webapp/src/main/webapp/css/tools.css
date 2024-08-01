@@ -214,9 +214,24 @@
   background-image: url(images/inspector/array.svg);
 }
 
+.bim_inspector_panel .tree li.constant
+{
+  background-image: url(images/inspector/constant.svg);
+}
+
+.bim_inspector_panel .tree li.constant > a
+{
+  color: #800080;
+}
+
 .bim_inspector_panel .tree li.string
 {
   background-image: url(images/inspector/string.svg);
+}
+
+.bim_inspector_panel .tree li.string > a
+{
+  color: #404080;
 }
 
 .bim_inspector_panel .tree li.number
@@ -224,9 +239,19 @@
   background-image: url(images/inspector/number.svg);
 }
 
+.bim_inspector_panel .tree li.number > a
+{
+  color: #808080;
+}
+
 .bim_inspector_panel .tree li.boolean
 {
   background-image: url(images/inspector/boolean.svg);
+}
+
+.bim_inspector_panel .tree li.number > a
+{
+  color: #404000;
 }
 
 .bim_inspector_panel .tree li > a.previous

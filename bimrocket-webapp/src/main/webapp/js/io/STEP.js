@@ -4,41 +4,33 @@
  * @author realor
  */
 
-const HEADER_SCHEMA = {};
-
-class STEPFile
-{
-  name = null;
-  description = null;
-  schema = null; // schema definition
-
-  tags = {};
-  references = [];
-};
-
 class STEPParser
 {
-  schema = null; // classes map
-  getSchemaTypes = null; // called to get schema types
-  onEntityCreated = null; // called each time an entity is created
-
-  decodeSTEPString(str)
+  constructor()
   {
-    return str.replace(/\\X2\\[\dA-F]{4}\\X0\\|\\X\\[\dA-F]{2}/gi,
-      function (match)
-      {
-        var code = match.length === 12 ?
-          match.substring(4, 8) : match.substring(3, 5);
-        return String.fromCharCode(parseInt(code, 16));
-      });
+    this.schema = null; // classes map
+    this.constantClass = null;
+    this.undefinedValue = undefined;
+  }
+
+  getSchemaTypes(schemaName)
+  {
+    return null;
+  }
+
+  setHeader(entity)
+  {
+  }
+
+  addEntity(entity)
+  {
   }
 
   parse(text)
   {
     const t0 = Date.now();
-    const file = new STEPFile();
-    let tags = file.tags;
-    let references = file.references;
+    let tags = {};
+    let references = [];
     let lineCount = 0;
 
     let builder = null;
@@ -104,7 +96,7 @@ class STEPParser
           if (builder) // previous builder
           {
             stack.push(builder); // save previous builder
-            builder.add(newBuilder.instance);
+            builder.add(newBuilder.entity);
           }
           builder = newBuilder;
           token = "";
@@ -129,11 +121,36 @@ class STEPParser
             }
             else if (token.charAt(0) === '#')
             {
-              if (builder.instance)
+              if (builder.entity)
               {
                 references.push(new STEPReference(builder, token));
               }
               builder.add(null);
+            }
+            else if (token === ".T.")
+            {
+              builder.add(true);
+            }
+            else if (token === ".F.")
+            {
+              builder.add(false);
+            }
+            else if (token.startsWith(".") && token.endsWith("."))
+            {
+              const value = token.substring(1, token.length - 1);
+              if (this.constantClass)
+              {
+                let constValue = new this.constantClass(value);
+                builder.add(constValue);
+              }
+              else
+              {
+                builder.add(value);
+              }
+            }
+            else if (token === "*")
+            {
+              builder.add(this.undefinedValue);
             }
             else
             {
@@ -153,36 +170,23 @@ class STEPParser
         {
           if (tag)
           {
-            if (builder && builder.instance)
+            if (builder && builder.entity)
             {
-              tags[tag] = builder.instance;
-              if (this.onEntityCreated)
-              {
-                this.onEntityCreated(builder.instance);
-              }
+              tags[tag] = builder.entity;
+              this.addEntity(builder.entity);
             }
           }
           else // process header elements
           {
             if (builder)
             {
-              let instance = builder.instance;
-              if (instance instanceof FILE_SCHEMA)
+              let entity = builder.entity;
+              this.setHeader(entity);
+
+              if (entity instanceof FILE_SCHEMA)
               {
-                file.schema = instance;
-                let schemaName = file.schema.Schemas[0];
-                if (this.getSchemaTypes)
-                {
-                  this.schema = this.getSchemaTypes(schemaName);
-                }
-              }
-              else if (instance instanceof FILE_NAME)
-              {
-                file.name = instance;
-              }
-              else if (instance instanceof FILE_DESCRIPTION)
-              {
-                file.description = instance;
+                let schemaName = entity.Schemas[0];
+                this.schema = this.getSchemaTypes(schemaName);
               }
             }
           }
@@ -226,23 +230,32 @@ class STEPParser
     for (let i = 0; i < references.length; i++)
     {
       let reference = references[i];
-      let instance = reference.instance;
+      let entity = reference.entity;
       let referencedInstance = tags[reference.tag] || null;
       if (reference.property)
       {
-        instance[reference.property] = referencedInstance;
+        entity[reference.property] = referencedInstance;
       }
       else // Array
       {
         let index = reference.index;
-        instance[index] = referencedInstance;
+        entity[index] = referencedInstance;
       }
     }
     const t1 = Date.now();
     console.info("STEP File parsed in " + (t1 - t0) + " millis.");
     console.info("File contains " + lineCount + " lines.");
+  }
 
-    return file;
+  decodeSTEPString(str)
+  {
+    return str.replace(/\\X2\\[\dA-F]{4}\\X0\\|\\X\\[\dA-F]{2}/gi,
+      match =>
+      {
+        const code = match.length === 12 ?
+          match.substring(4, 8) : match.substring(3, 5);
+        return String.fromCharCode(parseInt(code, 16));
+      });
   }
 };
 
@@ -253,20 +266,20 @@ class STEPBuilder
     this.index = 0;
     if (typeName === "Array")
     {
-      this.instance = [];
+      this.entity = [];
     }
     else
     {
       let cls = schema ? schema[typeName] : HEADER_SCHEMA[typeName];
       if (cls)
       {
-        this.instance = new cls();
-        this.properties = Object.getOwnPropertyNames(this.instance)
+        this.entity = new cls();
+        this.properties = Object.getOwnPropertyNames(this.entity)
           .filter(property => !property.startsWith("_"));
       }
       else
       {
-        this.instance = null;
+        this.entity = null;
         console.warn("Unsupported entity " + typeName);
       }
     }
@@ -274,38 +287,210 @@ class STEPBuilder
 
   add(element)
   {
-    var instance = this.instance;
-    if (instance instanceof Array)
+    let entity = this.entity;
+    if (entity instanceof Array)
     {
-      instance.push(element);
+      entity.push(element);
     }
-    else if (instance !== null)
+    else if (entity !== null)
     {
-      instance[this.properties[this.index]] = element;
+      entity[this.properties[this.index]] = element;
     }
     this.index++;
   }
-};
+}
 
 class STEPReference
 {
   constructor(builder, tag)
   {
-    this.instance = builder.instance;
+    this.entity = builder.entity;
     this.index = builder.index;
     this.tag = tag; // #<number>
     this.property = builder.properties ?
       builder.properties[builder.index] : null;
   }
-};
+}
+
+class STEPWriter
+{
+  constructor()
+  {
+    this.schemaName = "";
+    this.constantClass = null;
+    this.undefinedValue = undefined;
+    this.entityTags = new Map();
+    this.entities = [];
+    this.tagCount = 0;
+    this.output = "";
+  }
+
+  addEntities(object)
+  {
+    if (object instanceof Array)
+    {
+      const array = object;
+      for (let item of array)
+      {
+        this.addEntities(item);
+      }
+    }
+    else if (object instanceof Object && object.constructor.isEntity)
+    {
+      const entity = object;
+      let tag = this.entityTags.get(entity);
+      if (tag === undefined)
+      {
+        tag = ++this.tagCount;
+        this.entityTags.set(entity, tag);
+        this.entities.push(entity);
+        const attributes = this.getAttributeNames(entity);
+        for (let attribute of attributes)
+        {
+          let value = entity[attribute];
+          this.addEntities(value);
+        }
+      }
+    }
+  }
+
+  write()
+  {
+    this.output = "";
+
+    this.writeHeader();
+    this.writeData();
+    this.writeFooter();
+
+    return this.output;
+  }
+
+  writeHeader()
+  {
+    this.output += `ISO-10303-21;
+HEADER;
+
+FILE_DESCRIPTION(('step'),'2;1');
+FILE_NAME('step','',(''),(''),'Step','','');
+FILE_SCHEMA(('${this.schemaName}'));
+ENDSEC;
+
+`;
+  }
+
+  writeData()
+  {
+    this.output += "DATA;\n";
+    for (let entity of this.entities)
+    {
+      let tag = this.entityTags.get(entity);
+      this.output += "#" + tag + "= ";
+      this.writeObject(entity);
+      this.output += ";\n";
+    }
+    this.output += "ENDSEC;\n";
+  }
+
+  writeFooter()
+  {
+    this.output += "END-ISO-10303-21;\n";
+  }
+
+  writeObject(object)
+  {
+    if (object === null)
+    {
+      this.output += "$";
+    }
+    else if (object === this.undefinedValue || object === undefined)
+    {
+      this.output += "*";
+    }
+    else if (object instanceof Array)
+    {
+      const array = object;
+      this.output += "(";
+      for (let i = 0; i < array.length; i++)
+      {
+        if (i > 0) this.output += ",";
+        this.writeObjectWithTag(array[i]);
+      }
+      this.output += ")";
+    }
+    else if (typeof object === "boolean")
+    {
+      this.output += object ? ".T." : ".F.";
+    }
+    else if (typeof object === "string")
+    {
+      this.output += "'" + this.encodeSTEPString(object) + "'";
+    }
+    else if (typeof object === "number")
+    {
+      this.output += object;
+    }
+    else if (this.constantClass && (object instanceof this.constantClass))
+    {
+      this.output += "." + object.value + ".";
+    }
+    else if (typeof object === "object")
+    {
+      const className = object.constructor.name.toUpperCase();
+      this.output += className + "(";
+
+      if (object.constructor.isEntity)
+      {
+        const entity = object;
+        const attributes = this.getAttributeNames(entity);
+        for (let i = 0; i < attributes.length; i++)
+        {
+          if (i > 0) this.output += ",";
+          let attribute = attributes[i];
+          let value = entity[attribute];
+          this.writeObjectWithTag(value);
+        }
+      }
+      else // DefinedType
+      {
+        this.writeObject(object.Value);
+      }
+      this.output += ")";
+    }
+  }
+
+  writeObjectWithTag(object)
+  {
+    let tag = this.entityTags.get(object);
+    if (tag)
+    {
+      this.output += "#" + tag;
+    }
+    else
+    {
+      this.writeObject(object);
+    }
+  }
+
+  encodeSTEPString(text)
+  {
+    let encoded = "";
+    for (let i = 0; i < text.length; i++)
+    {
+      let ch = text[i];
+      if (ch === "'") encoded += "''";
+      else encoded += ch;
+    }
+    return encoded;
+  }
+
+  getAttributeNames(entity)
+  {
+    return Object.getOwnPropertyNames(entity)
+          .filter(name => !name.startsWith("_"));
+  }
+}
 
 /* STEP header elements */
-
-class FILE_DESCRIPTION
-{
-  Description = null;
-  ImplementationLevel = null;
-};
 
 class FILE_NAME
 {
@@ -318,13 +503,21 @@ class FILE_NAME
   Other = null;
 };
 
+class FILE_DESCRIPTION
+{
+  Description = null;
+  ImplementationLevel = null;
+};
+
 class FILE_SCHEMA
 {
   Schemas = null;
 };
 
-HEADER_SCHEMA.FILE_DESCRIPTION = FILE_DESCRIPTION;
-HEADER_SCHEMA.FILE_NAME = FILE_NAME;
-HEADER_SCHEMA.FILE_SCHEMA = FILE_SCHEMA;
+const HEADER_SCHEMA = {
+  FILE_DESCRIPTION : FILE_DESCRIPTION,
+  FILE_NAME : FILE_NAME,
+  FILE_SCHEMA : FILE_SCHEMA
+};
 
-export { STEPParser, STEPFile };
+export { HEADER_SCHEMA, STEPParser, STEPWriter };

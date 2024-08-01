@@ -137,7 +137,7 @@ export function load(application)
   IOManager.formats["brf"] =
   {
     description : "BIMROCKET (*.brf)",
-    extensions: ["brf"],
+    extensions : ["brf"],
     mimeType : "application/json",
     loader :
     {
@@ -154,8 +154,8 @@ export function load(application)
 
   IOManager.formats["dae"] =
   {
-    description: "Collada (*.dae)",
-    extensions: ["dae"],
+    description : "Collada (*.dae)",
+    extensions : ["dae"],
     mimeType : "model/vnd.collada+xml",
     loader :
     {
@@ -172,8 +172,8 @@ export function load(application)
 
   IOManager.formats["obj"] =
   {
-    description: "Wavefront object (*.obj)",
-    extensions: ["obj"],
+    description : "Wavefront object (*.obj)",
+    extensions : ["obj"],
     mimeType : "model/obj",
     loader :
     {
@@ -190,8 +190,8 @@ export function load(application)
 
   IOManager.formats["pcd"] =
   {
-    description: "Point cloud data (*.pcd)",
-    extensions: ["pcd"],
+    description : "Point cloud data (*.pcd)",
+    extensions : ["pcd"],
     mimeType : "application/octet-stream",
     loader :
     {
@@ -204,7 +204,7 @@ export function load(application)
   IOManager.formats["stl"] =
   {
     description : "Stereolithography (*.stl)",
-    extensions: ["stl"],
+    extensions : ["stl"],
     mimeType : "model/stl",
     loader :
     {
@@ -222,7 +222,7 @@ export function load(application)
   IOManager.formats["gltf"] =
   {
     description : "GL Transmission Format (*.gltf)",
-    extensions: ["gltf"],
+    extensions : ["gltf"],
     mimeType : "model/gltf+json",
     loader :
     {
@@ -241,7 +241,7 @@ export function load(application)
   IOManager.formats["glb"] =
   {
     description : "GL Transmission Format (*.glb)",
-    extensions: ["glb"],
+    extensions : ["glb"],
     mimeType : "model/gltf-binary",
     loader :
     {

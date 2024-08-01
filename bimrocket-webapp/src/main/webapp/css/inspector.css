@@ -12,7 +12,7 @@ div.inspector_toolbar
 
 div.inspector_properties
 {
-  overflow: auto;
+  overflow: visible;
 }
 
 ul.inspector

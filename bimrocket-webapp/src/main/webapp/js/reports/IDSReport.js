@@ -230,8 +230,7 @@ export class IDSPartOf extends IDSFacet
     {
       if (typeof this.relation === "string")
       {
-        let relType = $("IFC_rel_parent", "ifcClassName");
-        if (this.relation.toLowerCase() === relType.toLowerCase())
+        if (this.relationFound($()))
         {
           return this.cardinality === "required";
         }
@@ -242,6 +241,21 @@ export class IDSPartOf extends IDSFacet
       }
     }
     return this.cardinality === "prohibited";
+  }
+
+  relationFound(object)
+  {
+    const relationName = this.relation.toUpperCase();
+    for (let name in object.userData)
+    {
+      if (name.startsWith("IFC_rel_"))
+      {
+        let relProp = object.userData[name];
+        let ifcClassName = relProp.ifcClassName?.toUpperCase();
+        if (relationName === ifcClassName) return true;
+      }
+    }
+    return false;
   }
 }
 

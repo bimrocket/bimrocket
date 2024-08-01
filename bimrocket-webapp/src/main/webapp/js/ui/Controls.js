@@ -353,14 +353,17 @@ class Controls
         "color" : "#444",
         "fontWeight" : "bold"
       },
-      "& .ͼm" : {
-        "color" : "#808080"
+      "& .ͼe" : {
+        "color" : "#2020ff"
       },
       "& .ͼf" : {
         "color" : "#8080e0"
       },
-      "& .ͼe" : {
-        "color" : "#2020ff"
+      "& .ͼg" : {
+        "color" : "#444"
+      },
+      "& .ͼm" : {
+        "color" : "#808080"
       },
       "& .cm-wrap" : {
         "height" : "100%"

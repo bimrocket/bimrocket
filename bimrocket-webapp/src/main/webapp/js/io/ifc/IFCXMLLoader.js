@@ -12,6 +12,11 @@ class IFCXMLLoader extends IFCLoader
   {
     super(manager);
   }
+
+  parseFile(text)
+  {
+    throw "Not implemented";
+  }
 };
 
 export { IFCXMLLoader };

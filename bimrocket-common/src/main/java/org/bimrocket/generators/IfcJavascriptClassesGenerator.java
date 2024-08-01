@@ -110,14 +110,20 @@ public class IfcJavascriptClassesGenerator
     writer.println("*/");
     writer.println();
 
-    writer.println("import { BaseEntity, registerIfcClass } " +
-      "from \"../BaseEntity.js\";");
+    writer.println("import { registerIfcClass } " +
+      "from \"../IFC.js\";");
     writer.println();
 
-    writer.println("class SchemaBase extends BaseEntity");
+    writer.println("class SchemaBase");
     writer.println("{");
     writer.println("  static schemaName = \"" + schemaVersion + "\";");
     writer.println("  static schema = null;");
+    writer.println("};");
+    writer.println();
+
+    writer.println("class Entity extends SchemaBase");
+    writer.println("{");
+    writer.println("  static isEntity = true;");
     writer.println("};");
     writer.println();
   }
@@ -141,7 +147,7 @@ public class IfcJavascriptClassesGenerator
     // write this entity
     writer.print("class " + entity.getName());
     writer.println(" extends " + (superEntity == null ?
-      "SchemaBase" : superEntity.getName()));
+      "Entity" : superEntity.getName()));
     writer.println("{");
 
     List<ExpressAttribute> attributes = entity.getAttributes();

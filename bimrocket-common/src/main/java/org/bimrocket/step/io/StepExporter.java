@@ -1,31 +1,31 @@
 /*
  * BIMROCKET
- *  
+ *
  * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
- *  
- * This program is licensed and may be used, modified and redistributed under 
- * the terms of the European Public License (EUPL), either version 1.1 or (at 
- * your option) any later version as soon as they are approved by the European 
+ *
+ * This program is licensed and may be used, modified and redistributed under
+ * the terms of the European Public License (EUPL), either version 1.1 or (at
+ * your option) any later version as soon as they are approved by the European
  * Commission.
- *  
- * Alternatively, you may redistribute and/or modify this program under the 
- * terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either  version 3 of the License, or (at your option) 
- * any later version. 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *    
- * See the licenses for the specific language governing permissions, limitations 
+ *
+ * Alternatively, you may redistribute and/or modify this program under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either  version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the licenses for the specific language governing permissions, limitations
  * and more details.
- *    
- * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along 
- * with this program; if not, you may find them at: 
- *    
+ *
+ * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along
+ * with this program; if not, you may find them at:
+ *
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * http://www.gnu.org/licenses/ 
- * and 
+ * http://www.gnu.org/licenses/
+ * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
@@ -102,12 +102,12 @@ public abstract class StepExporter
     printer.println("FILE_DESCRIPTION(('step'),'2;1');");
     printer.println("FILE_NAME('step','',(''),(''),'Step','','');");
     printer.println("FILE_SCHEMA(('" + schema.getName() + "'));");
-    
+
     printer.println("ENDSEC;");
     printer.println();
     printer.println("DATA;");
   }
-  
+
   protected void printData(PrintWriter printer)
   {
     for (Object entity : entityList)
@@ -115,15 +115,15 @@ public abstract class StepExporter
       String tag = "#" + entityMap.get(entity);
       ExpressType entityType = getEntityType(entity);
       printer.println(tag + "= " + exportObject(entity, entityType) + ";");
-    }    
+    }
   }
-  
+
   protected void printFooter(PrintWriter printer)
   {
     printer.println("ENDSEC;");
     printer.println("END-ISO-10303-21;");
   }
-  
+
   protected ExpressEntity getEntityType(Object object)
   {
     String typeName = getTypeName(object);
@@ -232,12 +232,12 @@ public abstract class StepExporter
     else
     {
       String typeName = getTypeName(object);
-      if (typeName != null) // Entity
+      if (typeName != null)
       {
         buffer.append(typeName.toUpperCase());
         buffer.append("(");
         ExpressNamedType namedType = schema.getNamedType(typeName);
-        if (namedType instanceof ExpressEntity)
+        if (namedType instanceof ExpressEntity) // Entity
         {
           ExpressEntity entityType = (ExpressEntity)namedType;
           List<ExpressAttribute> attributes = entityType.getAllAttributes();
@@ -279,7 +279,7 @@ public abstract class StepExporter
       return "#" + tag;
     }
   }
-  
+
   protected String encodeString(String text)
   {
     StringBuilder buffer = new StringBuilder();
@@ -298,7 +298,7 @@ public abstract class StepExporter
       {
         buffer.append("\\X2\\").
           append(String.format("%04X", (int)ch)).
-          append("\\X0\\"); 
+          append("\\X0\\");
       }
       else
       {
@@ -307,7 +307,7 @@ public abstract class StepExporter
     }
     return buffer.toString();
   }
-  
+
   protected String formatNumber(Number number, ExpressType type)
   {
     ExpressPrimitive primitive = null;
@@ -332,7 +332,7 @@ public abstract class StepExporter
       }
     }
   }
-  
+
   protected abstract String getTypeName(Object object);
 
   protected abstract Object getPropertyValue(Object object, String propertyName);

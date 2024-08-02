@@ -13,7 +13,6 @@ import { RectangleBuilder } from "../../builders/RectangleBuilder.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import { Cloner } from "../../builders/Cloner.js";
 import { IFCVoider } from "../../builders/IFCVoider.js";
-
 import * as THREE from "../../lib/three.module.js";
 
 class IFCExporter
@@ -34,7 +33,6 @@ class IFCExporter
 
   parse(object, options)
   {
-    try {
     this.options = Object.assign({}, IFCExporter.options, options);
 
     this.schema = IFC.SCHEMAS[this.options.ifcSchema];
@@ -54,14 +52,6 @@ class IFCExporter
     this.ifcFile.updateInverseAttributes();
 
     return this.exportFile(this.ifcFile);
-
-    }
-    catch (ex)
-    {
-      console.error(ex);
-      throw ex;
-    }
-
   }
 
   exportFile(ifcFile) // abstract, returns text
@@ -397,6 +387,18 @@ class IFCExporter
     const shell = new schema.IfcClosedShell();
     brep.Outer = shell;
     shell.CfsFaces = [];
+    const cartesianPoints = [];
+    const vector = this._vector;
+
+    // create + transform IfcCartesianPoints
+    for (let vertex of geometry.vertices)
+    {
+      vector.copy(vertex);
+      if (matrix) vector.applyMatrix4(matrix);
+      cartesianPoints.push(this.createIfcCartesianPoint(vector));
+    }
+
+    // create IfcFace
     for (let face of geometry.faces)
     {
       let ifcFace = new schema.IfcFace();
@@ -404,32 +406,28 @@ class IFCExporter
 
       let outerBound = new schema.IfcFaceOuterBound();
       ifcFace.Bounds = [outerBound];
-      outerBound.Bound = this.createIfcPolyLoop(face.outerLoop, matrix);
+      outerBound.Bound = this.createIfcPolyLoop(face.outerLoop, cartesianPoints);
       outerBound.Orientation = true;
 
       for (let hole of face.holes)
       {
         let innerBound = new schema.IfcFaceBound();
         ifcFace.Bounds.push(innerBound);
-        innerBound.Bound = this.createIfcPolyLoop(hole, matrix);
+        innerBound.Bound = this.createIfcPolyLoop(hole, cartesianPoints);
         innerBound.Orientation = true;
       }
     }
     return brep;
   }
 
-  createIfcPolyLoop(loop, matrix)
+  createIfcPolyLoop(loop, cartesianPoints)
   {
-    const vector = new THREE.Vector3();
     const schema = this.schema;
     let poly  = new schema.IfcPolyLoop();
     poly.Polygon = [];
-    for (let i = 0; i < loop.getVertexCount(); i++)
+    for (let i of loop.indices)
     {
-      vector.copy(loop.getVertex(i));
-      if (matrix) vector.applyMatrix4(matrix);
-      let point = this.createIfcCartesianPoint(vector);
-      poly.Polygon.push(point);
+      poly.Polygon.push(cartesianPoints[i]);
     }
     return poly;
   }

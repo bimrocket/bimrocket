@@ -27,7 +27,7 @@ class SaveDialog extends Dialog
     let formatName = IOManager.getFormat(name);
     let formatInfo = IOManager.formats[formatName];
 
-    if (!(formatInfo && formatInfo.exporterClass))
+    if (!(formatInfo && formatInfo.exporter))
     {
       formatName = SaveDialog.DEFAULT_EXPORT_FORMAT;
       formatInfo = IOManager.formats[formatName];

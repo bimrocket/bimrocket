@@ -11,6 +11,7 @@ class TabbedPane
   constructor(element)
   {
     this.tabs = new Map();
+    this.visibleTabName = null;
 
     this.paneElem = document.createElement("div");
     element.appendChild(this.paneElem);
@@ -49,6 +50,7 @@ class TabbedPane
       if (this.tabs.size === 1) // first tab
       {
         this.selectTab(tabElems);
+        this.visibleTabName = name;
       }
       return tabElems.panel;
     }
@@ -65,8 +67,13 @@ class TabbedPane
       this.tabs.delete(name);
       if (this.tabs.size > 0) // not empty
       {
+        this.visibleTabName = this.tabs.keys().next().value;
         tabElems = this.tabs.values().next().value;
         this.selectTab(tabElems);
+      }
+      else
+      {
+        this.visibleTabName = null;
       }
     }
   }
@@ -85,6 +92,12 @@ class TabbedPane
     {
       this.selectTab(tabElems);
     }
+    this.visibleTabName = name;
+  }
+
+  getVisibleTabName()
+  {
+    return this.visibleTabName;
   }
 
   getTab(name)

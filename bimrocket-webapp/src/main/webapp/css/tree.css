@@ -12,7 +12,7 @@ ul.tree li
 {
   list-style: none;
   margin-left:6px;
-  padding-left:0;
+  padding-left: 1px;
   text-align: left;
 }
 
@@ -76,9 +76,10 @@ ul.tree li a
   margin-left: 18px;
   padding: 1px;
   line-height: 18px;
-  vertical-align:middle;
   text-decoration: none;
   color: #606060;
+  background-position: left center;
+  vertical-align: middle;
 }
 
 ul.tree li a:hover

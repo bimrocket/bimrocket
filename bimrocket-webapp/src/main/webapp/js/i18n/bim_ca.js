@@ -10,6 +10,7 @@ export const translations =
   "button.explore_selection" : "Explora selecció",
   "button.screenshot" : "Captura pantalla",
   "button.upload_image" : "Puja imatge",
+  "button.references" : "Referències",
 
   "tool.bim_inventory.label" : "Inventari BIM",
   "tool.bim_inventory.help" : "Inventari BIM",
@@ -22,6 +23,11 @@ export const translations =
 
   "tool.bcf.label" : "BCF",
   "tool.bcf.help" : "Gestió d'incidencies BCF",
+
+  "tab.file" : "Fitxer",
+  "tab.entity" : "Entitat",
+  "tab.inheritance" : "Herència",
+  "tab.references" : "Referències",
 
   "tab.comments" : "Comentaris",
   "tab.viewpoints" : "Vistes",

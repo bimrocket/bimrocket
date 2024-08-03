@@ -10,6 +10,7 @@ export const translations =
   "button.explore_selection" : "Explorar selección",
   "button.screenshot" : "Capturar pantalla",
   "button.upload_image" : "Subir imagen",
+  "button.references" : "Referencias",
 
   "tool.bim_inventory.label" : "Inventario BIM",
   "tool.bim_inventory.help" : "Inventario BIM",
@@ -19,6 +20,11 @@ export const translations =
 
   "tool.bim_inspector.label" : "Inspector BIM",
   "tool.bim_inspector.help" : "Muestra la representación IFC",
+
+  "tab.file" : "Fichero",
+  "tab.entity" : "Entidad",
+  "tab.inheritance" : "Herencia",
+  "tab.references" : "Referencias",
 
   "tool.bcf.label" : "BCF",
   "tool.bcf.help" : "Gestión de incidencias BCF",

@@ -60,8 +60,9 @@ class IFCSTEPLoader extends IFCLoader
         }
       }
 
-      addEntity(entity)
+      addEntity(entity, tag)
       {
+        entity._id = tag;
         ifcFile.add(entity);
       }
     };

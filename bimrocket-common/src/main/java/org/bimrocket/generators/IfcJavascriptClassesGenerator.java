@@ -118,6 +118,8 @@ public class IfcJavascriptClassesGenerator
     writer.println("{");
     writer.println("  static schemaName = \"" + schemaVersion + "\";");
     writer.println("  static schema = null;");
+    writer.println();
+    writer.println("  _id = null;");
     writer.println("};");
     writer.println();
 

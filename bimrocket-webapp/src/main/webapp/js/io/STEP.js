@@ -22,14 +22,14 @@ class STEPParser
   {
   }
 
-  addEntity(entity)
+  addEntity(entity, tag)
   {
   }
 
   parse(text)
   {
     const t0 = Date.now();
-    let tags = {};
+    let tags = new Map(); // number => Entity
     let references = [];
     let lineCount = 0;
 
@@ -90,7 +90,7 @@ class STEPParser
         else if (ch === '(')
         {
           let typeName = token.length > 0 ? token.toUpperCase() : "Array";
-          let schema = tag ? this.schema : HEADER_SCHEMA;
+          let schema = tag !== null ? this.schema : HEADER_SCHEMA;
           let newBuilder = new STEPBuilder(typeName, schema);
 
           if (builder) // previous builder
@@ -119,11 +119,12 @@ class STEPParser
             {
               builder.add(parseFloat(token));
             }
-            else if (token.charAt(0) === '#')
+            else if (token.startsWith("#"))
             {
               if (builder.entity)
               {
-                references.push(new STEPReference(builder, token));
+                let refTag = parseInt(token.trim().substring(1));
+                references.push(new STEPReference(builder, refTag));
               }
               builder.add(null);
             }
@@ -168,12 +169,12 @@ class STEPParser
         }
         else if (ch === ';')
         {
-          if (tag)
+          if (tag !== null)
           {
             if (builder && builder.entity)
             {
-              tags[tag] = builder.entity;
-              this.addEntity(builder.entity);
+              tags.set(tag, builder.entity);
+              this.addEntity(builder.entity, tag);
             }
           }
           else // process header elements
@@ -209,9 +210,9 @@ class STEPParser
         else if (ch === '=')
         {
           token = token.trim();
-          if (token.indexOf("#") === 0)
+          if (token.startsWith("#"))
           {
-            tag = token.trim();
+            tag = parseInt(token.substring(1));
           }
           token = "";
         }
@@ -231,7 +232,7 @@ class STEPParser
     {
       let reference = references[i];
       let entity = reference.entity;
-      let referencedInstance = tags[reference.tag] || null;
+      let referencedInstance = tags.get(reference.tag) || null;
       if (reference.property)
       {
         entity[reference.property] = referencedInstance;
@@ -306,7 +307,7 @@ class STEPReference
   {
     this.entity = builder.entity;
     this.index = builder.index;
-    this.tag = tag; // #<number>
+    this.tag = tag; // number
     this.property = builder.properties ?
       builder.properties[builder.index] : null;
   }
@@ -325,6 +326,11 @@ class STEPWriter
     this.output = "";
   }
 
+  createEntityTag(entity) // called once per entity
+  {
+    return ++this.tagCount;
+  }
+
   addEntities(object)
   {
     if (object instanceof Array)
@@ -341,7 +347,7 @@ class STEPWriter
       let tag = this.entityTags.get(entity);
       if (tag === undefined)
       {
-        tag = ++this.tagCount;
+        tag = this.createEntityTag(entity);
         this.entityTags.set(entity, tag);
         this.entities.push(entity);
         const attributes = this.getAttributeNames(entity);

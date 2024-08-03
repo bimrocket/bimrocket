@@ -10,6 +10,7 @@ export const translations =
   "button.explore_selection" : "Explore selection",
   "button.screenshot" : "Screenshot",
   "button.upload_image" : "Upload image",
+  "button.references" : "References",
 
   "tool.bim_inventory.label" : "BIM inventory",
   "tool.bim_inventory.help" : "BIM inventory setup",
@@ -22,6 +23,11 @@ export const translations =
 
   "tool.bcf.label" : "BCF",
   "tool.bcf.help" : "Manage BCF topics",
+
+  "tab.file" : "File",
+  "tab.entity" : "Entity",
+  "tab.inheritance" : "Inheritance",
+  "tab.references" : "References",
 
   "tab.comments" : "Comments",
   "tab.viewpoints" : "Viewpoints",

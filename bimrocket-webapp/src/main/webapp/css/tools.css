@@ -188,13 +188,30 @@
 .bim_inspector_panel .body
 {
   padding: 4px;
+  display: flex;
+  flex-direction: column;
 }
 
 .bim_inspector_panel .ifcClass
 {
   font-weight: bold;
   text-align: left;
-  padding-left: 8px;
+  padding-left: 18px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  background-image: url(images/inspector/object.svg);
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: left center;
+  vertical-align: middle;
+  line-height: 18px;
+}
+
+.bim_inspector_panel .ifcSchema
+{
+  font-weight: bold;
+  text-align: left;
+  padding-left: 0px;
   margin-top: 4px;
   margin-bottom: 4px;
 }
@@ -254,9 +271,35 @@
   color: #404000;
 }
 
+.bim_inspector_panel .tree li.inverse
+{
+  background-image: url(images/inspector/array.svg);
+}
+
+.bim_inspector_panel .tree li.inverse > a
+{
+  font-style: italic;
+  color: #606080;
+}
+
 .bim_inspector_panel .tree li > a.previous
 {
   background-color: #e0e0e0;
+}
+
+.bim_inspector_panel .tree li.previous
+{
+  background-image: url(images/previous_up.svg);
+}
+
+.bim_inspector_panel .tree li.next
+{
+  background-image: url(images/next_down.svg);
+}
+
+.bim_inspector_tabs
+{
+  height: 100%;
 }
 
 .report_panel

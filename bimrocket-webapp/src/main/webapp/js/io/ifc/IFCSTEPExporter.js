@@ -17,7 +17,21 @@ class IFCSTEPExporter extends IFCExporter
 
   exportFile(ifcFile)
   {
-    const writer = new STEPWriter();
+    const writer = new class IFCSTEPWriter extends STEPWriter
+    {
+      constructor()
+      {
+        super();
+      }
+
+      createEntityTag(entity)
+      {
+        const tag = super.createEntityTag(entity);
+        entity._id = tag;
+        return tag;
+      }
+    };
+
     writer.schemaName = IFC.DEFAULT_SCHEMA_NAME;
     writer.constantClass = Constant;
 

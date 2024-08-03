@@ -176,6 +176,36 @@ class IFCFile
       }
     }
   }
+
+  findReferencesTo(object)
+  {
+    const references = [];
+
+    for (let entry of this.entitiesByClass)
+    {
+      let array = entry[1];
+      let attributes = Object.getOwnPropertyNames(array[0])
+        .filter(name => !name.startsWith("_"));
+
+      for (let entity of array)
+      {
+        for (let attribute of attributes)
+        {
+          let value = entity[attribute];
+          if (value === object) references.push(entity);
+          else if (value instanceof Array)
+          {
+            const array = value;
+            for (let item of array)
+            {
+              if (item === object) references.push(entity);
+            }
+          }
+        }
+      }
+    }
+    return references;
+  }
 };
 
 export { IFCFile };

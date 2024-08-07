@@ -24,9 +24,11 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Reporting tool to check conditions on the model objects (supported reporting formats: BRS and [IDS](https://www.buildingsmart.org/what-is-information-delivery-specification-ids/)).
 - Object controllers (a Controller is a program that changes the state of an object when a certain event occurs).
 - Direct loading of IFC files from local disk or the web server. Support for multiple IFC schemas (IFC2X3, IFC4 and IFC4X3_ADD2).
-- IFC Inventory tool to explore the types, classifications, groups and layers of the model.
-- IFC Layout tool to view the building layout easily.
-- Search tool to find model properties by name or value.
+- Export models to IFC format.
+- BIM Inventory tool to list the IFC types, classifications, groups and layers of the model.
+- BIM Layout tool to visualize the interior layout of the building.
+- BIM Inspector tool to inspect the IFC entities of the model.
+- Search tool to find model properties by name or by value.
 - Histogram tool to visualize the distribution of values ​​for a given property.
 - Load/Export models in BRF format (JSON BimRocket format).
 - Load/Export models in STL, GLB, Wavefront OBJ and Collada formats.

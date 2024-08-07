@@ -3,6 +3,7 @@
  *
  * @author realor
  */
+import * as THREE from "../../lib/three.module.js";
 
 class Constant
 {
@@ -59,10 +60,10 @@ class IFC
 
   static getRepresentation(object)
   {
-    return object.children.find(child => child.name === IFC.RepresentationName);
+    return object.children.find(child => child.name === this.RepresentationName);
   }
 
-  static generateIFCGlobalId()
+  static generateIfcGlobalId()
   {
     const base64Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$";
 
@@ -82,19 +83,181 @@ class IFC
 
   static findBestIfcSchemaName(schemaName)
   {
-    if (IFC.SCHEMAS[schemaName]) return schemaName;
+    if (this.SCHEMAS[schemaName]) return schemaName;
 
     let index = schemaName.indexOf("_");
     if (index !== -1) schemaName = schemaName.substring(0, index);
 
-    const availableSchemaNames = Object.keys(IFC.SCHEMAS).sort();
+    const availableSchemaNames = Object.keys(this.SCHEMAS).sort();
 
     for (let availableSchemaName of availableSchemaNames)
     {
       if (schemaName <= availableSchemaName) return availableSchemaName;
     }
 
-    return IFC.DEFAULT_SCHEMA_NAME;
+    return this.DEFAULT_SCHEMA_NAME;
+  }
+
+  static initIfcObject(object3D, isProject = false)
+  {
+    if (object3D.type === "Object3D" || isProject)
+    {
+      // main IFC attributes
+      if (!object3D.userData.IFC)
+      {
+        object3D.userData.IFC = {
+          ifcClassName : isProject ? "IfcProject" : "IfcBuildingElementProxy",
+          GlobalId : null,
+          Name: object3D.name
+        };
+      }
+
+      // automatic relationships
+      const schema = this.SCHEMAS[this.DEFAULT_SCHEMA_NAME];
+
+      let parent = object3D.parent;
+      while (parent && parent.userData.IFC === undefined)
+      {
+        parent = parent.parent;
+      }
+
+      const ifcClassName = object3D.userData.IFC?.ifcClassName;
+      const parentIfcClassName = parent?.userData.IFC?.ifcClassName;
+
+      const ifcClass = schema[ifcClassName];
+      const parentIfcClass = schema[parentIfcClassName];
+
+      if (ifcClass && parentIfcClass)
+      {
+        let isParentProject = parentIfcClass === schema.IfcProject;
+        let isSpatial = ifcClass.prototype instanceof schema.IfcSpatialStructureElement;
+        let isParentSpatial = parentIfcClass.prototype instanceof schema.IfcSpatialStructureElement;
+
+        if (isParentProject ||
+            isSpatial && isParentSpatial)
+        {
+          if (!object3D.userData.IFC_rel_aggregated)
+          {
+            object3D.userData.IFC_rel_aggregated = {};
+          }
+        }
+        if (!isSpatial && isParentSpatial)
+        {
+          if (!object3D.userData.IFC_rel_contained)
+          {
+            object3D.userData.IFC_rel_contained = {};
+          }
+        }
+        if (parentIfcClass === schema.IfcOpeningElement &&
+            ifcClass.prototype instanceof schema.IfcElement)
+        {
+          if (!object3D.userData.IFC_rel_fills)
+          {
+            object3D.userData.IFC_rel_fills = {};
+          }
+        }
+        else if (parentIfcClass.prototype instanceof schema.IfcElement &&
+                 ifcClass === schema.IfcOpeningElement)
+        {
+          if (!object3D.userData.IFC_rel_voids)
+          {
+            object3D.userData.IFC_rel_voids = {};
+          }
+        }
+      }
+
+      // complete Ifc data
+      let dataNames = Object.getOwnPropertyNames(object3D.userData)
+        .filter(name => name === "IFC" || name.startsWith("IFC_"));
+
+      for (let dataName of dataNames)
+      {
+        this.completeIfcData(object3D, dataName);
+      }
+    }
+
+    for (let child of object3D.children)
+    {
+      this.initIfcObject(child);
+    }
+  }
+
+  static completeIfcData(object3D, dataName)
+  {
+    let ifcData = object3D.userData[dataName];
+    if (typeof ifcData !== "object") return;
+
+    let ifcClassName = null;
+    let name = null;
+    let isRoot = true;
+    if (dataName === "IFC_rel_aggregated")
+    {
+      ifcClassName = "IfcRelAggregates";
+      name = "Aggregates";
+    }
+    else if (dataName === "IFC_rel_contained")
+    {
+      ifcClassName = "IfcRelContainedInSpatialStructure";
+      name = "Contains";
+    }
+    else if (dataName === "IFC_rel_fills")
+    {
+      ifcClassName = "IfcRelFillsElement";
+      name = "Fills";
+    }
+    else if (dataName === "IFC_rel_voids")
+    {
+      ifcClassName = "IfcRelVoidsElement";
+      name = "Voids";
+    }
+    else if (dataName === "IFC_type")
+    {
+      // TODO: complete
+    }
+    else if (dataName === "IFC_group")
+    {
+      // TODO: complete
+    }
+    else if (dataName === "IFC_material_layerset")
+    {
+      ifcClassName = "IfcMaterialLayerSet";
+      isRoot = false;
+    }
+    else if (dataName.startsWith("IFC_material_layer"))
+    {
+      ifcClassName = "IfcMaterialLayer";
+      isRoot = false;
+    }
+    else if (dataName.startsWith("IFC_") &&
+            !dataName.startsWith("IFC_rel_")) // property set
+    {
+      ifcClassName = "IfcPropertySet";
+      let psetName = dataName.substring(4).trim();
+      let relDataName = "IFC_rel_" + psetName;
+      if (!object3D.userData[relDataName])
+      {
+        object3D.userData[relDataName] = {
+          ifcClassName : "IfcRelDefinesByProperties",
+          GlobalId : IFC.generateIfcGlobalId()
+        };
+      }
+    }
+
+    if (ifcClassName && typeof ifcData.ifcClassName !== "string")
+    {
+      ifcData.ifcClassName = ifcClassName;
+    }
+    if (isRoot)
+    {
+      if (typeof ifcData.GlobalId !== "string")
+      {
+        ifcData.GlobalId = this.generateIfcGlobalId();
+      }
+      if (typeof ifcData.Name !== "string")
+      {
+        ifcData.Name = name;
+      }
+    }
   }
 }
 

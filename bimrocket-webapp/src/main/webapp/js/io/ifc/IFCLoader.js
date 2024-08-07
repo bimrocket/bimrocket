@@ -449,29 +449,6 @@ class IFCLoader extends THREE.Loader
     return helper;
   }
 
-  setIFCProperties(ifcProperties, ifcObject)
-  {
-    let names = Object.keys(ifcObject);
-    for (let name of names)
-    {
-      let value = ifcObject[name];
-      if (value && value.Value !== undefined)
-      {
-        // unbox
-        value = value.Value;
-      }
-
-      if (typeof value === "string")
-      {
-        ifcProperties[name] = value;
-      }
-      else if (typeof value === "number")
-      {
-        ifcProperties[name] = value;
-      }
-    }
-  }
-
   unBox(value)
   {
     // unbox defined types: IfcLabel, IfcReal, IfcBoolean, etc.
@@ -482,19 +459,31 @@ class IFCLoader extends THREE.Loader
   {
     const data = { ifcClassName: ifcEntity.constructor.name };
 
-    for (let key in ifcEntity)
+    const attributes = Object.getOwnPropertyNames(ifcEntity)
+          .filter(name => !name.startsWith("_"));
+
+    for (let attribute of attributes)
     {
-      let value = ifcEntity[key];
-      let valueType = typeof value;
-      if (valueType === "string"
-          || valueType === "number"
-          || valueType === "boolean")
+      let value = ifcEntity[attribute];
+      if (value instanceof Constant)
       {
-        data[key] = value;
+        data[attribute] = "." + value.value + ".";
       }
-      else if (value instanceof Constant)
+      else
       {
-        data[key] = "." + value.value + ".";
+        if (value && value.Value !== undefined)
+        {
+          // unbox
+          value = value.Value;
+        }
+
+        let valueType = typeof value;
+        if (valueType === "string"
+            || valueType === "number"
+            || valueType === "boolean")
+        {
+          data[attribute] = value;
+        }
       }
     }
     return data;
@@ -682,10 +671,7 @@ class IfcProjectHelper extends IfcHelper
       const model = this.object3D;
 
       model.name = project.Name || project.LongName || "IFC";
-      model.userData.IFC = {
-        ifcClassName : "IfcProject"
-      };
-      loader.setIFCProperties(model.userData.IFC, project);
+      model.userData.IFC = loader.getIfcData(project);
 
       const types = new THREE.Group();
       types.name = IFC.TypesName;
@@ -813,14 +799,7 @@ class IfcProductHelper extends IfcHelper
       }
 
       object3D.name = name;
-
-      let ifcClassName = product.constructor.name;
-
-      object3D.userData.IFC = {
-        ifcClassName : ifcClassName
-      };
-
-      loader.setIFCProperties(object3D.userData.IFC, product);
+      object3D.userData.IFC = loader.getIfcData(product);
 
       let objectPlacement = product.ObjectPlacement;
       if (objectPlacement instanceof schema.IfcLocalPlacement)
@@ -1007,56 +986,59 @@ class IfcHalfSpaceSolidHelper extends IfcGeometricRepresentationItemHelper
     if (this.object3D === null)
     {
       const halfSpace = this.entity;
-      const loader = this.loader;
-      const helper = entity => loader.helper(entity);
-
-      const size = loader.options.halfSpaceSize / loader.modelFactor;
-
-      const surface = halfSpace.BaseSurface;
-      const flag = halfSpace.AgreementFlag === true;
-      const plane = surface.Position;
-
-      const geometry = new SolidGeometry();
-      let vertices = geometry.vertices;
-      vertices.push(new THREE.Vector3(-size, -size, 0));
-      vertices.push(new THREE.Vector3(size, -size, 0));
-      vertices.push(new THREE.Vector3(size, size, 0));
-      vertices.push(new THREE.Vector3(-size, size, 0));
-
-      vertices.push(new THREE.Vector3(-size, -size, size));
-      vertices.push(new THREE.Vector3(size, -size, size));
-      vertices.push(new THREE.Vector3(size, size, size));
-      vertices.push(new THREE.Vector3(-size, size, size));
-
-      geometry.addFace(3, 2, 1, 0);
-      geometry.addFace(4, 5, 6, 7);
-      geometry.addFace(0, 1, 5, 4);
-      geometry.addFace(1, 2, 6, 5);
-      geometry.addFace(2, 3, 7, 6);
-      geometry.addFace(3, 0, 4, 7);
-
-      let matrix = helper(plane).getMatrix();
-      if (flag)
-      {
-        matrix = matrix.clone();
-        var rotMatrix = new THREE.Matrix4();
-        rotMatrix.makeRotationX(Math.PI);
-        matrix.multiply(rotMatrix);
-      }
-      geometry.applyMatrix4(matrix);
-      const planeSolid = new Solid(geometry);
-      planeSolid.name = "halfSpace";
-
-      this.object3D = planeSolid;
+      const reverseSolid = halfSpace.AgreementFlag === true;
+      this.object3D = this.getPlaneSolid(reverseSolid);
     }
     return this.object3D;
+  }
+
+  getPlaneSolid(reverseSolid)
+  {
+    const halfSpace = this.entity;
+    const loader = this.loader;
+    const helper = entity => loader.helper(entity);
+
+    const size = loader.options.halfSpaceSize / loader.modelFactor;
+
+    const surface = halfSpace.BaseSurface;
+    const plane = surface.Position;
+
+    let planeProfile = new Profile();
+    planeProfile.builder = new RectangleBuilder(size, size);
+    planeProfile.name = "plane";
+    planeProfile.visible = false;
+    planeProfile.userData.IFC = {
+      ifcClassName : surface.constructor.name
+    };
+
+    let matrix = helper(plane).getMatrix();
+    if (reverseSolid)
+    {
+      matrix = matrix.clone();
+      const rotMatrix = new THREE.Matrix4();
+      rotMatrix.makeRotationX(Math.PI);
+      matrix.multiply(rotMatrix);
+    }
+    const extruder = new Extruder(size);
+
+    let planeSolid = new Solid();
+    planeSolid.add(planeProfile);
+    planeSolid.builder = extruder;
+    planeSolid.name = "halfSpace";
+    matrix.decompose(planeSolid.position, planeSolid.rotation, planeSolid.scale);
+    planeSolid.updateMatrix();
+    planeSolid.userData.IFC = {
+      ifcClassName : halfSpace.constructor.name
+    };
+    ObjectBuilder.build(planeSolid);
+
+    return planeSolid;
   }
 };
 registerIfcHelperClass(IfcHalfSpaceSolidHelper);
 
 
-class IfcPolygonalBoundedHalfSpaceHelper
-  extends IfcGeometricRepresentationItemHelper
+class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
 {
   constructor(loader, entity)
   {
@@ -1074,7 +1056,7 @@ class IfcPolygonalBoundedHalfSpaceHelper
 
       const surface = halfSpace.BaseSurface;
       const base = halfSpace.Position;
-      const flag = halfSpace.AgreementFlag === true;
+      const reverseSolid = halfSpace.AgreementFlag === false;
       const boundary = halfSpace.PolygonalBoundary;
 
       if (surface instanceof schema.IfcPlane)
@@ -1100,6 +1082,9 @@ class IfcPolygonalBoundedHalfSpaceHelper
           const polygonSolid = new Solid();
           polygonSolid.add(polygonProfile);
           polygonSolid.builder = extruder;
+          polygonProfile.userData.IFC = {
+            ifcClassName : boundary.constructor.name
+          };
 
           let matrix = helper(base).getMatrix();
           matrix.decompose(polygonSolid.position, polygonSolid.rotation,
@@ -1107,39 +1092,16 @@ class IfcPolygonalBoundedHalfSpaceHelper
           polygonSolid.updateMatrix();
 
           // plane solid
-          const plane = surface.Position;
-
-          shape = new THREE.Shape();
-          shape.moveTo(-size, -size);
-          shape.lineTo(size, -size);
-          shape.lineTo(size, size);
-          shape.lineTo(-size, size);
-          shape.closePath();
-
-          let planeProfile = new Profile(new ProfileGeometry(shape));
-          planeProfile.name = "plane";
-          planeProfile.visible = false;
-          let planeSolid = new Solid();
-          planeSolid.add(planeProfile);
-          planeSolid.builder = extruder;
-
-          matrix = helper(plane).getMatrix();
-          if (!flag)
-          {
-            matrix = matrix.clone();
-            let rotMatrix = new THREE.Matrix4();
-            rotMatrix.makeRotationX(Math.PI);
-            matrix.multiply(rotMatrix);
-          }
-          matrix.decompose(planeSolid.position, planeSolid.rotation,
-            planeSolid.scale);
-          planeSolid.updateMatrix();
+          let planeSolid = this.getPlaneSolid(reverseSolid);
 
           let halfSpaceSolid = new Solid();
           halfSpaceSolid.name = "polygonalHalfSpace";
           halfSpaceSolid.add(polygonSolid);
           halfSpaceSolid.add(planeSolid);
           halfSpaceSolid.builder = new BooleanOperator(BooleanOperator.SUBTRACT);
+          halfSpaceSolid.userData.IFC = {
+            ifcClassName : halfSpace.constructor.name
+          };
           ObjectBuilder.build(halfSpaceSolid);
 
           this.object3D = halfSpaceSolid;
@@ -1209,6 +1171,9 @@ class IfcBooleanResultHelper extends IfcGeometricRepresentationItemHelper
         secondObject.edgesVisible = false;
         object3D.attach(firstObject);
         object3D.attach(secondObject);
+        object3D.userData.IFC = {
+          ifcClassName: result.constructor.name
+        };
         ObjectBuilder.build(object3D);
         if (object3D.isValid())
         {

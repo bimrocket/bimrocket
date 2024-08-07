@@ -10,6 +10,9 @@ import { Solid } from "../../core/Solid.js";
 import { Profile } from "../../core/Profile.js";
 import { Extruder } from "../../builders/Extruder.js";
 import { RectangleBuilder } from "../../builders/RectangleBuilder.js";
+import { RectangleHollowBuilder } from "../../builders/RectangleHollowBuilder.js";
+import { CircleBuilder } from "../../builders/CircleBuilder.js";
+import { CircleHollowBuilder } from "../../builders/CircleHollowBuilder.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import { Cloner } from "../../builders/Cloner.js";
 import { IFCVoider } from "../../builders/IFCVoider.js";
@@ -43,6 +46,8 @@ class IFCExporter
     this.ifcFile = new IFCFile();
     object._ifcFile = this.ifcFile;
 
+    IFC.initIfcObject(object, true);
+
     this.createIfcRepresentationContexts();
 
     this.createIfcRoots(object);
@@ -64,15 +69,15 @@ class IFCExporter
     const schema = this.schema;
 
     const ifcData = object3D.userData.IFC;
-    if (ifcData)
+    if (ifcData?.ifcClassName)
     {
       const ifcFile = this.ifcFile;
       const ifcClassName = ifcData.ifcClassName;
       const ifcClass = schema[ifcClassName];
-      if (ifcClass.prototype instanceof schema.IfcRoot)
+      if (ifcClass.prototype instanceof schema.IfcRoot && ifcData.GlobalId)
       {
         const entity = new ifcClass();
-        this.copyProperties(ifcData, entity);
+        this.setIfcData(ifcData, entity);
         ifcFile.add(entity);
 
         if (entity instanceof schema.IfcProduct)
@@ -120,7 +125,7 @@ class IFCExporter
         {
           const relData = object3D.userData[name];
           const ifcClassName = relData?.ifcClassName;
-          const globalId = relData.GlobalId || IFC.generateIFCGlobalId();
+          const globalId = relData.GlobalId;
           let rel = ifcFile.entitiesByGlobalId.get(globalId);
 
           switch (ifcClassName)
@@ -173,7 +178,7 @@ class IFCExporter
 
             case "IfcRelDefinesByType":
               const type = object3D.userData.IFC_type;
-              const typeGlobalId = type?.GlobalId || IFC.generateIFCGlobalId();
+              const typeGlobalId = type?.GlobalId;
               if (!rel)
               {
                 rel = new schema.IfcRelDefinesByType();
@@ -189,7 +194,7 @@ class IFCExporter
             case "IfcRelDefinesByProperties":
               let psetName = name.substring(8);
               let pset = object3D.userData["IFC_" + psetName];
-              const psetGlobalId = pset?.GlobalId || IFC.generateIFCGlobalId();
+              const psetGlobalId = pset?.GlobalId;
               const ifcPset = this.getIfcPropertySet(psetGlobalId, psetName, pset);
               if (!rel)
               {
@@ -280,9 +285,17 @@ class IFCExporter
     {
       shapeRepr.RepresentationType = "Brep";
     }
-    else if (firstItem instanceof schema.IfcExtrudedAreaSolid)
+    else if (firstItem instanceof schema.IfcSweptAreaSolid)
     {
       shapeRepr.RepresentationType = "SweptSolid";
+    }
+    else if (firstItem instanceof schema.IfcBooleanClippingResult)
+    {
+      shapeRepr.RepresentationType = "Clipping";
+    }
+    else if (firstItem instanceof schema.IfcBooleanResult)
+    {
+      shapeRepr.RepresentationType = "CSG";
     }
     return shapeRepr;
   }
@@ -304,7 +317,17 @@ class IFCExporter
     }
     else if (reprObject3D instanceof Solid)
     {
-      if (reprObject3D.builder instanceof IFCVoider)
+      const ifcClassName = reprObject3D.userData.IFC?.ifcClassName;
+      if (ifcClassName === "IfcHalfSpaceSolid")
+      {
+        const halfSpace = new schema.IfcHalfSpaceSolid();
+        halfSpace.BaseSurface = new schema.IfcPlane();
+        halfSpace.BaseSurface.Position =
+          this.createIfcAxis2Placement3D(reprObject3D.matrix);
+        halfSpace.AgreementFlag = false;
+        return halfSpace;
+      }
+      else if (reprObject3D.builder instanceof IFCVoider)
       {
         const childObject = reprObject3D.children[2];
         const compMatrix = new THREE.Matrix4();
@@ -316,26 +339,49 @@ class IFCExporter
       else if (reprObject3D.builder instanceof BooleanOperator &&
               reprObject3D.children.length === 4)
       {
-        const builder = reprObject3D.builder;
-        const first = reprObject3D.children[2];
-        const second = reprObject3D.children[3];
-        const result = new schema.IfcBooleanClippingResult();
-        let operator;
-        switch (builder.operation)
+        const first = reprObject3D.children[2]; // IfcCurve extrusion
+        const second = reprObject3D.children[3]; // IfcPlane extrusion
+
+        if (ifcClassName === "IfcPolygonalBoundedHalfSpace")
         {
-          case "subtract": operator = "DIFFERENCE"; break;
-          case "union": operator = "UNION"; break;
-          case "intersection": operator = "INTERSECT"; break;
-          default: throw "Invalid operator";
+          const halfSpace = new schema.IfcPolygonalBoundedHalfSpace();
+          halfSpace.BaseSurface = new schema.IfcPlane();
+          halfSpace.BaseSurface.Position =
+            this.createIfcAxis2Placement3D(second.matrix);
+          halfSpace.AgreementFlag = true;
+          halfSpace.Position = this.createIfcAxis2Placement3D(first.matrix);
+
+          let boundaryProfile = first.children[2];
+          let profileGeometry = boundaryProfile.geometry;
+          let curvePoints =
+            profileGeometry.path.getPoints(profileGeometry.divisions);
+          halfSpace.PolygonalBoundary =
+            this.createIfcPolyline(curvePoints, boundaryProfile.matrix);
+          return halfSpace;
         }
-        const compMatrix = new THREE.Matrix4();
-        result.Operator = new Constant(operator);
-        compMatrix.copy(matrix).multiply(first.matrix);
-        result.FirstOperand = this.createIfcRepresentationItem(first, compMatrix);
-        compMatrix.copy(matrix).multiply(second.matrix);
-        result.SecondOperand = this.createIfcRepresentationItem(second, compMatrix);
-        ifcFile.add(this.createIfcStyledItem(reprObject3D.material, result));
-        return result;
+        else // IfcBooleanResult
+        {
+          const builder = reprObject3D.builder;
+          const result = builder.operation === "subtract" ?
+            new schema.IfcBooleanClippingResult() :
+            new schema.IfcBooleanResult();
+          let operator;
+          switch (builder.operation)
+          {
+            case "subtract": operator = "DIFFERENCE"; break;
+            case "union": operator = "UNION"; break;
+            case "intersection": operator = "INTERSECT"; break;
+            default: throw "Invalid operator";
+          }
+          const compMatrix = new THREE.Matrix4();
+          result.Operator = new Constant(operator);
+          compMatrix.copy(matrix).multiply(first.matrix);
+          result.FirstOperand = this.createIfcRepresentationItem(first, compMatrix);
+          compMatrix.copy(matrix).multiply(second.matrix);
+          result.SecondOperand = this.createIfcRepresentationItem(second, compMatrix);
+          ifcFile.add(this.createIfcStyledItem(reprObject3D.material, result));
+          return result;
+        }
       }
       else if (reprObject3D.builder instanceof Extruder) // export as IfcExtrudedAreaSolid
       {
@@ -440,15 +486,43 @@ class IFCExporter
     let profile = null;
     const schema = this.schema;
     const builder = profileObject3D.builder;
+    const profileName = profileObject3D.userData.IFC?.Name || "";
 
-    if (builder instanceof RectangleBuilder) // IfcRectangleProfileDef
+    if (builder instanceof RectangleHollowBuilder) // IfcRectangleHollowProfileDef
     {
-      profile = new schema.IfcRectangleProfileDef;
+      profile = new schema.IfcRectangleHollowProfileDef();
       profile.ProfileType = new Constant("AREA");
-      profile.ProfileName = '';
+      profile.ProfileName = profileName;
       profile.Position = this.createIfcAxis2Placement2D(profileObject3D.matrix);
       profile.XDim = builder.width;
       profile.YDim = builder.height;
+      profile.WallThickness = builder.wallThickness;
+    }
+    else if (builder instanceof RectangleBuilder) // IfcRectangleProfileDef
+    {
+      profile = new schema.IfcRectangleProfileDef();
+      profile.ProfileType = new Constant("AREA");
+      profile.ProfileName = profileName;
+      profile.Position = this.createIfcAxis2Placement2D(profileObject3D.matrix);
+      profile.XDim = builder.width;
+      profile.YDim = builder.height;
+    }
+    else if (builder instanceof CircleHollowBuilder) // IfcCircleHollowProfileDef
+    {
+      profile = new schema.IfcCircleHollowProfileDef();
+      profile.ProfileType = new Constant("AREA");
+      profile.ProfileName = profileName;
+      profile.Position = this.createIfcAxis2Placement2D(profileObject3D.matrix);
+      profile.Radius = builder.radius;
+      profile.WallThickness = builder.wallThickness;
+    }
+    else if (builder instanceof CircleBuilder) // IfcCircleProfileDef
+    {
+      profile = new schema.IfcCircleProfileDef();
+      profile.ProfileType = new Constant("AREA");
+      profile.ProfileName = profileName;
+      profile.Position = this.createIfcAxis2Placement2D(profileObject3D.matrix);
+      profile.Radius = builder.radius;
     }
     else // IfcArbitraryCloseProfileDef
     {
@@ -464,30 +538,31 @@ class IFCExporter
         profile = new schema.IfcArbitraryProfileDefWithVoids();
       }
       profile.ProfileType = new Constant("AREA");
-      profile.ProfileName = '';
-
-      const createPolyline = (points) =>
-      {
-        const polyline = new schema.IfcPolyline();
-        polyline.Points = [];
-        const vector = this._vector;
-        for (let point of points)
-        {
-          vector.set(point.x, point.y, 0).applyMatrix4(profileObject3D.matrix);
-          polyline.Points.push(this.createIfcCartesianPoint(vector, 2));
-        }
-        return polyline;
-      };
-
+      profile.ProfileName = profileName;
       let points = path.getPoints(profileGeometry.divisions);
-      profile.OuterCurve = createPolyline(points);
+      profile.OuterCurve = this.createIfcPolyline(points, profileObject3D.matrix);
       profile.InnerCurves = [];
       for (let pointsHole of pointsHoles)
       {
-        profile.InnerCurves.push(createPolyline(pointsHole));
+        profile.InnerCurves.push(this.createIfcPolyline(pointsHole, profileObject3D.matrix));
       }
     }
     return profile;
+  }
+
+  createIfcPolyline(points, matrix)
+  {
+    const schema = this.schema;
+    const polyline = new schema.IfcPolyline();
+    polyline.Points = [];
+    const vector = this._vector;
+    for (let point of points)
+    {
+      vector.set(point.x, point.y, 0);
+      if (matrix) vector.applyMatrix4(matrix);
+      polyline.Points.push(this.createIfcCartesianPoint(vector, 2));
+    }
+    return polyline;
   }
 
   createIfcCartesianTransformationOperator3D(matrix)
@@ -595,13 +670,31 @@ class IFCExporter
       ifcPset.HasProperties = [];
       for (let name in properties)
       {
-        if (name === "ifcClassName") continue;
+        if (name === "ifcClassName" ||
+            name === "GlobalId" ||
+            name === "Name") continue;
         let value = properties[name];
-        if (value)
+        if (value !== undefined && value !== null)
         {
           let sv = new schema.IfcPropertySingleValue();
           sv.Name = name;
-          sv.NominalValue = value;
+          let boxedValue;
+          if (typeof value === "number")
+          {
+            boxedValue = new schema.IfcReal();
+            boxedValue.Value = value;
+          }
+          else if (typeof value === "boolean")
+          {
+            boxedValue = new schema.IfcBoolean();
+            boxedValue.Value = value;
+          }
+          else
+          {
+            boxedValue = new schema.IfcLabel();
+            boxedValue.Value = String(value);
+          }
+          sv.NominalValue = boxedValue;
           ifcPset.HasProperties.push(sv);
         }
       }
@@ -695,7 +788,7 @@ class IFCExporter
     return parent ? this.getIfcEntity(parent) : null;
   }
 
-  copyProperties(ifcData, entity)
+  setIfcData(ifcData, entity)
   {
     const attributes = Object.getOwnPropertyNames(entity)
           .filter(name => !name.startsWith("_"));
@@ -703,7 +796,18 @@ class IFCExporter
     {
       let value = ifcData[attribute];
       let type = typeof value;
-      if (type === "string" || type === "number" || type === "boolean")
+      if (type === "string")
+      {
+        if (value.startsWith(".") && value.endsWith("."))
+        {
+          entity[attribute] = new Constant(value.substring(1, value.length - 1));
+        }
+        else
+        {
+          entity[attribute] = value;
+        }
+      }
+      else if (type === "number" || type === "boolean")
       {
         entity[attribute] = value;
       }

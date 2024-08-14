@@ -48,6 +48,9 @@ class AddObjectTool extends Tool
 
     switch (objectType)
     {
+      case "Object3D":
+        object = new THREE.Object3D();
+        break;
       case "Group":
         object = new THREE.Group();
         break;

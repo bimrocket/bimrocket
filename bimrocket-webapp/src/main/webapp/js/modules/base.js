@@ -384,6 +384,9 @@ export function load(application)
   const addHelicoidTool = new AddObjectTool(application,
     { name : "add_helicoid", label : "tool.add_helicoid.label",
       objectType : "Cord", builderClass : HelicoidBuilder });
+  const addObject3DTool = new AddObjectTool(application,
+    { name : "add_object3D", label : "tool.add_object3D.label",
+      objectType : "Object3D" });
   const addGroupTool = new AddObjectTool(application,
     { name : "add_group", label : "tool.add_group.label",
       objectType : "Group" });
@@ -510,6 +513,7 @@ export function load(application)
   application.addTool(inspectGeometryTool);
   application.addTool(resetMatrixTool);
   application.addTool(smoothEdgesTool);
+  application.addTool(addObject3DTool);
   application.addTool(addGroupTool);
   application.addTool(addBoxTool);
   application.addTool(addCylinderTool);
@@ -646,6 +650,7 @@ export function load(application)
   addLightMenu.addMenuItem(addDirectionalLightTool);
   addLightMenu.addMenuItem(addPointLightTool);
   addLightMenu.addMenuItem(addSpotLightTool);
+  addMenu.addMenuItem(addObject3DTool);
   addMenu.addMenuItem(addGroupTool);
   addMenu.addMenuItem(clonerTool);
   addMenu.addMenuItem(addText2DTool);

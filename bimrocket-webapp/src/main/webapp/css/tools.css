@@ -271,9 +271,14 @@
   color: #404000;
 }
 
-.bim_inspector_panel .tree li.inverse
+.bim_inspector_panel .tree li.enumeration
 {
-  background-image: url(images/inspector/array.svg);
+  background-image: url(images/inspector/enumeration.svg);
+}
+
+.bim_inspector_panel .tree li.select
+{
+  background-image: url(images/inspector/select.svg);
 }
 
 .bim_inspector_panel .tree li.inverse > a

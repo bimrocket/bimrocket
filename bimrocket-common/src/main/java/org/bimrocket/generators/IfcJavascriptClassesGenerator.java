@@ -38,10 +38,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import org.bimrocket.express.ExpressAttribute;
+import org.bimrocket.express.ExpressCollection;
 import org.bimrocket.express.ExpressDefinedType;
 import org.bimrocket.express.ExpressEntity;
+import org.bimrocket.express.ExpressEnumeration;
 import org.bimrocket.express.ExpressInverseAttribute;
+import org.bimrocket.express.ExpressNamedType;
+import org.bimrocket.express.ExpressPrimitive;
 import org.bimrocket.express.ExpressSchema;
+import org.bimrocket.express.ExpressSelect;
 import org.bimrocket.express.ExpressType;
 import org.bimrocket.express.io.ExpressLoader;
 
@@ -90,6 +95,24 @@ public class IfcJavascriptClassesGenerator
       {
         writeDefinedType(definedType);
       }
+      writer.println();
+
+      List<ExpressSelect> selects =
+        schema.getNamedTypes(ExpressSelect.class);
+      for (ExpressSelect select : selects)
+      {
+        writeSelect(select);
+      }
+      writer.println();
+
+
+      List<ExpressEnumeration> enumerations =
+        schema.getNamedTypes(ExpressEnumeration.class);
+      for (ExpressEnumeration enumeration : enumerations)
+      {
+        writeEnumeration(enumeration);
+      }
+      writer.println();
 
       writeFooter();
     }
@@ -117,15 +140,36 @@ public class IfcJavascriptClassesGenerator
     writer.println("class SchemaBase");
     writer.println("{");
     writer.println("  static schemaName = \"" + schemaVersion + "\";");
-    writer.println("  static schema = null;");
-    writer.println();
-    writer.println("  _id = null;");
+    writer.println("  static get schema()");
+    writer.println("  {");
+    writer.println("    return IFC.SCHEMAS[this.schemaName];");
+    writer.println("  }");
     writer.println("};");
     writer.println();
 
     writer.println("class Entity extends SchemaBase");
     writer.println("{");
     writer.println("  static isEntity = true;");
+    writer.println();
+    writer.println("  _id = null;");
+    writer.println("};");
+    writer.println();
+
+    writer.println("class DefinedType extends SchemaBase");
+    writer.println("{");
+    writer.println("  static isDefinedType = true;");
+    writer.println("};");
+    writer.println();
+
+    writer.println("class Select extends SchemaBase");
+    writer.println("{");
+    writer.println("  static isSelect = true;");
+    writer.println("};");
+    writer.println();
+
+    writer.println("class Enumeration extends SchemaBase");
+    writer.println("{");
+    writer.println("  static isEnumeration = true;");
     writer.println("};");
     writer.println();
   }
@@ -157,8 +201,10 @@ public class IfcJavascriptClassesGenerator
     {
       for (ExpressAttribute attribute : attributes)
       {
-        writer.print("  " + attribute.getName() + " = null; // ");
-        writer.println(attribute.getType());
+        writer.print("  static " + attribute.getName() + " = ");
+        writeType(attribute.getType());
+        writer.println(";");
+        writer.println("  " + attribute.getName() + " = null;");
       }
     }
 
@@ -168,10 +214,13 @@ public class IfcJavascriptClassesGenerator
     {
       for (ExpressInverseAttribute inverseAttribute : inverseAttributes)
       {
-        writer.print("  _" + inverseAttribute.getName() + " = null; // ");
-        writer.print(inverseAttribute.getType());
+        writer.print("  static _" + inverseAttribute.getName() + " = ");
+        writeType(inverseAttribute.getType());
+        writer.print("; // ");
         writer.println(" FOR " + inverseAttribute.getForAttribute());
+        writer.println("  _" + inverseAttribute.getName() + " = null;");
       }
+      writer.println();
     }
 
     writer.println("};");
@@ -184,12 +233,77 @@ public class IfcJavascriptClassesGenerator
   {
     ExpressType definition = type.getDefinition();
 
-    writer.println("class " + type.getName() + " extends SchemaBase");
+    writer.println("class " + type.getName() + " extends DefinedType");
     writer.println("{");
-    writer.println("  Value = null; // " + definition);
+    writer.print("  static Value = ");
+    writeType(definition);
+    writer.println(";");
+    writer.println("  Value = null;");
     writer.println("};");
     writer.println("registerIfcClass(" + type.getName() + ");");
     writer.println();
+  }
+
+  protected void writeSelect(ExpressSelect type)
+  {
+    writer.println("class " + type.getName() + " extends Select");
+    writer.println("{");
+    List<ExpressNamedType> options = type.getOptions();
+    writer.print("  static Options = [");
+    for (int i = 0; i < options.size(); i++)
+    {
+      if (i > 0) writer.print(", ");
+      writer.print('"' + options.get(i).getName() + '"');
+    }
+    writer.println("];");
+    writer.println("};");
+    writer.println("registerIfcClass(" + type.getName() + ");");
+    writer.println();
+  }
+
+  protected void writeEnumeration(ExpressEnumeration type)
+  {
+    writer.println("class " + type.getName() + " extends Enumeration");
+    writer.println("{");
+    List<String> values = type.getValues();
+    writer.print("  static Values = [");
+    for (int i = 0; i < values.size(); i++)
+    {
+      if (i > 0) writer.print(", ");
+      writer.print('"' + values.get(i) + '"');
+    }
+    writer.println("];");
+    writer.println("};");
+    writer.println("registerIfcClass(" + type.getName() + ");");
+    writer.println();
+  }
+
+  protected void writeType(ExpressType type)
+  {
+    if (type instanceof ExpressNamedType)
+    {
+      ExpressNamedType namedType = (ExpressNamedType)type;
+      writer.print('"' + namedType.getName() + '"');
+    }
+    else if (type instanceof ExpressCollection)
+    {
+      ExpressCollection col = (ExpressCollection)type;
+      writer.print("[");
+      writer.print('"' + col.getCollectionType() + '"');
+      writer.print(", ");
+      writeType(col.getElementType());
+      writer.print(", ");
+      writer.print(col.getMinOccurrences());
+      writer.print(", ");
+      writer.print(col.getMaxOccurrences());
+      writer.print("]");
+    }
+    else if (type instanceof ExpressPrimitive)
+    {
+      ExpressPrimitive primitive = (ExpressPrimitive)type;
+      String primType = primitive.getName();
+      writer.write('"' + primType + '"');
+    }
   }
 
   public static void main(String[] args) throws IOException

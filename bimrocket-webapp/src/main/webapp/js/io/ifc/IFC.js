@@ -23,8 +23,6 @@ function registerIfcClass(ifcClass)
     schema = {};
     IFC.SCHEMAS[schemaName] = schema;
   }
-  ifcClass.schema = schema;
-
   const ifcClassName = ifcClass.name;
   schema[ifcClassName] = ifcClass;
   schema[ifcClassName.toUpperCase()] = ifcClass;

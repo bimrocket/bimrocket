@@ -51,6 +51,16 @@ class BIMInspectorPanel extends Panel
       "bim_inspector_show", "button.view",
       () => this.viewEntity(this.ifcEntity));
 
+    this.definitionButton = Controls.addButton(this.entityPanelElem,
+      "bim_inspector_definition", "bim|button.definition",
+      () => {
+        if (this.ifcEntity)
+        {
+          this.populateDefinitionTree(this.ifcEntity.constructor);
+          this.tabbedPane.showTab("definition");
+        }
+      });
+
     this.referencesButton = Controls.addButton(this.entityPanelElem,
       "bim_inspector_references", "bim|button.references",
       () => this.findReferencesTo(this.ifcEntity));
@@ -61,9 +71,9 @@ class BIMInspectorPanel extends Panel
 
     this.entityTree = new Tree(this.entityPanelElem);
 
-    this.inheritancePanelElem =
-      this.tabbedPane.addTab("inheritance", "bim|tab.inheritance");
-    this.inheritanceTree = new Tree(this.inheritancePanelElem);
+    this.definitionPanelElem =
+      this.tabbedPane.addTab("definition", "bim|tab.definition");
+    this.definitionTree = new Tree(this.definitionPanelElem);
 
     this.referencesPanelElem =
       this.tabbedPane.addTab("references", "bim|tab.references");
@@ -140,13 +150,8 @@ class BIMInspectorPanel extends Panel
       I18N.set(this.helpElem, "textContent", "");
       application.i18n.update(this.helpElem);
       this.populateEntityTree(ifcRoot);
-      this.populateInheritance(ifcRoot);
       this.ifcEntity = ifcRoot;
-      const tabName = this.tabbedPane.getVisibleTabName();
-      if (tabName !== "entity" && tabName !== "inheritance")
-      {
-        this.tabbedPane.showTab("entity");
-      }
+      this.tabbedPane.showTab("entity");
       this.helpElem.style.display = "none";
     }
     else
@@ -158,9 +163,10 @@ class BIMInspectorPanel extends Panel
       this.typeElem.textContent = "";
       this.backButton.disabled = true;
       this.viewButton.disabled = true;
+      this.definitionButton.disabled = true;
       this.referencesButton.disabled = true;
       this.entityTree.clear();
-      this.inheritanceTree.clear();
+      this.definitionTree.clear();
       this.referencesTree.clear();
     }
 
@@ -226,6 +232,7 @@ class BIMInspectorPanel extends Panel
 
     this.backButton.disabled = this.returnStack.length === 0;
     this.viewButton.disabled = ifcEntity.GlobalId === undefined;
+    this.definitionButton.disabled = false;
     this.referencesButton.disabled = false;
 
     let id = this.getEntityIdSuffix(ifcEntity);
@@ -260,6 +267,16 @@ class BIMInspectorPanel extends Panel
 
   populateProperty(node, name, value, prevIfcData, recursive)
   {
+    let isInverse;
+    if (name.startsWith("_"))
+    {
+      isInverse = true;
+      name = name.substring(1);
+    }
+    else
+    {
+      isInverse = false;
+    }
     if (typeof value === "string")
     {
       node.addNode(name + ": " + value, null, "string");
@@ -283,7 +300,8 @@ class BIMInspectorPanel extends Panel
     else if (value instanceof Array)
     {
       const array = value;
-      let className = name.startsWith("_") ? "inverse" : "array";
+      let className = "array";
+      if (isInverse) className += " inverse";
       let arrayNode = node.addNode(name +
         ": [ " + value.length + " ]", null, className);
       this.populateArray(arrayNode, array, 0, recursive);
@@ -308,48 +326,163 @@ class BIMInspectorPanel extends Panel
     }
   }
 
-  populateInheritance(ifcEntity)
+  populateDefinitionTree(ifcClass)
   {
-    if (ifcEntity === this.ifcEntity) return;
+    const tree = this.definitionTree;
+    tree.clear();
 
-    const schema = ifcEntity.constructor.schema;
-    let ifcClass = Object.getPrototypeOf(ifcEntity);
+    if (!ifcClass) return;
+
+    const schema = ifcClass.schema;
     let hierarchy = [];
 
-    while (ifcClass.constructor.name !== "Entity")
+    while (ifcClass && ifcClass.name !== "Entity")
     {
-      hierarchy.push(ifcClass.constructor.name);
-      ifcClass = Object.getPrototypeOf(ifcClass);
+      hierarchy.push(ifcClass);
+      ifcClass = ifcClass.__proto__; // parent class
     }
     hierarchy.reverse();
 
-    const tree = this.inheritanceTree;
-    tree.clear();
-    let propCount = 0;
     let attributeCount = 1;
-    for (let className of hierarchy)
+    for (let superIfcClass of hierarchy)
     {
-      let node = tree.addNode(className, null, "object");
-      let instance = new schema[className];
-      let props = Object.getOwnPropertyNames(instance);
-      for (let i = propCount; i < props.length; i++)
+      let node = tree.addNode(superIfcClass.name,
+        event => this.populateDefinitionTree(superIfcClass), "object");
+      let attributeNames = Object.keys(superIfcClass);
+      for (let attributeName of attributeNames)
       {
-        let attributeName = props[i];
-        if (attributeName === "_id") continue;
+        let attributeType = superIfcClass[attributeName];
+        attributeCount = this.populateClassAttribute(node, schema,
+          attributeName, attributeType, attributeCount);
+      }
+      node.expand();
+    }
+  }
 
-        if (attributeName.startsWith("_")) // inverse
+  populateClassAttribute(node, schema,
+    attributeName, attributeType, attributeCount)
+  {
+    const isCollection = attributeType instanceof Array;
+    const isInverse = attributeName.startsWith("_");
+    let className = isInverse ? "inverse" : "";
+    let attributeField = "";
+    if (isInverse)
+    {
+      attributeField = attributeName.substring(1) + ": ";
+    }
+    else if (attributeCount > 0)
+    {
+      attributeField = attributeCount + ". " + attributeName + ": ";
+      attributeCount++;
+    }
+
+    if (isCollection)
+    {
+      const colType = attributeType[0];
+      const ifcClassName = attributeType[1];
+      const minOccurs = attributeType[2];
+      const maxOccurs = attributeType[3] === 0 ? "?" : attributeType[3];
+
+      className += " array";
+      let colNode = node.addNode(attributeField +
+        colType + " [ " + minOccurs + " : " + maxOccurs + " ]", null, className);
+      if (schema[ifcClassName])
+      {
+        this.populateClassAttribute(colNode, schema, "", ifcClassName, 0);
+      }
+      else
+      {
+        className += this.getBasicTypeClassName(ifcClassName);
+        colNode.addNode(ifcClassName, null, className);
+      }
+    }
+    else
+    {
+      const attributeIfcClass = schema[attributeType];
+      if (!attributeIfcClass) // basic type
+      {
+        className += this.getBasicTypeClassName(attributeType);
+        node.addNode(attributeField + attributeType, null, className);
+      }
+      else if (attributeIfcClass.isEntity)
+      {
+        className += "object";
+        const ifcClassName = attributeIfcClass.name;
+        node.addNode(attributeField + ifcClassName,
+          event => this.populateDefinitionTree(attributeIfcClass), className);
+      }
+      else if (attributeIfcClass.isSelect)
+      {
+        className += "select";
+        const ifcClassName = attributeIfcClass.name;
+        const selectNode = node.addNode(attributeField + ifcClassName,
+          null, className);
+        const options = attributeIfcClass.Options;
+        for (let option of options)
         {
-          node.addNode(attributeName, null, "inverse");
+          this.populateClassAttribute(selectNode, schema, "", option, 0);
+        }
+      }
+      else if (attributeIfcClass.isEnumeration)
+      {
+        className += "enumeration";
+        const ifcClassName = attributeIfcClass.name;
+        const enumNode = node.addNode(attributeField + ifcClassName,
+          null, className);
+        let values = attributeIfcClass.Values;
+        for (let value of values)
+        {
+          enumNode.addNode(value, null, "constant");
+        }
+      }
+      else // DefinedType
+      {
+        const ifcClassName = attributeIfcClass.name;
+        let defType = attributeIfcClass.Value;
+        if (defType instanceof Array)
+        {
+          className += "array";
+          const defNode = node.addNode(attributeField + ifcClassName,
+            null, className);
+          this.populateClassAttribute(defNode, schema, "", defType, 0);
         }
         else
         {
-          node.addNode(attributeCount + ": " + attributeName);
-          attributeCount++;
+          let ifcClass = schema[defType];
+          while (ifcClass && ifcClass.isDefinedType)
+          {
+            defType = ifcClass.Value;
+            ifcClass = typeof defType === "string" ? schema[defType] : null;
+          }
+          className += this.getBasicTypeClassName(defType);
+          node.addNode(attributeField + ifcClassName +
+            " (" + defType + ")", null, className);
         }
       }
-      node.expand();
-      propCount = props.length;
     }
+    return attributeCount;
+  }
+
+  getBasicTypeClassName(basicType)
+  {
+    let className;
+    switch (basicType)
+    {
+      case "INTEGER":
+      case "REAL":
+      case "NUMBER":
+        className = "number";
+        break;
+
+      case "BOOLEAN":
+      case "LOGICAL":
+        className = "boolean";
+        break;
+
+      default:
+        className = "string";
+    }
+    return className;
   }
 
   goBack()
@@ -359,7 +492,6 @@ class BIMInspectorPanel extends Panel
       let ifcEntity = this.returnStack.pop();
 
       this.populateEntityTree(ifcEntity);
-      this.populateInheritance(ifcEntity);
       this.ifcEntity = ifcEntity;
     }
   }
@@ -403,7 +535,6 @@ class BIMInspectorPanel extends Panel
     this.returnStack.push(this.ifcEntity);
 
     this.populateEntityTree(ifcEntity);
-    this.populateInheritance(ifcEntity);
     this.ifcEntity = ifcEntity;
     this.tabbedPane.showTab("entity");
   }

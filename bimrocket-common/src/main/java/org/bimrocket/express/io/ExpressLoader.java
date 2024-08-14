@@ -145,6 +145,19 @@ public class ExpressLoader
           solveReferences((ExpressCollection)attributeType);
         }
       }
+      for (ExpressInverseAttribute attribute : entity.getInverseAttributes())
+      {
+        ExpressType attributeType = attribute.getType();
+        if (attributeType instanceof ExpressNamedType)
+        {
+          attribute.setType(
+            getRealNamedType((ExpressNamedType)attributeType));
+        }
+        else if (attributeType instanceof ExpressCollection)
+        {
+          solveReferences((ExpressCollection)attributeType);
+        }
+      }
     }
     else if (namedType instanceof ExpressDefinedType)
     {

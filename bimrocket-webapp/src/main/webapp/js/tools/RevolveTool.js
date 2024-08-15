@@ -354,14 +354,14 @@ class RevolveTool extends Tool
     else if (object instanceof Profile
                && object.parent instanceof Solid
                && object.parent.builder instanceof Revolver
-               && object.parent.children.length === 3)
+               && object.parent.getComponentCount() === 1)
     {
       solid = object.parent;
     }
     else if (object instanceof Solid
              && object.builder instanceof Revolver
-             && object.children.length === 3
-             && object.children[2] instanceof Profile)
+             && object.getComponentCount() === 1
+             && object.getComponent(0) instanceof Profile)
     {
       solid = object;
     }

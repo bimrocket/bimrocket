@@ -49,12 +49,7 @@ class OnTerrainExtruder extends SweptSolidBuilder
     }
 
     // traverse children skiping faces & edges objects
-    const children = object.children;
-    for (let i = 2; i < children.length; i++)
-    {
-      let child = children[i];
-      action(child);
-    }
+    object.forEachComponent(action);
   }
 
   performBuild(solid)

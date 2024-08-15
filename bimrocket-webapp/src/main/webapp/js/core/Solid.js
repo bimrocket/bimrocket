@@ -179,6 +179,30 @@ class Solid extends THREE.Object3D
     }
   }
 
+  hasComponents()
+  {
+    return this.children.length > 2;
+  }
+
+  getComponentCount()
+  {
+    return this.children.length - 2;
+  }
+
+  getComponent(index)
+  {
+    return this.children[index + 2];
+  }
+
+  forEachComponent(fn)
+  {
+    const children = this.children;
+    for (let i = 2; i < children.length; i++)
+    {
+      fn(children[i], i - 2);
+    }
+  }
+
   union(solids)
   {
     return this.booleanOperation("union", solids);

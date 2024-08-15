@@ -338,7 +338,7 @@ class IFCExporter
       }
       else if (reprObject3D.builder instanceof IFCVoider)
       {
-        const childObject = reprObject3D.children[2];
+        const childObject = reprObject3D.getComponent(0);
         const compMatrix = new THREE.Matrix4();
         compMatrix.copy(matrix).multiply(childObject.matrix);
         const item = this.createIfcRepresentationItem(childObject, compMatrix);
@@ -346,10 +346,10 @@ class IFCExporter
         return item;
       }
       else if (reprObject3D.builder instanceof BooleanOperator &&
-              reprObject3D.children.length === 4)
+              reprObject3D.getComponentCount() === 2)
       {
-        const first = reprObject3D.children[2]; // IfcCurve extrusion
-        const second = reprObject3D.children[3]; // IfcPlane extrusion
+        const first = reprObject3D.getComponent(0); // IfcCurve extrusion
+        const second = reprObject3D.getComponent(1); // IfcPlane extrusion
 
         if (ifcClassName === "IfcPolygonalBoundedHalfSpace")
         {
@@ -360,7 +360,7 @@ class IFCExporter
           halfSpace.AgreementFlag = true;
           halfSpace.Position = this.createIfcAxis2Placement3D(first.matrix);
 
-          let boundaryProfile = first.children[2];
+          let boundaryProfile = first.getComponent(0);
           let profileGeometry = boundaryProfile.geometry;
           let curvePoints =
             profileGeometry.path.getPoints(profileGeometry.divisions);
@@ -396,7 +396,7 @@ class IFCExporter
       {
         const extruder = reprObject3D.builder;
         const extrudedArea = new schema.IfcExtrudedAreaSolid();
-        const profileObject = reprObject3D.children[2];
+        const profileObject = reprObject3D.getComponent(0);
         extrudedArea.SweptArea = this.createIfcProfile(profileObject);
         extrudedArea.Position = this.createIfcAxis2Placement3D(matrix);
         extrudedArea.ExtrudedDirection = this.createIfcDirection(extruder.direction);

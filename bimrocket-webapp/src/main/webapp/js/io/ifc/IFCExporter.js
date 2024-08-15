@@ -46,6 +46,10 @@ class IFCExporter
     this.ifcFile = new IFCFile();
     object._ifcFile = this.ifcFile;
 
+    const header = this.ifcFile.header;
+    header.filename = object.userData.IFC?.Name || "";
+    header.description = [object.userData.IFC?.Description || ""];
+
     IFC.initIfcObject(object, true);
 
     this.createIfcRepresentationContexts();
@@ -74,7 +78,12 @@ class IFCExporter
       const ifcFile = this.ifcFile;
       const ifcClassName = ifcData.ifcClassName;
       const ifcClass = schema[ifcClassName];
-      if (ifcClass.prototype instanceof schema.IfcRoot && ifcData.GlobalId)
+      if (!ifcClass)
+      {
+        console.warn(ifcClassName +
+          " entity not supported in the schema " + this.options.ifcSchema);
+      }
+      else if (ifcClass.prototype instanceof schema.IfcRoot && ifcData.GlobalId)
       {
         const entity = new ifcClass();
         this.setIfcData(ifcData, entity);

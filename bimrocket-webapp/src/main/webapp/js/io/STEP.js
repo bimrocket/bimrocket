@@ -11,6 +11,7 @@ class STEPParser
     this.schema = null; // classes map
     this.constantClass = null;
     this.undefinedValue = undefined;
+    this.header = null;
   }
 
   getSchemaTypes(schemaName)
@@ -20,6 +21,20 @@ class STEPParser
 
   setHeader(entity)
   {
+    if (!this.header) this.header = {};
+
+    if (entity instanceof FILE_DESCRIPTION)
+    {
+      this.header.fileDescription = entity;
+    }
+    else if (entity instanceof FILE_NAME)
+    {
+      this.header.fileName = entity;
+    }
+    else if (entity instanceof FILE_SCHEMA)
+    {
+      this.header.fileSchema = entity;
+    }
   }
 
   addEntity(entity, tag)
@@ -324,6 +339,26 @@ class STEPWriter
     this.entities = [];
     this.tagCount = 0;
     this.output = "";
+    this.header = {
+      fileDescription : new FILE_DESCRIPTION(),
+      fileName : new FILE_NAME(),
+      fileSchema : new FILE_SCHEMA()
+    };
+
+    // set default header values
+
+    const fileDescription = this.header.fileDescription;
+    fileDescription.Description = ["step"];
+    fileDescription.ImplementationLevel = "2;1";
+
+    const fileName = this.header.fileName;
+    fileName.Name = "step";
+    fileName.TimeStamp = new Date().toISOString();
+    fileName.Author = [""];
+    fileName.Organization = [""];
+    fileName.PreprocessorVersion = "BIMROCKET STEPWriter";
+    fileName.Authorization = "";
+    fileName.Other = "";
   }
 
   createEntityTag(entity) // called once per entity
@@ -373,15 +408,16 @@ class STEPWriter
 
   writeHeader()
   {
-    this.output += `ISO-10303-21;
-HEADER;
+    const header = this.header;
+    header.fileSchema.Schemas = [this.schemaName];
 
-FILE_DESCRIPTION(('step'),'2;1');
-FILE_NAME('step','',(''),(''),'Step','','');
-FILE_SCHEMA(('${this.schemaName}'));
-ENDSEC;
-
-`;
+    this.output += "ISO-10303-21;\nHEADER;\n\n";
+    this.writeObject(header.fileDescription);
+    this.output += ";\n";
+    this.writeObject(header.fileName);
+    this.output += ";\n";
+    this.writeObject(header.fileSchema);
+    this.output += ";\nENDSEC;\n\n";
   }
 
   writeData()
@@ -496,9 +532,20 @@ ENDSEC;
   }
 }
 
-/* STEP header elements */
+/* STEP header entities */
 
-class FILE_NAME
+class HEADER_ENTITY
+{
+  static isEntity = true;
+}
+
+class FILE_DESCRIPTION extends HEADER_ENTITY
+{
+  Description = null;
+  ImplementationLevel = null;
+};
+
+class FILE_NAME extends HEADER_ENTITY
 {
   Name = null;
   TimeStamp = null;
@@ -509,13 +556,7 @@ class FILE_NAME
   Other = null;
 };
 
-class FILE_DESCRIPTION
-{
-  Description = null;
-  ImplementationLevel = null;
-};
-
-class FILE_SCHEMA
+class FILE_SCHEMA extends HEADER_ENTITY
 {
   Schemas = null;
 };

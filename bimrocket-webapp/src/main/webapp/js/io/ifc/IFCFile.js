@@ -10,14 +10,19 @@ class IFCFile
 {
   constructor()
   {
-    this.filename = null;
-    this.description = null;
     this.schema = IFC.SCHEMAS[IFC.DEFAULT_SCHEMA_NAME];
     this.entitiesByGlobalId = new Map();
     this.entitiesByClass = new Map();
     this.products = [];
     this.typeProducts = [];
     this.relationships = [];
+    this.header = {
+      filename : "",
+      description : [""],
+      author : [""],
+      organization : [""],
+      timeStamp : null
+    };
   }
 
   getSchemaName()
@@ -64,13 +69,16 @@ class IFCFile
 
     const add = (entity, name, element) =>
     {
-      if (entity[name] === null)
+      if (entity)
       {
-        entity[name] = [];
-      }
-      if (entity[name])
-      {
-        entity[name].push(element);
+        if (entity[name] === null)
+        {
+          entity[name] = [];
+        }
+        if (entity[name])
+        {
+          entity[name].push(element);
+        }
       }
     };
 

@@ -35,6 +35,11 @@ class IFCSTEPExporter extends IFCExporter
     writer.schemaName = IFC.DEFAULT_SCHEMA_NAME;
     writer.constantClass = Constant;
 
+    writer.header.fileName.Name = ifcFile.header.filename || "model";
+    writer.header.fileName.Author = ifcFile.header.author || [""];
+    writer.header.fileName.Organization = ifcFile.header.organization || [""];
+    writer.header.fileDescription.Description = ifcFile.header.description || ["model"];
+
     let entry;
 
     // IfcRoots first (and dependent entities)

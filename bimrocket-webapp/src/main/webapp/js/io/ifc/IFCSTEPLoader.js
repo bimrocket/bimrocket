@@ -52,11 +52,14 @@ class IFCSTEPLoader extends IFCLoader
       {
         if (entity instanceof HEADER_SCHEMA.FILE_NAME)
         {
-          ifcFile.filename = entity;
+          ifcFile.header.filename = entity.Name;
+          ifcFile.header.author = entity.Author;
+          ifcFile.header.organization = entity.Organization;
+          ifcFile.header.timeStamp = entity.TimeStamp;
         }
         else if (entity instanceof HEADER_SCHEMA.FILE_DESCRIPTION)
         {
-          ifcFile.description = entity;
+          ifcFile.header.description = entity.Description;
         }
       }
 

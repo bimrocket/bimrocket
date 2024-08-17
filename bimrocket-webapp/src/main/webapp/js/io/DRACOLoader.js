@@ -6,7 +6,7 @@ import {
 	Loader,
 	LinearSRGBColorSpace,
 	SRGBColorSpace
-} from '../lib/three.module.js'; // bimrocket
+} from 'three';
 
 const _taskCache = new WeakMap();
 

@@ -13,7 +13,7 @@ import { SolidOptimizer } from "../core/SolidOptimizer.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Formula } from "../formula/Formula.js";
 import { Controller } from "../controllers/Controller.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BRFLoader extends THREE.Loader
 {

@@ -16,7 +16,7 @@ import { CircleHollowBuilder } from "../../builders/CircleHollowBuilder.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import { Cloner } from "../../builders/Cloner.js";
 import { IFCVoider } from "../../builders/IFCVoider.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "three";
 
 class IFCExporter
 {

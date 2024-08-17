@@ -32,7 +32,7 @@ import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
 import { ObjectUtils } from "../../utils/ObjectUtils.js";
 import { BIMUtils } from "../../utils/BIMUtils.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "three";
 
 class IFCLoader extends THREE.Loader
 {

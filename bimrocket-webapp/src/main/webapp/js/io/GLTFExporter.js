@@ -21,7 +21,7 @@ import {
 	Scene,
 	Source,
 	Vector3
-} from '../lib/three.module.js';
+} from 'three';
 
 
 class GLTFExporter {

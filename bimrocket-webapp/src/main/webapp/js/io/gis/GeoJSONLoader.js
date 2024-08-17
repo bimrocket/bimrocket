@@ -7,7 +7,7 @@
 import { GISLoader } from "./GISLoader.js";
 import { Solid } from "../../core/Solid.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "three";
 
 class GeoJSONLoader extends GISLoader
 {

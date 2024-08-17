@@ -64,7 +64,7 @@ import {
 	VectorKeyframeTrack,
 	SRGBColorSpace,
 	InstancedBufferAttribute
-} from '../lib/three.module.js'; // bimrocket
+} from 'three';
 import { toTrianglesDrawMode } from '../utils/BufferGeometryUtils.js'; // bimrocket
 
 import { DRACOLoader } from './DRACOLoader.js'; // bimrocket

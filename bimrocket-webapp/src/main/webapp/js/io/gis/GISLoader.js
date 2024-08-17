@@ -8,7 +8,7 @@ import { Profile } from "../../core/Profile.js";
 import { ProfileGeometry } from "../../core/ProfileGeometry.js";
 import { Cord } from "../../core/Cord.js";
 import { CordGeometry } from "../../core/CordGeometry.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "three";
 
 class GISLoader extends THREE.Loader
 {

@@ -37,7 +37,7 @@ import {
 	Vector3,
 	VectorKeyframeTrack,
 	SRGBColorSpace
-} from '../lib/three.module.js'; // bimrocket: change path
+} from 'three';
 import { TGALoader } from './TGALoader.js'; // bimrocket: change path
 
 class ColladaLoader extends Loader {

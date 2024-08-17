@@ -75,7 +75,7 @@ class Panel
 
     this._position = null;
     this.position = "left";
-    this.opacity = application.panelOpacity;
+    this.opacity = application.setup.panelOpacity;
   }
 
   get title()
@@ -250,9 +250,10 @@ class Panel
 
 class PanelManager
 {
-  constructor(container)
+  constructor(application)
   {
-    this.container = container || document.body;
+    this.application = application;
+    this.container = application.container || document.body;
     this.margin = 0;
     this.headerHeight = Panel.HEADER_HEIGHT;
     this.panels = [];
@@ -542,13 +543,15 @@ class PanelResizer
 
   restoreWidth()
   {
-    let value = window.localStorage.getItem("bimrocket.resizer." + this.side);
+    const application = this.panelManager.application;
+    let value = application.setup.getItem("resizer." + this.side);
     this.width = parseInt(value) || 250;
   }
 
   saveWidth()
   {
-    window.localStorage.setItem("bimrocket.resizer." + this.side, this.width);
+    const application = this.panelManager.application;
+    application.setup.setItem("resizer." + this.side, this.width);
   }
 
   getCurrentWidth(event)

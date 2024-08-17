@@ -99,7 +99,7 @@ class OpenLocalTool extends Tool
               .setI18N(application.i18n).show();
           },
           manager : this.application.loadingManager,
-          units : application.units
+          units : application.setup.units
         };
         IOManager.load(intent); // async load
       };

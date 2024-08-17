@@ -81,9 +81,10 @@ class ChatGPTTool extends Tool
 
   init()
   {
+    const application = this.application;
     this.setup = null;
 
-    let setupString = window.localStorage.getItem(ChatGPTTool.STORAGE_KEY);
+    let setupString = application.setup.getItem(ChatGPTTool.STORAGE_KEY);
     if (setupString === null)
     {
       this.setup =
@@ -148,11 +149,12 @@ class ChatGPTTool extends Tool
 
   editSetup()
   {
-    const dialog = new ChatGPTDialog(this.application, this.setup);
+    const application = this.application;
+    const dialog = new ChatGPTDialog(application, this.setup);
     dialog.setSetup = setup =>
     {
       this.setup = setup;
-      window.localStorage.setItem(ChatGPTTool.STORAGE_KEY, JSON.stringify(setup));
+      application.setup.setItem(ChatGPTTool.STORAGE_KEY, JSON.stringify(setup));
     };
     dialog.show();
   }

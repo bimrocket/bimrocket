@@ -29,6 +29,7 @@ class OptionsTool extends Tool
   createPanel()
   {
     const application = this.application;
+    const setup = application.setup;
 
     this.panel = application.createPanel(this.label, "left", "panel_options");
     this.panel.bodyElem.classList.add("p_4");
@@ -58,10 +59,7 @@ class OptionsTool extends Tool
     this.languageSelect.parentElement.className = "option_block inline";
     this.languageSelect.addEventListener("change", () =>
     {
-      let userLanguage = this.languageSelect.value;
-      i18n.userLanguages = userLanguage;
-      i18n.updateTree(this.application.element);
-      window.localStorage.setItem("bimrocket.language", userLanguage);
+      setup.userLanguage = this.languageSelect.value;
     });
 
     // Units
@@ -70,7 +68,7 @@ class OptionsTool extends Tool
     this.unitsSelect.parentElement.className = "option_block inline";
 
     this.unitsSelect.addEventListener("change", () =>
-      application.units = this.unitsSelect.value);
+      setup.units = this.unitsSelect.value);
 
     // Decimals
     this.decimalsElem = Controls.addNumberField(uiOptionsPanel, "decimals",
@@ -79,7 +77,7 @@ class OptionsTool extends Tool
     this.decimalsElem.min = 0;
     this.decimalsElem.max = 15;
     this.decimalsElem.addEventListener("change", () =>
-      application.decimals = parseInt(this.decimalsElem.value));
+      setup.decimals = parseInt(this.decimalsElem.value));
 
     // Frame rate divisor
 
@@ -98,7 +96,7 @@ class OptionsTool extends Tool
     this.frdValue = document.createElement("span");
     this.frdValue.innerHTML = "";
     this.frdValue.id = "frd_value";
-    this.frdValue.textContent = application.frameRateDivisor;
+    this.frdValue.textContent = setup.frameRateDivisor;
     this.frdValue.style.marginLeft = "4px";
     frdValueDiv.appendChild(this.frdValue);
 
@@ -119,7 +117,7 @@ class OptionsTool extends Tool
       () => this.frdValue.textContent = this.frdRange.value, false);
 
     this.frdRange.addEventListener("change",
-      () => application.frameRateDivisor = parseInt(this.frdRange.value),
+      () => setup.frameRateDivisor = parseInt(this.frdRange.value),
       false);
 
     // Selection Paint mode
@@ -132,7 +130,7 @@ class OptionsTool extends Tool
 
     this.selPaintModeSelect.addEventListener("change", event =>
     {
-      application.selectionPaintMode = this.selPaintModeSelect.value;
+      setup.selectionPaintMode = this.selPaintModeSelect.value;
       application.updateSelection();
     });
 
@@ -141,21 +139,21 @@ class OptionsTool extends Tool
     this.deepSelCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "deep_sel", "label.show_deep_sel", false, "option_block");
     this.deepSelCheckBox.addEventListener("change", event =>
-      application.showDeepSelection = this.deepSelCheckBox.checked);
+      setup.showDeepSelection = this.deepSelCheckBox.checked);
 
     // Enable/disable local axes visualization
 
     this.localAxesCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "local_axes", "label.show_local_axes", false, "option_block");
     this.localAxesCheckBox.addEventListener("change", event =>
-      application.showLocalAxes = this.localAxesCheckBox.checked);
+      setup.showLocalAxes = this.localAxesCheckBox.checked);
 
     // Enable/disable shadows
 
     this.shadowsCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
       "shadows", "label.cast_shadows", false, "option_block");
     this.shadowsCheckBox.addEventListener("change", event =>
-      application.shadowsEnabled = this.shadowsCheckBox.checked);
+      setup.shadowsEnabled = this.shadowsCheckBox.checked);
 
     // Background color
 
@@ -170,13 +168,13 @@ class OptionsTool extends Tool
       if (this.backSelect.value === "solid")
       {
         this.backColorInput2.style.display = "none";
-        application.backgroundColor = this.backColorInput1.value;
+        setup.backgroundColor = this.backColorInput1.value;
       }
       else
       {
         this.backColorInput2.style.display = "";
-        application.backgroundColor1 = this.backColorInput1.value;
-        application.backgroundColor2 = this.backColorInput2.value;
+        setup.backgroundColor1 = this.backColorInput1.value;
+        setup.backgroundColor2 = this.backColorInput2.value;
       }
     }, false);
 
@@ -196,16 +194,16 @@ class OptionsTool extends Tool
     {
       if (this.backSelect.value === "solid")
       {
-        application.backgroundColor = this.backColorInput1.value;
+        setup.backgroundColor = this.backColorInput1.value;
       }
       else
       {
-        application.backgroundColor1 = this.backColorInput1.value;
+        setup.backgroundColor1 = this.backColorInput1.value;
       }
     }, false);
 
     this.backColorInput2.addEventListener("input", event =>
-      application.backgroundColor2 = this.backColorInput2.value, false);
+      setup.backgroundColor2 = this.backColorInput2.value, false);
 
     this.panelOpacityRange = Controls.addInputField(uiOptionsPanel,
       "range", "panelopac_range", "label.panel_opacity",
@@ -219,7 +217,7 @@ class OptionsTool extends Tool
     this.panelOpacityRange.style.marginRight = "auto";
 
     this.panelOpacityRange.addEventListener("input", () =>
-      application.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value),
+      setup.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value),
       false);
 
     this.loaderSelect = Controls.addSelectField(loaderOptionsPanel,
@@ -335,11 +333,12 @@ class OptionsTool extends Tool
     this.panel.visible = true;
 
     const application = this.application;
+    const setup = application.setup;
 
-    this.backColorInput1.value = application.backgroundColor1;
-    this.backColorInput2.value = application.backgroundColor2;
+    this.backColorInput1.value = setup.backgroundColor1;
+    this.backColorInput2.value = setup.backgroundColor2;
 
-    if (application.backgroundColor1 === application.backgroundColor2)
+    if (setup.backgroundColor1 === setup.backgroundColor2)
     {
       this.backSelect.value = "solid";
       this.backColorInput2.style.display = "none";
@@ -357,15 +356,15 @@ class OptionsTool extends Tool
     supportedLanguages = supportedLanguages.map(lang => [lang, intl.of(lang)]);
     Controls.setSelectOptions(this.languageSelect, supportedLanguages);
     this.languageSelect.value = userLanguage;
-    this.unitsSelect.value = application.units;
-    this.decimalsElem.value = application.decimals;
-    this.frdValue.textContent = application.frameRateDivisor;
-    this.frdRange.value = application.frameRateDivisor;
-    this.selPaintModeSelect.value = application.selectionPaintMode;
-    this.deepSelCheckBox.checked = application.showDeepSelection;
-    this.localAxesCheckBox.checked = application.showLocalAxes;
-    this.shadowsCheckBox.checked = application.shadowsEnabled;
-    this.panelOpacityRange.value = 100 * application.panelOpacity;
+    this.unitsSelect.value = setup.units;
+    this.decimalsElem.value = setup.decimals;
+    this.frdValue.textContent = setup.frameRateDivisor;
+    this.frdRange.value = setup.frameRateDivisor;
+    this.selPaintModeSelect.value = setup.selectionPaintMode;
+    this.deepSelCheckBox.checked = setup.showDeepSelection;
+    this.localAxesCheckBox.checked = setup.showLocalAxes;
+    this.shadowsCheckBox.checked = setup.shadowsEnabled;
+    this.panelOpacityRange.value = 100 * setup.panelOpacity;
 
     let loaders = [];
     let exporters = [];

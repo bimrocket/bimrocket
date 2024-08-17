@@ -93,7 +93,7 @@ class CloudExplorerTool extends Tool
           .setI18N(application.i18n).show();
       },
       manager : this.application.loadingManager,
-      units: this.application.units
+      units: this.application.setup.units
     };
     panel.showProgressBar();
     IOManager.load(intent);
@@ -148,7 +148,7 @@ class CloudExplorerTool extends Tool
           .setClassName("error")
           .setI18N(application.i18n).show();
       },
-      options : { units : this.application.units }
+      options : { units : this.application.setup.units }
     };
     panel.showProgressBar();
     IOManager.export(intent);

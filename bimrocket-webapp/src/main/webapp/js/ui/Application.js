@@ -18,6 +18,7 @@ import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IOManager } from "../io/IOManager.js";
 import { Selection } from "../utils/Selection.js";
+import { Setup } from "../utils/Setup.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { ModuleLoader } from "../utils/ModuleLoader.js";
@@ -31,7 +32,7 @@ import { Formula } from "../formula/Formula.js";
 import { LoginDialog } from "./LoginDialog.js";
 import { ScriptDialog } from "./ScriptDialog.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Application
 {
@@ -65,13 +66,6 @@ class Application
     this.overlays = null;
     this.tools = {};
     this.tool = null;
-    this._units = null;
-    this._decimals = null;
-    this._backgroundColor1 = null;
-    this._backgroundColor2 = null;
-    this._panelOpacity = null;
-    this._frameRateDivisor = null;
-    this._shadowsEnabled = null;
 
     /* services */
     this.services = {}; // Service instances
@@ -79,18 +73,18 @@ class Application
     /* selection */
     this.selection = new Selection(this, true);
     this.selectionMode = Application.SET_SELECTION_MODE;
-    this.selectionPaintMode = Application.EDGES_SELECTION;
-    this._showDeepSelection = null;
-    this._showLocalAxes = null;
     this._selectionLines = null;
     this._axisLines = null;
 
-    this.clock = new THREE.Clock();
+    /* setup */
+    this.setup = new Setup(this);
 
+    /* rendering */
+    this.clock = new THREE.Clock();
     this.autoRepaint = false;
     this.needsRepaint = true;
 
-    /* internal properties */
+    /* events */
     this._copyObjects = [];
     this._cutObjects = [];
     this._eventListeners = {
@@ -187,9 +181,6 @@ class Application
     progressBarElem.className = "progress_bar";
     element.appendChild(progressBarElem);
 
-    this.restoreBackground();
-    this.updateBackground();
-
     // renderer
     let renderer;
     if (WEBGL.isWebGLAvailable())
@@ -202,7 +193,7 @@ class Application
         alpha : true,
         preserveDrawingBuffer : true
       });
-      renderer.shadowMap.enabled = this.shadowsEnabled;
+      renderer.shadowMap.enabled = this.setup.shadowsEnabled;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
     else
@@ -230,7 +221,7 @@ class Application
     container.appendChild(cssRenderer.domElement);
 
     // panelManager
-    this.panelManager = new PanelManager(container);
+    this.panelManager = new PanelManager(this);
 
     // general tabbed panel
     this.progressBar = new ProgressBar(progressBarElem);
@@ -268,9 +259,10 @@ class Application
 
     this.pointSelector = new PointSelector(this);
 
-    // set language
-    this.i18n.userLanguages = window.localStorage.getItem("bimrocket.language")
-      || navigator.language;
+    // apply setup
+    this.i18n.userLanguages = this.setup.userLanguage;
+    this.setShadowMapEnabled(this.setup.shadowsEnabled);
+    this.setup.applyBackground();
 
     // init scene
     this.initScene();
@@ -355,7 +347,7 @@ class Application
       }
 
       __animationCounter++;
-      if (__animationCounter >= this.frameRateDivisor)
+      if (__animationCounter >= this.setup.frameRateDivisor)
       {
         __animationCounter = 0;
 
@@ -481,6 +473,20 @@ class Application
     this.needsRepaint = true;
   }
 
+  setShadowMapEnabled(enabled)
+  {
+    if (this.renderer.shadowMap)
+    {
+      if (this.renderer.shadowMap.enabled !== enabled)
+      {
+        this.renderer.shadowMap.enabled = enabled;
+        this.scene.traverse(object =>
+        { if (object.material) object.material.needsUpdate = true; });
+        this.repaint();
+      }
+    }
+  }
+
   /* gets the model root depending on selection */
   getModelRoot(lowestRoot = false)
   {
@@ -519,213 +525,13 @@ class Application
     return root;
   }
 
-  get units()
-  {
-    if (this._units === null)
-    {
-      this._units = window.localStorage.getItem("bimrocket.units") || "m";
-    }
-    return this._units;
-  }
-
-  set units(units)
-  {
-    this._units = units;
-    window.localStorage.setItem("bimrocket.units", units);
-  }
-
-  get decimals()
-  {
-    if (this._decimals === null)
-    {
-      this._decimals = parseInt(window.localStorage.getItem(
-       "bimrocket.decimals") || "2");
-    }
-    return this._decimals;
-  }
-
-  set decimals(decimals)
-  {
-    this._decimals = decimals;
-    window.localStorage.setItem("bimrocket.decimals", String(decimals));
-  }
-
-  get backgroundColor()
-  {
-    return this._backgroundColor1;
-  }
-
-  set backgroundColor(color)
-  {
-    this._backgroundColor1 = color;
-    this._backgroundColor2 = color;
-    this.updateBackground();
-    this.saveBackground();
-  }
-
-  get backgroundColor1()
-  {
-    return this._backgroundColor1;
-  }
-
-  set backgroundColor1(color)
-  {
-    this._backgroundColor1 = color;
-    this.updateBackground();
-    this.saveBackground();
-  }
-
-  get backgroundColor2()
-  {
-    return this._backgroundColor2;
-  }
-
-  set backgroundColor2(color)
-  {
-    this._backgroundColor2 = color;
-    this.updateBackground();
-    this.saveBackground();
-  }
-
-  get panelOpacity()
-  {
-    if (this._panelOpacity === null)
-    {
-      let opacityValue = window.localStorage.getItem("bimrocket.panelOpacity");
-      this._panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
-    }
-    return this._panelOpacity;
-  }
-
-  set panelOpacity(opacity)
-  {
-    this._panelOpacity = opacity;
-    window.localStorage.setItem("bimrocket.panelOpacity", String(opacity));
-    let panels = this.panelManager.getPanels();
-    for (let panel of panels)
-    {
-      panel.opacity = opacity;
-    }
-  }
-
-  get frameRateDivisor()
-  {
-    if (this._frameRateDivisor === null)
-    {
-      let value = window.localStorage.getItem("bimrocket.frameRateDivisor");
-      this._frameRateDivisor = value ? parseInt(value) : 1;
-    }
-    return this._frameRateDivisor;
-  }
-
-  set frameRateDivisor(frd)
-  {
-    this._frameRateDivisor = frd;
-    window.localStorage.setItem("bimrocket.frameRateDivisor", String(frd));
-  }
-
-  get showDeepSelection()
-  {
-    if (this._showDeepSelection === null)
-    {
-      this._showDeepSelection = window.localStorage.getItem(
-        "bimrocket.showDeepSelection") !== "false";
-    }
-    return this._showDeepSelection;
-  }
-
-  set showDeepSelection(enabled)
-  {
-    this._showDeepSelection = enabled;
-    window.localStorage.setItem("bimrocket.showDeepSelection", enabled);
-    this.updateSelection();
-  }
-
-  get showLocalAxes()
-  {
-    if (this._showLocalAxes === null)
-    {
-      this._showLocalAxes = window.localStorage.getItem(
-       "bimrocket.showLocalAxes") !== "false";
-    }
-    return this._showLocalAxes;
-  }
-
-  set showLocalAxes(enabled)
-  {
-    this._showLocalAxes = enabled;
-    window.localStorage.setItem("bimrocket.showLocalAxes", enabled);
-    this.updateSelection();
-  }
-
-  get shadowsEnabled()
-  {
-    if (this._shadowsEnabled === null)
-    {
-      this._shadowsEnabled = window.localStorage.getItem(
-        "bimrocket.shadowsEnabled") === "true";
-    }
-    return this._shadowsEnabled;
-  }
-
-  set shadowsEnabled(enabled)
-  {
-    this._shadowsEnabled = enabled;
-    window.localStorage.setItem("bimrocket.shadowsEnabled", enabled);
-
-    if (this.renderer.shadowMap)
-    {
-      if (this.renderer.shadowMap.enabled !== enabled)
-      {
-        this.renderer.shadowMap.enabled = enabled;
-        this.scene.traverse(object =>
-        { if (object.material) object.material.needsUpdate = true; });
-        this.repaint();
-      }
-    }
-  }
-
-  updateBackground()
-  {
-    if (this._backgroundColor1 === this._backgroundColor2)
-    {
-      this.container.style.background = this._backgroundColor1;
-    }
-    else
-    {
-      this.container.style.background = "linear-gradient(" +
-        this._backgroundColor1 + "," + this._backgroundColor2 + ")";
-    }
-  }
-
-  restoreBackground()
-  {
-    this._backgroundColor1 =
-      window.localStorage.getItem("bimrocket.backgroundColor1");
-    if (this._backgroundColor1 === null)
-      this._backgroundColor1 = "#E0E0FF";
-
-    this._backgroundColor2 =
-      window.localStorage.getItem("bimrocket.backgroundColor2");
-    if (this._backgroundColor2 === null)
-      this._backgroundColor2 = "#E0F0E0";
-  }
-
-  saveBackground()
-  {
-    window.localStorage.setItem("bimrocket.backgroundColor1",
-      this._backgroundColor1);
-    window.localStorage.setItem("bimrocket.backgroundColor2",
-      this._backgroundColor2);
-  }
-
   updateSelection()
   {
     this.hideSelectionLines();
     this.showSelectionLines();
 
     this.hideAxisLines();
-    if (this.showLocalAxes)
+    if (this.setup.showLocalAxes)
     {
       this.showAxisLines();
     }
@@ -786,7 +592,7 @@ class Application
     {
       let solid = object;
 
-      if (this.selectionPaintMode === Application.EDGES_SELECTION)
+      if (this.setup.selectionPaintMode === Application.EDGES_SELECTION)
       {
         let edgesGeometry = solid.edgesGeometry;
         if (edgesGeometry)
@@ -964,12 +770,12 @@ class Application
   {
     if (object.visible)
     {
-      return this.showDeepSelection ?
+      return this.setup.showDeepSelection ?
         this.deepSelectionMaterial : this.selectionMaterial;
     }
     else
     {
-      return this.showDeepSelection ?
+      return this.setup.showDeepSelection ?
         this.deepInvisibleSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }
@@ -1106,13 +912,13 @@ class Application
       });
     }
     let json = JSON.stringify(data);
-    window.localStorage.setItem("bimrocket.services." + group, json);
+    this.setup.setItem("services." + group, json);
     console.info("save services." + group + ": ", data);
   }
 
   restoreServices(group)
   {
-    let json = window.localStorage.getItem("bimrocket.services." + group);
+    let json = this.setup.getItem("services." + group);
     if (json)
     {
       let array = JSON.parse(json);
@@ -1936,7 +1742,7 @@ class Application
           .setClassName("error")
           .setI18N(application.i18n).show();
       },
-      options : { units : application.units }
+      options : { units : application.setup.units }
     };
     application.progressBar.message = "Loading file...";
     application.progressBar.progress = undefined;

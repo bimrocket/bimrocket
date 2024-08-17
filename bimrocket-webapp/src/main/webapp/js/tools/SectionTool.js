@@ -61,10 +61,7 @@ class SectionTool extends Tool
     frontFaceStencilMat.clippingPlanes = this.planes;
     this.frontFaceStencilMat = frontFaceStencilMat;
 
-    let sectionColor =
-      window.localStorage.getItem("bimrocket.sectionColor");
-    if (sectionColor === null)
-      sectionColor = "#808080";
+    let sectionColor = application.setup.getItem("sectionColor") || "#808080";
 
     let planeStencilMat = new THREE.MeshLambertMaterial();
     planeStencilMat.color = new THREE.Color(sectionColor);
@@ -133,7 +130,7 @@ class SectionTool extends Tool
     this.sectionColorElem.addEventListener("change", event =>
     {
       let sectionColor = this.sectionColorElem.value;
-      window.localStorage.setItem("bimrocket.sectionColor", sectionColor);
+      application.setup.setItem("sectionColor", sectionColor);
       this.planeStencilMat.color = new THREE.Color(sectionColor);
       application.repaint();
     }, false);

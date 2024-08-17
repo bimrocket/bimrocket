@@ -418,7 +418,7 @@ class FlyTool extends Tool
       });
 
       const unitsText = document.createElement("span");
-      unitsText.textContent = this.application.units;
+      unitsText.textContent = this.application.setup.units;
       groundDistanceElem.parentElement.appendChild(unitsText);
 
       groundDistanceElem.disabled = !this.groundDistanceControlEnabled;

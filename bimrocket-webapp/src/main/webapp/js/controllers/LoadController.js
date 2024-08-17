@@ -73,7 +73,7 @@ class LoadController extends Controller
     const application = this.application;
     const intent = {
       url : url,
-      options : { units : this.application.units },
+      options : { units : this.application.setup.units },
       onCompleted : object =>
       {
         this._url = url;

@@ -44,8 +44,8 @@ class MeasureSelectionTool extends Tool
         }
       });
     }
-    const decimals = application.decimals;
-    const units = " " + application.units;
+    const decimals = application.setup.decimals;
+    const units = " " + application.setup.units;
     const dialog = new Dialog(this.label);
     dialog.setSize(240, 160);
     dialog.setI18N(application.i18n);

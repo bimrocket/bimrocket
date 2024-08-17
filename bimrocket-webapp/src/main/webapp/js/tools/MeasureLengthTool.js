@@ -179,7 +179,7 @@ class MeasureLengthTool extends Tool
     let length = this.getLineStringLength();
 
     I18N.set(this.distElem, "textContent", "message.measure_length",
-      length.toFixed(application.decimals), application.units);
+      length.toFixed(application.setup.decimals), application.setup.units);
     application.i18n.update(this.distElem);
   }
 

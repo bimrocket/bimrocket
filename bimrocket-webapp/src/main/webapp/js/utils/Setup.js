@@ -9,6 +9,19 @@ import { Application } from "../ui/Application.js";
 class Setup
 {
   static PREFIX = "bimrocket.";
+  static LANGUAGE = "language";
+  static UNITS = "units";
+  static DECIMALS = "decimals";
+  static BACKGROUND_COLOR_1 = "backgroundColor1";
+  static BACKGROUND_COLOR_2 = "backgroundColor2";
+  static PANEL_OPACITY = "panelOpacity";
+  static FRAME_RATE_DIVISOR = "frameRateDivisor";
+  static SELECTION_PAINT_MODE = "selectionPaintMode";
+  static SHADOWS_ENABLED = "shadowsEnabled";
+  static SHOW_DEEP_SELECTION = "showDeepSelection";
+  static SHOW_LOCAL_AXES = "showLocalAxes";
+  static AO_ENABLED = "aoEnabled";
+  static AO_INTENSITY = "aoIntensity";
 
   constructor(application)
   {
@@ -16,28 +29,32 @@ class Setup
 
     // restore setup from localStorage
 
-    this._userLanguage = this.getItem("language") || navigator.language;
+    this._userLanguage = this.getItem(Setup.LANGUAGE) || navigator.language;
 
-    this._units = this.getItem("units") || "m";
+    this._units = this.getItem(Setup.UNITS) || "m";
 
-    this._decimals = parseInt(this.getItem("decimals") || "2");
+    this._decimals = parseInt(this.getItem(Setup.DECIMALS) || "2");
 
     this.restoreBackground();
 
-    let opacityValue = this.getItem("panelOpacity");
+    let opacityValue = this.getItem(Setup.PANEL_OPACITY);
     this._panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
 
-    let frd = this.getItem("frameRateDivisor");
+    let frd = this.getItem(Setup.FRAME_RATE_DIVISOR);
     this._frameRateDivisor = frd ? parseInt(frd) : 1;
 
     this._selectionPaintMode =
-      this.getItem("selectionPaintMode") || Application.EDGES_SELECTION;
+      this.getItem(Setup.SELECTION_PAINT_MODE) || Application.EDGES_SELECTION;
 
-    this._shadowsEnabled = this.getItem("shadowsEnabled") === "true";
+    this._shadowsEnabled = this.getItem(Setup.SHADOWS_ENABLED) === "true";
 
-    this._showDeepSelection = this.getItem("showDeepSelection") !== "false";
+    this._showDeepSelection = this.getItem(Setup.SHOW_DEEP_SELECTION) !== "false";
 
-    this._showLocalAxes = this.getItem("showLocalAxes") !== "false";
+    this._showLocalAxes = this.getItem(Setup.SHOW_LOCAL_AXES) !== "false";
+
+    this._ambientOcclusionEnabled = this.getItem(Setup.AO_ENABLED) === "true";
+
+    this._ambientOcclusionIntensity = parseFloat(this.getItem(Setup.AO_INTENSITY) || "0.3");
   }
 
   get userLanguage()
@@ -53,7 +70,7 @@ class Setup
     const i18n = application.i18n;
     i18n.userLanguages = userLanguage;
     i18n.updateTree(application.element);
-    this.setItem("language", userLanguage);
+    this.setItem(Setup.LANGUAGE, userLanguage);
   }
 
   get units()
@@ -64,7 +81,7 @@ class Setup
   set units(units)
   {
     this._units = units;
-    this.setItem("units", units);
+    this.setItem(Setup.UNITS, units);
   }
 
   get decimals()
@@ -75,7 +92,7 @@ class Setup
   set decimals(decimals)
   {
     this._decimals = decimals;
-    this.setItem("decimals", String(decimals));
+    this.setItem(Setup.DECIMALS, String(decimals));
   }
 
   get backgroundColor()
@@ -123,7 +140,7 @@ class Setup
   set panelOpacity(opacity)
   {
     this._panelOpacity = opacity;
-    this.setItem("panelOpacity", String(opacity));
+    this.setItem(Setup.PANEL_OPACITY, String(opacity));
     let panels = this.application.panelManager.getPanels();
     for (let panel of panels)
     {
@@ -139,7 +156,7 @@ class Setup
   set frameRateDivisor(frd)
   {
     this._frameRateDivisor = frd;
-    this.setItem("frameRateDivisor", String(frd));
+    this.setItem(Setup.FRAME_RATE_DIVISOR, String(frd));
   }
 
   get selectionPaintMode()
@@ -150,7 +167,7 @@ class Setup
   set selectionPaintMode(selMode)
   {
     this._selectionPaintMode = selMode;
-    this.setItem("selectionPaintMode", selMode);
+    this.setItem(Setup.SELECTION_PAINT_MODE, selMode);
   }
 
   get showDeepSelection()
@@ -161,7 +178,7 @@ class Setup
   set showDeepSelection(enabled)
   {
     this._showDeepSelection = enabled;
-    this.setItem("showDeepSelection", enabled);
+    this.setItem(Setup.SHOW_DEEP_SELECTION, enabled);
     this.application.updateSelection();
   }
 
@@ -173,7 +190,7 @@ class Setup
   set showLocalAxes(enabled)
   {
     this._showLocalAxes = enabled;
-    this.setItem("showLocalAxes", enabled);
+    this.setItem(Setup.SHOW_LOCAL_AXES, enabled);
     this.application.updateSelection();
   }
 
@@ -185,8 +202,34 @@ class Setup
   set shadowsEnabled(enabled)
   {
     this._shadowsEnabled = enabled;
-    this.setItem("shadowsEnabled", enabled);
+    this.setItem(Setup.SHADOWS_ENABLED, enabled);
     this.application.setShadowMapEnabled(enabled);
+  }
+
+  get ambientOcclusionEnabled()
+  {
+    return this._ambientOcclusionEnabled;
+  }
+
+  set ambientOcclusionEnabled(enabled)
+  {
+    this._ambientOcclusionEnabled = enabled;
+    this.setItem(Setup.AO_ENABLED, enabled);
+    this.application.setupComposer();
+    this.application.repaint();
+  }
+
+  get ambientOcclusionIntensity()
+  {
+    return this._ambientOcclusionIntensity;
+  }
+
+  set ambientOcclusionIntensity(intensity)
+  {
+    this._ambientOcclusionIntensity = intensity;
+    this.setItem(Setup.AO_INTENSITY, String(intensity));
+    this.application.ambientOcclusionParams.saoIntensity = intensity;
+    this.application.repaint();
   }
 
   applyBackground()
@@ -204,19 +247,19 @@ class Setup
 
   restoreBackground()
   {
-    this._backgroundColor1 = this.getItem("backgroundColor1");
+    this._backgroundColor1 = this.getItem(Setup.BACKGROUND_COLOR_1);
     if (this._backgroundColor1 === null)
       this._backgroundColor1 = "#E0E0FF";
 
-    this._backgroundColor2 = this.getItem("backgroundColor2");
+    this._backgroundColor2 = this.getItem(Setup.BACKGROUND_COLOR_2);
     if (this._backgroundColor2 === null)
       this._backgroundColor2 = "#E0F0E0";
   }
 
   saveBackground()
   {
-    this.setItem("backgroundColor1", this._backgroundColor1);
-    this.setItem("backgroundColor2", this._backgroundColor2);
+    this.setItem(Setup.BACKGROUND_COLOR_1, this._backgroundColor1);
+    this.setItem(Setup.BACKGROUND_COLOR_2, this._backgroundColor2);
   }
 
   getItem(name)

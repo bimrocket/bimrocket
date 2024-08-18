@@ -358,6 +358,8 @@ export const translations =
   "label.background_color" : "Color de fons:",
   "label.panel_opacity" : "Opacitat de panells:",
   "label.cast_shadows" : "Projecció d'ombres",
+  "label.ambient_occlusion" : "Oclusió ambiental",
+  "label.ambient_occlusion_intensity" : "Intensitat OA:",
 
   "label.service_type" : "Tipus de servei:",
   "label.service_name" : "Nom del servei:",

@@ -31,6 +31,10 @@ import { FakeRenderer } from "../renderers/FakeRenderer.js";
 import { Formula } from "../formula/Formula.js";
 import { LoginDialog } from "./LoginDialog.js";
 import { ScriptDialog } from "./ScriptDialog.js";
+import { EffectComposer } from "../postprocessing/EffectComposer.js";
+import { RenderPass } from "../postprocessing/RenderPass.js";
+import { SAOPass } from "../postprocessing/SAOPass.js";
+import { OutputPass } from "../postprocessing/OutputPass.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
@@ -272,6 +276,7 @@ class Application
     {
       if (event.type === "cameraActivated")
       {
+        this.setupComposer();
         this.repaint();
       }
       else if (event.type !== "cut")
@@ -360,6 +365,49 @@ class Application
 
     animate();
     this.loadModules();
+  }
+
+  setupComposer()
+  {
+    if (this.composer)
+    {
+      for (let pass of this.composer.passes)
+      {
+        pass.dispose();
+      }
+      this.composer.dispose();
+      this.composer = null;
+      this.ambientOcclusionParams = null;
+    }
+
+    if (!this.setup.ambientOcclusionEnabled) return;
+
+    const scene = this.scene;
+    const camera = this.camera;
+    const container = this.container;
+    const setup = this.setup;
+    const composer = new EffectComposer(this.renderer);
+    composer.setPixelRatio(window.devicePixelRatio);
+    this.composer = composer;
+
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const saoPass = new SAOPass(scene, camera, container.clientWidth, container.clientHeight);
+    saoPass.params.saoBias = 0.5;
+    saoPass.params.saoIntensity = setup.ambientOcclusionIntensity;
+    saoPass.params.saoScale = 1000;
+		saoPass.params.saoKernelRadius = 100;
+    saoPass.params.saoMinResolution = 0;
+    saoPass.params.saoBlur = true;
+    saoPass.params.saoBlurRadius = 8;
+    saoPass.params.saoBlurStdDev = 4;
+    saoPass.params.saoBlurDepthCutoff = 0.01;
+    composer.addPass(saoPass);
+    this.ambientOcclusionParams = saoPass.params;
+
+    const outputPass = new OutputPass();
+    composer.addPass(outputPass);
   }
 
   initScene()
@@ -459,11 +507,20 @@ class Application
     this.notifyEventListeners("scene", sceneEvent);
 
     this.selection.set(baseObject);
+
+    this.setupComposer();
   }
 
   render()
   {
-    this.renderer.render(this.scene, this.camera);
+    if (this.composer && this.clippingPlane === null)
+    {
+      this.composer.render();
+    }
+    else
+    {
+      this.renderer.render(this.scene, this.camera);
+    }
     this.cssRenderer.render(this.scene, this.camera);
     this.needsRepaint = false;
   }
@@ -1582,6 +1639,10 @@ class Application
     renderer.setSize(container.clientWidth, container.clientHeight);
     const cssRenderer = this.cssRenderer;
     cssRenderer.setSize(container.clientWidth, container.clientHeight);
+    if (this.composer)
+    {
+      this.composer.setSize(container.clientWidth, container.clientHeight);
+    }
     this.repaint();
   }
 

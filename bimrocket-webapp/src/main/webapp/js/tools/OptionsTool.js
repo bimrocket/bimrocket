@@ -53,6 +53,7 @@ class OptionsTool extends Tool
     exporterOptionsPanel.className = "p_4 text_left flex flex_column border_box h_full";
 
     // Language
+
     const i18n = this.application.i18n;
     this.languageSelect = Controls.addSelectField(uiOptionsPanel,
       "language", "label.language");
@@ -63,6 +64,7 @@ class OptionsTool extends Tool
     });
 
     // Units
+
     this.unitsSelect = Controls.addSelectField(uiOptionsPanel, "units",
     "label.units", Application.UNITS);
     this.unitsSelect.parentElement.className = "option_block inline";
@@ -71,6 +73,7 @@ class OptionsTool extends Tool
       setup.units = this.unitsSelect.value);
 
     // Decimals
+
     this.decimalsElem = Controls.addNumberField(uiOptionsPanel, "decimals",
     "label.decimals");
     this.decimalsElem.parentElement.className = "option_block inline";
@@ -78,82 +81,6 @@ class OptionsTool extends Tool
     this.decimalsElem.max = 15;
     this.decimalsElem.addEventListener("change", () =>
       setup.decimals = parseInt(this.decimalsElem.value));
-
-    // Frame rate divisor
-
-    const frdElem = document.createElement("div");
-    frdElem.className = "option_block";
-    uiOptionsPanel.appendChild(frdElem);
-
-    const frdValueDiv = document.createElement("div");
-    frdElem.appendChild(frdValueDiv);
-
-    const frdLabel = document.createElement("label");
-    I18N.set(frdLabel, "textContent", "label.fr_divisor");
-    frdLabel.htmlFor = "frd_range";
-    frdValueDiv.appendChild(frdLabel);
-
-    this.frdValue = document.createElement("span");
-    this.frdValue.innerHTML = "";
-    this.frdValue.id = "frd_value";
-    this.frdValue.textContent = setup.frameRateDivisor;
-    this.frdValue.style.marginLeft = "4px";
-    frdValueDiv.appendChild(this.frdValue);
-
-    this.frdRange = document.createElement("input");
-    this.frdRange.id = "frd_range";
-    this.frdRange.type = "range";
-    this.frdRange.min = 1;
-    this.frdRange.max = 10;
-    this.frdRange.step = 1;
-    this.frdRange.style.display = "inline-block";
-    this.frdRange.style.width = "80%";
-    this.frdRange.style.marginLeft = "auto";
-    this.frdRange.style.marginRight = "auto";
-
-    frdElem.appendChild(this.frdRange);
-
-    this.frdRange.addEventListener("input",
-      () => this.frdValue.textContent = this.frdRange.value, false);
-
-    this.frdRange.addEventListener("change",
-      () => setup.frameRateDivisor = parseInt(this.frdRange.value),
-      false);
-
-    // Selection Paint mode
-
-    this.selPaintModeSelect = Controls.addSelectField(uiOptionsPanel,
-      "selpaint_mode", "label.sel_paint_mode",
-      [[Application.EDGES_SELECTION, "option.edges"],
-       [Application.FACES_SELECTION, "option.faces"]], null,
-     "option_block inline");
-
-    this.selPaintModeSelect.addEventListener("change", event =>
-    {
-      setup.selectionPaintMode = this.selPaintModeSelect.value;
-      application.updateSelection();
-    });
-
-    // Enable/disable deep selection visualization
-
-    this.deepSelCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
-      "deep_sel", "label.show_deep_sel", false, "option_block");
-    this.deepSelCheckBox.addEventListener("change", event =>
-      setup.showDeepSelection = this.deepSelCheckBox.checked);
-
-    // Enable/disable local axes visualization
-
-    this.localAxesCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
-      "local_axes", "label.show_local_axes", false, "option_block");
-    this.localAxesCheckBox.addEventListener("change", event =>
-      setup.showLocalAxes = this.localAxesCheckBox.checked);
-
-    // Enable/disable shadows
-
-    this.shadowsCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
-      "shadows", "label.cast_shadows", false, "option_block");
-    this.shadowsCheckBox.addEventListener("change", event =>
-      setup.shadowsEnabled = this.shadowsCheckBox.checked);
 
     // Background color
 
@@ -205,20 +132,70 @@ class OptionsTool extends Tool
     this.backColorInput2.addEventListener("input", event =>
       setup.backgroundColor2 = this.backColorInput2.value, false);
 
-    this.panelOpacityRange = Controls.addInputField(uiOptionsPanel,
-      "range", "panelopac_range", "label.panel_opacity",
-      null, "option_block stack");
-    this.panelOpacityRange.min = 1;
-    this.panelOpacityRange.max = 100;
-    this.panelOpacityRange.step = 1;
-    this.panelOpacityRange.style.display = "inline-block";
-    this.panelOpacityRange.style.width = "80%";
-    this.panelOpacityRange.style.marginLeft = "auto";
-    this.panelOpacityRange.style.marginRight = "auto";
+    this.panelOpacityRange = Controls.addRangeField(uiOptionsPanel,
+      "panelopacity_range", "label.panel_opacity", 0, 1, 0.01, setup.panelOpacity);
 
     this.panelOpacityRange.addEventListener("input", () =>
-      setup.panelOpacity = 0.01 * parseInt(this.panelOpacityRange.value),
-      false);
+      setup.panelOpacity = parseFloat(this.panelOpacityRange.value), false);
+
+    // Frame rate divisor
+
+    this.frdRange = Controls.addRangeField(uiOptionsPanel,
+      "frd_range", "label.fr_divisor", 1, 10, 1, setup.frameRateDivisor);
+    this.frdRange.addEventListener("change",
+      () => setup.frameRateDivisor = parseInt(this.frdRange.value), false);
+
+    // Selection Paint mode
+
+    this.selPaintModeSelect = Controls.addSelectField(uiOptionsPanel,
+      "selpaint_mode", "label.sel_paint_mode",
+      [[Application.EDGES_SELECTION, "option.edges"],
+       [Application.FACES_SELECTION, "option.faces"]], null,
+     "option_block inline");
+
+    this.selPaintModeSelect.addEventListener("change", event =>
+    {
+      setup.selectionPaintMode = this.selPaintModeSelect.value;
+      application.updateSelection();
+    });
+
+    // Enable/disable deep selection visualization
+
+    this.deepSelCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
+      "deep_sel", "label.show_deep_sel", false, "option_block");
+    this.deepSelCheckBox.addEventListener("change", event =>
+      setup.showDeepSelection = this.deepSelCheckBox.checked);
+
+    // Enable/disable local axes visualization
+
+    this.localAxesCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
+      "local_axes", "label.show_local_axes", false, "option_block");
+    this.localAxesCheckBox.addEventListener("change", event =>
+      setup.showLocalAxes = this.localAxesCheckBox.checked);
+
+    // Enable/disable shadows
+
+    this.shadowsCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
+      "shadows", "label.cast_shadows", false, "option_block");
+    this.shadowsCheckBox.addEventListener("change", event =>
+      setup.shadowsEnabled = this.shadowsCheckBox.checked);
+
+    // Enable/disable ambient occlusion
+
+    this.aoCheckBox = Controls.addCheckBoxField(uiOptionsPanel,
+      "aoEnabled", "label.ambient_occlusion", false, "option_block");
+    this.aoCheckBox.addEventListener("change", event => {
+      setup.ambientOcclusionEnabled = this.aoCheckBox.checked;
+      this.aoIntensityRange.disabled = !this.aoCheckBox.checked;
+    });
+
+    this.aoIntensityRange = Controls.addRangeField(uiOptionsPanel,
+      "aoIntensity", "label.ambient_occlusion_intensity",
+      0, 1, 0.01, setup.ambientOcclusionIntensity);
+    this.aoIntensityRange.addEventListener("input",
+      () => setup.ambientOcclusionIntensity = parseFloat(this.aoIntensityRange.value));
+
+    // Loader/Export
 
     this.loaderSelect = Controls.addSelectField(loaderOptionsPanel,
       "loader_sel", "tool.options.format", [], null, "field_flex mb_4");
@@ -358,13 +335,15 @@ class OptionsTool extends Tool
     this.languageSelect.value = userLanguage;
     this.unitsSelect.value = setup.units;
     this.decimalsElem.value = setup.decimals;
-    this.frdValue.textContent = setup.frameRateDivisor;
-    this.frdRange.value = setup.frameRateDivisor;
+    this.panelOpacityRange.rangeValue = setup.panelOpacity;
+    this.frdRange.rangeValue = setup.frameRateDivisor;
     this.selPaintModeSelect.value = setup.selectionPaintMode;
     this.deepSelCheckBox.checked = setup.showDeepSelection;
     this.localAxesCheckBox.checked = setup.showLocalAxes;
     this.shadowsCheckBox.checked = setup.shadowsEnabled;
-    this.panelOpacityRange.value = 100 * setup.panelOpacity;
+    this.aoCheckBox.checked = setup.ambientOcclusionEnabled;
+    this.aoIntensityRange.rangeValue = setup.ambientOcclusionIntensity;
+    this.aoIntensityRange.disabled = !setup.ambientOcclusionEnabled;
 
     let loaders = [];
     let exporters = [];

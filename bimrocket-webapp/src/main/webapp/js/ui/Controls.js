@@ -218,6 +218,65 @@ class Controls
     }
   }
 
+  static addRangeField(parent, name, label, min = 0, max = 100,
+    step = 1, value, className)
+  {
+    const id = this.getNextId();
+
+    const rangeDiv = document.createElement("div");
+    rangeDiv.className = className || "option_block";
+    parent.appendChild(rangeDiv);
+
+    const rangeValueDiv = document.createElement("div");
+    rangeDiv.appendChild(rangeValueDiv);
+
+    const rangeLabel = document.createElement("label");
+    I18N.set(rangeLabel, "textContent", label);
+    rangeLabel.htmlFor = id;
+    rangeLabel.style.verticalAlign = "middle";
+    rangeValueDiv.appendChild(rangeLabel);
+
+    const rangeValue = document.createElement("span");
+    rangeValue.textContent = value;
+    rangeValue.id = id + "_value";
+    rangeValue.style.marginLeft = "4px";
+    rangeValue.style.verticalAlign = "middle";
+    rangeValueDiv.appendChild(rangeValue);
+
+    const range = document.createElement("input");
+    range.id = id;
+    range.name = name;
+    range.type = "range";
+    range.min = min;
+    range.max = max;
+    range.value = value;
+    range.step = step;
+    range.style.display = "inline-block";
+    range.style.width = "80%";
+    range.style.marginLeft = "auto";
+    range.style.marginRight = "auto";
+
+    Object.defineProperty(range, 'rangeValue',
+    {
+      get: function()
+      {
+        return range.value;
+      },
+
+      set: function(value)
+      {
+        range.value = value;
+        rangeValue.textContent = value;
+      }
+    });
+
+    range.addEventListener("input", () => rangeValue.textContent = range.value);
+
+    rangeDiv.appendChild(range);
+
+    return range;
+  }
+
   static addRadioButtons(parent, name, label, options, value, className,
     clickListener)
   {

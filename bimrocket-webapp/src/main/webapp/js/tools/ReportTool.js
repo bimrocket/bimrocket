@@ -48,11 +48,12 @@ class ReportTool extends Tool
 
     const dialog = new ReportDialog(this.application,
       (name, code) => this.onSave(name, code));
+    dialog.reportPanel = reportPanel;
     this.dialog = dialog;
 
     panel.openFile = (url, source) =>
     {
-      this.setReport(url, source);
+      this.openReport(() => this.setReport(url, source));
     };
 
     panel.addContextButton("open", "button.open",
@@ -68,7 +69,11 @@ class ReportTool extends Tool
       () => panel.isDirectoryList() && panel.isEntrySelected());
 
     panel.addContextButton("new", "button.new",
-      () => this.createReport(),
+      () => this.openReport(() => this.createReport()),
+      () => true);
+
+    panel.addContextButton("editor", "button.editor",
+      () => dialog.show(),
       () => true);
 
     panel.addCommonContextButtons();
@@ -104,6 +109,7 @@ class ReportTool extends Tool
     {
       panel.savePath(path, code, () =>
       {
+        this.dialog.saved = true;
         this.dialog.hide();
       });
     }
@@ -125,6 +131,26 @@ class ReportTool extends Tool
       this.setReport("", source, reportTypeName);
     });
     typeDialog.show();
+  }
+
+  openReport(action)
+  {
+    const dialog = this.dialog;
+    const application = this.application;
+
+    if (!dialog.saved)
+    {
+      ConfirmDialog.create("title.unsaved_changes",
+        "question.discard_changes", dialog.scriptName)
+        .setAction(action)
+        .setAcceptLabel("button.discard")
+        .setCancelLabel("button.no")
+        .setI18N(application.i18n).show();
+    }
+    else
+    {
+      action();
+    }
   }
 
   setReport(url, source, reportTypeName = null)

@@ -20,6 +20,8 @@ class ReportDialog extends Dialog
     this.reportName = "";
     this.reportSource = "";
     this.reportTypeName = ReportType.getDefaultReportTypeName();
+    this.reportPanel = null;
+    this.saved = true;
 
     this.setSize(760, 600);
 
@@ -30,6 +32,13 @@ class ReportDialog extends Dialog
     this.editorView = this.addCodeEditor("editor",
       "tool.report.rules", "",
       { "height" : "calc(100% - 38px)" });
+
+    this.runButton = this.addButton("run", "button.run", () =>
+    {
+      this.endEdition();
+      this.hide();
+      this.run();
+    });
 
     this.saveButton = this.addButton("save", "button.save", () =>
     {
@@ -44,7 +53,7 @@ class ReportDialog extends Dialog
 
     this.saveButton.style.display = saveAction ? "" : "none";
 
-    this.closeButton = this.addButton("cancel", "button.cancel", () =>
+    this.closeButton = this.addButton("cancel", "button.close", () =>
     {
       this.endEdition();
       this.hide();
@@ -104,6 +113,16 @@ class ReportDialog extends Dialog
     if (source !== this.reportSource)
     {
       this.reportSource = source;
+      this.saved = false;
+    }
+  }
+
+  run()
+  {
+    const reportPanel = this.reportPanel;
+    if (reportPanel)
+    {
+      reportPanel.execute(this.reportName, this.reportSource, this.reportTypeName);
     }
   }
 

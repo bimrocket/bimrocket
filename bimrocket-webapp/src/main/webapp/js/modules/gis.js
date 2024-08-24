@@ -20,11 +20,11 @@ export function load(application)
     description : "GeoJSON (*.geojson)",
     extensions: ["geojson"],
     mimeType : "application/geo+json",
+    dataType : "text",
     loader :
     {
       class : GeoJSONLoader,
-      loadMethod : 0,
-      dataType : "text"
+      loadMethod : 0
     }
   };
 
@@ -33,11 +33,11 @@ export function load(application)
     description : "ASCII Grid (*.grd, *.asc)",
     extensions: ["grd", "asc"],
     mimeType : "text/plain",
+    dataType : "text",
     loader :
     {
       class : ASCIIGridLoader,
-      loadMethod : 2,
-      dataType : "text"
+      loadMethod : 2
     }
   };
 

@@ -83,7 +83,7 @@ class WebdavService extends FileService
 
               if (hrefValue.endsWith("/"))
                 hrefValue = hrefValue.substring(0, hrefValue.length - 1);
-              
+
               hrefValue = decodeURI(hrefValue);
 
               let fileName = hrefValue.substring(baseUri.length);
@@ -128,7 +128,7 @@ class WebdavService extends FileService
           {
             let request = new XMLHttpRequest();
             let formatInfo = IOManager.getFormatInfo(metadata.name);
-            let dataType = formatInfo?.loader?.dataType || "";
+            let dataType = formatInfo?.dataType || "text";
             request.responseType = dataType;
 
             request.onload = () =>

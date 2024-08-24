@@ -26,16 +26,15 @@ export function load(application)
     description : "Industry foundation classes (*.ifc)",
     extensions : ["ifc"],
     mimeType : "application/x-step",
+    dataType : "text",
     loader :
     {
       class : IFCSTEPLoader,
-      loadMethod : 2,
-      dataType : "text"
+      loadMethod : 2
     },
     exporter :
     {
-      class : IFCSTEPExporter,
-      dataType : "text"
+      class : IFCSTEPExporter
     }
   };
 

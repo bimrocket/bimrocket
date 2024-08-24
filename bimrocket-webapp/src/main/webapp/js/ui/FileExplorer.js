@@ -14,6 +14,7 @@ import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { FileService, Metadata, Result } from "../io/FileService.js";
+import { IOManager } from "../io/IOManager.js";
 import { I18N } from "../i18n/I18N.js";
 
 class FileExplorer extends Panel
@@ -331,7 +332,15 @@ class FileExplorer extends Panel
         },
         data => this.setProgress(data.progress));
       };
-      reader.readAsText(file);
+      let formatInfo = IOManager.getFormatInfo(file.name);
+      if (formatInfo?.dataType === "arraybuffer")
+      {
+        reader.readAsArrayBuffer(file);
+      }
+      else
+      {
+        reader.readAsText(file);
+      }
     }
   }
 

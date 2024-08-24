@@ -6,10 +6,30 @@
 
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class IOManager
 {
+  /*
+    Format definition:
+    {
+      description : {string} format description,
+      extensions : [{string}] extensions array,
+      mimeType : {string} the mime type,
+      dataType : {string} "text" | "arraybuffer",
+      loader :
+      {
+        class : {class} the loader class,
+        loadMethod : {number} loader method code
+      },
+      exporter :
+      {
+        class : {class} the exporter class,
+        exportMethod : {number} exporter method code
+      }
+    }
+  */
+
   static formats = {};
 
   static getFormat(fileName)
@@ -24,9 +44,10 @@ class IOManager
       }
     }
     if (extension === null) return null;
-    for (let formatName in this.formats)
+    const formats = this.formats;
+    for (let formatName in formats)
     {
-      let formatInfo = this.formats[formatName];
+      let formatInfo = formats[formatName];
       if (formatInfo.extensions.indexOf(extension) !== -1) return formatName;
     }
     return null;
@@ -39,6 +60,16 @@ class IOManager
       this.formats[formatName] :
       this.formats[fileName];
     return formatInfo || null;
+  }
+
+  static getFormatInfoByMimeType(mimeType)
+  {
+    const formats = this.formats;
+    for (let formatName in formats)
+    {
+      let formatInfo = formats[formatName];
+      if (formatInfo.mimeType === mimeType) return formatInfo;
+    }
   }
 
   static getLoaderOptions(formatName, factoryDefault = false)
@@ -93,7 +124,7 @@ class IOManager
   {
     let formatName = intent.format;
     let url = intent.url;
-    let data = intent.data;
+    let data = intent.data; // string or ArrayBuffer
     let onCompleted = intent.onCompleted; // onCompleted(object3D)
     let onProgress = intent.onProgress; // onProgress({progress: 0..100, message: text})
     let onError = intent.onError; // onError(error)
@@ -139,7 +170,7 @@ class IOManager
             if (request.status === 0 ||
               request.status === 200 || request.status === 207)
             {
-              if (formatInfo.loader.dataType === "arraybuffer")
+              if (formatInfo.dataType === "arraybuffer")
               {
                 data = request.response.arrayBuffer();
               }
@@ -204,7 +235,7 @@ class IOManager
   {
     let formatName = intent.format;
     let fileName = intent.name;
-    let onCompleted = intent.onCompleted;
+    let onCompleted = intent.onCompleted; // returns Blob
     let onProgress = intent.onProgress;
     let onError = intent.onError;
     let object = intent.object;

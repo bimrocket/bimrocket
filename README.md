@@ -18,25 +18,25 @@ BIMROCKET is an open source platform for managing BIM projects. It has a web app
 - Multiple selection of objects.
 - Editing of model structure and object properties.
 - Dynamic sectioning of models.
-- Shadow casting.
+- Realistic shading: shadow casting and ambient occlusion.
 - Vertex, egde and face snapping in the drawing, measurement and transformation tools.
 - Scripting tool (using javascript language).
 - Reporting tool to check conditions on the model objects (supported reporting formats: BRS and [IDS](https://www.buildingsmart.org/what-is-information-delivery-specification-ids/)).
 - Object controllers (a Controller is a program that changes the state of an object when a certain event occurs).
-- Direct loading of IFC files from local disk or the web server. Support for multiple IFC schemas (IFC2X3, IFC4 and IFC4X3_ADD2).
-- Export models to IFC format.
 - BIM Inventory tool to list the IFC types, classifications, groups and layers of the model.
 - BIM Layout tool to visualize the interior layout of the building.
 - BIM Inspector tool to inspect the IFC entities of the model.
 - Search tool to find model properties by name or by value.
 - Histogram tool to visualize the distribution of values ​​for a given property.
+- Multiple file storage systems are supported: webdav server, local file system and IndexedDB.
+- Load/Export IFC models. Support for multiple IFC schemas (IFC2X3, IFC4 and IFC4X3_ADD2).
 - Load/Export models in BRF format (JSON BimRocket format).
 - Load/Export models in STL, GLB, Wavefront OBJ and Collada formats.
 - Integrated with external services (some of them provided by bimrocket-server)
-  - File service (Webdav implementation)
+  - Webdav server
   - [BCF](https://en.wikipedia.org/wiki/BIM_Collaboration_Format) service (BIM Collaboration Service)
   - [WFS](https://en.wikipedia.org/wiki/Web_Feature_Service) service (Web Feature Service)
-  - IFC service (stores IFC models in database. In progress)
+  - IFC service (stores IFC models in external database. In progress)
   - Print service (generates a vectorial PDF file)
   - [Brain4it](http://brain4it.org) (AI platform oriented to the IoT)
 - Modular design to easily extend functionality.

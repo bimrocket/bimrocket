@@ -107,6 +107,7 @@ import { GLTFLoader } from "../io/GLTFLoader.js";
 import { GLTFExporter } from "../io/GLTFExporter.js";
 import { IOManager } from "../io/IOManager.js";
 import { WebdavService } from "../io/WebdavService.js";
+import { IDBFileService } from "../io/IDBFileService.js";
 import { BundleManager } from "../i18n/BundleManager.js";
 import { Controls } from "../ui/Controls.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
@@ -139,11 +140,11 @@ export function load(application)
     description : "BIMROCKET (*.brf)",
     extensions : ["brf"],
     mimeType : "application/json",
+    dataType : "text",
     loader :
     {
       class : BRFLoader,
-      loadMethod : 0,
-      dataType : "text"
+      loadMethod : 0
     },
     exporter :
     {
@@ -157,11 +158,11 @@ export function load(application)
     description : "Collada (*.dae)",
     extensions : ["dae"],
     mimeType : "model/vnd.collada+xml",
+    dataType : "text",
     loader :
     {
       class : ColladaLoader,
-      loadMethod : 1,
-      dataType : "text"
+      loadMethod : 1
     },
     exporter :
     {
@@ -175,11 +176,11 @@ export function load(application)
     description : "Wavefront object (*.obj)",
     extensions : ["obj"],
     mimeType : "model/obj",
+    dataType : "text",
     loader :
     {
       class : OBJLoader,
-      loadMethod : 0,
-      dataType : "text"
+      loadMethod : 0
     },
     exporter :
     {
@@ -193,11 +194,11 @@ export function load(application)
     description : "Point cloud data (*.pcd)",
     extensions : ["pcd"],
     mimeType : "application/octet-stream",
+    dataType : "arraybuffer",
     loader :
     {
       class : PCDLoader,
-      loadMethod : 0,
-      dataType : "arraybuffer"
+      loadMethod : 0
     }
   };
 
@@ -206,11 +207,11 @@ export function load(application)
     description : "Stereolithography (*.stl)",
     extensions : ["stl"],
     mimeType : "model/stl",
+    dataType : "arraybuffer",
     loader :
     {
       class : STLLoader,
-      loadMethod : 0,
-      dataType : "arraybuffer"
+      loadMethod : 0
     },
     exporter :
     {
@@ -224,11 +225,11 @@ export function load(application)
     description : "GL Transmission Format (*.gltf)",
     extensions : ["gltf"],
     mimeType : "model/gltf+json",
+    dataType : "arraybuffer",
     loader :
     {
       class : GLTFLoader,
-      loadMethod : 3,
-      dataType : "arraybuffer"
+      loadMethod : 3
     },
     exporter :
     {
@@ -243,11 +244,11 @@ export function load(application)
     description : "GL Transmission Format (*.glb)",
     extensions : ["glb"],
     mimeType : "model/gltf-binary",
+    dataType : "arraybuffer",
     loader :
     {
       class : GLTFLoader,
-      loadMethod : 3,
-      dataType : "arraybuffer"
+      loadMethod : 3
     },
     exporter :
     {
@@ -743,23 +744,32 @@ export function load(application)
   // create default services
   if (application.services.model === undefined)
   {
-    const cloudfs = new WebdavService("models",
-      "Repository", "/bimrocket-server/api/cloudfs/models");
-    application.addService(cloudfs, "model", false);
+    const webdav = new WebdavService("models",
+      "Remote", "/bimrocket-server/api/cloudfs/models");
+    application.addService(webdav, "model", false);
+
+    const idbfs = new IDBFileService("idb_models", "Local", "");
+    application.addService(idbfs, "model", false);
   }
 
   if (application.services.script === undefined)
   {
-    const cloudfs = new WebdavService("scripts",
-      "Scripts", "/bimrocket-server/api/cloudfs/scripts");
-    application.addService(cloudfs, "script", false);
+    const webdav = new WebdavService("scripts",
+      "Remote", "/bimrocket-server/api/cloudfs/scripts");
+    application.addService(webdav, "script", false);
+
+    const idbfs = new IDBFileService("idb_scripts", "Local", "");
+    application.addService(idbfs, "script", false);
   }
 
   if (application.services.report === undefined)
   {
-    const cloudfs = new WebdavService("reports",
-      "Reports", "/bimrocket-server/api/cloudfs/reports");
-    application.addService(cloudfs, "report", false);
+    const webdav = new WebdavService("reports",
+      "Remote", "/bimrocket-server/api/cloudfs/reports");
+    application.addService(webdav, "report", false);
+
+    const idbfs = new IDBFileService("idb_reports", "Local", "");
+    application.addService(idbfs, "report", false);
   }
 
   // register bundles and locales

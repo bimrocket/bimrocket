@@ -8,7 +8,7 @@ import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class MeasureAngleTool extends Tool
 {
@@ -41,6 +41,8 @@ class MeasureAngleTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.helpElem.style.padding = "8px";

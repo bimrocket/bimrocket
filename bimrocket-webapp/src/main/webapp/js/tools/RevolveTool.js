@@ -14,7 +14,7 @@ import { Controls } from "../ui/Controls.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class RevolveTool extends Tool
 {
@@ -89,6 +89,8 @@ class RevolveTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_revolve");
     this.panel.preferredHeight = 140;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

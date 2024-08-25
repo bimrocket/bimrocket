@@ -8,7 +8,7 @@ import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class HistogramTool extends Tool
 {
@@ -32,6 +32,8 @@ class HistogramTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_histogram");
     this.panel.minimumHeight = 200;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.psetSelect = Controls.addSelectField(this.panel.bodyElem,
       "pset", "label.property_set");

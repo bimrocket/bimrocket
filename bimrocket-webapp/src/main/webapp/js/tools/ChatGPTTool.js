@@ -9,7 +9,7 @@ import { Controls } from "../ui/Controls.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { ChatGPTDialog } from "../ui/ChatGPTDialog.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ChatGPTTool extends Tool
 {
@@ -35,6 +35,8 @@ class ChatGPTTool extends Tool
   createPanel()
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_chatgpt");
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.conversationElem = document.createElement("div");
     this.conversationElem.classList.add("conversation");

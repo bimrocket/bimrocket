@@ -10,7 +10,7 @@ import { IFC } from "../io/ifc/IFC.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { GestureHandler } from "../ui/GestureHandler.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BIMLayoutTool extends Tool
 {
@@ -44,6 +44,8 @@ class BIMLayoutTool extends Tool
   createPanel()
   {
     this.panel = this.application.createPanel(this.label, "left");
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.layoutPanelElem = document.createElement("div");
     this.layoutPanelElem.className = "bim_layout_panel";

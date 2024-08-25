@@ -11,7 +11,7 @@ import { WebUtils } from "../utils/WebUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SVGExporterTool extends Tool
 {
@@ -31,6 +31,8 @@ class SVGExporterTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.titleElem = Controls.addTextField(this.panel.bodyElem,
       "svg_exporter_title", "label.svg_exporter_title", "", "row");

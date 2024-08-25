@@ -9,7 +9,7 @@ import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ScaleTool extends TransformationTool
 {
@@ -44,6 +44,8 @@ class ScaleTool extends TransformationTool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_scale");
     this.panel.preferredHeight = 180;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

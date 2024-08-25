@@ -34,6 +34,7 @@ class CloudExplorerTool extends Tool
       () => this.showSaveDialog(), () => panel.service !== null);
 
     panel.openFile = (url, data) => this.openFile(url, data);
+    panel.onHide = () => this.application.useTool(null);
 
     application.panelManager.addPanel(this.panel);
   }

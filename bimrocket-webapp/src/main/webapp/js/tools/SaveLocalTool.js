@@ -35,6 +35,7 @@ class SaveLocalTool extends Tool
     {
       this.onSave(name, format, onlySelection);
     };
+    dialog.onHide = () => application.useTool(null);
     dialog.onCancel = () => { dialog.hide(); application.useTool(null); };
     dialog.show();
   }

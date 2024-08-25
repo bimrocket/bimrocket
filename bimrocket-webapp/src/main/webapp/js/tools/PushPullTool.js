@@ -26,6 +26,8 @@ class PushPullTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
 
+    this.panel.onHide = () => this.application.useTool(null);
+
     const helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(helpElem);
 

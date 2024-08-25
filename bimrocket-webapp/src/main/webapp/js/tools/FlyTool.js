@@ -7,7 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Dialog } from "../ui/Dialog.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class FlyTool extends Tool
 {
@@ -156,6 +156,8 @@ class FlyTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
     this.panel.mininumHeight = 120;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.panel.bodyElem.classList.add("fly_panel");
 

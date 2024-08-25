@@ -33,6 +33,8 @@ class BIMInventoryTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.bodyElem.classList.add("padding");
 
+    this.panel.onHide = () => this.application.useTool(null);
+
     this.exploreButton = Controls.addButton(this.panel.bodyElem,
       "bim_inventory_explore", "bim|button.explore_selection",
       () => this.explore());

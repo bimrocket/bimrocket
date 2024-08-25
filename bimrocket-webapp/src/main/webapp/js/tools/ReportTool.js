@@ -23,7 +23,7 @@ import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ReportTool extends Tool
 {
@@ -36,8 +36,10 @@ class ReportTool extends Tool
     this.setOptions(options);
 
     const panel = new FileExplorer(application, false);
-    panel.showFileSize = false;
     this.panel = panel;
+    panel.showFileSize = false;
+    panel.onHide = () => this.application.useTool(null);
+
     this.edit = false;
 
     const reportPanel = new ReportPanel(application);

@@ -10,7 +10,7 @@ import { Controls } from "../ui/Controls.js";
 import { Solid } from "../core/Solid.js";
 import { InputDialog } from "../ui/InputDialog.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class PaintTool extends Tool
 {
@@ -33,6 +33,8 @@ class PaintTool extends Tool
     const application = this.application;
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.minimumHeight = 160;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.materialListElem = Controls.addSelectField(this.panel.bodyElem,
       "materialList", "label.material_list");

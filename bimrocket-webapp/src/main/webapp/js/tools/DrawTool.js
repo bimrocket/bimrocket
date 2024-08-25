@@ -12,7 +12,7 @@ import { PointSelector } from "../utils/PointSelector.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class DrawTool extends Tool
 {
@@ -52,6 +52,8 @@ class DrawTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_draw");
     this.panel.preferredHeight = 140;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

@@ -9,7 +9,7 @@ import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { Tree } from "../ui/Tree.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SearchTool extends Tool
 {
@@ -30,6 +30,8 @@ class SearchTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_search");
     this.panel.minimumHeight = 200;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.textInput = Controls.addInputField(this.panel.bodyElem,
       "text", "text_to_find", "label.text_to_find");

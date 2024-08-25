@@ -12,7 +12,7 @@ import { Extruder } from "../builders/Extruder.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { Controls } from "../ui/Controls.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ExtrudeTool extends Tool
 {
@@ -87,6 +87,8 @@ class ExtrudeTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_extrude");
     this.panel.preferredHeight = 140;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

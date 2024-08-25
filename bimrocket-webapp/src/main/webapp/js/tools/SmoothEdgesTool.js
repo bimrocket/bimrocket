@@ -9,7 +9,7 @@ import { Selection } from "../utils/Selection.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Solid } from "../core/Solid.js";
 import { Controls } from "../ui/Controls.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SmoothEdgesTool extends Tool
 {
@@ -31,6 +31,8 @@ class SmoothEdgesTool extends Tool
     this.panel = application.createPanel(this.label, "left",
       "panel_smooth_edges");
     this.panel.preferredHeight = 100;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.smoothAngleElem = Controls.addNumberField(this.panel.bodyElem,
       "smooth_angle", "label.smooth_angle", 20, "row");

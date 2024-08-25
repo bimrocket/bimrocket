@@ -11,7 +11,7 @@ import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { GestureHandler } from "../ui/GestureHandler.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SectionTool extends Tool
 {
@@ -107,6 +107,8 @@ class SectionTool extends Tool
 
     this.panel = application.createPanel(this.label, "left", "panel_section");
     this.panel.preferredHeight = 160;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

@@ -8,7 +8,7 @@ import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Solid } from "../core/Solid.js";
 import { GestureHandler } from "../ui/GestureHandler.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class OrbitTool extends Tool
 {
@@ -92,6 +92,8 @@ class OrbitTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
+
+    this.panel.onHide = () => this.application.useTool(null);
 
     I18N.set(this.panel.bodyElem, "textContent", this.help);
   }

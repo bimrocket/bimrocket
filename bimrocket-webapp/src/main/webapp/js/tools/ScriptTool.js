@@ -20,7 +20,7 @@ import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
 import { ScriptDialog } from "../ui/ScriptDialog.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ScriptTool extends Tool
 {
@@ -33,8 +33,10 @@ class ScriptTool extends Tool
     this.setOptions(options);
 
     const panel = new FileExplorer(application, false);
-    panel.showFileSize = false;
     this.panel = panel;
+    panel.showFileSize = false;
+    panel.onHide = () => this.application.useTool(null);
+
     this.edit = false;
 
     panel.title = this.label;

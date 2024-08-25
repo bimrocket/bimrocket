@@ -68,8 +68,11 @@ export function load(application)
   // create default services
   if (application.services.bcf === undefined)
   {
-    const bcf = new BCFService("bcf",
-      application.constructor.NAME + " BCF", "/bimrocket-server/api");
+    const bcf = new BCFService({
+      name : "bcf",
+      description : application.constructor.NAME + " BCF",
+      url : "/bimrocket-server/api"
+    });
     application.addService(bcf, "bcf", false);
   }
 

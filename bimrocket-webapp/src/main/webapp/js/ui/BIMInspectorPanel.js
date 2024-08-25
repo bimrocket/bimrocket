@@ -9,6 +9,7 @@ import { Controls } from "./Controls.js";
 import { Tree } from "./Tree.js";
 import { IFC, Constant } from "../io/ifc/IFC.js";
 import { I18N } from "../i18n/I18N.js";
+import { TabbedPane } from "./TabbedPane.js";
 
 class BIMInspectorPanel extends Panel
 {

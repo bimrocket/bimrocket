@@ -8,10 +8,9 @@ import { Service } from "./Service.js";
 
 class FileService extends Service
 {
-  constructor(name, description = null,
-    url = null, username = null, password = null)
+  constructor(parameters)
   {
-    super(name, description, url, username, password);
+    super(parameters);
   }
 
   open(path, readyCallback, progressCallback)

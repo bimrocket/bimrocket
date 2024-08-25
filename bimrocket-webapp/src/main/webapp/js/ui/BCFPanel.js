@@ -1454,16 +1454,14 @@ class BCFPanel extends Panel
   {
     let serviceTypes = ServiceManager.getTypesOf(BCFService);
     let dialog = new ServiceDialog("Add BCF service", serviceTypes);
+    dialog.services = this.application.services[this.group];
+
     dialog.serviceTypeSelect.disabled = true;
     dialog.setI18N(this.application.i18n);
-    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    dialog.onSave = (serviceType, parameters) =>
     {
       const service = new ServiceManager.classes[serviceType];
-      service.name = name;
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
+      service.setParameters(parameters);
       this.application.addService(service, this.group);
       this.updateServices();
       this.service = service;
@@ -1481,17 +1479,13 @@ class BCFPanel extends Panel
     const service = this.service;
     let serviceTypes = ServiceManager.getTypesOf(BCFService);
     let dialog = new ServiceDialog("Edit BCF service",
-      serviceTypes, service.constructor.type, service.name, service.description,
-      service.url, service.username, service.password);
+      serviceTypes, service.constructor.name, service.getParameters());
     dialog.serviceTypeSelect.disabled = true;
     dialog.setI18N(this.application.i18n);
     dialog.nameElem.readOnly = true;
-    dialog.onSave = (serviceType, name, description, url, username, password) =>
+    dialog.onSave = (serviceType, parameters) =>
     {
-      service.description = description;
-      service.url = url;
-      service.username = username;
-      service.password = password;
+      service.setParameters(parameters);
       this.application.addService(service, this.group);
       this.updateServices();
       this.filterPanelElem.style.display = "none";

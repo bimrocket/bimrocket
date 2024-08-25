@@ -15,34 +15,39 @@ const FILE = Metadata.FILE;
 
 class IDBFileService extends FileService
 {
-  constructor(name, description = null,
-    url = null, username = null, password = null)
+  constructor(parameters)
   {
-    super(name, description, url, username, password);
+    super(parameters);
+  }
+
+  setParameters(parameters)
+  {
+    super.setParameters(parameters);
+    if (!this.url) this.url = "default";
   }
 
   open(path, readyCallback, progressCallback)
   {
     const openAction = new OpenAction();
-    openAction.execute(this.name, path, readyCallback);
+    openAction.execute(this.url, path, readyCallback);
   }
 
   save(path, data, readyCallback, progressCallback)
   {
     const saveAction = new SaveAction(data);
-    saveAction.execute(this.name, path, readyCallback, data);
+    saveAction.execute(this.url, path, readyCallback, data);
   }
 
   remove(path, readyCallback, progressCallback)
   {
     const removeAction = new RemoveAction();
-    removeAction.execute(this.name, path, readyCallback);
+    removeAction.execute(this.url, path, readyCallback);
   }
 
   makeCollection(path, readyCallback, progressCallback)
   {
     const mkColAction = new MakeCollectionAction();
-    mkColAction.execute(this.name, path, readyCallback);
+    mkColAction.execute(this.url, path, readyCallback);
   }
 }
 
@@ -59,6 +64,8 @@ class Action
 
   execute(dbName, path, readyCallback)
   {
+    if (!dbName) dbName = "default";
+
     if (path.startsWith("//")) path = path.substring(1);
     const pathArray = path === "/" ? [""] : path.split("/");
 

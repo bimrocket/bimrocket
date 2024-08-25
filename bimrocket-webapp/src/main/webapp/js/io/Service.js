@@ -6,24 +6,32 @@
 
 class Service
 {
-  constructor(name, description = null,
-    url = null, username = null, password = null)
+  constructor(parameters)
   {
-    this.name = name;
-    this.description = description;
-    this.url = url;
-    this.username = username;
-    this.password = password;
+    if (typeof parameters === "object")
+    {
+      this.setParameters(parameters);
+    }
   }
 
   getParameters()
   {
-    return this;
+    return {
+      name : this.name,
+      description : this.description,
+      url : this.url,
+      username : this.username,
+      password : this.password
+    };
   }
 
   setParameters(parameters)
   {
-    Object.assign(this, parameters);
+    this.name = parameters.name;
+    this.description = parameters.description;
+    this.url = parameters.url;
+    this.username = parameters.username;
+    this.password = parameters.password;
   }
 }
 

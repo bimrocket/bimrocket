@@ -13,12 +13,26 @@ class WebdavService extends FileService
 {
   static PROXY_URI = "/bimrocket-server/api/proxy?url=";
 
-  constructor(name, description, url, username, password)
+  constructor(parameters)
   {
-    super(name, description, url, username, password);
-    this.useProxy = false;
-    this.proxyUsername = null;
-    this.proxyPassword = null;
+    super(parameters);
+  }
+
+  getParameters()
+  {
+    const parameters = super.getParameters();
+    parameters.useProxy = this.useProxy;
+    parameters.proxyUsername = this.proxyUsername;
+    parameters.proxyPassword = this.proxyPassword;
+    return parameters;
+  }
+
+  setParameters(parameters)
+  {
+    super.setParameters(parameters);
+    this.useProxy = parameters.useProxy || false;
+    this.proxyUsername = parameters.proxyUsername || null;
+    this.proxyPassword = parameters.proxyPassword || null;
   }
 
   open(path, readyCallback, progressCallback)

@@ -10,10 +10,9 @@ import { WebUtils } from "../utils/WebUtils.js";
 
 class BCFService extends Service
 {
-  constructor(name, description = null,
-    url = null, username = null, password = null)
+  constructor(parameters)
   {
-    super(name, description, url, username, password);
+    super(parameters);
   }
 
   getProjects(onCompleted, onError)

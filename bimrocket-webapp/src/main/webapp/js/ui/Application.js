@@ -987,8 +987,7 @@ class Application
         let serviceClass = ServiceManager.classes[className];
         if (serviceClass)
         {
-          let service = new serviceClass();
-          service.setParameters(parameters);
+          let service = new serviceClass(parameters);
           this.addService(service, group, false);
         }
         else console.warn("Service " + className + " not restored.");
@@ -1698,6 +1697,7 @@ class Application
             }
             catch (ex)
             {
+              console.error(ex);
               console.error(`module ${modulePath} failed: ${ex}`);
             }
           },

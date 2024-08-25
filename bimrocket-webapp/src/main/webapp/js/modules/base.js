@@ -744,31 +744,52 @@ export function load(application)
   // create default services
   if (application.services.model === undefined)
   {
-    const webdav = new WebdavService("models",
-      "Remote", "/bimrocket-server/api/cloudfs/models");
+    const webdav = new WebdavService({
+      name: "models",
+      description : "Remote",
+      url : "/bimrocket-server/api/cloudfs/models"
+    });
     application.addService(webdav, "model", false);
 
-    const idbfs = new IDBFileService("idb_models", "Local", "");
+    const idbfs = new IDBFileService({
+      name: "idb_models",
+      description : "Local",
+      url : "idb_models"
+    });
     application.addService(idbfs, "model", false);
   }
 
   if (application.services.script === undefined)
   {
-    const webdav = new WebdavService("scripts",
-      "Remote", "/bimrocket-server/api/cloudfs/scripts");
+    const webdav = new WebdavService({
+      name : "scripts",
+      description : "Remote",
+      url : "/bimrocket-server/api/cloudfs/scripts"
+    });
     application.addService(webdav, "script", false);
 
-    const idbfs = new IDBFileService("idb_scripts", "Local", "");
+    const idbfs = new IDBFileService({
+      name : "idb_scripts",
+      description : "Local",
+      url : "idb_scripts"
+    });
     application.addService(idbfs, "script", false);
   }
 
   if (application.services.report === undefined)
   {
-    const webdav = new WebdavService("reports",
-      "Remote", "/bimrocket-server/api/cloudfs/reports");
+    const webdav = new WebdavService({
+      name : "reports",
+      description : "Remote",
+      url : "/bimrocket-server/api/cloudfs/reports"
+    });
     application.addService(webdav, "report", false);
 
-    const idbfs = new IDBFileService("idb_reports", "Local", "");
+    const idbfs = new IDBFileService({
+      name : "idb_reports",
+      description : "Local",
+      url : "idb_reports"
+    });
     application.addService(idbfs, "report", false);
   }
 

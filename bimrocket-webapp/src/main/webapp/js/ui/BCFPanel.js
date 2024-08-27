@@ -980,10 +980,11 @@ class BCFPanel extends Panel
       const scene = this.application.scene;
       scene.traverse(object =>
       {
-        if (object._ifc && object._ifc.constructor.name === "IfcProject")
+        if (object.userData.IFC?.ifcClassName === "IfcProject")
         {
-          let projectId = object._ifc.GlobalId;
-          let projectName = object._ifc.Name || object._ifc.LongName;
+          const ifc = object.userData.IFC;
+          let projectId = ifc.GlobalId;
+          let projectName = ifc.Name || ifc.LongName || object.name;
           if (!projectIdSet.has(projectId))
           {
             projects.push([projectId, projectName]);

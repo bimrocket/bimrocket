@@ -1,0 +1,50 @@
+/* contextmenu */
+
+body
+{
+  --focused-contextmenuitem-background: #ffc0c0;
+}
+
+menu.contextmenu
+{
+  display: inline-block;
+  position: absolute;
+  z-index: 10001;
+  background-color: #f0f0f0;
+  border: 1px solid black;
+  padding-left: 0;
+  margin: 0;
+  box-shadow: 0px 8px 6px -6px rgba(50, 50, 50, 0.3);
+  animation-name: fade_in_dialog;
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+}
+
+menu.contextmenu li
+{
+  list-style: none;
+  list-style-type: none;
+}
+
+menu.contextmenu li a
+{
+  text-decoration: none;
+  color: #202020;
+  padding: 4px;
+  display: block;
+  white-space: nowrap;
+}
+
+menu.contextmenu a:hover,
+menu.contextmenu a:focus
+{
+  background-color: var(--focused-contextmenuitem-background);
+  border:none;
+  outline: none;
+}
+
+@keyframes fade_in_contextmenu
+{
+  0% {opacity: 0; visibility: visible; }
+  100% {opacity: 1; }
+}

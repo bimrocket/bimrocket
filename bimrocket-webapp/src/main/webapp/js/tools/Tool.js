@@ -4,34 +4,52 @@
  * @author realor
  */
 
-import * as THREE from "../lib/three.module.js";
+import { Action } from "../ui/Action.js";
 import { I18N } from "../i18n/I18N.js";
+import * as THREE from "three";
 
-class Tool
+class Tool extends Action
 {
   constructor(application)
   {
+    super();
     this.application = application;
+    this.label = this.constructor.name;
+    this.className = this.constructor.name;
     this.name = "command"; // must be unique
-    this.label = "Command";
     this.help = "command help";
     this.className = "command";
     this.immediate = false;
   }
 
+  getLabel()
+  {
+    return this.label;
+  }
+
+  getClassName()
+  {
+    return this.className;
+  }
+
+  perform()
+  {
+    this.application.useTool(this);
+  }
+
   activate()
   {
-    console.info("activate " + this.id);
+    console.info("activate " + this.name);
   }
 
   deactivate()
   {
-    console.info("deactivate " + this.id);
+    console.info("deactivate " + this.name);
   }
 
   execute()
   {
-    console.info("execute " + this.id);
+    console.info("execute " + this.name);
   }
 
   setOptions(options)

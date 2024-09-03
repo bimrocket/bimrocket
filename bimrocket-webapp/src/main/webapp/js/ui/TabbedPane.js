@@ -26,16 +26,26 @@ class TabbedPane
     this.paneElem.appendChild(this.bodyElem);
   }
 
-  addTab(name, label)
+  addClassName(className)
+  {
+    this.paneElem.classList.add(className);
+  }
+
+  addTab(name, label, title, className)
   {
     if (!this.tabs.has(name))
     {
       const tabSelectorElem = document.createElement("a");
       tabSelectorElem.href = "#";
-      I18N.set(tabSelectorElem, "textContent", label || name);
-      tabSelectorElem.addEventListener("click", () => this.showTab(name));
       tabSelectorElem.addEventListener("pointerdown", () => this.showTab(name));
+      tabSelectorElem.addEventListener("click", () => this.showTab(name));
+      tabSelectorElem.addEventListener("contextmenu",
+        event => event.preventDefault());
       tabSelectorElem.className = "selector";
+      if (label) I18N.set(tabSelectorElem, "textContent", label || name);
+      if (title) I18N.set(tabSelectorElem, "title", title || name);
+      if (className) tabSelectorElem.classList.add(className);
+
       this.headerElem.appendChild(tabSelectorElem);
 
       const tabPanelElem = document.createElement("div");

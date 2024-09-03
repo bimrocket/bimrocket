@@ -2,6 +2,8 @@
 
 div.inspector_card
 {
+  height: 100%;
+  overflow: hidden;
 }
 
 div.inspector_toolbar
@@ -12,7 +14,14 @@ div.inspector_toolbar
 
 div.inspector_properties
 {
-  overflow: visible;
+  height: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+div.inspector_properties .tabbed_pane > .body
+{
+  min-height: 0px;
 }
 
 ul.inspector
@@ -56,26 +65,21 @@ ul.inspector li.section
   margin-left: 0;
   color: #202020;
   white-space: nowrap;
-  border-bottom: 1px solid gray;
+  border-top: 1px dotted grey;
   background-image: none;
 }
 
 ul.inspector li.section li.section
 {
-  padding-left: 0;
-  margin-left: 8px;
-  color: #202020;
-  white-space: nowrap;
-  border:none;
-  border-top: 1px solid lightgrey;
+  padding-left: 8px;
 }
 
-ul.inspector li.section li.section:first-child
+ul.inspector li.section:first-child
 {
-  border-top:none;
+  border-top: none;
 }
 
-ul.inspector li.section > a
+ul.inspector li.section > div
 {
   display:inline-block;
   text-align: left;
@@ -85,10 +89,10 @@ ul.inspector li.section > a
   background-repeat: no-repeat;
   background-position: 2px center;
   text-decoration: none;
-  vertical-align: middle;
+  cursor: pointer;
 }
 
-ul.inspector li.section > a:focus
+ul.inspector li.section > div:focus
 {
   outline-style: dotted;
   outline-color: black;
@@ -96,35 +100,28 @@ ul.inspector li.section > a:focus
   outline-width: 1px;
 }
 
-ul.inspector li.section > a.collapse
+ul.inspector li.section > div.collapse
 {
   background-image:url(images/collapse.svg);
 }
 
-ul.inspector li.section > a.expand
+ul.inspector li.section > div.expand
 {
   background-image:url(images/expand.svg);
 }
 
-ul.inspector li.section > button
+ul.inspector li.section.controller.started > div > span::after
 {
-  padding: 0px;
-  width: 16px;
-  height:16px;
-  background-repeat: no-repeat;
-  background-position: center center;
-  vertical-align: middle;
-  margin: 5px;
-  background-size: 16px;
+  content: ' ';
+  width: 10px;
+  height: 10px;
+  border: 1px solid #c0c0c0;
+  border-top-color: #404040;
+  border-radius: 50%;
   box-sizing: border-box;
-  vertical-align: middle;
-  cursor: pointer;
-}
-
-ul.inspector li.section a.anchored
-{
-  font-style: italic;
-  color: #800000;
+  display: inline-block;
+  animation: controller_running 4s steps(16) infinite;
+  margin-left: 4px;
 }
 
 div.inspector_toolbar > button
@@ -167,45 +164,73 @@ div.inspector_toolbar > button.next
   background-image: url(images/next.svg);
 }
 
-ul.inspector li.section > button:hover
+.inspector_properties button:hover
 {
   box-shadow: 0px 0px 4px 0px #c0a0a0;
 }
 
-ul.inspector li.section > button.add
+.inspector_properties .tabbed_pane .header a
 {
-  background-image: url(images/add.svg);
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 
-ul.inspector li.section > button.edit
+.inspector_properties .tabbed_pane .header a:before
 {
-  background-image: url(images/edit.svg);
+  content: "\00a0";
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
-ul.inspector li.section > button.remove
+.inspector_properties .tabbed_pane .header a.object
 {
-  background-image: url(images/remove.svg);
+  background-image: url(images/inspector/object_tab.svg);
 }
 
-ul.inspector li.section > button.anchor
+.inspector_properties .tabbed_pane .header a.geometry
 {
-  background-image: url(images/anchor.svg);
+  background-image: url(images/inspector/geometry_tab.svg);
 }
 
-ul.inspector li.section > button.start
+.inspector_properties .tabbed_pane .header a.material
 {
-  background-image: url(images/start.svg);
+  background-image: url(images/inspector/material_tab.svg);
 }
 
-ul.inspector li.section > button.stop
+.inspector_properties .tabbed_pane .header a.builder
 {
-  background-image: url(images/stop.svg);
+  background-image: url(images/inspector/builder_tab.svg);
 }
 
-ul.inspector li.section > span:hover
+.inspector_properties .tabbed_pane .header a.userdata
 {
-  cursor:pointer;
-  color: #802020;
+  background-image: url(images/inspector/userdata_tab.svg);
+}
+
+.inspector_properties .tabbed_pane .header a.formulas
+{
+  background-image: url(images/inspector/formula_tab.svg);
+}
+
+.inspector_properties .tabbed_pane .header a.controllers
+{
+  background-image: url(images/inspector/controllers_tab.svg);
+}
+
+.inspector_properties .tabbed_pane .header a.featured
+{
+  background-image: url(images/inspector/featured_tab.svg);
+}
+
+.inspector_properties .tabbed_pane .header a.links
+{
+  background-image: url(images/inspector/links_tab.svg);
+}
+
+.inspector_properties .tabbed_pane .header a
+{
+  background-image: url(images/inspector/default.svg);
 }
 
 ul.inspector li.property
@@ -221,9 +246,19 @@ ul.inspector li.property
   margin-bottom: 2px;
 }
 
-ul.inspector li.property > .label
+ul.inspector li.property > div
 {
+  display: inline-block;
   margin-left: 18px;
+}
+
+ul.inspector li.property > div:hover
+{
+  text-decoration: none;
+}
+
+ul.inspector li.property .label
+{
   text-align: left;
   color: #606060;
   font-size:12px;
@@ -232,7 +267,7 @@ ul.inspector li.property > .label
   text-decoration: none;
 }
 
-ul.inspector li.property > .label:focus
+ul.inspector li.property > div:focus
 {
   outline-style: dotted;
   outline-color: black;
@@ -240,7 +275,7 @@ ul.inspector li.property > .label:focus
   outline-width: 1px;
 }
 
-ul.inspector li.property > .value
+ul.inspector li.property .value
 {
   text-align: left;
   font-size:12px;
@@ -249,12 +284,12 @@ ul.inspector li.property > .value
   line-height: 0;
 }
 
-ul.inspector li.property > .value.disabled
+ul.inspector li.property .value.disabled
 {
   color: #606060;
 }
 
-ul.inspector li.property > a.value
+ul.inspector li.property .value
 {
   text-align: left;
   font-size:12px;
@@ -264,12 +299,12 @@ ul.inspector li.property > a.value
   text-decoration: none;
 }
 
-ul.inspector li.property > a.value:hover
+ul.inspector li.property a.value:hover
 {
   text-decoration: underline;
 }
 
-ul.inspector li.property > a.value:focus
+ul.inspector li.property a.value:focus
 {
   outline-style: dotted;
   outline-color: black;
@@ -277,18 +312,18 @@ ul.inspector li.property > a.value:focus
   outline-width: 1px;
 }
 
-ul.inspector li.property > .value > input[type=checkbox]
+ul.inspector li.property .value input[type=checkbox]
 {
   vertical-align: middle;
   margin: 0;
 }
 
-ul.inspector li.property.editable > .label
+ul.inspector li.property.editable .label
 {
   cursor: pointer;
 }
 
-ul.inspector li.property.editable > .value
+ul.inspector li.property.editable .value
 {
   color: #202020;
   cursor: pointer;
@@ -335,19 +370,18 @@ ul.inspector li.property.texture
   background-image: url(images/inspector/texture.svg);
 }
 
-
-ul.inspector li.property.color > span.value
+ul.inspector li.property.color > div span.value
 {
   margin-right: 2px;
   vertical-align: middle;
 }
 
-ul.inspector li.property.color > span.value > span
+ul.inspector li.property.color > div span.value > span
 {
   vertical-align: middle;
 }
 
-ul.inspector li.property.color > span.value > .color
+ul.inspector li.property.color > div span.value > .color
 {
   display: inline-block;
   width: 11px;
@@ -360,7 +394,7 @@ ul.inspector li.property.color > span.value > .color
 
 ul.inspector li.property ul.list_3 li
 {
-  margin: 3px 0px 3px 8px;
+  margin: 3px 0px 3px 0px;
 }
 
 ul.inspector li.property ul.list_3 li label
@@ -401,4 +435,10 @@ ul.inspector_list li
   white-space: nowrap;
   padding-left: 20px;
   line-height: 18px;
+}
+
+@keyframes controller_running
+{
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

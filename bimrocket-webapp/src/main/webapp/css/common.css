@@ -338,6 +338,16 @@ table.data > tbody > tr:hover
   flex-direction: column;
 }
 
+.flex_grow_0
+{
+  flex-grow: 0;
+}
+
+.flex_grow_1
+{
+  flex-grow: 1;
+}
+
 .border_box
 {
   box-sizing: border-box;

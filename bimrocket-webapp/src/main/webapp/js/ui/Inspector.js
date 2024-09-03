@@ -7,6 +7,9 @@
 import { Panel } from "./Panel.js";
 import { Tree } from "./Tree.js";
 import { Dialog } from "./Dialog.js";
+import { Action } from "./Action.js";
+import { TabbedPane } from "./TabbedPane.js";
+import { ContextMenu } from "./ContextMenu.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Application } from "./Application.js";
 import { Solid } from "../core/Solid.js";
@@ -21,7 +24,7 @@ import { BuilderDialog } from "./BuilderDialog.js";
 import { ControllerDialog } from "./ControllerDialog.js";
 import { Controls } from "./Controls.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Inspector extends Panel
 {
@@ -39,17 +42,11 @@ class Inspector extends Panel
     this.object = null;
     this.objects = null;
     this.state = {};
-    this.objectSectionName = 'Object';
-    this.materialSectionName = 'Material';
-    this.builderSectionName = 'Builder';
-    this.formulasSectionName = 'Formulas';
-    this.geometrySectionName = 'Geometry';
-    this.propertiesSectionName = "Properties";
-    this.controllersSectionName = "Controllers";
-    this.linksSectionName = "Links";
+    this.featuredProperties = {};
 
     this.renderers = {};
     this.editors = {};
+    this.contextActions = [];
 
     this.addRenderer(StringRenderer);
     this.addRenderer(NumberRenderer);
@@ -72,19 +69,37 @@ class Inspector extends Panel
     this.addEditor(ColorEditor);
     this.addEditor(TextureEditor);
 
-    this.objectPanelElem = document.createElement("div");
-    this.bodyElem.appendChild(this.objectPanelElem);
-    this.objectPanelElem.className = "inspector_card";
+    this.addContextAction(EditFormulaAction);
+    this.addContextAction(AddPropertyAction);
+    this.addContextAction(RemovePropertyAction);
+    this.addContextAction(StartControllerAction);
+    this.addContextAction(StopControllerAction);
+    this.addContextAction(RemoveControllerAction);
+    this.addContextAction(AddControllerAction);
+    this.addContextAction(AddFeaturedAction);
+    this.addContextAction(RemoveFeaturedAction);
+    this.addContextAction(ChangeMaterialAction);
+    this.addContextAction(SetBuilderAction);
+    this.addContextAction(EditPropertiesAction);
+    this.addContextAction(RemoveAllFeaturedAction);
+
+    this.objectCardElem = document.createElement("div");
+    this.bodyElem.appendChild(this.objectCardElem);
+    this.objectCardElem.className = "inspector_card";
+
+    this.listCardElem = document.createElement("div");
+    this.bodyElem.appendChild(this.listCardElem);
+    this.listCardElem.className = "inspector_card";
 
     this.toolBarElem = document.createElement("div");
-    this.objectPanelElem.appendChild(this.toolBarElem);
+    this.objectCardElem.appendChild(this.toolBarElem);
     this.toolBarElem.className = "inspector_toolbar";
 
     this.listButton = Controls.addButton(this.toolBarElem,
       "list", null, event =>
     {
-      this.listPanelElem.style.display = "";
-      this.objectPanelElem.style.display = "none";
+      this.listCardElem.style.display = "";
+      this.objectCardElem.style.display = "none";
     }, "list");
     I18N.set(this.listButton, "title", "button.list");
     I18N.set(this.listButton, "alt", "button.list");
@@ -98,7 +113,7 @@ class Inspector extends Panel
         this.centerObject();
       }
     }, "previous");
-    I18N.set(this.previousButton, "title", "button.previous");
+    I18N.set(this.previousButton, "t2pxitle", "button.previous");
     I18N.set(this.previousButton, "alt", "button.previous");
 
     this.indexElem = document.createElement("span");
@@ -125,15 +140,79 @@ class Inspector extends Panel
     I18N.set(this.selectButton, "alt", "button.select");
 
     this.propertiesElem = document.createElement("div");
-    this.objectPanelElem.appendChild(this.propertiesElem);
     this.propertiesElem.className = "inspector_properties";
+    this.objectCardElem.appendChild(this.propertiesElem);
+    this.propertiesTabbedPane = new TabbedPane(this.propertiesElem);
+    this.propertiesTabbedPane.addClassName("h_full");
 
-    this.listPanelElem = document.createElement("div");
-    this.bodyElem.appendChild(this.listPanelElem);
-    this.listPanelElem.className = "inspector_card";
+    this.objectTabElem = this.propertiesTabbedPane.addTab("object", null,
+      "label.inspector_object_tab", "object");
+    this.geometryTabElem = this.propertiesTabbedPane.addTab("geometry", null,
+      "label.inspector_geometry_tab", "geometry");
+    this.materialTabElem = this.propertiesTabbedPane.addTab("material", null,
+      "label.inspector_material_tab", "material");
+    this.builderTabElem = this.propertiesTabbedPane.addTab("builder", null,
+      "label.inspector_builder_tab", "builder");
+    this.formulasTabElem = this.propertiesTabbedPane.addTab("formulas", null,
+      "label.inspector_formulas_tab", "formulas");
+    this.userDataTabElem = this.propertiesTabbedPane.addTab("userdata", null,
+      "label.inspector_userdata_tab", "userdata");
+    this.controllersTabElem = this.propertiesTabbedPane.addTab("controllers", null,
+      "label.inspector_controllers_tab", "controllers");
+    this.linksTabElem = this.propertiesTabbedPane.addTab("links", null,
+      "label.inspector_links_tab", "links");
+    this.featuredTabElem = this.propertiesTabbedPane.addTab("featured", null,
+      "label.inspector_featured_tab", "featured");
+
+    this.objectTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, []);
+    });
+
+    this.geometryTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["geometry"]);
+    });
+
+    this.materialTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["material"]);
+    });
+
+    this.builderTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["builder"]);
+    });
+
+    this.formulasTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["formulas"]);
+    });
+
+    this.userDataTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["userData"]);
+    });
+
+    this.controllersTabElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+      this.showContextMenu(event, ["controllers"]);
+    });
+
+    this.linksTabElem.addEventListener("contextmenu",
+      event => event.preventDefault());
+
+    this.featuredTabElem.addEventListener("contextmenu",
+      event => event.preventDefault());
 
     this.objectIndex = -1;
-    this.anchoredSectionName = null;
 
     this.edition =
     {
@@ -146,6 +225,8 @@ class Inspector extends Panel
 
     application.addEventListener("selection", event =>
     {
+      this.stopEdition();
+
       this.showSelectedObjects(event.objects);
 
       if (event.objects.length === 1)
@@ -175,15 +256,43 @@ class Inspector extends Panel
       }
     });
     this.title = "tool.inspector.label";
+
+    this.loadFeaturedProperties();
+
+    this.contextMenu = new ContextMenu(this.application);
+    this.contextMenu.actions = this.contextActions;
+  }
+
+  showCard(cardName)
+  {
+    this.listCardElem.style.display = cardName === "list" ? "" : "none";
+    this.objectCardElem.style.display = cardName === "object" ? "" : "none";
+  }
+
+  loadFeaturedProperties()
+  {
+    const featuredString = this.application.setup.getItem("featuredProperties");
+    if (featuredString)
+    {
+      this.featuredProperties = JSON.parse(featuredString);
+      if (typeof this.featuredProperties !== "object")
+      {
+        this.featuredProperties = {};
+      }
+    }
+  }
+
+  saveFeaturedProperties()
+  {
+    const featuredString = JSON.stringify(this.featuredProperties);
+    this.application.setup.setItem("featuredProperties", featuredString);
   }
 
   showSelectedObjects(objects)
   {
-    this.listPanelElem.style.display = "";
-    this.objectPanelElem.style.display = "none";
+    this.showCard("list");
 
-    this.propertiesElem.innerHTML = "";
-    this.listPanelElem.innerHTML = "";
+    this.listCardElem.innerHTML = "";
 
     this.objects = objects;
     this.objectIndex = objects.length >= 0 ? 0 : -1;
@@ -192,9 +301,9 @@ class Inspector extends Panel
     infoElem.className = "inspector_info";
     I18N.set(infoElem, "textContent", "message.objects_selected", objects.length);
     this.application.i18n.update(infoElem);
-    this.listPanelElem.appendChild(infoElem);
+    this.listCardElem.appendChild(infoElem);
 
-    const selectionTree = new Tree(this.listPanelElem);
+    const selectionTree = new Tree(this.listCardElem);
 
     for (let i = 0; i < objects.length; i++)
     {
@@ -228,188 +337,204 @@ class Inspector extends Panel
 
     this.updateToolBar();
 
-    this.propertiesElem.innerHTML = "";
-    this.objectPanelElem.style.display = "";
-    this.listPanelElem.style.display = "none";
-    let anchoredSectionElem = null;
+    this.showCard("object");
 
+    this.populateObjectTab();
+    this.populateGeometryTab();
+    this.populateMaterialTab();
+    this.populateBuilderTab();
+    this.populateFormulasTab();
+    this.populateUserDataTab();
+    this.populateControllersTab();
+    this.populateLinksTab();
+    this.populateFeaturedTab();
+
+    this.application.i18n.updateTree(this.objectCardElem);
+  }
+
+  populateObjectTab()
+  {
+    this.objectTabElem.innerHTML = "";
+
+    const object = this.object;
     if (object)
     {
-      let topListElem = document.createElement("ul");
-      topListElem.className = "inspector";
-      this.propertiesElem.appendChild(topListElem);
+      let objListElem = document.createElement("ul");
+      objListElem.className = "inspector";
+      this.objectTabElem.appendChild(objListElem);
 
-      if (this.state[this.objectSectionName] === undefined)
-      {
-        this.state[this.objectSectionName] = "expanded";
-      }
-      // object
-      let objListElem = this.createSection(this.objectSectionName, topListElem,
-        [this.createClearAnchorSectionAction()]);
-      this.createReadOnlyProperty(objListElem, object, "id");
+      const objectPath = [];
+
+      this.createReadOnlyProperty(objListElem, object, objectPath, "id");
       for (let propertyName in object)
       {
         if (this.isSupportedProperty(propertyName))
         {
           if (this.isReadOnlyProperty(propertyName))
           {
-            this.createReadOnlyProperty(objListElem, object, propertyName);
+            this.createReadOnlyProperty(objListElem, object, objectPath, propertyName);
           }
           else
           {
-            this.createWriteableProperty(objListElem, object, propertyName);
+            this.createWriteableProperty(objListElem, object, objectPath, propertyName);
           }
         }
       }
       if (object instanceof Solid)
       {
-        this.createWriteableProperty(objListElem, object, "edgesVisible");
-        this.createWriteableProperty(objListElem, object, "facesVisible");
-        this.createWriteableProperty(objListElem, object, "castShadow");
-        this.createWriteableProperty(objListElem, object, "receiveShadow");
+        this.createWriteableProperty(objListElem, object, objectPath, "edgesVisible");
+        this.createWriteableProperty(objListElem, object, objectPath, "facesVisible");
+        this.createWriteableProperty(objListElem, object, objectPath, "castShadow");
+        this.createWriteableProperty(objListElem, object, objectPath, "receiveShadow");
       }
 
       if (object instanceof Text2D)
       {
-        this.createWriteableProperty(objListElem, object, "text");
-        this.createWriteableProperty(objListElem, object, "fontSize");
-        this.createWriteableProperty(objListElem, object, "color");
-        this.createWriteableProperty(objListElem, object, "backgroundColor");
-        this.createWriteableProperty(objListElem, object, "maxWidth");
+        this.createWriteableProperty(objListElem, object, objectPath, "text");
+        this.createWriteableProperty(objListElem, object, objectPath, "fontSize");
+        this.createWriteableProperty(objListElem, object, objectPath, "color");
+        this.createWriteableProperty(objListElem, object, objectPath, "backgroundColor");
+        this.createWriteableProperty(objListElem, object, objectPath, "maxWidth");
       }
+    }
+  }
 
-      let material = object.material;
-      if (material)
+  populateGeometryTab()
+  {
+    this.geometryTabElem.innerHTML = "";
+
+    const object = this.object;
+    const geometry = object?.geometry;
+    if (geometry)
+    {
+      let geomListElem = document.createElement("ul");
+      geomListElem.className = "inspector";
+      this.geometryTabElem.appendChild(geomListElem);
+
+      const geomPath = ["geometry"];
+
+      this.createReadOnlyProperty(geomListElem, geometry, geomPath, "id");
+      this.createReadOnlyProperty(geomListElem, geometry, geomPath, "uuid");
+      this.createReadOnlyProperty(geomListElem, geometry, geomPath, "type");
+
+      if (geometry instanceof SolidGeometry)
       {
-        // material
-        if (this.state[this.materialSectionName] === undefined)
+        this.createReadOnlyProperty(geomListElem, geometry, geomPath, "vertices",
+          geometry.vertices.length);
+        this.createReadOnlyProperty(geomListElem, geometry, geomPath, "faces",
+          geometry.faces.length);
+        this.createReadOnlyProperty(geomListElem, geometry, geomPath, "isManifold");
+        this.createReadOnlyProperty(geomListElem, geometry, geomPath, "smoothAngle");
+      }
+      else if (geometry instanceof THREE.BufferGeometry)
+      {
+        const attrPath = ["geometry", "attributes"];
+        for (let name in geometry.attributes)
         {
-          this.state[this.materialSectionName] = "expanded";
+          let attribute = geometry.attributes[name];
+          this.createReadOnlyProperty(geomListElem, attribute, attrPath, name,
+            attribute.array.length + " / " + attribute.itemSize);
         }
-        let materialListElem = this.createSection(this.materialSectionName,
-          topListElem, [this.createChangeMaterialAction(object)]);
-
-        for (let propertyName of Inspector.mainMaterialProperties)
+        if (geometry.getIndex())
         {
-          if (propertyName in material)
+          let attribute = geometry.getIndex();
+          this.createReadOnlyProperty(geomListElem, attribute, null,
+            "index", attribute.array.length + " / " + attribute.itemSize);
+        }
+      }
+    }
+  }
+
+  populateMaterialTab()
+  {
+    this.materialTabElem.innerHTML = "";
+
+    const object = this.object;
+    const material = object?.material;
+    if (material)
+    {
+      const materialPath = ["material"];
+
+      let materialListElem = document.createElement("ul");
+      materialListElem.className = "inspector";
+      this.materialTabElem.appendChild(materialListElem);
+
+      for (let propertyName of Inspector.mainMaterialProperties)
+      {
+        if (propertyName in material)
+        {
+          if (this.isReadOnlyProperty(propertyName)
+              || material === Solid.EdgeMaterial
+              || material === Solid.FaceMaterial)
           {
-            if (this.isReadOnlyProperty(propertyName)
-                || material === Solid.EdgeMaterial
-                || material === Solid.FaceMaterial)
+            this.createReadOnlyProperty(materialListElem,
+              material, materialPath, propertyName);
+          }
+          else
+          {
+            if (propertyName === "map")
             {
-              this.createReadOnlyProperty(materialListElem,
-                material, propertyName);
+              this.createWriteableProperty(materialListElem,
+                material, materialPath, propertyName,
+                this.renderers.TextureRenderer, this.editors.TextureEditor);
             }
             else
             {
-              if (propertyName === "map")
-              {
-                this.createWriteableProperty(materialListElem,
-                  material, propertyName,
-                  this.renderers.TextureRenderer, this.editors.TextureEditor);
-              }
-              else
-              {
-                this.createWriteableProperty(materialListElem,
-                  material, propertyName);
-              }
+              this.createWriteableProperty(materialListElem,
+                material, materialPath, propertyName);
             }
           }
         }
       }
+    }
+  }
 
-      // builder
-      if (this.state[this.builderSectionName] === undefined)
+  populateBuilderTab()
+  {
+    this.builderTabElem.innerHTML = "";
+
+    const object = this.object;
+    const builder = object?.builder;
+    if (builder)
+    {
+      let builderListElem = document.createElement("ul");
+      builderListElem.className = "inspector";
+      this.builderTabElem.appendChild(builderListElem);
+
+      const builderPath = ["builder"];
+
+      this.createReadOnlyProperty(builderListElem, builder.constructor,
+        builderPath, "type", builder.constructor.name);
+
+      for (let propertyName in builder)
       {
-        this.state[this.builderSectionName] = "expanded";
-      }
-      let builderListElem = this.createSection(this.builderSectionName,
-        topListElem, [this.createSetBuilderAction(object)]);
-
-      let builder = object.builder;
-      if (builder)
-      {
-        this.createReadOnlyProperty(builderListElem, builder.constructor,
-          "type", builder.constructor.name);
-
-        for (let propertyName in builder)
+        let propertyValue = builder[propertyName];
+        if (this.isSupportedProperty(propertyName))
         {
-          let propertyValue = builder[propertyName];
-          if (this.isSupportedProperty(propertyName))
+          if (propertyValue !== null)
           {
-            if (propertyValue !== null)
-            {
-              this.createWriteableProperty(builderListElem,
-                builder, propertyName);
-            }
+            this.createWriteableProperty(builderListElem,
+              builder, builderPath, propertyName);
           }
         }
       }
+    }
+  }
 
-      // formulas
-      if (this.state[this.formulasSectionName] === undefined)
-      {
-        this.state[this.formulasSectionName] = "expanded";
-      }
-      let formulasListElem = this.createSection(this.formulasSectionName,
-        topListElem, [this.createAddFormulaAction(object)]);
-      const formulas = Formula.getAll(object);
-      for (let path in formulas)
-      {
-        this.createWriteableProperty(formulasListElem, formulas, path);
-      }
+  populateUserDataTab()
+  {
+    this.userDataTabElem.innerHTML = "";
 
-      // geometry
-      let geometry = object.geometry;
-      if (geometry)
-      {
-        if (this.state[this.geometrySectionName] === undefined)
-        {
-          this.state[this.geometrySectionName] = "expanded";
-        }
-        let geomListElem = this.createSection(this.geometrySectionName,
-          topListElem);
+    const object = this.object;
+    if (object)
+    {
+      const userData = object.userData;
 
-        this.createReadOnlyProperty(geomListElem, geometry, "id");
-        this.createReadOnlyProperty(geomListElem, geometry, "uuid");
-        this.createReadOnlyProperty(geomListElem, geometry, "type");
+      let propListElem = document.createElement("ul");
+      propListElem.className = "inspector";
+      this.userDataTabElem.appendChild(propListElem);
 
-        if (geometry instanceof SolidGeometry)
-        {
-          this.createReadOnlyProperty(geomListElem, geometry, "vertices",
-            geometry.vertices.length);
-          this.createReadOnlyProperty(geomListElem, geometry, "faces",
-            geometry.faces.length);
-          this.createReadOnlyProperty(geomListElem, geometry, "isManifold");
-          this.createReadOnlyProperty(geomListElem, geometry, "smoothAngle");
-        }
-        else if (geometry instanceof THREE.BufferGeometry)
-        {
-          for (let name in geometry.attributes)
-          {
-            let attribute = geometry.attributes[name];
-            this.createReadOnlyProperty(geomListElem, attribute,
-              name, attribute.array.length + " / " + attribute.itemSize);
-          }
-          if (geometry.getIndex())
-          {
-            let attribute = geometry.getIndex();
-            this.createReadOnlyProperty(geomListElem, attribute,
-              "index", attribute.array.length + " / " + attribute.itemSize);
-          }
-        }
-      }
-
-      // userData
-      let userData = object.userData;
-      if (this.state[this.propertiesSectionName] === undefined)
-      {
-        this.state[this.propertiesSectionName] = "expanded";
-      }
-
-      let propListElem = this.createSection(this.propertiesSectionName,
-        topListElem, [this.createAddPropertyAction(object, userData),
-        this.createEditPropertiesAction(object)]);
+      const userDataPath = ["userData"];
 
       for (let propertyName in userData)
       {
@@ -423,91 +548,160 @@ class Inspector extends Panel
             this.state[dictName] = "expanded";
           }
 
-          let dictListElem = this.createSection(dictName, propListElem,
-            [this.createAddPropertyAction(object, dictionary),
-            this.createAnchorSectionAction(object, dictName)]);
+          const dictPath = ["userData", dictName];
+
+          let dictListElem = this.createSection(propListElem, dictPath);
+
           for (let dictPropertyName in dictionary)
           {
             this.createWriteableProperty(dictListElem, dictionary,
-              dictPropertyName);
-          }
-          if (dictName === this.anchoredSectionName)
-          {
-            anchoredSectionElem = dictListElem.parentElement;
+              dictPath, dictPropertyName);
           }
         }
         else
         {
-          this.createWriteableProperty(propListElem, userData, propertyName);
+          this.createWriteableProperty(propListElem, userData,
+            userDataPath, propertyName);
         }
       }
+    }
+  }
 
-      // controllers
-      let controllers = object.controllers;
-      if (this.state[this.controllersSectionName] === undefined)
+  populateFormulasTab()
+  {
+    this.formulasTabElem.innerHTML = "";
+
+    const object = this.object;
+    if (object)
+    {
+      const formulas = Formula.getAll(object);
+      if (formulas)
       {
-        this.state[this.controllersSectionName] = "expanded";
-      }
-      let controllersListElem =
-        this.createSection(this.controllersSectionName, topListElem,
-        [this.createAddControllerAction(object)]);
-      if (controllers)
-      {
-        for (let name in controllers)
+        let formulasListElem = document.createElement("ul");
+        formulasListElem.className = "inspector";
+        this.formulasTabElem.appendChild(formulasListElem);
+        for (let path in formulas)
         {
-          let controller = controllers[name];
-          if (this.state[name] === undefined)
-          {
-            this.state[name] = 'expanded';
-          }
-          let controlListElem = this.createSection(name, controllersListElem,
-            [this.createStartControllerAction(controller),
-             this.createStopControllerAction(controller),
-             this.createRemoveControllerAction(controller),
-             this.createAnchorSectionAction(object, name)]);
-          this.createReadOnlyProperty(controlListElem, controller, "type",
-            controller.constructor.name);
-          this.createReadOnlyProperty(controlListElem, controller, "started",
-            controller.isStarted());
-
-          for (let propertyName in controller)
-          {
-            if (propertyName !== "name" && propertyName !== "object" &&
-                !propertyName.startsWith("_"))
-            {
-              this.createWriteableProperty(controlListElem, controller,
-                propertyName);
-            }
-          }
-          if (name === this.anchoredSectionName)
-          {
-            anchoredSectionElem = controlListElem.parentElement;
-          }
+          this.createWriteableProperty(formulasListElem, formulas, null, path);
         }
       }
+    }
+  }
 
-      // links
-      let links = object.links;
-      if (this.state[this.linksSectionName] === undefined)
+  populateControllersTab()
+  {
+    this.controllersTabElem.innerHTML = "";
+
+    const object = this.object;
+    const controllers = object?.controllers;
+    if (controllers)
+    {
+      let controllersListElem = document.createElement("ul");
+      controllersListElem.className = "inspector";
+      this.controllersTabElem.appendChild(controllersListElem);
+
+      for (let name in controllers)
       {
-        this.state[this.linksSectionName] = "expanded";
-      }
-      let linksListElem =
-        this.createSection(this.linksSectionName, topListElem);
-      if (links)
-      {
-        for (let name in links)
+        const controller = controllers[name];
+        if (this.state[name] === undefined)
         {
-          this.createReadOnlyProperty(linksListElem, links, name);
+          this.state[name] = 'expanded';
+        }
+        const controllerPath = ["controllers", name];
+
+        let controlListElem = this.createSection(controllersListElem, controllerPath,
+          "controller", controller.isStarted() ? "started" : "stopped");
+        this.createReadOnlyProperty(controlListElem, controller, controllerPath, "type",
+          controller.constructor.name);
+        this.createReadOnlyProperty(controlListElem, controller, controllerPath, "started",
+          controller.isStarted());
+
+        for (let propertyName in controller)
+        {
+          if (propertyName !== "name" && propertyName !== "object" &&
+              !propertyName.startsWith("_"))
+          {
+            this.createWriteableProperty(controlListElem, controller,
+              controllerPath, propertyName);
+          }
         }
       }
+    }
+  }
 
-      this.application.i18n.updateTree(this.objectPanelElem);
+  populateLinksTab()
+  {
+    this.linksTabElem.innerHTML = "";
 
-      if (objectChanged)
+    const object = this.object;
+    const links = object?.links;
+    if (links)
+    {
+      let linksListElem = document.createElement("ul");
+      linksListElem.className = "inspector";
+      this.linksTabElem.appendChild(linksListElem);
+
+      const linkPath = ["links"];
+
+      for (let name in links)
       {
-        this.markAnchoredSection(anchoredSectionElem);
+        this.createReadOnlyProperty(linksListElem, links, linkPath, name);
       }
+    }
+  }
+
+  populateFeaturedTab()
+  {
+    this.featuredTabElem.innerHTML = "";
+
+    const object = this.object;
+    const featured = this.featuredProperties;
+
+    let favListElem = document.createElement("ul");
+    favListElem.className = "inspector";
+    this.featuredTabElem.appendChild(favListElem);
+
+    const populateGroup = (elem, object, group, path) =>
+    {
+      for (let name in group)
+      {
+        let value = object ? object[name] : undefined;
+
+        if (group[name] === true)
+        {
+          if (value === undefined) value = "?";
+
+          this.createReadOnlyProperty(elem, object,
+            path, name, value);
+        }
+        else
+        {
+          let subPath = [...path, name];
+          let subElem = this.createSection(elem, subPath);
+          let subGroup = group[name];
+          populateGroup(subElem, value, subGroup, subPath);
+        }
+      }
+    };
+
+    populateGroup(favListElem, object, featured, []);
+  }
+
+  showContextMenu(event, objectPath, propertyName = null)
+  {
+    this._objectPath = objectPath;
+    this._propertyName = propertyName;
+
+    const contextMenu = this.contextMenu;
+
+    if (this.edition.object === null)
+    {
+      contextMenu.show(event);
+    }
+    else
+    {
+      event.preventDefault();
+      this.stopEdition();
     }
   }
 
@@ -520,12 +714,10 @@ class Inspector extends Panel
     if (objectCount < 2)
     {
       this.toolBarElem.style.display = "none";
-      this.propertiesElem.style.top = "0px";
     }
     else
     {
       this.toolBarElem.style.display = "";
-      this.propertiesElem.style.top = "";
       this.previousButton.disabled = this.objectIndex <= 0;
       this.nextButton.disabled = this.objectIndex >= objectCount - 1;
     }
@@ -547,93 +739,128 @@ class Inspector extends Panel
     }
   }
 
-  createSection(name, parentElem, actions = null)
+  getFormulaPath(objectPath, propertyName)
   {
+    if (!objectPath || !propertyName) return null;
+
+    const fullPath = [...objectPath, propertyName];
+    let path = "";
+    for (let name of fullPath)
+    {
+      if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name))
+      {
+        if (path.length > 0) path += ".";
+        path += name;
+      }
+      else
+      {
+        name = name.replaceAll('"', '\\"');
+        path += '["' + name + '"]';
+      }
+    }
+    return path;
+  }
+
+  isSimpleValue(value)
+  {
+    const type = typeof value;
+    return (type === "string"
+        || type === "number"
+        || type === "boolean"
+        || value instanceof THREE.Vector3
+        || value instanceof THREE.Euler
+        || value instanceof THREE.Color);
+  }
+
+  createSection(parentElem, objectPath, ...classNames)
+  {
+    const sectionName = objectPath[objectPath.length - 1];
+
     let labelListener = event =>
     {
       let labelElem = event.target;
-      labelElem.className = (labelElem.className === 'expand') ?
-        'collapse' : 'expand';
-      let listElem = labelElem.parentNode.querySelector('ul');
-      listElem.className = (listElem.className === 'expanded') ?
-        'collapsed' : 'expanded';
-      let sectionName = labelElem.id.substring(8);
+      if (labelElem.nodeName.toUpperCase() === "SPAN")
+      {
+        labelElem = labelElem.parentNode;
+      }
+
+      labelElem.className = (labelElem.className === "expand") ?
+        "collapse" : "expand";
+      let listElem = labelElem.parentNode.querySelector("ul");
+      listElem.className = (listElem.className === "expanded") ?
+        "collapsed" : "expanded";
       this.state[sectionName] = listElem.className;
     };
 
     let sectionElem = document.createElement("li");
     sectionElem.className = "section";
     parentElem.appendChild(sectionElem);
+    if (classNames) sectionElem.classList.add(...classNames);
 
-    if (this.state[name] === "expanded"
-        && this.firstExpandedSectionElem === null)
-    {
-      this.firstExpandedSectionElem = sectionElem;
-    }
+    let labelElem = document.createElement("div");
+    labelElem.tabIndex = 0;
 
-    let labelElem = document.createElement("a");
-    labelElem.href = "#";
-    labelElem.id = 'section-' + name;
-    labelElem.textContent = name;
+    let nameElem = document.createElement("span");
+    nameElem.textContent = sectionName;
+    labelElem.appendChild(nameElem);
+
     sectionElem.appendChild(labelElem);
-    labelElem.className = this.state[name] === 'collapsed' ?
-      'expand' : 'collapse';
-    labelElem.addEventListener('click', labelListener);
+    labelElem.className = this.state[sectionName] === "collapsed" ?
+      "expand" : "collapse";
+    labelElem.addEventListener("click", labelListener);
 
-    if (actions instanceof Array)
-    {
-      for (let action of actions)
-      {
-        let actionElem = document.createElement("button");
-        actionElem.className = action.className;
-        I18N.set(actionElem, "alt", action.label);
-        I18N.set(actionElem, "title", action.label);
-        actionElem.addEventListener("click", action.listener);
-        sectionElem.appendChild(actionElem);
-      }
-    }
+    sectionElem.addEventListener("contextmenu", event => {
+      event.preventDefault();
+      event.cancelBubble = true;
+
+      this.showContextMenu(event, objectPath);
+    });
 
     let listElem = document.createElement("ul");
-    listElem.className = this.state[name];
+    listElem.className = this.state[sectionName] || "expanded";
     sectionElem.appendChild(listElem);
 
     return listElem;
   }
 
-  createReadOnlyProperty(parentElem, object, propertyName,
+  createReadOnlyProperty(parentElem, object, objectPath, propertyName,
     propertyValue = object[propertyName])
   {
-    this.createProperty(parentElem, object, propertyName, propertyValue);
+    this.createProperty(parentElem, object, objectPath, propertyName, propertyValue);
   }
 
-  createWriteableProperty(parentElem, object, propertyName, renderer, editor)
+  createWriteableProperty(parentElem, object, objectPath, propertyName,
+    renderer, editor)
   {
     let propertyValue = object[propertyName];
 
     editor = editor || this.getEditor(propertyValue);
 
-    this.createProperty(parentElem, object, propertyName, propertyValue,
+    this.createProperty(parentElem, object, objectPath, propertyName, propertyValue,
       renderer, editor);
   };
 
-  createProperty(parentElem, object, propertyName, propertyValue,
+  createProperty(parentElem, object, objectPath, propertyName, propertyValue,
     renderer = null, editor = null)
   {
     renderer = renderer || this.getRenderer(propertyValue);
     if (renderer)
     {
-      let propElem = document.createElement('li');
+      let itemElem = document.createElement('li');
       if (object instanceof THREE.Object3D)
       {
-        propElem.id = "inspector_" + propertyName;
+        itemElem.id = "inspector_" + propertyName;
       }
-      propElem.className = "property " + renderer.getClassName(propertyValue);
-      parentElem.appendChild(propElem);
+      itemElem.className = "property " + renderer.getClassName(propertyValue);
+      parentElem.appendChild(itemElem);
 
-      let labelElem = document.createElement('a');
-      labelElem.href = '#';
+      let propElem = document.createElement("div");
+      itemElem.appendChild(propElem);
+      propElem.tabIndex = 0;
+
+      let labelElem = document.createElement("span");
       labelElem.textContent = propertyName + ':';
-      labelElem.className = 'label';
+      labelElem.className = "label";
       propElem.appendChild(labelElem);
 
       this.createValueElem(propElem, object, propertyName, propertyValue,
@@ -641,13 +868,48 @@ class Inspector extends Panel
 
       if (editor)
       {
-        labelElem.addEventListener("click", event =>
+        const editProperty = (event) =>
         {
-          event.preventDefault();
-          this.startEdition(propElem, object, propertyName, renderer, editor);
+          if (this.edition.object === null) // no editing
+          {
+            event.preventDefault();
+
+            const formulaPath = this.getFormulaPath(objectPath, propertyName);
+            const formula = Formula.get(this.object, formulaPath);
+            if (formula)
+            {
+              const dialog = new FormulaDialog(this.application, this.object, formula);
+              dialog.show();
+            }
+            else
+            {
+              this.startEdition(propElem, object, propertyName, renderer, editor);
+            }
+          }
+        };
+
+        propElem.addEventListener("click", editProperty, false);
+        propElem.addEventListener("keydown", event =>
+        {
+          if (event.target === propElem && event.keyCode === 13)
+          {
+            editProperty(event);
+          }
         }, false);
-        propElem.className += " editable";
+        itemElem.className += " editable";
       }
+
+      const contextListener = event =>
+      {
+        event.preventDefault();
+        event.cancelBubble = true;
+        if (objectPath instanceof Array)
+        {
+          this.showContextMenu(event, objectPath, propertyName);
+        }
+      };
+
+      propElem.addEventListener("contextmenu", contextListener);
     }
   }
 
@@ -658,213 +920,6 @@ class Inspector extends Panel
     if (valueElem)
     {
       propElem.appendChild(valueElem);
-
-      if (editor)
-      {
-        valueElem.addEventListener("click", () =>
-          this.startEdition(propElem, object, propertyName, renderer, editor),
-          false);
-      }
-    }
-  }
-
-  createChangeMaterialAction(object)
-  {
-    const listener = () =>
-    {
-      object.material = object.material.clone();
-      this.application.notifyObjectsChanged(this.object, "");
-    };
-
-    return {
-      className: "button edit",
-      label: "button.change_material",
-      listener : listener
-    };
-  }
-
-  createSetBuilderAction(object)
-  {
-    const listener = () =>
-    {
-      const dialog = new BuilderDialog(this.application, object);
-      dialog.show();
-    };
-
-    return {
-      className: "button edit",
-      label: "button.object_builder",
-      listener : listener
-    };
-  }
-
-  createAddPropertyAction(object, dictionary)
-  {
-    const listener = () =>
-    {
-      const dialog = new PropertyDialog(this.application, object, dictionary);
-      dialog.show();
-    };
-
-    return {
-      className: "button add",
-      label: "button.add_property",
-      listener : listener
-    };
-  }
-
-  createEditPropertiesAction(object)
-  {
-    const listener = () =>
-    {
-      const dialog = new PropertiesDialog(this.application, object);
-      dialog.show();
-    };
-
-    return {
-      className: "button edit",
-      label: "button.edit_properties",
-      listener : listener
-    };
-  }
-
-  createClearAnchorSectionAction()
-  {
-    const listener = event =>
-    {
-      this.anchoredSectionName = null;
-      this.markAnchoredSection();
-    };
-
-    return {
-      className: "button anchor",
-      label: "button.anchor_section",
-      listener : listener
-    };
-  }
-
-  createAnchorSectionAction(object, dictName)
-  {
-    const listener = event =>
-    {
-      this.anchoredSectionName = dictName;
-
-      const elem = event.target.parentElement;
-      this.markAnchoredSection(elem);
-    };
-
-    return {
-      className: "button anchor",
-      label: "button.anchor_section",
-      listener : listener
-    };
-  }
-
-  createAddFormulaAction(object)
-  {
-    const listener = () =>
-    {
-      const dialog = new FormulaDialog(this.application, object);
-      dialog.show();
-    };
-
-    return {
-      className: "button add",
-      label: "button.add_formula",
-      listener : listener
-    };
-  }
-
-  createAddControllerAction(object)
-  {
-    const listener = () =>
-    {
-      const dialog = new ControllerDialog(this.application, object);
-      dialog.show();
-    };
-
-    return {
-      className: "button add",
-      label: "button.add_controller",
-      listener : listener
-    };
-  }
-
-  createRemoveControllerAction(controller)
-  {
-    const listener = () =>
-    {
-      ConfirmDialog.create("title.remove_controller",
-        "question.remove_controller", controller.name).setAction(() =>
-      {
-        controller.stop();
-        let object = controller.object;
-        delete object.controllers[controller.name];
-        this.showProperties(object);
-      }).setI18N(this.application.i18n).show();
-    };
-
-    return {
-      className: "button remove",
-      label: "button.remove_controller",
-      listener : listener
-    };
-  }
-
-  createStartControllerAction(controller)
-  {
-    const listener = () =>
-    {
-      if (!controller.isStarted())
-      {
-        controller.start();
-        let object = controller.object;
-        this.showProperties(object);
-      }
-    };
-
-    return {
-      className: "button start",
-      label: "button.start_controller",
-      listener : listener
-    };
-  }
-
-  createStopControllerAction(controller)
-  {
-    const listener = () =>
-    {
-      if (controller.isStarted())
-      {
-        controller.stop();
-        let object = controller.object;
-        this.showProperties(object);
-      }
-    };
-
-    return {
-      className: "button stop",
-      label: "button.stop_controller",
-      listener : listener
-    };
-  }
-
-  markAnchoredSection(sectionElem)
-  {
-    let anchored = this.propertiesElem.getElementsByClassName("anchored");
-    for (let anchoredElem of anchored)
-    {
-      anchoredElem.classList.remove("anchored");
-    }
-
-    if (sectionElem)
-    {
-      sectionElem.firstChild.classList.add("anchored");
-      this.propertiesElem.scrollTo(0, sectionElem.offsetTop);
-    }
-    else
-    {
-      this.propertiesElem.scrollTo(0, 0);
     }
   }
 
@@ -896,6 +951,7 @@ class Inspector extends Panel
   endEdition()
   {
     this.stopEdition();
+    this.populateFeaturedTab();
     this.application.notifyObjectsChanged(this.object, this);
   }
 
@@ -912,7 +968,7 @@ class Inspector extends Panel
       this.edition.propertyName, propertyValue,
       this.edition.renderer, this.edition.editor);
 
-    propElem.firstChild.focus();
+    propElem.focus();
 
     this.clearEdition();
   }
@@ -970,6 +1026,11 @@ class Inspector extends Panel
   addEditor(editorClass)
   {
     this.editors[editorClass.name] = new editorClass(this);
+  }
+
+  addContextAction(contextActionClass)
+  {
+    this.contextActions.push(new contextActionClass(this));
   }
 
   getRenderer(value)
@@ -1393,6 +1454,7 @@ class StringEditor extends PropertyEditor
     let valueElem = document.createElement("input");
     valueElem.className = "value";
     valueElem.value = text;
+    valueElem.setAttribute("spellcheck", "false");
     valueElem.addEventListener("keydown", event =>
     {
       if (event.keyCode === 13)
@@ -1640,9 +1702,9 @@ class FormulaEditor extends PropertyEditor
   edit(object, propertyName, formula)
   {
     const inspector = this.inspector;
+    const application = inspector.application;
 
-    const dialog = new FormulaDialog(inspector.application,
-      inspector.object, formula);
+    const dialog = new FormulaDialog(application, inspector.object, formula);
     dialog.show();
 
     this.inspector.clearEdition();
@@ -1679,6 +1741,7 @@ class ColorEditor extends PropertyEditor
     groupElem.appendChild(codeElem);
 
     let hexString = "#" + color.getHexString();
+    console.info("COLOR1", hexString);
     const sampleElem = document.createElement("label");
     sampleElem.className = "color";
     sampleElem.style.backgroundColor = hexString;
@@ -1698,6 +1761,8 @@ class ColorEditor extends PropertyEditor
 
     colorElem.addEventListener("change", () =>
     {
+      console.info("COLOR2", colorElem.value);
+
       object[propertyName].set(colorElem.value);
       document.body.removeEventListener("keydown", keyDownListener);
       document.body.removeEventListener("pointerdown", pointerDownListener);
@@ -1802,4 +1867,499 @@ class TextureEditor extends PropertyEditor
   }
 }
 
-export { Inspector };
+/* InspectorActions */
+
+class InspectorAction extends Action
+{
+  constructor(inspector)
+  {
+    super();
+    this.inspector = inspector;
+  }
+
+  getLabel()
+  {
+    let name = this.constructor.name;
+    if (name.endsWith("Action")) name = name.substring(0, name.length - 6);
+
+    return "action." + name;
+  }
+
+  getClassName()
+  {
+    return "edit";
+  }
+
+  isEnabled()
+  {
+    return false;
+  }
+
+  getObjectPath()
+  {
+    return this.inspector._objectPath;
+  }
+
+  getPropertyName()
+  {
+    return this.inspector._propertyName;
+  }
+
+  getFirstPathName()
+  {
+    const objectPath = this.getObjectPath();
+    return objectPath.length === 0 ? null : objectPath[0];
+  }
+
+  getLastObject()
+  {
+    const objectPath = this.getObjectPath();
+    let object = this.inspector.object;
+    for (let name of objectPath)
+    {
+      object = object[name];
+    }
+    return object;
+  }
+}
+
+class ChangeMaterialAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const material = this.inspector.object.material;
+    return material && this.getFirstPathName() === "material";
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const object = inspector.object;
+    object.material = object.material.clone();
+    inspector.application.notifyObjectsChanged(object, "");
+  }
+}
+
+class SetBuilderAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    return tabName === "builder";
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const object = inspector.object;
+    const dialog = new BuilderDialog(inspector.application, object);
+    dialog.show();
+  }
+}
+
+class AddPropertyAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "featured") return false;
+
+    return this.getFirstPathName() === "userData"
+           && this.getPropertyName() === null;
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+    const object = inspector.object;
+    const dictionary = this.getLastObject();
+    const dialog = new PropertyDialog(application, object, dictionary);
+    dialog.show();
+  }
+}
+
+class RemovePropertyAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "featured") return false;
+
+    return this.getFirstPathName() === "userData"
+           && this.getPropertyName() !== null;
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+    const object = inspector.object;
+    const dictionary = this.getLastObject();
+    const propertyName = this.getPropertyName();
+
+    ConfirmDialog.create("title.remove_property",
+      "question.remove_property", propertyName).setAction(() =>
+    {
+      delete dictionary[propertyName];
+
+      inspector.populateUserDataTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }).setI18N(application.i18n).show();
+  }
+}
+
+class EditPropertiesAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "featured") return false;
+
+    return this.getFirstPathName() === "userData";
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const object = inspector.object;
+    const application = inspector.application;
+    const dialog = new PropertiesDialog(application, object);
+    dialog.show();
+  }
+}
+
+class EditFormulaAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "geometry" || tabName === "featured") return false;
+
+    return this.getPropertyName() !== null;
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+    const object = inspector.object;
+    const objectPath = this.getObjectPath();
+    const propertyName = this.getPropertyName();
+    const formulaPath = inspector.getFormulaPath(objectPath, propertyName);
+    const formula = Formula.get(object, formulaPath);
+    const dialog = new FormulaDialog(application, object, formula);
+
+    if (!formula)
+    {
+      dialog.pathElem.value = formulaPath;
+      let value = this.getLastObject()[propertyName];
+      if (value !== null && value !== undefined && typeof value !== "object")
+      {
+        if (typeof value === "string") value = '"' + value + '"';
+        else value = String(value);
+
+        Controls.setCodeEditorDocument(dialog.editorView, value,
+          { language: "javascript" });
+      }
+    }
+    dialog.show();
+  }
+}
+
+class AddControllerAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    return this.getFirstPathName() === "controllers";
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+    const object = inspector.object;
+    const dialog = new ControllerDialog(application, object);
+    dialog.show();
+  }
+}
+
+class RemoveControllerAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const objectPath = this.getObjectPath();
+    return objectPath.length === 2 &&
+           objectPath[0] === "controllers" &&
+           this.getPropertyName() === null;
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+    const controller = this.getLastObject();
+
+    ConfirmDialog.create("title.remove_controller",
+      "question.remove_controller", controller.name).setAction(() =>
+    {
+      controller.stop();
+      let object = controller.object;
+      delete object.controllers[controller.name];
+
+      inspector.populateControllersTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }).setI18N(application.i18n).show();
+  }
+}
+
+class StartControllerAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const objectPath = this.getObjectPath();
+    return objectPath.length === 2 &&
+           objectPath[0] === "controllers" &&
+           this.getPropertyName() === null &&
+           !this.inspector.object.controllers[objectPath[1]]?.isStarted();
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const object = inspector.object;
+    const application = inspector.application;
+    const controller = this.getLastObject();
+
+    if (!controller.isStarted())
+    {
+      controller.start();
+      inspector.populateControllersTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }
+  }
+}
+
+class StopControllerAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const objectPath = this.getObjectPath();
+    return objectPath.length === 2 &&
+           objectPath[0] === "controllers" &&
+           this.getPropertyName() === null &&
+           this.inspector.object.controllers[objectPath[1]]?.isStarted();
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const object = inspector.object;
+    const application = inspector.application;
+    const controller = this.getLastObject();
+
+    if (controller.isStarted())
+    {
+      controller.stop();
+      inspector.populateControllersTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }
+  }
+}
+
+class FeaturedAction extends InspectorAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isFeatured()
+  {
+    const inspector = this.inspector;
+    const featured = inspector.featuredProperties;
+    const objectPath = this.getObjectPath();
+    const propertyName = this.getPropertyName();
+
+    let group = featured;
+    for (let name of objectPath)
+    {
+      if (!group[name]) return false;
+      group = group[name];
+    }
+    return group && group[propertyName];
+  }
+}
+
+class AddFeaturedAction extends FeaturedAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const inspector = this.inspector;
+    const tabName = inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "featured") return false;
+
+    const propertyName = this.getPropertyName();
+    if (propertyName === null) return false;
+
+    const lastObject = this.getLastObject();
+    const value = lastObject[propertyName];
+    if (!inspector.isSimpleValue(value)) return false;
+
+    return !this.isFeatured();
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const featured = inspector.featuredProperties;
+    const objectPath = this.getObjectPath();
+    const propertyName = this.getPropertyName();
+
+    let group = featured;
+    for (let name of objectPath)
+    {
+      if (!group[name])
+      {
+        group[name] = {};
+      }
+      group = group[name];
+    }
+    group[propertyName] = true;
+
+    inspector.populateFeaturedTab();
+    inspector.saveFeaturedProperties();
+  }
+}
+
+class RemoveFeaturedAction extends FeaturedAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    return this.getPropertyName() !== null && this.isFeatured();
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const featured = inspector.featuredProperties;
+    const objectPath = this.getObjectPath();
+    const propertyName = this.getPropertyName();
+
+    let group = featured;
+    let groups = [group];
+    for (let name of objectPath)
+    {
+      if (!group[name]) return;
+      group = group[name];
+      groups.push(group);
+    }
+    delete group[propertyName];
+
+    for (let i = objectPath.length - 1; i >= 0; i--)
+    {
+      let name = objectPath[i];
+      let igroup = groups[i];
+      if (Object.keys(igroup[name]).length === 0)
+      {
+        delete igroup[name];
+      }
+    }
+    inspector.populateFeaturedTab();
+    inspector.saveFeaturedProperties();
+  }
+}
+
+class RemoveAllFeaturedAction extends FeaturedAction
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isEnabled()
+  {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    return tabName === "featured";
+  }
+
+  perform()
+  {
+    const inspector = this.inspector;
+    const application = inspector.application;
+
+    ConfirmDialog.create("title.remove_featured_properties",
+      "question.remove_featured_properties").setAction(() =>
+    {
+      inspector.featuredProperties = {};
+      inspector.populateFeaturedTab();
+      inspector.saveFeaturedProperties();
+    }).setI18N(application.i18n).show();
+  }
+}
+
+export { Inspector, PropertyRenderer, PropertyEditor, InspectorAction };

@@ -348,6 +348,20 @@ export const translations =
 
   "tool.about.label" : "Quant a",
 
+  "action.ChangeMaterial" : "Canvia material",
+  "action.SetBuilder" : "Assigna constructor",
+  "action.AddProperty" : "Afegeix propietat",
+  "action.RemoveProperty" : "Esborra propietat",
+  "action.EditProperties" : "Edita propietats",
+  "action.EditFormula" : "Edita fórmula",
+  "action.AddController" : "Afegeix controlador",
+  "action.RemoveController" : "Esborra controlador",
+  "action.StartController" : "Inicia controlador",
+  "action.StopController" : "Atura controlador",
+  "action.AddFeatured" : "Afegeix a destacades",
+  "action.RemoveFeatured" : "Treu de destacades",
+  "action.RemoveAllFeatured" : "Treu totes les destacades",
+
   "label.language" : "Idioma:",
   "label.units" : "Unitats del model:",
   "label.decimals" : "Decimals a mostrar:",
@@ -475,6 +489,16 @@ export const translations =
 
   "label.report_type": "Tipus d'informe:",
 
+  "label.inspector_object_tab" : "Objecte",
+  "label.inspector_geometry_tab" : "Geometria",
+  "label.inspector_material_tab" : "Material",
+  "label.inspector_builder_tab" : "Constructor (builder)",
+  "label.inspector_formulas_tab" : "Fórmules",
+  "label.inspector_userdata_tab" : "Propietats (userData)",
+  "label.inspector_controllers_tab" : "Controlladors",
+  "label.inspector_links_tab" : "Enllaços",
+  "label.inspector_featured_tab" : "Propietats destacades",
+
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
   "option.value_desc" : "Valor (descendent)",
@@ -498,6 +522,8 @@ export const translations =
   "title.delete_from_cloud" : "Esborra del núvol",
   "title.unsaved_changes" : "Canvis no desats",
   "title.formula" : "Fórmula",
+  "title.remove_property" : "Esborra propietat",
+  "title.remove_featured_properties" : "Esborra propietats destacades",
   "title.add_controller" : "Afegeix controlador",
   "title.remove_controller" : "Esborra controlador",
   "title.properties" : "Propietats",
@@ -570,7 +596,9 @@ export const translations =
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,
   "question.delete_folder" : name => `Vols esborrar la carpeta ${name}?`,
   "question.delete_file" : name => `Vols esborrar el fitxer ${name}?`,
+  "question.remove_property" : name => `Vols esborrar la propietat ${name}?`,
   "question.remove_controller" : name => `Vols esborrar el controlador ${name}?`,
+  "question.remove_featured_properties" : "Vols esborrar totes les propietats destacades?",
   "question.create_new_scene" : "Vols crear una nova escena?",
   "question.delete_conversation" : "Vols esborrar la conversa?",
 

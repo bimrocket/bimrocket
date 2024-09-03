@@ -24,6 +24,7 @@ class FormulaDialog extends Dialog
 
     this.pathElem = this.addTextField("path", "label.formula.path", path,
       "code");
+    this.pathElem.setAttribute("spellcheck", false);
 
     this.editorView = this.addCodeEditor("editor",
       "label.formula.expression", expression,

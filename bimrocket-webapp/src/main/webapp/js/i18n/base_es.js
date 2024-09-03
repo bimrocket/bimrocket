@@ -346,7 +346,21 @@ export const translations =
 
   "tool.inspect_geometry.help" : "Selecciona la geometría",
 
-  "tool.about.label" : "Acerca de ",
+  "tool.about.label" : "Acerca de",
+
+  "action.ChangeMaterial" : "Cambiar material",
+  "action.SetBuilder" : "Asignar constructor",
+  "action.AddProperty" : "Añadir propiedad",
+  "action.RemoveProperty" : "Borrar propiedad",
+  "action.EditProperties" : "Editar propiedades",
+  "action.EditFormula" : "Editar fórmula",
+  "action.AddController" : "Añadir controlador",
+  "action.RemoveController" : "Borrar controlador",
+  "action.StartController" : "Iniciar controlador",
+  "action.StopController" : "Parar controlador",
+  "action.AddFeatured" : "Añadir a destacadas",
+  "action.RemoveFeatured" : "Quitar de destacadas",
+  "action.RemoveAllFeatured" : "Quitar todas las destacadas",
 
   "label.language" : "Idioma:",
   "label.units" : "Unidades del modelo:",
@@ -475,6 +489,16 @@ export const translations =
 
   "label.report_type": "Tipo de informe:",
 
+  "label.inspector_object_tab" : "Objeto",
+  "label.inspector_geometry_tab" : "Geometría",
+  "label.inspector_material_tab" : "Material",
+  "label.inspector_builder_tab" : "Constructor (builder)",
+  "label.inspector_formulas_tab" : "Fórmulas",
+  "label.inspector_userdata_tab" : "Propiedades (userData)",
+  "label.inspector_controllers_tab" : "Controlladores",
+  "label.inspector_links_tab" : "Enlaces",
+  "label.inspector_featured_tab" : "Propiedades destacadas",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -498,6 +522,8 @@ export const translations =
   "title.delete_from_cloud" : "Borrar de la nube",
   "title.unsaved_changes" : "Cambios no guardados",
   "title.formula" : "Fórmula",
+  "title.remove_property" : "Borrar propiedad",
+  "title.remove_featured_properties" : "Borrar propiedades destacadas",
   "title.add_controller" : "Añadir controlador",
   "title.remove_controller" : "Borrar controlador",
   "title.properties" : "Propiedades",
@@ -570,7 +596,9 @@ export const translations =
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
   "question.delete_file" : name => `Quieres borrar el fichero ${name}?`,
-  "question.remove_controller" : name => `Quieres esborrar el controlador ${name}?`,
+  "question.remove_property" : name => `Quieres borrar la propiedad ${name}?`,
+  "question.remove_controller" : name => `Quieres borrar el controlador ${name}?`,
+  "question.remove_featured_properties" : "Quieres borrar todas las propiedades destacadas?",
   "question.create_new_scene" : "Quieres crear una nueva escena?",
   "question.delete_conversation" : "Quieres borrar la conversación?",
 

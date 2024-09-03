@@ -348,6 +348,20 @@ export const translations =
 
   "tool.about.label" : "About",
 
+  "action.ChangeMaterial" : "Change material",
+  "action.SetBuilder" : "Set builder",
+  "action.AddProperty" : "Add property",
+  "action.RemoveProperty" : "Remove property",
+  "action.EditProperties" : "Edit all properties",
+  "action.EditFormula" : "Edit formula",
+  "action.AddController" : "Add controller",
+  "action.RemoveController" : "Remove controller",
+  "action.StartController" : "Start controller",
+  "action.StopController" : "Stop controller",
+  "action.AddFeatured" : "Add to featured",
+  "action.RemoveFeatured" : "Remove from featured",
+  "action.RemoveAllFeatured" : "Remove all featured",
+
   "label.language" : "Language:",
   "label.units" : "Model units:",
   "label.decimals" : "Decimals to display:",
@@ -475,6 +489,16 @@ export const translations =
 
   "label.report_type": "Report type:",
 
+  "label.inspector_object_tab" : "Object",
+  "label.inspector_geometry_tab" : "Geometry",
+  "label.inspector_material_tab" : "Material",
+  "label.inspector_builder_tab" : "Builder",
+  "label.inspector_formulas_tab" : "Formulas",
+  "label.inspector_userdata_tab" : "Properties",
+  "label.inspector_controllers_tab" : "Controllers",
+  "label.inspector_links_tab" : "Links",
+  "label.inspector_featured_tab" : "Featured properties",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -498,6 +522,8 @@ export const translations =
   "title.delete_from_cloud" : "Delete from cloud",
   "title.unsaved_changes" : "Unsaved changes",
   "title.formula" : "Formula",
+  "title.remove_property" : "Remove property",
+  "title.remove_featured_properties" : "Remove featured properties",
   "title.add_controller" : "Add controller",
   "title.remove_controller" : "Remove controller",
   "title.properties" : "Properties",
@@ -570,7 +596,9 @@ export const translations =
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,
   "question.delete_file" : name => `Do you want to delete the ${name} file?`,
+  "question.remove_property" : name => `Remove property ${name}?`,
   "question.remove_controller" : name => `Remove controller ${name}?`,
+  "question.remove_featured_properties" : "Remove all featured properties?",
   "question.create_new_scene" : "Do you want to create a new scene?",
   "question.delete_conversation" : "Do you want to delete the conversation?",
 

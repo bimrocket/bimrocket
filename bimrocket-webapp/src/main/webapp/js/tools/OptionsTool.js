@@ -37,7 +37,7 @@ class OptionsTool extends Tool
     this.panel.onHide = () => this.application.useTool(null);
 
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
-    this.tabbedPane.paneElem.style.height = "100%";
+    this.tabbedPane.addClassName("h_full");
 
     const uiOptionsPanel =
       this.tabbedPane.addTab("ui_options", "tool.options.ui");

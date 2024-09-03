@@ -222,7 +222,7 @@ div.dialog > .header > button:focus
 .dialog .body .code > input[type=text]
 {
   font-family: monospace;
-  font-size: 14px;
+  font-size: 13px;
   color: #404040;
 }
 

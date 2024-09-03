@@ -442,7 +442,7 @@ class Controls
       highlightSelectionMatches(),
       theme];
 
-    const language = options.language || "json";
+    const language = options?.language || "json";
     switch (language)
     {
       case "json":

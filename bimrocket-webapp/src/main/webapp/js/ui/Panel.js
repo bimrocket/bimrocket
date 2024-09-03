@@ -11,6 +11,7 @@ class Panel
   static LARGE_SCREEN_WIDTH = 768;
   static POSITIONS = ["left", "right", "bottom"];
   static HEADER_HEIGHT = 24;
+  static DEFAULT_WIDTH = 280;
   static MARGIN = 6;
 
   constructor(application)
@@ -545,7 +546,7 @@ class PanelResizer
   {
     const application = this.panelManager.application;
     let value = application.setup.getItem("resizer." + this.side);
-    this.width = parseInt(value) || 250;
+    this.width = parseInt(value) || Panel.DEFAULT_WIDTH;
   }
 
   saveWidth()

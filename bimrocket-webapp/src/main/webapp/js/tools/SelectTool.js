@@ -26,6 +26,9 @@ class SelectTool extends Tool
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
     this._onPointerMove = this.onPointerMove.bind(this);
+    this._onPointerLeave = this.onPointerLeave.bind(this);
+
+    this.dragging = false;
 
     this.createPanel();
 
@@ -73,34 +76,41 @@ class SelectTool extends Tool
   {
     this.panel.visible = true;
     const container = this.application.container;
-    container.addEventListener('pointerdown', this._onPointerDown, false);
-    container.addEventListener('pointerup', this._onPointerUp, false);
+    container.addEventListener("pointerdown", this._onPointerDown, false);
+    container.addEventListener("pointerup", this._onPointerUp, false);
+    container.addEventListener("pointerleave", this._onPointerLeave, false);
   }
 
   deactivate()
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener('pointerdown', this._onPointerDown, false);
-    container.removeEventListener('pointerup', this._onPointerUp, false);
-    container.removeEventListener('pointermove', this._onPointerMove, false);
-    this.pointerElem.style.display = "none";
+    container.removeEventListener("pointerdown", this._onPointerDown, false);
+    container.removeEventListener("pointerup", this._onPointerUp, false);
+    container.removeEventListener("pointerleave", this._onPointerLeave, false);
+
+    this.stopDragging();
   }
 
   onPointerDown(event)
   {
-    const container = this.application.container;
-    container.addEventListener('pointermove', this._onPointerMove, false);
+    event.preventDefault();
+
+    const application = this.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    this.startDragging();
   }
 
   onPointerUp(event)
   {
-    const application = this.application;
-    const container = application.container;
-    container.removeEventListener('pointermove', this._onPointerMove, false);
+    event.preventDefault();
 
-    const pointerElem = this.pointerElem;
-    pointerElem.style.display = "none";
+    if (!this.dragging) return;
+
+    this.stopDragging();
+
+    const application = this.application;
 
     if (!application.isCanvasEvent(event)) return;
 
@@ -147,6 +157,33 @@ class SelectTool extends Tool
     pointerElem.style.top =
       (pointerPosition.y - this.pointerSize / 2) + "px";
     pointerElem.style.display = "";
+  }
+
+  onPointerLeave(event)
+  {
+    if (this.dragging)
+    {
+      this.stopDragging();
+    }
+  }
+
+  startDragging()
+  {
+    const container = this.application.container;
+    container.addEventListener("pointermove", this._onPointerMove, false);
+
+    this.dragging = true;
+  }
+
+  stopDragging()
+  {
+    const container = this.application.container;
+    container.removeEventListener("pointermove", this._onPointerMove, false);
+
+    const pointerElem = this.pointerElem;
+    pointerElem.style.display = "none";
+
+    this.dragging = false;
   }
 
   getPointerPosition(event)

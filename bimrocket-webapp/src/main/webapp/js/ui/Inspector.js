@@ -113,7 +113,7 @@ class Inspector extends Panel
         this.centerObject();
       }
     }, "previous");
-    I18N.set(this.previousButton, "t2pxitle", "button.previous");
+    I18N.set(this.previousButton, "title", "button.previous");
     I18N.set(this.previousButton, "alt", "button.previous");
 
     this.indexElem = document.createElement("span");
@@ -698,11 +698,6 @@ class Inspector extends Panel
     {
       contextMenu.show(event);
     }
-    else
-    {
-      event.preventDefault();
-      this.stopEdition();
-    }
   }
 
   updateToolBar()
@@ -856,11 +851,11 @@ class Inspector extends Panel
 
       let propElem = document.createElement("div");
       itemElem.appendChild(propElem);
-      propElem.tabIndex = 0;
 
       let labelElem = document.createElement("span");
       labelElem.textContent = propertyName + ':';
       labelElem.className = "label";
+      labelElem.tabIndex = 0;
       propElem.appendChild(labelElem);
 
       this.createValueElem(propElem, object, propertyName, propertyValue,
@@ -889,9 +884,9 @@ class Inspector extends Panel
         };
 
         propElem.addEventListener("click", editProperty, false);
-        propElem.addEventListener("keydown", event =>
+        labelElem.addEventListener("keydown", event =>
         {
-          if (event.target === propElem && event.keyCode === 13)
+          if (event.keyCode === 13)
           {
             editProperty(event);
           }
@@ -968,7 +963,7 @@ class Inspector extends Panel
       this.edition.propertyName, propertyValue,
       this.edition.renderer, this.edition.editor);
 
-    propElem.focus();
+    propElem.firstChild.focus();
 
     this.clearEdition();
   }
@@ -1372,7 +1367,10 @@ class Object3DRenderer extends PropertyRenderer
     valueElem.className = "value";
     valueElem.textContent = object.name || "object-" + object.id;
     valueElem.addEventListener("click",
-      () => this.inspector.application.selection.set(object));
+      () => {
+        this.inspector.propertiesTabbedPane.showTab("object");
+        this.inspector.application.selection.set(object);
+      });
     return valueElem;
   }
 }
@@ -1932,6 +1930,9 @@ class ChangeMaterialAction extends InspectorAction
 
   isEnabled()
   {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName === "featured") return false;
+
     const material = this.inspector.object.material;
     return material && this.getFirstPathName() === "material";
   }
@@ -2067,7 +2068,7 @@ class EditFormulaAction extends InspectorAction
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
     if (tabName === "geometry" || tabName === "featured") return false;
 
-    return this.getPropertyName() !== null;
+    return this.getPropertyName() !== null || tabName === "formulas";
   }
 
   perform()
@@ -2077,11 +2078,18 @@ class EditFormulaAction extends InspectorAction
     const object = inspector.object;
     const objectPath = this.getObjectPath();
     const propertyName = this.getPropertyName();
-    const formulaPath = inspector.getFormulaPath(objectPath, propertyName);
-    const formula = Formula.get(object, formulaPath);
+
+    let formula = null;
+    let formulaPath = null;
+
+    if (propertyName)
+    {
+      formulaPath = inspector.getFormulaPath(objectPath, propertyName);
+      formula = Formula.get(object, formulaPath);
+    }
     const dialog = new FormulaDialog(application, object, formula);
 
-    if (!formula)
+    if (!formula && formulaPath)
     {
       dialog.pathElem.value = formulaPath;
       let value = this.getLastObject()[propertyName];

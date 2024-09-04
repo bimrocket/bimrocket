@@ -18,6 +18,10 @@ menu.contextmenu
   animation-name: fade_in_dialog;
   animation-duration: 0.2s;
   animation-fill-mode: forwards;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
 }
 
 menu.contextmenu li
@@ -33,6 +37,7 @@ menu.contextmenu li a
   padding: 4px;
   display: block;
   white-space: nowrap;
+  -webkit-user-drag: none;
 }
 
 menu.contextmenu a:hover,

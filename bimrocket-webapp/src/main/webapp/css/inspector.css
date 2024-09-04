@@ -252,11 +252,6 @@ ul.inspector li.property > div
   margin-left: 18px;
 }
 
-ul.inspector li.property > div:hover
-{
-  text-decoration: none;
-}
-
 ul.inspector li.property .label
 {
   text-align: left;
@@ -267,7 +262,7 @@ ul.inspector li.property .label
   text-decoration: none;
 }
 
-ul.inspector li.property > div:focus
+ul.inspector li.property > div > .label:focus
 {
   outline-style: dotted;
   outline-color: black;

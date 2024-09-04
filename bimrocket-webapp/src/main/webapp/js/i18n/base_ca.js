@@ -495,7 +495,7 @@ export const translations =
   "label.inspector_builder_tab" : "Constructor (builder)",
   "label.inspector_formulas_tab" : "Fórmules",
   "label.inspector_userdata_tab" : "Propietats (userData)",
-  "label.inspector_controllers_tab" : "Controlladors",
+  "label.inspector_controllers_tab" : "Controladors",
   "label.inspector_links_tab" : "Enllaços",
   "label.inspector_featured_tab" : "Propietats destacades",
 

@@ -41,11 +41,12 @@ class ContextMenu
         linkElem.href = "#";
         itemElem.appendChild(linkElem);
         linkElem.addEventListener("mouseover", event => linkElem.focus());
+        linkElem.addEventListener("contextmenu", event => event.preventDefault());
+        linkElem.addEventListener("click", () => action.perform());
 
         if (firstLinkElem === null) firstLinkElem = linkElem;
 
         I18N.set(linkElem, "textContent", action.getLabel());
-        linkElem.addEventListener("click", () => action.perform());
         menuElement.appendChild(itemElem);
 
         this.application.i18n.update(linkElem);

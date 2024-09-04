@@ -62,17 +62,17 @@ class Panel
     I18N.set(this.closeButtonElem, "title", "button.close");
     this.headerElem.appendChild(this.closeButtonElem);
 
-    this.titleLinkElem.addEventListener("pointerdown", event =>
+    this.titleLinkElem.addEventListener("click", event =>
       { event.preventDefault(); this.zoom(); }, false);
 
-    this.minimizeButtonElem.addEventListener("pointerdown", event =>
-      this.minimized = true, false);
+    this.minimizeButtonElem.addEventListener("click", () =>
+      this.minimized = true);
 
-    this.maximizeButtonElem.addEventListener("pointerdown", event =>
-      this.minimized = false, false);
+    this.maximizeButtonElem.addEventListener("click", () =>
+      this.minimized = false);
 
-    this.closeButtonElem.addEventListener("pointerdown", event =>
-      this.visible = false, false);
+    this.closeButtonElem.addEventListener("click", () =>
+      this.visible = false);
 
     this._position = null;
     this.position = "left";

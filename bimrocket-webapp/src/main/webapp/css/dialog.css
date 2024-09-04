@@ -113,6 +113,11 @@ div.dialog > .header > .title
   text-align: center;
 }
 
+div.dialog > .header > .title > a
+{
+  -webkit-user-drag: none;
+}
+
 div.dialog > .header > button
 {
   flex-grow: 0;

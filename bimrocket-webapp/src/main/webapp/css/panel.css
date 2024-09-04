@@ -71,6 +71,10 @@ div.panel > .header
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
 }
 
 div.panel > .header > .title
@@ -83,6 +87,7 @@ div.panel > .header > .title > a
   font-weight: bold;
   text-decoration: none;
   color:#404040;
+  -webkit-user-drag: none;
 }
 
 div.panel > .header > .title > a:focus

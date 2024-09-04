@@ -37,7 +37,6 @@ class TabbedPane
     {
       const tabSelectorElem = document.createElement("a");
       tabSelectorElem.href = "#";
-      tabSelectorElem.addEventListener("pointerdown", () => this.showTab(name));
       tabSelectorElem.addEventListener("click", () => this.showTab(name));
       tabSelectorElem.addEventListener("contextmenu",
         event => event.preventDefault());

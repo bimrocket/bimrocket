@@ -67,6 +67,12 @@ class FormulaDialog extends Dialog
         try
         {
           Formula.create(this.object, path, expression);
+          if (path.startsWith("position." ||
+              path.startsWith("rotation.") ||
+              path.startsWith("scale.")))
+          {
+            this.object.updateMatrix();
+          }
           this.application.notifyObjectsChanged(this.object, this);
           this.hide();
         }

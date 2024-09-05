@@ -111,6 +111,32 @@ class IFCExporter
             entity.RepresentationMaps = [reprMap];
           }
         }
+        else if (entity instanceof schema.IfcProject)
+        {
+          const units = object3D.userData.units || "m";
+          let prefix = null;
+          let name = null;
+          switch (units)
+          {
+            case "mm" : prefix = "MILLI"; name = "METRE"; break;
+            case "cm" : prefix = "CENTI"; name = "METRE"; break;
+            case "dm" : prefix = "DECI"; name = "METRE"; break;
+            case "m" : prefix = null; name = "METRE"; break;
+            case "hm" : prefix = "HECTO"; name = "METRE"; break;
+            case "km" : prefix = "KILO"; name = "METRE"; break;
+          }
+          if (name === "METRE")
+          {
+            const ifcSIUnit = new schema.IfcSIUnit();
+            ifcSIUnit.Dimensions = undefined;
+            ifcSIUnit.UnitType = new Constant("LENGTHUNIT");
+            ifcSIUnit.Name = new Constant("METRE");
+            if (prefix) ifcSIUnit.Prefix = new Constant(prefix);
+
+            entity.UnitsInContext = new schema.IfcUnitAssignment();
+            entity.UnitsInContext.Units = [ifcSIUnit];
+          }
+        }
       }
     }
 

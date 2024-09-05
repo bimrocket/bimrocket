@@ -2115,6 +2115,9 @@ class AddControllerAction extends InspectorAction
 
   isEnabled()
   {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName !== "controllers") return false;
+
     return this.getFirstPathName() === "controllers";
   }
 
@@ -2137,6 +2140,9 @@ class RemoveControllerAction extends InspectorAction
 
   isEnabled()
   {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName !== "controllers") return false;
+
     const objectPath = this.getObjectPath();
     return objectPath.length === 2 &&
            objectPath[0] === "controllers" &&
@@ -2172,6 +2178,9 @@ class StartControllerAction extends InspectorAction
 
   isEnabled()
   {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName !== "controllers") return false;
+
     const objectPath = this.getObjectPath();
     return objectPath.length === 2 &&
            objectPath[0] === "controllers" &&
@@ -2205,6 +2214,9 @@ class StopControllerAction extends InspectorAction
 
   isEnabled()
   {
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    if (tabName !== "controllers") return false;
+
     const objectPath = this.getObjectPath();
     return objectPath.length === 2 &&
            objectPath[0] === "controllers" &&

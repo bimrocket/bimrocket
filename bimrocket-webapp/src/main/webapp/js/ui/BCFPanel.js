@@ -1466,7 +1466,7 @@ class BCFPanel extends Panel
       this.application.addService(service, this.group);
       this.updateServices();
       this.service = service;
-      this.bcfServiceElem.value = name;
+      this.bcfServiceElem.value = service.name;
       this.filterPanelElem.style.display = "none";
       this.topicTableElem.style.display = "none";
     };

@@ -94,19 +94,19 @@ class SelectTool extends Tool
 
   onPointerDown(event)
   {
-    event.preventDefault();
-
     const application = this.application;
     if (!application.isCanvasEvent(event)) return;
+
+    event.preventDefault();
 
     this.startDragging();
   }
 
   onPointerUp(event)
   {
-    event.preventDefault();
-
     if (!this.dragging) return;
+
+    event.preventDefault();
 
     this.stopDragging();
 

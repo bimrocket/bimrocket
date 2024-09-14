@@ -459,6 +459,11 @@ class Controls
         const { xml } = CM["@codemirror/lang-xml"];
         extensions.push(xml({ autoCloseTags : true }));
         break;
+
+      case "sql":
+        const { sql } = CM["@codemirror/lang-sql"];
+        extensions.push(sql());
+        break;
     }
 
     const editorState = EditorState.create(

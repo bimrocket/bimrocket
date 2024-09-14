@@ -47,7 +47,16 @@ class WebUtils
     if (username && password)
     {
       const userPass = username + ":" + password;
-      request.setRequestHeader("Authorization", "Basic " + btoa(userPass));
+      const authorization = "Basic " + btoa(userPass);
+
+      if (request instanceof XMLHttpRequest)
+      {
+        request.setRequestHeader("Authorization", authorization);
+      }
+      else if (typeof request === "object") // fetch header options
+      {
+        request["Authorization"] = authorization;
+      }
     }
   }
 

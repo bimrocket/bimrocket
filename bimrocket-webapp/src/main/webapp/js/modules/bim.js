@@ -7,10 +7,12 @@
 import { BIMInventoryTool } from "../tools/BIMInventoryTool.js";
 import { BIMLayoutTool } from "../tools/BIMLayoutTool.js";
 import { BIMInspectorTool } from "../tools/BIMInspectorTool.js";
+import { IFCDBTool } from "../tools/IFCDBTool.js";
 import { BCFTool } from "../tools/BCFTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
+import { IFCDBService } from "../io/IFCDBService.js";
 import { IOManager } from "../io/IOManager.js";
 import { IDSReportType } from "../reports/IDSReportType.js";
 import { BundleManager } from "../i18n/BundleManager.js";
@@ -42,11 +44,13 @@ export function load(application)
   const bimInventoryTool = new BIMInventoryTool(application);
   const bimLayoutTool = new BIMLayoutTool(application);
   const bimInspectorTool = new BIMInspectorTool(application);
+  const ifcDBTool = new IFCDBTool(application);
   const bcfTool = new BCFTool(application);
 
   application.addTool(bimInventoryTool);
   application.addTool(bimLayoutTool);
   application.addTool(bimInspectorTool);
+  application.addTool(ifcDBTool);
   application.addTool(bcfTool);
 
   // create menus
@@ -56,6 +60,7 @@ export function load(application)
   bimMenu.addMenuItem(bimLayoutTool);
   bimMenu.addMenuItem(bimInventoryTool);
   bimMenu.addMenuItem(bimInspectorTool);
+  bimMenu.addMenuItem(ifcDBTool);
   bimMenu.addMenuItem(bcfTool);
 
   const toolBar = application.toolBar;
@@ -64,6 +69,7 @@ export function load(application)
 
   // restore services
   application.restoreServices("bcf");
+  application.restoreServices("ifcdb");
 
   // create default services
   if (application.services.bcf === undefined)
@@ -74,6 +80,23 @@ export function load(application)
       url : "/bimrocket-server/api"
     });
     application.addService(bcf, "bcf", false);
+  }
+
+  if (application.services.ifcdb === undefined)
+  {
+    const ifcdb_2X3 = new IFCDBService({
+      name : "ifcdb_2X3",
+      description : application.constructor.NAME + " IFCDB (IFC2X3)",
+      url : "/bimrocket-server/api/ifcdb/1.0/models/IFC2X3"
+    });
+    application.addService(ifcdb_2X3, "ifcdb", false);
+
+    const ifcdb_4 = new IFCDBService({
+      name : "ifcdb_4",
+      description : application.constructor.NAME + " IFCDB (IFC4)",
+      url : "/bimrocket-server/api/ifcdb/1.0/models/IFC4"
+    });
+    application.addService(ifcdb_4, "ifcdb", false);
   }
 
   // load bundles

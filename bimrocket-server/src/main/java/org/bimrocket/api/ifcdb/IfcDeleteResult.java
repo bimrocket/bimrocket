@@ -28,34 +28,23 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.ifc;
+package org.bimrocket.api.ifcdb;
 
 /**
  *
  * @author realor
  */
-public class IfcQuery
+public class IfcDeleteResult
 {
-  String language;
-  String query;
+  int count = 0;
 
-  public String getLanguage()
+  public int getCount()
   {
-    return language;
+    return count;
   }
 
-  public void setLanguage(String language)
+  public void setCount(int count)
   {
-    this.language = language;
-  }
-
-  public String getQuery()
-  {
-    return query;
-  }
-
-  public void setQuery(String query)
-  {
-    this.query = query;
+    this.count = count;
   }
 }

@@ -22,6 +22,8 @@ export const translations =
   "tool.bim_inspector.label" : "Inspector BIM",
   "tool.bim_inspector.help" : "Muestra la representación IFC",
 
+  "tool.ifcdb.label" : "IFCDB",
+
   "tab.file" : "Fichero",
   "tab.entity" : "Entidad",
   "tab.definition" : "Definición",
@@ -39,6 +41,9 @@ export const translations =
   "tab.classifications" : "Clasificaciones",
   "tab.groups" : "Grupos",
   "tab.layers" : "Capas",
+
+  "tab.ifcdb_models" : "Modelos",
+  "tab.ifcdb_query" : "Consulta",
 
   "label.bcf_service" : "Servicio BCF:",
   "label.project" : "Proyecto:",
@@ -63,6 +68,9 @@ export const translations =
   "label.doc_ref_description" : "Descripción:",
   "label.link_models" : "Enlazar modelos",
   "label.keep_pov" : "Mantener punto de vista",
+  "label.ifcdb_service" : "Servicio IFCDB:",
+  "label.ifcdb_modelid" : "Id. de modelo:",
+  "label.ifcdb_query" : "Consulta SQL:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
@@ -72,6 +80,7 @@ export const translations =
   "title.delete_comment" : "Borrar comentario",
   "title.delete_viewpoint" : "Borrar punto de vista",
   "title.delete_bcf_service" : "Borrar servicio BCF",
+  "title.delete_ifcdb_service" : "Borrar servicio IFCDB",
   "title.viewpoint" : "Vista de la incidencia",
   "title.delete_doc_ref" : "Borrar referencia a documento",
 
@@ -94,5 +103,6 @@ export const translations =
   "question.delete_comment" : "Quieres borrar este comentario?",
   "question.delete_viewpoint" : "Quieres borrar este punto de vista?",
   "question.delete_doc_ref" : "Quieres borrar esta referencia a documento?",
-  "question.delete_bcf_service" : name => `Quieres borrar el servicio ${name}?`
+  "question.delete_bcf_service" : name => `Quieres borrar el servicio ${name}?`,
+  "question.delete_ifcdb_service" : name => `Quieres borrar el servicio ${name}?`
 };

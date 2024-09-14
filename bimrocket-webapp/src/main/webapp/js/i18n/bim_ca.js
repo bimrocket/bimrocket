@@ -40,6 +40,11 @@ export const translations =
   "tab.groups" : "Grups",
   "tab.layers" : "Capes",
 
+  "tab.ifcdb_models" : "Models",
+  "tab.ifcdb_query" : "Consulta",
+
+  "tool.ifcdb.label" : "IFCDB",
+
   "label.bcf_service" : "Servei BCF:",
   "label.project" : "Projecte:",
   "label.status" : "Estat:",
@@ -63,15 +68,19 @@ export const translations =
   "label.doc_ref_description" : "Descripció:",
   "label.link_models" : "Enllaça models",
   "label.keep_pov" : "Manté punt de vista",
+  "label.ifcdb_service" : "Servei IFCDB:",
+  "label.ifcdb_modelid" : "Id. de model:",
+  "label.ifcdb_query" : "Consulta SQL:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
-  "col.status" : "Estat",
+  "col.sta servicetus" : "Estat",
 
   "title.delete_topic" : "Esborra incidència",
   "title.delete_comment" : "Esborra comentari",
   "title.delete_viewpoint" : "Esborra punt de vista",
   "title.delete_bcf_service" : "Esborra servei BCF",
+  "title.delete_ifcdb_service" : "Esborra servei IFCDB",
   "title.viewpoint" : "Vista de la incidència",
   "title.delete_doc_ref" : "Esborra referència a document",
 
@@ -94,5 +103,6 @@ export const translations =
   "question.delete_comment" : "Vols esborrar aquest comentari?",
   "question.delete_viewpoint" : "Vols esborrar aquest punt de vista?",
   "question.delete_doc_ref" : "Vols esborrar aquesta referència a document?",
-  "question.delete_bcf_service" : name => `Vols esborrar el servei ${name}?`
+  "question.delete_bcf_service" : name => `Vols esborrar el servei ${name}?`,
+  "question.delete_ifcdb_service" : name => `Vols esborrar el servei ${name}?`
 };

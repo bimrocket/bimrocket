@@ -78,12 +78,9 @@ public abstract class StepExporter
     for (Object object : objects)
     {
       ExpressEntity entityType = getEntityType(object);
-      if (entityType != null)
+      if (entityType != null) // is entity
       {
-        if ("IfcRoot".equals(entityType.getRootEntity().getName()))
-        {
-          registerObject(object);
-        }
+        registerObject(object);
       }
     }
 
@@ -142,7 +139,7 @@ public abstract class StepExporter
   {
     if (object instanceof Collection)
     {
-      Collection col = (List)object;
+      Collection col = (Collection)object;
       for (Object value : col)
       {
         registerObject(value);

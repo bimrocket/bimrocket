@@ -28,10 +28,12 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api.ifc;
+package org.bimrocket.api.ifcdb;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -50,20 +52,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
-import org.bimrocket.service.ifc.IfcService;
+import org.bimrocket.service.ifcdb.IfcDatabaseService;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 /**
  *
  * @author realor
  */
-@Path("ifc/1.0")
-@Tag(name="IFC", description="Industry Foundation Classes")
-public class IfcEndpoint
+@Path("ifcdb/1.0")
+@Tag(name="IFCDB", description="Industry Foundation Classes Database")
+public class IfcDatabaseEndpoint
 {
   @Inject
-  IfcService ifcService;
+  IfcDatabaseService ifcDatabaseService;
 
   /* Auth */
 
@@ -75,48 +77,63 @@ public class IfcEndpoint
     return new ArrayList<>();
   }
 
-  @GET
-  @Path("/files/{schema}/{fileId}")
-  public Response getIfcFileById(@PathParam("schema") String schemaName,
-    @PathParam("fileId") String fileId)
-  {
-    try
-    {
-      File ifcFile = File.createTempFile("file", ".ifc");
-
-      ifcService.getIfcFileById(schemaName, fileId, ifcFile);
-
-      return sendIfcFile(ifcFile);
-    }
-    catch (Exception ex)
-    {
-      return Response.status(INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
   @POST
-  @Path("/files/{schema}")
-  public Response getIfcFileByQuery(@PathParam("schema") String schemaName,
+  @Path("/models/{schema}")
+  @Consumes(APPLICATION_JSON)
+  @Produces({ TEXT_PLAIN, APPLICATION_JSON })
+  public Response executeQuery(@PathParam("schema") String schemaName,
     IfcQuery query)
   {
     try
     {
-      File ifcFile = File.createTempFile("file", ".ifc");
+      if ("json".equals(query.getOutputFormat()))
+      {
+        File file = File.createTempFile("file", ".json");
 
-      ifcService.getIfcFileByQuery(schemaName, query.getQuery(), ifcFile);
+        ifcDatabaseService.executeQuery(schemaName, query, file);
 
-      return sendIfcFile(ifcFile);
+        return sendFile(file, "application/json");
+      }
+      else
+      {
+        File file = File.createTempFile("file", ".ifc");
+
+        ifcDatabaseService.executeQuery(schemaName, query, file);
+
+        return sendFile(file, "application/x-step");
+      }
     }
     catch (Exception ex)
     {
-      return Response.status(INTERNAL_SERVER_ERROR).build();
+      throw createException(ex);
+    }
+  }
+
+  @GET
+  @Path("/models/{schema}/{modelId}")
+  @Produces({ TEXT_PLAIN, APPLICATION_JSON })
+  public Response getModel(@PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId)
+  {
+    try
+    {
+      File ifcFile = File.createTempFile("file", ".ifc");
+
+      ifcDatabaseService.getModel(schemaName, modelId, ifcFile);
+
+      return sendFile(ifcFile, "application/x-step");
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
     }
   }
 
   @PUT
-  @Path("/files/{schema}/{fileId}")
-  public Response putIfcFile(@PathParam("schema") String schemaName,
-    @PathParam("fileId") String fileId, InputStream input)
+  @Path("/models/{schema}/{modelId}")
+  @Produces(APPLICATION_JSON)
+  public IfcUploadResult putModel(@PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId, InputStream input)
   {
     try
     {
@@ -126,31 +143,53 @@ public class IfcEndpoint
         IOUtils.copy(input, output);
       }
 
-      ifcService.putIfcFile(schemaName, fileId, ifcFile);
-
-      return Response.ok().build();
+      return ifcDatabaseService.putModel(schemaName, modelId, ifcFile);
     }
     catch (Exception ex)
     {
-      return Response.status(INTERNAL_SERVER_ERROR).build();
+      throw createException(ex);
     }
   }
 
-  private Response sendIfcFile(File ifcFile)
+  @DELETE
+  @Path("/models/{schema}/{modelId}")
+  @Produces(APPLICATION_JSON)
+  public IfcDeleteResult deleteModel(@PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId)
+  {
+    try
+    {
+      return ifcDatabaseService.deleteModel(schemaName, modelId);
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
+    }
+  }
+
+  private Response sendFile(File file, String contentType)
   {
     StreamingOutput stream = (OutputStream output) ->
     {
-      try (FileInputStream input = new FileInputStream(ifcFile))
+      try (FileInputStream input = new FileInputStream(file))
       {
         IOUtils.copy(input, output);
       }
     };
     ResponseBuilder builder = Response.ok(stream);
 
-    return builder.header("Content-Type", "application/x-step")
-      .header("Content-Length", ifcFile.length())
+    return builder.header("Content-Type", contentType)
+      .header("Content-Length", file.length())
       .lastModified(new Date())
       .build();
+  }
+
+  private RuntimeException createException(Exception ex)
+  {
+    String message = ex.getMessage();
+    if (message == null) message = ex.toString();
+
+    return new RuntimeException(message);
   }
 
 }

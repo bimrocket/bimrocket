@@ -25,6 +25,8 @@ export const translations =
   "tool.bcf.label" : "BCF",
   "tool.bcf.help" : "Manage BCF topics",
 
+  "tool.ifcdb.label" : "IFCDB",
+
   "tab.file" : "File",
   "tab.entity" : "Entity",
   "tab.definition" : "Definition",
@@ -39,6 +41,9 @@ export const translations =
   "tab.classifications" : "Classifications",
   "tab.groups" : "Groups",
   "tab.layers" : "Layers",
+
+  "tab.ifcdb_models" : "Models",
+  "tab.ifcdb_query" : "Query",
 
   "label.bcf_service" : "BCF service:",
   "label.project" : "Project:",
@@ -63,6 +68,9 @@ export const translations =
   "label.doc_ref_description" : "Description:",
   "label.link_models" : "Link models",
   "label.keep_pov" : "Keep point of view",
+  "label.ifcdb_service" : "IFCDB service:",
+  "label.ifcdb_modelid" : "Model id:",
+  "label.ifcdb_query" : "SQL query:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -72,6 +80,7 @@ export const translations =
   "title.delete_comment" : "Delete comment",
   "title.delete_viewpoint" : "Delete viewpoint",
   "title.delete_bcf_service" : "Delete BCF service",
+  "title.delete_ifcdb_service" : "Delete IFCDB service",
   "title.viewpoint" : "Topic viewpoint",
   "title.delete_doc_ref" : "Delete document reference",
 
@@ -94,5 +103,6 @@ export const translations =
   "question.delete_comment" : "Do you want to delete this comment?",
   "question.delete_viewpoint" : "Do you want to delete this viewpoint?",
   "question.delete_doc_ref" : "Do you want to delete this document reference?",
-  "question.delete_bcf_service" : name => `Do you want to delete the ${name} service?`
+  "question.delete_bcf_service" : name => `Do you want to delete the ${name} service?`,
+  "question.delete_ifcdb_service" : name => `Do you want to delete the ${name} service?`
 };

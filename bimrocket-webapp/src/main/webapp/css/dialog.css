@@ -265,6 +265,7 @@ div.dialog > .header > button:focus
   display:flex;
   justify-content: center;
   align-items: center;
+  word-break: break-word;
 }
 
 .dialog .body.error span

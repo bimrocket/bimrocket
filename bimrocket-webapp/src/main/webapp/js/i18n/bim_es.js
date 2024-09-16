@@ -43,7 +43,7 @@ export const translations =
   "tab.layers" : "Capas",
 
   "tab.ifcdb_models" : "Modelos",
-  "tab.ifcdb_query" : "Consulta",
+  "tab.ifcdb_command" : "Comando",
 
   "label.bcf_service" : "Servicio BCF:",
   "label.project" : "Proyecto:",
@@ -70,7 +70,7 @@ export const translations =
   "label.keep_pov" : "Mantener punto de vista",
   "label.ifcdb_service" : "Servicio IFCDB:",
   "label.ifcdb_modelid" : "Id. de modelo:",
-  "label.ifcdb_query" : "Consulta SQL:",
+  "label.ifcdb_command" : "Comando SQL:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",

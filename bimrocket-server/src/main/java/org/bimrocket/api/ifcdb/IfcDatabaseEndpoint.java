@@ -81,16 +81,16 @@ public class IfcDatabaseEndpoint
   @Path("/models/{schema}")
   @Consumes(APPLICATION_JSON)
   @Produces({ TEXT_PLAIN, APPLICATION_JSON })
-  public Response executeQuery(@PathParam("schema") String schemaName,
-    IfcQuery query)
+  public Response execute(@PathParam("schema") String schemaName,
+    IfcCommand command)
   {
     try
     {
-      if ("json".equals(query.getOutputFormat()))
+      if ("json".equals(command.getOutputFormat()))
       {
         File file = File.createTempFile("file", ".json");
 
-        ifcDatabaseService.executeQuery(schemaName, query, file);
+        ifcDatabaseService.execute(schemaName, command, file);
 
         return sendFile(file, "application/json");
       }
@@ -98,7 +98,7 @@ public class IfcDatabaseEndpoint
       {
         File file = File.createTempFile("file", ".ifc");
 
-        ifcDatabaseService.executeQuery(schemaName, query, file);
+        ifcDatabaseService.execute(schemaName, command, file);
 
         return sendFile(file, "application/x-step");
       }

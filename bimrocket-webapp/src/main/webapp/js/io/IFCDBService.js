@@ -15,9 +15,9 @@ class IFCDBService extends Service
     super(parameters);
   }
 
-  async executeQuery(query)
+  async execute(command)
   {
-    const response = await this.invoke("POST", "", "application/json", JSON.stringify(query));
+    const response = await this.invoke("POST", "", "application/json", JSON.stringify(command));
     return await response.text();
   }
 

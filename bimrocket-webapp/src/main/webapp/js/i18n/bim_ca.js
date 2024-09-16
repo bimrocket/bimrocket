@@ -41,7 +41,7 @@ export const translations =
   "tab.layers" : "Capes",
 
   "tab.ifcdb_models" : "Models",
-  "tab.ifcdb_query" : "Consulta",
+  "tab.ifcdb_command" : "Comanda",
 
   "tool.ifcdb.label" : "IFCDB",
 
@@ -70,7 +70,7 @@ export const translations =
   "label.keep_pov" : "Manté punt de vista",
   "label.ifcdb_service" : "Servei IFCDB:",
   "label.ifcdb_modelid" : "Id. de model:",
-  "label.ifcdb_query" : "Consulta SQL:",
+  "label.ifcdb_command" : "Comanda SQL:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",

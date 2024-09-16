@@ -34,7 +34,7 @@ package org.bimrocket.api.ifcdb;
  *
  * @author realor
  */
-public class IfcQuery
+public class IfcCommand
 {
   String language;
   String query;

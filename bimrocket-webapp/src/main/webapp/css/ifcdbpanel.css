@@ -57,7 +57,7 @@
   padding: 4px;
 }
 
-.ifcdb_query
+.ifcdb_command
 {
   display: flex;
   flex-direction: column;

@@ -65,10 +65,10 @@ class IFCDBPanel extends Panel
     this.modelTabElem =
       this.tabbedPane.addTab("mode", "bim|tab.ifcdb_models");
 
-    this.queryTabElem =
-      this.tabbedPane.addTab("query", "bim|tab.ifcdb_query");
+    this.commandTabElem =
+      this.tabbedPane.addTab("command", "bim|tab.ifcdb_command");
 
-    this.queryTabElem.style.textAlign = "left";
+    this.commandTabElem.style.textAlign = "left";
 
     this.modelIdElem = Controls.addTextField(this.modelTabElem, "ifc_modelid", "bim|label.ifcdb_modelid");
     this.modelIdElem.parentElement.className = "ifcdb_modelid";
@@ -86,27 +86,27 @@ class IFCDBPanel extends Panel
     this.deleteModelButton = Controls.addButton(modelButtonsElem, "del_ifc",
       "button.delete", () => this.deleteModel());
 
-    const queryPanelElem = document.createElement("div");
-    queryPanelElem.className = "ifcdb_query";
-    this.queryTabElem.appendChild(queryPanelElem);
+    const commandPanelElem = document.createElement("div");
+    commandPanelElem.className = "ifcdb_command";
+    this.commandTabElem.appendChild(commandPanelElem);
 
-    this.extensionsView = Controls.addCodeEditor(queryPanelElem,
-      "query", "bim|label.ifcdb_query", "",
+    this.extensionsView = Controls.addCodeEditor(commandPanelElem,
+      "command", "bim|label.ifcdb_command", "",
       { "language" : "sql", "height" : "200px" });
 
-    const queryButtonsElem = document.createElement("div");
-    queryButtonsElem.className = "ifcdb_buttons";
-    queryPanelElem.appendChild(queryButtonsElem);
+    const commandButtonsElem = document.createElement("div");
+    commandButtonsElem.className = "ifcdb_buttons";
+    commandPanelElem.appendChild(commandButtonsElem);
 
-    this.executeButton = Controls.addButton(queryButtonsElem, "exec_ifcstep",
-      "button.open", () => this.executeQuery("step"));
+    this.executeButton = Controls.addButton(commandButtonsElem, "exec_ifcstep",
+      "button.open", () => this.execute("step"));
 
-    this.executeButton = Controls.addButton(queryButtonsElem, "exec_ifcjson",
-      "button.run", () => this.executeQuery("json"));
+    this.executeButton = Controls.addButton(commandButtonsElem, "exec_ifcjson",
+      "button.run", () => this.execute("json"));
 
     this.resultElem = document.createElement("pre");
     this.resultElem.className = "ifcdb_result";
-    queryPanelElem.appendChild(this.resultElem);
+    commandPanelElem.appendChild(this.resultElem);
   }
 
   onShow()
@@ -201,19 +201,19 @@ class IFCDBPanel extends Panel
     }
   }
 
-  async executeQuery(format = "step")
+  async execute(format = "step")
   {
     try
     {
       const sql = this.extensionsView.state.doc.toString();
-      const query = {
-        "language" : "orientdb",
+      const command = {
+        "language" : "sql",
         "query" : sql,
         "outputFormat" : format
       };
 
-      this.showProgressBar("Executing query...");
-      const data = await this.service.executeQuery(query);
+      this.showProgressBar("Executing command...");
+      const data = await this.service.execute(command);
       if (format === "json")
       {
         this.resultElem.innerHTML = "";
@@ -226,7 +226,7 @@ class IFCDBPanel extends Panel
     }
     catch (ex)
     {
-      this.handleError(ex, () => this.executeQuery(format));
+      this.handleError(ex, () => this.execute(format));
     }
     finally
     {

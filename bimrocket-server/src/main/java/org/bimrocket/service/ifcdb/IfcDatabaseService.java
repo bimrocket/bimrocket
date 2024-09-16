@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bimrocket.api.ifcdb.IfcDeleteResult;
-import org.bimrocket.api.ifcdb.IfcQuery;
+import org.bimrocket.api.ifcdb.IfcCommand;
 import org.bimrocket.api.ifcdb.IfcUploadResult;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
@@ -75,7 +75,7 @@ public class IfcDatabaseService
   @Inject
   ServletContext servletContext;
 
-  public void executeQuery(String schemaName, IfcQuery query, File file)
+  public void execute(String schemaName, IfcCommand command, File file)
     throws Exception
   {
     ExpressLoader expressParser = new ExpressLoader();
@@ -85,16 +85,14 @@ public class IfcDatabaseService
 
     try (OrientDB orientDB = getServer())
     {
-      OrientStepExporter exporter = new OrientStepExporter(schema);
-
       try (ODatabaseDocument db = openDB(orientDB, dbName))
       {
-        String outputFormat = query.getOutputFormat();
+        String outputFormat = command.getOutputFormat();
 
         if ("json".equals(outputFormat))
         {
           ArrayList<OResult> results = new ArrayList<>();
-          try (OResultSet rs = db.query(query.getQuery()))
+          try (OResultSet rs = db.command(command.getQuery()))
           {
             rs.stream().forEach(result -> results.add(result));
           }
@@ -103,10 +101,11 @@ public class IfcDatabaseService
         else
         {
           ArrayList<OElement> elements = new ArrayList<>();
-          try (OResultSet rs = db.query(query.getQuery()))
+          try (OResultSet rs = db.query(command.getQuery()))
           {
             rs.elementStream().forEach(element -> elements.add(element));
           }
+          OrientStepExporter exporter = new OrientStepExporter(schema);
           exporter.export(new OutputStreamWriter(
             new FileOutputStream(file)), elements);
         }

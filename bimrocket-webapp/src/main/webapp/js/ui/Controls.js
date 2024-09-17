@@ -462,7 +462,7 @@ class Controls
 
       case "sql":
         const { sql } = CM["@codemirror/lang-sql"];
-        extensions.push(sql());
+        extensions.push(sql(options.sqlConfig));
         break;
     }
 

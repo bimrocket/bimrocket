@@ -31,7 +31,6 @@
 package org.bimrocket.service.ifcdb;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
-import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
@@ -42,11 +41,9 @@ import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -124,7 +121,6 @@ public class IfcDatabaseService
     try (OrientDB orientDB = getServer())
     {
       ArrayList<OElement> elements = new ArrayList<>();
-      OrientStepExporter exporter = new OrientStepExporter(schema);
 
       try (ODatabaseDocument db = openDB(orientDB, dbName))
       {
@@ -134,6 +130,7 @@ public class IfcDatabaseService
         }
         if (elements.isEmpty()) throw new Exception("There is no model with that Id");
 
+        OrientStepExporter exporter = new OrientStepExporter(schema);
         exporter.export(new OutputStreamWriter(
           new FileOutputStream(ifcFile)), elements);
       }

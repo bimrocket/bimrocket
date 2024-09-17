@@ -90,9 +90,30 @@ class IFCDBPanel extends Panel
     commandPanelElem.className = "ifcdb_command";
     this.commandTabElem.appendChild(commandPanelElem);
 
+    const { SQLDialect } = CM["@codemirror/lang-sql"];
+
+    const OrientDB = SQLDialect.define({
+      keywords: "after and as asc batch before between breadth_first by " +
+        "cluster contains containsall containskey containstext containsvalue " +
+        "create default defined delete depth_first desc distinct edge " +
+        "fetchplan from in increment insert instanceof into is let like " +
+        "limit lock match matches maxdepth nocache not null or parallel " +
+        "polymorphic retry return select set skip strategy timeout traverse " +
+        "unsafe unwind update upsert vertex wait where while",
+      types: "boolean integer short long float double datetime string binary " +
+        "embedded embeddedlist embeddedset embeddedmap link linklist " +
+        "linkset linkmap byte transient date custom decimal linkbag any",
+      specialVar: "$",
+      builtin: "@rid @class @version metadata:schema metadata:database " +
+        "metadata:storage metadata:indexmanager",
+      slashComments: false
+    });
+
+    const sqlConfig = { dialect : OrientDB };
+
     this.extensionsView = Controls.addCodeEditor(commandPanelElem,
       "command", "bim|label.ifcdb_command", "",
-      { "language" : "sql", "height" : "200px" });
+      { "language" : "sql", "height" : "200px", sqlConfig : sqlConfig });
 
     const commandButtonsElem = document.createElement("div");
     commandButtonsElem.className = "ifcdb_buttons";
@@ -106,6 +127,7 @@ class IFCDBPanel extends Panel
 
     this.resultElem = document.createElement("pre");
     this.resultElem.className = "ifcdb_result";
+    this.resultElem.tabIndex = -1;
     commandPanelElem.appendChild(this.resultElem);
   }
 

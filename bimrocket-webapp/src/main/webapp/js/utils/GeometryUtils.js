@@ -145,11 +145,50 @@ class GeometryUtils
     return normal;
   }
 
-  /* Returns the offset vector that should be subtracted from the given point
+  /**
+   * Returns the center of a circle that passes through the 3 given points.
+   *
+   * @param {THREE.Vector2} point1
+   * @param {THREE.Vector2} point2
+   * @param {THREE.Vector2} point3
+   * @returns {THREE.Vector2}
+   */
+  static getCircleCenter(point1, point2, point3)
+  {
+    const x1 = point1.x;
+    const y1 = point1.y;
+    const x2 = point2.x;
+    const y2 = point2.y;
+    const x3 = point3.x;
+    const y3 = point3.y;
+
+    const x1_2 = x1 * x1;
+    const x2_2 = x2 * x2;
+    const x3_2 = x3 * x3;
+    const y1_2 = y1 * y1;
+    const y2_2 = y2 * y2;
+    const y3_2 = y3 * y3;
+
+    const t1 = (x2_2 + y2_2 - x3_2 - y3_2);
+    const t2 = (x1_2 + y1_2 - x2_2 - y2_2);
+
+    const xc = ((y2 - y1) * t1 - (y3 - y2) * t2) /
+      (2 * (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)));
+
+    const yc = ((x2 - x1) * t1 - (x3 - x2) * t2) /
+      (2 * (y1 * (x2 - x3) + y2 * (x3 - x1) + y3 * (x1 - x2)));
+
+    if (!isFinite(xc) || !isFinite(yc)) return null;
+
+    return new THREE.Vector2(xc, yc);
+  }
+
+  /**
+   * Returns the offset vector that should be subtracted from the given point
    * to avoid lost of precision when its coordinates are represented with float32.
    *
-   * @param {Vector2 | Vector3} point
-   * @returns {Vector3} the offsetVector
+   * @param {THREE.Vector2 | THREE.Vector3} point
+   * @returns {THREE.Vector3} the offsetVector
    */
   static getOffsetVectorForFloat32(point)
   {

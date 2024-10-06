@@ -49,15 +49,16 @@ class IFCLoader extends THREE.Loader
   static options =
   {
     units : "m", // default model units
-    minCircleSegments : 16, // minimum circle segments
-    circleSegmentsByRadius : 64, // circle segments by meter of radius
-    halfSpaceSize : 30, // half space size in meters
+    minCircleSegments : 16, // minimum circle segments.
+    circleSegmentsPerRadius : 32, // circle segments per meter radius.
+    halfSpaceSize : 100, // half space size in meters
     unvoidableClasses : [
       "IfcDoor",
       "IfcWindow",
       "IfcOpeningElement"
     ],
-    voidingMode: this.VOIDING_MODE_ALL
+    voidingMode : this.VOIDING_MODE_ALL,
+    faceSetOptimizationRange : [0, 1000] // range of number of faces [min, max] to optimize the geometry
   };
 
   constructor(manager)
@@ -495,7 +496,7 @@ class IFCLoader extends THREE.Loader
 
     let segments = Math.max(
       this.options.minCircleSegments,
-      Math.ceil(this.options.circleSegmentsByRadius * meterRadius));
+      Math.ceil(this.options.circleSegmentsPerRadius * meterRadius));
 
     if (segments % 2 === 1) segments++;
 
@@ -2179,7 +2180,8 @@ class IfcIndexedPolyCurveHelper extends IfcCurveHelper
     if (this.points === null)
     {
       const polyCurve = this.entity;
-      const helper = entity => this.loader.helper(entity);
+      const loader = this.loader;
+      const helper = entity => loader.helper(entity);
       const segments = polyCurve.Segments;
       const schema = polyCurve.constructor.schema;
       let points = helper(polyCurve.Points).getPoints();
@@ -2197,10 +2199,55 @@ class IfcIndexedPolyCurveHelper extends IfcCurveHelper
           }
           else if (segment instanceof schema.IfcArcIndex)
           {
-            // TODO: make arc segments
+            const arcPoints = [];
             for (let index of segment.Value)
             {
-              this.points.push(points[index - 1]);
+              arcPoints.push(points[index - 1]);
+            }
+            let center = arcPoints.length === 3 ?
+              GeometryUtils.getCircleCenter(...arcPoints) : null;
+
+            if (center)
+            {
+              const p1 = arcPoints[0];
+              const p2 = arcPoints[1];
+              const p3 = arcPoints[2];
+
+              const d1x = p1.x - center.x;
+              const d1y = p1.y - center.y;
+              let startAngle = Math.atan2(d1y, d1x);
+
+              const d2x = p2.x - center.x;
+              const d2y = p2.y - center.y;
+              let middleAngle = Math.atan2(d2y, d2x);
+
+              const d3x = p3.x - center.x;
+              const d3y = p3.y - center.y;
+              let endAngle = Math.atan2(d3y, d3x);
+
+              if ((startAngle < middleAngle && middleAngle > endAngle) ||
+                  (startAngle > middleAngle && middleAngle < endAngle))
+              {
+                const angle = startAngle === 0 ? middleAngle : startAngle;
+                endAngle += Math.sign(angle) * 2 * Math.PI;
+              }
+
+              const radius = Math.sqrt(d1x * d1x + d1y * d1y);
+
+              const divisions = loader.getCircleSegments(radius);
+              const delta = (endAngle - startAngle) / divisions;
+
+              for (let i = 0; i <= divisions; i++)
+              {
+                let angle = startAngle + i * delta;
+                let x = radius * Math.cos(angle) + center.x;
+                let y = radius * Math.sin(angle) + center.y;
+                this.points.push(new THREE.Vector2(x, y));
+              }
+            }
+            else
+            {
+              this.points.push(...arcPoints);
             }
           }
         }
@@ -2512,7 +2559,8 @@ class IfcConnectedFaceSetHelper extends IfcHelper
     if (this.object3D === null)
     {
       const faceSet = this.entity;
-      const helper = entity => this.loader.helper(entity);
+      const loader = this.loader;
+      const helper = entity => loader.helper(entity);
       const schema = faceSet.constructor.schema;
 
       let faces = faceSet.CfsFaces;
@@ -2559,7 +2607,16 @@ class IfcConnectedFaceSetHelper extends IfcHelper
         }
       }
       let solid = new Solid();
-      solid.updateGeometry(geometry, true);
+      let optimize = false;
+      const range = loader.options.faceSetOptimizationRange;
+      if (range instanceof Array)
+      {
+        const minFaces = range[0] || 0;
+        const maxFaces = range[1] || 0;
+        const numFaces = geometry.faces.length;
+        optimize = numFaces >= minFaces && numFaces <= maxFaces;
+      }
+      solid.updateGeometry(geometry, optimize);
       this.object3D = solid;
     }
     return this.object3D;
@@ -3631,7 +3688,8 @@ class IfcStyledItemHelper extends IfcHelper
     if (item === null || styles === null) return;
 
     let style = styles[0]; // apply only first style
-    if (style instanceof schema.IfcPresentationStyleAssignment)
+    if (schema.IfcPresentationStyleAssignment &&
+        style instanceof schema.IfcPresentationStyleAssignment)
     {
       style = style.Styles[0];
     }

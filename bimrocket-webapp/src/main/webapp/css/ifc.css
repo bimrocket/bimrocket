@@ -5,6 +5,11 @@ ul.tree li.IfcBeam
   background-image: url(images/ifc/IfcBeam.svg);
 }
 
+ul.tree li.IfcFacility
+{
+  background-image: url(images/ifc/IfcFacility.svg);
+}
+
 ul.tree li.IfcBuilding
 {
   background-image: url(images/ifc/IfcBuilding.svg);
@@ -18,6 +23,26 @@ ul.tree li.IfcBuildingElementPart
 ul.tree li.IfcBuildingStorey
 {
   background-image: url(images/ifc/IfcBuildingStorey.svg);
+}
+
+ul.tree li.IfcRoad
+{
+  background-image: url(images/ifc/IfcRoad.svg);
+}
+
+ul.tree li.IfcRoadPart
+{
+  background-image: url(images/ifc/IfcRoadPart.svg);
+}
+
+ul.tree li.IfcEarthworksFill
+{
+  background-image: url(images/ifc/IfcEarthworksFill.svg);
+}
+
+ul.tree li.IfcCourse
+{
+  background-image: url(images/ifc/IfcCourse.svg);
 }
 
 ul.tree li.IfcClassification
@@ -38,6 +63,11 @@ ul.tree li.IfcColumn
 ul.tree li.IfcCovering
 {
   background-image: url(images/ifc/IfcCovering.svg);
+}
+
+ul.tree li.IfcPavement
+{
+  background-image: url(images/ifc/IfcPavement.svg);
 }
 
 ul.tree li.IfcCurtainWall

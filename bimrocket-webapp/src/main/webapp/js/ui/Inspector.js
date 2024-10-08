@@ -157,10 +157,10 @@ class Inspector extends Panel
       "label.inspector_formulas_tab", "formulas");
     this.userDataTabElem = this.propertiesTabbedPane.addTab("userdata", null,
       "label.inspector_userdata_tab", "userdata");
-    this.controllersTabElem = this.propertiesTabbedPane.addTab("controllers", null,
-      "label.inspector_controllers_tab", "controllers");
     this.linksTabElem = this.propertiesTabbedPane.addTab("links", null,
       "label.inspector_links_tab", "links");
+    this.controllersTabElem = this.propertiesTabbedPane.addTab("controllers", null,
+      "label.inspector_controllers_tab", "controllers");
     this.featuredTabElem = this.propertiesTabbedPane.addTab("featured", null,
       "label.inspector_featured_tab", "featured");
 
@@ -200,14 +200,14 @@ class Inspector extends Panel
       this.showContextMenu(event, ["userData"]);
     });
 
+    this.linksTabElem.addEventListener("contextmenu",
+      event => event.preventDefault());
+
     this.controllersTabElem.addEventListener("contextmenu", event =>
     {
       event.preventDefault();
       this.showContextMenu(event, ["controllers"]);
     });
-
-    this.linksTabElem.addEventListener("contextmenu",
-      event => event.preventDefault());
 
     this.featuredTabElem.addEventListener("contextmenu",
       event => event.preventDefault());
@@ -345,8 +345,8 @@ class Inspector extends Panel
     this.populateBuilderTab();
     this.populateFormulasTab();
     this.populateUserDataTab();
-    this.populateControllersTab();
     this.populateLinksTab();
+    this.populateControllersTab();
     this.populateFeaturedTab();
 
     this.application.i18n.updateTree(this.objectCardElem);
@@ -528,42 +528,11 @@ class Inspector extends Panel
     const object = this.object;
     if (object)
     {
-      const userData = object.userData;
-
       let propListElem = document.createElement("ul");
       propListElem.className = "inspector";
       this.userDataTabElem.appendChild(propListElem);
 
-      const userDataPath = ["userData"];
-
-      for (let propertyName in userData)
-      {
-        let propertyValue = userData[propertyName];
-        if (propertyValue !== null && typeof propertyValue === "object")
-        {
-          let dictName = propertyName;
-          let dictionary = propertyValue;
-          if (this.state[dictName] === undefined)
-          {
-            this.state[dictName] = "expanded";
-          }
-
-          const dictPath = ["userData", dictName];
-
-          let dictListElem = this.createSection(propListElem, dictPath);
-
-          for (let dictPropertyName in dictionary)
-          {
-            this.createWriteableProperty(dictListElem, dictionary,
-              dictPath, dictPropertyName);
-          }
-        }
-        else
-        {
-          this.createWriteableProperty(propListElem, userData,
-            userDataPath, propertyName);
-        }
-      }
+      this.populateUserData(propListElem, object, []);
     }
   }
 
@@ -584,6 +553,31 @@ class Inspector extends Panel
         {
           this.createWriteableProperty(formulasListElem, formulas, null, path);
         }
+      }
+    }
+  }
+
+  populateLinksTab()
+  {
+    this.linksTabElem.innerHTML = "";
+
+    const object = this.object;
+    const links = object?.links;
+    if (links)
+    {
+      let linksListElem = document.createElement("ul");
+      linksListElem.className = "inspector";
+      this.linksTabElem.appendChild(linksListElem);
+
+      for (let linkName in links)
+      {
+        let link = links[linkName];
+
+        let linkPath = ["links", linkName];
+
+        let linkPropsElem = this.createSection(linksListElem, linkPath);
+        this.createReadOnlyProperty(linkPropsElem, links, linkPath, linkName);
+        this.populateUserData(linkPropsElem, link, linkPath);
       }
     }
   }
@@ -629,27 +623,6 @@ class Inspector extends Panel
     }
   }
 
-  populateLinksTab()
-  {
-    this.linksTabElem.innerHTML = "";
-
-    const object = this.object;
-    const links = object?.links;
-    if (links)
-    {
-      let linksListElem = document.createElement("ul");
-      linksListElem.className = "inspector";
-      this.linksTabElem.appendChild(linksListElem);
-
-      const linkPath = ["links"];
-
-      for (let name in links)
-      {
-        this.createReadOnlyProperty(linksListElem, links, linkPath, name);
-      }
-    }
-  }
-
   populateFeaturedTab()
   {
     this.featuredTabElem.innerHTML = "";
@@ -685,6 +658,42 @@ class Inspector extends Panel
     };
 
     populateGroup(favListElem, object, featured, []);
+  }
+
+  populateUserData(listElem, object, objectPath)
+  {
+    const userData = object.userData;
+
+    const userDataPath = [...objectPath, "userData"];
+
+    for (let propertyName in userData)
+    {
+      let propertyValue = userData[propertyName];
+      if (propertyValue !== null && typeof propertyValue === "object")
+      {
+        let dictName = propertyName;
+        let dictionary = propertyValue;
+        if (this.state[dictName] === undefined)
+        {
+          this.state[dictName] = "expanded";
+        }
+
+        const dictPath = [...userDataPath, dictName];
+
+        let dictListElem = this.createSection(listElem, dictPath);
+
+        for (let dictPropertyName in dictionary)
+        {
+          this.createWriteableProperty(dictListElem, dictionary,
+            dictPath, dictPropertyName);
+        }
+      }
+      else
+      {
+        this.createWriteableProperty(listElem, userData,
+          userDataPath, propertyName);
+      }
+    }
   }
 
   showContextMenu(event, objectPath, propertyName = null)
@@ -2066,7 +2075,8 @@ class EditFormulaAction extends InspectorAction
   isEnabled()
   {
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
-    if (tabName === "geometry" || tabName === "featured") return false;
+    if (tabName === "geometry" || tabName === "links" || tabName === "featured")
+      return false;
 
     return this.getPropertyName() !== null || tabName === "formulas";
   }

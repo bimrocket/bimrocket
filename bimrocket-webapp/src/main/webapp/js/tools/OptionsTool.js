@@ -140,12 +140,12 @@ class OptionsTool extends Tool
     this.panelOpacityRange.addEventListener("input", () =>
       setup.panelOpacity = parseFloat(this.panelOpacityRange.value), false);
 
-    // Frame rate divisor
+    // fast rendering FPR
 
-    this.frdRange = Controls.addRangeField(uiOptionsPanel,
-      "frd_range", "label.fr_divisor", 1, 10, 1, setup.frameRateDivisor);
-    this.frdRange.addEventListener("change",
-      () => setup.frameRateDivisor = parseInt(this.frdRange.value), false);
+    this.frRange = Controls.addRangeField(uiOptionsPanel,
+      "fr_range", "label.fr_fps", 0, 60, 1, setup.fastRenderingFPS);
+    this.frRange.addEventListener("change",
+      () => setup.fastRenderingFPS = parseInt(this.frRange.value), false);
 
     // Selection Paint mode
 
@@ -338,7 +338,7 @@ class OptionsTool extends Tool
     this.unitsSelect.value = setup.units;
     this.decimalsElem.value = setup.decimals;
     this.panelOpacityRange.rangeValue = setup.panelOpacity;
-    this.frdRange.rangeValue = setup.frameRateDivisor;
+    this.frRange.rangeValue = setup.fastRenderingFPS;
     this.selPaintModeSelect.value = setup.selectionPaintMode;
     this.deepSelCheckBox.checked = setup.showDeepSelection;
     this.localAxesCheckBox.checked = setup.showLocalAxes;

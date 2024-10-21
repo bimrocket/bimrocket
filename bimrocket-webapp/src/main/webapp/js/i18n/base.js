@@ -365,7 +365,7 @@ export const translations =
   "label.language" : "Language:",
   "label.units" : "Model units:",
   "label.decimals" : "Decimals to display:",
-  "label.fr_divisor" : "Frame rate divisor:",
+  "label.fr_fps" : "Fast rendering activation (FPS):",
   "label.sel_paint_mode" : "Selection paint mode:",
   "label.show_deep_sel" : "Show deep selection",
   "label.show_local_axes" : "Show local axes",

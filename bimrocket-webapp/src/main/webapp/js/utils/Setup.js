@@ -15,7 +15,7 @@ class Setup
   static BACKGROUND_COLOR_1 = "backgroundColor1";
   static BACKGROUND_COLOR_2 = "backgroundColor2";
   static PANEL_OPACITY = "panelOpacity";
-  static FRAME_RATE_DIVISOR = "frameRateDivisor";
+  static FAST_RENDERING_FPS = "fastRenderingFPS";
   static SELECTION_PAINT_MODE = "selectionPaintMode";
   static SHADOWS_ENABLED = "shadowsEnabled";
   static SHOW_DEEP_SELECTION = "showDeepSelection";
@@ -40,8 +40,8 @@ class Setup
     let opacityValue = this.getItem(Setup.PANEL_OPACITY);
     this._panelOpacity = opacityValue ? parseFloat(opacityValue) : 0.8;
 
-    let frd = this.getItem(Setup.FRAME_RATE_DIVISOR);
-    this._frameRateDivisor = frd ? parseInt(frd) : 1;
+    let fps = this.getItem(Setup.FAST_RENDERING_FPS);
+    this._fastRenderingFPS = fps ? parseInt(fps) : 15;
 
     this._selectionPaintMode =
       this.getItem(Setup.SELECTION_PAINT_MODE) || Application.EDGES_SELECTION;
@@ -148,15 +148,15 @@ class Setup
     }
   }
 
-  get frameRateDivisor()
+  get fastRenderingFPS()
   {
-    return this._frameRateDivisor;
+    return this._fastRenderingFPS;
   }
 
-  set frameRateDivisor(frd)
+  set fastRenderingFPS(fps)
   {
-    this._frameRateDivisor = frd;
-    this.setItem(Setup.FRAME_RATE_DIVISOR, String(frd));
+    this._fastRenderingFPS = fps;
+    this.setItem(Setup.FAST_RENDERING_FPS, String(fps));
   }
 
   get selectionPaintMode()

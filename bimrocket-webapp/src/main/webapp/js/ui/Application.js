@@ -84,9 +84,8 @@ class Application
     this.setup = new Setup(this);
 
     /* rendering */
-    this.clock = new THREE.Clock();
-    this.autoRepaint = false;
-    this.needsRepaint = true;
+    this._needsRepaint = true;
+    this._fastRenderingLevel = 0; // 0: disabled
 
     /* events */
     this._copyObjects = [];
@@ -95,6 +94,7 @@ class Application
       scene : [],
       selection : [],
       animation : [],
+      render : [],
       tool : []
     };
 
@@ -185,6 +185,8 @@ class Application
     progressBarElem.className = "progress_bar";
     element.appendChild(progressBarElem);
 
+    const setup = this.setup;
+
     // renderer
     let renderer;
     if (WEBGL.isWebGLAvailable())
@@ -197,7 +199,7 @@ class Application
         alpha : true,
         preserveDrawingBuffer : true
       });
-      renderer.shadowMap.enabled = this.setup.shadowsEnabled;
+      renderer.shadowMap.enabled = setup.shadowsEnabled;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     }
     else
@@ -264,9 +266,9 @@ class Application
     this.pointSelector = new PointSelector(this);
 
     // apply setup
-    this.i18n.userLanguages = this.setup.userLanguage;
-    this.setShadowMapEnabled(this.setup.shadowsEnabled);
-    this.setup.applyBackground();
+    this.i18n.userLanguages = setup.userLanguage;
+    this.setShadowMapEnabled(setup.shadowsEnabled);
+    setup.applyBackground();
 
     // init scene
     this.initScene();
@@ -339,25 +341,46 @@ class Application
     });
 
     // animation
-    let __animationEvent = {delta : 0};
-    let __animationCounter = 0;
+    let animationClock = new THREE.Clock();
+    let _animationEvent = { delta : 0 };
+    let _slownessCounter = 0;
+
     let animate = () =>
     {
       requestAnimationFrame(animate);
 
-      __animationEvent.delta = this.clock.getDelta();
+      _animationEvent.delta = animationClock.getDelta();
+
       if (this._eventListeners.animation.length > 0)
       {
-        this.notifyEventListeners('animation', __animationEvent);
+        this.notifyEventListeners("animation", _animationEvent);
       }
 
-      __animationCounter++;
-      if (__animationCounter >= this.setup.frameRateDivisor)
+      if (this._needsRepaint)
       {
-        __animationCounter = 0;
+        const fps = 1 / _animationEvent.delta;
 
-        if (this.autoRepaint || this.needsRepaint)
+        if (fps < setup.fastRenderingFPS)
         {
+          if (_slownessCounter < 2)
+          {
+            _slownessCounter++;
+          }
+          else if (this._fastRenderingLevel < 2)
+          {
+            this._fastRenderingLevel++;
+            this.updateFastRendering();
+          }
+        }
+        this.render();
+      }
+      else
+      {
+        _slownessCounter = 0;
+        if (this._fastRenderingLevel > 0)
+        {
+          this._fastRenderingLevel = 0; // disable fast rendering
+          this.updateFastRendering();
           this.render();
         }
       }
@@ -365,6 +388,84 @@ class Application
 
     animate();
     this.loadModules();
+  }
+
+  updateFastRendering()
+  {
+    const level = this._fastRenderingLevel;
+
+    let minSize = Infinity;
+    let maxSize = 0;
+    let objectCount = 0;
+    let sum = 0;
+    let mediumSize = 0;
+
+    if (this._fastRenderingLevel === 2)
+    {
+      // calc object medium size
+      this.scene.traverseVisible(object =>
+      {
+        if (object instanceof Solid)
+        {
+          let sphere = object.geometry.boundingSphere;
+          if (sphere === null)
+          {
+            object.geometry.computeBoundingSphere();
+            sphere = object.geometry.boundingSphere;
+          }
+          const scale = object.matrixWorld.getMaxScaleOnAxis();
+          const size = sphere.radius * scale;
+          if (size < minSize) minSize = size;
+          else if (size > maxSize) maxSize = size;
+          objectCount++;
+          sum += size;
+        }
+      });
+      mediumSize = sum / objectCount;
+    }
+
+
+    this.scene.traverseVisible(object =>
+    {
+      if (object instanceof Solid)
+      {
+        let sphere = object.geometry.boundingSphere;
+        if (sphere === null)
+        {
+          object.geometry.computeBoundingSphere();
+          sphere = object.geometry.boundingSphere;
+        }
+        const scale = object.matrixWorld.getMaxScaleOnAxis();
+        const size = sphere.radius * scale;
+
+        switch (level)
+        {
+          case 0: // disable fast rendering
+            if (object._facesVisible !== undefined)
+            {
+              object.facesVisible = object._facesVisible;
+            }
+            if (object._edgesVisible !== undefined)
+            {
+              object.edgesVisible = object._edgesVisible;
+            }
+            break;
+
+          case 1: // hide all edges
+            object._edgesVisible = object.edgesVisible;
+            object.edgesVisible = false;
+            break;
+
+          case 2: // hide faces objects smaller than mediumSize
+            if (size < mediumSize)
+            {
+              object._facesVisible = object.facesVisible;
+              object.facesVisible = false;
+            }
+            break;
+        }
+      }
+    });
   }
 
   setupComposer()
@@ -522,12 +623,12 @@ class Application
       this.renderer.render(this.scene, this.camera);
     }
     this.cssRenderer.render(this.scene, this.camera);
-    this.needsRepaint = false;
+    this._needsRepaint = false;
   }
 
   repaint()
   {
-    this.needsRepaint = true;
+    this._needsRepaint = true;
   }
 
   setShadowMapEnabled(enabled)

@@ -365,7 +365,7 @@ export const translations =
   "label.language" : "Idioma:",
   "label.units" : "Unitats del model:",
   "label.decimals" : "Decimals a mostrar:",
-  "label.fr_divisor" : "Divisor de FPS:",
+  "label.fr_fps" : "Activació del pintat ràpid (FPS):",
   "label.sel_paint_mode" : "Pintat de selecció:",
   "label.show_deep_sel" : "Mostra selecció profunda",
   "label.show_local_axes" : "Mostra eixos locals",

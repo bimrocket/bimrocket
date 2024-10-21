@@ -105,7 +105,6 @@ class IFCLoader extends THREE.Loader
     this.blocks = new Set();
 
     const schema = ifcFile.schema;
-    const helper = entity => this.helper(entity);
 
     /* process project info */
     const processProjectInfo = () =>
@@ -113,7 +112,7 @@ class IFCLoader extends THREE.Loader
       let project = ifcFile.entitiesByClass.has("IfcProject") ?
         ifcFile.entitiesByClass.get("IfcProject")[0] : new schema.IfcProject();
 
-      model = helper(project).getObject3D();
+      model = this.helper(project).getObject3D();
       types = model.getObjectByName(IFC.TypesName);
       this.model = model;
     };
@@ -127,7 +126,7 @@ class IFCLoader extends THREE.Loader
         for (let i = 0; i < styledItems.length; i++)
         {
           let styledItem = styledItems[i];
-          helper(styledItem).applyStyle();
+          this.helper(styledItem).applyStyle();
         }
       }
     };
@@ -136,10 +135,10 @@ class IFCLoader extends THREE.Loader
     const createObject = index =>
     {
       let product = ifcFile.products[index];
-      let object3D = helper(product).getObject3D();
+      let object3D = this.helper(product).getObject3D();
       if (product.ObjectPlacement instanceof schema.IfcLocalPlacement)
       {
-        let matrixWorld = helper(product.ObjectPlacement).getMatrixWorld();
+        let matrixWorld = this.helper(product.ObjectPlacement).getMatrixWorld();
         matrixWorld.decompose(object3D.position,
           object3D.quaternion, object3D.scale);
         object3D.matrix.copy(matrixWorld);
@@ -167,7 +166,7 @@ class IFCLoader extends THREE.Loader
       let relationships = ifcFile.relationships;
       for (let relationship of relationships)
       {
-        helper(relationship).relate();
+        this.helper(relationship).relate();
       }
       model.updateMatrixWorld();
     };
@@ -181,7 +180,7 @@ class IFCLoader extends THREE.Loader
       {
         for (let assignment of assignments)
         {
-          helper(assignment).assign();
+          this.helper(assignment).assign();
         }
       }
       model.updateMatrixWorld();
@@ -197,7 +196,7 @@ class IFCLoader extends THREE.Loader
         IFCLoader.PARAMETRIC_REPRESENTATIONS : [];
 
       let product = ifcFile.products[index];
-      let productObject3D = helper(product).getObject3D();
+      let productObject3D = this.helper(product).getObject3D();
       if (productObject3D)
       {
         if (BIMUtils.createVoidings(productObject3D, voidingFilter))
@@ -229,7 +228,7 @@ class IFCLoader extends THREE.Loader
       let typeProducts = ifcFile.typeProducts;
       for (let typeProduct of typeProducts)
       {
-        let typeGroup = helper(typeProduct).getObject3D();
+        let typeGroup = this.helper(typeProduct).getObject3D();
         types.add(typeGroup);
 
         if (typeProduct.RepresentationMaps &&
@@ -237,7 +236,7 @@ class IFCLoader extends THREE.Loader
         {
           // add typeProduct representation
           const reprMap = typeProduct.RepresentationMaps[0];
-          const mappedObject3D = helper(reprMap).getObject3D();
+          const mappedObject3D = this.helper(reprMap).getObject3D();
           if (mappedObject3D && mappedObject3D.parent === null)
           {
             typeGroup.add(mappedObject3D);
@@ -321,7 +320,7 @@ class IFCLoader extends THREE.Loader
       for (let i = 0; i < products.length; i++)
       {
         let product = products[i];
-        let object3D = helper(product).getObject3D();
+        let object3D = this.helper(product).getObject3D();
         if (object3D && object3D.userData && object3D.userData.IFC)
         {
           let reprObject3D = IFC.getRepresentation(object3D);
@@ -380,7 +379,7 @@ class IFCLoader extends THREE.Loader
         for (let i = 0; i < storeys.length; i++)
         {
           let storey = storeys[i];
-          let storeyObject3D = helper(storey).getObject3D();
+          let storeyObject3D = this.helper(storey).getObject3D();
           if (storeyObject3D)
           {
             groupObject(storeyObject3D);
@@ -439,7 +438,10 @@ class IFCLoader extends THREE.Loader
         if (helperClass)
         {
           helper = new helperClass(this, entity);
-          this.helpers.set(entity, helper);
+          if (helperClass.cacheable)
+          {
+            this.helpers.set(entity, helper);
+          }
           break;
         }
         let ifcSuperClass = ifcClass.__proto__;
@@ -643,10 +645,17 @@ function registerIfcHelperClass(ifcHelperClass)
 
 class IfcHelper
 {
+  static cacheable = true;
+
   constructor(loader, entity)
   {
     this.loader = loader;
     this.entity = entity;
+  }
+
+  helper(entity)
+  {
+    return this.loader.helper(entity);
   }
 };
 registerIfcHelperClass(IfcHelper);
@@ -737,7 +746,6 @@ class IfcTypeProductHelper extends IfcHelper
     {
       const typeProduct = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
 
       let typeName = typeProduct.Name || typeProduct.GlobalId;
       if (typeName.startsWith(THREE.Object3D.HIDDEN_PREFIX))
@@ -756,10 +764,10 @@ class IfcTypeProductHelper extends IfcHelper
       {
         for (let propertySet of propertySets)
         {
-          if (helper(propertySet)?.getProperties)
+          if (this.helper(propertySet)?.getProperties)
           {
             typeGroup.userData["IFC_" + propertySet.Name] =
-              helper(propertySet).getProperties();
+              this.helper(propertySet).getProperties();
           }
         }
       }
@@ -786,7 +794,6 @@ class IfcProductHelper extends IfcHelper
       const product = this.entity;
       const schema = this.entity.constructor.schema;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
 
       let object3D = new THREE.Object3D();
       ObjectUtils.setSelectionGroup(object3D, true);
@@ -805,7 +812,7 @@ class IfcProductHelper extends IfcHelper
       let objectPlacement = product.ObjectPlacement;
       if (objectPlacement instanceof schema.IfcLocalPlacement)
       {
-        let matrix = helper(objectPlacement).getMatrix();
+        let matrix = this.helper(objectPlacement).getMatrix();
         matrix.decompose(object3D.position,
           object3D.quaternion, object3D.scale);
         object3D.matrix.copy(matrix);
@@ -817,7 +824,7 @@ class IfcProductHelper extends IfcHelper
       {
         // add object representation as first child
 
-        let reprObject3D = helper(productRepr).getObject3D("Body");
+        let reprObject3D = this.helper(productRepr).getObject3D("Body");
         if (reprObject3D)
         {
           if (reprObject3D.parent)
@@ -840,6 +847,8 @@ registerIfcHelperClass(IfcProductHelper);
 
 class IfcProductRepresentationHelper extends IfcHelper
 {
+  static cacheable = false;
+
   constructor(loader, entity)
   {
     super(loader, entity);
@@ -850,15 +859,12 @@ class IfcProductRepresentationHelper extends IfcHelper
     let reprObject3D = null;
     const productRepr = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
 
-    let repCount = productRepr.Representations.length;
-    for (var i = 0; i < repCount; i++)
+    for (let repr of productRepr.Representations)
     {
-      let repr = productRepr.Representations[i]; // IfcRepresentation
       if (repr.RepresentationIdentifier === representationIdentifier)
       {
-        reprObject3D = helper(repr).getObject3D();
+        reprObject3D = this.helper(repr).getObject3D();
         if (reprObject3D === null)
         {
           console.warn("Unsupported representation",
@@ -886,24 +892,24 @@ class IfcRepresentationHelper extends IfcHelper
     if (this.object3D === null)
     {
       const representation = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
-      var group = new THREE.Group();
-      for (var i = 0; i < representation.Items.length; i++)
+      let group = new THREE.Group();
+      for (let i = 0; i < representation.Items.length; i++)
       {
-        var item = representation.Items[i];
-        if (item && helper(item).getObject3D)
+        let item = representation.Items[i];
+        let itemHelper = this.helper(item);
+        if (item && itemHelper.getObject3D)
         {
-          var itemObject3D = helper(item).getObject3D();
+          let itemObject3D = itemHelper.getObject3D();
           if (itemObject3D)
           {
             itemObject3D.name = "Item" + i;
             itemObject3D.userData.IFC =
               {"ifcClassName" : item.constructor.name};
             group.add(itemObject3D);
-            if (itemObject3D instanceof Solid && helper(item).material)
+            if (itemObject3D instanceof Solid && itemHelper.material)
             {
-              itemObject3D.material = helper(item).material;
+              itemObject3D.material = itemHelper.material;
             }
           }
         }
@@ -955,7 +961,6 @@ class IfcGeometricSetHelper extends IfcGeometricRepresentationItemHelper
   getObject3D()
   {
     const entity = this.entity;
-    const helper = entity => this.loader.helper(entity);
     const schema = entity.constructor.schema;
     const elements = entity.Elements;
 
@@ -997,7 +1002,6 @@ class IfcHalfSpaceSolidHelper extends IfcGeometricRepresentationItemHelper
   {
     const halfSpace = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
 
     const size = loader.options.halfSpaceSize / loader.modelFactor;
 
@@ -1012,7 +1016,7 @@ class IfcHalfSpaceSolidHelper extends IfcGeometricRepresentationItemHelper
       ifcClassName : surface.constructor.name
     };
 
-    let matrix = helper(plane).getMatrix();
+    let matrix = this.helper(plane).getMatrix();
     if (reverseSolid)
     {
       matrix = matrix.clone();
@@ -1052,7 +1056,6 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
     {
       const halfSpace = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
       const schema = halfSpace.constructor.schema;
 
       const surface = halfSpace.BaseSurface;
@@ -1068,7 +1071,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
           const extruder = new Extruder(size);
 
           // polygon solid
-          const curvePoints = helper(boundary).getPoints();
+          const curvePoints = this.helper(boundary).getPoints();
           let shape = new THREE.Shape();
           shape.moveTo(curvePoints[0].x, curvePoints[0].y);
           for (let i = 1; i < curvePoints.length; i++)
@@ -1087,7 +1090,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
             ifcClassName : boundary.constructor.name
           };
 
-          let matrix = helper(base).getMatrix();
+          let matrix = this.helper(base).getMatrix();
           matrix.decompose(polygonSolid.position, polygonSolid.rotation,
             polygonSolid.scale);
           polygonSolid.updateMatrix();
@@ -1131,17 +1134,19 @@ class IfcBooleanResultHelper extends IfcGeometricRepresentationItemHelper
     if (this.object3D === null)
     {
       const result = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
-      var operator = result.Operator;
-      var firstOperand = result.FirstOperand;
-      var secondOperand = result.SecondOperand;
+      const operator = result.Operator;
+      const firstOperand = result.FirstOperand;
+      const secondOperand = result.SecondOperand;
 
-      var firstObject = helper(firstOperand).getObject3D();
-      var secondObject = helper(secondOperand).getObject3D();
-      if (firstObject instanceof Solid && helper(firstOperand).material)
+      const firstHelper = this.helper(firstOperand);
+      const secondHelper = this.helper(secondOperand);
+
+      const firstObject = firstHelper.getObject3D();
+      const secondObject = secondHelper.getObject3D();
+      if (firstObject instanceof Solid && firstHelper.material)
       {
-        firstObject.material = helper(firstOperand).material;
+        firstObject.material = firstHelper.material;
       }
 
       if (firstObject instanceof Solid && secondObject instanceof Solid)
@@ -1210,12 +1215,11 @@ class IfcTriangulatedFaceSetHelper extends IfcGeometricRepresentationItemHelper
     if (this.object3D === null)
     {
       const faceSet = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       let geometry = new SolidGeometry();
 
       geometry.vertices =
-        GeometryUtils.cloneRing(helper(faceSet.Coordinates).getPoints());
+        GeometryUtils.cloneRing(this.helper(faceSet.Coordinates).getPoints());
 
       let coordIndex = faceSet.CoordIndex;
       for (let t = 0; t < coordIndex.length; t++)
@@ -1248,12 +1252,11 @@ class IfcPolygonalFaceSetHelper extends IfcGeometricRepresentationItemHelper
     if (this.object3D === null)
     {
       const faceSet = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       let geometry = new SolidGeometry();
 
       geometry.vertices =
-        GeometryUtils.cloneRing(helper(faceSet.Coordinates).getPoints());
+        GeometryUtils.cloneRing(this.helper(faceSet.Coordinates).getPoints());
 
       let faces = faceSet.Faces;
       for (let f = 0; f < faces.length; f++)
@@ -1305,7 +1308,6 @@ class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
     const swept = this.entity;
     const schema = swept.constructor.schema;
     const profileDef = swept.SweptArea;
-    const helper = entity => this.loader.helper(entity);
 
     let profiles = []; // Profile[]
 
@@ -1315,7 +1317,7 @@ class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
       const profileDefs = compositeProfileDef.Profiles;
       for (let subProfileDef of profileDefs)
       {
-        let profile = helper(subProfileDef).getProfile();
+        let profile = this.helper(subProfileDef).getProfile();
         if (profile)
         {
           profiles.push(profile);
@@ -1328,7 +1330,7 @@ class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
     }
     else if (profileDef instanceof schema.IfcProfileDef)
     {
-      let profile = helper(profileDef).getProfile();
+      let profile = this.helper(profileDef).getProfile();
       if (profile) profiles.push(profile);
       else console.warn("Unsupported profile", profileDef);
     }
@@ -1351,7 +1353,7 @@ class IfcSweptAreaSolidHelper extends IfcGeometricRepresentationItemHelper
 
         if (swept.Position)
         {
-          const matrix = helper(swept.Position).getMatrix();
+          const matrix = this.helper(swept.Position).getMatrix();
           matrix.decompose(solid.position, solid.quaternion, solid.scale);
           solid.updateMatrix();
         }
@@ -1400,8 +1402,7 @@ class IfcExtrudedAreaSolidHelper extends IfcSweptAreaSolidHelper
     if (this.object3D === null)
     {
       const swept = this.entity;
-      const helper = entity => this.loader.helper(entity);
-      const direction = helper(swept.ExtrudedDirection).getDirection();
+      const direction = this.helper(swept.ExtrudedDirection).getDirection();
       const depth = swept.Depth;
 
       this.createSolid(new Extruder(depth, direction));
@@ -1425,9 +1426,9 @@ class IfcRevolvedAreaSolidHelper extends IfcSweptAreaSolidHelper
     {
       const swept = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
-      const location = helper(swept.Axis).getLocation();
-      const axis = helper(swept.Axis).getAxis();
+      const axisHelper = this.helper(swept.Axis);
+      const location = axisHelper.getLocation();
+      const axis = axisHelper.getAxis();
       const angle = THREE.MathUtils.radToDeg(swept.Angle);
 
       const radius = location.length() + 10; // radius estimate
@@ -1455,19 +1456,20 @@ class IfcSurfaceCurveSweptAreaSolidHelper
     if (this.object3D === null)
     {
       const swept = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const profileDef = swept.SweptArea; // IfcProfileDef
       const position = swept.Position; // IfcAxis2Placement3D
-      const matrix = helper(position).getMatrix();
+      const matrix = this.helper(position).getMatrix();
       const directrix = swept.Directrix; // IfcCurve
       const startParam = swept.StartParam; // IfcParameterValue : number
       const endParam = swept.EndParam; // IfcParameterValue : number
       const surface = swept.ReferenceSurface; // IfcSurface: ignored
 
-      const cordPoints = GeometryUtils.cloneRing(helper(directrix).getPoints());
+      const cordPoints =
+        GeometryUtils.cloneRing(this.helper(directrix).getPoints());
+
       if (cordPoints)
       {
-        const profile = helper(profileDef).getProfile();
+        const profile = this.helper(profileDef).getProfile();
         if (profile)
         {
           try
@@ -1524,7 +1526,6 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
     {
       const swept = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
       const directrix = swept.Directrix; // IfcCurve
       const radius = swept.Radius;
       const innerRadius = swept.InnerRadius;
@@ -1551,7 +1552,8 @@ class IfcSweptDiskSolidHelper extends IfcGeometricRepresentationItemHelper
         }
         object3D.add(profile);
 
-        const cordPoints = GeometryUtils.cloneRing(helper(directrix).getPoints());
+        const cordPoints =
+          GeometryUtils.cloneRing(this.helper(directrix).getPoints());
         const cord = new Cord(new CordGeometry(cordPoints));
         object3D.add(cord);
 
@@ -1580,10 +1582,9 @@ class IfcManifoldSolidBrepHelper extends IfcGeometricRepresentationItemHelper
     if (this.object3D === null)
     {
       const brep = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       const outerShell = brep.Outer;
-      this.object3D = helper(outerShell).getObject3D();
+      this.object3D = this.helper(outerShell).getObject3D();
     }
     return this.object3D;
   }
@@ -1605,12 +1606,11 @@ class IfcFaceBasedSurfaceModelHelper
     {
       this.object3D = new THREE.Group();
       const surface = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const faceSets = surface.FbsmFaces; // IfcConnectedFaceSet[...]
       for (let i = 0; i < faceSets.length; i++)
       {
         let faceSet = faceSets[i]; // IfcConnectedFaceSet
-        let faceSetObject3D = helper(faceSet).getObject3D();
+        let faceSetObject3D = this.helper(faceSet).getObject3D();
         faceSetObject3D.name = "FaceSet" + i;
         this.object3D.add(faceSetObject3D);
       }
@@ -1635,12 +1635,11 @@ class IfcShellBasedSurfaceModelHelper
     {
       this.object3D = new THREE.Group();
       const surface = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const shells = surface.SbsmBoundary; // IfcShell[...]
       for (var i = 0; i < shells.length; i++)
       {
         let shell = shells[i]; // IfcConnectedFaceSet
-        let shellObject3D = helper(shell).getObject3D();
+        let shellObject3D = this.helper(shell).getObject3D();
         shellObject3D.name = "Shell" + i;
         this.object3D.add(shellObject3D);
       }
@@ -1665,12 +1664,11 @@ class IfcRepresentationMapHelper extends IfcHelper
     {
       const reprMap = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
 
       const repr = reprMap.MappedRepresentation; // IfcRepresentation
       const origin = reprMap.MappingOrigin;
 
-      let object3D = helper(repr).getObject3D();
+      let object3D = this.helper(repr).getObject3D();
       if (object3D.parent)
       {
         // already added to scene, clone it
@@ -1683,7 +1681,7 @@ class IfcRepresentationMapHelper extends IfcHelper
 
       if (origin)
       {
-        let matrix = helper(origin).getMatrix();
+        let matrix = this.helper(origin).getMatrix();
         object3D.matrix.multiplyMatrices(matrix, object3D.matrix);
         object3D.matrix.decompose(object3D.position,
           object3D.quaternion, object3D.scale);
@@ -1710,12 +1708,11 @@ class IfcMappedItemHelper extends IfcGeometricRepresentationItemHelper
     {
       const mappedItem = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
 
       const source = mappedItem.MappingSource; // IfcRepresentationMap
       const target = mappedItem.MappingTarget;
 
-      const mappedObject3D = helper(source).getObject3D();
+      const mappedObject3D = this.helper(source).getObject3D();
 
       if (mappedObject3D)
       {
@@ -1723,7 +1720,7 @@ class IfcMappedItemHelper extends IfcGeometricRepresentationItemHelper
 
         if (target)
         {
-          let matrix = helper(target).getMatrix();
+          let matrix = this.helper(target).getMatrix();
           matrix.decompose(instanceGroup.position,
             instanceGroup.quaternion, instanceGroup.scale);
           instanceGroup.updateMatrix();
@@ -1773,7 +1770,6 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
       if (builder)
       {
         const profileDef = this.entity;
-        const helper = entity => this.loader.helper(entity);
 
         const profile = new Profile();
 
@@ -1787,7 +1783,7 @@ class IfcParameterizedProfileDefHelper extends IfcProfileDefHelper
 
         if (profileDef.Position)
         {
-          const profMat = helper(profileDef.Position).getMatrix();
+          const profMat = this.helper(profileDef.Position).getMatrix();
           profMat.decompose(profile.position, profile.quaternion, profile.scale);
           profile.updateMatrix();
         }
@@ -2045,10 +2041,9 @@ class IfcArbitraryClosedProfileDefHelper extends IfcProfileDefHelper
     if (this.profile === null)
     {
       const profileDef = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       const curve = profileDef.OuterCurve; // IfcCurve
-      const curvePoints = helper(curve).getPoints();
+      const curvePoints = this.helper(curve).getPoints();
       if (curvePoints)
       {
         const shape = new THREE.Shape();
@@ -2090,9 +2085,8 @@ class IfcArbitraryProfileDefWithVoidsHelper
     if (this.profile === null)
     {
       const profileDef = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const curve = profileDef.OuterCurve; // IfcCurve
-      let curvePoints = helper(curve).getPoints();
+      let curvePoints = this.helper(curve).getPoints();
       if (curvePoints)
       {
         const shape = new THREE.Shape();
@@ -2101,7 +2095,7 @@ class IfcArbitraryProfileDefWithVoidsHelper
         const innerCurves = profileDef.InnerCurves; // IfcCurve[]
         for (let innerCurve of innerCurves)
         {
-          curvePoints = helper(innerCurve).getPoints();
+          curvePoints = this.helper(innerCurve).getPoints();
           if (curvePoints)
           {
             let hole = new THREE.Path();
@@ -2140,6 +2134,31 @@ class IfcCurveHelper extends IfcHelper
 registerIfcHelperClass(IfcCurveHelper);
 
 
+class IfcLineHelper extends IfcCurveHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const line = this.entity;
+
+      const pnt = this.helper(line.Pnt).getPoint();
+      const dir = this.helper(line.Dir).getVector();
+      const pnt2 = new THREE.Vector3();
+      pnt2.copy(pnt).add(dir);
+      this.points = [pnt, pnt2];
+    }
+    return this.points;
+  }
+}
+registerIfcHelperClass(IfcLineHelper);
+
+
 class IfcPolylineHelper extends IfcCurveHelper
 {
   constructor(loader, entity)
@@ -2152,13 +2171,12 @@ class IfcPolylineHelper extends IfcCurveHelper
     if (this.points === null)
     {
       const polyline = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       this.points = [];
       const points = polyline.Points;
       for (let i = 0; i < points.length; i++)
       {
-        let point = helper(points[i]).getPoint();
+        let point = this.helper(points[i]).getPoint();
         this.points.push(point);
       }
     }
@@ -2181,10 +2199,9 @@ class IfcIndexedPolyCurveHelper extends IfcCurveHelper
     {
       const polyCurve = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
       const segments = polyCurve.Segments;
       const schema = polyCurve.constructor.schema;
-      let points = helper(polyCurve.Points).getPoints();
+      let points = this.helper(polyCurve.Points).getPoints();
       if (segments)
       {
         this.points = [];
@@ -2275,10 +2292,10 @@ class IfcTrimmedCurveHelper extends IfcCurveHelper
     if (this.points === null)
     {
       const curve = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const schema = curve.constructor.schema;
 
       const basisCurve = curve.BasisCurve;
+      const basisHelper = this.helper(basisCurve);
       const trim1 = curve.Trim1[0];
       const trim2 = curve.Trim2[0];
       if (basisCurve instanceof schema.IfcConic)
@@ -2291,11 +2308,16 @@ class IfcTrimmedCurveHelper extends IfcCurveHelper
 
         let sense = curve.SenseAgreement === true;
         this.points =
-          helper(basisCurve).getTrimmedPoints(startAngle, endAngle, sense);
+          basisHelper.getTrimmedPoints(startAngle, endAngle, sense);
+      }
+      else if (basisCurve instanceof schema.IfcLine)
+      {
+        this.points = basisHelper.getPoints();
+        //console.warn("unsupported trimmming of IfcLine", curve);
       }
       else
       {
-        console.warn("unsupported trimmed curve segment", curve);
+        //console.warn("unsupported trimmed curve segment", curve);
       }
     }
     return this.points;
@@ -2316,7 +2338,6 @@ class IfcCompositeCurveHelper extends IfcCurveHelper
     if (this.points === null)
     {
       const compositeCurve = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const schema = compositeCurve.constructor.schema;
 
       let points = [];
@@ -2325,7 +2346,7 @@ class IfcCompositeCurveHelper extends IfcCurveHelper
       {
         let segment = segments[i]; // IfcCompositeCurveSegment
         let curve = segment.ParentCurve;
-        let curvePoints = helper(curve).getPoints();
+        let curvePoints = this.helper(curve).getPoints();
         if (curvePoints)
         {
           if (segment.SameSense === true)
@@ -2426,9 +2447,8 @@ class IfcCircleHelper extends IfcConicHelper
       this.points = [];
       const circle = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
 
-      const matrix = helper(circle.Position).getMatrix();
+      const matrix = this.helper(circle.Position).getMatrix();
       const radius = circle.Radius;
       const segments = loader.getCircleSegments(radius);
       const angleStep = 2 * Math.PI / segments;
@@ -2451,9 +2471,8 @@ class IfcCircleHelper extends IfcConicHelper
     let points = [];
     const circle = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
 
-    const matrix = helper(circle.Position).getMatrix();
+    const matrix = this.helper(circle.Position).getMatrix();
     const radius = circle.Radius;
     const startAngle = THREE.MathUtils.degToRad(param1);
     const endAngle = THREE.MathUtils.degToRad(param2);
@@ -2491,8 +2510,7 @@ class IfcEllipseHelper extends IfcConicHelper
       this.points = [];
       const ellipse = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
-      const matrix = helper(ellipse.Position).getMatrix();
+      const matrix = this.helper(ellipse.Position).getMatrix();
       const semiAxis1 = ellipse.SemiAxis1;
       const semiAxis2 = ellipse.SemiAxis2;
       const maxAxis = Math.max(semiAxis1, semiAxis2);
@@ -2517,8 +2535,7 @@ class IfcEllipseHelper extends IfcConicHelper
     let points = [];
     const ellipse = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
-    const matrix = helper(ellipse.Position).getMatrix();
+    const matrix = this.helper(ellipse.Position).getMatrix();
     const semiAxis1 = ellipse.SemiAxis1;
     const semiAxis2 = ellipse.SemiAxis2;
     const maxAxis = Math.max(semiAxis1, semiAxis2);
@@ -2560,51 +2577,15 @@ class IfcConnectedFaceSetHelper extends IfcHelper
     {
       const faceSet = this.entity;
       const loader = this.loader;
-      const helper = entity => loader.helper(entity);
-      const schema = faceSet.constructor.schema;
 
       let faces = faceSet.CfsFaces;
 
       let geometry = new SolidGeometry();
 
-      for (let f = 0; f < faces.length; f++)
+      for (let face of faces)
       {
-        let face = faces[f]; // IfcFace
-        let bounds = face.Bounds; // IfcFaceBound[...]
-
-        let faceVertices = null;
-        let holes = [];
-        for (let b = 0; b < bounds.length; b++)
-        {
-          let bound = bounds[b]; // IfcFaceBound
-          let loop = bound.Bound; // IfcLoop:
-          // (IfcPolyLoop, IfcEdgeLoop, IfcVertexLoop)
-          let loopVertices = GeometryUtils.cloneRing(helper(loop).getPoints());
-          let loopOrientation = bound.Orientation;
-          if (loopOrientation === false)
-          {
-            // reverse loop sense
-            loopVertices = loopVertices.slice().reverse();
-          }
-          if (bound instanceof schema.IfcFaceOuterBound)
-          {
-            faceVertices = loopVertices;
-          }
-          else
-          {
-            holes.push(loopVertices);
-          }
-        }
-
-        if (faceVertices && faceVertices.length >= 3)
-        {
-          let face = geometry.addFace(...faceVertices);
-          for (let holeVertices of holes)
-          {
-            if (holeVertices.length >= 3)
-            face.addHole(...holeVertices);
-          }
-        }
+        // IfcFace | IfcAdvancedFace
+        this.helper(face).addFaces(geometry);
       }
       let solid = new Solid();
       let optimize = false;
@@ -2625,6 +2606,78 @@ class IfcConnectedFaceSetHelper extends IfcHelper
 registerIfcHelperClass(IfcConnectedFaceSetHelper);
 
 
+class IfcFaceHelper extends IfcHelper
+{
+  static cacheable = false;
+
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  addFaces(solidGeometry)
+  {
+    const face = this.entity;
+    const schema = face.constructor.schema;
+
+    let bounds = face.Bounds; // IfcFaceBound[...]
+
+    let faceVertices = null;
+    let holes = [];
+    for (let b = 0; b < bounds.length; b++)
+    {
+      let bound = bounds[b]; // IfcFaceBound
+      let loop = bound.Bound; // IfcLoop:
+
+      // (IfcPolyLoop, IfcEdgeLoop, IfcVertexLoop)
+      let loopVertices =
+        GeometryUtils.cloneRing(this.helper(loop).getPoints());
+
+      let loopOrientation = bound.Orientation;
+      if (loopOrientation === false)
+      {
+        // reverse loop sense
+        loopVertices = loopVertices.slice().reverse();
+      }
+      if (bound instanceof schema.IfcFaceOuterBound)
+      {
+        faceVertices = loopVertices;
+      }
+      else
+      {
+        holes.push(loopVertices);
+      }
+    }
+
+    if (faceVertices && faceVertices.length >= 3)
+    {
+      let face = solidGeometry.addFace(...faceVertices);
+      for (let holeVertices of holes)
+      {
+        if (holeVertices.length >= 3)
+        face.addHole(...holeVertices);
+      }
+    }
+  }
+}
+registerIfcHelperClass(IfcFaceHelper);
+
+
+class IfcAdvancedFaceHelper extends IfcFaceHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  addFaces(solidGeometry)
+  {
+    super.addFaces(solidGeometry);
+  }
+}
+registerIfcHelperClass(IfcAdvancedFaceHelper);
+
+
 class IfcPolyLoopHelper extends IfcHelper
 {
   constructor(loader, entity)
@@ -2638,13 +2691,12 @@ class IfcPolyLoopHelper extends IfcHelper
     if (this.points === null)
     {
       const loop = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const polygon = loop.Polygon;
 
       this.points = [];
       for (let i = 0; i < polygon.length; i++)
       {
-        let point = helper(polygon[i]).getPoint();
+        let point = this.helper(polygon[i]).getPoint();
         this.points.push(point);
       }
     }
@@ -2666,23 +2718,114 @@ class IfcEdgeLoopHelper extends IfcHelper
   {
     if (this.points === null)
     {
-      const edges = this.entity.EdgeList; // IfcOrientedEdge[]
-      const helper = entity => this.loader.helper(entity);
+      const edges = this.entity.EdgeList;
 
       this.points = [];
       for (let i = 0; i < edges.length; i++)
       {
         let edge = edges[i];
-        let point = edge.Orientation === true ?
-          helper(edge.EdgeElement.EdgeStart.VertexGeometry).getPoint() :
-          helper(edge.EdgeElement.EdgeEnd.VertexGeometry).getPoint();
-        this.points.push(point);
+        let edgePoints = this.helper(edge).getPoints();
+        GeometryUtils.joinPointArrays(this.points, edgePoints);
       }
     }
     return this.points;
   }
 };
 registerIfcHelperClass(IfcEdgeLoopHelper);
+
+
+class IfcEdgeHelper extends IfcHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+    this.points = null;
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const edge = this.entity;
+
+      this.points = [];
+      if (edge.EdgeStart)
+      {
+        this.points.push(this.helper(edge.EdgeStart.VertexGeometry).getPoint());
+      }
+      if (edge.EdgeEnd)
+      {
+        this.points.push(this.helper(edge.EdgeEnd.VertexGeometry).getPoint());
+      }
+    }
+    return this.points;
+  }
+}
+registerIfcHelperClass(IfcEdgeHelper);
+
+
+class IfcOrientedEdgeHelper extends IfcEdgeHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const edge = this.entity;
+
+      this.points = this.helper(edge.EdgeElement).getPoints();
+
+      if (this.points.length > 0)
+      {
+        if (edge.Orientation === false)
+        {
+          this.points = [...this.points];
+          this.points.reverse();
+        }
+      }
+    }
+    return this.points;
+  }
+}
+registerIfcHelperClass(IfcOrientedEdgeHelper);
+
+
+class IfcEdgeCurveHelper extends IfcEdgeHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  getPoints()
+  {
+    if (this.points === null)
+    {
+      const edge = this.entity;
+      const schema = edge.constructor.schema;
+
+      const edgePoints = super.getPoints();
+      const edgeGeometry = edge.EdgeGeometry;
+      const geometryHelper = this.helper(edgeGeometry);
+
+      let geomPoints = geometryHelper.getPoints();
+      if (geomPoints && geomPoints.length > 0 && edgeGeometry instanceof schema.IfcConic)
+      {
+        this.points = geomPoints;
+      }
+      else
+      {
+        this.points = edgePoints;
+      }
+    }
+    return this.points;
+  }
+}
+registerIfcHelperClass(IfcEdgeCurveHelper);
 
 
 class IfcVertexLoopHelper extends IfcHelper
@@ -2698,8 +2841,7 @@ class IfcVertexLoopHelper extends IfcHelper
     if (this.points === null)
     {
       const vertex = this.entity.LoopVertex; // IfcVertexPoint
-      const helper = entity => this.loader.helper(entity);
-      const point = helper(vertex.VertexGeometry).getPoint();
+      const point = this.helper(vertex.VertexGeometry).getPoint();
       this.points = [point];
     }
     return this.points;
@@ -2720,13 +2862,12 @@ class IfcCartesianPointList2DHelper extends IfcHelper
   {
     if (this.points === null)
     {
-      var list = this.entity;
+      const list = this.entity;
 
       this.points = [];
-      for (var i = 0; i < list.CoordList.length; i++)
+      for (let coord of list.CoordList)
       {
-        var coord = list.CoordList[i];
-        var point = new THREE.Vector3();
+        let point = new THREE.Vector3();
         point.x = coord[0];
         point.y = coord[1];
         this.points.push(point);
@@ -2750,13 +2891,12 @@ class IfcCartesianPointList3DHelper extends IfcHelper
   {
     if (this.points === null)
     {
-      var list = this.entity;
+      const list = this.entity;
 
       this.points = [];
-      for (var i = 0; i < list.CoordList.length; i++)
+      for (let coord of list.CoordList)
       {
-        var coord = list.CoordList[i];
-        var point = new THREE.Vector3();
+        let point = new THREE.Vector3();
         point.x = coord[0];
         point.y = coord[1];
         point.z = coord[2];
@@ -2785,10 +2925,9 @@ class IfcLocalPlacementHelper extends IfcHelper
     if (this.matrix === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const relativePlacement = placement.RelativePlacement;
       this.matrix = relativePlacement ?
-        helper(relativePlacement).getMatrix() : new THREE.Matrix4();
+        this.helper(relativePlacement).getMatrix() : new THREE.Matrix4();
     }
     return this.matrix;
   }
@@ -2798,13 +2937,12 @@ class IfcLocalPlacementHelper extends IfcHelper
     if (this.matrixWorld === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const schema = placement.constructor.schema;
 
       const placementRelTo = placement.PlacementRelTo;
       if (placementRelTo instanceof schema.IfcLocalPlacement)
       {
-        this.matrixWorld = helper(placementRelTo).getMatrixWorld().clone();
+        this.matrixWorld = this.helper(placementRelTo).getMatrixWorld().clone();
         this.matrixWorld.multiply(this.getMatrix());
       }
       else this.matrixWorld = this.getMatrix();
@@ -2828,12 +2966,11 @@ class IfcCartesianTransformationOperatorHelper extends IfcHelper
     if (this.matrix === null)
     {
       const operator = this.entity;
-      const helper = entity => this.loader.helper(entity);
 
       this.matrix = new THREE.Matrix4();
-      const origin = helper(operator.LocalOrigin).getPoint();
-      const axis1 = helper(operator.Axis1)?.getDirection();
-      const axis2 = helper(operator.Axis2)?.getDirection();
+      const origin = this.helper(operator.LocalOrigin).getPoint();
+      const axis1 = this.helper(operator.Axis1)?.getDirection();
+      const axis2 = this.helper(operator.Axis2)?.getDirection();
       const scale = operator.Scale;
 
       if (axis1 && axis2)
@@ -2875,10 +3012,9 @@ class IfcPlacementHelper extends IfcHelper
     if (this.location === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const loc = placement.Location;
       this.location = loc ?
-        helper(loc).getPoint() : new THREE.Vector3(0, 0, 0);
+        this.helper(loc).getPoint() : new THREE.Vector3(0, 0, 0);
     }
     return this.location;
   }
@@ -2887,7 +3023,6 @@ class IfcPlacementHelper extends IfcHelper
   {
     if (this.matrix === null)
     {
-      var placement = this.entity;
       this.matrix = new THREE.Matrix4();
       this.matrix.setPosition(this.getLocation());
     }
@@ -2910,10 +3045,9 @@ class IfcAxis1PlacementHelper extends IfcPlacementHelper
     if (this.axis === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const axis = placement.Axis;
       this.axis = axis ?
-        helper(axis).getDirection() : new THREE.Vector3(0, 0, 1);
+        this.helper(axis).getDirection() : new THREE.Vector3(0, 0, 1);
     }
     return this.axis;
   }
@@ -2953,10 +3087,9 @@ class IfcAxis2Placement2DHelper extends IfcPlacementHelper
     if (this.refDirection === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const refd = placement.RefDirection;
       this.refDirection = refd ?
-        helper(refd).getDirection() : new THREE.Vector3(1, 0, 0);
+        this.helper(refd).getDirection() : new THREE.Vector3(1, 0, 0);
     }
     return this.refDirection;
   }
@@ -2965,10 +3098,10 @@ class IfcAxis2Placement2DHelper extends IfcPlacementHelper
   {
     if (this.matrix === null)
     {
-      var loc = this.getLocation();
-      var vx = this.getRefDirection();
-      var vz = new THREE.Vector3(0, 0, 1);
-      var vy = new THREE.Vector3();
+      const loc = this.getLocation();
+      const vx = this.getRefDirection();
+      const vz = new THREE.Vector3(0, 0, 1);
+      const vy = new THREE.Vector3();
       vy.crossVectors(vz, vx);
 
       this.matrix = new THREE.Matrix4();
@@ -2998,10 +3131,9 @@ class IfcAxis2Placement3DHelper extends IfcPlacementHelper
     if (this.axis === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const axis = placement.Axis;
       this.axis = axis ?
-        helper(axis).getDirection() : new THREE.Vector3(0, 0, 1);
+        this.helper(axis).getDirection() : new THREE.Vector3(0, 0, 1);
     }
     return this.axis;
   }
@@ -3011,10 +3143,9 @@ class IfcAxis2Placement3DHelper extends IfcPlacementHelper
     if (this.refDirection === null)
     {
       const placement = this.entity;
-      const helper = entity => this.loader.helper(entity);
       const refd = placement.RefDirection;
       this.refDirection = refd ?
-        helper(refd).getDirection() : new THREE.Vector3(1, 0, 0);
+        this.helper(refd).getDirection() : new THREE.Vector3(1, 0, 0);
     }
     return this.refDirection;
   }
@@ -3023,10 +3154,10 @@ class IfcAxis2Placement3DHelper extends IfcPlacementHelper
   {
     if (this.matrix === null)
     {
-      var loc = this.getLocation();
-      var vz = this.getAxis();
-      var vx = this.getRefDirection();
-      var vy = new THREE.Vector3();
+      const loc = this.getLocation();
+      const vz = this.getAxis();
+      const vx = this.getRefDirection();
+      const vy = new THREE.Vector3();
       vy.crossVectors(vz, vx);
 
       this.matrix = new THREE.Matrix4();
@@ -3046,6 +3177,8 @@ registerIfcHelperClass(IfcAxis2Placement3DHelper);
 
 class IfcRelationshipHelper extends IfcHelper
 {
+  static cacheable = false;
+
   constructor(loader, entity)
   {
     super(loader, entity);
@@ -3069,21 +3202,21 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     let relatedObjects = rel.RelatedObjects;
     let ifcType = rel.RelatingType;
 
-    const typeGroup = helper(ifcType)?.getObject3D();
+    const typeGroup = this.helper(ifcType)?.getObject3D();
 
     const typeData = typeGroup?.userData.IFC;
 
     for (let relatedObject of relatedObjects)
     {
-      if (helper(relatedObject).getObject3D)
+      let relatedHelper = this.helper(relatedObject);
+      if (relatedHelper.getObject3D)
       {
-        let object3D = helper(relatedObject).getObject3D();
+        let object3D = relatedHelper.getObject3D();
 
         if (object3D.links === undefined)
         {
@@ -3114,7 +3247,6 @@ class IfcRelAssociatesMaterialHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     const ifcObjects = rel.RelatedObjects;
@@ -3171,9 +3303,10 @@ class IfcRelAssociatesMaterialHelper extends IfcRelationshipHelper
     {
       for (let ifcObject of ifcObjects)
       {
-        if (helper(ifcObject)?.getObject3D)
+        let objectHelper = this.helper(ifcObject);
+        if (objectHelper?.getObject3D)
         {
-          let object3D = helper(ifcObject).getObject3D();
+          let object3D = objectHelper.getObject3D();
           if (layerSetData)
           {
             object3D.userData["IFC_material_layerset"] = layerSetData;
@@ -3202,7 +3335,6 @@ class IfcRelAssociatesClassificationHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     const ifcObjects = rel.RelatedObjects;
@@ -3212,9 +3344,10 @@ class IfcRelAssociatesClassificationHelper extends IfcRelationshipHelper
     {
       for (let ifcObject of ifcObjects)
       {
-        if (helper(ifcObject)?.getObject3D)
+        let objectHelper = this.helper(ifcObject);
+        if (objectHelper?.getObject3D)
         {
-          let object3D = helper(ifcObject).getObject3D();
+          let object3D = objectHelper.getObject3D();
 
           let ifcClassification = ifcClassifRef.ReferencedSource || {};
           let classifName = "Unnamed";
@@ -3248,7 +3381,6 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     const ifcGroup = rel.RelatingGroup;
@@ -3262,10 +3394,11 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
     for (let i = 0; i < ifcObjects.length; i++)
     {
       let ifcObject = ifcObjects[i];
+      let objectHelper = this.helper(ifcObject);
 
-      if (helper(ifcObject).getObject3D)
+      if (objectHelper.getObject3D)
       {
-        let object3D = helper(ifcObject).getObject3D();
+        let object3D = objectHelper.getObject3D();
         object3D.userData["IFC_group_" + groupName] = groupData;
         object3D.userData["IFC_rel_group"] = loader.getIfcData(rel);
       }
@@ -3286,7 +3419,6 @@ class IfcRelAggregatesHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     const ifcObject = rel.RelatingObject;
@@ -3294,7 +3426,7 @@ class IfcRelAggregatesHelper extends IfcRelationshipHelper
 
     if (ifcObject instanceof schema.IfcObjectDefinition)
     {
-      const containerObject3D = helper(ifcObject).getObject3D();
+      const containerObject3D = this.helper(ifcObject).getObject3D();
       if (containerObject3D)
       {
         for (let i = 0; i < relatedObjects.length; i++)
@@ -3303,7 +3435,7 @@ class IfcRelAggregatesHelper extends IfcRelationshipHelper
 
           if (ifcRelatedObject instanceof schema.IfcObjectDefinition)
           {
-            let object3D = helper(ifcRelatedObject).getObject3D();
+            let object3D = this.helper(ifcRelatedObject).getObject3D();
             if (object3D)
             {
               object3D.userData["IFC_rel_aggregated"] = loader.getIfcData(rel);
@@ -3333,13 +3465,12 @@ class IfcRelContainedInSpatialStructureHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     const ifcSpatialElement = rel.RelatingStructure;
     if (ifcSpatialElement)
     {
-      let containerObject3D = helper(ifcSpatialElement).getObject3D();
+      let containerObject3D = this.helper(ifcSpatialElement).getObject3D();
       if (containerObject3D)
       {
         for (let i = 0; i < rel.RelatedElements.length; i++)
@@ -3348,7 +3479,7 @@ class IfcRelContainedInSpatialStructureHelper extends IfcRelationshipHelper
 
           if (ifcRelatedProduct instanceof schema.IfcProduct)
           {
-            let object3D = helper(ifcRelatedProduct).getObject3D();
+            let object3D = this.helper(ifcRelatedProduct).getObject3D();
             if (object3D)
             {
               object3D.userData["IFC_rel_contained"] = loader.getIfcData(rel);
@@ -3386,16 +3517,15 @@ class IfcRelVoidsElementHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
 
     const element = rel.RelatingBuildingElement;
     const opening = rel.RelatedOpeningElement;
     if (element && opening)
     {
-      let object3D = helper(element).getObject3D();
+      let object3D = this.helper(element).getObject3D();
       if (object3D)
       {
-        let openingObject3D = helper(opening).getObject3D();
+        let openingObject3D = this.helper(opening).getObject3D();
         if (openingObject3D)
         {
           let className = object3D.userData.IFC.ifcClassName;
@@ -3433,16 +3563,15 @@ class IfcRelFillsElementHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
 
     const opening = rel.RelatingOpeningElement;
     const element = rel.RelatedBuildingElement;
     if (element && opening)
     {
-      let object3D = helper(element).getObject3D();
+      let object3D = this.helper(element).getObject3D();
       if (object3D)
       {
-        let openingObject3D = helper(opening).getObject3D();
+        let openingObject3D = this.helper(opening).getObject3D();
         if (openingObject3D)
         {
           object3D.userData["IFC_rel_fills"] = loader.getIfcData(rel);
@@ -3469,16 +3598,15 @@ class IfcRelConnectsPortToElementHelper extends IfcRelationshipHelper
   relate()
   {
     const rel = this.entity;
-    const helper = entity => this.loader.helper(entity);
     const port = rel.RelatingPort;
     const element = rel.RelatedElement;
 
     if (port && element)
     {
-      let object3D = helper(element).getObject3D();
+      let object3D = this.helper(element).getObject3D();
       if (object3D)
       {
-        let portObject3D = helper(port).getObject3D();
+        let portObject3D = this.helper(port).getObject3D();
         if (portObject3D)
         {
           if (object3D !== portObject3D.parent)
@@ -3504,7 +3632,6 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
   {
     const rel = this.entity;
     const loader = this.loader;
-    const helper = entity => loader.helper(entity);
     const schema = rel.constructor.schema;
 
     let propertySet = rel.RelatingPropertyDefinition;
@@ -3515,12 +3642,12 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
     if (propertySet instanceof schema.IfcPropertySet)
     {
       let psetName = propertySet.Name;
-      let properties = helper(propertySet).getProperties();
+      let properties = this.helper(propertySet).getProperties();
       for (let relatedObject of relatedObjects)
       {
         if (relatedObject instanceof schema.IfcProduct)
         {
-          let object3D = helper(relatedObject).getObject3D();
+          let object3D = this.helper(relatedObject).getObject3D();
           if (object3D)
           {
             object3D.userData["IFC_" + psetName] = properties;
@@ -3573,7 +3700,7 @@ class IfcCartesianPointHelper extends IfcPointHelper
   {
     if (this.point === null)
     {
-      var point = this.entity;
+      const point = this.entity;
 
       this.point = new THREE.Vector3();
       this.point.x = point.Coordinates[0];
@@ -3604,7 +3731,7 @@ class IfcDirectionHelper extends IfcHelper
   {
     if (this.direction === null)
     {
-      var direction = this.entity;
+      const direction = this.entity;
 
       this.direction = new THREE.Vector3();
       this.direction.x = direction.DirectionRatios[0];
@@ -3623,8 +3750,43 @@ class IfcDirectionHelper extends IfcHelper
 registerIfcHelperClass(IfcDirectionHelper);
 
 
+class IfcVectorHelper extends IfcHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+    this.vector = null;
+  }
+
+  getVector()
+  {
+    if (this.vector === null)
+    {
+      const vector = this.entity;
+      const loader = this.loader;
+      const helper = entity => loader.helper(entity);
+
+      const direction = helper(vector.Orientation).getDirection();
+      const magnitude = loader.unBox(vector.Magnitude);
+
+      this.vector = new THREE.Vector3();
+      this.vector.copy(direction);
+      if (magnitude !== 0)
+      {
+        this.vector.normalize();
+        this.vector.multiplyScalar(magnitude);
+      }
+    }
+    return this.vector;
+  }
+}
+registerIfcHelperClass(IfcVectorHelper);
+
+
 class IfcPresentationLayerAssignmentHelper extends IfcHelper
 {
+  static cacheable = false;
+
   constructor(loader, entity)
   {
     super(loader, entity);
@@ -3633,7 +3795,6 @@ class IfcPresentationLayerAssignmentHelper extends IfcHelper
   assign()
   {
     const assignment = this.entity;
-    const helper = entity => this.loader.helper(entity);
     const schema = assignment.constructor.schema;
 
     const layerName = assignment.Name;
@@ -3648,9 +3809,10 @@ class IfcPresentationLayerAssignmentHelper extends IfcHelper
         let items = assignedItem.Items;
         for (let item of items)
         {
-          if (helper(item).getObject3D)
+          let itemHelper = this.helper(item);
+          if (itemHelper.getObject3D)
           {
-            let object = helper(item).getObject3D();
+            let object = itemHelper.getObject3D();
             if (object)
             {
               object.userData.IFC_layer =
@@ -3680,7 +3842,6 @@ class IfcStyledItemHelper extends IfcHelper
   applyStyle()
   {
     const styledItem = this.entity;
-    const helper = entity => this.loader.helper(entity);
     const schema = styledItem.constructor.schema;
 
     const item = styledItem.Item; // item to apply style
@@ -3696,10 +3857,10 @@ class IfcStyledItemHelper extends IfcHelper
 
     if (style instanceof schema.IfcSurfaceStyle)
     {
-      const material = helper(style).getMaterial();
-      if (helper(item) && material)
+      const material = this.helper(style).getMaterial();
+      if (this.helper(item) && material)
       {
-        helper(item).material = material;
+        this.helper(item).material = material;
       }
     }
   }

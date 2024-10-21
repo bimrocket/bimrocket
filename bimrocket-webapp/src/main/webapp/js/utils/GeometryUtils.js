@@ -249,6 +249,34 @@ class GeometryUtils
     return clonedRing;
   }
 
+  /**
+   * Add nextPoints to points without repeating vertices
+   *
+   * @param {Vector2[] | Vector3[]} points the array of vectors
+   * @param {Vector2[] | Vector3[]} nextPoints the array of vectors
+   */
+  static joinPointArrays(points, nextPoints)
+  {
+    if (nextPoints.length === 0)
+    {
+      // nothing to do
+    }
+    else if (points.length === 0)
+    {
+      points.push(...nextPoints);
+    }
+    else
+    {
+      const lastPoint = points[points.length - 1];
+      const nextPoint = nextPoints[0];
+      let start = lastPoint.equals(nextPoint) ? 1 : 0;
+      for (let i = start; i < nextPoints.length; i++)
+      {
+        points.push(nextPoints[i]);
+      }
+    }
+  }
+
   /* triangulate a 3D face */
   static triangulateFace(vertices, holes, normal)
   {

@@ -8,7 +8,7 @@ import { BSP } from "./BSP.js";
 import { SolidGeometry } from "./SolidGeometry.js";
 import { SolidOptimizer } from "./SolidOptimizer.js";
 import { Formula } from "../formula/Formula.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Solid extends THREE.Object3D
 {

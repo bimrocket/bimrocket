@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 

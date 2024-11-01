@@ -8,7 +8,7 @@ import { Panel } from "./Panel.js";
 import { Tree } from "./Tree.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Outliner extends Panel
 {

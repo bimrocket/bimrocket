@@ -8,7 +8,7 @@ import { ObjectBuilder } from "./ObjectBuilder.js";
 import { SolidBuilder } from "./SolidBuilder.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SweptSolidBuilder extends SolidBuilder
 {

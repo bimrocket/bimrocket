@@ -7,7 +7,7 @@
 import { IFC } from "../io/ifc/IFC.js";
 import { IFCVoider } from "../builders/IFCVoider.js";
 import { ObjectUtils } from "./ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BIMUtils
 {

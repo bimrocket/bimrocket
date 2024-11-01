@@ -6,7 +6,7 @@
 
 import { Formula } from "../formula/Formula.js";
 import { CordGeometry } from "./CordGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Cord extends THREE.LineSegments
 {

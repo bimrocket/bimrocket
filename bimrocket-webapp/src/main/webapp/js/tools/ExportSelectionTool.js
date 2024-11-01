@@ -9,7 +9,7 @@ import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ExportSelectionTool extends Tool
 {

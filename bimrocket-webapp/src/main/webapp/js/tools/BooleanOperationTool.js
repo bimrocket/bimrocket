@@ -9,7 +9,7 @@ import { Solid } from "../core/Solid.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { BooleanOperator } from "../builders/BooleanOperator.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BooleanOperationTool extends Tool
 {

@@ -15,7 +15,7 @@ import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { BCFService } from "../io/BCFService.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BCFPanel extends Panel
 {

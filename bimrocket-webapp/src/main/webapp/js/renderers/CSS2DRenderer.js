@@ -3,7 +3,7 @@ import {
 	Object3D,
 	Vector2,
 	Vector3
-} from '../lib/three.module.js'; // bimrocket
+} from 'three'; // bimrocket
 
 class CSS2DObject extends Object3D {
 

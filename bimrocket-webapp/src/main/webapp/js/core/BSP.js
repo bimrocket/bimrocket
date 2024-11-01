@@ -6,7 +6,7 @@
 
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BSP
 {

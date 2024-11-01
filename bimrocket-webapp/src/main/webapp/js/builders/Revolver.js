@@ -11,7 +11,7 @@ import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Revolver extends SweptSolidBuilder
 {

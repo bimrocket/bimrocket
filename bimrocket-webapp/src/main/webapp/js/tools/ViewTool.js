@@ -6,7 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ViewTool extends Tool
 {

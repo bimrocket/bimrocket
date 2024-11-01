@@ -9,7 +9,7 @@ import { Selection } from "../utils/Selection.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { Solid } from "../core/Solid.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class MergeGeometriesTool extends Tool
 {

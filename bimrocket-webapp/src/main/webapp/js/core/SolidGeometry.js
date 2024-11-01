@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 
 class SolidGeometry extends THREE.BufferGeometry

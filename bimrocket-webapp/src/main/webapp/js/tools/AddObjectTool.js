@@ -22,7 +22,7 @@ import { Extruder } from "../builders/Extruder.js";
 import { Revolver } from "../builders/Revolver.js";
 import { Formula } from "../formula/Formula.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class AddObjectTool extends Tool
 {

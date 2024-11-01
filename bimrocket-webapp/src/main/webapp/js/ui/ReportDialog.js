@@ -8,7 +8,7 @@ import { Dialog } from "./Dialog.js";
 import { Toast } from "../ui/Toast.js";
 import { Report } from "../reports/Report.js";
 import { ReportType } from "../reports/ReportType.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ReportDialog extends Dialog
 {

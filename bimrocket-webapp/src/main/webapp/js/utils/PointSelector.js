@@ -12,7 +12,7 @@ import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
 import { I18N } from "../i18n/I18N.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class PointSelector
 {

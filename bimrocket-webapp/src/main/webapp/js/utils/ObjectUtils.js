@@ -9,7 +9,7 @@ import { Profile } from "../core/Profile.js";
 import { Solid } from "../core/Solid.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { CSS2DObject } from "../renderers/CSS2DRenderer.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ObjectUtils
 {

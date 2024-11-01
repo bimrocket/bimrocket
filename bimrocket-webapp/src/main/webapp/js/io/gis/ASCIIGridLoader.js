@@ -7,7 +7,7 @@ import { Solid } from "../../core/Solid.js";
 import { SolidGeometry } from "../../core/SolidGeometry.js";
 import { GeometryUtils } from "../../utils/GeometryUtils.js";
 import { WebUtils } from "../../utils/WebUtils.js";
-import * as THREE from "../../lib/three.module.js";
+import * as THREE from "three";
 
 class ASCIIGridLoader extends THREE.Loader
 {

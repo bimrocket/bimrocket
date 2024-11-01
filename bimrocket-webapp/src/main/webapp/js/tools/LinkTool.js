@@ -4,7 +4,7 @@
  * @author realor
  */
 
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { Toast } from "../ui/Toast.js";

@@ -6,7 +6,7 @@
 
 import { Tool } from "./Tool.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class AutoOrbitTool extends Tool
 {

@@ -5,7 +5,7 @@
  */
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class SolidBuilder extends ObjectBuilder
 {

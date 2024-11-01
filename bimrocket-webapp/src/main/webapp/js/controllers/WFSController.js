@@ -11,7 +11,7 @@ import { GeometryMerger } from "../builders/GeometryMerger.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { GeoJSONLoader } from "../io/gis/GeoJSONLoader.js";
 import { Formula } from "../formula/Formula.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class WFSController extends Controller
 {

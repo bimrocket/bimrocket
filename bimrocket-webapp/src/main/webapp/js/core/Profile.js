@@ -6,7 +6,7 @@
 
 import { Formula } from "../formula/Formula.js";
 import { ProfileGeometry } from "./ProfileGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Profile extends THREE.LineSegments
 {

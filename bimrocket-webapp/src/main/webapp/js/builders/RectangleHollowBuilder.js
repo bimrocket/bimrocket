@@ -7,7 +7,7 @@
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { RectangleBuilder } from "./RectangleBuilder.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class RectangleHollowBuilder extends RectangleBuilder
 {

@@ -9,7 +9,7 @@ import {
 	TriangleStripDrawMode,
 	TrianglesDrawMode,
 	Vector3,
-} from '../lib/three.module.js'; // bimrocket
+} from 'three'; // bimrocket
 
 function computeMikkTSpaceTangents( geometry, MikkTSpace, negateSign = true ) {
 

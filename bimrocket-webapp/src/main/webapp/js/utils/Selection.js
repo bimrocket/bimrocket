@@ -5,7 +5,7 @@
  */
 
 import { Application } from "../ui/Application.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class Selection
 {

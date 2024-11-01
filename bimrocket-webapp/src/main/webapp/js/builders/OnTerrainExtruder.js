@@ -11,7 +11,7 @@ import { Profile } from "../core/Profile.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { ElevationMap } from "../utils/ElevationMap.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class OnTerrainExtruder extends SweptSolidBuilder
 {

@@ -11,7 +11,7 @@ import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class GeometryMerger extends ObjectBuilder
 {

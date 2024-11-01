@@ -9,7 +9,7 @@ import { BSP } from "../core/BSP.js";
 import { ObjectBuilder } from "./ObjectBuilder.js";
 import { SolidBuilder } from "./SolidBuilder.js";
 import { IFC } from "../io/ifc/IFC.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class IFCVoider extends SolidBuilder
 {

@@ -11,7 +11,7 @@ import { ReportType } from "../reports/ReportType.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { Toast } from "./Toast.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class ReportPanel extends Panel
 {

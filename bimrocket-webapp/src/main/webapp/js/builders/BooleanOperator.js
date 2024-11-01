@@ -9,7 +9,7 @@ import { SolidBuilder } from "./SolidBuilder.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { Solid } from "../core/Solid.js";
 import { BSP } from "../core/BSP.js";
-import * as THREE from "../lib/three.module.js";
+import * as THREE from "three";
 
 class BooleanOperator extends SolidBuilder
 {

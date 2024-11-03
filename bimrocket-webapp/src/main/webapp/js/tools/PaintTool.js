@@ -338,8 +338,8 @@ class PaintTool extends Tool
   {
     const application = this.application;
     const roots = application.selection.roots;
-    ObjectUtils.updateAppearance(roots, appearance);
-    application.repaint();
+    const changed = ObjectUtils.updateAppearance(roots, appearance);
+    application.notifyObjectsChanged(Array.from(changed));
   }
 
   createMaterial(name)

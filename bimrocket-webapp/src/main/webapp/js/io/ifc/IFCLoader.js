@@ -3396,7 +3396,7 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
       let ifcObject = ifcObjects[i];
       let objectHelper = this.helper(ifcObject);
 
-      if (objectHelper.getObject3D)
+      if (objectHelper?.getObject3D)
       {
         let object3D = objectHelper.getObject3D();
         object3D.userData["IFC_group_" + groupName] = groupData;

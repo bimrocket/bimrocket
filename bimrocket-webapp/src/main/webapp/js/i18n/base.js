@@ -365,7 +365,8 @@ export const translations =
   "label.language" : "Language:",
   "label.units" : "Model units:",
   "label.decimals" : "Decimals to display:",
-  "label.fr_fps" : "Fast rendering activation (FPS):",
+  "label.render_mode" : "Render mode:",
+  "label.requested_fps" : "Requested FPS:",
   "label.sel_paint_mode" : "Selection paint mode:",
   "label.show_deep_sel" : "Show deep selection",
   "label.show_local_axes" : "Show local axes",
@@ -512,6 +513,10 @@ export const translations =
   "option.faces" : "Faces",
   "option.solid" : "Solid",
   "option.gradient" : "Gradient",
+
+  "option.render_mode.normal" : "Normal",
+  "option.render_mode.simplified" : "Simplified",
+  "option.render_mode.batch" : "Batch",
 
   "title.add_cloud_service" : "Add cloud service",
   "title.edit_cloud_service" : "Edit cloud service",

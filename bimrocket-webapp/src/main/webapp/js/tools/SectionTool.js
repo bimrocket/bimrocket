@@ -163,17 +163,19 @@ class SectionTool extends Tool
 
   activate()
   {
+    const application = this.application;
+    const container = application.container;
     this.panel.visible = true;
-    const container = this.application.container;
-    container.addEventListener('wheel', this._onWheel, false);
+    container.addEventListener("wheel", this._onWheel, false);
     this.gestureHandler.enable();
   }
 
   deactivate()
   {
+    const application = this.application;
+    const container = application.container;
     this.panel.visible = false;
-    const container = this.application.container;
-    container.removeEventListener('wheel', this._onWheel, false);
+    container.removeEventListener("wheel", this._onWheel, false);
     this.gestureHandler.disable();
   }
 
@@ -314,10 +316,8 @@ class SectionTool extends Tool
       }
     });
 
-    for (let i = 0; i < this.meshes.length; i++)
+    for (let mesh of this.meshes)
     {
-      let mesh = this.meshes[i];
-
       let backMesh = new THREE.Mesh(mesh.geometry, this.backFaceStencilMat);
       backMesh.name = THREE.Object3D.HIDDEN_PREFIX + "backMesh";
       backMesh.raycast = () => {};
@@ -326,7 +326,7 @@ class SectionTool extends Tool
 
       let frontMesh = new THREE.Mesh(mesh.geometry, this.frontFaceStencilMat);
       frontMesh.name = THREE.Object3D.HIDDEN_PREFIX + "frontMesh";
-      frontMesh.raycast = function(){};
+      frontMesh.raycast = () => {};
       mesh.add(frontMesh);
       frontMesh.updateMatrix();
     }
@@ -344,10 +344,8 @@ class SectionTool extends Tool
     application.clippingGroup.remove(this.planeMesh);
     application.clippingPlane = null;
 
-    for (let i = 0; i < this.meshes.length; i++)
+    for (let mesh of this.meshes)
     {
-      const mesh = this.meshes[i];
-
       let frontMesh = mesh.getObjectByName(
         THREE.Object3D.HIDDEN_PREFIX + "frontMesh");
       if (frontMesh)

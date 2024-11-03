@@ -56,7 +56,7 @@ class OptionsTool extends Tool
 
     // Language
 
-    const i18n = this.application.i18n;
+    const i18n = application.i18n;
     this.languageSelect = Controls.addSelectField(uiOptionsPanel,
       "language", "label.language");
     this.languageSelect.parentElement.className = "option_block inline";
@@ -140,12 +140,27 @@ class OptionsTool extends Tool
     this.panelOpacityRange.addEventListener("input", () =>
       setup.panelOpacity = parseFloat(this.panelOpacityRange.value), false);
 
-    // fast rendering FPR
+    // render mode
 
-    this.frRange = Controls.addRangeField(uiOptionsPanel,
-      "fr_range", "label.fr_fps", 0, 60, 1, setup.fastRenderingFPS);
-    this.frRange.addEventListener("change",
-      () => setup.fastRenderingFPS = parseInt(this.frRange.value), false);
+    this.renderModeSelect = Controls.addSelectField(uiOptionsPanel,
+      "render_mode", "label.render_mode",
+      [["normal", "option.render_mode.normal"],
+       ["simplified", "option.render_mode.simplified"],
+       ["batch", "option.render_mode.batch"]], null,
+     "option_block inline");
+
+    this.renderModeSelect.addEventListener("change", event =>
+    {
+      setup.renderMode = this.renderModeSelect.value;
+      if (setup.renderMode !== "batch") application.disableBatch();
+    });
+
+    // requested FPS
+
+    this.fpsRange = Controls.addRangeField(uiOptionsPanel,
+      "fps_range", "label.requested_fps", 0, 60, 1, setup.requestedFPS);
+    this.fpsRange.addEventListener("change",
+      () => setup.requestedFPS = parseInt(this.fpsRange.value), false);
 
     // Selection Paint mode
 
@@ -338,7 +353,8 @@ class OptionsTool extends Tool
     this.unitsSelect.value = setup.units;
     this.decimalsElem.value = setup.decimals;
     this.panelOpacityRange.rangeValue = setup.panelOpacity;
-    this.frRange.rangeValue = setup.fastRenderingFPS;
+    this.renderModeSelect.value = setup.renderMode;
+    this.fpsRange.rangeValue = setup.requestedFPS;
     this.selPaintModeSelect.value = setup.selectionPaintMode;
     this.deepSelCheckBox.checked = setup.showDeepSelection;
     this.localAxesCheckBox.checked = setup.showLocalAxes;

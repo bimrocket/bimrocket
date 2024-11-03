@@ -365,7 +365,8 @@ export const translations =
   "label.language" : "Idioma:",
   "label.units" : "Unidades del modelo:",
   "label.decimals" : "Decimales a mostrar:",
-  "label.fr_fps" : "Activación del pintado rápido (FPS):",
+  "label.render_mode" : "Modo de pintado:",
+  "label.requested_fps" : "FPS solicitados:",
   "label.sel_paint_mode" : "Pintado de selección:",
   "label.show_deep_sel" : "Mostrar selección profunda",
   "label.show_local_axes" : "Mostrar ejes locales",
@@ -512,6 +513,10 @@ export const translations =
   "option.faces" : "Caras",
   "option.solid" : "Sólido",
   "option.gradient" : "Gradiente",
+
+  "option.render_mode.normal" : "Normal",
+  "option.render_mode.simplified" : "Simplificado",
+  "option.render_mode.batch" : "Batch",
 
   "title.add_cloud_service": "Añadir servicio de nube",
   "title.edit_cloud_service": "Editar servicio de nube",

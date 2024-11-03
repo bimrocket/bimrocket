@@ -35,6 +35,7 @@ import { EffectComposer } from "../postprocessing/EffectComposer.js";
 import { RenderPass } from "../postprocessing/RenderPass.js";
 import { SAOPass } from "../postprocessing/SAOPass.js";
 import { OutputPass } from "../postprocessing/OutputPass.js";
+import { ObjectBatcher } from "../utils/ObjectBatcher.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
@@ -67,6 +68,7 @@ class Application
     this.baseObject = null;
     this.clippingPlane = null;
     this.clippingGroup = null;
+    this.batchGroup = null;
     this.overlays = null;
     this.tools = {};
     this.tool = null;
@@ -85,7 +87,7 @@ class Application
 
     /* rendering */
     this._needsRepaint = true;
-    this._fastRenderingLevel = 0; // 0: disabled
+    this._sceneSimplificationLevel = 0; // 0: disabled
 
     /* events */
     this._copyObjects = [];
@@ -283,6 +285,7 @@ class Application
       }
       else if (event.type !== "cut")
       {
+        let clearBatch = false;
         if (event.type === "nodeChanged")
         {
           let updateSelection = false;
@@ -293,14 +296,24 @@ class Application
               object.needsRebuild = true;
             }
 
-            if (object instanceof THREE.Camera &&
-                event.source instanceof Inspector)
+            if (object instanceof THREE.Camera)
             {
-              // inspector has changed a camera
-              const camera = object;
-              camera.updateProjectionMatrix();
+              if (event.source instanceof Inspector)
+              {
+                // inspector has changed a camera
+                const camera = object;
+                camera.updateProjectionMatrix();
+              }
             }
-            else if (this.selection.contains(object))
+            else // a non Camera object was changed
+            {
+              if (ObjectUtils.isObjectDescendantOf(object, this.baseObject))
+              {
+                clearBatch = true;
+              }
+            }
+
+            if (this.selection.contains(object))
             {
               updateSelection = true;
             }
@@ -312,10 +325,16 @@ class Application
         {
           this.cssRenderer.cssObjects = -1; // force css rendering
           event.parent.needsRebuild = true;
+          clearBatch = true;
         }
         else if (event.type === "structureChange")
         {
           this.cssRenderer.cssObjects = -1; // force css rendering
+          clearBatch = true;
+        }
+        if (clearBatch)
+        {
+          this.disableBatch();
         }
         this.repaint();
       }
@@ -356,31 +375,67 @@ class Application
         this.notifyEventListeners("animation", _animationEvent);
       }
 
-      if (this._needsRepaint)
+      if (setup.renderMode === "simplified")
       {
-        const fps = 1 / _animationEvent.delta;
-
-        if (fps < setup.fastRenderingFPS)
+        if (this._needsRepaint)
         {
-          if (_slownessCounter < 2)
+          const fps = 1 / _animationEvent.delta;
+
+          if (fps < setup.requestedFPS)
           {
-            _slownessCounter++;
+            if (_slownessCounter < 2)
+            {
+              _slownessCounter++;
+            }
+            else if (this._sceneSimplificationLevel < 2)
+            {
+              this._sceneSimplificationLevel++;
+              this.updateSceneSimplification(); // enable simplification
+            }
           }
-          else if (this._fastRenderingLevel < 2)
+          this.render();
+        }
+        else
+        {
+          _slownessCounter = 0;
+          if (this._sceneSimplificationLevel > 0)
           {
-            this._fastRenderingLevel++;
-            this.updateFastRendering();
+            this._sceneSimplificationLevel = 0; // disable simplification
+            this.updateSceneSimplification();
+            this.render();
           }
         }
-        this.render();
       }
-      else
+      else if (setup.renderMode === "batch")
       {
-        _slownessCounter = 0;
-        if (this._fastRenderingLevel > 0)
+        if (this._needsRepaint)
         {
-          this._fastRenderingLevel = 0; // disable fast rendering
-          this.updateFastRendering();
+          if (!this.batchGroup)
+          {
+            const fps = 1 / _animationEvent.delta;
+            if (fps < setup.requestedFPS)
+            {
+              if (_slownessCounter < 2)
+              {
+                _slownessCounter++;
+              }
+              else
+              {
+                this.enableBatch();
+              }
+            }
+          }
+          this.render();
+        }
+        else
+        {
+          _slownessCounter = 0;
+        }
+      }
+      else // normal
+      {
+        if (this._needsRepaint)
+        {
           this.render();
         }
       }
@@ -390,9 +445,9 @@ class Application
     this.loadModules();
   }
 
-  updateFastRendering()
+  updateSceneSimplification()
   {
-    const level = this._fastRenderingLevel;
+    const level = this._sceneSimplificationLevel;
 
     let minSize = Infinity;
     let maxSize = 0;
@@ -400,7 +455,7 @@ class Application
     let sum = 0;
     let mediumSize = 0;
 
-    if (this._fastRenderingLevel === 2)
+    if (level === 2)
     {
       // calc object medium size
       this.scene.traverseVisible(object =>
@@ -468,6 +523,36 @@ class Application
     });
   }
 
+  enableBatch()
+  {
+    if (this.batchGroup === null)
+    {
+      try
+      {
+        const batcher = new ObjectBatcher();
+        this.batchGroup = batcher.batch(this.baseObject);
+        this.overlays.add(this.batchGroup);
+        console.info("batch enabled");
+      }
+      catch (ex)
+      {
+        console.error(ex);
+        this.setup.renderMode = "simplified";
+      }
+    }
+  }
+
+  disableBatch()
+  {
+    if (this.batchGroup)
+    {
+      this.batchGroup.removeFromParent();
+      ObjectUtils.dispose(this.batchGroup);
+      this.batchGroup = null;
+      console.info("batch disabled");
+    }
+  }
+
   setupComposer()
   {
     if (this.composer)
@@ -519,6 +604,7 @@ class Application
     {
       ObjectUtils.dispose(this.scene);
       this.stopControllers();
+      this.disableBatch();
     }
 
     this.scene = new THREE.Scene();
@@ -614,7 +700,16 @@ class Application
 
   render()
   {
-    if (this.composer && this.clippingPlane === null)
+    const clippingEnabled = this.clippingPlane !== null;
+
+    if (this.batchGroup)
+    {
+      this.batchGroup.visible = !clippingEnabled;
+      this.baseObject.visible = clippingEnabled;
+    }
+
+    // wegl renderer
+    if (this.composer && !clippingEnabled)
     {
       this.composer.render();
     }
@@ -622,8 +717,12 @@ class Application
     {
       this.renderer.render(this.scene, this.camera);
     }
+
+    // css renderer
     this.cssRenderer.render(this.scene, this.camera);
     this._needsRepaint = false;
+
+    this.baseObject.visible = true;
   }
 
   repaint()
@@ -1242,14 +1341,14 @@ class Application
   /**
    * Adds a Line and/or a Points object inside the application.overlay group.
    *
-   * @param {Vector3[]} vertices: the Line/Points vertices represented in global CS.
-   * @param {boolean} isLineSegments: when true the vertices represent segments
+   * @param vertices {Vector3[]}: the Line/Points vertices represented in global CS.
+   * @param isLineSegments {boolean}: when true the vertices represent segments
    *        of two points. When false vertices represent a sequence of connected points.
-   * @param {LineMaterial} lineMaterial: the Line object material.
+   * @param lineMaterial {LineMaterial}: the Line object material.
    *        If lineMaterial is null no Line object will be created.
-   * @param {PointsMaterial} pointsMaterial: the Points object material.
+   * @param pointsMaterial {PointsMaterial} : the Points object material.
    *        If pointsMaterial is null no Points object will be created.
-   * @param {Group} the optional group to add the objects to.
+   * @param group {Group}: the optional group to add the objects to.
    *        When null, the created objects will the added to the overlay group.
    */
   addOverlay(vertices, isLineSegments,

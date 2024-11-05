@@ -255,6 +255,7 @@ class Controls
     range.style.width = "80%";
     range.style.marginLeft = "auto";
     range.style.marginRight = "auto";
+    range.formatValue = value => value;
 
     Object.defineProperty(range, 'rangeValue',
     {
@@ -266,11 +267,14 @@ class Controls
       set: function(value)
       {
         range.value = value;
-        rangeValue.textContent = value;
+        rangeValue.textContent = range.formatValue(value);
       }
     });
 
-    range.addEventListener("input", () => rangeValue.textContent = range.value);
+    range.addEventListener("input", () =>
+    {
+      rangeValue.textContent = range.formatValue(range.value);
+    });
 
     rangeDiv.appendChild(range);
 

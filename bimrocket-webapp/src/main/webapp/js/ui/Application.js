@@ -628,10 +628,10 @@ class Application
     sunLight.intensity = 3;
     sunLight.shadow.mapSize.width = 4096;
     sunLight.shadow.mapSize.height = 4096;
-    sunLight.shadow.camera.left = -40;
-    sunLight.shadow.camera.right = 40;
-    sunLight.shadow.camera.top = 40;
-    sunLight.shadow.camera.bottom = -40;
+    sunLight.shadow.camera.left = -100;
+    sunLight.shadow.camera.right = 100;
+    sunLight.shadow.camera.top = 100;
+    sunLight.shadow.camera.bottom = -100;
     sunLight.shadow.camera.far = 3000;
     sunLight.shadow.camera.near = 0.01;
     sunLight.shadow.camera.matrixAutoUpdate = true;

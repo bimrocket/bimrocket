@@ -331,6 +331,9 @@ export const translations =
 
   "tool.chatgpt.label" : "ChatGPT",
 
+  "tool.solar_simulator.label" : "Simulador solar",
+  "tool.solar_simulator.help" : "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
+
   "tool.start_controllers.label" : "Inicia controladors",
 
   "tool.stop_controllers.label" : "Atura controladors",
@@ -375,6 +378,13 @@ export const translations =
   "label.cast_shadows" : "Projecció d'ombres",
   "label.ambient_occlusion" : "Oclusió ambiental",
   "label.ambient_occlusion_intensity" : "Intensitat OA:",
+
+  "label.date" : "Data:",
+  "label.time" : "Hora:",
+  "label.azimuth" : azimuth => `Azimut: ${azimuth}º`,
+  "label.elevation" : elevation => `Elevació: ${elevation}º`,
+  "label.longitude" : "Longitud:",
+  "label.latitude" : "Latitud:",
 
   "label.service_type" : "Tipus de servei:",
   "label.service_name" : "Nom del servei:",

@@ -331,6 +331,9 @@ export const translations =
 
   "tool.chatgpt.label" : "ChatGPT",
 
+  "tool.solar_simulator.label" : "Solar simulator",
+  "tool.solar_simulator.help" : "Select position in scene to calculate the sun azimuth and elevation.",
+
   "tool.start_controllers.label" : "Start controllers",
 
   "tool.stop_controllers.label" : "Stop controllers",
@@ -375,6 +378,13 @@ export const translations =
   "label.cast_shadows" : "Cast shadows",
   "label.ambient_occlusion" : "Ambient occlusion",
   "label.ambient_occlusion_intensity" : "AO intensity:",
+
+  "label.date" : "Date:",
+  "label.time" : "Time:",
+  "label.azimuth" : azimuth => `Azimuth: ${azimuth}º`,
+  "label.elevation" : elevation => `Elevation: ${elevation}º`,
+  "label.longitude" : "Longitude:",
+  "label.latitude" : "Latitude:",
 
   "label.service_type" : "Service type:",
   "label.service_name" : "Service name:",

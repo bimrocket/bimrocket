@@ -65,6 +65,7 @@ import { InspectorTool } from "../tools/InspectorTool.js";
 import { StatisticsTool } from "../tools/StatisticsTool.js";
 import { StartControllersTool } from "../tools/StartControllersTool.js";
 import { StopControllersTool } from "../tools/StopControllersTool.js";
+import { SolarSimulatorTool } from "../tools/SolarSimulatorTool.js";
 import { ScriptTool } from "../tools/ScriptTool.js";
 import { AboutTool } from "../tools/AboutTool.js";
 import { OpenLinkTool } from "../tools/OpenLinkTool.js";
@@ -454,6 +455,7 @@ export function load(application)
       edgesVisible : false, facesVisible : false });
   const paintTool = new PaintTool(application);
   const chatGPTTool = new ChatGPTTool(application);
+  const solarSimulatorTool = new SolarSimulatorTool(application);
 
   const outlinerTool = new OutlinerTool(application);
   const inspectorTool = new InspectorTool(application);
@@ -567,6 +569,7 @@ export function load(application)
   application.addTool(aboutTool);
   application.addTool(githubTool);
   application.addTool(chatGPTTool);
+  application.addTool(solarSimulatorTool);
 
   // create menus
   const menuBar = application.menuBar;
@@ -682,14 +685,16 @@ export function load(application)
   designMenu.addMenuItem(scriptTool);
 
   const analysisMenu = menuBar.addMenu("menu.analysis");
-  analysisMenu.addMenuItem(reportTool);
-  analysisMenu.addMenuItem(histogramTool);
-  analysisMenu.addMenuItem(searchTool);
 
   const measureMenu = analysisMenu.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
   measureMenu.addMenuItem(measureAngleTool);
   measureMenu.addMenuItem(measureSelectionTool);
+
+  analysisMenu.addMenuItem(reportTool);
+  analysisMenu.addMenuItem(histogramTool);
+  analysisMenu.addMenuItem(searchTool);
+  analysisMenu.addMenuItem(solarSimulatorTool);
 
   const controlMenu = menuBar.addMenu("menu.control");
   controlMenu.addMenuItem(startControllersTool);

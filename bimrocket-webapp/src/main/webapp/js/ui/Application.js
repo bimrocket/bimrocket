@@ -268,7 +268,7 @@ class Application
     this.pointSelector = new PointSelector(this);
 
     // apply setup
-    this.i18n.userLanguages = setup.userLanguage;
+    this.setUserLanguage(setup.userLanguage);
     this.setShadowMapEnabled(setup.shadowsEnabled);
     setup.applyBackground();
 
@@ -1856,6 +1856,14 @@ class Application
     this.panelManager.addPanel(panel);
 
     return panel;
+  }
+
+  setUserLanguage(userLanguage)
+  {
+    const i18n = this.i18n;
+    i18n.userLanguages = userLanguage;
+    i18n.updateTree(this.element);
+    document.documentElement.setAttribute("lang", userLanguage);
   }
 
   loadModules()

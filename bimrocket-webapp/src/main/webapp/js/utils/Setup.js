@@ -30,7 +30,16 @@ class Setup
 
     // restore setup from localStorage
 
-    this._userLanguage = this.getItem(Setup.LANGUAGE) || navigator.language;
+    this._userLanguage = this.getItem(Setup.LANGUAGE);
+    if (!this._userLanguage)
+    {
+      this._userLanguage = navigator.language;
+      let index = this._userLanguage.indexOf("-");
+      if (index !== -1)
+      {
+        this._userLanguage = this._userLanguage.substring(0, index);
+      }
+    }
 
     this._units = this.getItem(Setup.UNITS) || "m";
 
@@ -69,10 +78,7 @@ class Setup
   {
     this._userLanguage = userLanguage;
 
-    const application = this.application;
-    const i18n = application.i18n;
-    i18n.userLanguages = userLanguage;
-    i18n.updateTree(application.element);
+    this.application.setUserLanguage(userLanguage);
     this.setItem(Setup.LANGUAGE, userLanguage);
   }
 

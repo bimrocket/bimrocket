@@ -345,11 +345,13 @@ class OptionsTool extends Tool
 
     const i18n = application.i18n;
     let supportedLanguages = Array.from(i18n.supportedLanguages);
-    let userLanguage = i18n.requestedLanguages[0];
-    let intl = new Intl.DisplayNames([userLanguage], { type: "language" });
-    supportedLanguages = supportedLanguages.map(lang => [lang, intl.of(lang)]);
+    supportedLanguages = supportedLanguages.map(lang =>
+    {
+      let intl = new Intl.DisplayNames([lang], { type: "language" });
+      return [lang, intl.of(lang)];
+    });
     Controls.setSelectOptions(this.languageSelect, supportedLanguages);
-    this.languageSelect.value = userLanguage;
+    this.languageSelect.value = setup.userLanguage;
     this.unitsSelect.value = setup.units;
     this.decimalsElem.value = setup.decimals;
     this.panelOpacityRange.rangeValue = setup.panelOpacity;

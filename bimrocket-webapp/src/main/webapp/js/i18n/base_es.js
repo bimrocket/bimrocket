@@ -333,6 +333,7 @@ export const translations =
 
   "tool.solar_simulator.label" : "Simulador solar",
   "tool.solar_simulator.help" : "Selecciona una posició en la escena para calcular el azimut y la elevación del sol.",
+  "tool.solar_simulator.drag" : "Cambia la hora arrastrando el puntero sobre el gráfico",
 
   "tool.start_controllers.label" : "Iniciar controlad.",
 
@@ -381,8 +382,8 @@ export const translations =
 
   "label.date" : "Fecha:",
   "label.time" : "Hora:",
-  "label.azimuth" : azimuth => `Azimut: ${azimuth}º`,
-  "label.elevation" : elevation => `Elevación: ${elevation}º`,
+  "label.azimuth" : "Azimut:",
+  "label.elevation" : "Elevación:",
   "label.longitude" : "Longitud:",
   "label.latitude" : "Latitud:",
 

@@ -1399,6 +1399,11 @@ div.script_code
   margin-bottom: 2px;
 }
 
+.panel_solar_sim canvas
+{
+  touch-action: pan-y;
+}
+
 .ellipsis_loading
 {
   padding: 0;

@@ -25,8 +25,12 @@ class SolarSimulatorTool extends Tool
     this.target.name = "target";
 
     this.time = 0;
+    this.times = null; // sunrise, sunset, ... (Date)
+
     this.azimuthInDegrees = 0; // 0..360
     this.elevationInDegrees = 0; // -90..90
+    this.sunriseElevationInDegrees = 0;
+    this.sunsetElevationInDegrees = 0;
 
     this.resizeObverser = new ResizeObserver(() => this.onResize());
 
@@ -36,7 +40,7 @@ class SolarSimulatorTool extends Tool
   createPanel()
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_solar_sim");
-    this.panel.preferredHeight = 380;
+    this.panel.preferredHeight = 400;
     this.panel.minimumHeight = 300;
 
     this.panel.onHide = () => this.application.useTool(null);
@@ -107,6 +111,11 @@ class SolarSimulatorTool extends Tool
     this.latElem.addEventListener("input", () => this.update());
     this.dateElem.addEventListener("change", () => this.update());
 
+    this.intensityCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+      "solar_intensity", "tool.solar_simulator.adjust_intensity", true,
+      "flex align_items_center p_2 text_center");
+    this.intensityCheckBox.addEventListener("change", () => this.update());
+
     this.cancelButton = Controls.addButton(this.panel.bodyElem,
       "solar_cancel", "button.cancel", () => this.cancel());
     this.cancelButton.style.display = "none";
@@ -175,20 +184,24 @@ class SolarSimulatorTool extends Tool
     const application = this.application;
     const MathUtils = THREE.MathUtils;
     const scene = application.scene;
-    const sunLight = scene.getObjectByName("SunLight");
+    const sunLight = this.getSunLight();
     sunLight.target = this.target;
     application.selection.set(sunLight);
+
+    const hemisphereLight = this.getHemisphereLight();
 
     let longitude = parseFloat(this.lonElem.value);
     let latitude = parseFloat(this.latElem.value);
 
-    let date = this.getDateTime();
+    let date = this.getDate();
 
-    let pos = SunCalc.getPosition(date, latitude, longitude);
-    pos.azimuth = pos.azimuth + Math.PI;
+    this.times = SunCalc.getTimes(date, latitude, longitude);
+    const pos = SunCalc.getPosition(date, latitude, longitude);
+    const srPos = SunCalc.getPosition(this.times.sunrise, latitude, longitude);
+    const ssPos = SunCalc.getPosition(this.times.sunset, latitude, longitude);
 
     const solarElevation = pos.altitude;
-    const solarAzimuth = pos.azimuth;
+    const solarAzimuth = pos.azimuth + Math.PI;
 
     const radius = 100;
     const x = Math.cos(0.5 * Math.PI - solarAzimuth) * radius;
@@ -202,10 +215,20 @@ class SolarSimulatorTool extends Tool
     sunLight.updateMatrix();
     sunLight.visible = solarElevation > 0;
 
-    application.notifyObjectsChanged([this.target, sunLight]);
+    if (this.intensityCheckBox.checked)
+    {
+      // calculate intensity of lights depending on solarElevation
+      const intensity = Math.max(0.5 + 2.5 * Math.sin(solarElevation), 0.5);
+      sunLight.intensity = intensity;
+      hemisphereLight.intensity = intensity;
+    }
+
+    application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
 
     this.elevationInDegrees = MathUtils.radToDeg(solarElevation);
     this.azimuthInDegrees = (MathUtils.radToDeg(solarAzimuth) + 360) % 360;
+    this.sunriseElevationInDegrees = MathUtils.radToDeg(srPos.altitude);
+    this.sunsetElevationInDegrees = MathUtils.radToDeg(ssPos.altitude);
   }
 
   renderGraph()
@@ -300,7 +323,7 @@ class SolarSimulatorTool extends Tool
     const millisPerPixel = millisPerDay / graphWidth;
     const azimuthArray = [];
     const elevationArray = [];
-    let millis = this.getDate().getTime();
+    let millis = this.getDateAt0().getTime();
 
     for (let i = 0; i < graphWidth; i++)
     {
@@ -333,6 +356,31 @@ class SolarSimulatorTool extends Tool
     ctx.lineTo(graphMaxX, elevationArray[graphWidth - 1]);
     ctx.stroke();
 
+    // sunset, sunrise
+    const margin = 4;
+
+    const sunriseTime = this.getTimeFromDate(this.times.sunriseEnd);
+    const sunriseX = getX(sunriseTime);
+    const sunriseY = getElevationY(this.sunriseElevationInDegrees);
+
+    const sunsetTime = this.getTimeFromDate(this.times.sunsetStart);
+    const sunsetX = getX(sunsetTime);
+    const sunsetY = getElevationY(this.sunsetElevationInDegrees);
+
+    ctx.fillStyle = "#404040";
+    ctx.beginPath();
+    ctx.arc(sunriseX, sunriseY, 2, 0, 2 * Math.PI);
+    ctx.fill();
+    const sunriseTimeString = this.getTimeString(sunriseTime);
+    const sunriseWidth = ctx.measureText(sunriseTimeString).width;
+    ctx.fillText(sunriseTimeString, sunriseX - 0.5 * sunriseWidth, sunriseY - margin);
+
+    ctx.beginPath();
+    ctx.arc(sunsetX, sunsetY, 2, 0, 2 * Math.PI);
+    ctx.fill();
+    const sunsetTimeString = this.getTimeString(sunsetTime);
+    const sunsetWidth = ctx.measureText(sunriseTimeString).width;
+    ctx.fillText(sunsetTimeString, sunsetX - 0.5 * sunsetWidth, sunsetY - margin);
 
     // selected time
     const timeX = getX(this.time);
@@ -343,12 +391,8 @@ class SolarSimulatorTool extends Tool
     ctx.lineTo(timeX, height);
     ctx.stroke();
 
-    let n = new Date(0,0);
-    n.setSeconds(this.time * 60 * 60);
-    const timeString = n.toTimeString().slice(0, 5);
-
+    const timeString = this.getTimeString(this.time);
     const fontSize = 13;
-    const margin = 4;
     ctx.fillStyle = gridColor;
     ctx.font = fontSize + "px monospace";
     const metrics = ctx.measureText(timeString);
@@ -389,12 +433,17 @@ class SolarSimulatorTool extends Tool
   {
     const application = this.application;
     const scene = application.scene;
-    const sunLight = scene.getObjectByName("SunLight");
+    const hemisphereLight = this.getHemisphereLight();
+    const sunLight = this.getSunLight();
     sunLight.target = scene;
     sunLight.position.set(20, 20, 80);
     sunLight.updateMatrix();
     this.target.removeFromParent();
-    application.notifyObjectsChanged([this.target, sunLight]);
+
+    hemisphereLight.intensity = 3;
+    sunLight.intensity = 3;
+
+    application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
     application.selection.clear();
     this.cancelButton.style.display = "none";
     this.renderGraph();
@@ -447,21 +496,20 @@ class SolarSimulatorTool extends Tool
     return this.transform;
   }
 
-  getDateTime()
+  getDate()
   {
     let sdate = this.dateElem.value;
-    let time = this.time;
 
     let n = new Date(0,0);
-    n.setSeconds(time * 60 * 60);
-    time = n.toTimeString().slice(0, 8);
+    n.setSeconds(this.time * 60 * 60);
+    let stime = n.toTimeString().slice(0, 8);
 
-    let dateTime = sdate + "T" + time;
+    let dateTime = sdate + "T" + stime;
 
     return new Date(Date.parse(dateTime));
   }
 
-  getDate()
+  getDateAt0()
   {
     let sdate = this.dateElem.value;
     let dateTime = sdate + "T00:00:00";
@@ -470,7 +518,7 @@ class SolarSimulatorTool extends Tool
 
   setTime(date)
   {
-    this.time = date.getHours() + date.getMinutes() / 60;
+    this.time = this.getTimeFromDate(date);
   }
 
   getXFromTime()
@@ -491,6 +539,38 @@ class SolarSimulatorTool extends Tool
     this.time = time;
 
     this.update();
+  }
+
+  getTimeString(time)
+  {
+    const n = new Date(0, 0);
+    n.setSeconds(time * 60 * 60);
+    return n.toTimeString().slice(0, 5);
+  }
+
+  getTimeFromDate(date)
+  {
+    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+  }
+
+  getHemisphereLight()
+  {
+    const children = this.application.scene.children;
+    for (let child of children)
+    {
+      if (child instanceof THREE.HemisphereLight) return child;
+    }
+    return null;
+  }
+
+  getSunLight()
+  {
+    const children = this.application.scene.children;
+    for (let child of children)
+    {
+      if (child instanceof THREE.DirectionalLight) return child;
+    }
+    return null;
   }
 }
 

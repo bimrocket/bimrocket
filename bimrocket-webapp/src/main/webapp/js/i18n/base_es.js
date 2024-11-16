@@ -336,6 +336,7 @@ export const translations =
   "tool.solar_simulator.label" : "Simulador solar",
   "tool.solar_simulator.help" : "Selecciona una posició en la escena para calcular el azimut y la elevación del sol.",
   "tool.solar_simulator.drag" : "Cambia la hora arrastrando el puntero sobre el gráfico",
+  "tool.solar_simulator.adjust_intensity" : "Ajusta la intensidad solar",
 
   "tool.start_controllers.label" : "Iniciar controlad.",
 

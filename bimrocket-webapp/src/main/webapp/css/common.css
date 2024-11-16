@@ -338,6 +338,11 @@ table.data > tbody > tr:hover
   flex-direction: column;
 }
 
+.align_items_center
+{
+  align-items: center;
+}
+
 .flex_grow_0
 {
   flex-grow: 0;

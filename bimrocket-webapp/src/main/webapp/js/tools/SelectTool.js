@@ -121,12 +121,17 @@ class SelectTool extends Tool
     let intersect = this.intersect(pointerPosition, scene);
     if (intersect)
     {
-      let point = intersect.point;
-      let xpos = Math.round(point.x * 1000) / 1000;
-      let ypos = Math.round(point.y * 1000) / 1000;
-      let zpos = Math.round(point.z * 1000) / 1000;
+      const point = intersect.point;
+      const selPoint = new THREE.Vector3();
+      const decimals = 3;
+
+      selPoint.setFromMatrixPosition(application.baseObject.matrix);
+      selPoint.negate().add(point);
+
       this.posElem.textContent = "(x, y ,z) = (" +
-        xpos + ", " + ypos + ", " + zpos + ")";
+        selPoint.x.toFixed(decimals) + ", " +
+        selPoint.y.toFixed(decimals) + ", " +
+        selPoint.z.toFixed(decimals) + ")";
 
       let object = this.findActualSelectedObject(intersect.object);
 

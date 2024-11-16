@@ -55,6 +55,7 @@ import { CutTool } from "../tools/CutTool.js";
 import { PasteTool } from "../tools/PasteTool.js";
 import { LinkTool } from "../tools/LinkTool.js";
 import { ZoomAllTool } from "../tools/ZoomAllTool.js";
+import { ReduceCoordinatesTool } from "../tools/ReduceCoordinatesTool.js";
 import { FullscreenTool } from "../tools/FullscreenTool.js";
 import { CenterSelectionTool } from "../tools/CenterSelectionTool.js";
 import { VisibilityTool } from "../tools/VisibilityTool.js";
@@ -435,6 +436,8 @@ export function load(application)
     { name : "focus_selection", label : "tool.focus_selection.label",
       focusOnSelection : true, className : "focus_selection" });
 
+  const reduceCoordinatesTool = new ReduceCoordinatesTool(application);
+
   const showTool = new VisibilityTool(application,
     { name : "show", label : "tool.show.label", className : "show",
       visible : true });
@@ -680,6 +683,7 @@ export function load(application)
   geometryMenu.addMenuItem(offsetGeometriesTool);
   geometryMenu.addMenuItem(resetMatrixTool);
   geometryMenu.addMenuItem(smoothEdgesTool);
+  geometryMenu.addMenuItem(reduceCoordinatesTool);
   designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(scriptTool);

@@ -77,17 +77,21 @@ class OpenLocalTool extends Tool
           },
           onCompleted : object =>
           {
-            object.updateMatrix();
-            application.initControllers(object);
-            application.addObject(object, application.baseObject, false, true);
-            let container = application.container;
-            let aspect = container.clientWidth / container.clientHeight;
-            let camera = application.camera;
+            const container = application.container;
+            const baseObject = application.baseObject;
+            const aspect = container.clientWidth / container.clientHeight;
+            const camera = application.camera;
 
-            object.updateMatrixWorld(true);
+            object.updateMatrix();
+            application.addObject(object, baseObject);
+
+            ObjectUtils.reduceCoordinates(baseObject);
             ObjectUtils.zoomAll(camera, object, aspect);
 
-            application.notifyObjectsChanged(camera, this);
+            application.selection.set(object);
+            application.initControllers(object);
+
+            application.notifyObjectsChanged([baseObject, camera], this);
             application.progressBar.visible = false;
           },
           onError : error =>

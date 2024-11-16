@@ -317,6 +317,8 @@ export const translations =
 
   "tool.zoom_all.label" : "Zoom all",
 
+  "tool.reduce_coordinates.label" : "Reduce coordinates",
+
   "tool.fullscreen.label" : "Enter fullscreen",
 
   "tool.center_selection.label" : "Center selection",

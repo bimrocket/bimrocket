@@ -13,8 +13,6 @@ class ObjectBatcher
   {
     this.blocks = new Map(); // Material uuid => Block
     this.lines = [];
-    this.center = new THREE.Vector3();
-    this.matrix = new THREE.Matrix4();
     this.vector = new THREE.Vector3();
   }
 
@@ -22,9 +20,6 @@ class ObjectBatcher
   {
     this.blocks.clear();
     this.lines = [];
-
-    const box = ObjectUtils.getLocalBoundingBox(object);
-    box.getCenter(this.center);
 
     this.collectStats(object);
 
@@ -82,8 +77,6 @@ class ObjectBatcher
     if (!object.visible) return;
 
     const vector = this.vector;
-    const center = this.center;
-    const matrix = this.matrix;
 
     if (object instanceof THREE.Mesh)
     {
@@ -117,9 +110,7 @@ class ObjectBatcher
 
           // add instance
           let instanceId = block.mesh.addInstance(geometryId);
-          vector.setFromMatrixPosition(object.matrixWorld).sub(center);
-          matrix.copy(object.matrixWorld).setPosition(vector);
-          block.mesh.setMatrixAt(instanceId, matrix);
+          block.mesh.setMatrixAt(instanceId, object.matrixWorld);
         }
       }
     }
@@ -128,14 +119,11 @@ class ObjectBatcher
       const geometry = object.geometry;
       if (geometry.attributes?.position)
       {
-        vector.setFromMatrixPosition(object.matrixWorld).sub(center);
-        matrix.copy(object.matrixWorld).setPosition(vector);
-
         const array = geometry.attributes.position.array;
         for (let i = 0; i < array.length; i += 3)
         {
           vector.set(array[i], array[i + 1], array[i + 2]);
-          vector.applyMatrix4(matrix);
+          vector.applyMatrix4(object.matrixWorld);
           this.lines.push(vector.x, vector.y, vector.z);
         }
       }
@@ -160,7 +148,6 @@ class ObjectBatcher
       let block = this.blocks.get(material);
       group.add(block.mesh);
     }
-    group.position.copy(this.center);
     group.updateMatrix();
 
 

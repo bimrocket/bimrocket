@@ -317,6 +317,8 @@ export const translations =
 
   "tool.zoom_all.label" : "Enquadra tot",
 
+  "tool.reduce_coordinates.label" : "Redueix coordenades",
+
   "tool.fullscreen.label" : "Pantalla completa",
 
   "tool.center_selection.label" : "Centra selecció",

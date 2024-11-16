@@ -61,19 +61,21 @@ class CloudExplorerTool extends Tool
 
     const onCompleted = object =>
     {
+      const container = application.container;
+      const baseObject = application.baseObject;
+      const aspect = container.clientWidth / container.clientHeight;
+      const camera = application.camera;
+
       object.updateMatrix();
+      application.addObject(object, baseObject);
 
-      application.initControllers(object);
-      application.addObject(object, application.baseObject, false, true);
-      let container = application.container;
-      let aspect = container.clientWidth / container.clientHeight;
-      let camera = application.camera;
-
-      object.updateMatrixWorld(true);
+      ObjectUtils.reduceCoordinates(baseObject);
       ObjectUtils.zoomAll(camera, object, aspect);
 
-      application.notifyObjectsChanged(camera, this);
+      application.selection.set(object);
+      application.initControllers(object);
 
+      application.notifyObjectsChanged([baseObject, camera], this);
       application.progressBar.visible = false;
       panel.showButtonsPanel();
     };

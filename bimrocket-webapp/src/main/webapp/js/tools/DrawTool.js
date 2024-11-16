@@ -392,19 +392,9 @@ class DrawTool extends Tool
       }
       else if (this.vertices.length >= 2) // create Cord by default
       {
-        let firstPoint = this.vertices[0];
-        let offsetVector = GeometryUtils.getOffsetVectorForFloat32(firstPoint);
-        if (offsetVector)
-        {
-          GeometryUtils.offsetRings(offsetVector, this.vertices);
-        }
         geometry = new CordGeometry(this.vertices);
         this.object = new Cord(geometry, this.lineMaterial);
-        if (offsetVector)
-        {
-          this.object.position.add(offsetVector);
-          this.object.updateMatrix();
-        }
+        this.object.position.copy(application.baseObject.position).negate();
         application.addObject(this.object, null, false, true);
       }
     }

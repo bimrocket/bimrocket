@@ -66,9 +66,10 @@ class Application
     this.perspectiveCamera = null;
     this.orthographicCamera = null;
     this.baseObject = null;
-    this.clippingPlane = null;
     this.clippingGroup = null;
-    this.batchGroup = null;
+    this.clippingPlane = null;
+    this.batchedGroup = null;
+    this.lastBatchedGroupInvalidation = 0;
     this.overlays = null;
     this.tools = {};
     this.tool = null;
@@ -325,16 +326,16 @@ class Application
         {
           this.cssRenderer.cssObjects = -1; // force css rendering
           event.parent.needsRebuild = true;
-          clearBatch = true;
+          clearBatch = event.parent !== this.overlays;
         }
-        else if (event.type === "structureChange")
+        else if (event.type === "structureChanged")
         {
           this.cssRenderer.cssObjects = -1; // force css rendering
           clearBatch = true;
         }
         if (clearBatch)
         {
-          this.disableBatch();
+          this.destroyBatchedGroup();
         }
         this.repaint();
       }
@@ -410,7 +411,7 @@ class Application
       {
         if (this._needsRepaint)
         {
-          if (!this.batchGroup)
+          if (!this.batchedGroup)
           {
             const fps = 1 / _animationEvent.delta;
             if (fps < setup.requestedFPS)
@@ -421,7 +422,7 @@ class Application
               }
               else
               {
-                this.enableBatch();
+                this.createBatchedGroup();
               }
             }
           }
@@ -523,15 +524,19 @@ class Application
     });
   }
 
-  enableBatch()
+  createBatchedGroup()
   {
-    if (this.batchGroup === null)
+    if (this.batchedGroup === null)
     {
+      // prevent batch creation when the scene changes very often
+      const ellapsed = Date.now() - this.lastBatchedGroupInvalidation;
+      if (ellapsed < 1000) return;
+
       try
       {
         const batcher = new ObjectBatcher();
-        this.batchGroup = batcher.batch(this.baseObject);
-        this.overlays.add(this.batchGroup);
+        this.batchedGroup = batcher.batch(this.baseObject);
+        this.overlays.add(this.batchedGroup);
         console.info("batch enabled");
       }
       catch (ex)
@@ -542,15 +547,16 @@ class Application
     }
   }
 
-  disableBatch()
+  destroyBatchedGroup()
   {
-    if (this.batchGroup)
+    if (this.batchedGroup)
     {
-      this.batchGroup.removeFromParent();
-      ObjectUtils.dispose(this.batchGroup);
-      this.batchGroup = null;
+      this.batchedGroup.removeFromParent();
+      ObjectUtils.dispose(this.batchedGroup);
+      this.batchedGroup = null;
       console.info("batch disabled");
     }
+    this.lastBatchedGroupInvalidation = Date.now();
   }
 
   setupComposer()
@@ -604,7 +610,7 @@ class Application
     {
       ObjectUtils.dispose(this.scene);
       this.stopControllers();
-      this.disableBatch();
+      this.destroyBatchedGroup();
     }
 
     this.scene = new THREE.Scene();
@@ -702,9 +708,9 @@ class Application
   {
     const clippingEnabled = this.clippingPlane !== null;
 
-    if (this.batchGroup)
+    if (this.batchedGroup)
     {
-      this.batchGroup.visible = !clippingEnabled;
+      this.batchedGroup.visible = !clippingEnabled;
       this.baseObject.visible = clippingEnabled;
     }
 
@@ -1361,24 +1367,7 @@ class Application
     {
       let geometry = new THREE.BufferGeometry();
 
-      let firstPoint = vertices[0];
-      let offsetVector = GeometryUtils.getOffsetVectorForFloat32(firstPoint);
-      if (offsetVector)
-      {
-        let transformedVertices = [];
-        for (let vertex of vertices)
-        {
-          let transformedVertex = new THREE.Vector3();
-          transformedVertex.copy(vertex);
-          transformedVertices.push(transformedVertex);
-        }
-        GeometryUtils.offsetRings(offsetVector, transformedVertices);
-        geometry.setFromPoints(transformedVertices);
-      }
-      else
-      {
-        geometry.setFromPoints(vertices);
-      }
+      geometry.setFromPoints(vertices);
 
       if (lineMaterial && vertices.length >= 2)
       {
@@ -1391,11 +1380,6 @@ class Application
           line = new THREE.Line(geometry, lineMaterial);
         }
         line.raycast = function(){};
-        if (offsetVector)
-        {
-          line.position.add(offsetVector);
-          line.updateMatrix();
-        }
         if (group) group.add(line);
         else this.overlays.add(line);
       }
@@ -1404,11 +1388,7 @@ class Application
       {
         points = new THREE.Points(geometry, pointsMaterial);
         points.raycast = function(){};
-        if (offsetVector)
-        {
-          points.position.add(offsetVector);
-          points.updateMatrix();
-        }
+
         if (group) group.add(points);
         else this.overlays.add(points);
       }
@@ -1997,10 +1977,18 @@ class Application
       },
       onCompleted : object =>
       {
-        application.progressBar.element.classList.remove("splash");
-        application.addObject(object);
-        application.progressBar.visible = false;
+        const baseObject = application.baseObject;
+
+        object.updateMatrix();
+        application.addObject(object, baseObject);
+
+        ObjectUtils.reduceCoordinates(baseObject);
         application.initControllers(object);
+        application.notifyObjectsChanged(baseObject, this);
+
+        application.progressBar.element.classList.remove("splash");
+        application.progressBar.visible = false;
+
         application.initTasks();
       },
       onError : error =>

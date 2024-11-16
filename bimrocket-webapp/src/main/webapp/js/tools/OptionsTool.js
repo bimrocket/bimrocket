@@ -152,7 +152,7 @@ class OptionsTool extends Tool
     this.renderModeSelect.addEventListener("change", event =>
     {
       setup.renderMode = this.renderModeSelect.value;
-      if (setup.renderMode !== "batch") application.disableBatch();
+      if (setup.renderMode !== "batch") application.destroyBatchedGroup();
     });
 
     // requested FPS

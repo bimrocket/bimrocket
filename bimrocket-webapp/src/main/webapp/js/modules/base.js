@@ -43,6 +43,7 @@ import { ReportTool } from "../tools/ReportTool.js";
 import { HistogramTool } from "../tools/HistogramTool.js";
 import { SearchTool } from "../tools/SearchTool.js";
 import { MeasureLengthTool } from "../tools/MeasureLengthTool.js";
+import { MeasureAreaTool } from "../tools/MeasureAreaTool.js";
 import { MeasureAngleTool } from "../tools/MeasureAngleTool.js";
 import { MeasureSelectionTool } from "../tools/MeasureSelectionTool.js";
 import { ActivateCameraTool } from "../tools/ActivateCameraTool.js";
@@ -330,6 +331,7 @@ export function load(application)
   const histogramTool = new HistogramTool(application);
   const searchTool = new SearchTool(application);
   const measureLengthTool = new MeasureLengthTool(application);
+  const measureAreaTool = new MeasureAreaTool(application);
   const measureAngleTool = new MeasureAngleTool(application);
   const measureSelectionTool = new MeasureSelectionTool(application);
   const activateCameraTool = new ActivateCameraTool(application);
@@ -511,6 +513,7 @@ export function load(application)
   application.addTool(histogramTool);
   application.addTool(searchTool);
   application.addTool(measureLengthTool);
+  application.addTool(measureAreaTool);
   application.addTool(measureAngleTool);
   application.addTool(measureSelectionTool);
   application.addTool(activateCameraTool);
@@ -692,6 +695,7 @@ export function load(application)
 
   const measureMenu = analysisMenu.addMenu("menu.measure");
   measureMenu.addMenuItem(measureLengthTool);
+  measureMenu.addMenuItem(measureAreaTool);
   measureMenu.addMenuItem(measureAngleTool);
   measureMenu.addMenuItem(measureSelectionTool);
 

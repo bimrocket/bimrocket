@@ -156,6 +156,9 @@ export const translations =
   "tool.measure_length.label" : "Medir longitud",
   "tool.measure_length.help" : "Dibuja la linia a medir.",
 
+  "tool.measure_area.label" : "Medir área",
+  "tool.measure_area.help" : "Dibuja el área a medir.",
+
   "tool.measure_angle.label" : "Medir ángulo",
   "tool.measure_angle.select_first_point" : "Selecciona primer punto.",
   "tool.measure_angle.select_second_point" : "Selecciona segundo punto.",
@@ -560,6 +563,7 @@ export const translations =
   "title.chatgpt_setup" : "Configuración de ChatGPT",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
+  "message.measure_area" : (area, units) => `Área: ${area} ${units}2`,
   "message.measure_angle" : angle => `Ángulo: ${angle} grados`,
 
   "message.solids_count" : count => `Sólidos: ${count}`,

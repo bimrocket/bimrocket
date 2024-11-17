@@ -1,5 +1,5 @@
 /*
- * MeasureLengthTool.js
+ * MeasureAreaTool.js
  *
  * @author realor
  */
@@ -10,19 +10,21 @@ import { Controls } from "../ui/Controls.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "three";
 
-class MeasureLengthTool extends Tool
+class MeasureAreaTool extends Tool
 {
   constructor(application, options)
   {
     super(application);
-    this.name = "measure_length";
-    this.label = "tool.measure_length.label";
-    this.className = "measure_length";
+    this.name = "measure_area";
+    this.label = "tool.measure_area.label";
+    this.className = "measure_area";
     this.setOptions(options);
 
     this.vertices = []; // Vector3[]
+    this.plane = null; // THREE.Plane
     this.line = null; // THREE.Line
     this.points = null; // THREE.Points
+    this.mesh = null; // THREE.Mesh
 
     this.lineMaterial = new THREE.LineBasicMaterial(
       { linewidth : 2, color : new THREE.Color(0x0000ff), opacity : 1,
@@ -31,6 +33,25 @@ class MeasureLengthTool extends Tool
     this.pointsMaterial = new THREE.PointsMaterial(
       { color : 0, size : 4, sizeAttenuation : false,
         depthTest : false, transparent : true });
+
+    this.meshMaterial = new THREE.MeshBasicMaterial({
+      name: 'MeasureAreaMaterial',
+      color: 0xc0c020,
+      side: THREE.DoubleSide,
+      polygonOffset : true,
+      polygonOffsetFactor : -0.1
+    });
+
+    const manager = application.loadingManager;
+    const textureLoader = new THREE.TextureLoader(manager);
+    textureLoader.load("textures/area.png", texture =>
+    {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1.25, 1.25);
+      this.meshMaterial.map = texture;
+      this.meshMaterial.needsUpdate = true;
+    });
 
     this._onPointerUp = this.onPointerUp.bind(this);
 
@@ -48,10 +69,10 @@ class MeasureLengthTool extends Tool
     this.helpElem.style.padding = "8px";
     this.panel.bodyElem.appendChild(this.helpElem);
 
-    I18N.set(this.helpElem, "textContent", "tool.measure_length.help");
+    I18N.set(this.helpElem, "textContent", "tool.measure_area.help");
 
     const resetButton = Controls.addButton(this.panel.bodyElem,
-      "clear_linestring", "button.clear", () => this.clearLineString());
+      "clear_area", "button.clear", () => this.clearArea());
 
     const undoButton = Controls.addButton(this.panel.bodyElem,
       "undo_last", "button.undo", () => this.removeLastPoint());
@@ -73,7 +94,7 @@ class MeasureLengthTool extends Tool
         && !ObjectUtils.isObjectDescendantOf(this.line, application.scene))
     {
       this.vertices = [];
-      this.updateLineString();
+      this.updateArea();
     }
   }
 
@@ -103,9 +124,16 @@ class MeasureLengthTool extends Tool
 
       axisMatrixWorld.setPosition(snap.positionWorld);
 
-      let vertex = snap.positionWorld;
+      let vertex = new THREE.Vector3();
+      if (this.plane)
+      {
+        this.plane.projectPoint(snap.positionWorld, vertex);
+      }
+      else
+      {
+        vertex.copy(snap.positionWorld);
+      }
       vertices.push(vertex);
-      this.updateLineString();
 
       pointSelector.auxiliaryPoints = vertices;
       let count = vertices.length;
@@ -113,8 +141,15 @@ class MeasureLengthTool extends Tool
       {
         pointSelector.auxiliaryLines.push(
           new THREE.Line3(vertices[count - 2], vertices[count - 1]));
+        if (count === 3)
+        {
+          this.plane = new THREE.Plane();
+          this.plane.setFromCoplanarPoints(vertices[0], vertices[1], vertices[2]);
+        }
       }
       pointSelector.setAxisGuides(axisMatrixWorld, true);
+
+      this.updateArea();
     }
     else
     {
@@ -122,14 +157,15 @@ class MeasureLengthTool extends Tool
     }
   }
 
-  clearLineString()
+  clearArea()
   {
     const pointSelector = this.application.pointSelector;
     pointSelector.auxiliaryPoints = [];
     pointSelector.auxiliaryLines = [];
     pointSelector.clearAxisGuides();
     this.vertices = [];
-    this.updateLineString();
+    this.plane = null;
+    this.updateArea();
   }
 
   removeLastPoint()
@@ -140,7 +176,9 @@ class MeasureLengthTool extends Tool
     if (vertices.length > 0)
     {
       vertices.pop();
-      this.updateLineString();
+      if (vertices.length < 3) this.plane = null;
+
+      this.updateArea();
 
       if (vertices.length > 0)
       {
@@ -157,7 +195,7 @@ class MeasureLengthTool extends Tool
     }
   }
 
-  updateLineString()
+  updateArea()
   {
     const application = this.application;
 
@@ -171,35 +209,52 @@ class MeasureLengthTool extends Tool
       application.removeObject(this.points);
     }
 
-    const overlayedObjects = application.addOverlay(this.vertices, false,
+    if (this.mesh !== null)
+    {
+      application.removeObject(this.mesh);
+    }
+
+
+    const vertices = [...this.vertices];
+    if (vertices.length > 2)
+    {
+      vertices.push(vertices[0]);
+    }
+
+    const overlayedObjects = application.addOverlay(vertices, false,
       this.lineMaterial, this.pointsMaterial);
 
     this.line = overlayedObjects.line;
     this.points = overlayedObjects.points;
+    this.mesh = vertices.length > 3 ?
+      application.addOverlayArea(vertices, this.meshMaterial) : null;
 
     application.repaint();
 
-    let length = this.getLineStringLength();
+    let area = this.getArea();
 
-    I18N.set(this.distElem, "textContent", "message.measure_length",
-      length.toFixed(application.setup.decimals), application.setup.units);
+    I18N.set(this.distElem, "textContent", "message.measure_area",
+      area.toFixed(application.setup.decimals), application.setup.units);
     application.i18n.update(this.distElem);
   }
 
-  getLineStringLength()
+  getArea()
   {
-    let length = 0;
-    const vertices = this.vertices;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < vertices.length - 1; i++)
+    if (!this.mesh) return 0;
+
+    const shape = this.mesh.geometry.parameters.shapes;
+    const points = shape.getPoints();
+
+    let area = 0;
+    for (let i = 0; i < points.length - 1; i++)
     {
-      let p1 = vertices[i];
-      let p2 = vertices[i + 1];
-      v.set(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
-      length += v.length();
+      let p1 = points[i];
+      let p2 = points[i + 1];
+
+      area += (p1.x * p2.y) - (p2.x * p1.y);
     }
-    return length;
+    return Math.abs(0.5 * area);
   }
 }
 
-export { MeasureLengthTool };
+export { MeasureAreaTool };

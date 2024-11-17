@@ -1401,6 +1401,61 @@ class Application
     return { line, points };
   }
 
+  /**
+   * Adds a Mesh with a ShapeGeometry created from the given vertices.
+   *
+   * @param vertices {Vector3[]}: the Shape vertices represented in global CS.
+   * @param meshMaterial {MeshMaterial} : the Mesh object material.
+   * @param group {Group}: the optional group to add the objects to.
+   *        When null, the created objects will the added to the overlay group.
+   */
+  addOverlayArea(vertices, meshMaterial, group = null)
+  {
+    const normal = GeometryUtils.calculateNormal(vertices);
+
+    const vx = new THREE.Vector3();
+    const vy = new THREE.Vector3();
+    const vz = normal;
+    const v0 = vertices[0];
+    const v1 = vertices[1];
+    vx.subVectors(v1, v0).normalize();
+    vy.crossVectors(vz, vx);
+
+    const matrix = new THREE.Matrix4();
+    matrix.set(vx.x, vy.x, vz.x, v0.x,
+               vx.y, vy.y, vz.y, v0.y,
+               vx.z, vy.z, vz.z, v0.z,
+               0, 0, 0, 1);
+    const inverseMatrix = new THREE.Matrix4();
+    inverseMatrix.copy(matrix).invert();
+
+    const projectedVertices = [];
+    const projectedVertex = new THREE.Vector3();
+    for (let vertex of vertices)
+    {
+      projectedVertex.copy(vertex);
+      projectedVertex.applyMatrix4(inverseMatrix);
+      projectedVertices.push(
+        new THREE.Vector2(projectedVertex.x, projectedVertex.y));
+    };
+
+    const shape = new THREE.Shape(projectedVertices);
+    const geometry = new THREE.ShapeGeometry(shape);
+    const mesh = new THREE.Mesh(geometry, meshMaterial);
+    matrix.decompose(mesh.position, mesh.rotation, mesh.scale);
+    mesh.updateMatrix();
+
+    if (group) group.add(mesh);
+    else this.overlays.add(mesh);
+
+    if (group && group.parent !== this.overlays)
+    {
+      this.overlays.add(group);
+    }
+
+    return mesh;
+  }
+
   copyObjects()
   {
     let copyObjects = this.selection.roots;

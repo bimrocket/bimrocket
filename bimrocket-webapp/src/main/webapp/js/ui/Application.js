@@ -724,11 +724,11 @@ class Application
       this.renderer.render(this.scene, this.camera);
     }
 
+    this.baseObject.visible = true;
+
     // css renderer
     this.cssRenderer.render(this.scene, this.camera);
     this._needsRepaint = false;
-
-    this.baseObject.visible = true;
   }
 
   repaint()

@@ -207,6 +207,8 @@ class PointSelector
     pointerPosition.x = event.clientX - rect.left;
     pointerPosition.y = event.clientY - rect.top;
 
+    if (pointerPosition.y < 0) return; // out of container
+
     if (event.pointerType === "touch")
     {
       pointerPosition.x += this.touchPointerOffsetX;

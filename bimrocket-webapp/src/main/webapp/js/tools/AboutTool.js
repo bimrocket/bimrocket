@@ -30,6 +30,7 @@ class AboutTool extends Tool
     let report = [];
     report.push([appName + " version", appVersion]);
     report.push(["ThreeJS revision", THREE.REVISION]);
+    report.push(["ThreeJS renderer", application.renderer.constructor.name]);
     report.push(["User agent", navigator.userAgent]);
     if (!window.WebGLRenderingContext)
     {
@@ -43,10 +44,14 @@ class AboutTool extends Tool
       canvas.height = 1;
       document.body.appendChild(canvas);
       let gl;
-      gl = canvas.getContext('webgl');
+      gl = canvas.getContext("webgl2");
       if (!gl)
       {
-       gl = canvas.getContext('experimental-webgl');
+        gl = canvas.getContext("webgl");
+        if (!gl)
+        {
+          gl = canvas.getContext("experimental-webgl");
+        }
       }
       document.body.removeChild(canvas);
       if (gl)
@@ -70,7 +75,7 @@ class AboutTool extends Tool
     }
 
     const dialog = new Dialog(this.label);
-    dialog.setSize(400, 400);
+    dialog.setSize(400, 410);
     dialog.setI18N(application.i18n);
 
     const tabbedPane = new TabbedPane(dialog.bodyElem);

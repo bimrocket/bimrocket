@@ -22,12 +22,11 @@ import { Setup } from "../utils/Setup.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { ModuleLoader } from "../utils/ModuleLoader.js";
-import { WEBGL } from "../utils/WebGL.js";
 import { PointSelector } from "../utils/PointSelector.js";
 import { LineDashedShaderMaterial } from "../materials/LineDashedShaderMaterial.js";
 import { Inspector } from "../ui/Inspector.js";
 import { CSS2DRenderer } from "../renderers/CSS2DRenderer.js";
-import { FakeRenderer } from "../renderers/FakeRenderer.js";
+import { SVGRenderer } from "../renderers/SVGRenderer.js";
 import { Formula } from "../formula/Formula.js";
 import { LoginDialog } from "./LoginDialog.js";
 import { ScriptDialog } from "./ScriptDialog.js";
@@ -37,6 +36,7 @@ import { SAOPass } from "../postprocessing/SAOPass.js";
 import { OutputPass } from "../postprocessing/OutputPass.js";
 import { ObjectBatcher } from "../utils/ObjectBatcher.js";
 import { I18N } from "../i18n/I18N.js";
+import WebGL from "../utils/WebGL.js";
 import * as THREE from "three";
 
 class Application
@@ -192,7 +192,7 @@ class Application
 
     // renderer
     let renderer;
-    if (WEBGL.isWebGLAvailable())
+    if (WebGL.isWebGL2Available())
     {
       // WebGL renderer
       renderer = new THREE.WebGLRenderer(
@@ -204,15 +204,16 @@ class Application
       });
       renderer.shadowMap.enabled = setup.shadowsEnabled;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.setClearColor(0x000000, 0);
     }
     else
     {
-      // fake renderer
-      renderer = new FakeRenderer();
+      // svg renderer fallback
+      renderer = new SVGRenderer();
+      renderer.setClearColor(0xffffff);
     }
     this.renderer = renderer;
     renderer.alpha = true;
-    renderer.setClearColor(0x000000, 0);
     renderer.sortObjects = true;
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -407,7 +408,7 @@ class Application
           }
         }
       }
-      else if (setup.renderMode === "batch")
+      else if (setup.renderMode === "batch" && this.renderer.isWebGLRenderer)
       {
         if (this._needsRepaint)
         {

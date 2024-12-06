@@ -35,10 +35,11 @@ BIMROCKET is an open source platform for BIM project management. It features a w
 - Integrated with external services (some of them provided by bimrocket-server)
   - Webdav server
   - [BCF](https://en.wikipedia.org/wiki/BIM_Collaboration_Format) service (BIM Collaboration Service)
-  - [WFS](https://en.wikipedia.org/wiki/Web_Feature_Service) service (Web Feature Service)
-  - IFC service (stores IFC models in external database. In progress)
-  - Print service (generates a vectorial PDF file)
+  - [bSDD](https://www.buildingsmart.org/users/services/buildingsmart-data-dictionary/) service (buildingSmart Data Dictionary)
+  - [WFS](https://www.ogc.org/es/publications/standard/wfs/) service (OGC Web Feature Service)
   - [Brain4it](http://brain4it.org) (AI platform oriented to the IoT)
+  - IFCDB service (stores IFC models in external database. In progress)
+  - Print service (generates a vectorial PDF file)
 - Modular design to easily extend functionality.
 - Web application with a responsive user interface. Support for touch devices.
 - Based on [THREE.js](https://threejs.org) library.

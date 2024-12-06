@@ -58,14 +58,14 @@
   max-width: 80%;
 }
 
-.logo_panel.visible
+.logo_panel.show
 {
   animation: fade_in_logo;
   animation-duration: 1s;
   animation-fill-mode: forwards;
 }
 
-.logo_panel.hidden
+.logo_panel.hide
 {
   animation: fade_out_logo;
   animation-duration: 1s;
@@ -98,14 +98,14 @@
   animation-iteration-count: infinite;
 }
 
-.splash_panel.visible
+.splash_panel.show
 {
   animation: fade_in_logo;
   animation-duration: 1s;
   animation-fill-mode: forwards;
 }
 
-.splash_panel.hidden
+.splash_panel.hide
 {
   animation: fade_out_logo;
   animation-duration: 1s;

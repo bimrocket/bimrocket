@@ -27,6 +27,8 @@ export const translations =
 
   "tool.ifcdb.label" : "IFCDB",
 
+  "tool.bsdd.label" : "bSDD",
+
   "tab.file" : "File",
   "tab.entity" : "Entity",
   "tab.definition" : "Definition",
@@ -44,6 +46,10 @@ export const translations =
 
   "tab.ifcdb_models" : "Models",
   "tab.ifcdb_command" : "Command",
+
+  "tab.bsdd_dictionaries" : "Dictionaries",
+  "tab.bsdd_classes" : "Classes",
+  "tab.bsdd_properties" : "Properties",
 
   "label.bcf_service" : "BCF service:",
   "label.project" : "Project:",
@@ -71,6 +77,8 @@ export const translations =
   "label.ifcdb_service" : "IFCDB service:",
   "label.ifcdb_modelid" : "Model id:",
   "label.ifcdb_command" : "SQL command:",
+  "label.bsdd_filter" : "Filter:",
+  "label.bsdd_class_type" : "Class type:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -98,6 +106,11 @@ export const translations =
   "message.project_extensions_saved" : "Project extensions saved.",
   "message.doc_ref_deleted" : "Document reference deleted.",
   "message.doc_ref_saved" : "Document reference saved.",
+
+  "message.bsdd_dictionary_count" : count => `Dictionaries: ${count}`,
+  "message.bsdd_class_count" : count => `Classes: ${count}`,
+  "message.bsdd_dictionary_found" : (count, total) => `Dictionaries found: ${count} of ${total}`,
+  "message.bsdd_class_found" : (count, total) => `Classes found: ${count} of ${total}`,
 
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",

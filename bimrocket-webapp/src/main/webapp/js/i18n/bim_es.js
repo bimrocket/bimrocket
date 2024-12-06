@@ -24,6 +24,8 @@ export const translations =
 
   "tool.ifcdb.label" : "IFCDB",
 
+  "tool.bsdd.label" : "bSDD",
+
   "tab.file" : "Fichero",
   "tab.entity" : "Entidad",
   "tab.definition" : "Definición",
@@ -44,6 +46,10 @@ export const translations =
 
   "tab.ifcdb_models" : "Modelos",
   "tab.ifcdb_command" : "Comando",
+
+  "tab.bsdd_dictionaries" : "Diccionarios",
+  "tab.bsdd_classes" : "Clases",
+  "tab.bsdd_properties" : "Propiedades",
 
   "label.bcf_service" : "Servicio BCF:",
   "label.project" : "Proyecto:",
@@ -71,6 +77,8 @@ export const translations =
   "label.ifcdb_service" : "Servicio IFCDB:",
   "label.ifcdb_modelid" : "Id. de modelo:",
   "label.ifcdb_command" : "Comando SQL:",
+  "label.bsdd_filter" : "Filtro:",
+  "label.bsdd_class_type" : "Tipo de clase:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
@@ -98,6 +106,11 @@ export const translations =
   "message.project_extensions_saved" : "Extensiones guardadas.",
   "message.doc_ref_deleted" : "Referencia a documento borrada.",
   "message.doc_ref_saved" : "Referencia a documento guardada.",
+
+  "message.bsdd_dictionary_count" : count => `Diccionarios: ${count}`,
+  "message.bsdd_class_count" : count => `Clases: ${count}`,
+  "message.bsdd_dictionary_found" : (count, total) => `Diccionarios encontrados: ${count} de ${total}`,
+  "message.bsdd_class_found" : (count, total) => `Clases encontradas: ${count} de ${total}`,
 
   "question.delete_topic" : "Quieres borrar esta incidencia?",
   "question.delete_comment" : "Quieres borrar este comentario?",

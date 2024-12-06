@@ -1961,14 +1961,14 @@ class Application
 
   showLogo()
   {
-    this.logoPanel.classList.add("visible");
-    this.logoPanel.classList.remove("hidden");
+    this.logoPanel.classList.add("show");
+    this.logoPanel.classList.remove("hide");
   }
 
   hideLogo()
   {
-    this.logoPanel.classList.add("hidden");
-    this.logoPanel.classList.remove("visible");
+    this.logoPanel.classList.add("hide");
+    this.logoPanel.classList.remove("show");
   }
 
   enterPresentationMode()

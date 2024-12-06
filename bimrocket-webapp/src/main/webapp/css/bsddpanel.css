@@ -1,0 +1,334 @@
+/* bsdd panel */
+
+.bsdd_panel
+{
+  overflow: auto;
+  text-align: left;
+}
+
+.bsdd_panel a
+{
+  text-decoration: none;
+}
+
+.bsdd_panel > .body
+{
+  padding: 4px;
+}
+
+.bsdd_panel > .body .loading
+{
+  display: block;
+  text-align: center;
+}
+
+.bsdd_panel > .body .loading:after
+{
+  content: " ";
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  border-color: red rgb(240, 180, 180) red rgb(240, 180, 180);
+  animation: progress_undeterminate 1.2s linear infinite;
+}
+
+.bsdd_panel > .body .tab_panel ul.items
+{
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li
+{
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
+  padding: 2px;
+  overflow: hidden;
+  margin-top:0;
+  margin-bottom: 2px;
+  word-break: break-word;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li:hover
+{
+  border-color: #808080;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.main
+{
+  display: flex;
+  align-items: start;
+  padding-left: 20px;
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: 16px;
+}
+
+.bsdd_panel > .body .tab_panel ul.items.dictionaries > li > div.main
+{
+  background-image: url(images/bsdd/dictionary.svg);
+}
+
+.bsdd_panel > .body .tab_panel ul.items.classes > li > div.main
+{
+  background-image: url(images/bsdd/class.svg);
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.detail
+{
+  max-height: 0px;
+  transition: max-height 0.2s;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.detail ul
+{
+  padding-left: 20px;
+  list-style-type: circle;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li.expanded > div.detail
+{
+  max-height: 150px;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.main a
+{
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.main a[role="button"]
+{
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: 4px;
+  background-image: url(images/chevron_down.svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: transform 0.2s;
+  width: 16px;
+  height: 16px;
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li > div.main a[role="button"]::before
+{
+  content: "\00a0";
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li.expanded > div.main a[role="button"]
+{
+  transform: rotate(180deg);
+}
+
+.bsdd_panel > .body .tab_panel ul.items > li.selected
+{
+  background-color: #ffd0d0;
+  border-color: black;
+}
+
+.bsdd_panel > .body .tab_panel div.header
+{
+  margin-top:6px;
+  margin-bottom:2px;
+  text-align: left;
+}
+
+.bsdd_panel > .body .tab_panel div.field_flex
+{
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+.bsdd_panel > .body .tab_panel div.field_flex label
+{
+  white-space: nowrap;
+}
+
+.bsdd_panel label,
+.bsdd_panel a
+{
+  user-select: none;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form
+{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel > .form > .header
+{
+  flex-grow: 0;
+  text-align: left;
+  border-bottom: 1px solid #d0d0d0;
+  margin: 0;
+  padding: 4px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel > .form > .properties
+{
+  overflow: auto;
+  text-align: left;
+  flex-grow: 1;
+  padding: 4px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset
+{
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header
+{
+  display: flex;
+  flex-direction: row;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > div
+{
+  flex-grow: 1;
+  font-weight: bold;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > a
+{
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: 4px;
+  background-image: url(images/chevron_down.svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset.expanded .header > a
+{
+  transform: rotate(180deg);
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > a::before
+{
+  content: "\00a0";
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset .body
+{
+  display: none;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .pset.expanded .body
+{
+  display: flex;
+  flex-direction: column;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .footer
+{
+  flex-grow: 0;
+  text-align: center;
+  border-top: 1px solid #d0d0d0;
+  padding: 4px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property
+{
+  display: block;
+  text-align: left;
+  margin-top:3px;
+  margin-bottom: 3px;
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
+  padding: 4px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property.changed
+{
+  border-color: #808080;
+  background-color: #f0e8e8;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .name
+{
+  display: block;
+  word-break: break-word;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .value
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .value .control
+{
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 10px;
+  background-color: white;
+  color: #404040;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr
+{
+  display: flex;
+  margin-top: 2px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr > div
+{
+  flex-grow: 1;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr > a
+{
+  flex-grow: 0;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .desc
+{
+  margin-top: 4px;
+  max-height: 0;
+  transition: max-height 0.2s;
+  overflow: hidden;
+}
+
+.bsdd_panel .tabbed_pane > .body .tab_panel .form .properties .property .help a.desc_button
+{
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: 4px;
+  background-image: url(images/chevron_down.svg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: transform 0.2s;
+  width: 16px;
+  height: 16px;
+}
+
+.bsdd_panel .tabbed_pane > .body .tab_panel .form .properties .property .help a.desc_button::before
+{
+  content: "\00a0";
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help.expanded .desc
+{
+  max-height: 200px;
+}
+
+.bsdd_panel .tabbed_pane > .body > .tab_panel .form .properties .property .help.expanded .attr > a
+{
+  transform: rotate(180deg);
+}
+

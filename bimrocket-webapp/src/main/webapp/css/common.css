@@ -38,6 +38,15 @@ input:focus, button:focus, select:focus, textarea:focus
   transition: box-shadow 0.4s ease;
 }
 
+a:focus
+{
+  outline-style: dotted;
+  outline-color: black;
+  outline-offset: 1px;
+  outline-width: 1px;
+  border-radius: 1px;
+}
+
 button
 {
   background-color: #f0f0f0;
@@ -368,6 +377,20 @@ table.data > tbody > tr:hover
   height: 100%;
 }
 
+.hidden
+{
+  display: none !important;
+}
+
+.overflow_hidden
+{
+  overflow: hidden;
+}
+
+.overflow_auto
+{
+  overflow: auto;
+}
 
 /* animation */
 

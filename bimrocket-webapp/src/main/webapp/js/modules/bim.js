@@ -9,6 +9,7 @@ import { BIMLayoutTool } from "../tools/BIMLayoutTool.js";
 import { BIMInspectorTool } from "../tools/BIMInspectorTool.js";
 import { IFCDBTool } from "../tools/IFCDBTool.js";
 import { BCFTool } from "../tools/BCFTool.js";
+import { BSDDTool } from "../tools/BSDDTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
@@ -46,12 +47,14 @@ export function load(application)
   const bimInspectorTool = new BIMInspectorTool(application);
   const ifcDBTool = new IFCDBTool(application);
   const bcfTool = new BCFTool(application);
+  const bsddTool = new BSDDTool(application);
 
   application.addTool(bimInventoryTool);
   application.addTool(bimLayoutTool);
   application.addTool(bimInspectorTool);
   application.addTool(ifcDBTool);
   application.addTool(bcfTool);
+  application.addTool(bsddTool);
 
   // create menus
   const menuBar = application.menuBar;
@@ -62,11 +65,12 @@ export function load(application)
   bimMenu.addMenuItem(bimInspectorTool);
   bimMenu.addMenuItem(ifcDBTool);
   bimMenu.addMenuItem(bcfTool);
+  bimMenu.addMenuItem(bsddTool);
 
   const toolBar = application.toolBar;
   toolBar.addToolButton(bimLayoutTool);
   toolBar.addToolButton(bimInventoryTool);
-
+  
   // restore services
   application.restoreServices("bcf");
   application.restoreServices("ifcdb");

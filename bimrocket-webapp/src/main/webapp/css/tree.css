@@ -80,6 +80,10 @@ ul.tree li a
   color: #606060;
   background-position: left center;
   vertical-align: middle;
+  user-drag: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
 }
 
 ul.tree li a:hover

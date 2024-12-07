@@ -66,12 +66,12 @@ ul.outliner .active_camera
   font-weight: bold;
 }
 
-ul.outliner .hidden
+ul.outliner .invisible
 {
   color:#C0C0C0;
 }
 
-ul.outliner .selected.hidden
+ul.outliner .selected.invisible
 {
   color:#707070;
 }

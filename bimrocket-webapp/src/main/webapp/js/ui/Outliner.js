@@ -213,11 +213,11 @@ class Outliner extends Panel
     const object = treeNode.value;
     if (object.visible)
     {
-      treeNode.removeClass("hidden");
+      treeNode.removeClass("invisible");
     }
     else
     {
-      treeNode.addClass("hidden");
+      treeNode.addClass("invisible");
     }
     let expanded = treeNode.isExpanded();
     treeNode.itemElem.className = ObjectUtils.getObjectClassNames(object);

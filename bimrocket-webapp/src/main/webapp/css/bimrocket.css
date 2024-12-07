@@ -18,6 +18,22 @@
   user-select: text;
 }
 
+@keyframes flash
+{
+  0% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF;
+  }
+  50% {
+    background-color: #FFF;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF2;
+  }
+  100% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF, -32px 0 #FFF2;
+  }
+}
+
 @keyframes fade_out_logo
 {
   0% {opacity: 1}
@@ -40,13 +56,14 @@
 .logo_panel
 {
   z-index: 20000;
-  background: black;
+  background-image: linear-gradient(#500000, black);
   position:absolute;
   top:0;
   bottom:0;
   left:0;
   right:0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
@@ -56,6 +73,23 @@
 {
   width: 400px;
   max-width: 80%;
+}
+
+.logo_panel > .info
+{
+  color: white;
+  min-height: 16px;
+}
+
+.logo_panel > .info > .loading
+{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 32px 0 #fff, -32px 0 #fff;
+  position: relative;
+  animation: flash 1s ease-out infinite alternate;
 }
 
 .logo_panel.show

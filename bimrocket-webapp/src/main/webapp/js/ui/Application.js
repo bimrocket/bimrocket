@@ -128,17 +128,13 @@ class Application
 
     /* create sub elements */
 
-    const logoPanelElem = document.createElement("div");
+    const logoPanelElem = document.body.querySelector(".logo_panel");
     this.logoPanel = logoPanelElem;
-    logoPanelElem.className = "logo_panel";
     logoPanelElem.addEventListener("click", () => this.hideLogo());
-    element.appendChild(logoPanelElem);
 
-    const bigLogoImage = document.createElement("img");
-    bigLogoImage.src = "css/images/bimrocket.svg";
+    const bigLogoImage = logoPanelElem.querySelector("img");
     bigLogoImage.title = Application.NAME;
     bigLogoImage.alt = Application.NAME;
-    logoPanelElem.appendChild(bigLogoImage);
 
     const splash = this.params["splash"];
     if (splash)
@@ -1942,7 +1938,7 @@ class Application
             {
               module.load(this);
               this.loadedModules.push(modulePath);
-              console.info(`module ${modulePath} completed.`);
+              console.info(`module ${modulePath} loaded.`);
             }
             catch (ex)
             {
@@ -1957,6 +1953,8 @@ class Application
       }
       else
       {
+        this.logoPanel.classList.remove("loading");
+        this.logoPanel.querySelector(".info").innerHTML = "";
         this.hideLogo();
         this.loadModelFromUrl();
       };
@@ -1966,14 +1964,18 @@ class Application
 
   showLogo()
   {
+    this.logoPanel.querySelector(".info").textContent = Application.VERSION;
     this.logoPanel.classList.add("show");
     this.logoPanel.classList.remove("hide");
   }
 
   hideLogo()
   {
-    this.logoPanel.classList.add("hide");
-    this.logoPanel.classList.remove("show");
+    if (!this.logoPanel.classList.contains("loading"))
+    {
+      this.logoPanel.classList.add("hide");
+      this.logoPanel.classList.remove("show");
+    }
   }
 
   enterPresentationMode()

@@ -10,6 +10,7 @@ import { Controls } from "./Controls.js";
 import { TabbedPane } from "./TabbedPane.js";
 import { I18N } from "../i18n/I18N.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { Environment } from "../Environment.js";
 import * as THREE from "three";
 
 class BSDDPanel extends Panel
@@ -27,7 +28,8 @@ class BSDDPanel extends Panel
 
     this.dictionaryUri = null;
     this.classUri = null;
-    this.baseUrl = "/bimrocket-server/api/proxy?url=" + BSDDPanel.BSDD_HOST;
+    this.baseUrl = (Environment.SERVER_URL || "/bimrocket-server") +
+      "/api/proxy?url=" + BSDDPanel.BSDD_HOST;
     this.headers = {
       "Accept" : "application/json",
       "X-User-Agent" : "bimrocket/" + Application.VERSION

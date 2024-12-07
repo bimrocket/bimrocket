@@ -11,6 +11,7 @@ import { WebUtils } from "../utils/WebUtils.js";
 import { Controls } from "../ui/Controls.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
+import { Environment } from "../Environment.js";
 import * as THREE from "three";
 
 class PrintTool extends Tool
@@ -74,8 +75,7 @@ class PrintTool extends Tool
   {
     const application = this.application;
     const request = new XMLHttpRequest();
-    const serviceUrl = location.protocol + "//" + location.host +
-      "/bimrocket-server/api/print";
+    const serviceUrl = (Environment.SERVER_URL || "/bimrocket-server") + "/api/print";
 
     let scale = parseFloat(this.scaleElem.value);
     // assume units in meters

@@ -133,6 +133,7 @@ import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { Controller } from "../controllers/Controller.js";
 import { Formula } from "../formula/Formula.js";
 import { BRSReportType } from "../reports/BRSReportType.js";
+import { Environment } from "../Environment.js";
 import * as THREE from "three";
 
 export function load(application)
@@ -760,7 +761,7 @@ export function load(application)
     const webdav = new WebdavService({
       name: "models",
       description : "Remote",
-      url : "/bimrocket-server/api/cloudfs/models"
+      url : (Environment.SERVER_URL || "/bimrocket-server") + "/api/cloudfs/models"
     });
     application.addService(webdav, "model", false);
 
@@ -777,7 +778,7 @@ export function load(application)
     const webdav = new WebdavService({
       name : "scripts",
       description : "Remote",
-      url : "/bimrocket-server/api/cloudfs/scripts"
+      url : (Environment.SERVER_URL || "/bimrocket-server") + "/api/cloudfs/scripts"
     });
     application.addService(webdav, "script", false);
 
@@ -794,7 +795,7 @@ export function load(application)
     const webdav = new WebdavService({
       name : "reports",
       description : "Remote",
-      url : "/bimrocket-server/api/cloudfs/reports"
+      url : (Environment.SERVER_URL || "/bimrocket-server") + "/api/cloudfs/reports"
     });
     application.addService(webdav, "report", false);
 

@@ -9,6 +9,7 @@ import { Controls } from "../ui/Controls.js";
 import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { ChatGPTDialog } from "../ui/ChatGPTDialog.js";
+import { Environment } from "../Environment.js";
 import * as THREE from "three";
 
 class ChatGPTTool extends Tool
@@ -91,7 +92,7 @@ class ChatGPTTool extends Tool
     {
       this.setup =
       {
-        api_url: "/bimrocket-server/api/proxy?url=@chatgpt",
+        api_url: (Environment.SERVER_URL || "/bimrocket-server") + "/api/proxy?url=@chatgpt",
         api_key: "implicit",
         model: "gpt-4-turbo",
         temperature: 0.7,

@@ -37,6 +37,7 @@ import { OutputPass } from "../postprocessing/OutputPass.js";
 import { ObjectBatcher } from "../utils/ObjectBatcher.js";
 import { I18N } from "../i18n/I18N.js";
 import WebGL from "../utils/WebGL.js";
+import { Environment } from "../Environment.js";
 import * as THREE from "three";
 
 class Application
@@ -100,6 +101,9 @@ class Application
       render : [],
       tool : []
     };
+
+    console.info("BIMROCKET " + Application.VERSION);
+    console.info("Environment", Environment);
 
     this.params = WebUtils.getQueryParams();
 
@@ -1915,7 +1919,7 @@ class Application
     }
     else
     {
-      modulePaths = ["base", "bim", "gis"];
+      modulePaths = [...(Environment.MODULES || ["base", "bim", "gis"])];
     }
     modulePaths.reverse();
 

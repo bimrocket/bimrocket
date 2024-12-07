@@ -539,6 +539,7 @@ class Application
 
       try
       {
+        ObjectUtils.dispose(this.baseObject);
         const batcher = new ObjectBatcher();
         this.batchedGroup = batcher.batch(this.baseObject);
         this.overlays.add(this.batchedGroup);

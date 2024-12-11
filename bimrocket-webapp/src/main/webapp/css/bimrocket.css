@@ -13,7 +13,14 @@
   user-select: none;
 }
 
-.container *
+body *
+{
+  user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+body input, textarea, table *
 {
   user-select: text;
 }

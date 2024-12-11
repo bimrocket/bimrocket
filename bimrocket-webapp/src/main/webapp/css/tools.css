@@ -307,6 +307,26 @@
   height: 100%;
 }
 
+.bim_delta_panel .tree li.delta
+{
+  background-image: url(images/delta.svg);
+}
+
+.bim_delta_panel .tree li.changed
+{
+  background-image: url(images/edit.svg);
+}
+
+.bim_delta_panel .tree li.added
+{
+  background-image: url(images/add.svg);
+}
+
+.bim_delta_panel .tree li.removed
+{
+  background-image: url(images/remove.svg);
+}
+
 .report_panel
 {
   padding: 2px;

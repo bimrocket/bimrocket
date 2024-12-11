@@ -29,6 +29,8 @@ export const translations =
 
   "tool.bsdd.label" : "bSDD",
 
+  "tool.bim_delta.label" : "Detecció de canvis",
+
   "tab.file" : "Fitxer",
   "tab.entity" : "Entitat",
   "tab.definition" : "Definició",
@@ -79,6 +81,9 @@ export const translations =
   "label.ifcdb_command" : "Comanda SQL:",
   "label.bsdd_filter" : "Filtre:",
   "label.bsdd_class_type" : "Tipus de classe:",
+  "label.bim_delta_changes" : "Canvis",
+  "label.bim_delta_added" : "Objecte afegit",
+  "label.bim_delta_removed" : "Objecte esborrat",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",

@@ -26,6 +26,7 @@ BIMROCKET is an open source platform for BIM project management. It features a w
 - BIM Inventory tool to list the IFC types, classifications, groups and layers of the model.
 - BIM Layout tool to visualize the interior layout of the building.
 - BIM Inspector tool to inspect the IFC entities of the model.
+- BIM Delta tool to detect changes between two versions of an IFC file.
 - Search tool to find model properties by name or by value.
 - Histogram tool to visualize the distribution of values ​​for a given property.
 - Multiple file storage systems are supported: webdav server, local file system and IndexedDB.

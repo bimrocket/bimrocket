@@ -26,6 +26,8 @@ export const translations =
 
   "tool.bsdd.label" : "bSDD",
 
+  "tool.bim_delta.label" : "Detección de cambios",
+
   "tab.file" : "Fichero",
   "tab.entity" : "Entidad",
   "tab.definition" : "Definición",
@@ -79,6 +81,9 @@ export const translations =
   "label.ifcdb_command" : "Comando SQL:",
   "label.bsdd_filter" : "Filtro:",
   "label.bsdd_class_type" : "Tipo de clase:",
+  "label.bim_delta_changes" : "Cambios",
+  "label.bim_delta_added" : "Objeto añadido",
+  "label.bim_delta_removed" : "Objeto borrado",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",

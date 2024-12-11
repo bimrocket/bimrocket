@@ -73,7 +73,7 @@
   </context-param>
   <context-param>
     <param-name>cloudfs.directories</param-name>
-    <param-value>models,scripts,reports</param-value>
+    <param-value>models,scripts,reports,ifc_snapshots</param-value>
   </context-param>
 
   <context-param>

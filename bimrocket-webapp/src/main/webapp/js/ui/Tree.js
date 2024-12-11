@@ -4,6 +4,8 @@
  * @author realor
  */
 
+import { I18N } from "../i18n/I18N.js";
+
 class Tree
 {
   constructor(element)
@@ -13,6 +15,7 @@ class Tree
     this.rootsElem.className = "tree";
     this.roots = [];
     this.formattedLabels = false;
+    this.translateLabels = false;
   }
 
   addNode(object, action, className)
@@ -142,7 +145,14 @@ class TreeNode
     }
     else
     {
-      this.linkElem.textContent = label;
+      if (this.tree.translateLabels)
+      {
+        I18N.set(this.linkElem, "textContent", label);
+      }
+      else
+      {
+        this.linkElem.textContent = label;
+      }
     }
   }
 

@@ -1368,6 +1368,11 @@ div.script_code
   border: 1px solid #c0c0c0;
 }
 
+.panel_search .body .tree a > div
+{
+  display: inline;
+}
+
 .panel_search .body .tree .match
 {
   background-color: #ffff00;

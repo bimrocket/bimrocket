@@ -14,7 +14,6 @@ class Tree
     element.appendChild(this.rootsElem);
     this.rootsElem.className = "tree";
     this.roots = [];
-    this.formattedLabels = false;
     this.translateLabels = false;
   }
 
@@ -139,12 +138,18 @@ class TreeNode
   {
     let label = this.tree.getNodeLabel(this._value);
 
-    if (this.tree.formattedLabels)
+    if (label instanceof HTMLElement)
     {
-      this.linkElem.innerHTML = label;
+      this.linkElem.innerHTML = "";
+      this.linkElem.appendChild(label);
     }
     else
     {
+      if (typeof label !== "string")
+      {
+        label = String(label);
+      }
+
       if (this.tree.translateLabels)
       {
         I18N.set(this.linkElem, "textContent", label);

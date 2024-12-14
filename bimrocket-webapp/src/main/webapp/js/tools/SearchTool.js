@@ -75,7 +75,6 @@ class SearchTool extends Tool
 
     this.tree = new Tree(matchingsElem);
     const tree = this.tree;
-    tree.formattedLabels = true;
     tree.getNodeLabel = (group) =>
     {
       let label;
@@ -93,10 +92,12 @@ class SearchTool extends Tool
           index = group.name.toLowerCase().indexOf(textToFind.toLowerCase());
         }
         let endIndex = index + textToFind.length;
-        label = group.name.substring(0, index)
+        let html = group.name.substring(0, index)
           + '<span class="match">' + group.name.substring(index, endIndex) + '</span>'
           + group.name.substring(endIndex)
           + " (" + group.objects.length + ")";
+        label = document.createElement("div");
+        label.innerHTML = html;
       }
       else
       {

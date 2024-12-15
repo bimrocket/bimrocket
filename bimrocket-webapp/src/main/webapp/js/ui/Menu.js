@@ -352,10 +352,12 @@ class MenuBar
   processKey(event)
   {
     if (event.target.nodeName === "INPUT" ||
-        event.target.nodeName === "TEXTAREA" ||
-        event.target.nodeName === "PRE") return;
+        event.target.nodeName === "TEXTAREA") return;
 
     if (event.target.classList.contains("cm-content")) return;
+
+    const textSelection = window.getSelection();
+    if (textSelection && textSelection.toString().length > 0) return;
 
     let keys = [];
     if (event.altKey) keys.push("Alt");

@@ -365,6 +365,7 @@ class Application
     let animationClock = new THREE.Clock();
     let _animationEvent = { delta : 0 };
     let _slownessCounter = 0;
+    let slownessRepeat = 1;
 
     let animate = () =>
     {
@@ -385,7 +386,7 @@ class Application
 
           if (fps < setup.requestedFPS)
           {
-            if (_slownessCounter < 2)
+            if (_slownessCounter < slownessRepeat)
             {
               _slownessCounter++;
             }
@@ -417,7 +418,7 @@ class Application
             const fps = 1 / _animationEvent.delta;
             if (fps < setup.requestedFPS)
             {
-              if (_slownessCounter < 2)
+              if (_slownessCounter < slownessRepeat)
               {
                 _slownessCounter++;
               }

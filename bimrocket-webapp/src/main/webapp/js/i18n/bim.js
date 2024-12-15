@@ -53,6 +53,9 @@ export const translations =
   "tab.bsdd_classes" : "Classes",
   "tab.bsdd_properties" : "Properties",
 
+  "tab.bim_delta_tree" : "Tree",
+  "tab.bim_delta_json" : "JSON",
+
   "label.bcf_service" : "BCF service:",
   "label.project" : "Project:",
   "label.status" : "Status:",
@@ -81,9 +84,9 @@ export const translations =
   "label.ifcdb_command" : "SQL command:",
   "label.bsdd_filter" : "Filter:",
   "label.bsdd_class_type" : "Class type:",
-  "label.bim_delta_changes" : "Changes",
   "label.bim_delta_added" : "Object added",
   "label.bim_delta_removed" : "Object removed",
+  "label.bim_delta_snapshot_name" : "IFC snapshot name:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -96,6 +99,8 @@ export const translations =
   "title.delete_ifcdb_service" : "Delete IFCDB service",
   "title.viewpoint" : "Topic viewpoint",
   "title.delete_doc_ref" : "Delete document reference",
+
+  "title.bim_delta_snapshots" : "IFC snapshots",
 
   "message.no_bim_object_selected" : "No BIM object selected.",
 
@@ -116,6 +121,9 @@ export const translations =
   "message.bsdd_class_count" : count => `Classes: ${count}`,
   "message.bsdd_dictionary_found" : (count, total) => `Dictionaries found: ${count} of ${total}`,
   "message.bsdd_class_found" : (count, total) => `Classes found: ${count} of ${total}`,
+
+  "message.bim_delta_changes" : changes => `Changes: ${changes}`,
+  "message.bim_delta_cannot_compare" : "This IFC snapshot is not comparable with the current model or it was generated with a previous version of the application.",
 
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",

@@ -11,32 +11,63 @@ import { InputDialog } from "../ui/InputDialog.js";
 import { FileExplorer } from "../ui/FileExplorer.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Metadata, Result } from "../io/FileService.js";
+import { Solid } from "../core/Solid.js";
+import { IFC } from "../io/ifc/IFC.js";
 import { I18N } from "../i18n/I18N.js";
 
 class BIMDeltaTool extends Tool
 {
+  static SNAPSHOT_VERSION = "1.0";
+
   constructor(application, options)
   {
     super(application);
     this.name = "bim_delta";
     this.label = "bim|tool.bim_delta.label";
     this.className = "bim_delta";
+    this.decimals = 6;
     this.setOptions(options);
 
     const panel = new FileExplorer(application);
     this.panel = panel;
+    panel.title = "bim|title.bim_delta_snapshots";
+    panel.group = "ifc_snapshots";
 
     const deltaPanel = new Panel(application);
     this.deltaPanel = deltaPanel;
     deltaPanel.title = "bim|tool.bim_delta.label";
     deltaPanel.visible = false;
     deltaPanel.setClassName("bim_delta_panel");
+    deltaPanel.minimumHeight = 200;
 
-    this.deltaTree = new Tree(deltaPanel.bodyElem);
-    this.deltaTree.translateLabels = true;
+    const tabbedPane = new TabbedPane(deltaPanel.bodyElem);
+    tabbedPane.addClassName("h_full");
 
-    panel.title = this.label;
-    panel.group = "ifc_snapshots";
+    const treeTab = tabbedPane.addTab("tree", "bim|tab.bim_delta_tree");
+    const jsonTab = tabbedPane.addTab("json", "bim|tab.bim_delta_json");
+
+    deltaPanel.deltaTree = new Tree(treeTab);
+    deltaPanel.deltaTree.translateLabels = true;
+    deltaPanel.deltaTree.getNodeLabel = (object) =>
+    {
+      if (typeof object === "string") return object;
+      else
+      {
+        const elem = document.createElement("span");
+        I18N.set(elem, "textContent", "bim|message.bim_delta_changes", object);
+        return elem;
+      }
+    };
+
+    deltaPanel.jsonElem = document.createElement("pre");
+    jsonTab.appendChild(deltaPanel.jsonElem);
+
+    deltaPanel.onHide = () =>
+    {
+      deltaPanel.deltaTree.clear();
+      deltaPanel.jsonElem.innerHTML = "";
+      console.info("hide");
+    };
 
     panel.addContextButton("save", "button.save",
       () => this.showSaveDialog(), () => panel.service !== null);
@@ -69,6 +100,8 @@ class BIMDeltaTool extends Tool
     const snapshot = JSON.parse(data);
     this.compareSnapshot(snapshot);
     deltaPanel.visible = true;
+    if (!deltaPanel.visible) deltaPanel.visible = true;
+    else deltaPanel.minimized = false;
   }
 
   showSaveDialog()
@@ -79,7 +112,8 @@ class BIMDeltaTool extends Tool
     let filename = "snp-" +
       (new Date()).toISOString().substring(0, 19).replaceAll(":", "-");
 
-    let dialog = new InputDialog(application, "bim|tool.bim_delta.label", "title.save_to_cloud", filename);
+    let dialog = new InputDialog(application,
+      "bim|tool.bim_delta.label", "bim|label.bim_delta_snapshot_name", filename);
     dialog.setI18N(this.application.i18n);
     dialog.onAccept = () =>
     {
@@ -113,17 +147,27 @@ class BIMDeltaTool extends Tool
   {
     const application = this.application;
     const baseObject = application.baseObject;
-    const deltaTree = this.deltaTree;
+    const deltaTree = this.deltaPanel.deltaTree;
+    const jsonElem = this.deltaPanel.jsonElem;
+
     deltaTree.clear();
+    jsonElem.textContent = "";
 
     const globalId = snapshot.globalId;
 
     let root = this.findObjectByGlobalId(baseObject, globalId);
-    if (root)
+    if (root &&
+        snapshot.version === this.constructor.SNAPSHOT_VERSION &&
+        snapshot.decimals === this.decimals)
     {
+      let changes = 0;
+      const objectsChanged = [];
+      const diff = [];
+      let currentDiffObject = null;
+
       const currentSnapshot = this.generateSnapshot(root);
-      const deltaNode = deltaTree.addNode("bim|label.bim_delta_changes", null, "delta");
-      deltaNode.expand(1);
+      const deltaNode = deltaTree.addNode(0,
+        () => this.selectObjects(objectsChanged), "delta");
 
       for (let globalId of Object.keys(currentSnapshot.objects))
       {
@@ -149,9 +193,18 @@ class BIMDeltaTool extends Tool
                 {
                   objectNode = deltaNode.addNode(objectData1.IFC.Name || "Object",
                     onClick, objectData1.IFC?.ifcClassName);
+                  let globalId = objectData1.IFC?.GlobalId;
+                  if (globalId) objectsChanged.push(globalId);
+                  currentDiffObject = {
+                    IFC : objectData1.IFC,
+                    type: "change",
+                    changes : [] };
+                  diff.push(currentDiffObject);
                 }
-                objectNode.addNode(psetName + "." + key + ": " +
-                  value2 + " -> " + value1, onClick, "changed");
+                let label = psetName + "." + key + ": " + value2 + " → " + value1;
+                objectNode.addNode(label, onClick, "changed");
+                changes++;
+                currentDiffObject.changes.push(label);
               }
             }
           }
@@ -160,7 +213,13 @@ class BIMDeltaTool extends Tool
         {
           const objectNode = deltaNode.addNode(objectData1.IFC.Name || "Object",
             onClick, objectData1.IFC?.ifcClassName);
+          objectNode.addClass("added");
           objectNode.addNode("bim|label.bim_delta_added", onClick, "added");
+          changes++;
+          let globalId = objectData1.IFC?.GlobalId;
+          if (globalId) objectsChanged.push(globalId);
+          currentDiffObject = { IFC : objectData1.IFC, type : "added" };
+          diff.push(currentDiffObject);
         }
       }
 
@@ -172,11 +231,25 @@ class BIMDeltaTool extends Tool
         if (!objectData1 && objectData2)
         {
           const objectNode = deltaNode.addNode(
-            objectData2.IFC.Name || "Object", null, objectData2.IFC?.ifcClassName);
+            objectData2.IFC.Name || "Object",
+              () => application.selection.clear(), objectData2.IFC?.ifcClassName);
+          objectNode.addClass("removed");
           objectNode.addNode("bim|label.bim_delta_removed", null, "removed");
+          changes++;
+          currentDiffObject = { IFC : objectData2.IFC, type : "removed" };
+          diff.push(currentDiffObject);
         }
       }
+      deltaNode.value = changes;
+      deltaNode.expand(1);
       application.i18n.updateTree(deltaTree.rootsElem);
+      jsonElem.textContent = JSON.stringify(diff, null, 2);
+    }
+    else
+    {
+      MessageDialog.create("ERROR", "bim|message.bim_delta_cannot_compare")
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
     }
   }
 
@@ -188,8 +261,10 @@ class BIMDeltaTool extends Tool
     if (globalId)
     {
       snapshot = {
+        version : this.constructor.SNAPSHOT_VERSION,
         globalId : globalId,
         dateTime : new Date().toISOString(),
+        decimals : this.decimals,
         objects : {}
       };
 
@@ -215,6 +290,25 @@ class BIMDeltaTool extends Tool
     const userData = object.userData;
     for (let psetName of Object.keys(userData))
     {
+      const transform = {
+        "position" : "(" + this.round(object.position.x) + ", " +
+                           this.round(object.position.y) + ", " +
+                           this.round(object.position.z) + ")",
+        "rotation" : "(" + this.round(object.rotation.x) + ", " +
+                           this.round(object.rotation.y) + ", " +
+                           this.round(object.rotation.z) + ")",
+        "scale" : "(" + this.round(object.scale.x) + ", " +
+                        this.round(object.scale.y) + ", " +
+                        this.round(object.scale.z) + ")"
+      };
+      objectData["transform"] = transform;
+
+      const repr = IFC.getRepresentation(object);
+      if (repr)
+      {
+        objectData["representation"] = this.getRepresentationData(repr);
+      }
+
       if (psetName === "IFC") // Attributes
       {
         const attribs = userData[psetName];
@@ -233,16 +327,29 @@ class BIMDeltaTool extends Tool
     return objectData;
   }
 
-  findObjectByGlobalId(obj, globalId)
+  getRepresentationData(repr)
   {
-    if (obj.userData.IFC?.GlobalId === globalId) return obj;
+    const items = repr instanceof Solid ? [repr] : repr.children;
 
-    for (let child of obj.children)
+    let area = 0;
+    let vertices = 0;
+    for (let item of items)
     {
-      let root = this.findObjectByGlobalId(child, globalId);
-      if (root) return root;
+      if (item instanceof Solid)
+      {
+        const geometry = item.geometry;
+        vertices += geometry.vertices.length;
+        for (let face of geometry.faces)
+        {
+          area += face.getArea();
+        }
+      }
     }
-    return null;
+    return {
+      items : items.length,
+      vertices : vertices,
+      area : this.round(area)
+    };
   }
 
   selectObject(globalId)
@@ -255,6 +362,45 @@ class BIMDeltaTool extends Tool
     {
       application.selection.set(root);
     }
+    else
+    {
+      application.selection.clear();
+    }
+  }
+
+  selectObjects(globalIds)
+  {
+    const application = this.application;
+    const baseObject = application.baseObject;
+    const objects = [];
+
+    for (let globalId of globalIds)
+    {
+      let root = this.findObjectByGlobalId(baseObject, globalId);
+      if (root)
+      {
+        objects.push(root);
+      }
+    }
+    application.selection.set(...objects);
+  }
+
+  findObjectByGlobalId(obj, globalId)
+  {
+    if (obj.userData.IFC?.GlobalId === globalId) return obj;
+
+    for (let child of obj.children)
+    {
+      let root = this.findObjectByGlobalId(child, globalId);
+      if (root) return root;
+    }
+    return null;
+  }
+
+  round(number)
+  {
+    const k = Math.pow(10, this.decimals);
+    return String(Math.round(number * k) / k);
   }
 }
 

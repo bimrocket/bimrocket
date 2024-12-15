@@ -307,6 +307,17 @@
   height: 100%;
 }
 
+.bim_delta_panel .body
+{
+  padding: 2px;
+}
+
+.bim_delta_panel .body .tab_panel > pre
+{
+  text-align: left;
+  user-select: text;
+}
+
 .bim_delta_panel .tree li.delta
 {
   background-image: url(images/delta.svg);
@@ -325,6 +336,16 @@
 .bim_delta_panel .tree li.removed
 {
   background-image: url(images/remove.svg);
+}
+
+.bim_delta_panel .tree a.added
+{
+  color: #000080;
+}
+
+.bim_delta_panel .tree a.removed
+{
+  color: #800000;
 }
 
 .report_panel

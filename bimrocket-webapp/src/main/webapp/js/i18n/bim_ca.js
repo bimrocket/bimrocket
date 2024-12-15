@@ -53,6 +53,9 @@ export const translations =
   "tab.bsdd_classes" : "Classes",
   "tab.bsdd_properties" : "Propietats",
 
+  "tab.bim_delta_tree" : "Àrbre",
+  "tab.bim_delta_json" : "JSON",
+
   "label.bcf_service" : "Servei BCF:",
   "label.project" : "Projecte:",
   "label.status" : "Estat:",
@@ -81,9 +84,9 @@ export const translations =
   "label.ifcdb_command" : "Comanda SQL:",
   "label.bsdd_filter" : "Filtre:",
   "label.bsdd_class_type" : "Tipus de classe:",
-  "label.bim_delta_changes" : "Canvis",
   "label.bim_delta_added" : "Objecte afegit",
   "label.bim_delta_removed" : "Objecte esborrat",
+  "label.bim_delta_snapshot_name" : "Nom de la captura IFC:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
@@ -96,6 +99,8 @@ export const translations =
   "title.delete_ifcdb_service" : "Esborra servei IFCDB",
   "title.viewpoint" : "Vista de la incidència",
   "title.delete_doc_ref" : "Esborra referència a document",
+
+  "title.bim_delta_snapshots" : "Captures IFC",
 
   "message.no_bim_object_selected" : "Cap objecte BIM seleccionat.",
 
@@ -116,6 +121,9 @@ export const translations =
   "message.bsdd_class_count" : count => `Classes: ${count}`,
   "message.bsdd_dictionary_found" : (count, total) => `Diccionaris trobats: ${count} de ${total}`,
   "message.bsdd_class_found" : (count, total) => `Classes trobades: ${count} de ${total}`,
+
+  "message.bim_delta_changes" : changes => `Canvis: ${changes}`,
+  "message.bim_delta_cannot_compare" : "Aquesta captura IFC no és comparable amb el model actual o s'ha generat amb una versió anterior de l'aplicació.",
 
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
   "question.delete_comment" : "Vols esborrar aquest comentari?",

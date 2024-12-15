@@ -22,6 +22,9 @@ export const translations =
   "tool.bim_inspector.label" : "Inspector BIM",
   "tool.bim_inspector.help" : "Muestra la representación IFC",
 
+  "tool.bcf.label" : "BCF",
+  "tool.bcf.help" : "Gestión de incidencias BCF",
+
   "tool.ifcdb.label" : "IFCDB",
 
   "tool.bsdd.label" : "bSDD",
@@ -32,9 +35,6 @@ export const translations =
   "tab.entity" : "Entidad",
   "tab.definition" : "Definición",
   "tab.references" : "Referencias",
-
-  "tool.bcf.label" : "BCF",
-  "tool.bcf.help" : "Gestión de incidencias BCF",
 
   "tab.comments" : "Comentarios",
   "tab.viewpoints" : "Vistas",
@@ -52,6 +52,9 @@ export const translations =
   "tab.bsdd_dictionaries" : "Diccionarios",
   "tab.bsdd_classes" : "Clases",
   "tab.bsdd_properties" : "Propiedades",
+
+  "tab.bim_delta_tree" : "Árbol",
+  "tab.bim_delta_json" : "JSON",
 
   "label.bcf_service" : "Servicio BCF:",
   "label.project" : "Proyecto:",
@@ -81,9 +84,9 @@ export const translations =
   "label.ifcdb_command" : "Comando SQL:",
   "label.bsdd_filter" : "Filtro:",
   "label.bsdd_class_type" : "Tipo de clase:",
-  "label.bim_delta_changes" : "Cambios",
   "label.bim_delta_added" : "Objeto añadido",
   "label.bim_delta_removed" : "Objeto borrado",
+  "label.bim_delta_snapshot_name" : "Nombre de la captura IFC:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
@@ -96,6 +99,8 @@ export const translations =
   "title.delete_ifcdb_service" : "Borrar servicio IFCDB",
   "title.viewpoint" : "Vista de la incidencia",
   "title.delete_doc_ref" : "Borrar referencia a documento",
+
+  "title.bim_delta_snapshots" : "Capturas IFC",
 
   "message.no_bim_object_selected" : "Ningún objeto BIM seleccionado.",
 
@@ -116,6 +121,9 @@ export const translations =
   "message.bsdd_class_count" : count => `Clases: ${count}`,
   "message.bsdd_dictionary_found" : (count, total) => `Diccionarios encontrados: ${count} de ${total}`,
   "message.bsdd_class_found" : (count, total) => `Clases encontradas: ${count} de ${total}`,
+
+  "message.bim_delta_changes" : changes => `Cambios: ${changes}`,
+  "message.bim_delta_cannot_compare" : "Esta captura IFC no es comparable con el modelo actual o se ha generado con una versión anterior de la aplicación.",
 
   "question.delete_topic" : "Quieres borrar esta incidencia?",
   "question.delete_comment" : "Quieres borrar este comentario?",

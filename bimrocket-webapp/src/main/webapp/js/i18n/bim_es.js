@@ -124,6 +124,7 @@ export const translations =
 
   "message.bim_delta_changes" : changes => `Cambios: ${changes}`,
   "message.bim_delta_cannot_compare" : "Esta captura IFC no es comparable con el modelo actual o se ha generado con una versión anterior de la aplicación.",
+  "message.bim_delta_not_ifc_object" : "Selecciona el objeto IFC del cual quieres generar la captura.",
 
   "question.delete_topic" : "Quieres borrar esta incidencia?",
   "question.delete_comment" : "Quieres borrar este comentario?",

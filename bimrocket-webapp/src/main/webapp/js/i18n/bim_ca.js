@@ -124,6 +124,7 @@ export const translations =
 
   "message.bim_delta_changes" : changes => `Canvis: ${changes}`,
   "message.bim_delta_cannot_compare" : "Aquesta captura IFC no és comparable amb el model actual o s'ha generat amb una versió anterior de l'aplicació.",
+  "message.bim_delta_not_ifc_object" : "Selecciona l'objecte IFC del qual vols generar la captura.",
 
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
   "question.delete_comment" : "Vols esborrar aquest comentari?",

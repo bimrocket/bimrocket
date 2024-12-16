@@ -97,11 +97,20 @@ class BIMDeltaTool extends Tool
   {
     const application = this.application;
     const deltaPanel = this.deltaPanel;
-    const snapshot = JSON.parse(data);
-    this.compareSnapshot(snapshot);
-    deltaPanel.visible = true;
-    if (!deltaPanel.visible) deltaPanel.visible = true;
-    else deltaPanel.minimized = false;
+    try
+    {
+      const snapshot = JSON.parse(data);
+      this.compareSnapshot(snapshot);
+      deltaPanel.visible = true;
+      if (!deltaPanel.visible) deltaPanel.visible = true;
+      else deltaPanel.minimized = false;
+    }
+    catch (ex)
+    {
+      MessageDialog.create("ERROR", String(ex))
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
   }
 
   showSaveDialog()
@@ -109,38 +118,40 @@ class BIMDeltaTool extends Tool
     const application = this.application;
     const panel = this.panel;
 
-    let filename = "snp-" +
-      (new Date()).toISOString().substring(0, 19).replaceAll(":", "-");
-
-    let dialog = new InputDialog(application,
-      "bim|tool.bim_delta.label", "bim|label.bim_delta_snapshot_name", filename);
-    dialog.setI18N(this.application.i18n);
-    dialog.onAccept = () =>
+    const object = application.selection.object;
+    if (object && object.userData.IFC?.GlobalId)
     {
-      let name = dialog.inputElem.value;
-      panel.entryName = name;
-      panel.entryType = Metadata.FILE;
-      this.saveFile(panel.basePath + "/" + name);
-      dialog.hide();
-    };
-    dialog.show();
+      let name = object.userData.IFC.Name || "snp";
+      let filename = name.replaceAll(" ", "_") + "-" +
+        (new Date()).toISOString().substring(0, 19).replaceAll(":", "-");
+
+      let dialog = new InputDialog(application,
+        "bim|tool.bim_delta.label", "bim|label.bim_delta_snapshot_name", filename);
+      dialog.setI18N(this.application.i18n);
+      dialog.onAccept = () =>
+      {
+        let name = dialog.inputElem.value;
+        panel.entryName = name;
+        panel.entryType = Metadata.FILE;
+        this.saveFile(panel.basePath + "/" + name, object);
+        dialog.hide();
+      };
+      dialog.show();
+    }
+    else
+    {
+      MessageDialog.create("bim|tool.bim_delta.label", "bim|message.bim_delta_not_ifc_object")
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
   }
 
-  saveFile(path)
+  saveFile(path, object)
   {
-    const application = this.application;
     const panel = this.panel;
-
-    const object = application.selection.object;
-    if (object)
-    {
-      const snapshot = this.generateSnapshot(object);
-      if (snapshot)
-      {
-        const data = JSON.stringify(snapshot, null, 2);
-        panel.savePath(path, data);
-      }
-    }
+    const snapshot = this.generateSnapshot(object);
+    const data = JSON.stringify(snapshot, null, 2);
+    panel.savePath(path, data);
   }
 
   compareSnapshot(snapshot)
@@ -247,7 +258,7 @@ class BIMDeltaTool extends Tool
     }
     else
     {
-      MessageDialog.create("ERROR", "bim|message.bim_delta_cannot_compare")
+      MessageDialog.create("bim|tool.bim_delta.label", "bim|message.bim_delta_cannot_compare")
         .setClassName("error")
         .setI18N(this.application.i18n).show();
     }
@@ -255,31 +266,27 @@ class BIMDeltaTool extends Tool
 
   generateSnapshot(object)
   {
-    let snapshot = null;
+    let globalId = object.userData.IFC.GlobalId;
 
-    let globalId = object.userData.IFC?.GlobalId;
-    if (globalId)
+    const snapshot = {
+      version : this.constructor.SNAPSHOT_VERSION,
+      globalId : globalId,
+      dateTime : new Date().toISOString(),
+      decimals : this.decimals,
+      objects : {}
+    };
+
+    object.traverse(obj =>
     {
-      snapshot = {
-        version : this.constructor.SNAPSHOT_VERSION,
-        globalId : globalId,
-        dateTime : new Date().toISOString(),
-        decimals : this.decimals,
-        objects : {}
-      };
-
-      object.traverse(obj =>
+      if (obj.visible)
       {
-        if (obj.visible)
+        let globalId = obj.userData.IFC?.GlobalId;
+        if (typeof globalId === "string")
         {
-          let globalId = obj.userData.IFC?.GlobalId;
-          if (typeof globalId === "string")
-          {
-            snapshot.objects[globalId] = this.getObjectData(obj);
-          }
+          snapshot.objects[globalId] = this.getObjectData(obj);
         }
-      });
-    }
+      }
+    });
     return snapshot;
   }
 
@@ -312,19 +319,38 @@ class BIMDeltaTool extends Tool
       if (psetName === "IFC") // Attributes
       {
         const attribs = userData[psetName];
-        objectData["IFC"] = attribs;
+        if (typeof attribs.ifcClassName === "string")
+        {
+          objectData["IFC"] = {};
+          this.copyProperties(attribs, objectData["IFC"]);
+        }
       }
       else if (psetName.startsWith("IFC_"))
       {
         const pset = userData[psetName];
         if (pset.ifcClassName === "IfcPropertySet")
         {
-          const props = userData[psetName];
-          objectData[psetName] = props;
+          objectData[psetName] = {};
+          this.copyProperties(pset, objectData[psetName]);
         }
       }
     }
     return objectData;
+  }
+
+  copyProperties(source, target)
+  {
+    for (let propName of Object.keys(source))
+    {
+      let value = source[propName];
+      let valueType = typeof value;
+      if (valueType === "string" ||
+          valueType === "number" ||
+          valueType === "boolean")
+      {
+        target[propName] = value;
+      }
+    }
   }
 
   getRepresentationData(repr)

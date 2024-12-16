@@ -124,6 +124,7 @@ export const translations =
 
   "message.bim_delta_changes" : changes => `Changes: ${changes}`,
   "message.bim_delta_cannot_compare" : "This IFC snapshot is not comparable with the current model or it was generated with a previous version of the application.",
+  "message.bim_delta_not_ifc_object" : "Select the IFC object you want to generate the snapshot of.",
 
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",

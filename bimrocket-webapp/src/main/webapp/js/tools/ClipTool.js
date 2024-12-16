@@ -19,6 +19,7 @@ class ClipTool extends Tool
     this.help = "tool.clip.help";
     this.className = "clip";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
   }
 

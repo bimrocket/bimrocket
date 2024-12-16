@@ -19,6 +19,7 @@ class OpenLocalTool extends Tool
     this.help = "tool.openlocal.help";
     this.className = "openlocal";
     this.setOptions(options);
+    application.addTool(this);
 
     this._onChange = this.onChange.bind(this);
     this._onFocus = this.onFocus.bind(this);

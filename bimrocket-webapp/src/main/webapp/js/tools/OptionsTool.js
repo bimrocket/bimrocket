@@ -23,6 +23,7 @@ class OptionsTool extends Tool
     this.help = "tool.options.help";
     this.className = "options";
     this.setOptions(options);
+    application.addTool(this);
     this.createPanel();
   }
 

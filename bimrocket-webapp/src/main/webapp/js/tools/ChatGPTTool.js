@@ -26,8 +26,10 @@ class ChatGPTTool extends Tool
     this.label = "tool.chatgpt.label";
     this.className = "chatgpt";
     this.setOptions(options);
-    this.createPanel();
+    application.addTool(this);
     this.immediate = true;
+
+    this.createPanel();
     this.messages = [];
 
     this.init();

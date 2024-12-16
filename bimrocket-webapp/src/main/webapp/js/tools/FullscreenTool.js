@@ -13,8 +13,9 @@ class FullscreenTool extends Tool
     this.name = "fullscreen";
     this.label = "tool.fullscreen.label";
     this.className = "fullscreen";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

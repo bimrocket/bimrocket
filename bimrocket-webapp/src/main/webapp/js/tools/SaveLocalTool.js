@@ -20,6 +20,7 @@ class SaveLocalTool extends Tool
     this.className = "savelocal";
     this.url = null;
     this.setOptions(options);
+    application.addTool(this);
   }
 
   activate()

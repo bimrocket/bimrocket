@@ -34,6 +34,7 @@ class ReportTool extends Tool
     this.label = "tool.report.label";
     this.className = "report";
     this.setOptions(options);
+    application.addTool(this);
 
     const panel = new FileExplorer(application, false);
     this.panel = panel;

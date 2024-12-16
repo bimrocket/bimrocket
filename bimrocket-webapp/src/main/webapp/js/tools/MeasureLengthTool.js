@@ -19,10 +19,7 @@ class MeasureLengthTool extends Tool
     this.label = "tool.measure_length.label";
     this.className = "measure_length";
     this.setOptions(options);
-
-    this.vertices = []; // Vector3[]
-    this.line = null; // THREE.Line
-    this.points = null; // THREE.Points
+    application.addTool(this);
 
     this.lineMaterial = new THREE.LineBasicMaterial(
       { linewidth : 2, color : new THREE.Color(0x0000ff), opacity : 1,
@@ -31,6 +28,10 @@ class MeasureLengthTool extends Tool
     this.pointsMaterial = new THREE.PointsMaterial(
       { color : 0, size : 4, sizeAttenuation : false,
         depthTest : false, transparent : true });
+
+    this.vertices = []; // Vector3[]
+    this.line = null; // THREE.Line
+    this.points = null; // THREE.Points
 
     this._onPointerUp = this.onPointerUp.bind(this);
 

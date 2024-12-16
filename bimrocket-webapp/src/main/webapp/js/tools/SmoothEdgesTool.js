@@ -20,6 +20,7 @@ class SmoothEdgesTool extends Tool
     this.label = "tool.smooth_edges.label";
     this.className = "smooth_edges";
     this.setOptions(options);
+    application.addTool(this);
 
     this.createPanel();
   }

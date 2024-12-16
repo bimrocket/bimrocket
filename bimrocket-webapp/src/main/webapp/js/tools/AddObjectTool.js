@@ -33,11 +33,13 @@ class AddObjectTool extends Tool
     this.label = "tool.add_object.label";
     this.help = "tool.add_object.help";
     this.className = "add_object";
-    this.immediate = true;
-    this.objectType = null;
-    this.builderClass = null;
 
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
+
+    this.objectType = null;
+    this.builderClass = null;
     this.counter = 0;
   }
 

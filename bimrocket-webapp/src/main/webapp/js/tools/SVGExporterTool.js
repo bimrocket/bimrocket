@@ -22,8 +22,9 @@ class SVGExporterTool extends Tool
     this.label = "tool.svg_exporter.label";
     this.className = "svg_exporter";
     this.decimals = 5;
-
     this.setOptions(options);
+    application.addTool(this);
+
     this.createPanel();
   }
 

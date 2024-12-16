@@ -22,6 +22,7 @@ class BIMLayoutTool extends Tool
     this.help = "bim|tool.bim_layout.help";
     this.className = "bim_layout";
     this.setOptions(options);
+    application.addTool(this);
 
     this._onWheel = this.onWheel.bind(this);
     this._animate = this.animate.bind(this);

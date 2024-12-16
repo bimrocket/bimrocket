@@ -15,8 +15,9 @@ class PasteTool extends Tool
     this.label = "tool.paste.label";
     this.help = "tool.paste.help";
     this.className = "paste";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

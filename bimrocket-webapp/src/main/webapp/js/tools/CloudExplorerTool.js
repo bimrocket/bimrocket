@@ -23,6 +23,7 @@ class CloudExplorerTool extends Tool
     this.help = "tool.cloud_explorer.help";
     this.className = "cloud_explorer";
     this.setOptions(options);
+    application.addTool(this);
 
     const panel = new FileExplorer(application);
     this.panel = panel;

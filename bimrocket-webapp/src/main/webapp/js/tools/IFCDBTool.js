@@ -16,8 +16,9 @@ class IFCDBTool extends Tool
     this.label = "bim|tool.ifcdb.label";
     this.help = "bim|tool.ifcdb.help";
     this.className = "ifcdb";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.panel = new IFCDBPanel(this.application);
     application.panelManager.addPanel(this.panel);

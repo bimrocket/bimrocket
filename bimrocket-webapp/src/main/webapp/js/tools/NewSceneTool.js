@@ -17,8 +17,9 @@ class NewSceneTool extends Tool
     this.label = "tool.new_scene.label";
     this.help = "tool.new_scene.help";
     this.className = "new_scene";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

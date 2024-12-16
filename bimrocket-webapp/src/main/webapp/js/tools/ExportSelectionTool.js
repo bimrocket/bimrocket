@@ -21,6 +21,7 @@ class ExportSelectionTool extends Tool
     this.help = "tool.export_selection.help";
     this.className = "export_selection";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
 
     this.dialog = new PropertySelectorDialog(this.application,

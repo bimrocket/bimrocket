@@ -16,8 +16,9 @@ class CameraProjectionTool extends Tool
     this.label = "tool.projection_type.label";
     this.help = "tool.projection_type.help";
     this.className = "projection_type";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()
@@ -29,7 +30,7 @@ class CameraProjectionTool extends Tool
     }
     else
     {
-      application.activateCamera(application.perspectiveCamera);      
+      application.activateCamera(application.perspectiveCamera);
     }
   }
 }

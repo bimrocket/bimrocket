@@ -16,9 +16,10 @@ class VisibilityTool extends Tool
     this.help = "tool.visibility.help";
     this.className = "visibility";
 
-    this.immediate = true;
     this.visible = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

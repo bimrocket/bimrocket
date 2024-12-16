@@ -27,6 +27,7 @@ class RevolveTool extends Tool
     this.className = "revolve";
     this.angleStep = 1;
     this.setOptions(options);
+    application.addTool(this);
 
     this.stage = 0;
     this.solid = null;

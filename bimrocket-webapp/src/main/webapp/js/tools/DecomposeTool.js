@@ -17,8 +17,9 @@ class DecomposeTool extends Tool
     this.label = "tool.decompose.label";
     this.help = "tool.decompose.help";
     this.className = "decompose";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

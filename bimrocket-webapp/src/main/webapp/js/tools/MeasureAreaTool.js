@@ -19,12 +19,7 @@ class MeasureAreaTool extends Tool
     this.label = "tool.measure_area.label";
     this.className = "measure_area";
     this.setOptions(options);
-
-    this.vertices = []; // Vector3[]
-    this.plane = null; // THREE.Plane
-    this.line = null; // THREE.Line
-    this.points = null; // THREE.Points
-    this.mesh = null; // THREE.Mesh
+    application.addTool(this);
 
     this.lineMaterial = new THREE.LineBasicMaterial(
       { linewidth : 2, color : new THREE.Color(0x0000ff), opacity : 1,
@@ -41,6 +36,12 @@ class MeasureAreaTool extends Tool
       polygonOffset : true,
       polygonOffsetFactor : -0.1
     });
+
+    this.vertices = []; // Vector3[]
+    this.plane = null; // THREE.Plane
+    this.line = null; // THREE.Line
+    this.points = null; // THREE.Points
+    this.mesh = null; // THREE.Mesh
 
     const manager = application.loadingManager;
     const textureLoader = new THREE.TextureLoader(manager);

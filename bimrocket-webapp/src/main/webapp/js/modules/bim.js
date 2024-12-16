@@ -54,14 +54,6 @@ export function load(application)
   const bsddTool = new BSDDTool(application);
   const bimDeltaTool = new BIMDeltaTool(application);
 
-  application.addTool(bimInventoryTool);
-  application.addTool(bimLayoutTool);
-  application.addTool(bimInspectorTool);
-  application.addTool(ifcDBTool);
-  application.addTool(bcfTool);
-  application.addTool(bsddTool);
-  application.addTool(bimDeltaTool);
-
   // create menus
   const menuBar = application.menuBar;
 

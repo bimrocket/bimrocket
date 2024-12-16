@@ -14,8 +14,9 @@ class RebuildTool extends Tool
     this.name = "rebuild";
     this.label = "tool.rebuild.label";
     this.className = "rebuild";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

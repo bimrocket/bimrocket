@@ -16,8 +16,9 @@ class InspectorTool extends Tool
     this.label = "tool.inspector.label";
     this.help = "tool.inspector.help";
     this.className = "inspector";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.panel = new Inspector(this.application);
     application.panelManager.addPanel(this.panel);

@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Tree } from "../ui/Tree.js";
 import { Panel } from "../ui/Panel.js";
+import { TabbedPane } from "../ui/TabbedPane.js";
 import { InputDialog } from "../ui/InputDialog.js";
 import { FileExplorer } from "../ui/FileExplorer.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
@@ -27,6 +28,7 @@ class BIMDeltaTool extends Tool
     this.className = "bim_delta";
     this.decimals = 6;
     this.setOptions(options);
+    application.addTool(this);
 
     const panel = new FileExplorer(application);
     this.panel = panel;

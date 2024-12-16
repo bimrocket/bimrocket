@@ -18,6 +18,7 @@ class BSDDTool extends Tool
     this.className = "bsdd";
     this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
 
     this.panel = new BSDDPanel(this.application);
     application.panelManager.addPanel(this.panel);

@@ -21,6 +21,7 @@ class PaintTool extends Tool
     this.label = "tool.paint.label";
     this.className = "paint";
     this.setOptions(options);
+    application.addTool(this);
 
     this.createPanel();
 

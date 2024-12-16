@@ -23,6 +23,7 @@ class MoveTool extends TransformationTool
     this.snapDistance = 0.1;
     this.snapPercent = 0.3;
     this.setOptions(options);
+    application.addTool(this);
 
     // internals
     this.anchorPointWorld = new THREE.Vector3();

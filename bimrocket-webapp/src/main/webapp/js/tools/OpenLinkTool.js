@@ -14,8 +14,9 @@ class OpenLinkTool extends Tool
     this.name = "open_link";
     this.label = "tool.open_link.label";
     this.className = "open_link";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.url = options.url;
     this.target = options.target || null;

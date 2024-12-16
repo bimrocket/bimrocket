@@ -22,8 +22,9 @@ class BooleanOperationTool extends Tool
     this.className = "boolean_operation";
     this.operation = BooleanOperator.SUBTRACT;
     this.keepParent = true;
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.material = new THREE.MeshPhongMaterial(
       {color : 0x4040ff, side : THREE.DoubleSide});

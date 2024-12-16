@@ -21,6 +21,7 @@ class SelectByPropertyTool extends Tool
     this.help = "tool.select_by_property.help";
     this.className = "select_by_property";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
 
     this.dialog = new PropertySelectorDialog(this.application,

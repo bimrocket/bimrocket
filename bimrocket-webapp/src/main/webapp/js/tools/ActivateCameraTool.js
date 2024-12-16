@@ -17,8 +17,9 @@ class ActivateCameraTool extends Tool
     this.label = "tool.activate_camera.label";
     this.help = "tool.activate_camera.help";
     this.className = "activate_camera";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

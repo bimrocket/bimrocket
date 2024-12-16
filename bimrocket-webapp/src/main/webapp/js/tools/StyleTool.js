@@ -16,10 +16,11 @@ class StyleTool extends Tool
     this.help = "tool.style.help";
     this.className = "style";
 
-    this.immediate = true;
     this.edgesVisible = true;
     this.facesVisible = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

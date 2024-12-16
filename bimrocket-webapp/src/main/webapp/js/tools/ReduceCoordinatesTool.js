@@ -17,6 +17,7 @@ class ReduceCoordinatesTool extends Tool
     this.label = "tool.reduce_coordinates.label";
     this.className = "reduce_coordinates";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
   }
 

@@ -17,7 +17,6 @@ class AutoOrbitTool extends Tool
     this.label = "tool.auto_orbit.label";
     this.help = "tool.auto_orbit.help";
     this.className = "auto_orbit";
-    this.setOptions(options);
 
     this.theta = 0.8;
     this.phi = 0.1;
@@ -28,6 +27,9 @@ class AutoOrbitTool extends Tool
 
     this.minDistance = 0;
     this.maxDistance = Infinity;
+
+    this.setOptions(options);
+    application.addTool(this);
 
     // internals
     this.vector = new THREE.Vector3();

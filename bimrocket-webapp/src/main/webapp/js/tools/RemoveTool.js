@@ -15,8 +15,9 @@ class RemoveTool extends Tool
     this.label = "tool.remove.label";
     this.help = "tool.remove.help";
     this.className = "remove";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

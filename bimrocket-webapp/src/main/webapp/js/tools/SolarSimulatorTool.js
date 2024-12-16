@@ -20,6 +20,7 @@ class SolarSimulatorTool extends Tool
     this.label = "tool.solar_simulator.label";
     this.className = "solar_simulator";
     this.setOptions(options);
+    application.addTool(this);
 
     this.target = new THREE.Object3D();
     this.target.name = "target";

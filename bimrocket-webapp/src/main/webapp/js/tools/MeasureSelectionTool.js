@@ -17,7 +17,7 @@ class MeasureSelectionTool extends Tool
     this.label = "tool.measure_selection.label";
     this.className = "measure_selection";
     this.setOptions(options);
-
+    application.addTool(this);
     this.immediate = true;
   }
 

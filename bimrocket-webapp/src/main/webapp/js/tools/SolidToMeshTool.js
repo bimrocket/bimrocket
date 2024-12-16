@@ -20,6 +20,7 @@ class SolidToMeshTool extends Tool
     this.help = "tool.solid_to_mesh.help";
     this.className = "solid_to_mesh";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
   }
 

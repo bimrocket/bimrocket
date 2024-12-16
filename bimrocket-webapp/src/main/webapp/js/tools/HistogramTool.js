@@ -18,9 +18,10 @@ class HistogramTool extends Tool
     this.name = "histogram";
     this.label = "tool.histogram.label";
     this.className = "histogram";
-    this.immediate = true;
     this.materialCount = 50;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.TRANSPARENT_MATERIAL =
       new THREE.MeshLambertMaterial({ transparent : true, opacity: 0.3 });

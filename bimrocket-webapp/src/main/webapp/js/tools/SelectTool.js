@@ -8,6 +8,7 @@ import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { Application } from "../ui/Application.js";
 import { I18N } from "../i18n/I18N.js";
+import * as THREE from "three";
 
 class SelectTool extends Tool
 {
@@ -22,6 +23,7 @@ class SelectTool extends Tool
     this.touchPointerOffsetX = -40;
     this.touchPointerOffsetY = -40;
     this.setOptions(options);
+    application.addTool(this);
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);

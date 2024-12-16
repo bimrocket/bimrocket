@@ -22,6 +22,7 @@ class BIMInspectorTool extends Tool
     this.help = "bim|tool.bim_inspector.help";
     this.className = "bim_inspector";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
 
     this.panel = new BIMInspectorPanel(this.application);

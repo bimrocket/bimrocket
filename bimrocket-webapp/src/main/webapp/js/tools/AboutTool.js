@@ -18,7 +18,7 @@ class AboutTool extends Tool
     this.label = "tool.about.label";
     this.className = "about";
     this.setOptions(options);
-
+    application.addTool(this);
     this.immediate = true;
   }
 

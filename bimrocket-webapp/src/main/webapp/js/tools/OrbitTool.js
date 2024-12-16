@@ -45,6 +45,7 @@ class OrbitTool extends Tool
     this.selectionEnabled = true;
 
     this.setOptions(options);
+    application.addTool(this);
 
     this.updateCamera = true;
 

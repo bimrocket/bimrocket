@@ -14,8 +14,9 @@ class StopControllersTool extends Tool
     this.name = "stop_controllers";
     this.label = "tool.stop_controllers.label";
     this.className = "stop_controllers";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

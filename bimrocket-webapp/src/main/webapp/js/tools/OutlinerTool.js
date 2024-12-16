@@ -16,8 +16,9 @@ class OutlinerTool extends Tool
     this.label = "tool.outliner.label";
     this.help = "tool.outliner.help";
     this.className = "outliner";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.panel = new Outliner(this.application);
     application.panelManager.addPanel(this.panel);

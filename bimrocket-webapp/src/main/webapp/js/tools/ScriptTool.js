@@ -31,6 +31,7 @@ class ScriptTool extends Tool
     this.label = "tool.script.label";
     this.className = "script";
     this.setOptions(options);
+    application.addTool(this);
 
     const panel = new FileExplorer(application, false);
     this.panel = panel;

@@ -22,6 +22,7 @@ class RotateTool extends TransformationTool
     this.label = "tool.rotate.label";
     this.className = "rotate";
     this.setOptions(options);
+    application.addTool(this);
 
     // internals
     this.firstPointWorld = new THREE.Vector3();

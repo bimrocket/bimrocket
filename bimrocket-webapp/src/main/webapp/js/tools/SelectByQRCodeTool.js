@@ -18,8 +18,9 @@ class SelectByQRCodeTool extends Tool
     this.name = "select_by_qrcode";
     this.label = "tool.select_by_qrcode.label";
     this.className = "select_by_qrcode";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.dialog = this.createDialog();
   }

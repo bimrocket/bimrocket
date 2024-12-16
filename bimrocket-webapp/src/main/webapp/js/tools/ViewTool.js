@@ -16,11 +16,12 @@ class ViewTool extends Tool
     this.name = "view";
     this.label = "tool.view.label";
     this.className = "view";
-    this.immediate = true;
     this.x = 0; // degrees
     this.y = 0; // degrees
     this.z = 0; // degrees
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

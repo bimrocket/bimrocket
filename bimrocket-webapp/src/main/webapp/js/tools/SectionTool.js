@@ -22,6 +22,7 @@ class SectionTool extends Tool
     this.label = "tool.section.label";
     this.className = "section";
     this.setOptions(options);
+    application.addTool(this);
 
     // section plane parameters
     this.basePoint = new THREE.Vector3(0, 0, 0);

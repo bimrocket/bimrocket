@@ -21,6 +21,7 @@ class MergeGeometriesTool extends Tool
     this.help = "tool.merge_geometries.help";
     this.className = "merge_geometries";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
   }
 

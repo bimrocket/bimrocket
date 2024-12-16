@@ -6,6 +6,7 @@
 
 import { IFC } from "../io/ifc/IFC.js";
 import { IFCVoider } from "../builders/IFCVoider.js";
+import { Solid } from "../core/Solid.js";
 import { ObjectUtils } from "./ObjectUtils.js";
 import * as THREE from "three";
 

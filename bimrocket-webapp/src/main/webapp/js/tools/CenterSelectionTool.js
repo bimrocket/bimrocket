@@ -17,11 +17,10 @@ class CenterSelectionTool extends Tool
     this.label = "tool.center_selection.label";
     this.help = "tool.center_selection.help";
     this.className = "center_selection";
-    this.setOptions(options);
-
-    this.immediate = true;
     this.focusOnSelection = false;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

@@ -26,6 +26,7 @@ class PlaceTool extends Tool
     this.help = "tool.place.help";
     this.className = "place";
     this.setOptions(options);
+    application.addTool(this);
 
     this.stage = 0;
     this.snap = null;

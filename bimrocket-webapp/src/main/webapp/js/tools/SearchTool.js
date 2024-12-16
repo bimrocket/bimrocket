@@ -22,6 +22,7 @@ class SearchTool extends Tool
     this.immediate = true;
     this.materialCount = 50;
     this.setOptions(options);
+    application.addTool(this);
 
     this.createPanel();
   }

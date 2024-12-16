@@ -25,6 +25,7 @@ class ExtrudeTool extends Tool
     this.className = "extrude";
     this.depthStep = 0.1;
     this.setOptions(options);
+    application.addTool(this);
 
     this.stage = 0;
     this.solid = null;

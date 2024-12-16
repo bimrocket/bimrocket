@@ -17,8 +17,9 @@ class BCFTool extends Tool
     this.label = "bim|tool.bcf.label";
     this.help = "bim|tool.bcf.help";
     this.className = "bcf";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.panel = new BCFPanel(this.application);
     application.panelManager.addPanel(this.panel);

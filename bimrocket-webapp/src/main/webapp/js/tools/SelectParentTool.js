@@ -14,19 +14,20 @@ class SelectParentTool extends Tool
     this.name = "select_parent";
     this.label = "tool.select_parent.label";
     this.className = "select_parent";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()
   {
     const selection = this.application.selection;
     let objects = selection.objects;
-    
+
     objects = objects.map(object => object.parent).filter(object => object);
-    
+
     selection.set(...objects);
-  }  
+  }
 }
 
 export { SelectParentTool };

@@ -16,8 +16,9 @@ class StatisticsTool extends Tool
     this.label = "tool.statistics.label";
     this.help = "tool.statistics.help";
     this.className = "statistics";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
 
     this.panel = new Statistics(this.application);
     application.panelManager.addPanel(this.panel);

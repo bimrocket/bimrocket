@@ -20,6 +20,7 @@ class BIMInventoryTool extends Tool
     this.help = "bim|tool.bim_inventory.help";
     this.className = "bim_inventory";
     this.setOptions(options);
+    application.addTool(this);
 
     this.types = {};
     this.classifications = {};

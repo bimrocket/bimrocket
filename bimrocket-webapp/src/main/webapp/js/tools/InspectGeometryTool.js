@@ -22,11 +22,7 @@ class InspectGeometryTool extends Tool
     this.name = "inspect_geometry";
     this.label = "tool.inspect_geometry.label";
     this.className = "inspect_geometry";
-    this.immediate = true;
 
-    this.object = null;
-    this.selectedNode = null;
-    this.highlightGroup = null;
     this.lineMaterial = new THREE.LineBasicMaterial(
       { color : 0, linewidth : 1.5, depthTest : false, transparent : true });
     this.pointsMaterial = new THREE.PointsMaterial(
@@ -36,9 +32,14 @@ class InspectGeometryTool extends Tool
       { color : 0x000080, size: 8, sizeAttenuation : false, depthTest : false,
         transparent : true });
 
-    this.sceneUuid = null;
-
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
+
+    this.sceneUuid = null;
+    this.object = null;
+    this.selectedNode = null;
+    this.highlightGroup = null;
 
     this.createPanel();
 

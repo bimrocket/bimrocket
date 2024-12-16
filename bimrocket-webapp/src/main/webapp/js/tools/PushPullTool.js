@@ -17,6 +17,7 @@ class PushPullTool extends Tool
     this.help = "tool.push.help";
     this.className = "pushpull";
     this.setOptions(options);
+    application.addTool(this);
 
     this._onPointerUp = this.onPointerUp.bind(this);
     this.createPanel();

@@ -6,6 +6,7 @@
 
 import { Action } from "../ui/Action.js";
 import { I18N } from "../i18n/I18N.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import * as THREE from "three";
 
 class Tool extends Action

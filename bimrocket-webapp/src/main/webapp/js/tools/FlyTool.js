@@ -115,6 +115,7 @@ class FlyTool extends Tool
     this.help = "tool.fly.help";
     this.className = "fly";
     this.setOptions(options);
+    application.addTool(this);
 
     this.linearVelocity = 2; // meters/s
     this.angularVelocity = THREE.MathUtils.degToRad(20); // radians/s

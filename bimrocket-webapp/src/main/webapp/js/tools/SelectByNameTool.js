@@ -15,21 +15,22 @@ class SelectByNameTool extends Tool
     this.label = "tool.select_by_name.label";
     this.className = "select_by_name";
     this.propertyName = "Representation";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()
   {
     const selection = this.application.selection;
     let objects = selection.objects;
-    
+
     objects = objects.map(object => this.getNamedChild(object))
       .filter(object => object);
-    
+
     selection.set(...objects);
   }
-  
+
   getNamedChild(object)
   {
     const children = object.children;

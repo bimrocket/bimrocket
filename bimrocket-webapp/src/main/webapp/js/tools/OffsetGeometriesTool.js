@@ -20,7 +20,9 @@ class OffsetGeometriesTool extends Tool
     this.label = "tool.offset_geometries.label";
     this.className = "offset_geometries";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
+    
     this.geometryMap = new Map();
     this.matrix = new THREE.Matrix4();
   }

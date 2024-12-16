@@ -14,8 +14,9 @@ class StartControllersTool extends Tool
     this.name = "start_controllers";
     this.label = "tool.start_controllers.label";
     this.className = "start_controllers";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

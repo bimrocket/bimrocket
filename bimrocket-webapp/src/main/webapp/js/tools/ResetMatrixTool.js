@@ -15,8 +15,9 @@ class ResetMatrixTool extends Tool
     this.name = "reset_matrix";
     this.label = "tool.reset_matrix.label";
     this.className = "reset_matrix";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

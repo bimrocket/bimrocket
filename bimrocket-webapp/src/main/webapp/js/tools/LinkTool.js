@@ -20,6 +20,7 @@ class LinkTool extends Tool
     this.help = "tool.link.help";
     this.className = "link";
     this.setOptions(options);
+    application.addTool(this);
     this.immediate = true;
 
     this.sourceObject = null;

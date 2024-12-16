@@ -15,9 +15,10 @@ class CopyTool extends Tool
     this.label = "tool.copy.label";
     this.help = "tool.copy.help";
     this.className = "copy";
-    this.immediate = true;
     this.dynamic = false;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

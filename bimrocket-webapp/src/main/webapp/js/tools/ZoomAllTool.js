@@ -16,8 +16,9 @@ class ZoomAllTool extends Tool
     this.label = "tool.zoom_all.label";
     this.help = "tool.zoom_all.help";
     this.className = "zoom_all";
-    this.immediate = true;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

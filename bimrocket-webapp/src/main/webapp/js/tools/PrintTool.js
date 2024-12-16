@@ -24,6 +24,7 @@ class PrintTool extends Tool
     this.help = "tool.print.help";
     this.className = "print";
     this.setOptions(options);
+    application.addTool(this);
     this.createPanel();
   }
 

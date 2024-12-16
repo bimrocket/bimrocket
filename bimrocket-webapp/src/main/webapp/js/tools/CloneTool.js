@@ -17,9 +17,10 @@ class CloneTool extends Tool
     this.label = "tool.clone.label";
     this.help = "tool.clone.help";
     this.className = "clone";
-    this.immediate = true;
     this.dynamic = false;
     this.setOptions(options);
+    application.addTool(this);
+    this.immediate = true;
   }
 
   execute()

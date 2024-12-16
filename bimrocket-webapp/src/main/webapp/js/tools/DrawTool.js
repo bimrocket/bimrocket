@@ -24,6 +24,7 @@ class DrawTool extends Tool
     this.help = "tool.draw.help";
     this.className = "draw";
     this.setOptions(options);
+    application.addTool(this);
 
     this.mode = 0; // 0: add, 1: edit
     this.vertices = []; // Vector3[]

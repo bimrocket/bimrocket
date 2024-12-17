@@ -114,8 +114,6 @@ class FlyTool extends Tool
     this.label = "tool.fly.label";
     this.help = "tool.fly.help";
     this.className = "fly";
-    this.setOptions(options);
-    application.addTool(this);
 
     this.linearVelocity = 2; // meters/s
     this.angularVelocity = THREE.MathUtils.degToRad(20); // radians/s
@@ -123,6 +121,9 @@ class FlyTool extends Tool
     this.angularAccel = THREE.MathUtils.degToRad(50); // radians/s2
     this.linearDecel = 2; // meters/s2
     this.angularDecel = THREE.MathUtils.degToRad(20); // radians/s2
+
+    this.setOptions(options);
+    application.addTool(this);
 
     this.yaw = 0; // radians (0: north)
     this.pitch = 0; // radians

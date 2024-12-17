@@ -34,18 +34,21 @@ class AddObjectTool extends Tool
     this.help = "tool.add_object.help";
     this.className = "add_object";
 
+    this.objectType = null;
+    this.builderClass = null;
+
     this.setOptions(options);
     application.addTool(this);
     this.immediate = true;
 
-    this.objectType = null;
-    this.builderClass = null;
     this.counter = 0;
   }
 
   execute()
   {
     const objectType = this.objectType || "Group";
+    console.info("objectType " + objectType);
+    
     let object;
 
     switch (objectType)

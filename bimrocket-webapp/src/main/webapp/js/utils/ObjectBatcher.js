@@ -12,21 +12,32 @@ class ObjectBatcher
 {
   constructor()
   {
-    this.blocks = new Map(); // Material uuid => Block
-    this.lines = [];
-    this.vector = new THREE.Vector3();
+    this.maxLinesLength = 3 * 1024 * 1024;
+    this._blocks = new Map(); // Material uuid => Block
+    this._lines = [];
+    this._vector = new THREE.Vector3();
   }
 
   batch(object)
   {
-    this.blocks.clear();
-    this.lines = [];
+    this._blocks.clear();
+    this._lines = [];
 
     this.collectStats(object);
 
-    this.addGeometry(object, object.matrix);
+    const group = new THREE.Group();
+    group.name = "batch";
 
-    return this.createGroup();
+    this.addGeometry(object, group);
+    
+    if (this._lines.length > 0)
+    {
+      this.addLineSegments(group);
+    }
+
+    group.updateMatrix();
+    
+    return group;
   }
 
   collectStats(object)
@@ -73,11 +84,11 @@ class ObjectBatcher
     }
   }
 
-  addGeometry(object)
+  addGeometry(object, group)
   {
     if (!object.visible) return;
 
-    const vector = this.vector;
+    const vector = this._vector;
 
     if (object instanceof THREE.Mesh)
     {
@@ -99,6 +110,7 @@ class ObjectBatcher
             block.mesh.castShadow = block.castShadow;
             block.mesh.receiveShadow = block.receiveShadow;
             ObjectUtils.setSelectionHighlight(block.mesh, ObjectUtils.HIGHLIGHT_NONE);
+            group.add(block.mesh);
           }
 
           // add geometry
@@ -125,7 +137,11 @@ class ObjectBatcher
         {
           vector.set(array[i], array[i + 1], array[i + 2]);
           vector.applyMatrix4(object.matrixWorld);
-          this.lines.push(vector.x, vector.y, vector.z);
+          this._lines.push(vector.x, vector.y, vector.z);
+        }
+        if (this._lines.length > this.maxLinesLength)
+        {
+          this.addLineSegments(group);
         }
       }
     }
@@ -133,44 +149,28 @@ class ObjectBatcher
     {
       for (let child of object.children)
       {
-        this.addGeometry(child);
+        this.addGeometry(child, group);
       }
     }
   }
 
-  createGroup()
+  addLineSegments(group)
   {
-    const group = new THREE.Group();
-    group.name = "batch";
-
-    /* meshes */
-    for (let material of this.blocks.keys())
-    {
-      let block = this.blocks.get(material);
-      group.add(block.mesh);
-    }
-    group.updateMatrix();
-
-
-    /* lines */
     const linesGeometry = new THREE.BufferGeometry();
-
     linesGeometry.setAttribute("position",
-      new THREE.Float32BufferAttribute(this.lines, 3));
+      new THREE.Float32BufferAttribute(this._lines, 3));
 
-    const lines = new THREE.LineSegments(linesGeometry, Solid.EdgeMaterial);
-    lines.name = "edges";
-    lines.raycast = function(){};
-    ObjectUtils.setSelectionHighlight(lines, ObjectUtils.HIGHLIGHT_NONE);
-
-    group.add(lines);
-
-    return group;
+    const lineSegments = new THREE.LineSegments(linesGeometry, Solid.EdgeMaterial);
+    lineSegments.name = "edges";
+    lineSegments.raycast = function(){};
+    ObjectUtils.setSelectionHighlight(lineSegments, ObjectUtils.HIGHLIGHT_NONE);      
+    group.add(lineSegments);  
+    this._lines = [];
   }
 
   getBlock(material, create = false)
   {
-    let block = this.blocks.get(material);
+    let block = this._blocks.get(material);
     if (block === undefined && create)
     {
       block = {
@@ -182,7 +182,7 @@ class ObjectBatcher
         geometries : new Map(), // BufferGeometry uuid => id
         mesh: null // BatchedMesh
       };
-      this.blocks.set(material, block);
+      this._blocks.set(material, block);
     }
     return block;
   }

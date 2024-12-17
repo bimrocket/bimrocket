@@ -9,6 +9,7 @@ import { Tree } from "../ui/Tree.js";
 import { Panel } from "../ui/Panel.js";
 import { TabbedPane } from "../ui/TabbedPane.js";
 import { InputDialog } from "../ui/InputDialog.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 import { FileExplorer } from "../ui/FileExplorer.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Metadata, Result } from "../io/FileService.js";

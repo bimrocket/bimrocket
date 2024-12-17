@@ -5,7 +5,6 @@
  */
 
 import { CSS2DObject } from "../renderers/CSS2DRenderer.js";
-import * as THREE from "three";
 
 class Text2D extends CSS2DObject
 {

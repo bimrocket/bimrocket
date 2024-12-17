@@ -8,7 +8,6 @@ import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
 import { ObjectBuilder } from "./ObjectBuilder.js";
-import * as THREE from "three";
 
 class Cloner extends ObjectBuilder
 {

@@ -4,7 +4,6 @@
  * @author realor
  */
 
-import * as THREE from "three";
 import { Tool } from "./Tool.js";
 import { Solid } from "../core/Solid.js";
 import { BSP } from "../core/BSP.js";

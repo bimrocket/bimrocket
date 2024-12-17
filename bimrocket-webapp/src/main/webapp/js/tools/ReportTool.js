@@ -23,7 +23,6 @@ import { Profile } from "../core/Profile.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { Metadata, Result } from "../io/FileService.js";
 import { I18N } from "../i18n/I18N.js";
-import * as THREE from "three";
 
 class ReportTool extends Tool
 {

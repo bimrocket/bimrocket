@@ -9,7 +9,6 @@ import { Solid } from "../core/Solid.js";
 import { GeometryUtils } from "../utils/GeometryUtils.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { Controls } from "../ui/Controls.js";
-import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 

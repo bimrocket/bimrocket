@@ -4,9 +4,9 @@
  * @author realor
  */
 
-import * as THREE from "three";
 import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 import { Toast } from "../ui/Toast.js";
 import { Tool } from "./Tool.js";
 

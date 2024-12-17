@@ -6,7 +6,6 @@
 
 import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Tool } from "../tools/Tool.js";
-import * as THREE from "three";
 
 class ReduceCoordinatesTool extends Tool
 {

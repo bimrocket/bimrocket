@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Cloner } from "../builders/Cloner.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
+import * as THREE from "three";
 
 class CloneTool extends Tool
 {

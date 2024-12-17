@@ -5,7 +5,6 @@
  */
 
 import { ObjectBuilder } from "./ObjectBuilder.js";
-import * as THREE from "three";
 
 class CordBuilder extends ObjectBuilder
 {

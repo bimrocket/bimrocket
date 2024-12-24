@@ -105,7 +105,7 @@ class Application
     console.info("BIMROCKET " + Application.VERSION);
     console.info("Environment", Environment);
 
-    this.params = WebUtils.getQueryParams();
+    this.params = new URLSearchParams(document.location.search);
 
     this.loadingManager = new THREE.LoadingManager();
     const loadingManager = this.loadingManager;
@@ -135,27 +135,6 @@ class Application
     const bigLogoImage = logoPanelElem.querySelector("img");
     bigLogoImage.title = Application.NAME;
     bigLogoImage.alt = Application.NAME;
-
-    const splash = this.params["splash"];
-    if (splash)
-    {
-      const splashPanelElem = document.createElement("div");
-      this.splashPanel = splashPanelElem;
-      splashPanelElem.className = "splash_panel";
-      element.appendChild(splashPanelElem);
-
-      if (splash.startsWith("url:"))
-      {
-        this.loadSplashContent(splash.substring(4), splashPanelElem);
-      }
-      else
-      {
-        const splashContentElem = document.createElement("div");
-        splashContentElem.textContent = splash;
-        splashContentElem.className = "fade";
-        splashPanelElem.appendChild(splashContentElem);
-      }
-    }
 
     const headerElem = document.createElement("header");
     this.headerElem = headerElem;
@@ -1910,7 +1889,7 @@ class Application
 
     this.loadedModules = [];
 
-    const modulesParam = this.params.modules;
+    const modulesParam = this.params.get("modules");
     if (modulesParam)
     {
       modulePaths = modulesParam.split(",");
@@ -1997,13 +1976,6 @@ class Application
     this.onResize();
   }
 
-  async loadSplashContent(url, element)
-  {
-    const response = await fetch(url);
-    const content = await response.text();
-    element.innerHTML = content;
-  }
-
   fullscreen()
   {
     if (document.body.requestFullscreen)
@@ -2021,14 +1993,8 @@ class Application
   loadModelFromUrl()
   {
     const params = this.params;
-    const url = params["url"];
-    if (url === undefined) return;
-
-    const splash = this.params["splash"];
-    if (splash)
-    {
-      this.progressBar.element.classList.add("splash");
-    }
+    const url = params.get("url");
+    if (!url) return;
 
     const application = this;
     const intent =
@@ -2050,14 +2016,12 @@ class Application
         application.initControllers(object);
         application.notifyObjectsChanged(baseObject, this);
 
-        application.progressBar.element.classList.remove("splash");
         application.progressBar.visible = false;
 
         application.initTasks();
       },
       onError : error =>
       {
-        application.progressBar.element.classList.remove("splash");
         application.progressBar.visible = false;
         MessageDialog.create("ERROR", error)
           .setClassName("error")
@@ -2095,7 +2059,7 @@ class Application
   initTasks()
   {
     const params = this.params;
-    const toolName = params["tool"];
+    const toolName = params.get("tool");
     if (toolName)
     {
       let tool = this.tools[toolName];

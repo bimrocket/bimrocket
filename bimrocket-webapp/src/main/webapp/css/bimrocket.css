@@ -113,46 +113,6 @@ body input, textarea, table *
   animation-fill-mode: forwards;
 }
 
-.splash_panel
-{
-  z-index: 20000;
-  background: black;
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:0;
-  right:0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  flex-direction: column;
-  color: white;
-}
-
-.splash_panel > div.fade
-{
-  color: white;
-  font-size: 20px;
-  animation-name: text_fade;
-  animation-duration: 5s;
-  animation-iteration-count: infinite;
-}
-
-.splash_panel.show
-{
-  animation: fade_in_logo;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
-}
-
-.splash_panel.hide
-{
-  animation: fade_out_logo;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
-}
-
 header > a.logo_link
 {
   background-color: #B00000;

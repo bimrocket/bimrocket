@@ -60,36 +60,6 @@ class WebUtils
     }
   }
 
-  static getQueryParams()
-  {
-    var queryString = {};
-    var query = window.location.search.substring(1);
-    var pairs = query.split("&");
-    for (var i = 0; i < pairs.length; i++)
-    {
-      var index = pairs[i].indexOf("=");
-      if (index !== -1)
-      {
-        var name = decodeURIComponent(pairs[i].substring(0, index));
-        var value = decodeURIComponent(pairs[i].substring(index + 1));
-        if (typeof queryString[name] === "undefined")
-        {
-          queryString[name] = value;
-        }
-        else if (typeof queryString[name] === "string")
-        {
-          var arr = [queryString[name], value];
-          queryString[name] = arr;
-        }
-        else
-        {
-          queryString[name].push(value);
-        }
-      }
-    }
-    return queryString;
-  }
-
   static toHTML(text)
   {
     var html = "";

@@ -1,0 +1,96 @@
+# bimrocket-server config
+
+# config locations
+smallrye:
+  config:
+    locations:
+      - ${user.dir}/config/bimrocket-server.yaml
+
+# service config
+services:
+
+  # security service
+  security:
+    adminPassword: bimrocket
+    passwordPattern: '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_\-])(?=\S+$).{8,}$'
+    authorizationCacheTimeout: 300
+    userCacheTimeout: 300
+    roleCacheTimeout: 300
+    ldap:
+      enabled: false
+      url: ldap://dc1.santfeliu.local
+      domain: santfeliu.local
+      searchBase: DC=santfeliu,DC=local
+      adminUsername: admin
+      adminPassword: changeit
+    store:
+      class: org.bimrocket.service.security.store.SecurityOrientDaoStore
+      orient:
+        database: orientdb
+
+  # bcf service
+  bcf:
+    projectTemplate:
+    store:
+      class: org.bimrocket.service.bcf.store.BcfOrientDaoStore
+      orient:
+        database: orientdb
+    mail:
+      createTopic:
+        subject: '#{project.name}##{index}: #{title} [#{priority}]'
+        body: '#{description}'
+
+  # cloudfs service
+  cloudfs:
+    property: user.home
+    directory: cloudfs
+    directories:
+      - models
+      - scripts
+      - reports
+      - ifc_snapshots
+
+  # ifcdb service
+  ifcdb:
+    url: remote:localhost
+    username: root
+    password: orientdb
+
+  # print service
+  print:
+    property: user.home
+    directory: printsvc
+    title: 'Bimrocket print'
+    creator: 'Bimrocket PrintService'
+
+  # mail service
+  mail:
+    enabled: false
+    host: helios
+    port: 25
+    startTls: false
+    auth: false
+    username: none
+    password: none
+    from: 'admin@bimrocket.org'
+    contentType: 'text/plain;charset=ISO-8859-1'
+
+# database config
+databases:
+  orientdb:
+    url: remote:localhost/bimdb
+    username: root
+    password: orientdb
+
+# proxy config
+proxy:
+  validUrls:
+    - http://gis.santfeliu.cat/
+    - https://gis.santfeliu.cat/
+    - https://api.openai.com/
+    - https://api.bsdd.buildingsmart.org
+  aliases:
+    chatgpt:
+      url: https://api.openai.com/v1/chat/completions
+      ipFilter: ''
+      authorization: changeit

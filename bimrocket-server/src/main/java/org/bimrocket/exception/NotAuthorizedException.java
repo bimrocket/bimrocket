@@ -28,62 +28,23 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package org.bimrocket.exception;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class NotAuthorizedException extends SecurityException
 {
-  @JsonProperty("code")
-  private int code;
+  private static final long serialVersionUID = 1L;
 
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
+  public NotAuthorizedException()
   {
+    super("NOT_AUTHORIZED");
   }
 
-  public ApiError(int code, String message)
+  public NotAuthorizedException(String message)
   {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
+    super(message);
   }
 }

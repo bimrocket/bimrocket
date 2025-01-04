@@ -28,62 +28,60 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.dao.empty;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.bimrocket.dao.Dao;
 
 /**
  *
  * @author realor
+ * @param <E> the type managed by this DAO
  */
-public class ApiError
+public class EmptyDao<E> implements Dao<E>
 {
-  @JsonProperty("code")
-  private int code;
-
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
+  @Override
+  public List<E> select(Map<String, Object> filter, Collection<String> orderBy)
   {
-  }
-
-  public ApiError(int code, String message)
-  {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
+    return Collections.emptyList();
   }
 
   @Override
-  public String toString()
+  public Object select(String groupExpression, Map<String, Object> filter)
   {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
+    return null;
+  }
+
+  @Override
+  public E select(Object id)
+  {
+    return null;
+  }
+
+  @Override
+  public E insert(E entity)
+  {
+    return entity;
+  }
+
+  @Override
+  public E update(E entity)
+  {
+    return entity;
+  }
+
+  @Override
+  public boolean delete(Object id)
+  {
+    return false;
+  }
+
+  @Override
+  public int delete(Map<String, Object> filter)
+  {
+    return 0;
   }
 }

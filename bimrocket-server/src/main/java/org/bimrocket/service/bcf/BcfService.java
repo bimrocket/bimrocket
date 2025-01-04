@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,9 +30,11 @@
  */
 package org.bimrocket.service.bcf;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
-import jakarta.ws.rs.core.Application;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -50,33 +52,35 @@ import org.bimrocket.api.bcf.BcfTopic;
 import org.bimrocket.api.bcf.BcfViewpoint;
 import org.bimrocket.dao.Dao;
 import org.bimrocket.dao.DaoConnection;
-import org.bimrocket.dao.DaoConnectionFactory;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.odata.SimpleODataParser;
 import org.bimrocket.service.mail.MailService;
-import org.jvnet.hk2.annotations.Service;
 import java.util.logging.Logger;
 import org.apache.commons.text.StringSubstitutor;
 import static java.util.Arrays.asList;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import org.bimrocket.service.bcf.store.BcfDaoStore;
+import org.bimrocket.service.bcf.store.BcfEmptyDaoStore;
+import org.bimrocket.service.security.SecurityService;
+import org.eclipse.microprofile.config.Config;
 
 
 /**
  *
  * @author realor
  */
-@Service
+@ApplicationScoped
 public class BcfService
 {
-  static final String MAIL_CREATE_TOPIC_SUBJECT = "bcf.mail.createTopic.subject";
-  static final String MAIL_CREATE_TOPIC_MESSAGE = "bcf.mail.createTopic.message";
-
-  static final String PROJECT_TEMPLATE = "project_template";
-
-  static final Map<String, String> topicFieldMap = new HashMap<>();
-
   static final Logger LOGGER =
     Logger.getLogger(BcfService.class.getName());
+
+  static final String BASE = "services.bcf.";
+
+  static final Map<String, String> topicFieldMap = new ConcurrentHashMap<>();
 
   static
   {
@@ -89,19 +93,51 @@ public class BcfService
   }
 
   @Inject
-  ServletContext servletContext;
-
-  @Inject
-  Application application;
+  Config config;
 
   @Inject
   MailService mailService;
+
+  @Inject
+  SecurityService securityService;
+
+  BcfDaoStore daoStore;
+
+  @PostConstruct
+  public void init()
+  {
+    LOGGER.log(Level.INFO, "Init BcfService");
+
+    CDI<Object> cdi = CDI.current();
+
+    try
+    {
+      @SuppressWarnings("unchecked")
+      Class<BcfDaoStore> storeClass =
+        config.getValue(BASE + "store.class", Class.class);
+      daoStore = cdi.select(storeClass).get();
+    }
+    catch (Exception ex)
+    {
+      LOGGER.log(Level.SEVERE, "Invalid BcfDaoStore: {0}",
+        config.getOptionalValue(BASE + "store.class", String.class).orElse(null));
+      daoStore = new BcfEmptyDaoStore();
+    }
+    LOGGER.log(Level.INFO, "BcfDaoStore: {0}", daoStore.getClass());
+  }
+
+  @PreDestroy
+  public void destroy()
+  {
+    LOGGER.log(Level.INFO, "Destroying BcfService");
+    daoStore.close();
+  }
 
   /* Projects */
 
   public List<BcfProject> getProjects()
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> dao = conn.getDao(BcfProject.class);
       return dao.select(Collections.emptyMap(), asList("name"));
@@ -110,7 +146,7 @@ public class BcfService
 
   public BcfProject getProject(String projectId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> dao = conn.getDao(BcfProject.class);
       return dao.select(projectId);
@@ -120,7 +156,7 @@ public class BcfService
   public BcfProject updateProject(
     String projectId, BcfProject projectUpdate)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> dao = conn.getDao(BcfProject.class);
       BcfProject project = dao.select(projectId);
@@ -144,7 +180,7 @@ public class BcfService
 
   public BcfExtensions getExtensions(String projectId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
       BcfProject project = projectDao.select(projectId);
@@ -160,16 +196,19 @@ public class BcfService
       BcfExtensions extensions = dao.select(projectId);
       if (extensions == null)
       {
-        extensions = new BcfExtensions();
-        BcfExtensions template = dao.select(PROJECT_TEMPLATE);
-        if (template == null)
+        Optional<String> projectTemplateId =
+          config.getOptionalValue(BASE + "projectTemplateId", String.class);
+
+        if (projectTemplateId.isPresent())
         {
+          extensions = dao.select(projectTemplateId.get());
+        }
+        if (extensions == null)
+        {
+          extensions = new BcfExtensions();
           extensions.setDefaultValues();
         }
-        else
-        {
-          extensions = template;
-        }
+
         extensions.setProjectId(projectId);
         extensions = dao.insert(extensions);
       }
@@ -180,7 +219,7 @@ public class BcfService
   public BcfExtensions updateExtensions(
     String projectId, BcfExtensions extensionsUpdate)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
       BcfProject project = projectDao.select(projectId);
@@ -212,7 +251,7 @@ public class BcfService
   public List<BcfTopic> getTopics(String projectId,
     String odataFilter, String odataOrderBy)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       SimpleODataParser parser = new SimpleODataParser(topicFieldMap);
@@ -225,7 +264,7 @@ public class BcfService
 
   public BcfTopic getTopic(String projectId, String topicId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       return dao.select(topicId);
@@ -234,7 +273,11 @@ public class BcfService
 
   public BcfTopic createTopic(String projectId, BcfTopic topic)
   {
-    try (DaoConnection conn = getDaoConnection())
+    String userId = securityService.getCurrentUser().getId();
+    topic.setCreationAuthor(userId);
+    topic.setModifyAuthor(userId);
+
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getDao(BcfProject.class);
       BcfProject project = projectDao.select(projectId);
@@ -276,15 +319,15 @@ public class BcfService
         vars.put("priority", topic.getPriority());
         vars.put("description", topic.getDescription());
 
-        String subjectPattern =
-          servletContext.getInitParameter(MAIL_CREATE_TOPIC_SUBJECT);
+        String mailSubjectPattern =
+          config.getValue(BASE + "mail.createTopic.subject", String.class);
 
-        String messagePattern =
-          servletContext.getInitParameter(MAIL_CREATE_TOPIC_MESSAGE);
+        String mailBodyPattern =
+          config.getValue(BASE + "mail.createTopic.body", String.class);
 
-        StringSubstitutor substitutor = new StringSubstitutor(vars);
-        String subject = substitutor.replace(subjectPattern);
-        String message = substitutor.replace(messagePattern);
+        StringSubstitutor substitutor = new StringSubstitutor(vars, "#{", "}");
+        String subject = substitutor.replace(mailSubjectPattern);
+        String message = substitutor.replace(mailBodyPattern);
 
         mailService.asyncSendMail(null, topic.getAssignedTo(), subject,
           message, null);
@@ -296,7 +339,10 @@ public class BcfService
   public BcfTopic updateTopic(String projectId, String topicId,
     BcfTopic topicUpdate)
   {
-    try (DaoConnection conn = getDaoConnection())
+    String username = securityService.getCurrentUser().getId();
+    topicUpdate.setModifyAuthor(username);
+
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       BcfTopic topic = dao.select(topicId);
@@ -320,7 +366,7 @@ public class BcfService
 
   public void deleteTopic(String projectId, String topicId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfTopic> dao = conn.getDao(BcfTopic.class);
       dao.delete(topicId);
@@ -340,7 +386,7 @@ public class BcfService
 
   public List<BcfComment> getComments(String projectId, String topicId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       Map<String, Object> filter = new HashMap<>();
@@ -352,7 +398,7 @@ public class BcfService
   public BcfComment getComment(String projectId, String topicId,
     String commentId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       return dao.select(commentId);
@@ -362,7 +408,11 @@ public class BcfService
   public BcfComment createComment(String projectId, String topicId,
     BcfComment comment)
   {
-    try (DaoConnection conn = getDaoConnection())
+    String username = securityService.getCurrentUser().getId();
+    comment.setAuthor(username);
+    comment.setModifyAuthor(username);
+
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       comment.setId(UUID.randomUUID().toString());
@@ -377,7 +427,10 @@ public class BcfService
   public BcfComment updateComment(String projectId, String topicId,
     String commentId, BcfComment commentUpdate)
   {
-    try (DaoConnection conn = getDaoConnection())
+    String username = securityService.getCurrentUser().getId();
+    commentUpdate.setModifyAuthor(username);
+
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       BcfComment comment = dao.select(commentId);
@@ -395,7 +448,7 @@ public class BcfService
   public void deleteComment(String projectId, String topicId,
     String commentId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> dao = conn.getDao(BcfComment.class);
       dao.delete(commentId);
@@ -407,7 +460,7 @@ public class BcfService
   public List<BcfViewpoint> getViewpoints(
     String projectId, String topicId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       Map<String, Object> filter = new HashMap<>();
@@ -419,7 +472,7 @@ public class BcfService
   public BcfViewpoint getViewpoint(
     String projectId, String topicId, String viewpointId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       return dao.select(viewpointId);
@@ -429,7 +482,7 @@ public class BcfService
   public BcfViewpoint createViewpoint(
     String projectId, String topicId, BcfViewpoint viewpoint)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfTopic> topicDao = conn.getDao(BcfTopic.class);
       BcfTopic topic = topicDao.select(topicId);
@@ -449,7 +502,7 @@ public class BcfService
   public void deleteViewpoint(
     String projectId, String topicId, String viewpointId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       dao.delete(viewpointId);
@@ -459,7 +512,7 @@ public class BcfService
   public BcfSnapshot getViewpointSnapshot(
     String projectId, String topicId, String viewpointId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfViewpoint> dao = conn.getDao(BcfViewpoint.class);
       BcfViewpoint viewpoint = dao.select(viewpointId);
@@ -477,7 +530,7 @@ public class BcfService
   public List<BcfDocumentReference> getDocumentReferences(
     String projectId, String topicId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfDocumentReference> dao = conn.getDao(BcfDocumentReference.class);
       Map<String, Object> filter = new HashMap<>();
@@ -490,7 +543,7 @@ public class BcfService
   public BcfDocumentReference createDocumentReference(
     String projectId, String topicId, BcfDocumentReference documentReference)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       validate(documentReference);
       documentReference.setTopicId(topicId);
@@ -505,7 +558,7 @@ public class BcfService
     String projectId, String topicId, String documentReferenceId,
     BcfDocumentReference documentReference)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       validate(documentReference);
       documentReference.setTopicId(topicId);
@@ -532,7 +585,7 @@ public class BcfService
   public void deleteDocumentReference(
     String projectId, String topicId, String documentReferenceId)
   {
-    try (DaoConnection conn = getDaoConnection())
+    try (DaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfDocumentReference> dao = conn.getDao(BcfDocumentReference.class);
       dao.delete(documentReferenceId);
@@ -553,15 +606,6 @@ public class BcfService
 
     if (refs == 0)
       throw new InvalidRequestException("Must define document_guid or url");
-  }
-
-  private DaoConnection getDaoConnection()
-  {
-    DaoConnectionFactory daoFactory =
-      (DaoConnectionFactory)application.getProperties().get("bcfDao");
-    if (daoFactory == null) throw new RuntimeException("bcfDAO not found");
-
-    return daoFactory.getConnection();
   }
 
   private String getDateString()

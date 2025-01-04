@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,31 +28,39 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.security;
+package org.bimrocket.api.security;
 
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
  * @author realor
  */
-public interface UserStore
+public class ChangePassword
 {
-  public static final String ANONYMOUS_USER = "anonymous";
-  public static final String EVERYONE_ROLE = "EVERYONE";
-  public static final String AUTHENTICATED_ROLE = "AUTHENTICATED";
+  @JsonProperty("old_password")
+  String oldPassword;
 
-  public boolean validateCredential(String username, String password);
+  @JsonProperty("new_password")
+  String newPassword;
 
-  /**
-   * Gets the user roles.
-   *
-   * The returned set contains the user nominal role and the EVERYONE role.
-   * If the user is not anonymous the set will also contain the AUTHENTICATED
-   * role.
-   *
-   * @param username the username whose roles are to be obtained
-   * @return a Set containing the user roles
-   */
-  public Set<String> getRoles(String username);
+  public String getOldPassword()
+  {
+    return oldPassword;
+  }
+
+  public void setOldPassword(String oldPassword)
+  {
+    this.oldPassword = oldPassword;
+  }
+
+  public String getNewPassword()
+  {
+    return newPassword;
+  }
+
+  public void setNewPassword(String newPassword)
+  {
+    this.newPassword = newPassword;
+  }
 }

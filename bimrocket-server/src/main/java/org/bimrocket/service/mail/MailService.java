@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,6 +30,8 @@
  */
 package org.bimrocket.service.mail;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -39,54 +41,61 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.ServletContext;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jvnet.hk2.annotations.Service;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
  * @author realor
  */
-@Service
+@ApplicationScoped
 public class MailService
 {
+  static final Logger LOGGER =
+    Logger.getLogger(MailService.class.getName());
+
+  static final String BASE = "services.mail.";
+
   static final String SMTP_HOST = "mail.smtp.host";
   static final String SMTP_PORT = "mail.smtp.port";
   static final String SMTP_START_TLS = "mail.smtp.starttls.enable";
   static final String SMTP_AUTH = "mail.smtp.auth";
-  static final String SMTP_USERNAME = "mail.smtp.username";
-  static final String SMTP_PASSWORD = "mail.smtp.password";
-  static final String SMTP_FROM = "mail.smtp.from";
-  static final String SMTP_CONTENT_TYPE = "mail.smtp.contenttype";
-
-  static final Logger LOGGER =
-    Logger.getLogger(MailService.class.getName());
 
   @Inject
-  ServletContext servletContext;
+  Config config;
+
+  @PostConstruct
+  public void init()
+  {
+    LOGGER.log(Level.INFO, "Init MailService");
+
+    LOGGER.log(Level.INFO, "MailService enabled: {0}", isEnabled());
+  }
 
   public boolean isEnabled()
   {
-    return servletContext.getInitParameter(SMTP_HOST) != null;
+    return config.getValue(BASE + "enabled", Boolean.class);
   }
 
   public boolean sendMail(String from, String to, String subject,
     String body, String contentType)
   {
     Properties props = new Properties();
-    props.put(SMTP_HOST, getInitParameter(SMTP_HOST, "localhost"));
-    props.put(SMTP_PORT, getInitParameter(SMTP_PORT, "25"));
-    props.put(SMTP_START_TLS, getInitParameter(SMTP_START_TLS, "false"));
-    props.put(SMTP_AUTH, getInitParameter(SMTP_AUTH, "false"));
+    props.put(SMTP_HOST, config.getValue(BASE + "host", String.class));
+    props.put(SMTP_PORT, config.getValue(BASE + "port", String.class));
+    props.put(SMTP_START_TLS, config.getValue(BASE + "startTls", String.class));
+    props.put(SMTP_AUTH, config.getValue(BASE + "auth", String.class));
 
-    String username = servletContext.getInitParameter(SMTP_USERNAME);
-    String password = servletContext.getInitParameter(SMTP_PASSWORD);
+    String username = config.getValue(BASE + "username", String.class);
+    String password = config.getValue(BASE + "password", String.class);
+
     if (from == null)
-      from = servletContext.getInitParameter(SMTP_FROM);
+      from = config.getValue(BASE + "from", String.class);
+
     if (contentType == null)
-      contentType = servletContext.getInitParameter(SMTP_CONTENT_TYPE);
+      contentType = config.getValue(BASE + "contentType", String.class);
 
     try
     {
@@ -134,11 +143,5 @@ public class MailService
       sendMail(from, to, subject, body, contentType);
     });
     thread.start();
-  }
-
-  private String getInitParameter(String name, String defaultValue)
-  {
-    String value = servletContext.getInitParameter(name);
-    return value == null ? defaultValue : value;
   }
 }

@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,9 +30,10 @@
  */
 package org.bimrocket.api.proxy;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
-import jakarta.servlet.ServletContext;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -41,7 +42,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -58,17 +58,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.bimrocket.api.cloudfs.methods.MKCOL;
 import org.bimrocket.api.cloudfs.methods.PROPFIND;
+import org.bimrocket.api.security.User;
+import org.bimrocket.exception.AccessDeniedException;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
+import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.URIEncoder;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
@@ -78,9 +81,11 @@ import org.bimrocket.util.URIEncoder;
 @Tag(name = "Proxy", description = "HTTP Proxy service")
 public class ProxyEndpoint
 {
-  private static final Logger LOGGER = Logger.getLogger("Proxy");
+  static final Logger LOGGER = Logger.getLogger("Proxy");
 
-  private static final HashSet<String> ignoredHeaders = new HashSet<>();
+  static final String BASE = "proxy.";
+
+  static final HashSet<String> ignoredHeaders = new HashSet<>();
 
   static
   {
@@ -93,14 +98,15 @@ public class ProxyEndpoint
   @Context
   HttpServletRequest httpServletRequest;
 
-  @Context
-  ServletContext servletContext;
+  @Inject
+  SecurityService securityService;
 
-  @Context
-  ContainerRequestContext context;
+  @Inject
+  Config config;
 
   @OPTIONS
   @PermitAll
+  @Operation(summary = "Proxy HTTP OPTIONS request")
   public Response options(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers)
   {
@@ -109,6 +115,7 @@ public class ProxyEndpoint
 
   @GET
   @PermitAll
+  @Operation(summary = "Proxy HTTP GET request")
   public Response doGet(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers)
   {
@@ -117,6 +124,7 @@ public class ProxyEndpoint
 
   @POST
   @PermitAll
+  @Operation(summary = "Proxy HTTP POST request")
   public Response doPost(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers, InputStream body)
   {
@@ -125,6 +133,7 @@ public class ProxyEndpoint
 
   @PUT
   @PermitAll
+  @Operation(summary = "Proxy HTTP PUT request")
   public Response doPut(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers, InputStream body)
   {
@@ -133,6 +142,7 @@ public class ProxyEndpoint
 
   @DELETE
   @PermitAll
+  @Operation(summary = "Proxy HTTP DELETE request")
   public Response doDelete(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers)
   {
@@ -141,6 +151,7 @@ public class ProxyEndpoint
 
   @PROPFIND
   @PermitAll
+  @Operation(summary = "Proxy HTTP PROPFIND request")
   public Response doPropfind(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers)
   {
@@ -149,6 +160,7 @@ public class ProxyEndpoint
 
   @MKCOL
   @PermitAll
+  @Operation(summary = "Proxy HTTP MKCOL request")
   public Response doMkcol(@QueryParam("url") String url,
     @Context UriInfo info, @Context HttpHeaders headers)
   {
@@ -165,8 +177,8 @@ public class ProxyEndpoint
 
     try
     {
-      HttpRequest request
-        = createRequest(method, url, info, headers, BodyPublishers.noBody());
+      HttpRequest request =
+        createRequest(method, url, info, headers, BodyPublishers.noBody());
 
       return send(request);
     }
@@ -199,19 +211,19 @@ public class ProxyEndpoint
 
   private boolean isValidUrl(String url)
   {
-    Object value = servletContext.getInitParameter("proxy.validDomains");
-    if (value instanceof String)
+    List<String> validUrls =
+      config.getValues(BASE + "validUrls", String.class);
+
+    for (String validUrl : validUrls)
     {
-      String[] validDomains = ((String) value).split(",");
-      for (String validDomain : validDomains)
+      if (url.startsWith(validUrl))
       {
-        if (url.startsWith(validDomain))
-        {
-          return true;
-        }
+        return true;
       }
     }
-    return !getUserRoles().isEmpty();
+
+    User user = securityService.getCurrentUser();
+    return user.getRoleIds().contains(AUTHENTICATED_ROLE);
   }
 
   private HttpRequest createRequest(String method,
@@ -224,18 +236,20 @@ public class ProxyEndpoint
     {
       alias = url.substring(1);
 
-      url = servletContext.getInitParameter("proxy." + alias + ".url");
+      String aliasBase = BASE + "aliases." + alias + ".";
+
+      url = config.getOptionalValue(aliasBase + "url", String.class).orElse(null);
       if (url == null)
       {
-        throw new IOException("Invalid url alias: " + alias);
+        throw new IOException("Invalid alias url: " + alias);
       }
 
-      String ipFilterKey = "proxy." + alias + ".ipfilter";
-      String ipFilter = servletContext.getInitParameter(ipFilterKey);
+      String ipFilter =
+        config.getOptionalValue(aliasBase + ".ipfilter", String.class).orElse(null);
       String addr = httpServletRequest.getRemoteAddr();
       if (ipFilter != null && !addr.startsWith(ipFilter))
       {
-        throw new SecurityException("Not authorized remote ip: " + addr);
+        throw new AccessDeniedException("Not authorized remote ip: " + addr);
       }
     }
     else
@@ -244,7 +258,7 @@ public class ProxyEndpoint
 
       if (!isValidUrl(url))
       {
-        throw new SecurityException("Access forbidden to " + url);
+        throw new AccessDeniedException("Access forbidden to " + url);
       }
     }
 
@@ -298,8 +312,8 @@ public class ProxyEndpoint
         && name.equalsIgnoreCase("Authorization")
         && "Bearer implicit".equals(value))
       {
-        String authoKey = "proxy." + alias + ".authorization";
-        String autho = servletContext.getInitParameter(authoKey);
+        String authoKey = BASE + "aliases." + alias + ".authorization";
+        String autho = config.getOptionalValue(authoKey, String.class).orElse(null);
         if (autho != null)
         {
           builder.header("Authorization", autho);
@@ -363,12 +377,5 @@ public class ProxyEndpoint
       response = Response.serverError().entity(ex.toString());
     }
     return response.build();
-  }
-
-  @SuppressWarnings("unchecked")
-  private Set<String> getUserRoles()
-  {
-    Object value = context.getProperty("userRoles");
-    return value == null ? Collections.emptySet() : (Set<String>) value;
   }
 }

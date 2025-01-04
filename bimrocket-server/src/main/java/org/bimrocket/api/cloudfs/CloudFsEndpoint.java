@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,6 +30,7 @@
  */
 package org.bimrocket.api.cloudfs;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.bimrocket.api.cloudfs.methods.PROPFIND;
 import org.bimrocket.api.cloudfs.methods.MKCOL;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,8 +46,6 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -78,7 +77,10 @@ import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import java.util.Date;
+import org.bimrocket.api.security.User;
+import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.URIEncoder;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
@@ -88,15 +90,13 @@ import org.bimrocket.util.URIEncoder;
 @Tag(name="CloudFS", description="Cloud File System")
 public class CloudFsEndpoint
 {
-  public static final String BASE_PROPERTY = "cloudfs.baseProperty";
-  public static final String BASE_DIRECTORY = "cloudfs.baseDirectory";
-  public static final String DIRECTORIES = "cloudfs.directories";
+  static final String BASE = "services.cloudfs.";
 
   @Inject
-  Application application;
+  SecurityService securityService;
 
-  @Context
-  ContainerRequestContext context;
+  @Inject
+  Config config;
 
   @Context
   ServletContext servletContext;
@@ -106,6 +106,7 @@ public class CloudFsEndpoint
 
   @OPTIONS
   @PermitAll
+  @Operation(summary = "Get HTTP options")
   public Response options()
   {
     return Response.ok()
@@ -115,8 +116,9 @@ public class CloudFsEndpoint
   }
 
   @PROPFIND
-  @PermitAll
   @Produces(TEXT_XML)
+  @PermitAll
+  @Operation(summary = "List root directory")
   public Response propfind(@HeaderParam("depth") String depth)
   {
     File file = getBaseDir();
@@ -125,8 +127,9 @@ public class CloudFsEndpoint
 
   @PROPFIND
   @Path("/{path:.*}")
-  @PermitAll
   @Produces(TEXT_XML)
+  @PermitAll
+  @Operation(summary = "List directory")
   public Response propfind(@PathParam("path") List<PathSegment> path,
     @HeaderParam("depth") String depth)
   {
@@ -147,6 +150,7 @@ public class CloudFsEndpoint
 
   @MKCOL
   @Path("/{path:.*}")
+  @Operation(summary = "Make directory")
   public Response mkcol(@PathParam("path") List<PathSegment> path)
   {
     String uri = getPathUri(path);
@@ -166,6 +170,7 @@ public class CloudFsEndpoint
   @HEAD
   @Path("/{path:.*}")
   @PermitAll
+  @Operation(summary = "Get HTTP head")
   public Response head(@PathParam("path") List<PathSegment> path)
   {
     String uri = getPathUri(path);
@@ -192,6 +197,7 @@ public class CloudFsEndpoint
 
   @GET
   @PermitAll
+  @Operation(summary = "Get root file")
   public Response get()
   {
     File file = getBaseDir();
@@ -201,6 +207,7 @@ public class CloudFsEndpoint
   @GET
   @Path("/{path:.*}")
   @PermitAll
+  @Operation(summary = "Get file")
   public Response get(@PathParam("path") List<PathSegment> path)
   {
     String uri = getPathUri(path);
@@ -227,6 +234,7 @@ public class CloudFsEndpoint
 
   @PUT
   @Path("/{path:.*}")
+  @Operation(summary = "Save file")
   public Response put(@PathParam("path") List<PathSegment> path,
     InputStream input)
   {
@@ -253,6 +261,7 @@ public class CloudFsEndpoint
 
   @DELETE
   @Path("/{path:.*}")
+  @Operation(summary = "Delete file")
   public Response delete(@PathParam("path") List<PathSegment> path)
   {
     String uri = getPathUri(path);
@@ -293,22 +302,18 @@ public class CloudFsEndpoint
 
   private File getBaseDir()
   {
-    String baseProperty = servletContext.getInitParameter(BASE_PROPERTY);
-    String baseDirectory = servletContext.getInitParameter(BASE_DIRECTORY);
+    String baseProperty = config.getValue(BASE + "property", String.class);
+    String baseDirectory = config.getValue(BASE + "directory", String.class);
     String basePath = System.getProperty(baseProperty);
     File baseDir = new File(basePath, baseDirectory);
     if (!baseDir.exists())
     {
       baseDir.mkdirs();
-      String directories = servletContext.getInitParameter(DIRECTORIES);
-      if (directories != null)
+      List<String> directories = config.getValues(BASE + "directories", String.class);
+      for (String dirName : directories)
       {
-        String[] dirArray = directories.split(",");
-        for (String dirName : dirArray)
-        {
-          File dir = new File(baseDir, dirName);
-          dir.mkdir();
-        }
+        File dir = new File(baseDir, dirName);
+        dir.mkdir();
       }
     }
     return baseDir;
@@ -460,21 +465,15 @@ public class CloudFsEndpoint
         filename = dir.getName();
         dir = dir.getParentFile();
       }
-      Set<String> userRoles = getUserRoles();
-      return fileRoles.isEmpty() || !Collections.disjoint(fileRoles, userRoles);
+      User user = securityService.getCurrentUser();
+      return fileRoles.isEmpty() ||
+        !Collections.disjoint(fileRoles, user.getRoleIds());
     }
-    catch (IOException ex)
+    catch (Exception ex)
     {
       // ignore
     }
     return false;
-  }
-
-  @SuppressWarnings("unchecked")
-  private Set<String> getUserRoles()
-  {
-    Object value = context.getProperty("userRoles");
-    return value == null ? Collections.emptySet() : (Set<String>)value;
   }
 
   private String getContentType(File file)

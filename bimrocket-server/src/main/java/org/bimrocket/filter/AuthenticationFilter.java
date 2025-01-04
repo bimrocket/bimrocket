@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.config;
+package org.bimrocket.filter;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -37,21 +37,22 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
-import java.util.Set;
 import org.bimrocket.api.ApiError;
-import org.bimrocket.security.UserStore;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
-import static org.bimrocket.security.UserStore.ANONYMOUS_USER;
+import java.util.Collections;
+import java.util.Set;
+import org.bimrocket.api.security.User;
+import org.bimrocket.exception.NotAuthorizedException;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
+import org.bimrocket.service.security.SecurityService;
 
 /**
  *
@@ -60,76 +61,40 @@ import static org.bimrocket.security.UserStore.ANONYMOUS_USER;
 @Provider
 public class AuthenticationFilter implements ContainerRequestFilter
 {
-  @Inject
-  Application application;
-
   @Context
   private ResourceInfo resourceInfo;
+
+  @Inject
+  SecurityService securityService;
 
   @Override
   public void filter(ContainerRequestContext context) throws IOException
   {
     if ("OPTIONS".equals(context.getMethod())) return;
 
-    UserStore userStore =
-      (UserStore)application.getProperties().get("userStore");
-    if (userStore == null) return;
-
-    String username = ANONYMOUS_USER;
-
-    List<String> authos = context.getHeaders().get("Authorization");
-    if (authos != null && !authos.isEmpty())
-    {
-      String autho = authos.get(0);
-      String[] authoParts = autho.split(" ");
-
-      // basic authentication
-      if (authoParts.length == 2 && authoParts[0].equalsIgnoreCase("basic"))
-      {
-        String userPassword = authoParts[1].trim();
-        String decoded = new String(Base64.getDecoder().decode(userPassword));
-        String[] userPasswordParts = decoded.split(":");
-        username = userPasswordParts[0];
-        String password = userPasswordParts.length > 1 ?
-          userPasswordParts[1] : null;
-        if (!userStore.validateCredential(username, password))
-        {
-          context.abortWith(getErrorResponse(401, "Invalid credentials"));
-          return;
-        }
-      }
-    }
-
-    context.setProperty("username", username);
-
-    Set<String> userRoles = userStore.getRoles(username);
-    context.setProperty("userRoles", userRoles);
-
-    if (!isAccessAllowed(username, userRoles))
-    {
-      context.abortWith(getErrorResponse(403, "Access denied"));
-    }
-  }
-
-  private boolean isAccessAllowed(String username, Set<String> userRoles)
-  {
     Method method = resourceInfo.getResourceMethod();
 
-    if (method.isAnnotationPresent(PermitAll.class)) return true;
+    if (method.isAnnotationPresent(PermitAll.class)) return;
 
-    RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
-    if (rolesAllowed != null)
+    User user;
+    try
     {
-      String[] roles = rolesAllowed.value();
-      for (String role : roles)
-      {
-        if (userRoles.contains(role)) return true;
-      }
-      return false;
+      user = securityService.getCurrentUser();
+    }
+    catch (NotAuthorizedException ex)
+    {
+      context.abortWith(getErrorResponse(401, "NOT_AUTHORIZED"));
+      return;
     }
 
-    // only authenticated users can access methods with no roles defined
-    return !ANONYMOUS_USER.equals(username);
+    RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
+    Set<String> allowedRoleIds = rolesAllowed == null ?
+      Set.of(AUTHENTICATED_ROLE) : Set.of(rolesAllowed.value());
+
+    if (Collections.disjoint(allowedRoleIds, user.getRoleIds()))
+    {
+      context.abortWith(getErrorResponse(403, "ACCESS_DENIED"));
+    }
   }
 
   private Response getErrorResponse(int statusCode, String message)

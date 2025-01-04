@@ -28,62 +28,56 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.api.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Id;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class Role
 {
-  @JsonProperty("code")
-  private int code;
+  @Id
+  @JsonProperty("id")
+  String id;
 
-  @JsonProperty("message")
-  private String message;
+  @JsonProperty("description")
+  String description;
 
-  public ApiError()
+  @JsonProperty("roles")
+  Set<String> roleIds = new HashSet<>();
+
+  public String getId()
   {
+    return id;
   }
 
-  public ApiError(int code, String message)
+  public void setId(String id)
   {
-    this.code = code;
-    this.message = message;
+    this.id = id;
   }
 
-  public int getCode()
+  public String getDescription()
   {
-    return code;
+    return description;
   }
 
-  public void setCode(int code)
+  public void setDescription(String description)
   {
-    this.code = code;
+    this.description = description;
   }
 
-  public String getMessage()
+  public Set<String> getRoleIds()
   {
-    return message;
+    return roleIds;
   }
 
-  public void setMessage(String message)
+  public void setRoleIds(Set<String> roleIds)
   {
-    this.message = message;
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
+    this.roleIds = roleIds;
   }
 }

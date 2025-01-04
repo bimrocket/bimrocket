@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,17 +30,16 @@
  */
 package org.bimrocket.api.print;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import java.io.OutputStream;
@@ -55,17 +54,15 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Tag(name="Print", description="PDF print service")
 public class PrintEndpoint
 {
-  @Context
-  ServletContext servletContext;
-
   @Inject
   PrintService printService;
 
   @POST
   @Path("/")
-  @PermitAll
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @PermitAll
+  @Operation(summary = "Generate PDF file from graphic primitives")
   public PrintResult print(PrintSource printSource) throws Exception
   {
     String printId = printService.print(printSource);
@@ -76,8 +73,9 @@ public class PrintEndpoint
 
   @GET
   @Path("/{printId}")
-  @PermitAll
   @Produces("application/pdf")
+  @PermitAll
+  @Operation(summary = "Download PDF file")
   public Response print(@PathParam("printId") String printId)
   {
     StreamingOutput output = (OutputStream out) ->

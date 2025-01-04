@@ -90,7 +90,7 @@ class PrintTool extends Tool
 
     let printSource =
     {
-      title : this.titleElem.value || "Bimrocket print",
+      title : this.titleElem.value || "",
       commands : []
     };
 

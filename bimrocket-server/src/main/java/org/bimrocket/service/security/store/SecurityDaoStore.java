@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,37 +28,14 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.security;
+package org.bimrocket.service.security.store;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
+import org.bimrocket.dao.DaoStore;
 
 /**
  *
  * @author realor
  */
-public class InMemoryUserStore implements UserStore
+public interface SecurityDaoStore extends DaoStore
 {
-  public InMemoryUserStore()
-  {
-  }
-
-  @Override
-  public boolean validateCredential(String username, String password)
-  {
-    return !StringUtils.isBlank(username);
-  }
-
-  @Override
-  public Set<String> getRoles(String username)
-  {
-    if (StringUtils.isBlank(username)) return Collections.emptySet();
-
-    Set<String> roles = new HashSet<>();
-    roles.add(username.trim()); // nominal role
-    roles.add(EVERYONE_ROLE); // everyone role
-    return roles;
-  }
 }

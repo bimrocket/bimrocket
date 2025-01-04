@@ -28,62 +28,18 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package org.bimrocket.service.security;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class SecurityConstants
 {
-  @JsonProperty("code")
-  private int code;
+  public static final String ANONYMOUS_USER = "anonymous";
+  public static final String ADMIN_USER = "admin";
 
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
-  {
-  }
-
-  public ApiError(int code, String message)
-  {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
-  }
+  public static final String EVERYONE_ROLE = "EVERYONE";
+  public static final String AUTHENTICATED_ROLE = "AUTHENTICATED";
+  public static final String ADMIN_ROLE = "ADMIN";
 }

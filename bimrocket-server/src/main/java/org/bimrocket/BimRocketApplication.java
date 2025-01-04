@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -32,113 +32,100 @@ package org.bimrocket;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.util.ArrayList;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.beanutils.BeanUtils;
-import org.bimrocket.config.AuthenticationFilter;
-import org.bimrocket.config.AutoScanFeature;
-import org.bimrocket.config.CORSFilter;
-import org.glassfish.jersey.server.ResourceConfig;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  *
  * @author realor
  */
-public class BimRocketApplication extends ResourceConfig
+@ApplicationPath("/api")
+public class BimRocketApplication extends Application
 {
-  private static final Logger LOGGER = Logger.getLogger("BimRocketApplication");
-  private final CloseableList closeableList = new CloseableList();
-
-  @Inject
-  ServletContext servletContext;
+  static final Logger LOGGER = Logger.getLogger("BimRocketApplication");
 
   @PostConstruct
   public void init()
   {
     LOGGER.log(Level.INFO, "BimRocket INIT");
-    packages("org.bimrocket.api");
-    register(CORSFilter.class);
-    register(AuthenticationFilter.class);
-    register(AutoScanFeature.class);
-    initBeans();
+    String userDir = System.getProperty("user.dir");
+    LOGGER.log(Level.INFO, "Current working directory: {0}", userDir);
+
+    createDefaultConfig();
   }
 
   @PreDestroy
   public void destroy()
   {
     LOGGER.log(Level.INFO, "BimRocket DESTROY");
-    for (AutoCloseable closeable : closeableList)
-    {
-      try
-      {
-        closeable.close();
-      }
-      catch (Exception ex)
-      {
-        // ignore
-      }
-    }
   }
 
-  protected void initBeans()
+  private void createDefaultConfig()
   {
-    String value = servletContext.getInitParameter("bimrocket.beans");
-    if (value != null)
-    {
-      String[] beanNames = value.split(",");
-      for (String beanName : beanNames)
-      {
-        beanName = beanName.trim();
-        Object bean = createBean(beanName);
-        if (bean instanceof AutoCloseable)
-        {
-          closeableList.add((AutoCloseable)bean);
-        }
-        property(beanName, bean);
-        servletContext.setAttribute(beanName, bean);
-      }
-    }
-  }
+    Config config = ConfigProvider.getConfig();
+    Optional<List<String>> locations =
+      config.getOptionalValues("smallrye.config.locations", String.class);
 
-  protected Object createBean(String beanName)
-  {
-    try
+    if (locations.isPresent())
     {
-      LOGGER.log(Level.INFO, "Creating bean [{0}]", beanName);
-      String beanClassName = servletContext.getInitParameter(beanName + ".class");
-      Class<?> beanClass = Class.forName(beanClassName);
-      BeanInfo beanInfo = Introspector.getBeanInfo(beanClass);
-      Object bean = beanClass.getDeclaredConstructor().newInstance();
-      PropertyDescriptor[] properties = beanInfo.getPropertyDescriptors();
-      for (PropertyDescriptor property : properties)
+      File file = null;
+
+      for (String location : locations.get())
       {
-        if (property.getWriteMethod() != null)
+        try
         {
-          String propertyName = property.getName();
-          String attributeName = beanName + "." + propertyName;
-          String value = servletContext.getInitParameter(attributeName);
-          if (value != null)
+          URI uri = new URI(location);
+          if (uri.getScheme() == null)
           {
-            BeanUtils.setProperty(bean, property.getName(), value);
+            file = new File(uri.getPath());
+            break;
+          }
+        }
+        catch (Exception ex)
+        {
+          // ignore
+        }
+      }
+
+      if (file != null)
+      {
+        if (file.exists())
+        {
+          LOGGER.log(Level.INFO, "Config found in {0}", file);
+        }
+        else
+        {
+          try
+          {
+            URL resource = getClass().getResource("/application.yaml");
+            file.getParentFile().mkdirs();
+            try (InputStream is = resource.openStream();
+                 OutputStream os = new FileOutputStream(file))
+            {
+              IOUtils.copy(is, os);
+            }
+            LOGGER.log(Level.INFO, "Config created in {0}", file);
+          }
+          catch (Exception ex)
+          {
+            LOGGER.log(Level.WARNING, "Can not create config in {0}: {1}",
+              new Object[]{ file, ex });
           }
         }
       }
-      return bean;
     }
-    catch (Exception ex)
-    {
-      throw new RuntimeException("Can't create bean [" + beanName + "]:", ex);
-    }
-  }
-
-  public class CloseableList extends ArrayList<AutoCloseable>
-  {
-    private static final long serialVersionUID = 19693L;
   }
 }

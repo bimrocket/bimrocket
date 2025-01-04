@@ -28,40 +28,78 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.bcf.dao;
+package org.bimrocket.dao.orientdb;
 
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
-import com.orientechnologies.orient.core.entity.OEntityManager;
-import org.bimrocket.api.bcf.*;
-import org.bimrocket.dao.orientdb.OrientDaoConnectionFactory;
+import jakarta.inject.Inject;
+import org.bimrocket.dao.DaoConnection;
+import org.bimrocket.dao.DaoStore;
 
-/**
- *
- * @author realor
- */
-public class BcfOrientDaoConnectionFactory
-  extends OrientDaoConnectionFactory
+
+public class OrientDaoStore implements DaoStore
 {
+  private String databaseName;
+  private String entitiesPackage;
+
+  private boolean initialized;
+
+  @Inject
+  OrientPoolManager poolManager;
+
+  public String getDatabaseName()
+  {
+    return databaseName;
+  }
+
+  public void setDatabaseName(String databaseName)
+  {
+    this.databaseName = databaseName;
+  }
+
+  public String getEntitiesPackage()
+  {
+    return entitiesPackage;
+  }
+
+  public void setEntitiesPackage(String entitiesPackage)
+  {
+    this.entitiesPackage = entitiesPackage;
+  }
+
+  public OrientDaoStore()
+  {
+  }
+
+  public OrientDaoStore(OrientPoolManager poolManager)
+  {
+    this.poolManager = poolManager;
+  }
+
   @Override
+  public DaoConnection getConnection()
+  {
+    ODatabaseObject db = poolManager.getConnection(databaseName);
+
+    if (!initialized)
+    {
+      registerEntityClasses(db);
+      initialized = true;
+    }
+
+    return new OrientDaoConnection(db);
+  }
+
+  @Override
+  public void close()
+  {
+    // pool is closed by OrientPoolManager
+  }
+
   protected void registerEntityClasses(ODatabaseObject db)
   {
-    // register persistent classes
-    OEntityManager entityManager = db.getEntityManager();
-    entityManager.registerEntityClass(BcfColoring.class);
-    entityManager.registerEntityClass(BcfComment.class);
-    entityManager.registerEntityClass(BcfComponent.class);
-    entityManager.registerEntityClass(BcfComponents.class);
-    entityManager.registerEntityClass(BcfDirection.class);
-    entityManager.registerEntityClass(BcfExtensions.class);
-    entityManager.registerEntityClass(BcfLine.class);
-    entityManager.registerEntityClass(BcfOrthogonalCamera.class);
-    entityManager.registerEntityClass(BcfPerspectiveCamera.class);
-    entityManager.registerEntityClass(BcfDocumentReference.class);
-    entityManager.registerEntityClass(BcfPoint.class);
-    entityManager.registerEntityClass(BcfProject.class);
-    entityManager.registerEntityClass(BcfTopic.class);
-    entityManager.registerEntityClass(BcfVector.class);
-    entityManager.registerEntityClass(BcfViewpoint.class);
-    entityManager.registerEntityClass(BcfSnapshot.class);
+    if (entitiesPackage != null)
+    {
+      db.getEntityManager().registerEntityClasses(entitiesPackage);
+    }
   }
 }

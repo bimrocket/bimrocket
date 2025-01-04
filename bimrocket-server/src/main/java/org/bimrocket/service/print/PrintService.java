@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -31,12 +31,12 @@
 package org.bimrocket.service.print;
 
 import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -50,23 +50,46 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bimrocket.api.print.PrintSource;
 import org.bimrocket.api.print.PrintCommand;
-import org.jvnet.hk2.annotations.Service;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
  * @author realor
  */
-@Service
+@ApplicationScoped
 public class PrintService
 {
-  static final String BASE_PROPERTY = "print.baseProperty";
-  static final String BASE_DIRECTORY = "print.baseDirectory";
-
   static final Logger LOGGER =
     Logger.getLogger(PrintService.class.getName());
 
+  static final String BASE = "services.print.";
+
   @Inject
-  ServletContext servletContext;
+  Config config;
+
+  File baseDir;
+
+  @PostConstruct
+  public void init()
+  {
+    LOGGER.log(Level.INFO, "Init PrintService");
+
+    String baseProperty =
+      config.getOptionalValue(BASE + "property", String.class)
+        .orElse("user.home");
+
+    String baseDirectory =
+      config.getOptionalValue(BASE + "directory", String.class)
+        .orElse("print");
+
+    String basePath = System.getProperty(baseProperty);
+    baseDir = new File(basePath, baseDirectory);
+    if (!baseDir.exists())
+    {
+      baseDir.mkdirs();
+    }
+    LOGGER.log(Level.INFO, "Base dir: {0}", baseDir);
+  }
 
   public String print(PrintSource printSource) throws IOException
   {
@@ -75,7 +98,7 @@ public class PrintService
     String title = printSource.getTitle();
     if (StringUtils.isBlank(title))
     {
-      title = "Bimrocket print";
+      title = config.getValue(BASE + "title", String.class);
     }
 
     File file = getFile(printId);
@@ -86,7 +109,7 @@ public class PrintService
       PdfWriter writer = PdfWriter.getInstance(document, output);
       document.open();
       document.addTitle(title);
-      document.addCreator("Bimrocket PrintService");
+      document.addCreator(config.getValue(BASE + "creator", String.class));
       document.add(new Paragraph(title));
 
       PdfContentByte canvas = writer.getDirectContent();
@@ -145,19 +168,6 @@ public class PrintService
 
   private File getFile(String printId)
   {
-    return new File(getBaseDir(), "print-" + printId + ".pdf");
-  }
-
-  private File getBaseDir()
-  {
-    String baseProperty = servletContext.getInitParameter(BASE_PROPERTY);
-    String baseDirectory = servletContext.getInitParameter(BASE_DIRECTORY);
-    String basePath = System.getProperty(baseProperty);
-    File baseDir = new File(basePath, baseDirectory);
-    if (!baseDir.exists())
-    {
-      baseDir.mkdirs();
-    }
-    return baseDir;
+    return new File(baseDir, "print-" + printId + ".pdf");
   }
 }

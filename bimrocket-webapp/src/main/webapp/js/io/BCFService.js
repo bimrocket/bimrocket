@@ -245,6 +245,7 @@ class BCFService extends Service
     };
 
     request.open(method, this.url + "/bcf/2.1/" + path);
+    request.setRequestHeader("Accept", "application/json");
     request.setRequestHeader("Content-Type", "application/json");
 
     WebUtils.setBasicAuthorization(request, this.username, this.password);

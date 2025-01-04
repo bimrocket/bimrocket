@@ -28,62 +28,32 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.filter;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.ext.Provider;
+import java.io.IOException;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+@Provider
+public class CORSFilter implements ContainerResponseFilter
 {
-  @JsonProperty("code")
-  private int code;
-
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
-  {
-  }
-
-  public ApiError(int code, String message)
-  {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
-  }
-
   @Override
-  public String toString()
+  public void filter(ContainerRequestContext requestContext,
+    ContainerResponseContext responseContext) throws IOException
   {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
+    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+    headers.add("Access-Control-Allow-Origin", "*");
+    headers.add("Access-Control-Allow-Credentials", "true");
+    headers.add("Access-Control-Allow-Headers",
+     "origin,content-type,accept,authorization,depth,if-modified-since,if-none-match");
+    headers.add("Access-Control-Allow-Methods",
+      "HEAD,GET,POST,PUT,DELETE,OPTIONS,PROPFIND,MKCOL");
   }
 }

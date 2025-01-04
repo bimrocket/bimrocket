@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -37,8 +37,9 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,24 +54,28 @@ import org.bimrocket.api.ifcdb.IfcCommand;
 import org.bimrocket.api.ifcdb.IfcUploadResult;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
-import org.jvnet.hk2.annotations.Service;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
  * @author realor
  */
-@Service
+@ApplicationScoped
 public class IfcDatabaseService
 {
-  public static final String IFC_DB_URL = "ifc.db.url";
-  public static final String IFC_DB_USERNAME = "ifc.db.username";
-  public static final String IFC_DB_PASSWORD = "ifc.db.password";
-
   static final Logger LOGGER =
     Logger.getLogger(IfcDatabaseService.class.getName());
 
+  static final String BASE = "services.ifcdb.";
+
   @Inject
-  ServletContext servletContext;
+  Config config;
+
+  @PostConstruct
+  public void init()
+  {
+    LOGGER.log(Level.INFO, "Init IfcdbService");
+  }
 
   public void execute(String schemaName, IfcCommand command, File file)
     throws Exception
@@ -215,9 +220,9 @@ public class IfcDatabaseService
 
   OrientDB getServer()
   {
-    String url = servletContext.getInitParameter(IFC_DB_URL);
-    String username = servletContext.getInitParameter(IFC_DB_USERNAME);
-    String password = servletContext.getInitParameter(IFC_DB_PASSWORD);
+    String url = config.getValue(BASE + "url", String.class);
+    String username = config.getValue(BASE + "username", String.class);
+    String password = config.getValue(BASE + "password", String.class);
 
     LOGGER.log(Level.INFO, "Connect to {0}@{1}", new Object[]{url, username});
 
@@ -226,8 +231,8 @@ public class IfcDatabaseService
 
   ODatabaseDocument openDB(OrientDB server, String dbName) throws Exception
   {
-    String username = servletContext.getInitParameter(IFC_DB_USERNAME);
-    String password = servletContext.getInitParameter(IFC_DB_PASSWORD);
+    String username = config.getValue(BASE + "username", String.class);
+    String password = config.getValue(BASE + "password", String.class);
 
     if (!server.exists(dbName))
       throw new Exception("No database for schema " + dbName);

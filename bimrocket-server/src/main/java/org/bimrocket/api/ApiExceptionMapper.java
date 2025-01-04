@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -35,6 +35,8 @@ import org.bimrocket.exception.InvalidRequestException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import org.bimrocket.exception.AccessDeniedException;
+import org.bimrocket.exception.NotAuthorizedException;
 
 /**
  *
@@ -58,7 +60,7 @@ public class ApiExceptionMapper
         message = ex.toString();
       }
       error.setMessage(message);
-      return Response.serverError().entity(error).build();
+      return Response.status(404).entity(error).build();
     }
   }
 
@@ -78,7 +80,47 @@ public class ApiExceptionMapper
         message = ex.toString();
       }
       error.setMessage(message);
-      return Response.serverError().entity(error).build();
+      return Response.status(400).entity(error).build();
+    }
+  }
+
+  @Provider
+  public static class NotAuthorizedExceptionMapper
+    implements ExceptionMapper<NotAuthorizedException>
+  {
+    @Override
+    public Response toResponse(NotAuthorizedException ex)
+    {
+      ApiError error = new ApiError();
+
+      error.setCode(401);
+      String message = ex.getMessage();
+      if (message == null)
+      {
+        message = ex.toString();
+      }
+      error.setMessage(message);
+      return Response.status(401).entity(error).build();
+    }
+  }
+
+  @Provider
+  public static class AccessDeniedExceptionMapper
+    implements ExceptionMapper<AccessDeniedException>
+  {
+    @Override
+    public Response toResponse(AccessDeniedException ex)
+    {
+      ApiError error = new ApiError();
+
+      error.setCode(403);
+      String message = ex.getMessage();
+      if (message == null)
+      {
+        message = ex.toString();
+      }
+      error.setMessage(message);
+      return Response.status(403).entity(error).build();
     }
   }
 

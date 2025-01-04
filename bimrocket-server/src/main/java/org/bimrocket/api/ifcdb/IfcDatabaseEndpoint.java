@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,6 +30,7 @@
  */
 package org.bimrocket.api.ifcdb;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -72,15 +73,18 @@ public class IfcDatabaseEndpoint
   @GET
   @Path("/auth")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get authorization schemes")
   public List<String> getAuth()
   {
+    if (true) throw new RuntimeException("NO_AUTH");
     return new ArrayList<>();
   }
 
   @POST
   @Path("/models/{schema}")
   @Consumes(APPLICATION_JSON)
-  @Produces({ TEXT_PLAIN, APPLICATION_JSON })
+  @Produces({ APPLICATION_JSON, TEXT_PLAIN })
+  @Operation(summary = "Execute command")
   public Response execute(@PathParam("schema") String schemaName,
     IfcCommand command)
   {
@@ -111,7 +115,8 @@ public class IfcDatabaseEndpoint
 
   @GET
   @Path("/models/{schema}/{modelId}")
-  @Produces({ TEXT_PLAIN, APPLICATION_JSON })
+  @Produces({ APPLICATION_JSON, TEXT_PLAIN })
+  @Operation(summary = "Get model")
   public Response getModel(@PathParam("schema") String schemaName,
     @PathParam("modelId") String modelId)
   {
@@ -132,6 +137,7 @@ public class IfcDatabaseEndpoint
   @PUT
   @Path("/models/{schema}/{modelId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Save model")
   public IfcUploadResult putModel(@PathParam("schema") String schemaName,
     @PathParam("modelId") String modelId, InputStream input)
   {
@@ -154,6 +160,7 @@ public class IfcDatabaseEndpoint
   @DELETE
   @Path("/models/{schema}/{modelId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Delete model")
   public IfcDeleteResult deleteModel(@PathParam("schema") String schemaName,
     @PathParam("modelId") String modelId)
   {
@@ -191,5 +198,4 @@ public class IfcDatabaseEndpoint
 
     return new RuntimeException(message);
   }
-
 }

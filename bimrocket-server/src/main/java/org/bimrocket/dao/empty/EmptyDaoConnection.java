@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,32 +28,25 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.config;
+package org.bimrocket.dao.empty;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.ext.Provider;
-import java.io.IOException;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.DaoConnection;
 
 /**
  *
  * @author realor
  */
-@Provider
-public class CORSFilter implements ContainerResponseFilter
+public class EmptyDaoConnection implements DaoConnection
 {
   @Override
-  public void filter(ContainerRequestContext requestContext,
-    ContainerResponseContext responseContext) throws IOException
+  public <E> Dao<E> getDao(Class<E> cls)
   {
-    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-    headers.add("Access-Control-Allow-Origin", "*");
-    headers.add("Access-Control-Allow-Credentials", "true");
-    headers.add("Access-Control-Allow-Headers",
-     "origin,content-type,accept,authorization,depth,if-modified-since,if-none-match");
-    headers.add("Access-Control-Allow-Methods",
-      "HEAD,GET,POST,PUT,DELETE,OPTIONS,PROPFIND,MKCOL");
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public void close()
+  {
   }
 }

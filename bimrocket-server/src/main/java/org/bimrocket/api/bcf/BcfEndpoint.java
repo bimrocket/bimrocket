@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -31,6 +31,7 @@
 
 package org.bimrocket.api.bcf;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -43,8 +44,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Context;
 import java.util.List;
 import jakarta.ws.rs.core.Response;
 import java.util.Base64;
@@ -60,9 +59,6 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 @Tag(name="BCF", description="BIM Collaboration Format")
 public class BcfEndpoint
 {
-  @Context
-  ContainerRequestContext context;
-
   @Inject
   BcfService bcfService;
 
@@ -72,6 +68,7 @@ public class BcfEndpoint
   @Path("/auth")
   @Produces(APPLICATION_JSON)
   @PermitAll
+  @Operation(summary = "Generate authorization schemes")
   public BcfAuthentication getAuth()
   {
     BcfAuthentication auth = new BcfAuthentication();
@@ -85,6 +82,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get projects")
   public List<BcfProject> getProjects()
   {
     return bcfService.getProjects();
@@ -93,6 +91,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get project")
   public BcfProject getProject(@PathParam("projectId") String projectId)
   {
     return bcfService.getProject(projectId);
@@ -102,6 +101,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Update project")
   public BcfProject updateProject(
     @PathParam("projectId") String projectId, BcfProject projectUpdate)
   {
@@ -113,6 +113,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/extensions")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get project extensions")
   public BcfExtensions getExtensions(@PathParam("projectId") String projectId)
   {
     return bcfService.getExtensions(projectId);
@@ -121,6 +122,7 @@ public class BcfEndpoint
   @PUT
   @Path("/projects/{projectId}/extensions")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Update project extensions")
   public BcfExtensions updateExtensions(
     @PathParam("projectId") String projectId,
     BcfExtensions extensionsUpdate)
@@ -133,6 +135,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get topics")
   public List<BcfTopic> getTopics(@PathParam("projectId") String projectId,
     @QueryParam("$filter") String odataFilter,
     @QueryParam("$orderBy") String odataOrderBy)
@@ -143,6 +146,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics/{topicId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get topic")
   public BcfTopic getTopic(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -154,13 +158,10 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Create topic")
   public BcfTopic createTopic(
     @PathParam("projectId") String projectId, BcfTopic topic)
   {
-    String username = getUsername();
-    topic.setCreationAuthor(username);
-    topic.setModifyAuthor(username);
-
     return bcfService.createTopic(projectId, topic);
   }
 
@@ -168,20 +169,19 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Update topic")
   public BcfTopic updateTopic(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
     BcfTopic topicUpdate)
   {
-    String username = getUsername();
-    topicUpdate.setModifyAuthor(username);
-
     return bcfService.updateTopic(projectId, topicId, topicUpdate);
   }
 
   @DELETE
   @Path("/projects/{projectId}/topics/{topicId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Delete topic")
   public Response deleteTopic(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -195,6 +195,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics/{topicId}/comments")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get comments")
   public List<BcfComment> getComments(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -205,6 +206,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics/{topicId}/comments/{commentId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get comment")
   public BcfComment getComment(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -217,15 +219,12 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/comments")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Create comment")
   public BcfComment createComment(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
     BcfComment comment)
   {
-    String username = getUsername();
-    comment.setAuthor(username);
-    comment.setModifyAuthor(username);
-
     return bcfService.createComment(projectId, topicId, comment);
   }
 
@@ -233,15 +232,13 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/comments/{commentId}")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Update comment")
   public BcfComment updateComment(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
     @PathParam("commentId") String commentId,
     BcfComment commentUpdate)
   {
-    String username = getUsername();
-    commentUpdate.setModifyAuthor(username);
-
     return bcfService.updateComment(projectId, topicId, commentId,
       commentUpdate);
   }
@@ -249,6 +246,7 @@ public class BcfEndpoint
   @DELETE
   @Path("/projects/{projectId}/topics/{topicId}/comments/{commentId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Delete comment")
   public Response deleteComment(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -263,6 +261,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get viewpoints")
   public List<BcfViewpoint> getViewpoints(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -273,6 +272,7 @@ public class BcfEndpoint
   @GET
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}")
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get viewpoint")
   public BcfViewpoint getViewpoint(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -285,6 +285,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Create viewpoint")
   public BcfViewpoint createViewpoint(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -297,6 +298,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Delete viewpoint")
   public Response deleteViewpoint(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -310,6 +312,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/viewpoints/{viewpointId}/snapshot")
   @PermitAll
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get viewport snapshot")
   public Response getViewpointSnapshot(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -333,6 +336,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/document_references")
   @PermitAll
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get document references")
   public List<BcfDocumentReference> getDocumentReferences(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId)
@@ -344,6 +348,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/document_references")
   @PermitAll
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Create document reference")
   public BcfDocumentReference createDocumentReference(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -357,6 +362,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/document_references/{documentReferenceId}")
   @PermitAll
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Update document reference")
   public BcfDocumentReference updateDocumentReference(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -371,6 +377,7 @@ public class BcfEndpoint
   @Path("/projects/{projectId}/topics/{topicId}/document_references/{documentReferenceId}")
   @PermitAll
   @Produces(APPLICATION_JSON)
+  @Operation(summary = "Delete document reference")
   public Response deleteDocumentReference(
     @PathParam("projectId") String projectId,
     @PathParam("topicId") String topicId,
@@ -378,15 +385,5 @@ public class BcfEndpoint
   {
     bcfService.deleteDocumentReference(projectId, topicId, documentReferenceId);
     return Response.ok().build();
-  }
-
-  private String getUsername()
-  {
-    Object value = context.getProperty("username");
-    if (value instanceof String)
-    {
-      return String.valueOf(value);
-    }
-    return "anonymous";
   }
 }

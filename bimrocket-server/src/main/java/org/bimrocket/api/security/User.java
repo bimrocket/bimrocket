@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,62 +28,95 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.api.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Id;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public class User
 {
-  @JsonProperty("code")
-  private int code;
+  @Id
+  @JsonProperty("id")
+  String id;
 
-  @JsonProperty("message")
-  private String message;
+  @JsonProperty("display_name")
+  String displayName;
 
-  public ApiError()
+  @JsonProperty("password")
+  String password;
+
+  @JsonProperty("password_hash")
+  String passwordHash;
+
+  @JsonProperty("email")
+  String email;
+
+  @JsonProperty("roles")
+  Set<String> roleIds = new HashSet<>();
+
+  public String getId()
   {
+    return id;
   }
 
-  public ApiError(int code, String message)
+  public void setId(String id)
   {
-    this.code = code;
-    this.message = message;
+    this.id = id;
   }
 
-  public int getCode()
+  public String getDisplayName()
   {
-    return code;
+    return displayName;
   }
 
-  public void setCode(int code)
+  public void setDisplayName(String displayName)
   {
-    this.code = code;
+    this.displayName = displayName;
   }
 
-  public String getMessage()
+  public String getPassword()
   {
-    return message;
+    return password;
   }
 
-  public void setMessage(String message)
+  public void setPassword(String password)
   {
-    this.message = message;
+    this.password = password;
   }
 
-  @Override
-  public String toString()
+  public String getPasswordHash()
   {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
+    return passwordHash;
+  }
+
+  public void setPasswordHash(String passwordHash)
+  {
+    this.passwordHash = passwordHash;
+  }
+
+  public String getEmail()
+  {
+    return email;
+  }
+
+  public void setEmail(String email)
+  {
+    this.email = email;
+  }
+
+  public Set<String> getRoleIds()
+  {
+    return roleIds;
+  }
+
+  public void setRoleIds(Set<String> roleIds)
+  {
+    this.roleIds = roleIds;
   }
 }

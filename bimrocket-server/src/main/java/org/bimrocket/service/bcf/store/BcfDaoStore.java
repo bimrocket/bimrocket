@@ -28,62 +28,14 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.api;
+package org.bimrocket.service.bcf.store;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.bimrocket.dao.DaoStore;
 
 /**
  *
  * @author realor
  */
-public class ApiError
+public interface BcfDaoStore extends DaoStore
 {
-  @JsonProperty("code")
-  private int code;
-
-  @JsonProperty("message")
-  private String message;
-
-  public ApiError()
-  {
-  }
-
-  public ApiError(int code, String message)
-  {
-    this.code = code;
-    this.message = message;
-  }
-
-  public int getCode()
-  {
-    return code;
-  }
-
-  public void setCode(int code)
-  {
-    this.code = code;
-  }
-
-  public String getMessage()
-  {
-    return message;
-  }
-
-  public void setMessage(String message)
-  {
-    this.message = message;
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append(code);
-    if (message != null)
-    {
-      buffer.append(": ");
-      buffer.append(message);
-    }
-    return buffer.toString();
-  }
 }

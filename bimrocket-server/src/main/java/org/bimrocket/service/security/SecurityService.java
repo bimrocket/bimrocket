@@ -405,7 +405,7 @@ public class SecurityService
           if (!adminPassword.equals(password))
             throw new NotAuthorizedException();
         }
-        else if (user.getPassword() == null) // LDAP User
+        else if (user.getPasswordHash() == null) // LDAP User
         {
           if (ldapConnector == null ||
               !ldapConnector.validateCredentials(userId, password))
@@ -415,7 +415,7 @@ public class SecurityService
         {
           String passwordHash = hash(password);
 
-          if (!user.getPassword().equals(passwordHash))
+          if (!user.getPasswordHash().equals(passwordHash))
             throw new NotAuthorizedException();
         }
         return user;

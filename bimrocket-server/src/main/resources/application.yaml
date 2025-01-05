@@ -75,22 +75,22 @@ services:
     from: 'admin@bimrocket.org'
     contentType: 'text/plain;charset=ISO-8859-1'
 
+  # proxy service
+  proxy:
+    validUrls:
+      - http://gis.santfeliu.cat/
+      - https://gis.santfeliu.cat/
+      - https://api.openai.com/
+      - https://api.bsdd.buildingsmart.org
+    aliases:
+      chatgpt:
+        url: https://api.openai.com/v1/chat/completions
+        ipFilter: ''
+        authorization: changeit
+
 # database config
 databases:
   orientdb:
     url: remote:localhost/bimdb
     username: root
     password: orientdb
-
-# proxy config
-proxy:
-  validUrls:
-    - http://gis.santfeliu.cat/
-    - https://gis.santfeliu.cat/
-    - https://api.openai.com/
-    - https://api.bsdd.buildingsmart.org
-  aliases:
-    chatgpt:
-      url: https://api.openai.com/v1/chat/completions
-      ipFilter: ''
-      authorization: changeit

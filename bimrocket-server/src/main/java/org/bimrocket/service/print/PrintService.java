@@ -74,16 +74,11 @@ public class PrintService
   {
     LOGGER.log(Level.INFO, "Init PrintService");
 
-    String baseProperty =
-      config.getOptionalValue(BASE + "property", String.class)
-        .orElse("user.home");
-
     String baseDirectory =
       config.getOptionalValue(BASE + "directory", String.class)
         .orElse("print");
 
-    String basePath = System.getProperty(baseProperty);
-    baseDir = new File(basePath, baseDirectory);
+    baseDir = new File(baseDirectory);
     if (!baseDir.exists())
     {
       baseDir.mkdirs();

@@ -302,17 +302,15 @@ public class CloudFsEndpoint
 
   private File getBaseDir()
   {
-    String baseProperty = config.getValue(BASE + "property", String.class);
     String baseDirectory = config.getValue(BASE + "directory", String.class);
-    String basePath = System.getProperty(baseProperty);
-    File baseDir = new File(basePath, baseDirectory);
+    File baseDir = new File(baseDirectory);
     if (!baseDir.exists())
     {
       baseDir.mkdirs();
-      List<String> directories = config.getValues(BASE + "directories", String.class);
-      for (String dirName : directories)
+      List<String> folders = config.getValues(BASE + "folders", String.class);
+      for (String folder : folders)
       {
-        File dir = new File(baseDir, dirName);
+        File dir = new File(baseDir, folder);
         dir.mkdir();
       }
     }

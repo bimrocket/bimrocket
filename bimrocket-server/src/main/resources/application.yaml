@@ -1,10 +1,13 @@
 # bimrocket-server config
 
 # config locations
+bimrocket:
+  location: ${user.home}/bimrocket
+
 smallrye:
   config:
     locations:
-      - ${user.dir}/config/bimrocket-server.yaml
+      - ${bimrocket.location}/bimrocket-server.yaml
 
 # service config
 services:
@@ -42,9 +45,8 @@ services:
 
   # cloudfs service
   cloudfs:
-    property: user.home
-    directory: cloudfs
-    directories:
+    directory: ${bimrocket.location}/cloudfs
+    folders:
       - models
       - scripts
       - reports
@@ -58,8 +60,7 @@ services:
 
   # print service
   print:
-    property: user.home
-    directory: printsvc
+    directory: ${bimrocket.location}/printsvc
     title: 'Bimrocket print'
     creator: 'Bimrocket PrintService'
 
@@ -78,10 +79,8 @@ services:
   # proxy service
   proxy:
     validUrls:
-      - http://gis.santfeliu.cat/
-      - https://gis.santfeliu.cat/
       - https://api.openai.com/
-      - https://api.bsdd.buildingsmart.org
+      - https://api.bsdd.buildingsmart.org/
     aliases:
       chatgpt:
         url: https://api.openai.com/v1/chat/completions

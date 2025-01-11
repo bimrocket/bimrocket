@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -33,6 +33,7 @@ package org.bimrocket.service.ifcdb;
 
 import java.util.ArrayList;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.record.OElement;
 import java.util.List;
 import org.bimrocket.express.*;
@@ -92,6 +93,8 @@ public class OrientStepLoader extends StepLoader<OElement>
   {
     OElementBuilder(ExpressEntity type)
     {
+      createClassIfNotExists(type);
+
       this.type = type;
       this.instance = db.newElement(type.getName());
       entities.add(instance);
@@ -112,6 +115,8 @@ public class OrientStepLoader extends StepLoader<OElement>
   {
     SimpleOElementBuilder(ExpressDefinedType type)
     {
+      createClassIfNotExists(type);
+
       this.type = type;
       this.instance = db.newElement(type.getName());
       entities.add(instance);
@@ -121,6 +126,24 @@ public class OrientStepLoader extends StepLoader<OElement>
     public void set(int index, Object item)
     {
       instance.setProperty("value", item);
+    }
+  }
+
+  protected void createClassIfNotExists(ExpressEntity type)
+  {
+    OSchema schema = db.getMetadata().getSchema();
+    if (schema.getClass(type.getName()) == null)
+    {
+      db.createClass(type.getName());
+    }
+  }
+
+  protected void createClassIfNotExists(ExpressDefinedType type)
+  {
+    OSchema schema = db.getMetadata().getSchema();
+    if (schema.getClass(type.getName()) == null)
+    {
+      db.createClass(type.getName());
     }
   }
 }

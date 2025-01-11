@@ -31,17 +31,21 @@
 package org.bimrocket.dao.orientdb;
 
 import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.storage.cache.local.OWOWCache;
+import com.orientechnologies.orient.core.storage.impl.local.OAbstractPaginatedStorage;
+import com.orientechnologies.orient.core.storage.impl.local.paginated.wal.cas.CASDiskWriteAheadLog;
 import com.orientechnologies.orient.object.db.ODatabaseObjectPool;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.microprofile.config.Config;
@@ -54,6 +58,8 @@ import org.eclipse.microprofile.config.Config;
 public class OrientPoolManager
 {
   static final Logger LOGGER = Logger.getLogger("OrientPoolManager");
+
+  static final String BASE = "databases.";
 
   @Inject
   Config config;
@@ -72,61 +78,91 @@ public class OrientPoolManager
   {
     LOGGER.log(Level.INFO, "Destroying OrientPoolManager");
 
-    poolCache.forEach((dbName, db) -> {
-      LOGGER.log(Level.INFO, "Closing pool {0}", dbName);
+    poolCache.forEach((dbAlias, db) -> {
+      LOGGER.log(Level.INFO, "Closing pool {0}", dbAlias);
       db.close();
     });
 
     poolCache.clear();
 
     Orient.instance().shutdown();
+
+    shutdownExecutors();
   }
 
-  public synchronized ODatabaseObject getConnection(String dbName)
+  public synchronized ODatabaseObject getObjectConnection(String dbAlias)
   {
-    ODatabaseObjectPool pool = poolCache.get(dbName);
+    ODatabaseObjectPool pool = poolCache.get(dbAlias);
     if (pool == null)
     {
-      pool = createPool(dbName);
-      poolCache.put(dbName, pool);
+      pool = createObjectPool(dbAlias);
+      poolCache.put(dbAlias, pool);
     }
     return pool.acquire();
   }
 
-  private ODatabaseObjectPool createPool(String name)
+  private ODatabaseObjectPool createObjectPool(String dbAlias)
   {
-    String base = "databases.";
-    String url = config.getValue(base + name + ".url", String.class);
+    String url = config.getValue(BASE + dbAlias + ".url", String.class);
     String username =
-      config.getOptionalValue(base + name + ".username", String.class).orElse(null);
+      config.getOptionalValue(BASE + dbAlias + ".username", String.class).orElse(null);
     String password =
-      config.getOptionalValue(base + name + ".password", String.class).orElse(null);
+      config.getOptionalValue(BASE + dbAlias + ".password", String.class).orElse(null);
 
-    OrientDBConfig orientConfig = OrientDBConfig.defaultConfig();
-
-    if (url.startsWith("embedded:"))
-    {
-      int index = url.lastIndexOf("/");
-      if (index != -1)
-      {
-        String path = url.substring(0, index + 1);
-        String dbName = url.substring(index + 1);
-
-        try (OrientDB orientDB = new OrientDB(path, orientConfig))
-        {
-          if (!orientDB.exists(dbName))
-          {
-            LOGGER.log(Level.INFO, "Creating embedded database {0} in {1}",
-              new Object[]{dbName, path});
-            orientDB.create(dbName, ODatabaseType.PLOCAL);
-          }
-        }
-      }
-    }
+    createDatabaseIfNotExists(url, username, password);
 
     ODatabaseObjectPool pool = new ODatabaseObjectPool(url,
-      username, password, orientConfig);
+      username, password, OrientDBConfig.defaultConfig());
 
     return pool;
+  }
+
+  private void createDatabaseIfNotExists(String url,
+    String username, String password)
+  {
+    int index = url.lastIndexOf("/");
+    if (index == -1) throw new RuntimeException("Invalid database url: " + url);
+
+    String serverUrl = url.substring(0, index);
+    String dbName = url.substring(index + 1);
+
+    try (OrientDB server = new OrientDB(serverUrl,
+      username, password, OrientDBConfig.defaultConfig()))
+    {
+      if (!server.exists(dbName))
+      {
+        LOGGER.log(Level.INFO, "Creating database {0} in {1}",
+          new Object[]{ dbName, serverUrl });
+
+        server.execute(
+          "create database ? plocal users (? identified by ? role admin) ",
+          dbName, username, password);
+      }
+    }
+  }
+
+  private void shutdownExecutors()
+  {
+    shutdownExecutor(OWOWCache.class, "commitExecutor");
+    shutdownExecutor(OAbstractPaginatedStorage.class, "fuzzyCheckpointExecutor");
+    shutdownExecutor(CASDiskWriteAheadLog.class, "commitExecutor");
+    shutdownExecutor(CASDiskWriteAheadLog.class, "writeExecutor");
+  }
+
+  private void shutdownExecutor(Class<?> cls, String fieldName)
+  {
+    try
+    {
+      LOGGER.log(Level.INFO, "Shutting down executor {0}",
+        cls.getSimpleName() + "." + fieldName);
+      Field field = cls.getDeclaredField(fieldName);
+      field.setAccessible(true);
+      ExecutorService executorService = (ExecutorService)field.get(null);
+      executorService.shutdownNow();
+    }
+    catch (Exception ex)
+    {
+      // ignore
+    }
   }
 }

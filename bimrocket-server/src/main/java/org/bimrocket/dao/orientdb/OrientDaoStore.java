@@ -78,7 +78,7 @@ public class OrientDaoStore implements DaoStore
   @Override
   public DaoConnection getConnection()
   {
-    ODatabaseObject db = poolManager.getConnection(databaseName);
+    ODatabaseObject db = poolManager.getObjectConnection(databaseName);
 
     if (!initialized)
     {

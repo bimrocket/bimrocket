@@ -235,7 +235,13 @@ public class IfcDatabaseService
     String password = config.getValue(BASE + "password", String.class);
 
     if (!server.exists(dbName))
-      throw new Exception("No database for schema " + dbName);
+    {
+      LOGGER.log(Level.INFO, "Creating database {0}", dbName);
+
+      server.execute(
+        "create database ? plocal users (? identified by ? role admin) ",
+        dbName, username, password);
+    }
 
     ODatabaseSession db = server.open(dbName, username, password);
 

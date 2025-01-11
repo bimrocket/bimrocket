@@ -72,6 +72,8 @@ class IFCDBPanel extends Panel
 
     this.modelIdElem = Controls.addTextField(this.modelTabElem, "ifc_modelid", "bim|label.ifcdb_modelid");
     this.modelIdElem.parentElement.className = "ifcdb_modelid";
+    this.modelIdElem.spellcheck = false;
+    this.modelIdElem.addEventListener("keyup", () => this.updateButtons());
 
     const modelButtonsElem = document.createElement("div");
     modelButtonsElem.className = "ifcdb_buttons";
@@ -134,6 +136,7 @@ class IFCDBPanel extends Panel
   onShow()
   {
     this.updateServices();
+    this.updateButtons();
   }
 
   updateServices()
@@ -162,6 +165,14 @@ class IFCDBPanel extends Panel
     this.addServiceButton.style.display = "";
     this.editServiceButton.style.display = service ? "" : "none";
     this.deleteServiceButton.style.display = service ? "" : "none";
+  }
+
+  updateButtons()
+  {
+    const disabled = this.modelIdElem.value.trim().length === 0;
+    this.getModelButton.disabled = disabled;
+    this.putModelButton.disabled = disabled;
+    this.deleteModelButton.disabled = disabled;
   }
 
   showAddDialog()
@@ -261,7 +272,7 @@ class IFCDBPanel extends Panel
     try
     {
       this.showProgressBar("Downloading model...");
-      const modelId = this.modelIdElem.value;
+      const modelId = this.modelIdElem.value.trim();
       const data = await this.service.getModel(modelId);
       this.loadModel(data);
     }
@@ -280,7 +291,7 @@ class IFCDBPanel extends Panel
     try
     {
       this.showProgressBar("Uploading model...");
-      const modelId = this.modelIdElem.value;
+      const modelId = this.modelIdElem.value.trim();
       const response = await this.service.putModel(modelId, data);
       console.info(response);
     }
@@ -299,7 +310,7 @@ class IFCDBPanel extends Panel
     try
     {
       this.showProgressBar("Deleting model...");
-      const modelId = this.modelIdElem.value;
+      const modelId = this.modelIdElem.value.trim();
       const response = await this.service.deleteModel(modelId);
       console.info(response);
     }
@@ -376,17 +387,21 @@ class IFCDBPanel extends Panel
       },
       onCompleted : object =>
       {
-        object.updateMatrix();
-        application.initControllers(object);
-        application.addObject(object, application.baseObject, false, true);
-        let container = application.container;
-        let aspect = container.clientWidth / container.clientHeight;
-        let camera = application.camera;
+        const container = application.container;
+        const baseObject = application.baseObject;
+        const aspect = container.clientWidth / container.clientHeight;
+        const camera = application.camera;
 
-        object.updateMatrixWorld(true);
+        object.updateMatrix();
+        application.addObject(object, baseObject);
+
+        ObjectUtils.reduceCoordinates(baseObject);
         ObjectUtils.zoomAll(camera, object, aspect);
 
-        application.notifyObjectsChanged(camera, this);
+        application.selection.set(object);
+        application.initControllers(object);
+
+        application.notifyObjectsChanged([baseObject, camera], this);
         application.progressBar.visible = false;
       },
       onError : error =>

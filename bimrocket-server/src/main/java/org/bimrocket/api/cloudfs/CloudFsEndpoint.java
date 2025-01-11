@@ -78,6 +78,7 @@ import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import java.util.Date;
 import org.bimrocket.api.security.User;
+import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.URIEncoder;
 import org.eclipse.microprofile.config.Config;
@@ -465,6 +466,7 @@ public class CloudFsEndpoint
       }
       User user = securityService.getCurrentUser();
       return fileRoles.isEmpty() ||
+        user.getRoleIds().contains(ADMIN_ROLE) ||
         !Collections.disjoint(fileRoles, user.getRoleIds());
     }
     catch (Exception ex)

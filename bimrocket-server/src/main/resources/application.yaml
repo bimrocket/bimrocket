@@ -2,7 +2,7 @@
 
 # config locations
 bimrocket:
-  location: ${user.home}/bimrocket
+  location: ${user.home.slash}/bimrocket
 
 smallrye:
   config:
@@ -15,7 +15,7 @@ services:
   # security service
   security:
     adminPassword: bimrocket
-    passwordPattern: '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_\-])(?=\S+$).{8,}$'
+    passwordPattern: '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_\-\.])(?=\S+$).{8,}$'
     authorizationCacheTimeout: 300
     userCacheTimeout: 300
     roleCacheTimeout: 300
@@ -54,7 +54,7 @@ services:
 
   # ifcdb service
   ifcdb:
-    url: remote:localhost
+    url: embedded:${bimrocket.location}/db
     username: root
     password: orientdb
 
@@ -90,6 +90,6 @@ services:
 # database config
 databases:
   orientdb:
-    url: remote:localhost/bimdb
-    username: root
+    url: embedded:${bimrocket.location}/db/bimdb
+    username: admin
     password: orientdb

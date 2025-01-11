@@ -61,8 +61,13 @@ public class BimRocketApplication extends Application
   public void init()
   {
     LOGGER.log(Level.INFO, "BimRocket INIT");
-    String userDir = System.getProperty("user.dir");
-    LOGGER.log(Level.INFO, "Current working directory: {0}", userDir);
+
+    String userHome = System.getProperty("user.home");
+    int index = userHome.indexOf(":");
+    if (index != -1) userHome = userHome.substring(index + 1);
+    String userHomeSlash = userHome.replace('\\', '/');
+    System.setProperty("user.home.slash", userHomeSlash);
+    LOGGER.log(Level.INFO, "User home: {0}", userHomeSlash);
 
     createDefaultConfig();
   }
@@ -88,7 +93,8 @@ public class BimRocketApplication extends Application
         try
         {
           URI uri = new URI(location);
-          if (uri.getScheme() == null)
+          String scheme = uri.getScheme();
+          if (scheme == null || "file".equals(scheme))
           {
             file = new File(uri.getPath());
             break;

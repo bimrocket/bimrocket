@@ -38,7 +38,7 @@ import org.bimrocket.dao.DaoStore;
 
 public class OrientDaoStore implements DaoStore
 {
-  private String databaseName;
+  private String dbAlias;
   private String entitiesPackage;
 
   private boolean initialized;
@@ -46,14 +46,14 @@ public class OrientDaoStore implements DaoStore
   @Inject
   OrientPoolManager poolManager;
 
-  public String getDatabaseName()
+  public String getDbAlias()
   {
-    return databaseName;
+    return dbAlias;
   }
 
-  public void setDatabaseName(String databaseName)
+  public void setDbAlias(String dbAlias)
   {
-    this.databaseName = databaseName;
+    this.dbAlias = dbAlias;
   }
 
   public String getEntitiesPackage()
@@ -78,7 +78,7 @@ public class OrientDaoStore implements DaoStore
   @Override
   public DaoConnection getConnection()
   {
-    ODatabaseObject db = poolManager.getObjectConnection(databaseName);
+    ODatabaseObject db = poolManager.getObjectConnection(dbAlias);
 
     if (!initialized)
     {

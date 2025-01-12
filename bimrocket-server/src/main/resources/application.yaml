@@ -29,7 +29,7 @@ services:
     store:
       class: org.bimrocket.service.security.store.SecurityOrientDaoStore
       orient:
-        database: orientdb
+        database: bimdb
 
   # bcf service
   bcf:
@@ -37,7 +37,7 @@ services:
     store:
       class: org.bimrocket.service.bcf.store.BcfOrientDaoStore
       orient:
-        database: orientdb
+        database: bimdb
     mail:
       createTopic:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
@@ -54,9 +54,6 @@ services:
 
   # ifcdb service
   ifcdb:
-    url: embedded:${bimrocket.location}/db
-    username: root
-    password: orientdb
 
   # print service
   print:
@@ -89,7 +86,16 @@ services:
 
 # database config
 databases:
-  orientdb:
+  bimdb:
     url: embedded:${bimrocket.location}/db/bimdb
-    username: admin
+    username: root
     password: orientdb
+  IFC2X3:
+    url: embedded:${bimrocket.location}/db/IFC2X3
+    username: root
+    password: orientdb
+  IFC4:
+    url: embedded:${bimrocket.location}/db/IFC4
+    username: root
+    password: orientdb
+

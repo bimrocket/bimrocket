@@ -56,7 +56,7 @@ public class SecurityOrientDaoStore extends OrientDaoStore
   public void init()
   {
     Config config = ConfigProvider.getConfig();
-    setDatabaseName(config.getValue(BASE + "database", String.class));
+    setDbAlias(config.getValue(BASE + "database", String.class));
   }
 
   @Override

@@ -31,13 +31,16 @@
 package org.bimrocket.dao.orientdb;
 
 import com.orientechnologies.orient.core.Orient;
+import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
+import com.orientechnologies.orient.core.db.ODatabasePool;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
 import com.orientechnologies.orient.core.storage.cache.local.OWOWCache;
 import com.orientechnologies.orient.core.storage.impl.local.OAbstractPaginatedStorage;
 import com.orientechnologies.orient.core.storage.impl.local.paginated.wal.cas.CASDiskWriteAheadLog;
-import com.orientechnologies.orient.object.db.ODatabaseObjectPool;
+import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -64,7 +67,7 @@ public class OrientPoolManager
   @Inject
   Config config;
 
-  Map<String, ODatabaseObjectPool> poolCache = new HashMap<>();
+  Map<String, ODatabasePool> poolCache = new HashMap<>();
 
   @PostConstruct
   public void init()
@@ -90,20 +93,34 @@ public class OrientPoolManager
     shutdownExecutors();
   }
 
-  public synchronized ODatabaseObject getObjectConnection(String dbAlias)
+  public synchronized ODatabaseDocument getDocumentConnection(String dbAlias)
   {
-    ODatabaseObjectPool pool = poolCache.get(dbAlias);
-    if (pool == null)
-    {
-      pool = createObjectPool(dbAlias);
-      poolCache.put(dbAlias, pool);
-    }
+    ODatabasePool pool = getPool(dbAlias);
     return pool.acquire();
   }
 
-  private ODatabaseObjectPool createObjectPool(String dbAlias)
+  public synchronized ODatabaseObject getObjectConnection(String dbAlias)
   {
-    String url = config.getValue(BASE + dbAlias + ".url", String.class);
+    ODatabasePool pool = getPool(dbAlias);
+    return new OObjectDatabaseTx((ODatabaseDocumentInternal) pool.acquire());
+  }
+
+  private ODatabasePool getPool(String dbAlias)
+  {
+    ODatabasePool pool = poolCache.get(dbAlias);
+    if (pool == null)
+    {
+      pool = createPool(dbAlias);
+      poolCache.put(dbAlias, pool);
+    }
+    return pool;
+  }
+
+  private synchronized ODatabasePool createPool(String dbAlias)
+  {
+    String url = config.getOptionalValue(BASE + dbAlias + ".url", String.class).orElse(null);
+    if (url == null) throw new RuntimeException("Invalid dbAlias: " + dbAlias);
+
     String username =
       config.getOptionalValue(BASE + dbAlias + ".username", String.class).orElse(null);
     String password =
@@ -111,8 +128,7 @@ public class OrientPoolManager
 
     createDatabaseIfNotExists(url, username, password);
 
-    ODatabaseObjectPool pool = new ODatabaseObjectPool(url,
-      username, password, OrientDBConfig.defaultConfig());
+    ODatabasePool pool = new ODatabasePool(url, username, password);
 
     return pool;
   }

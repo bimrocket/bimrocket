@@ -30,10 +30,9 @@
  */
 package org.bimrocket.service.ifcdb;
 
-import com.orientechnologies.orient.core.db.ODatabaseSession;
-import com.orientechnologies.orient.core.db.OrientDB;
-import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
@@ -52,6 +51,7 @@ import java.util.logging.Logger;
 import org.bimrocket.api.ifcdb.IfcDeleteResult;
 import org.bimrocket.api.ifcdb.IfcCommand;
 import org.bimrocket.api.ifcdb.IfcUploadResult;
+import org.bimrocket.dao.orientdb.OrientPoolManager;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
 import org.eclipse.microprofile.config.Config;
@@ -71,6 +71,9 @@ public class IfcDatabaseService
   @Inject
   Config config;
 
+  @Inject
+  OrientPoolManager poolManager;
+
   @PostConstruct
   public void init()
   {
@@ -83,34 +86,33 @@ public class IfcDatabaseService
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
-    String dbName = schemaName;
+    String dbAlias = schemaName;
 
-    try (OrientDB orientDB = getServer())
+    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
     {
-      try (ODatabaseDocument db = openDB(orientDB, dbName))
-      {
-        String outputFormat = command.getOutputFormat();
+      registerModelClass(db);
 
-        if ("json".equals(outputFormat))
+      String outputFormat = command.getOutputFormat();
+
+      if ("json".equals(outputFormat))
+      {
+        ArrayList<OResult> results = new ArrayList<>();
+        try (OResultSet rs = db.command(command.getQuery()))
         {
-          ArrayList<OResult> results = new ArrayList<>();
-          try (OResultSet rs = db.command(command.getQuery()))
-          {
-            rs.stream().forEach(result -> results.add(result));
-          }
-          exportToJson(results, file);
+          rs.stream().forEach(result -> results.add(result));
         }
-        else
+        exportToJson(results, file);
+      }
+      else
+      {
+        ArrayList<OElement> elements = new ArrayList<>();
+        try (OResultSet rs = db.query(command.getQuery()))
         {
-          ArrayList<OElement> elements = new ArrayList<>();
-          try (OResultSet rs = db.query(command.getQuery()))
-          {
-            rs.elementStream().forEach(element -> elements.add(element));
-          }
-          OrientStepExporter exporter = new OrientStepExporter(schema);
-          exporter.export(new OutputStreamWriter(
-            new FileOutputStream(file)), elements);
+          rs.elementStream().forEach(element -> elements.add(element));
         }
+        OrientStepExporter exporter = new OrientStepExporter(schema);
+        exporter.export(new OutputStreamWriter(
+          new FileOutputStream(file)), elements);
       }
     }
   }
@@ -121,24 +123,23 @@ public class IfcDatabaseService
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
-    String dbName = schemaName;
+    String dbAlias = schemaName;
 
-    try (OrientDB orientDB = getServer())
+    ArrayList<OElement> elements = new ArrayList<>();
+
+    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
     {
-      ArrayList<OElement> elements = new ArrayList<>();
+      registerModelClass(db);
 
-      try (ODatabaseDocument db = openDB(orientDB, dbName))
+      try (OResultSet rs = db.query("select expand(Entities) from IfcModel where Id = ?", modelId))
       {
-        try (OResultSet rs = db.query("select expand(Entities) from IfcModel where Id = ?", modelId))
-        {
-          rs.elementStream().forEach(element -> elements.add(element));
-        }
-        if (elements.isEmpty()) throw new Exception("There is no model with that Id");
-
-        OrientStepExporter exporter = new OrientStepExporter(schema);
-        exporter.export(new OutputStreamWriter(
-          new FileOutputStream(ifcFile)), elements);
+        rs.elementStream().forEach(element -> elements.add(element));
       }
+      if (elements.isEmpty()) throw new Exception("There is no model with that Id");
+
+      OrientStepExporter exporter = new OrientStepExporter(schema);
+      exporter.export(new OutputStreamWriter(
+        new FileOutputStream(ifcFile)), elements);
     }
   }
 
@@ -148,31 +149,30 @@ public class IfcDatabaseService
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
-    String dbName = schemaName;
+    String dbAlias = schemaName;
 
     IfcUploadResult uploadResult = new IfcUploadResult();
 
-    try (OrientDB orientDB = getServer())
+    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
     {
-      try (ODatabaseDocument db = openDB(orientDB, dbName))
+      registerModelClass(db);
+
+      try (OResultSet rs = db.query("select 1 from IfcModel where Id = ?", modelId))
       {
-        try (OResultSet rs = db.query("select 1 from IfcModel where Id = ?", modelId))
-        {
-          if (rs.hasNext())
-            throw new Exception("A model with that identifier already exists");
-        }
-
-        OrientStepLoader loader = new OrientStepLoader(db, schema);
-        OElement model = loader.load(ifcFile);
-
-        model.setProperty("Id", modelId);
-        LOGGER.log(Level.INFO, "Saving model {0}", modelId);
-        db.save(model);
-
-        List<? extends Object> elements =
-          (List<? extends Object>)model.getProperty("Entities");
-        uploadResult.setCount(elements.size());
+        if (rs.hasNext())
+          throw new Exception("A model with that identifier already exists");
       }
+
+      OrientStepLoader loader = new OrientStepLoader(db, schema);
+      OElement model = loader.load(ifcFile);
+
+      model.setProperty("Id", modelId);
+      LOGGER.log(Level.INFO, "Saving model {0}", modelId);
+      db.save(model);
+
+      List<? extends Object> elements =
+        (List<? extends Object>)model.getProperty("Entities");
+      uploadResult.setCount(elements.size());
     }
     return uploadResult;
   }
@@ -180,30 +180,29 @@ public class IfcDatabaseService
   public IfcDeleteResult deleteModel(String schemaName, String modelId)
     throws Exception
   {
-    String dbName = schemaName;
+    String dbAlias = schemaName;
     IfcDeleteResult deleteResult = new IfcDeleteResult();
 
-    try (OrientDB orientDB = getServer())
+    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
     {
-      try (ODatabaseDocument db = openDB(orientDB, dbName))
+      registerModelClass(db);
+
+      try (OResultSet rs = db.command(
+        "delete from (select expand(Entities) from IfcModel where Id = ?)", modelId))
       {
-        try (OResultSet rs = db.command(
-          "delete from (select expand(Entities) from IfcModel where Id = ?)", modelId))
+        if (rs.hasNext())
         {
-          if (rs.hasNext())
-          {
-            OResult row = rs.next();
-            Number count = (Number)row.getProperty("count");
-            deleteResult.setCount(count.intValue());
-          }
-          db.command("delete from IfcModel where Id = ?", modelId);
+          OResult row = rs.next();
+          Number count = (Number)row.getProperty("count");
+          deleteResult.setCount(count.intValue());
         }
+        db.command("delete from IfcModel where Id = ?", modelId);
       }
     }
     return deleteResult;
   }
 
-  void exportToJson(List<OResult> results, File file) throws IOException
+  private void exportToJson(List<OResult> results, File file) throws IOException
   {
     try (PrintWriter writer = new PrintWriter(file, "UTF-8"))
     {
@@ -218,35 +217,14 @@ public class IfcDatabaseService
     }
   }
 
-  OrientDB getServer()
+  private void registerModelClass(ODatabaseDocument db)
   {
-    String url = config.getValue(BASE + "url", String.class);
-    String username = config.getValue(BASE + "username", String.class);
-    String password = config.getValue(BASE + "password", String.class);
-
-    LOGGER.log(Level.INFO, "Connect to {0}@{1}", new Object[]{url, username});
-
-    return new OrientDB(url, username, password, OrientDBConfig.defaultConfig());
-  }
-
-  ODatabaseDocument openDB(OrientDB server, String dbName) throws Exception
-  {
-    String username = config.getValue(BASE + "username", String.class);
-    String password = config.getValue(BASE + "password", String.class);
-
-    if (!server.exists(dbName))
+    if (db.getClass("IfcModel") == null)
     {
-      LOGGER.log(Level.INFO, "Creating database {0}", dbName);
-
-      server.execute(
-        "create database ? plocal users (? identified by ? role admin) ",
-        dbName, username, password);
+      OClass modelClass = db.createClass("IfcModel");
+      modelClass.createProperty("Id", OType.STRING);
+      modelClass.createProperty("Name", OType.STRING);
+      modelClass.createProperty("Entities", OType.LINKLIST);
     }
-
-    ODatabaseSession db = server.open(dbName, username, password);
-
-    db.createClassIfNotExist("IfcModel");
-
-    return db;
   }
 }

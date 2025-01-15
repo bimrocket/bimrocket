@@ -27,7 +27,7 @@ services:
       adminUsername: admin
       adminPassword: changeit
     store:
-      class: org.bimrocket.service.security.store.SecurityOrientDaoStore
+      class: org.bimrocket.service.security.store.orient.SecurityOrientDaoStore
       orient:
         database: bimdb
 
@@ -35,7 +35,7 @@ services:
   bcf:
     projectTemplate:
     store:
-      class: org.bimrocket.service.bcf.store.BcfOrientDaoStore
+      class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
       orient:
         database: bimdb
     mail:

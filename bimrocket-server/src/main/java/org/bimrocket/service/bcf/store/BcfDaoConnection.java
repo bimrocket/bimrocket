@@ -28,14 +28,32 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.security.store;
+package org.bimrocket.service.bcf.store;
 
-import org.bimrocket.dao.DaoStore;
+import org.bimrocket.api.bcf.BcfComment;
+import org.bimrocket.api.bcf.BcfDocumentReference;
+import org.bimrocket.api.bcf.BcfExtensions;
+import org.bimrocket.api.bcf.BcfProject;
+import org.bimrocket.api.bcf.BcfTopic;
+import org.bimrocket.api.bcf.BcfViewpoint;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.DaoConnection;
 
 /**
  *
  * @author realor
  */
-public interface SecurityDaoStore extends DaoStore<SecurityDaoConnection>
+public interface BcfDaoConnection extends DaoConnection
 {
+  Dao<BcfProject> getProjectDao();
+
+  Dao<BcfExtensions> getExtensionsDao();
+
+  Dao<BcfTopic> getTopicDao();
+
+  Dao<BcfComment> getCommentDao();
+
+  Dao<BcfViewpoint> getViewpointDao();
+
+  Dao<BcfDocumentReference> getDocumentReferenceDao();
 }

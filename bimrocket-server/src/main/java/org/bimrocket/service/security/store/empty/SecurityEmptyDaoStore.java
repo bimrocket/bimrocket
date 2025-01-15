@@ -28,14 +28,22 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.security.store;
+package org.bimrocket.service.security.store.empty;
 
-import org.bimrocket.dao.DaoStore;
+import org.bimrocket.dao.empty.EmptyDaoStore;
+import org.bimrocket.service.security.store.SecurityDaoConnection;
+import org.bimrocket.service.security.store.SecurityDaoStore;
 
 /**
  *
  * @author realor
  */
-public interface SecurityDaoStore extends DaoStore<SecurityDaoConnection>
+public class SecurityEmptyDaoStore extends EmptyDaoStore<SecurityDaoConnection>
+  implements SecurityDaoStore
 {
+  @Override
+  public SecurityDaoConnection getConnection()
+  {
+    return new SecurityEmptyDaoConnection();
+  }
 }

@@ -28,14 +28,59 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.security.store;
+package org.bimrocket.service.bcf.store.empty;
 
-import org.bimrocket.dao.DaoStore;
+import org.bimrocket.api.bcf.BcfComment;
+import org.bimrocket.api.bcf.BcfDocumentReference;
+import org.bimrocket.api.bcf.BcfExtensions;
+import org.bimrocket.api.bcf.BcfProject;
+import org.bimrocket.api.bcf.BcfTopic;
+import org.bimrocket.api.bcf.BcfViewpoint;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.empty.EmptyDao;
+import org.bimrocket.dao.empty.EmptyDaoConnection;
+import org.bimrocket.service.bcf.store.BcfDaoConnection;
 
 /**
  *
  * @author realor
  */
-public interface SecurityDaoStore extends DaoStore<SecurityDaoConnection>
+public class BcfEmptyDaoConnection extends EmptyDaoConnection
+  implements BcfDaoConnection
 {
+  @Override
+  public Dao<BcfProject> getProjectDao()
+  {
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public Dao<BcfExtensions> getExtensionsDao()
+  {
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public Dao<BcfTopic> getTopicDao()
+  {
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public Dao<BcfComment> getCommentDao()
+  {
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public Dao<BcfViewpoint> getViewpointDao()
+  {
+    return new EmptyDao<>();
+  }
+
+  @Override
+  public Dao<BcfDocumentReference> getDocumentReferenceDao()
+  {
+    return new EmptyDao<>();
+  }
 }

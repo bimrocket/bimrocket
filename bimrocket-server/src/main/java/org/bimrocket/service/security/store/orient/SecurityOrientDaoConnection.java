@@ -28,15 +28,37 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.security.store;
+package org.bimrocket.service.security.store.orient;
 
-import org.bimrocket.dao.empty.EmptyDaoStore;
+import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import org.bimrocket.api.security.Role;
+import org.bimrocket.api.security.User;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.orient.OrientDao;
+import org.bimrocket.dao.orient.OrientDaoConnection;
+import org.bimrocket.service.security.store.SecurityDaoConnection;
 
 /**
  *
  * @author realor
  */
-public class SecurityEmptyDaoStore extends EmptyDaoStore
-  implements SecurityDaoStore
+public class SecurityOrientDaoConnection extends OrientDaoConnection
+  implements SecurityDaoConnection
 {
+  SecurityOrientDaoConnection(ODatabaseObject conn)
+  {
+    super(conn);
+  }
+
+  @Override
+  public Dao<User> getUserDao()
+  {
+    return new OrientDao<>(conn, User.class);
+  }
+
+  @Override
+  public Dao<Role> getRoleDao()
+  {
+    return new OrientDao<>(conn, Role.class);
+  }
 }

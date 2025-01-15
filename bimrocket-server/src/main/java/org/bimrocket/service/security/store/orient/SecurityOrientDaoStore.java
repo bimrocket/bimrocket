@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.security.store;
+package org.bimrocket.service.security.store.orient;
 
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
 import com.orientechnologies.orient.core.entity.OEntityManager;
@@ -38,7 +38,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.bimrocket.api.security.Role;
 import org.bimrocket.api.security.User;
-import org.bimrocket.dao.orientdb.OrientDaoStore;
+import org.bimrocket.dao.orient.OrientDaoStore;
+import org.bimrocket.service.security.store.SecurityDaoConnection;
+import org.bimrocket.service.security.store.SecurityDaoStore;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -47,7 +49,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
  * @author realor
  */
 @ApplicationScoped
-public class SecurityOrientDaoStore extends OrientDaoStore
+public class SecurityOrientDaoStore extends OrientDaoStore<SecurityDaoConnection>
   implements SecurityDaoStore
 {
   static final String BASE = "services.security.store.orient.";
@@ -83,5 +85,11 @@ public class SecurityOrientDaoStore extends OrientDaoStore
     OEntityManager entityManager = db.getEntityManager();
     entityManager.registerEntityClass(User.class);
     entityManager.registerEntityClass(Role.class);
+  }
+
+  @Override
+  public SecurityDaoConnection getConnection()
+  {
+    return new SecurityOrientDaoConnection(getOrientConnection());
   }
 }

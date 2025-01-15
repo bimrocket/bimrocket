@@ -28,14 +28,16 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.bcf.store;
+package org.bimrocket.service.bcf.store.orient;
 
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
 import com.orientechnologies.orient.core.entity.OEntityManager;
 import com.orientechnologies.orient.object.metadata.schema.OSchemaProxyObject;
 import jakarta.annotation.PostConstruct;
 import org.bimrocket.api.bcf.*;
-import org.bimrocket.dao.orientdb.OrientDaoStore;
+import org.bimrocket.dao.orient.OrientDaoStore;
+import org.bimrocket.service.bcf.store.BcfDaoConnection;
+import org.bimrocket.service.bcf.store.BcfDaoStore;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -43,8 +45,8 @@ import org.eclipse.microprofile.config.ConfigProvider;
  *
  * @author realor
  */
-public class BcfOrientDaoStore
-  extends OrientDaoStore implements BcfDaoStore
+public class BcfOrientDaoStore extends OrientDaoStore<BcfDaoConnection>
+  implements BcfDaoStore
 {
   static final String BASE = "services.bcf.store.orient.";
 
@@ -96,5 +98,11 @@ public class BcfOrientDaoStore
     entityManager.registerEntityClass(BcfVector.class);
     entityManager.registerEntityClass(BcfViewpoint.class);
     entityManager.registerEntityClass(BcfSnapshot.class);
+  }
+
+  @Override
+  public BcfDaoConnection getConnection()
+  {
+    return new BcfOrientDaoConnection(getOrientConnection());
   }
 }

@@ -36,6 +36,6 @@ import org.bimrocket.dao.DaoStore;
  *
  * @author realor
  */
-public interface BcfDaoStore extends DaoStore
+public interface BcfDaoStore extends DaoStore<BcfDaoConnection>
 {
 }

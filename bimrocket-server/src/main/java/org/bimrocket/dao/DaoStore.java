@@ -33,10 +33,11 @@ package org.bimrocket.dao;
 /**
  *
  * @author realor
+ * @param <C> DaoConnection
  */
-public interface DaoStore extends AutoCloseable
+public interface DaoStore<C extends DaoConnection> extends AutoCloseable
 {
-  DaoConnection getConnection();
+  C getConnection();
 
   @Override
   void close();

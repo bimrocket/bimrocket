@@ -28,15 +28,22 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.bcf.store;
+package org.bimrocket.service.bcf.store.empty;
 
 import org.bimrocket.dao.empty.EmptyDaoStore;
+import org.bimrocket.service.bcf.store.BcfDaoConnection;
+import org.bimrocket.service.bcf.store.BcfDaoStore;
 
 /**
  *
  * @author realor
  */
-public class BcfEmptyDaoStore extends EmptyDaoStore
+public class BcfEmptyDaoStore extends EmptyDaoStore<BcfDaoConnection>
   implements BcfDaoStore
 {
+  @Override
+  public BcfDaoConnection getConnection()
+  {
+    return new BcfEmptyDaoConnection();
+  }
 }

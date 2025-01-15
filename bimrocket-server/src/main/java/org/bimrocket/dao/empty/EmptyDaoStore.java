@@ -36,15 +36,11 @@ import org.bimrocket.dao.DaoStore;
 /**
  *
  * @author realor
+ * @param <C> DaoConnection
  */
-public class EmptyDaoStore implements DaoStore
+public abstract class EmptyDaoStore<C extends DaoConnection>
+  implements DaoStore<C>
 {
-  @Override
-  public DaoConnection getConnection()
-  {
-    return new EmptyDaoConnection();
-  }
-
   @Override
   public void close()
   {

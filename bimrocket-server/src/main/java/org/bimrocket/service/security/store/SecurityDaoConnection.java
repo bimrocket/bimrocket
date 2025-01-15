@@ -30,12 +30,18 @@
  */
 package org.bimrocket.service.security.store;
 
-import org.bimrocket.dao.DaoStore;
+import org.bimrocket.api.security.Role;
+import org.bimrocket.api.security.User;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.DaoConnection;
 
 /**
  *
  * @author realor
  */
-public interface SecurityDaoStore extends DaoStore<SecurityDaoConnection>
+public interface SecurityDaoConnection extends DaoConnection
 {
+  Dao<User> getUserDao();
+  
+  Dao<Role> getRoleDao();
 }

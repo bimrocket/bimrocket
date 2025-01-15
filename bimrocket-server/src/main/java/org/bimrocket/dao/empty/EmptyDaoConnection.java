@@ -30,7 +30,6 @@
  */
 package org.bimrocket.dao.empty;
 
-import org.bimrocket.dao.Dao;
 import org.bimrocket.dao.DaoConnection;
 
 /**
@@ -40,9 +39,13 @@ import org.bimrocket.dao.DaoConnection;
 public class EmptyDaoConnection implements DaoConnection
 {
   @Override
-  public <E> Dao<E> getDao(Class<E> cls)
+  public void commit()
   {
-    return new EmptyDao<>();
+  }
+
+  @Override
+  public void rollback()
+  {
   }
 
   @Override

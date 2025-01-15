@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 import org.bimrocket.api.ifcdb.IfcDeleteResult;
 import org.bimrocket.api.ifcdb.IfcCommand;
 import org.bimrocket.api.ifcdb.IfcUploadResult;
-import org.bimrocket.dao.orientdb.OrientPoolManager;
+import org.bimrocket.dao.orient.OrientPoolManager;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
 import org.eclipse.microprofile.config.Config;

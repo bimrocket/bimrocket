@@ -35,9 +35,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +63,7 @@ import org.bimrocket.service.bcf.store.BcfDaoConnection;
 import org.bimrocket.service.bcf.store.BcfDaoStore;
 import org.bimrocket.service.bcf.store.empty.BcfEmptyDaoStore;
 import org.bimrocket.service.security.SecurityService;
+import static org.bimrocket.util.TextUtils.getISODate;
 import org.eclipse.microprofile.config.Config;
 
 
@@ -298,7 +297,7 @@ public class BcfService
       Dao<BcfTopic> dao = conn.getTopicDao();
       topic.setId(UUID.randomUUID().toString());
       topic.setProjectId(projectId);
-      String dateString = getDateString();
+      String dateString = getISODate();
 
       topic.setCreationDate(dateString);
       topic.setModifyDate(dateString);
@@ -357,7 +356,7 @@ public class BcfService
       topic.setDescription(topicUpdate.getDescription());
       topic.setDueDate(topicUpdate.getDueDate());
       topic.setAssignedTo(topicUpdate.getAssignedTo());
-      String dateString = getDateString();
+      String dateString = getISODate();
       topic.setModifyDate(dateString);
       topic.setModifyAuthor(topicUpdate.getModifyAuthor());
       return dao.update(topic);
@@ -417,7 +416,7 @@ public class BcfService
       Dao<BcfComment> dao = conn.getCommentDao();
       comment.setId(UUID.randomUUID().toString());
       comment.setTopicId(topicId);
-      String dateString = getDateString();
+      String dateString = getISODate();
       comment.setDate(dateString);
       comment.setModifyDate(dateString);
       return dao.insert(comment);
@@ -439,7 +438,7 @@ public class BcfService
       comment.setComment(commentUpdate.getComment());
       comment.setViewpointId(commentUpdate.getViewpointId());
       comment.setReplayToCommentId(comment.getReplayToCommentId());
-      String dateString = getDateString();
+      String dateString = getISODate();
       comment.setModifyDate(dateString);
       return dao.update(comment);
     }
@@ -606,12 +605,5 @@ public class BcfService
 
     if (refs == 0)
       throw new InvalidRequestException("Must define document_guid or url");
-  }
-
-  private String getDateString()
-  {
-    Date now = new Date();
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    return df.format(now);
   }
 }

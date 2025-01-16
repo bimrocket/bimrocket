@@ -50,6 +50,7 @@ import java.util.Base64;
 import org.bimrocket.service.bcf.BcfService;
 import static org.bimrocket.api.bcf.BcfSnapshot.PNG_TYPE;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.bimrocket.api.ApiResult.OK;
 
 /**
  *
@@ -187,7 +188,7 @@ public class BcfEndpoint
     @PathParam("topicId") String topicId)
   {
     bcfService.deleteTopic(projectId, topicId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 
   /* Comments */
@@ -253,7 +254,7 @@ public class BcfEndpoint
     @PathParam("commentId") String commentId)
   {
     bcfService.deleteComment(projectId, topicId, commentId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 
   /* Viewpoints */
@@ -305,7 +306,7 @@ public class BcfEndpoint
     @PathParam("viewpointId") String viewpointId)
   {
     bcfService.deleteViewpoint(projectId, topicId, viewpointId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 
   @GET
@@ -384,6 +385,6 @@ public class BcfEndpoint
     @PathParam("documentReferenceId") String documentReferenceId)
   {
     bcfService.deleteDocumentReference(projectId, topicId, documentReferenceId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 }

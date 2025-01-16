@@ -47,6 +47,7 @@ import jakarta.ws.rs.QueryParam;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import static org.bimrocket.api.ApiResult.OK;
 import org.bimrocket.service.security.SecurityService;
 
 /**
@@ -113,7 +114,7 @@ public class SecurityEndpoint
   public Response deleteUser(@PathParam("userId") String userId)
   {
     securityService.deleteUser(userId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 
   @POST
@@ -129,7 +130,7 @@ public class SecurityEndpoint
     String newPassword = changePassword.getNewPassword();
 
     securityService.changePassword(userId, oldPassword, newPassword);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 
   /* Roles */
@@ -185,6 +186,6 @@ public class SecurityEndpoint
   public Response deleteRole(@PathParam("roleId") String roleId)
   {
     securityService.deleteRole(roleId);
-    return Response.ok().build();
+    return Response.ok(OK).build();
   }
 }

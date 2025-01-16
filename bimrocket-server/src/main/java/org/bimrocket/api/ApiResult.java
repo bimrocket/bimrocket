@@ -36,19 +36,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author realor
  */
-public class ApiError
+public class ApiResult
 {
+  public static final ApiResult OK = new ApiResult(200, "OK");
+
   @JsonProperty("code")
   private int code;
 
   @JsonProperty("message")
   private String message;
 
-  public ApiError()
+  public ApiResult()
   {
   }
 
-  public ApiError(int code, String message)
+  public ApiResult(int code, String message)
   {
     this.code = code;
     this.message = message;

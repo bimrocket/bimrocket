@@ -44,7 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import org.bimrocket.api.ApiError;
+import org.bimrocket.api.ApiResult;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
 import java.util.Collections;
@@ -108,7 +108,7 @@ public class AuthenticationFilter implements ContainerRequestFilter
       List<String> contentTypes = Arrays.asList(producesValue);
       if (contentTypes.contains(APPLICATION_JSON))
       {
-        ApiError error = new ApiError(statusCode, message);
+        ApiResult error = new ApiResult(statusCode, message);
         return Response.status(statusCode).entity(error).build();
       }
       else if (contentTypes.contains(TEXT_XML))

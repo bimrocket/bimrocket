@@ -51,7 +51,7 @@ public class ApiExceptionMapper
     @Override
     public Response toResponse(NotFoundException ex)
     {
-      ApiError error = new ApiError();
+      ApiResult error = new ApiResult();
 
       error.setCode(404);
       String message = ex.getMessage();
@@ -71,7 +71,7 @@ public class ApiExceptionMapper
     @Override
     public Response toResponse(InvalidRequestException ex)
     {
-      ApiError error = new ApiError();
+      ApiResult error = new ApiResult();
 
       error.setCode(400);
       String message = ex.getMessage();
@@ -91,7 +91,7 @@ public class ApiExceptionMapper
     @Override
     public Response toResponse(NotAuthorizedException ex)
     {
-      ApiError error = new ApiError();
+      ApiResult error = new ApiResult();
 
       error.setCode(401);
       String message = ex.getMessage();
@@ -111,7 +111,7 @@ public class ApiExceptionMapper
     @Override
     public Response toResponse(AccessDeniedException ex)
     {
-      ApiError error = new ApiError();
+      ApiResult error = new ApiResult();
 
       error.setCode(403);
       String message = ex.getMessage();
@@ -131,7 +131,7 @@ public class ApiExceptionMapper
     @Override
     public Response toResponse(Exception ex)
     {
-      ApiError error = new ApiError();
+      ApiResult error = new ApiResult();
 
       error.setCode(500);
       String message = ex.getMessage();

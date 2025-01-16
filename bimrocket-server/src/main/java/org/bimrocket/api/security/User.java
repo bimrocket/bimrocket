@@ -30,6 +30,8 @@
  */
 package org.bimrocket.api.security;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Id;
 import java.util.HashSet;
@@ -48,6 +50,7 @@ public class User
   @JsonProperty("display_name")
   String displayName;
 
+  @JsonInclude(Include.NON_NULL)
   @JsonProperty("password")
   String password;
 
@@ -59,6 +62,15 @@ public class User
 
   @JsonProperty("roles")
   Set<String> roleIds = new HashSet<>();
+
+  @JsonProperty("active")
+  Boolean active;
+
+  @JsonProperty("creation_date")
+  String creationDate;
+
+  @JsonProperty("modify_date")
+  String modifyDate;
 
   public String getId()
   {
@@ -118,5 +130,35 @@ public class User
   public void setRoleIds(Set<String> roleIds)
   {
     this.roleIds = roleIds;
+  }
+
+  public Boolean getActive()
+  {
+    return active;
+  }
+
+  public void setActive(Boolean active)
+  {
+    this.active = active;
+  }
+
+  public String getCreationDate()
+  {
+    return creationDate;
+  }
+
+  public void setCreationDate(String creationDate)
+  {
+    this.creationDate = creationDate;
+  }
+
+  public String getModifyDate()
+  {
+    return modifyDate;
+  }
+
+  public void setModifyDate(String modifyDate)
+  {
+    this.modifyDate = modifyDate;
   }
 }

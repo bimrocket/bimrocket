@@ -37,6 +37,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import static java.lang.Boolean.FALSE;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -62,6 +63,7 @@ import org.eclipse.microprofile.config.Config;
 import static org.bimrocket.service.security.SecurityConstants.*;
 import org.bimrocket.service.security.store.SecurityDaoConnection;
 import org.bimrocket.util.ExpiringCache;
+import static org.bimrocket.util.TextUtils.getISODate;
 
 /**
  *
@@ -197,26 +199,54 @@ public class SecurityService
   public User createUser(User user)
   {
     LOGGER.log(Level.INFO, "userId: {0}", user.getId());
+
     validateUser(user);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
       Dao<User> dao = conn.getUserDao();
+      User prevUser = dao.select(user.getId());
+      if (prevUser != null)
+        throw new InvalidRequestException("USER_ALREADY_EXISTS");
+
+      String dateString = getISODate();
+      user.setCreationDate(dateString);
+      user.setModifyDate(dateString);
+      if (user.getActive() == null)
+      {
+        user.setActive(true);
+      }
       return dao.insert(user);
     }
   }
 
-  public User updateUser(User user)
+  public User updateUser(User userUpdate)
   {
-    LOGGER.log(Level.INFO, "userId: {0}", user.getId());
-    validateUser(user);
+    String userId = userUpdate.getId();
+    LOGGER.log(Level.INFO, "userId: {0}", userId);
 
-    userCache.remove(user.getId());
+    validateUser(userUpdate);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
       Dao<User> dao = conn.getUserDao();
-      return dao.update(user);
+      User user = dao.select(userUpdate.getId());
+      if (user == null) throw new InvalidRequestException("USER_NOT_FOUND");
+
+      userCache.remove(userId);
+
+      user.setDisplayName(userUpdate.getDisplayName());
+      user.setEmail(userUpdate.getEmail());
+      if (userUpdate.getActive() != null)
+      {
+        user.setActive(userUpdate.getActive());
+      }
+      user.setRoleIds(userUpdate.getRoleIds());
+      user.setPasswordHash(userUpdate.getPasswordHash());
+      String dateString = getISODate();
+      user.setModifyDate(dateString);
+      user = dao.update(user);
+      return user;
     }
   }
 
@@ -400,6 +430,9 @@ public class SecurityService
           user.setDisplayName(userId);
         }
 
+        if (FALSE.equals(user.getActive()))
+          throw new NotAuthorizedException("USER_IS_NOT_ACTIVE");
+
         if (userId.equals(ADMIN_USER)) // admin user
         {
           if (!adminPassword.equals(password))
@@ -431,6 +464,9 @@ public class SecurityService
 
   private void validateUser(User user)
   {
+    if (StringUtils.isBlank(user.getId()))
+      throw new InvalidRequestException("ID_IS_REQUIRED");
+
     String password = user.getPassword();
     if (!StringUtils.isBlank(password))
     {

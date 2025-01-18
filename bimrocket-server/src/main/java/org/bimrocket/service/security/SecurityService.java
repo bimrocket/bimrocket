@@ -159,7 +159,7 @@ public class SecurityService
 
     anonymousUser = new User();
     anonymousUser.setId(ANONYMOUS_USER);
-    anonymousUser.setDisplayName(ANONYMOUS_USER);
+    anonymousUser.setName(ANONYMOUS_USER);
     anonymousUser.getRoleIds().add(EVERYONE_ROLE);
   }
 
@@ -235,7 +235,7 @@ public class SecurityService
 
       userCache.remove(userId);
 
-      user.setDisplayName(userUpdate.getDisplayName());
+      user.setName(userUpdate.getName());
       user.setEmail(userUpdate.getEmail());
       if (userUpdate.getActive() != null)
       {
@@ -427,7 +427,7 @@ public class SecurityService
         {
           user = new User();
           user.setId(userId);
-          user.setDisplayName(userId);
+          user.setName(userId);
         }
 
         if (FALSE.equals(user.getActive()))

@@ -47,8 +47,8 @@ public class User
   @JsonProperty("id")
   String id;
 
-  @JsonProperty("display_name")
-  String displayName;
+  @JsonProperty("name")
+  String name;
 
   @JsonInclude(Include.NON_NULL)
   @JsonProperty("password")
@@ -82,14 +82,14 @@ public class User
     this.id = id;
   }
 
-  public String getDisplayName()
+  public String getName()
   {
-    return displayName;
+    return name;
   }
 
-  public void setDisplayName(String displayName)
+  public void setName(String name)
   {
-    this.displayName = displayName;
+    this.name = name;
   }
 
   public String getPassword()

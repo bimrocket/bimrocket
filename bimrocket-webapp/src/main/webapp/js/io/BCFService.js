@@ -31,6 +31,11 @@ class BCFService extends Service
       onCompleted, onError);
   }
 
+  deleteProject(projectId, onCompleted, onError)
+  {
+    this.invoke("DELETE", "projects/" + projectId, null, onCompleted, onError);
+  }
+
   getExtensions(projectId, onCompleted, onError)
   {
     this.invoke("GET", "projects/" + projectId + "/extensions", null,

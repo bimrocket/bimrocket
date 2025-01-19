@@ -103,13 +103,13 @@ class BCFPanel extends Panel
       "searchTopics", "button.search", () => this.searchTopics());
     this.searchTopicsButton.disabled = true;
 
-    this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
-      "setupProject", "button.setup", () => this.showProjectSetup());
-    this.setupProjectButton.disabled = true;
-
     this.searchNewTopicButton = Controls.addButton(this.filterButtonsElem,
       "searchNewTopic", "button.create", () => this.showTopic());
     this.searchNewTopicButton.disabled = true;
+
+    this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
+      "setupProject", "button.setup", () => this.showProjectSetup());
+    this.setupProjectButton.disabled = true;
 
     // topic table
 
@@ -299,12 +299,21 @@ class BCFPanel extends Panel
     this.projectNameElem = Controls.addTextField(this.setupBodyElem,
       "project_name", "bim|label.project_name");
 
-    this.saveProjectButtonsElem = document.createElement("div");
-    this.saveProjectButtonsElem.className = "bcf_buttons";
-    this.setupBodyElem.appendChild(this.saveProjectButtonsElem);
+    this.projectButtonsElem = document.createElement("div");
+    this.projectButtonsElem.className = "bcf_buttons";
+    this.setupBodyElem.appendChild(this.projectButtonsElem);
 
-    this.saveProjectNameButton = Controls.addButton(this.saveProjectButtonsElem,
-      "saveProjectName", "button.save", () => this.saveProjectName());
+    this.saveProjectButton = Controls.addButton(this.projectButtonsElem,
+      "saveProject", "button.save", () => this.saveProject());
+
+    this.deleteProjectButton = Controls.addButton(this.projectButtonsElem,
+      "deleteProject", "button.delete", () => {
+       ConfirmDialog.create("bim|title.delete_project",
+         "bim|question.delete_project")
+         .setAction(() => this.deleteProject())
+         .setAcceptLabel("button.delete")
+         .setI18N(this.application.i18n).show();
+      });
 
     this.extensionsView = Controls.addCodeEditor(this.setupBodyElem,
       "extensions_json", "bim|label.project_extensions", "",
@@ -1010,73 +1019,88 @@ class BCFPanel extends Panel
     this.service.getProjects(onCompleted, onError);
   }
 
-  saveProjectName()
+  saveProject()
   {
     const application = this.application;
     const projectName = this.projectNameElem.value;
     const index = this.projectElem.selectedIndex;
     const options = this.projectElem.options;
-    const oldProjectName = options[index].label;
 
-    if (projectName !== oldProjectName)
+    const onCompleted = project =>
     {
-      const onCompleted = project =>
-      {
-        this.hideProgressBar();
-        options[index].label = project.name;
-        Toast.create("bim|message.project_saved")
-          .setI18N(application.i18n).show();
-      };
+      this.hideProgressBar();
+      options[index].label = project.name;
+      Toast.create("bim|message.project_saved")
+        .setI18N(application.i18n).show();
+    };
 
-      const onError = error =>
-      {
-        this.handleError(error, () => this.saveProjectName());
-      };
+    const onError = error =>
+    {
+      this.handleError(error, () => this.saveProject());
+    };
 
-      const projectId = this.getProjectId();
-      const project = {
-        "name" : projectName
-      };
-      this.showProgressBar();
-      this.service.updateProject(projectId, project, onCompleted, onError);
-    }
+    const projectId = this.getProjectId();
+    const project = {
+      "name" : projectName
+    };
+    this.showProgressBar();
+    this.service.updateProject(projectId, project, onCompleted, onError);
+  }
+
+  deleteProject()
+  {
+    const application = this.application;
+
+    const onCompleted = () =>
+    {
+      this.hideProgressBar();
+      Toast.create("bim|message.project_deleted")
+        .setI18N(application.i18n).show();
+      this.refreshProjects();
+      this.showTopicList();
+    };
+
+    const onError = error =>
+    {
+      this.handleError(error, () => this.deleteProject());
+    };
+
+    const projectId = this.getProjectId();
+    this.showProgressBar();
+    this.service.deleteProject(projectId, onCompleted, onError);
   }
 
   saveProjectExtensions()
   {
     const application  = this.application;
     const extensionsText = this.extensionsView.state.doc.toString();
-    const oldExtensionsText = JSON.stringify(this.extensions, null, 2);
 
-    if (extensionsText !== oldExtensionsText)
+    const onCompleted = extensions =>
     {
-      const onCompleted = extensions =>
-      {
-        this.hideProgressBar();
-        this.extensions = extensions;
-        this.populateExtensions();
-        Toast.create("bim|message.project_extensions_saved")
-          .setI18N(application.i18n).show();
-      };
+      this.hideProgressBar();
+      this.extensions = extensions;
+      this.populateExtensions();
+      Toast.create("bim|message.project_extensions_saved")
+        .setI18N(application.i18n).show();
+    };
 
-      const onError = error =>
-      {
-        this.handleError(error, () => this.saveProjectExtensions());
-      };
+    const onError = error =>
+    {
+      this.handleError(error, () => this.saveProjectExtensions());
+    };
 
-      try
-      {
-        let extensions = JSON.parse(extensionsText);
+    try
+    {
+      let extensions = JSON.parse(extensionsText);
 
-        const projectId = this.getProjectId();
-        this.showProgressBar();
-        this.service.updateExtensions(projectId, extensions,
-          onCompleted, onError);
-      }
-      catch (ex)
-      {
-        console.error(ex);
-      }
+      const projectId = this.getProjectId();
+      this.showProgressBar();
+      this.service.updateExtensions(projectId, extensions,
+        onCompleted, onError);
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.saveProjectExtensions());
     }
   }
 

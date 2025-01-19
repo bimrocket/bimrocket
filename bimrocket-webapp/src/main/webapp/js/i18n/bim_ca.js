@@ -92,6 +92,7 @@ export const translations =
   "col.topic" : "Incidència",
   "col.sta servicetus" : "Estat",
 
+  "title.delete_project" : "Esborra projecte",
   "title.delete_topic" : "Esborra incidència",
   "title.delete_comment" : "Esborra comentari",
   "title.delete_viewpoint" : "Esborra punt de vista",
@@ -106,13 +107,14 @@ export const translations =
 
   "message.viewpoint" : (index, type) => `Punt de vista ${index} ${type}`,
 
+  "message.project_saved" : "Projecte desat.",
+  "message.project_deleted" : "Projecte esborrat.",
   "message.topic_saved" : "Incidència desada.",
   "message.topic_deleted" : "Incidència esborrada.",
   "message.comment_saved" : "Comentari desat.",
   "message.comment_deleted" : "Comentari esborrat.",
   "message.viewpoint_saved" : "Punt de vista desat.",
   "message.viewpoint_deleted" : "Punt de vista esborrat.",
-  "message.project_saved" : "Projecte desat.",
   "message.project_extensions_saved" : "Extensions desades.",
   "message.doc_ref_deleted" : "Referència a document esborrada.",
   "message.doc_ref_saved" : "Referència a document desada.",
@@ -126,6 +128,7 @@ export const translations =
   "message.bim_delta_cannot_compare" : "Aquesta captura IFC no és comparable amb el model actual o s'ha generat amb una versió anterior de l'aplicació.",
   "message.bim_delta_not_ifc_object" : "Selecciona l'objecte IFC del qual vols generar la captura.",
 
+  "question.delete_project" : "Vols esborrar aquest projecte i totes les seves incidències?",
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
   "question.delete_comment" : "Vols esborrar aquest comentari?",
   "question.delete_viewpoint" : "Vols esborrar aquest punt de vista?",

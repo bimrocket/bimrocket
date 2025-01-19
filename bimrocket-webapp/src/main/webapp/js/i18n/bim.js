@@ -92,6 +92,7 @@ export const translations =
   "col.topic" : "Topic",
   "col.status" : "Status",
 
+  "title.delete_project" : "Delete project",
   "title.delete_topic" : "Delete topic",
   "title.delete_comment" : "Delete comment",
   "title.delete_viewpoint" : "Delete viewpoint",
@@ -106,13 +107,14 @@ export const translations =
 
   "message.viewpoint" : (index, type) => `Viewpoint ${index} ${type}`,
 
+  "message.project_saved" : "Project saved.",
+  "message.project_deleted" : "Project deleted.",
   "message.topic_saved" : "Topic saved.",
   "message.topic_deleted" : "Topic deleted.",
   "message.comment_saved" : "Comment saved.",
   "message.comment_deleted" : "Comment deleted.",
   "message.viewpoint_saved" : "Viewpoint saved.",
   "message.viewpoint_deleted" : "Viewpoint deleted.",
-  "message.project_saved" : "Project saved.",
   "message.project_extensions_saved" : "Project extensions saved.",
   "message.doc_ref_deleted" : "Document reference deleted.",
   "message.doc_ref_saved" : "Document reference saved.",
@@ -126,6 +128,7 @@ export const translations =
   "message.bim_delta_cannot_compare" : "This IFC snapshot is not comparable with the current model or it was generated with a previous version of the application.",
   "message.bim_delta_not_ifc_object" : "Select the IFC object you want to generate the snapshot of.",
 
+  "question.delete_project" : "Do you want to delete this project and all its topics?",
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",
   "question.delete_viewpoint" : "Do you want to delete this viewpoint?",

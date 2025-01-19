@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -37,6 +37,11 @@ package org.bimrocket.exception;
 public class NotFoundException extends RuntimeException
 {
   private static final long serialVersionUID = 124109441L;
+
+  public NotFoundException()
+  {
+    super("Not found.");
+  }
 
   public NotFoundException(String message)
   {

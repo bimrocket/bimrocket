@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -36,7 +36,12 @@ package org.bimrocket.exception;
  */
 public class InvalidRequestException extends RuntimeException
 {
-  private static final long serialVersionUID = 856024482L;
+  private static final long serialVersionUID = 256024482L;
+
+  public InvalidRequestException()
+  {
+    super("Invalid request.");
+  }
 
   public InvalidRequestException(String message)
   {

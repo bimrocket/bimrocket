@@ -37,7 +37,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import static java.lang.Boolean.FALSE;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,14 +55,16 @@ import org.bimrocket.api.security.User;
 import org.bimrocket.dao.Dao;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotAuthorizedException;
+import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.odata.SimpleODataParser;
 import org.bimrocket.service.security.store.SecurityDaoStore;
 import org.bimrocket.service.security.store.empty.SecurityEmptyDaoStore;
 import org.eclipse.microprofile.config.Config;
-import static org.bimrocket.service.security.SecurityConstants.*;
 import org.bimrocket.service.security.store.SecurityDaoConnection;
 import org.bimrocket.util.ExpiringCache;
+import static org.bimrocket.service.security.SecurityConstants.*;
 import static org.bimrocket.util.TextUtils.getISODate;
+import static java.lang.Boolean.FALSE;
 
 /**
  *
@@ -80,6 +81,21 @@ public class SecurityService
 
   static final Map<String, String> userFieldMap = new ConcurrentHashMap<>();
   static final Map<String, String> roleFieldMap = new ConcurrentHashMap<>();
+
+  // Exceptions
+
+  static final String USER_ALREADY_EXISTS =
+    "SEC001: User already exists.";
+  static final String USER_NOT_FOUND =
+    "SEC002: User not found.";
+  static final String USER_IS_NOT_ACTIVE =
+    "SEC003: User is not active.";
+  static final String CAN_NOT_CHANGE_PASSWORD =
+    "SEC004: Can not change password.";
+  static final String ID_IS_REQUIRED =
+    "SEC005: User id is required.";
+  static final String INVALID_PASSWORD_FORMAT =
+    "SEC006: Invalid password format.";
 
   static
   {
@@ -172,7 +188,7 @@ public class SecurityService
 
   public List<User> getUsers(String odataFilter, String odataOrderBy)
   {
-    LOGGER.log(Level.INFO, "getUsers {0}", odataFilter);
+    LOGGER.log(Level.FINE, "filter: {0}", odataFilter);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
@@ -180,34 +196,34 @@ public class SecurityService
       Map<String, Object> filter = parser.parseFilter(odataFilter);
       List<String> orderBy = parser.parseOrderBy(odataOrderBy);
 
-      Dao<User> dao = conn.getUserDao();
-      return dao.select(filter, orderBy);
+      Dao<User> userDao = conn.getUserDao();
+      return userDao.select(filter, orderBy);
     }
   }
 
   public User getUser(String userId)
   {
-    LOGGER.log(Level.INFO, "userId: {0}", userId);
+    LOGGER.log(Level.FINE, "userId: {0}", userId);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> dao = conn.getUserDao();
-      return dao.select(userId);
+      Dao<User> userDao = conn.getUserDao();
+      return userDao.select(userId);
     }
   }
 
   public User createUser(User user)
   {
-    LOGGER.log(Level.INFO, "userId: {0}", user.getId());
+    LOGGER.log(Level.FINE, "userId: {0}", user.getId());
 
     validateUser(user);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> dao = conn.getUserDao();
-      User prevUser = dao.select(user.getId());
+      Dao<User> userDao = conn.getUserDao();
+      User prevUser = userDao.select(user.getId());
       if (prevUser != null)
-        throw new InvalidRequestException("USER_ALREADY_EXISTS");
+        throw new InvalidRequestException(USER_ALREADY_EXISTS);
 
       String dateString = getISODate();
       user.setCreationDate(dateString);
@@ -216,22 +232,22 @@ public class SecurityService
       {
         user.setActive(true);
       }
-      return dao.insert(user);
+      return userDao.insert(user);
     }
   }
 
   public User updateUser(User userUpdate)
   {
     String userId = userUpdate.getId();
-    LOGGER.log(Level.INFO, "userId: {0}", userId);
+    LOGGER.log(Level.FINE, "userId: {0}", userId);
 
     validateUser(userUpdate);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> dao = conn.getUserDao();
-      User user = dao.select(userUpdate.getId());
-      if (user == null) throw new InvalidRequestException("USER_NOT_FOUND");
+      Dao<User> userDao = conn.getUserDao();
+      User user = userDao.select(userUpdate.getId());
+      if (user == null) throw new NotFoundException(USER_NOT_FOUND);
 
       userCache.remove(userId);
 
@@ -245,26 +261,26 @@ public class SecurityService
       user.setPasswordHash(userUpdate.getPasswordHash());
       String dateString = getISODate();
       user.setModifyDate(dateString);
-      user = dao.update(user);
+      user = userDao.update(user);
       return user;
     }
   }
 
   public boolean deleteUser(String userId)
   {
-    LOGGER.log(Level.INFO, "userId: {0}", userId);
+    LOGGER.log(Level.FINE, "userId: {0}", userId);
     userCache.remove(userId);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> dao = conn.getUserDao();
-      return dao.delete(userId);
+      Dao<User> userDao = conn.getUserDao();
+      return userDao.delete(userId);
     }
   }
 
   public List<Role> getRoles(String odataFilter, String odataOrderBy)
   {
-    LOGGER.log(Level.INFO, "getRoles {0}", odataFilter);
+    LOGGER.log(Level.FINE, "filter: {0}", odataFilter);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
@@ -272,80 +288,80 @@ public class SecurityService
       Map<String, Object> filter = parser.parseFilter(odataFilter);
       List<String> orderBy = parser.parseOrderBy(odataOrderBy);
 
-      Dao<Role> dao = conn.getRoleDao();
-      return dao.select(filter, orderBy);
+      Dao<Role> userDao = conn.getRoleDao();
+      return userDao.select(filter, orderBy);
     }
   }
 
   public Role getRole(String roleId)
   {
-    LOGGER.log(Level.INFO, "getRole {0}", roleId);
+    LOGGER.log(Level.FINE, "roleId: {0}", roleId);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> dao = conn.getRoleDao();
-      return dao.select(roleId);
+      Dao<Role> roleDao = conn.getRoleDao();
+      return roleDao.select(roleId);
     }
   }
 
   public Role createRole(Role role)
   {
-    LOGGER.log(Level.INFO, "createRole {0}", role.getId());
+    LOGGER.log(Level.FINE, "roleId: {0}", role.getId());
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> dao = conn.getRoleDao();
-      return dao.insert(role);
+      Dao<Role> roleDao = conn.getRoleDao();
+      return roleDao.insert(role);
     }
   }
 
   public Role updateRole(Role role)
   {
-    LOGGER.log(Level.INFO, "updateRole {0}", role.getId());
+    LOGGER.log(Level.FINE, "roleId: {0}", role.getId());
     roleCache.remove(role.getId());
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> dao = conn.getRoleDao();
-      return dao.update(role);
+      Dao<Role> roleDao = conn.getRoleDao();
+      return roleDao.update(role);
     }
   }
 
   public boolean deleteRole(String roleId)
   {
-    LOGGER.log(Level.INFO, "deleteRole {0}", roleId);
+    LOGGER.log(Level.FINE, "roleId: {0}", roleId);
     roleCache.remove(roleId);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> dao = conn.getRoleDao();
-      return dao.delete(roleId);
+      Dao<Role> roleDao = conn.getRoleDao();
+      return roleDao.delete(roleId);
     }
   }
 
   public void changePassword(String userId,
     String oldPassword, String newPassword)
   {
-    LOGGER.log(Level.INFO, "changePassword for {0}", userId);
+    LOGGER.log(Level.FINE, "userId: {0}", userId);
 
     if (ADMIN_USER.equals(userId) ||
         ANONYMOUS_USER.equals(userId) ||
         StringUtils.isBlank(newPassword))
-      throw new InvalidRequestException("CAN_NOT_CHANGE_PASSWORD");
+      throw new InvalidRequestException(CAN_NOT_CHANGE_PASSWORD);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> dao = conn.getUserDao();
-      User user = dao.select(userId);
+      Dao<User> userDao = conn.getUserDao();
+      User user = userDao.select(userId);
 
       if (user == null ||
           !Objects.equals(hash(oldPassword), user.getPasswordHash()))
-        throw new InvalidRequestException("CAN_NOT_CHANGE_PASSWORD");
+        throw new InvalidRequestException(CAN_NOT_CHANGE_PASSWORD);
 
       checkPasswordFormat(newPassword);
       user.setPasswordHash(hash(newPassword));
 
-      dao.update(user);
+      userDao.update(user);
     }
   }
 
@@ -398,13 +414,13 @@ public class SecurityService
     userCache.put(userId, user);
     request.setAttribute(USER_REQUEST_ATTRIBUTE, user);
 
-    LOGGER.log(Level.INFO, "User {0} identified with roles {1}",
+    LOGGER.log(Level.FINE, "User {0} identified with roles {1}",
       new Object[] { userId, user.getRoleIds() });
 
     return user;
   }
 
-  /* private */
+  /* private methods */
 
   private User getUserFromAuthorization(String authorization)
   {
@@ -431,7 +447,7 @@ public class SecurityService
         }
 
         if (FALSE.equals(user.getActive()))
-          throw new NotAuthorizedException("USER_IS_NOT_ACTIVE");
+          throw new NotAuthorizedException(USER_IS_NOT_ACTIVE);
 
         if (userId.equals(ADMIN_USER)) // admin user
         {
@@ -465,7 +481,7 @@ public class SecurityService
   private void validateUser(User user)
   {
     if (StringUtils.isBlank(user.getId()))
-      throw new InvalidRequestException("ID_IS_REQUIRED");
+      throw new InvalidRequestException(ID_IS_REQUIRED);
 
     String password = user.getPassword();
     if (!StringUtils.isBlank(password))
@@ -482,7 +498,7 @@ public class SecurityService
       config.getValue(BASE + "passwordPattern", String.class);
 
     if (!password.matches(passwordPattern))
-      throw new InvalidRequestException("INVALID_PASSWORD_FORMAT");
+      throw new InvalidRequestException(INVALID_PASSWORD_FORMAT);
   }
 
   private String hash(String password)

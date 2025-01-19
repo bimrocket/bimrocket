@@ -36,11 +36,11 @@ package org.bimrocket.exception;
  */
 public class NotAuthorizedException extends SecurityException
 {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 339718753L;
 
   public NotAuthorizedException()
   {
-    super("NOT_AUTHORIZED");
+    super("Not authorized.");
   }
 
   public NotAuthorizedException(String message)

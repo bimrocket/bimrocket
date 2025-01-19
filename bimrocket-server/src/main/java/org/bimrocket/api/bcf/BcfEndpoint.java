@@ -34,6 +34,7 @@ package org.bimrocket.api.bcf;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -102,12 +103,27 @@ public class BcfEndpoint
   @Path("/projects/{projectId}")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @RolesAllowed("ADMIN")
   @Operation(summary = "Update project")
   public BcfProject updateProject(
     @PathParam("projectId") String projectId, BcfProject projectUpdate)
   {
     return bcfService.updateProject(projectId, projectUpdate);
   }
+
+  @DELETE
+  @Path("/projects/{projectId}")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @RolesAllowed("ADMIN")
+  @Operation(summary = "Delete project")
+  public Response deleteProject(
+    @PathParam("projectId") String projectId)
+  {
+    bcfService.deleteProject(projectId);
+    return Response.ok(OK).build();
+  }
+
 
   /* Extensions */
 
@@ -123,6 +139,7 @@ public class BcfEndpoint
   @PUT
   @Path("/projects/{projectId}/extensions")
   @Produces(APPLICATION_JSON)
+  @RolesAllowed("ADMIN")
   @Operation(summary = "Update project extensions")
   public BcfExtensions updateExtensions(
     @PathParam("projectId") String projectId,

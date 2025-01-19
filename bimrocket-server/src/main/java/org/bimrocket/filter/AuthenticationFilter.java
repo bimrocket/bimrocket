@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -45,14 +45,14 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import org.bimrocket.api.ApiResult;
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static jakarta.ws.rs.core.MediaType.TEXT_XML;
 import java.util.Collections;
 import java.util.Set;
 import org.bimrocket.api.security.User;
 import org.bimrocket.exception.NotAuthorizedException;
-import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
 import org.bimrocket.service.security.SecurityService;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.TEXT_XML;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
 
 /**
  *
@@ -83,7 +83,7 @@ public class AuthenticationFilter implements ContainerRequestFilter
     }
     catch (NotAuthorizedException ex)
     {
-      context.abortWith(getErrorResponse(401, "NOT_AUTHORIZED"));
+      context.abortWith(getErrorResponse(401, "Not authorized."));
       return;
     }
 
@@ -93,7 +93,7 @@ public class AuthenticationFilter implements ContainerRequestFilter
 
     if (Collections.disjoint(allowedRoleIds, user.getRoleIds()))
     {
-      context.abortWith(getErrorResponse(403, "ACCESS_DENIED"));
+      context.abortWith(getErrorResponse(403, "Access denied."));
     }
   }
 

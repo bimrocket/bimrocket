@@ -36,11 +36,11 @@ package org.bimrocket.exception;
  */
 public class AccessDeniedException extends SecurityException
 {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 561127728L;
 
   public AccessDeniedException()
   {
-    super("ACCESS_DENIED");
+    super("Access denied.");
   }
 
   public AccessDeniedException(String message)

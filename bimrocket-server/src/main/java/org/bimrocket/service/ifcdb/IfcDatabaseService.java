@@ -52,6 +52,8 @@ import org.bimrocket.api.ifcdb.IfcDeleteResult;
 import org.bimrocket.api.ifcdb.IfcCommand;
 import org.bimrocket.api.ifcdb.IfcUploadResult;
 import org.bimrocket.dao.orient.OrientPoolManager;
+import org.bimrocket.exception.InvalidRequestException;
+import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
 import org.eclipse.microprofile.config.Config;
@@ -68,6 +70,13 @@ public class IfcDatabaseService
 
   static final String BASE = "services.ifcdb.";
 
+  // Exceptions
+
+  static final String MODEL_NOT_FOUND =
+    "IFC001: Model not found.";
+  static final String MODEL_ALREADY_EXISTS =
+    "IFC002: Model already exists.";
+
   @Inject
   Config config;
 
@@ -83,6 +92,8 @@ public class IfcDatabaseService
   public void execute(String schemaName, IfcCommand command, File file)
     throws Exception
   {
+    LOGGER.log(Level.FINE, "command: {0}", command.getQuery());
+
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
@@ -120,6 +131,9 @@ public class IfcDatabaseService
   public void getModel(String schemaName, String modelId, File ifcFile)
     throws Exception
   {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
@@ -135,7 +149,8 @@ public class IfcDatabaseService
       {
         rs.elementStream().forEach(element -> elements.add(element));
       }
-      if (elements.isEmpty()) throw new Exception("There is no model with that Id");
+      if (elements.isEmpty())
+        throw new NotFoundException(MODEL_NOT_FOUND);
 
       OrientStepExporter exporter = new OrientStepExporter(schema);
       exporter.export(new OutputStreamWriter(
@@ -146,6 +161,9 @@ public class IfcDatabaseService
   public IfcUploadResult putModel(String schemaName, String modelId, File ifcFile)
     throws Exception
   {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
     ExpressLoader expressParser = new ExpressLoader();
     ExpressSchema schema = expressParser.load("schema:" + schemaName);
 
@@ -160,14 +178,13 @@ public class IfcDatabaseService
       try (OResultSet rs = db.query("select 1 from IfcModel where Id = ?", modelId))
       {
         if (rs.hasNext())
-          throw new Exception("A model with that identifier already exists");
+          throw new InvalidRequestException(MODEL_ALREADY_EXISTS);
       }
 
       OrientStepLoader loader = new OrientStepLoader(db, schema);
       OElement model = loader.load(ifcFile);
 
       model.setProperty("Id", modelId);
-      LOGGER.log(Level.INFO, "Saving model {0}", modelId);
       db.save(model);
 
       List<? extends Object> elements =
@@ -180,6 +197,9 @@ public class IfcDatabaseService
   public IfcDeleteResult deleteModel(String schemaName, String modelId)
     throws Exception
   {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
     String dbAlias = schemaName;
     IfcDeleteResult deleteResult = new IfcDeleteResult();
 
@@ -201,6 +221,8 @@ public class IfcDatabaseService
     }
     return deleteResult;
   }
+
+  /* private methods */
 
   private void exportToJson(List<OResult> results, File file) throws IOException
   {

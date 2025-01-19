@@ -33,7 +33,7 @@ services:
 
   # bcf service
   bcf:
-    projectTemplate:
+    templateProjectName: template
     store:
       class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
       orient:

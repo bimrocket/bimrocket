@@ -225,6 +225,8 @@ public class SecurityService
       if (prevUser != null)
         throw new InvalidRequestException(USER_ALREADY_EXISTS);
 
+      userCache.remove(user.getId()); // User may exist in cache
+
       String dateString = getISODate();
       user.setCreationDate(dateString);
       user.setModifyDate(dateString);

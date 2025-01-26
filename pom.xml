@@ -56,6 +56,7 @@
     <module>bimrocket-common</module>
     <module>bimrocket-server</module>
     <module>bimrocket-webapp</module>
+    <module>bimrocket-tomcat</module>
   </modules>
 
 </project>

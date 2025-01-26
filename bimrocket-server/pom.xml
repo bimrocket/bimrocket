@@ -19,7 +19,7 @@
     <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <resteasy.version>6.2.11.Final</resteasy.version>
-    <weld.version>5.1.3.Final</weld.version>
+    <weld.version>5.1.5.Final</weld.version>
     <smallrye.config.version>3.9.1</smallrye.config.version>
     <orientdb.version>3.2.36</orientdb.version>
   </properties>

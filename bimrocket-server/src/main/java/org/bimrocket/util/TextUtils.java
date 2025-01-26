@@ -32,8 +32,6 @@ package org.bimrocket.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.apache.commons.beanutils.BeanUtils;
-import org.bimrocket.api.security.User;
 
 /**
  *

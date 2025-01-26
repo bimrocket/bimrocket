@@ -1,13 +1,7 @@
 # bimrocket-server config
 
-# config locations
-bimrocket:
-  location: ${user.home.slash}/bimrocket
-
-smallrye:
-  config:
-    locations:
-      - ${bimrocket.location}/bimrocket-server.yaml
+# bimrocket.location is set by default to ${user.home}/bimrocket
+# but can be changed via JVM property or environ variable
 
 # service config
 services:

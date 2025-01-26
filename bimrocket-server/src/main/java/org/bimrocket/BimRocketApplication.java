@@ -34,19 +34,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  *
@@ -60,78 +49,12 @@ public class BimRocketApplication extends Application
   @PostConstruct
   public void init()
   {
-    LOGGER.log(Level.INFO, "BimRocket INIT");
-
-    String userHome = System.getProperty("user.home");
-    int index = userHome.indexOf(":");
-    if (index != -1) userHome = userHome.substring(index + 1);
-    String userHomeSlash = userHome.replace('\\', '/');
-    System.setProperty("user.home.slash", userHomeSlash);
-    LOGGER.log(Level.INFO, "User home: {0}", userHomeSlash);
-
-    createDefaultConfig();
+    LOGGER.log(Level.INFO, "BimRocket API init");
   }
 
   @PreDestroy
   public void destroy()
   {
-    LOGGER.log(Level.INFO, "BimRocket DESTROY");
-  }
-
-  private void createDefaultConfig()
-  {
-    Config config = ConfigProvider.getConfig();
-    Optional<List<String>> locations =
-      config.getOptionalValues("smallrye.config.locations", String.class);
-
-    if (locations.isPresent())
-    {
-      File file = null;
-
-      for (String location : locations.get())
-      {
-        try
-        {
-          URI uri = new URI(location);
-          String scheme = uri.getScheme();
-          if (scheme == null || "file".equals(scheme))
-          {
-            file = new File(uri.getPath());
-            break;
-          }
-        }
-        catch (Exception ex)
-        {
-          // ignore
-        }
-      }
-
-      if (file != null)
-      {
-        if (file.exists())
-        {
-          LOGGER.log(Level.INFO, "Config found in {0}", file);
-        }
-        else
-        {
-          try
-          {
-            URL resource = getClass().getResource("/application.yaml");
-            file.getParentFile().mkdirs();
-            try (InputStream is = resource.openStream();
-                 OutputStream os = new FileOutputStream(file))
-            {
-              IOUtils.copy(is, os);
-            }
-            LOGGER.log(Level.INFO, "Config created in {0}", file);
-          }
-          catch (Exception ex)
-          {
-            LOGGER.log(Level.WARNING, "Can not create config in {0}: {1}",
-              new Object[]{ file, ex });
-          }
-        }
-      }
-    }
+    LOGGER.log(Level.INFO, "BimRocket API destroy");
   }
 }

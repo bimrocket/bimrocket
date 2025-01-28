@@ -13,4 +13,10 @@ set "JAVA_OPTS=%JAVA_OPTS% --enable-native-access=ALL-UNNAMED"
 set "JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=org.bimrocket.tomcat.TomcatLogManager"
 set "JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.config.file="conf/logging.properties""
 
-java -cp lib/* %JAVA_OPTS% org.bimrocket.tomcat.BimRocketTomcat
+if exist ".\jre" (
+  set "JAVA_EXEC=.\jre\bin\java"
+) else (
+  set "JAVA_EXEC=java"
+)
+
+%JAVA_EXEC% -cp lib/* %JAVA_OPTS% org.bimrocket.tomcat.BimRocketTomcat

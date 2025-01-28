@@ -52,8 +52,12 @@ BIMROCKET is an open source platform for BIM project management. It features a w
 ![Facility interior](/docs/images/screenshot2.png?raw=true "Facility interior")
 
 ## Installation
-Both the bimrocket web application and the bimrocket server are currently distributed as Java war files. A Jakarta EE 10 web container (like [Apache Tomcat 10.1](https://tomcat.apache.org/download-10.cgi)) and JDK11+ is required to deploy these applications.
+Both the bimrocket web application and the bimrocket server are currently distributed as Java war files.
+A Jakarta EE 10 web container (like [Apache Tomcat 10.1](https://tomcat.apache.org/download-10.cgi)) and JDK17+ is required to deploy these applications.
 
-An [OrientDB](https://orientdb.org/) database is also required to work with the BCF and the IFC services (tested with OrientDB version 3.1.11).
+An [OrientDB](https://orientdb.org/) database is also required for most services (tested with OrientDB version 3.2.26).
 
 Try it: https://bim.santfeliu.cat
+
+To install your own bimrocket server, follow these instructions:
+[Installation](https://github.com/bimrocket/bimrocket/wiki/Installation)

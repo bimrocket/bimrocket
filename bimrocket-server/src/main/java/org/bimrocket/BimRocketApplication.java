@@ -36,6 +36,7 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bimrocket.util.BimRocketInfo;
 
 /**
  *
@@ -49,12 +50,13 @@ public class BimRocketApplication extends Application
   @PostConstruct
   public void init()
   {
-    LOGGER.log(Level.INFO, "BimRocket API init");
+    LOGGER.log(Level.INFO, "BimRocket version: {0}", BimRocketInfo.getVersionLabel());
+    LOGGER.log(Level.INFO, "REST API init");
   }
 
   @PreDestroy
   public void destroy()
   {
-    LOGGER.log(Level.INFO, "BimRocket API destroy");
+    LOGGER.log(Level.INFO, "REST API destroy");
   }
 }

@@ -8,6 +8,7 @@ import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { Application } from "../ui/Application.js";
 import { I18N } from "../i18n/I18N.js";
+import { BIMUtils } from "../utils/BIMUtils.js";
 import "../lib/suncalc.js";
 import * as THREE from "three";
 
@@ -41,7 +42,7 @@ class SolarSimulatorTool extends Tool
   createPanel()
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_solar_sim");
-    this.panel.preferredHeight = 400;
+    this.panel.preferredHeight = 410;
     this.panel.minimumHeight = 300;
 
     this.panel.onHide = () => this.application.useTool(null);
@@ -112,6 +113,14 @@ class SolarSimulatorTool extends Tool
     this.latElem.addEventListener("input", () => this.update());
     this.dateElem.addEventListener("change", () => this.update());
 
+    const setup = this.application.setup;
+
+    this.shadowsCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
+      "solar_cast_shadows", "tool.solar_simulator.cast_shadows", false,
+      "flex align_items_center p_2 text_center");
+    this.shadowsCheckBox.addEventListener("change",
+      () => setup.shadowsEnabled = this.shadowsCheckBox.checked);
+
     this.intensityCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
       "solar_intensity", "tool.solar_simulator.adjust_intensity", true,
       "flex align_items_center p_2 text_center");
@@ -131,8 +140,9 @@ class SolarSimulatorTool extends Tool
     const application = this.application;
     const container = this.application.container;
     this.panel.visible = true;
+    this.shadowsCheckBox.checked = application.setup.shadowsEnabled;
     container.addEventListener("pointerdown", this._onPointerDown);
-    this.resizeObverser.observe(this.panel.bodyElem);
+    this.resizeObverser.observe(this.panel.element);
   }
 
   deactivate()
@@ -140,7 +150,7 @@ class SolarSimulatorTool extends Tool
     const container = this.application.container;
     this.panel.visible = false;
     container.removeEventListener("pointerdown", this._onPointerDown);
-    this.resizeObverser.unobserve(this.panel.bodyElem);
+    this.resizeObverser.unobserve(this.panel.element);
   }
 
   onPointerDown(event)
@@ -157,6 +167,15 @@ class SolarSimulatorTool extends Tool
         this.application.overlays.add(this.target);
         this.cancelButton.style.display = "";
       }
+      let object = intersect.object;
+      let geolocation = BIMUtils.getGeolocation(object);
+
+      if (geolocation)
+      {
+        this.lonElem.value = geolocation.longitude;
+        this.latElem.value = geolocation.latitude;
+      }
+
       this.target.position.copy(intersect.point);
       this.target.updateMatrix();
       this.update();
@@ -458,7 +477,7 @@ class SolarSimulatorTool extends Tool
     {
       const scaleWidth = 20;
       const scaleHeight = 20;
-      const width = this.panel.bodyElem.clientWidth - 10;
+      const width = this.panel.element.clientWidth - 10;
       const height = 140 + 2 * scaleHeight;
       const graphWidth = (width - 2 * scaleWidth);
       const graphHeight = (height - 2 * scaleHeight);

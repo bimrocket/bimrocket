@@ -339,6 +339,7 @@ export const translations =
   "tool.solar_simulator.label" : "Solar simulator",
   "tool.solar_simulator.select" : "Select position in the scene to calculate the sun azimuth and elevation.",
   "tool.solar_simulator.drag" : "Change time by dragging the pointer on the graph.",
+  "tool.solar_simulator.cast_shadows" : "Cast shadows",
   "tool.solar_simulator.adjust_intensity" : "Adjust solar intensity",
 
   "tool.start_controllers.label" : "Start controllers",

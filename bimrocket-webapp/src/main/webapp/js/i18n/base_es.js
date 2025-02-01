@@ -337,9 +337,10 @@ export const translations =
   "tool.chatgpt.label" : "ChatGPT",
 
   "tool.solar_simulator.label" : "Simulador solar",
-  "tool.solar_simulator.help" : "Selecciona una posició en la escena para calcular el azimut y la elevación del sol.",
+  "tool.solar_simulator.select" : "Selecciona una posición en la escena para calcular el azimut y la elevación del sol.",
   "tool.solar_simulator.drag" : "Cambia la hora arrastrando el puntero sobre el gráfico",
-  "tool.solar_simulator.adjust_intensity" : "Ajusta la intensidad solar",
+  "tool.solar_simulator.cast_shadows" : "Proyectar sombras",
+  "tool.solar_simulator.adjust_intensity" : "Ajustar la intensidad solar",
 
   "tool.start_controllers.label" : "Iniciar controlad.",
 
@@ -382,7 +383,7 @@ export const translations =
   "label.show_local_axes" : "Mostrar ejes locales",
   "label.background_color" : "Color de fondo:",
   "label.panel_opacity" : "Opacidad de paneles:",
-  "label.cast_shadows" : "Proyección de sombras",
+  "label.cast_shadows" : "Proyectar sombras",
   "label.ambient_occlusion" : "Oclusión ambiental",
   "label.ambient_occlusion_intensity" : "Intensidad OA:",
 

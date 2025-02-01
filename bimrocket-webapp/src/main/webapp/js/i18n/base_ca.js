@@ -339,6 +339,7 @@ export const translations =
   "tool.solar_simulator.label" : "Simulador solar",
   "tool.solar_simulator.select" : "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
   "tool.solar_simulator.drag" : "Canvia l'hora arrossegant el punter sobre la gràfica",
+  "tool.solar_simulator.cast_shadows" : "Projecta ombres",
   "tool.solar_simulator.adjust_intensity" : "Ajusta la intensitat solar",
 
   "tool.start_controllers.label" : "Inicia controladors",
@@ -382,7 +383,7 @@ export const translations =
   "label.show_local_axes" : "Mostra eixos locals",
   "label.background_color" : "Color de fons:",
   "label.panel_opacity" : "Opacitat de panells:",
-  "label.cast_shadows" : "Projecció d'ombres",
+  "label.cast_shadows" : "Projecta ombres",
   "label.ambient_occlusion" : "Oclusió ambiental",
   "label.ambient_occlusion_intensity" : "Intensitat OA:",
 

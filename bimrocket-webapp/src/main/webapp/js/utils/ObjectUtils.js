@@ -28,6 +28,25 @@ class ObjectUtils
     "in" : 39.3701
   };
 
+  static isBasicType(value)
+  {
+    let type = typeof value;
+    return type === "string" || type === "number" || type === "boolean";
+  }
+
+  static isBasicArray(array)
+  {
+    if (array instanceof Array)
+    {
+      for (let i = 0; i < array.length; i++)
+      {
+        if (!this.isBasicType(array[i])) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
   static getObjectValue(object, ...properties)
   {
     if (properties.length === 0) return object;

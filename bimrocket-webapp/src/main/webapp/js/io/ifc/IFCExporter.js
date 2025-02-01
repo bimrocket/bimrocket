@@ -16,6 +16,7 @@ import { CircleHollowBuilder } from "../../builders/CircleHollowBuilder.js";
 import { BooleanOperator } from "../../builders/BooleanOperator.js";
 import { Cloner } from "../../builders/Cloner.js";
 import { IFCVoider } from "../../builders/IFCVoider.js";
+import { ObjectUtils } from "../../utils/ObjectUtils.js";
 import * as THREE from "three";
 
 class IFCExporter
@@ -843,6 +844,10 @@ class IFCExporter
         }
       }
       else if (type === "number" || type === "boolean")
+      {
+        entity[attribute] = value;
+      }
+      else if (ObjectUtils.isBasicArray(value))
       {
         entity[attribute] = value;
       }

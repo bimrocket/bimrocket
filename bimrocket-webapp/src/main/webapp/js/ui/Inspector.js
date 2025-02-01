@@ -56,6 +56,7 @@ class Inspector extends Panel
     this.addRenderer(EulerRenderer);
     this.addRenderer(FormulaRenderer);
     this.addRenderer(ColorRenderer);
+    this.addRenderer(ArrayRenderer);
     this.addRenderer(TextureRenderer);
     this.addRenderer(Object3DRenderer);
 
@@ -1347,6 +1348,41 @@ class ColorRenderer extends PropertyRenderer
     colorElem.alt = rgb;
     colorElem.title = rgb;
     valueElem.appendChild(colorElem);
+
+    return valueElem;
+  }
+}
+
+class ArrayRenderer extends PropertyRenderer
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return ObjectUtils.isBasicArray(value) && value.length > 0;
+  }
+
+  getClassName(value)
+  {
+    return "array";
+  }
+
+  render(array, disabled)
+  {
+    const maxNumbers = 4;
+
+    let valueElem = document.createElement("span");
+    valueElem.className = "value";
+
+    if (array.length > maxNumbers)
+    {
+      array = array.slice(0, maxNumbers);
+      array.push("...");
+    }
+    valueElem.innerHTML = "[ " + array.join(" ") + " ]";
 
     return valueElem;
   }

@@ -355,6 +355,11 @@ ul.inspector li.property.color
   background-image: url(images/inspector/color.svg);
 }
 
+ul.inspector li.property.array
+{
+  background-image: url(images/inspector/array.svg);
+}
+
 ul.inspector li.property.formula
 {
   background-image: url(images/inspector/formula.svg);

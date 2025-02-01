@@ -480,10 +480,7 @@ class IFCLoader extends THREE.Loader
           value = value.Value;
         }
 
-        let valueType = typeof value;
-        if (valueType === "string"
-            || valueType === "number"
-            || valueType === "boolean")
+        if (ObjectUtils.isBasicType(value) || ObjectUtils.isBasicArray(value))
         {
           data[attribute] = value;
         }

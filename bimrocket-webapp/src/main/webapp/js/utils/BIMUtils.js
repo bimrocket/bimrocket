@@ -12,6 +12,52 @@ import * as THREE from "three";
 
 class BIMUtils
 {
+  static getGeolocation(object)
+  {
+    let ifcSite = null;
+
+    while (object)
+    {
+      if (object.userData.IFC?.ifcClassName === "IfcSite")
+      {
+        ifcSite = object;
+        break;
+      }
+      object = object.parent;
+    }
+
+    if (ifcSite &&
+        ifcSite.userData.IFC?.RefLongitude instanceof Array &&
+        ifcSite.userData.IFC?.RefLatitude instanceof Array &&
+        typeof ifcSite.userData.IFC?.RefElevation === "number")
+    {
+      const lonArray = ifcSite.userData.IFC.RefLongitude;
+      const latArray = ifcSite.userData.IFC.RefLatitude;
+
+      while (lonArray.length < 4) lonArray.push(0);
+      while (latArray.length < 4) latArray.push(0);
+
+      const k1 = 60;
+      const k2 = k1 * 60;
+      const k3 = k2 * 1000000;
+
+      const longitude =
+        lonArray[0] + lonArray[1] / k1 + lonArray[2] / k2 + lonArray[3] / k3;
+
+      const latitude =
+        latArray[0] + latArray[1] / k1 + latArray[2] / k2 + latArray[3] / k3;
+
+      const decimals = 1000000;
+
+      return {
+        longitude: Math.round(longitude * decimals) / decimals,
+        latitude: Math.round(latitude * decimals) / decimals,
+        elevation: ifcSite.userData.IFC.RefElevation
+      };
+    }
+    return null;
+  }
+
   static createVoidings(productObject3D, voidingFilter = [])
   {
     let openingCount = 0;

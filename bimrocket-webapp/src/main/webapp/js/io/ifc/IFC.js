@@ -185,54 +185,72 @@ class IFC
     let ifcData = object3D.userData[dataName];
     if (typeof ifcData !== "object") return;
 
-    let ifcClassName = null;
+    let ifcClassName = ifcData.ifcClassName || null;
+    let isRoot = false;
     let name = null;
-    let isRoot = true;
+
     if (dataName === "IFC_rel_aggregated")
     {
-      ifcClassName = "IfcRelAggregates";
+      ifcClassName ||= "IfcRelAggregates";
       name = "Aggregates";
+      isRoot = true;
     }
     else if (dataName === "IFC_rel_contained")
     {
-      ifcClassName = "IfcRelContainedInSpatialStructure";
+      ifcClassName ||= "IfcRelContainedInSpatialStructure";
       name = "Contains";
+      isRoot = true;
     }
     else if (dataName === "IFC_rel_fills")
     {
-      ifcClassName = "IfcRelFillsElement";
+      ifcClassName ||= "IfcRelFillsElement";
       name = "Fills";
+      isRoot = true;
     }
     else if (dataName === "IFC_rel_voids")
     {
-      ifcClassName = "IfcRelVoidsElement";
+      ifcClassName ||= "IfcRelVoidsElement";
       name = "Voids";
+      isRoot = true;
     }
     else if (dataName === "IFC_type")
     {
       // TODO: complete
+      name = "Type";
+      isRoot = true;
     }
     else if (dataName === "IFC_group")
     {
       // TODO: complete
+      name = "Group";
+      isRoot = true;
     }
     else if (dataName === "IFC_material_layerset")
     {
-      ifcClassName = "IfcMaterialLayerSet";
-      isRoot = false;
+      ifcClassName ||= "IfcMaterialLayerSet";
     }
     else if (dataName.startsWith("IFC_material_layer"))
     {
-      ifcClassName = "IfcMaterialLayer";
-      isRoot = false;
+      ifcClassName ||= "IfcMaterialLayer";
+    }
+    else if (dataName === "IFC_map_conversion")
+    {
+      ifcClassName ||= "IfcMapConversion";
+    }
+    else if (dataName === "IFC_target_crs")
+    {
+      ifcClassName ||= "IfcProjectedCRS";
     }
     else if (dataName.startsWith("IFC_") &&
-            !dataName.startsWith("IFC_rel_")) // property set
+            !dataName.startsWith("IFC_rel_") &&
+            (ifcClassName === null || ifcClassName === "IfcPropertySet"))
     {
+      // property set
       ifcClassName = "IfcPropertySet";
+      isRoot = true;
       let psetName = dataName.substring(4).trim();
       let relDataName = "IFC_rel_" + psetName;
-      if (!object3D.userData[relDataName])
+      if (!object3D.userData[relDataName]) // create relationship if not exists
       {
         object3D.userData[relDataName] = {
           ifcClassName : "IfcRelDefinesByProperties",
@@ -241,19 +259,20 @@ class IFC
       }
     }
 
-    if (ifcClassName && typeof ifcData.ifcClassName !== "string")
+    if (ifcClassName)
     {
       ifcData.ifcClassName = ifcClassName;
-    }
-    if (isRoot)
-    {
-      if (typeof ifcData.GlobalId !== "string")
+
+      if (isRoot)
       {
-        ifcData.GlobalId = this.generateIfcGlobalId();
-      }
-      if (typeof ifcData.Name !== "string")
-      {
-        ifcData.Name = name;
+        if (typeof ifcData.GlobalId !== "string")
+        {
+          ifcData.GlobalId = this.generateIfcGlobalId();
+        }
+        if (typeof ifcData.Name !== "string")
+        {
+          ifcData.Name = name || ifcClassName;
+        }
       }
     }
   }

@@ -114,6 +114,10 @@ class IFCExporter
         }
         else if (entity instanceof schema.IfcProject)
         {
+          entity.RepresentationContexts = [this.reprContext];
+
+          // export length unit
+          // TODO: export other units
           const units = object3D.userData.units || "m";
           let prefix = null;
           let name = null;
@@ -136,6 +140,23 @@ class IFCExporter
 
             entity.UnitsInContext = new schema.IfcUnitAssignment();
             entity.UnitsInContext.Units = [ifcSIUnit];
+          }
+
+          // export MapConversion
+          const targetCRS = object3D.userData.IFC_target_crs;
+          const mapConversion = object3D.userData.IFC_map_conversion;
+
+          if (targetCRS && mapConversion)
+          {
+            const ifcTargetCRS = new schema[targetCRS.ifcClassName || "IfcProjectedCRS"]();
+            this.setIfcData(targetCRS, ifcTargetCRS);
+
+            const ifcMapConversion = new schema.IfcMapConversion();
+            this.setIfcData(mapConversion, ifcMapConversion);
+            ifcMapConversion.SourceCRS = this.reprContext;
+            ifcMapConversion.TargetCRS = ifcTargetCRS;
+
+            ifcFile.add(ifcMapConversion);
           }
         }
       }

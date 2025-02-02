@@ -687,6 +687,8 @@ class IfcProjectHelper extends IfcHelper
       model.add(types);
       model._ifcFile = loader.ifcFile;
 
+      // load length unit
+      // TODO: load all units as properties
       let contextUnits = project.UnitsInContext;
       if (contextUnits)
       {
@@ -721,6 +723,37 @@ class IfcProjectHelper extends IfcHelper
             }
           }
         }
+      }
+
+      // process IfcMapConversion
+      const mapCons = loader.ifcFile.entitiesByClass.get("IfcMapConversion");
+      if (mapCons)
+      {
+        const mapConversion = mapCons[0];
+        const targetCRS = mapConversion.TargetCRS;
+
+        model.userData.IFC_target_crs = loader.getIfcData(targetCRS);
+        model.userData.IFC_map_conversion = loader.getIfcData(mapConversion);
+
+        const x = mapConversion.Eastings;
+        const y = mapConversion.Northings;
+        const z = mapConversion.OrthogonalHeight;
+
+        if (typeof x === "number" &&
+            typeof y === "number" &&
+            typeof z === "number")
+        {
+          model.position.set(x, y, z);
+        }
+
+        const vx = mapConversion.XAxisAbscissa;
+        const vy = mapConversion.XAxisOrdinate;
+        console.info(vx, vy);
+        if (typeof vx === "number" && typeof vy === "number")
+        {
+          model.rotation.z = Math.atan2(vy, vx);
+        }
+        model.updateMatrix();
       }
     }
     return this.object3D;

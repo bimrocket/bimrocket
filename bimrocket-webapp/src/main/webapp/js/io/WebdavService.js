@@ -291,18 +291,21 @@ class WebdavService extends FileService
     }
     request.open(method, encodeURI(url), true);
 
+    const credentials = this.getCredentials();
+
     if (this.useProxy)
     {
       WebUtils.setBasicAuthorization(request, this.proxyUsername, this.proxyPassword);
-      if (this.username && this.password)
+      if (credentials.username && credentials.password)
       {
-        const userPass = this.username + ":" + this.password;
-        request.setRequestHeader("Forwarded-Authorization", "Basic " + btoa(userPass));
+        WebUtils.setBasicAuthorization(request,
+          credentials.username, credentials.password, "Forwarded-Authorization");
       }
     }
     else
     {
-      WebUtils.setBasicAuthorization(request, this.username, this.password);
+      WebUtils.setBasicAuthorization(request,
+        credentials.username, credentials.password);
     }
   }
 

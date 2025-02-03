@@ -5,31 +5,52 @@
  */
 
 import { Dialog } from "./Dialog.js";
+import { CredentialsManager } from "../utils/CredentialsManager.js";
 
 class ServiceDialog extends Dialog
 {
-  constructor(title, serviceTypeOptions, serviceType = null, parameters = {})
+  constructor(title, serviceTypeOptions, serviceType = null, service = null)
   {
     super(title);
 
-    this.setSize(260, 330);
+    this.setSize(300, 350);
 
     this.services = null;
 
     this.serviceTypeSelect = this.addSelectField("svcType",
       "label.service_type", serviceTypeOptions, serviceType);
     this.nameElem = this.addTextField("svcName", "label.service_name",
-      parameters.name);
+      service?.name);
     this.nameElem.spellcheck = false;
     this.descriptionElem = this.addTextField("svcDesc", "label.service_desc",
-      parameters.description);
+      service?.description);
     this.urlElem = this.addTextField("svcUrl", "label.service_url",
-      parameters.url);
+      service?.url);
     this.urlElem.spellcheck = false;
+
+    this.credentialsAliasElem = this.addTextField("svcCredAlias",
+      "label.service_credentials_alias", service?.credentialsAlias);
+    this.credentialsAliasElem.spellcheck = false;
+
+    const credentials = service?.getCredentials() || {};
     this.usernameElem = this.addTextField("svcUsername",
-      "label.service_user", parameters.username);
+      "label.service_user", credentials.username);
+    this.usernameElem.spellcheck = false;
     this.passwordElem = this.addPasswordField("svcPassword",
-      "label.service_pass", parameters.password);
+      "label.service_pass", credentials.password);
+
+    this.credentialsAliasElem.addEventListener("input", () => {
+      let alias = this.credentialsAliasElem.value;
+      if (alias)
+      {
+        let credentials = CredentialsManager.getCredentials(alias, false);
+        if (credentials)
+        {
+          this.usernameElem.value = credentials.username;
+          this.passwordElem.value = credentials.password;
+        }
+      }
+    });
 
     this.saveButton = this.addButton("save", "button.save", () =>
     {
@@ -39,14 +60,17 @@ class ServiceDialog extends Dialog
         name : this.nameElem.value.trim(),
         description : this.descriptionElem.value,
         url : this.urlElem.value,
-        username : this.usernameElem.value,
-        password : this.passwordElem.value
+        credentialsAlias : this.credentialsAliasElem.value,
+        credentials : {
+          username : this.usernameElem.value,
+          password : this.passwordElem.value
+        }
       };
 
       this.onSave(this.serviceTypeSelect.value, parameters);
     });
 
-    this.saveButton.disabled = !this.isValidServiceName(parameters.name);
+    this.saveButton.disabled = !this.isValidServiceName(service?.name);
     this.nameElem.addEventListener("input", () =>
     {
       const serviceName = this.nameElem.value;

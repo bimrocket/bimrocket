@@ -398,6 +398,7 @@ export const translations =
   "label.service_name" : "Service name:",
   "label.service_desc" : "Service description:",
   "label.service_url" : "URL:",
+  "label.service_credentials_alias" : "Credentials alias:",
   "label.service_user" : "Username:",
   "label.service_pass" : "Password:",
 

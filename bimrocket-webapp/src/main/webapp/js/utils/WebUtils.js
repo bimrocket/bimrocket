@@ -42,7 +42,8 @@ class WebUtils
     return message;
   };
 
-  static setBasicAuthorization(request, username, password)
+  static setBasicAuthorization(request, username, password,
+    headerName = "Authorization")
   {
     if (username && password)
     {
@@ -51,11 +52,11 @@ class WebUtils
 
       if (request instanceof XMLHttpRequest)
       {
-        request.setRequestHeader("Authorization", authorization);
+        request.setRequestHeader(headerName, authorization);
       }
       else if (typeof request === "object") // fetch header options
       {
-        request["Authorization"] = authorization;
+        request[headerName] = authorization;
       }
     }
   }

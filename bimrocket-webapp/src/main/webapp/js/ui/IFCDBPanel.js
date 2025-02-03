@@ -135,11 +135,11 @@ class IFCDBPanel extends Panel
 
   onShow()
   {
-    this.updateServices();
+    this.refreshServices();
     this.updateButtons();
   }
 
-  updateServices()
+  refreshServices()
   {
     const application = this.application;
     const services = application.services[this.group];
@@ -188,7 +188,7 @@ class IFCDBPanel extends Panel
       const service = new ServiceManager.classes[serviceType];
       service.setParameters(parameters);
       this.application.addService(service, this.group);
-      this.updateServices();
+      this.refreshServices();
       this.service = service;
       this.ifcdbServiceElem.value = service.name;
     };
@@ -202,7 +202,7 @@ class IFCDBPanel extends Panel
     const service = this.service;
     let serviceTypes = ServiceManager.getTypesOf(IFCDBService);
     let dialog = new ServiceDialog("Edit IFCDB service",
-      serviceTypes, service.constructor.name, service.getParameters());
+      serviceTypes, service.constructor.name, service);
     dialog.serviceTypeSelect.disabled = true;
     dialog.setI18N(this.application.i18n);
     dialog.nameElem.readOnly = true;
@@ -210,7 +210,7 @@ class IFCDBPanel extends Panel
     {
       service.setParameters(parameters);
       this.application.addService(service, this.group);
-      this.updateServices();
+      this.refreshServices();
     };
     dialog.show();
   }
@@ -227,7 +227,7 @@ class IFCDBPanel extends Panel
         {
           let service = application.services[this.group][name];
           application.removeService(service, this.group);
-          this.updateServices();
+          this.refreshServices();
         })
        .setAcceptLabel("button.delete")
        .setI18N(application.i18n).show();
@@ -446,8 +446,7 @@ class IFCDBPanel extends Panel
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.username = username;
-      this.service.password = password;
+      this.service.setCredentials(username, password);
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>

@@ -1443,10 +1443,10 @@ class BCFPanel extends Panel
 
   onShow()
   {
-    this.updateServices();
+    this.refreshServices();
   }
 
-  updateServices()
+  refreshServices()
   {
     const application = this.application;
     const services = application.services[this.group];
@@ -1488,7 +1488,7 @@ class BCFPanel extends Panel
       const service = new ServiceManager.classes[serviceType];
       service.setParameters(parameters);
       this.application.addService(service, this.group);
-      this.updateServices();
+      this.refreshServices();
       this.service = service;
       this.bcfServiceElem.value = service.name;
       this.filterPanelElem.style.display = "none";
@@ -1504,7 +1504,7 @@ class BCFPanel extends Panel
     const service = this.service;
     let serviceTypes = ServiceManager.getTypesOf(BCFService);
     let dialog = new ServiceDialog("Edit BCF service",
-      serviceTypes, service.constructor.name, service.getParameters());
+      serviceTypes, service.constructor.name, service);
     dialog.serviceTypeSelect.disabled = true;
     dialog.setI18N(this.application.i18n);
     dialog.nameElem.readOnly = true;
@@ -1512,7 +1512,7 @@ class BCFPanel extends Panel
     {
       service.setParameters(parameters);
       this.application.addService(service, this.group);
-      this.updateServices();
+      this.refreshServices();
       this.filterPanelElem.style.display = "none";
       this.topicTableElem.style.display = "none";
     };
@@ -1531,7 +1531,7 @@ class BCFPanel extends Panel
         {
           let service = application.services[this.group][name];
           application.removeService(service, this.group);
-          this.updateServices();
+          this.refreshServices();
           this.filterPanelElem.style.display = "none";
           this.topicTableElem.style.display = "none";
         })
@@ -1566,8 +1566,7 @@ class BCFPanel extends Panel
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.username = username;
-      this.service.password = password;
+      this.service.setCredentials(username, password);
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>

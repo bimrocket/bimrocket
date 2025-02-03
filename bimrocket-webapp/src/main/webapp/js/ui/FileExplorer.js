@@ -171,7 +171,7 @@ class FileExplorer extends Panel
 
     const serviceTypes = ServiceManager.getTypesOf(FileService);
     let dialog = new ServiceDialog("title.edit_cloud_service",
-      serviceTypes, service.constructor.name, service.getParameters());
+      serviceTypes, service.constructor.name, service);
     this.addProxyFields(dialog, service);
 
     dialog.setI18N(this.application.i18n);
@@ -198,7 +198,7 @@ class FileExplorer extends Panel
           application.removeService(service, this.group);
           this.entryName = "";
           this.entryType = null;
-          this.showServices();
+          this.refreshServices();
         })
         .setAcceptLabel("button.delete")
         .setI18N(application.i18n).show();
@@ -480,7 +480,7 @@ class FileExplorer extends Panel
     }
   }
 
-  showServices()
+  refreshServices()
   {
     const application = this.application;
 
@@ -588,7 +588,7 @@ class FileExplorer extends Panel
     this.entryName = "";
     this.entryType = null;
     this.service = null;
-    this.showServices();
+    this.refreshServices();
   };
 
   goBack()
@@ -601,7 +601,7 @@ class FileExplorer extends Panel
     if (this.basePath === "/")
     {
       this.service = null;
-      this.showServices();
+      this.refreshServices();
     }
     else
     {
@@ -733,8 +733,7 @@ class FileExplorer extends Panel
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.username = username;
-      this.service.password = password;
+      this.service.setCredentials(username, password);
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>
@@ -776,7 +775,7 @@ class FileExplorer extends Panel
 
     service.setParameters(parameters);
     this.application.addService(service, this.group);
-    this.showServices();
+    this.refreshServices();
   }
 };
 

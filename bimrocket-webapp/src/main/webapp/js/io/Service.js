@@ -4,6 +4,8 @@
  * @author realor
  */
 
+import { CredentialsManager } from "../utils/CredentialsManager.js";
+
 class Service
 {
   constructor(parameters)
@@ -20,8 +22,8 @@ class Service
       name : this.name,
       description : this.description,
       url : this.url,
-      username : this.username,
-      password : this.password
+      credentialsAlias : this.credentialsAlias || null,
+      credentials : this.credentials || null
     };
   }
 
@@ -30,8 +32,37 @@ class Service
     this.name = parameters.name;
     this.description = parameters.description;
     this.url = parameters.url;
-    this.username = parameters.username;
-    this.password = parameters.password;
+    this.credentialsAlias = parameters.credentialsAlias || null;
+    if (parameters.credentials)
+    {
+      this.setCredentials(
+        parameters.credentials.username || null,
+        parameters.credentials.password || null);
+    }
+  }
+
+  getCredentials()
+  {
+    return this.credentialsAlias ?
+      CredentialsManager.getCredentials(this.credentialsAlias, true) :
+      this.credentials;
+  }
+
+  setCredentials(username, password)
+  {
+    if (this.credentialsAlias)
+    {
+      CredentialsManager.setCredentials(this.credentialsAlias, username, password);
+      this.credentials = null;
+    }
+    else
+    {
+      this.credentialsAlias = null;
+      this.credentials = {
+        username : username || null,
+        password: password || null
+      };
+    }
   }
 }
 

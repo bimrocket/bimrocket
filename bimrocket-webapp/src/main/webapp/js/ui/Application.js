@@ -16,6 +16,7 @@ import { Solid } from "../core/Solid.js";
 import { ObjectBuilder } from "../builders/ObjectBuilder.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ServiceManager } from "../io/ServiceManager.js";
+import { CredentialsManager } from "../utils/CredentialsManager.js";
 import { IOManager } from "../io/IOManager.js";
 import { Selection } from "../utils/Selection.js";
 import { Setup } from "../utils/Setup.js";
@@ -1131,7 +1132,15 @@ class Application
       this.services[group] = {};
     }
     this.services[group][service.name] = service;
-    if (save) this.saveServices(group);
+    if (save)
+    {
+      this.saveServices(group);
+      const alias = service.credentialsAlias;
+      if (alias)
+      {
+        CredentialsManager.saveCredentials(alias);
+      }
+    }
   }
 
   removeService(service, group, save = true)

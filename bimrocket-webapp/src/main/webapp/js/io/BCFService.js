@@ -253,7 +253,10 @@ class BCFService extends Service
     request.setRequestHeader("Accept", "application/json");
     request.setRequestHeader("Content-Type", "application/json");
 
-    WebUtils.setBasicAuthorization(request, this.username, this.password);
+    const credentials = this.getCredentials();
+
+    WebUtils.setBasicAuthorization(request,
+      credentials.username, credentials.password);
 
     if (data)
     {

@@ -63,7 +63,10 @@ class IFCDBService extends Service
       fetchOptions.body = body;
     }
 
-    WebUtils.setBasicAuthorization(fetchOptions.headers, username, password);
+    const credentials = this.getCredentials();
+
+    WebUtils.setBasicAuthorization(fetchOptions.headers,
+      credentials.username, credentials.password);
 
     const response = await fetch(url, fetchOptions);
     if (!response.ok) throw await response.json();

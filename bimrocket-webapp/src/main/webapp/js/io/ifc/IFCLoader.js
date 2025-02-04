@@ -40,6 +40,9 @@ class IFCLoader extends THREE.Loader
   static VOIDING_MODE_NONE = "none";
   static VOIDING_MODE_PARAMETRIC = "parametric";
 
+  static RETAIN_IFC_FILE_NO = 0; // discard IfcFile
+  static RETAIN_IFC_FILE_YES = 1; // retain IfcFile
+
   static PARAMETRIC_REPRESENTATIONS = [
     "IfcExtrudedAreaSolid",
     "IfcBooleanResult",
@@ -57,6 +60,7 @@ class IFCLoader extends THREE.Loader
       "IfcWindow",
       "IfcOpeningElement"
     ],
+    retainIfcFile: this.RETAIN_IFC_FILE_YES,
     voidingMode : this.VOIDING_MODE_ALL,
     faceSetOptimizationRange : [0, 1000] // range of number of faces [min, max] to optimize the geometry
   };
@@ -685,7 +689,17 @@ class IfcProjectHelper extends IfcHelper
       types.visible = false;
       ObjectUtils.setSelectionHighlight(types, ObjectUtils.HIGHLIGHT_NONE);
       model.add(types);
-      model._ifcFile = loader.ifcFile;
+
+      const retainIfcFile = loader.options.retainIfcFile;
+      if (retainIfcFile === undefined)
+      {
+        retainIfcFile = IFCLoader.RETAIN_IFC_FILE_YES;
+      }
+
+      if (retainIfcFile === IFCLoader.RETAIN_IFC_FILE_YES)
+      {
+        model._ifcFile = loader.ifcFile;
+      }
 
       // load length unit
       // TODO: load all units as properties

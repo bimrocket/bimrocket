@@ -21,8 +21,13 @@ import * as THREE from "three";
 
 class IFCExporter
 {
+  static REUSE_IFC_FILE_NONE = 0; // regenerate all IFC objects
+  static REUSE_IFC_FILE_UNCHANGED = 1; // reuse unchanged IFC objects (NIY)
+  static REUSE_IFC_FILE_ALL = 2; // reuse all IFC objects
+
   static options = {
-    ifcSchema : IFC.DEFAULT_SCHEMA_NAME
+    ifcSchema : IFC.DEFAULT_SCHEMA_NAME,
+    reuseIfcFile : this.REUSE_IFC_FILE_NONE
   };
 
   constructor()
@@ -44,24 +49,38 @@ class IFCExporter
 
     console.info("IFC schema: " + this.options.ifcSchema);
 
-    this.ifcFile = new IFCFile();
-    object._ifcFile = this.ifcFile;
+    const reuseIfcFile = this.options.reuseIfcFile;
+    if (reuseIfcFile === undefined)
+    {
+      reuseIfcFile = IFCExporter.REUSE_IFC_FILE_NONE;
+    }
 
-    const header = this.ifcFile.header;
-    header.filename = object.userData.IFC?.Name || "";
-    header.description = [object.userData.IFC?.Description || ""];
+    if (reuseIfcFile === IFCExporter.REUSE_IFC_FILE_ALL && object._ifcFile)
+    {
+      return this.exportFile(object._ifcFile);
+    }
+    else
+    {
+      // regenerate IfcFile from object
+      this.ifcFile = new IFCFile();
+      object._ifcFile = this.ifcFile;
 
-    IFC.initIfcObject(object, true);
+      const header = this.ifcFile.header;
+      header.filename = object.userData.IFC?.Name || "";
+      header.description = [object.userData.IFC?.Description || ""];
 
-    this.createIfcRepresentationContexts();
+      IFC.initIfcObject(object, true);
 
-    this.createIfcRoots(object);
+      this.createIfcRepresentationContexts();
 
-    this.createIfcRelationships(object);
+      this.createIfcRoots(object);
 
-    this.ifcFile.updateInverseAttributes();
+      this.createIfcRelationships(object);
 
-    return this.exportFile(this.ifcFile);
+      this.ifcFile.updateInverseAttributes();
+
+      return this.exportFile(this.ifcFile);
+    }
   }
 
   exportFile(ifcFile) // abstract, returns text

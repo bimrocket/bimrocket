@@ -33,9 +33,12 @@ class Service
     this.description = parameters.description;
     this.url = parameters.url;
     this.credentialsAlias = parameters.credentialsAlias || null;
-    this.setCredentials(
-      parameters.credentials?.username || null,
-      parameters.credentials?.password || null);
+    if (parameters.credentials)
+    {
+      this.setCredentials(
+        parameters.credentials.username || null,
+        parameters.credentials.password || null);
+    }
   }
 
   getCredentials()

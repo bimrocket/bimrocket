@@ -12,6 +12,7 @@ export const translations =
   "button.edit" : "Edit",
   "button.open" : "Open",
   "button.close" : "Close",
+  "button.stop" : "Stop",
   "button.create" : "Create",
   "button.save" : "Save",
   "button.add" : "Add",
@@ -70,6 +71,8 @@ export const translations =
   "button.finish" : "Finish",
   "button.make_profile" : "Make profile",
   "button.change_axis" : "Change axis",
+
+  "button.exposure" : "Exposure",
 
   "button.menu_show" : "MENU",
   "button.menu_hide" : "CLOSE",
@@ -338,7 +341,7 @@ export const translations =
 
   "tool.solar_simulator.label" : "Solar simulator",
   "tool.solar_simulator.select" : "Select position in the scene to calculate the sun azimuth and elevation.",
-  "tool.solar_simulator.drag" : "Change time by dragging the pointer on the graph.",
+  "tool.solar_simulator.drag_select" : "Change time by dragging the pointer on the graph. Select the faces of the model on which you want to calculate solar exposure. ",
   "tool.solar_simulator.cast_shadows" : "Cast shadows",
   "tool.solar_simulator.adjust_intensity" : "Adjust solar intensity",
 
@@ -393,6 +396,8 @@ export const translations =
   "label.elevation" : "Elevation:",
   "label.longitude" : "Longitude:",
   "label.latitude" : "Latitude:",
+  "label.max_length" : "Max. length:",
+  "label.max_area" : "Max. area:",
 
   "label.service_type" : "Service type:",
   "label.service_name" : "Service name:",

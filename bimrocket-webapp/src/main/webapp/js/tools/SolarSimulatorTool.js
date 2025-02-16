@@ -8,7 +8,9 @@ import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { Application } from "../ui/Application.js";
 import { I18N } from "../i18n/I18N.js";
+import { Solid } from "../core/Solid.js";
 import { BIMUtils } from "../utils/BIMUtils.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import "../lib/suncalc.js";
 import * as THREE from "three";
 
@@ -24,28 +26,42 @@ class SolarSimulatorTool extends Tool
     application.addTool(this);
 
     this.target = new THREE.Object3D();
-    this.target.name = "target";
-
-    this.time = 0;
-    this.times = null; // sunrise, sunset, ... (Date)
-
-    this.azimuthInDegrees = 0; // 0..360
-    this.elevationInDegrees = 0; // -90..90
-    this.sunriseElevationInDegrees = 0;
-    this.sunsetElevationInDegrees = 0;
+    this.target.name = "Target";
 
     this.resizeObverser = new ResizeObserver(() => this.onResize());
+
+    this.simulationGroup = new THREE.Group();
+    this.simulationGroup.name = "SolarSimulation";
+
+    this.surfacesGroup = new THREE.Group();
+    this.surfacesGroup.name = "Surfaces";
+
+    this.edgeMaterial = null;
+    this.surfaceMaterial = null;
+    this.shadowMaterial = null;
+    this.sunMaterial = null;
+
+    application.addEventListener("scene", event =>
+    {
+      if (event.type === "structureChanged"
+          && event.objects[0] instanceof THREE.Scene)
+      {
+        this.cancel();
+      }
+    });
 
     this.createPanel();
   }
 
   createPanel()
   {
-    this.panel = this.application.createPanel(this.label, "left", "panel_solar_sim");
-    this.panel.preferredHeight = 410;
+    const application = this.application;
+
+    this.panel = application.createPanel(this.label, "left", "panel_solar_sim");
+    this.panel.preferredHeight = 490;
     this.panel.minimumHeight = 300;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onHide = () => application.useTool(null);
 
     this.helpElem = document.createElement("div");
     I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select");
@@ -74,40 +90,7 @@ class SolarSimulatorTool extends Tool
       "solar_date", "label.date", isoDate);
     this.dateElem.style.margin = "4px";
 
-    this.canvas = document.createElement("canvas");
-    this.canvas.style.border = "1px solid gray";
-    this.panel.bodyElem.appendChild(this.canvas);
-
-    let drag = false;
-    const canvas = this.canvas;
-    canvas.addEventListener("pointerdown", event =>
-      {
-        const distance = Math.abs(event.offsetX - this.getXFromTime());
-        if (event.pointerType === "mouse" || distance < 20)
-        {
-          drag = true;
-          this.setTimeFromX(event.offsetX);
-        }
-      });
-    canvas.addEventListener("pointerup", () =>
-      {
-        drag = false;
-      });
-    canvas.addEventListener("pointermove", event =>
-      {
-        if (drag)
-        {
-          this.setTimeFromX(event.offsetX);
-        }
-      });
-    canvas.addEventListener("pointerleave", () =>
-      {
-        drag = false;
-      });
-    canvas.addEventListener("contextmenu", event =>
-      {
-        event.preventDefault();
-      });
+    this.timeGraph = new TimeGraph(this);
 
     this.lonElem.addEventListener("input", () => this.update());
     this.latElem.addEventListener("input", () => this.update());
@@ -126,13 +109,33 @@ class SolarSimulatorTool extends Tool
       "flex align_items_center p_2 text_center");
     this.intensityCheckBox.addEventListener("change", () => this.update());
 
+    this.maxLengthElem = Controls.addNumberField(this.panel.bodyElem,
+      "solar_max_length", "label.max_length", 0.1);
+    this.maxLengthElem.step = 0.01;
+    this.maxLengthElem.style.margin = "4px";
+    this.maxLengthElem.style.width = "80px";
+
+    this.maxAreaElem = Controls.addNumberField(this.panel.bodyElem,
+      "solar_max_area", "label.max_area", 0.0001);
+    this.maxAreaElem.step = 0.0001;
+    this.maxAreaElem.style.margin = "4px";
+    this.maxAreaElem.style.width = "80px";
+
+    this.startExposureButton = Controls.addButton(this.panel.bodyElem,
+      "solar_exposure", "button.exposure", () => this.startExposure());
+    this.startExposureButton.style.display = "none";
+
+    this.stopExposureButton = Controls.addButton(this.panel.bodyElem,
+      "solar_exposure", "button.stop", () => this.stopExposure());
+    this.stopExposureButton.style.display = "none";
+
     this.cancelButton = Controls.addButton(this.panel.bodyElem,
       "solar_cancel", "button.cancel", () => this.cancel());
     this.cancelButton.style.display = "none";
 
     this._onPointerDown = (event) => this.onPointerDown(event);
 
-    this.setTime(date);
+    this.timeGraph.setTime(date);
   }
 
   activate()
@@ -165,34 +168,85 @@ class SolarSimulatorTool extends Tool
       if (this.target.parent === null)
       {
         this.application.overlays.add(this.target);
+        this.startExposureButton.style.display = "";
+        this.startExposureButton.disabled = true;
         this.cancelButton.style.display = "";
-      }
-      let object = intersect.object;
-      let geolocation = BIMUtils.getGeolocation(object);
 
-      if (geolocation)
+        let object = intersect.object;
+        let geolocation = BIMUtils.getGeolocation(object);
+
+        if (geolocation)
+        {
+          this.lonElem.value = geolocation.longitude;
+          this.latElem.value = geolocation.latitude;
+        }
+
+        this.target.position.copy(intersect.point);
+        this.target.updateMatrix();
+        this.update();
+        I18N.set(this.helpElem, "textContent", "tool.solar_simulator.drag_select");
+        application.i18n.update(this.helpElem);
+      }
+      else
       {
-        this.lonElem.value = geolocation.longitude;
-        this.latElem.value = geolocation.latitude;
+        let object = intersect.object;
+        if (object.parent === this.surfacesGroup)
+        {
+          application.removeObject(object);
+          this.startExposureButton.disabled =
+            this.surfacesGroup.children.length === 0;
+        }
+        else
+        {
+          this.addSurface(intersect);
+          this.startExposureButton.disabled = false;
+        }
       }
-
-      this.target.position.copy(intersect.point);
-      this.target.updateMatrix();
-      this.update();
-      I18N.set(this.helpElem, "textContent", "tool.solar_simulator.drag");
-      application.i18n.update(this.helpElem);
     }
+  }
+
+  intersect(pointerPosition, baseObject, recursive)
+  {
+    const application = this.application;
+    const camera = application.camera;
+    const container = application.container;
+    const raycaster = new THREE.Raycaster();
+
+    let pointercc = new THREE.Vector2();
+    pointercc.x = (pointerPosition.x / container.clientWidth) * 2 - 1;
+    pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(pointercc, camera);
+    raycaster.camera = camera;
+    raycaster.params.Line.threshold = 0.1;
+
+    let intersects = raycaster.intersectObjects([baseObject], recursive);
+
+    if (intersects.length === 0) return null;
+    for (let intersect of intersects)
+    {
+      if (intersect.object.parent === this.surfacesGroup) return intersect;
+    }
+    for (let intersect of intersects)
+    {
+      if (application.clippingPlane === null ||
+          application.clippingPlane.distanceToPoint(intersect.point) > 0)
+      {
+        if (this.isSelectableObject(intersect.object)) return intersect;
+      }
+    }
+    return null;
   }
 
   onResize()
   {
-    this.renderGraph();
+    this.timeGraph.render();
   }
 
   update()
   {
     this.placeSun();
-    this.renderGraph();
+    this.timeGraph.render();
   }
 
   placeSun()
@@ -202,6 +256,7 @@ class SolarSimulatorTool extends Tool
     const point = this.target.position;
 
     const application = this.application;
+    const timeGraph = this.timeGraph;
     const MathUtils = THREE.MathUtils;
     const scene = application.scene;
     const sunLight = this.getSunLight();
@@ -215,15 +270,16 @@ class SolarSimulatorTool extends Tool
 
     let date = this.getDate();
 
-    this.times = SunCalc.getTimes(date, latitude, longitude);
+    const times = SunCalc.getTimes(date, latitude, longitude);
+    timeGraph.times = times;
     const pos = SunCalc.getPosition(date, latitude, longitude);
-    const srPos = SunCalc.getPosition(this.times.sunrise, latitude, longitude);
-    const ssPos = SunCalc.getPosition(this.times.sunset, latitude, longitude);
+    const srPos = SunCalc.getPosition(times.sunrise, latitude, longitude);
+    const ssPos = SunCalc.getPosition(times.sunset, latitude, longitude);
 
     const solarElevation = pos.altitude;
     const solarAzimuth = pos.azimuth + Math.PI;
 
-    const radius = 100;
+    const radius = 1000;
     const x = Math.cos(0.5 * Math.PI - solarAzimuth) * radius;
     const y = Math.sin(0.5 * Math.PI - solarAzimuth) * radius;
     const z = Math.sin(solarElevation) * radius;
@@ -245,18 +301,485 @@ class SolarSimulatorTool extends Tool
 
     application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
 
-    this.elevationInDegrees = MathUtils.radToDeg(solarElevation);
-    this.azimuthInDegrees = (MathUtils.radToDeg(solarAzimuth) + 360) % 360;
-    this.sunriseElevationInDegrees = MathUtils.radToDeg(srPos.altitude);
-    this.sunsetElevationInDegrees = MathUtils.radToDeg(ssPos.altitude);
+    timeGraph.elevationInDegrees = MathUtils.radToDeg(solarElevation);
+    timeGraph.azimuthInDegrees = (MathUtils.radToDeg(solarAzimuth) + 360) % 360;
+    timeGraph.sunriseElevationInDegrees = MathUtils.radToDeg(srPos.altitude);
+    timeGraph.sunsetElevationInDegrees = MathUtils.radToDeg(ssPos.altitude);
   }
 
-  renderGraph()
+  startExposure()
+  {
+    const sunLight = this.getSunLight();
+    if (!sunLight) return;
+
+    const application = this.application;
+    const progressBar = application.progressBar;
+
+    const shadowGenerator =
+      new ShadowGenerator(application.scene, sunLight.position);
+    shadowGenerator.maxLength = parseFloat(this.maxLengthElem.value);
+    shadowGenerator.maxArea = parseFloat(this.maxAreaElem.value);
+
+    this.shadowGenerator = shadowGenerator;
+
+    const surfacesGroup = this.surfacesGroup;
+    for (let surface of surfacesGroup.children)
+    {
+      const array = surface.geometry.getAttribute("position").array;
+      for (let i = 0; i < array.length; i += 9)
+      {
+        const x1 = array[i];
+        const y1 = array[i + 1];
+        const z1 = array[i + 2];
+        const p1 = new THREE.Vector3(x1, y1, z1);
+        p1.applyMatrix4(surface.matrixWorld);
+
+        const x2 = array[i + 3];
+        const y2 = array[i + 4];
+        const z2 = array[i + 5];
+        const p2 = new THREE.Vector3(x2, y2, z2);
+        p2.applyMatrix4(surface.matrixWorld);
+
+        const x3 = array[i + 6];
+        const y3 = array[i + 7];
+        const z3 = array[i + 8];
+        const p3 = new THREE.Vector3(x3, y3, z3);
+        p3.applyMatrix4(surface.matrixWorld);
+        shadowGenerator.addTriangle(p1, p2, p3);
+      }
+    }
+
+    shadowGenerator.onProgress = (message) =>
+    {
+      progressBar.message = message;
+    };
+
+    shadowGenerator.onComplete = () =>
+    {
+      progressBar.visible = false;
+      progressBar.progress = undefined;
+      progressBar.message = "";
+
+      this.startExposureButton.style.display = "";
+      this.stopExposureButton.style.display = "none";
+
+      if (shadowGenerator.interrupted) return;
+
+      const simulationGroup = this.simulationGroup;
+      for (let child of simulationGroup.children)
+      {
+        if (child !== this.surfacesGroup)
+        {
+          child.visible = false;
+          application.notifyObjectsChanged(child);
+        }
+      }
+
+      const exposureGroup = new THREE.Group();
+      exposureGroup.name = "Exposure-" + this.getDate().toISOString();
+      exposureGroup.userData = shadowGenerator.getStatistics();
+
+      const shadowEdgesGeometry = shadowGenerator.getEdgeGeometry();
+      const shadowLines = new THREE.LineSegments(shadowEdgesGeometry, this.getEdgeMaterial());
+      shadowLines.name = "ShadowEdges";
+      shadowLines.position.sub(application.baseObject.position);
+      shadowLines.updateMatrix();
+      shadowLines.visible = false;
+      shadowLines.raycast = function(){};
+      exposureGroup.add(shadowLines);
+
+      const sunEdgesGeometry = shadowGenerator.getEdgeGeometry(false);
+      const sunLines = new THREE.LineSegments(sunEdgesGeometry, this.getEdgeMaterial());
+      sunLines.name = "SunEdges";
+      sunLines.position.sub(application.baseObject.position);
+      sunLines.updateMatrix();
+      sunLines.visible = false;
+      sunLines.raycast = function(){};
+      exposureGroup.add(sunLines);
+
+      const shadowGeometry = shadowGenerator.getShadowGeometry();
+      const shadowMesh = new THREE.Mesh(shadowGeometry, this.getShadowMaterial());
+      shadowMesh.position.sub(application.baseObject.position);
+      shadowMesh.name = "Shadow";
+      shadowMesh.updateMatrix();
+      shadowMesh.raycast = function(){};
+      exposureGroup.add(shadowMesh);
+
+      const sunGeometry = shadowGenerator.getShadowGeometry(false);
+      const sunMesh = new THREE.Mesh(sunGeometry, this.getSunMaterial());
+      sunMesh.position.sub(application.baseObject.position);
+      sunMesh.name = "Sun";
+      sunMesh.updateMatrix();
+      sunMesh.raycast = function(){};
+      exposureGroup.add(sunMesh);
+
+      this.application.addObject(exposureGroup, simulationGroup);
+    };
+
+    progressBar.visible = true;
+    progressBar.progress = undefined;
+
+    this.startExposureButton.style.display = "none";
+    this.stopExposureButton.style.display = "";
+
+    shadowGenerator.start();
+  }
+
+  stopExposure()
+  {
+    const shadowGenerator = this.shadowGenerator;
+    if (shadowGenerator)
+    {
+      shadowGenerator.stop();
+      this.shadowGenerator = null;
+    }
+  }
+
+  cancel()
+  {
+    this.stopExposure();
+
+    const application = this.application;
+    const scene = application.scene;
+    const hemisphereLight = this.getHemisphereLight();
+    const sunLight = this.getSunLight();
+    sunLight.target = scene;
+    sunLight.position.set(20, 20, 80);
+    sunLight.updateMatrix();
+    this.target.removeFromParent();
+
+    hemisphereLight.intensity = 3;
+    sunLight.intensity = 3;
+
+    application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
+    application.selection.clear();
+    this.startExposureButton.style.display = "none";
+    this.stopExposureButton.style.display = "none";
+    this.cancelButton.style.display = "none";
+    this.timeGraph.render();
+    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select");
+    application.i18n.update(this.helpElem);
+
+    const simulationGroup = this.simulationGroup;
+    if (simulationGroup.parent)
+    {
+      application.removeObject(simulationGroup);
+      simulationGroup.clear();
+
+      const surfacesGroup = this.surfacesGroup;
+      surfacesGroup.clear();
+    }
+  }
+
+  addSurface(intersect)
+  {
+    const object = intersect.object;
+    if (object instanceof Solid)
+    {
+      const application = this.application;
+      const point = intersect.point;
+      const normal = intersect.normal.clone();
+      const matrixWorld = object.matrixWorld;
+
+      const geometry = this.getSurfaceGeometry(object.geometry, normal);
+      if (!geometry) return;
+
+      const mesh = new THREE.Mesh(geometry, this.getSurfaceMaterial());
+      matrixWorld.decompose(mesh.position, mesh.rotation, mesh.scale);
+      mesh.position.sub(application.baseObject.position);
+      mesh.receiveShadow = true;
+      mesh.name = "Surface-" + mesh.id;
+      mesh.updateMatrix();
+
+      const simulationGroup = this.simulationGroup;
+      const surfacesGroup = this.surfacesGroup;
+      simulationGroup.visible = true;
+      surfacesGroup.visible = true;
+
+      if (simulationGroup.parent === null)
+      {
+        ObjectUtils.dispose(simulationGroup);
+        simulationGroup.clear();
+        application.addObject(simulationGroup);
+      }
+
+      if (surfacesGroup.parent === null)
+      {
+        ObjectUtils.dispose(surfacesGroup);
+        surfacesGroup.clear();
+        application.addObject(surfacesGroup, simulationGroup);
+      }
+
+      application.addObject(mesh, surfacesGroup);
+    }
+  }
+
+  getEdgeMaterial()
+  {
+    if (!this.edgeMaterial)
+    {
+      this.edgeMaterial = new THREE.LineBasicMaterial(
+        { color: 0x0, linewidth: 1 });
+    }
+    return this.edgeMaterial;
+  }
+
+  getSurfaceMaterial()
+  {
+    if (!this.surfaceMaterial)
+    {
+      this.surfaceMaterial = new THREE.MeshPhongMaterial({ color : 0x8080ff });
+      this.surfaceMaterial.name = "surface";
+      this.surfaceMaterial.polygonOffset = true;
+      this.surfaceMaterial.polygonOffsetUnits = -1;
+      this.surfaceMaterial.side = 2;
+    }
+    return this.surfaceMaterial;
+  }
+
+  getShadowMaterial()
+  {
+    if (!this.shadowMaterial)
+    {
+      this.shadowMaterial = new THREE.MeshPhongMaterial({ color : 0x606060 });
+      this.shadowMaterial.name = "shadow";
+      this.shadowMaterial.polygonOffset = true;
+      this.shadowMaterial.polygonOffsetUnits = -3;
+      this.shadowMaterial.side = 2;
+    }
+    return this.shadowMaterial;
+  }
+
+  getSunMaterial()
+  {
+    if (!this.sunMaterial)
+    {
+      this.sunMaterial = new THREE.MeshPhongMaterial({ color : 0xffff00 });
+      this.sunMaterial.name = "sun";
+      this.sunMaterial.polygonOffset = true;
+      this.sunMaterial.polygonOffsetUnits = -3;
+      this.sunMaterial.side = 2;
+    }
+    return this.sunMaterial;
+  }
+
+  getSurfaceGeometry(geometry, normal)
+  {
+    const bufferGeometry = new THREE.BufferGeometry();
+    const positions = [];
+    const normals = [];
+    const factor = 0.8;
+
+    for (let face of geometry.faces)
+    {
+      if (face.normal === null) face.updateNormal();
+
+      if (face.normal.dot(normal) > factor)
+      {
+        let triangles = face.getTriangles();
+        for (let triangle of triangles)
+        {
+          for (let i = 0; i < 3; i++)
+          {
+            let vertex = geometry.vertices[triangle[i]];
+            positions.push(vertex.x, vertex.y, vertex.z);
+            normals.push(normal.x, normal.y, normal.z);
+          }
+        }
+      }
+    }
+    if (positions.length < 3) return null;
+
+    bufferGeometry.setAttribute('position',
+      new THREE.Float32BufferAttribute(positions, 3));
+    bufferGeometry.setAttribute('normal',
+      new THREE.Float32BufferAttribute(normals, 3));
+    bufferGeometry.setIndex(null);
+    return bufferGeometry;
+  }
+
+  getDate()
+  {
+    let sdate = this.dateElem.value;
+
+    let n = new Date(0,0);
+    n.setSeconds(this.timeGraph.time * 60 * 60);
+    let stime = n.toTimeString().slice(0, 8);
+
+    let dateTime = sdate + "T" + stime;
+
+    return new Date(Date.parse(dateTime));
+  }
+
+  getDateAt0()
+  {
+    let sdate = this.dateElem.value;
+    let dateTime = sdate + "T00:00:00";
+    return new Date(Date.parse(dateTime));
+  }
+
+  getHemisphereLight()
+  {
+    const children = this.application.scene.children;
+    for (let child of children)
+    {
+      if (child instanceof THREE.HemisphereLight) return child;
+    }
+    return null;
+  }
+
+  getSunLight()
+  {
+    const children = this.application.scene.children;
+    for (let child of children)
+    {
+      if (child instanceof THREE.DirectionalLight) return child;
+    }
+    return null;
+  }
+}
+
+class TimeGraph
+{
+  constructor(tool)
+  {
+    this.tool = tool;
+    const parent = tool.panel.bodyElem;
+
+    let drag = false;
+    this.time = 0; // 0..24
+    this.times = null; // CalcSun object
+    this.transform = null;
+
+    this.azimuthInDegrees = 0; // 0..360
+    this.elevationInDegrees = 0; // -90..90
+    this.sunriseElevationInDegrees = 0;
+    this.sunsetElevationInDegrees = 0;
+
+    const canvas = document.createElement("canvas");
+    canvas.style.border = "1px solid gray";
+    parent.appendChild(canvas);
+
+    this.canvas = canvas;
+
+    canvas.addEventListener("pointerdown", event =>
+      {
+        const distance = Math.abs(event.offsetX - this.getXFromTime());
+        if (event.pointerType === "mouse" || distance < 20)
+        {
+          drag = true;
+          this.setTimeFromX(event.offsetX);
+        }
+      });
+    canvas.addEventListener("pointerup", () =>
+      {
+        drag = false;
+      });
+    canvas.addEventListener("pointermove", event =>
+      {
+        if (drag)
+        {
+          this.setTimeFromX(event.offsetX);
+        }
+      });
+    canvas.addEventListener("pointerleave", () =>
+      {
+        drag = false;
+      });
+    canvas.addEventListener("contextmenu", event =>
+      {
+        event.preventDefault();
+      });
+  }
+
+  setTime(date)
+  {
+    this.time = this.getTimeFromDate(date);
+  }
+
+  getTimeFromDate(date)
+  {
+    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+  }
+
+  getXFromTime()
+  {
+    const { getX } = this.getTransform();
+
+    return getX(this.time);
+  }
+
+  setTimeFromX(offsetX)
+  {
+    const { getTimeFromX } = this.getTransform();
+
+    let time = getTimeFromX(offsetX);
+    if (time < 0) time = 0;
+    else if (time > 24) time = 24;
+
+    this.time = time;
+
+    this.tool.update();
+  }
+
+  getTimeString(time)
+  {
+    const n = new Date(0, 0);
+    n.setSeconds(time * 60 * 60);
+    return n.toTimeString().slice(0, 5);
+  }
+
+  getTransform(update = false)
+  {
+    if (!this.transform || update)
+    {
+      const scaleWidth = 20;
+      const scaleHeight = 20;
+      const width = this.tool.panel.bodyElem.clientWidth - 10;
+      const height = 140 + 2 * scaleHeight;
+      const graphWidth = (width - 2 * scaleWidth);
+      const graphHeight = (height - 2 * scaleHeight);
+
+      this.transform = {
+        width: width,
+        height: height,
+
+        graphWidth: graphWidth,
+        graphHeight: graphHeight,
+
+        scaleWidth: scaleWidth,
+        scaleHeight: scaleHeight,
+
+        getX: function(time) // time in hours 0..24
+        {
+          return scaleWidth + Math.round(graphWidth * time / 24);
+        },
+
+        getAzimuthY: function(azimuth) // azimuth in degrees (0..360)
+        {
+          return scaleHeight + graphHeight * azimuth / 360;
+        },
+
+        getElevationY: function(elevation) // elevation in degrees (-90..90)
+        {
+          return scaleHeight + graphHeight * (90 - elevation) / 180;
+        },
+
+        getTimeFromX: function(x) // canvas offset x
+        {
+          return 24 * (x - scaleWidth) / graphWidth;
+        }
+      };
+    }
+    return this.transform;
+  }
+
+  render()
   {
     let canvas = this.canvas;
 
     // adjust canvas size
-    const application = this.application;
+    const application = this.tool.application;
     const i18n = application.i18n;
 
     const pixelRatio = window.devicePixelRatio || 1;
@@ -272,12 +795,12 @@ class SolarSimulatorTool extends Tool
     ctx.clearRect(0, 0, width, height);
     ctx.scale(pixelRatio, pixelRatio);
 
-    if (this.target.parent === null) return;
+    if (this.tool.target.parent === null) return;
 
     const MathUtils = THREE.MathUtils;
 
-    const longitude = parseFloat(this.lonElem.value);
-    const latitude = parseFloat(this.latElem.value);
+    const longitude = parseFloat(this.tool.lonElem.value);
+    const latitude = parseFloat(this.tool.latElem.value);
 
     const gridColor = "#202020";
     const azimuthColor = "#2020ff";
@@ -343,7 +866,7 @@ class SolarSimulatorTool extends Tool
     const millisPerPixel = millisPerDay / graphWidth;
     const azimuthArray = [];
     const elevationArray = [];
-    let millis = this.getDateAt0().getTime();
+    let millis = this.tool.getDateAt0().getTime();
 
     for (let i = 0; i < graphWidth; i++)
     {
@@ -448,150 +971,433 @@ class SolarSimulatorTool extends Tool
 
     ctx.fillText(elevationText, graph12X + margin, graphMinY - margin);
   }
+}
 
-  cancel()
+class ShadowGenerator
+{
+  constructor(scene, sunPosition)
   {
-    const application = this.application;
-    const scene = application.scene;
-    const hemisphereLight = this.getHemisphereLight();
-    const sunLight = this.getSunLight();
-    sunLight.target = scene;
-    sunLight.position.set(20, 20, 80);
-    sunLight.updateMatrix();
-    this.target.removeFromParent();
-
-    hemisphereLight.intensity = 3;
-    sunLight.intensity = 3;
-
-    application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
-    application.selection.clear();
-    this.cancelButton.style.display = "none";
-    this.renderGraph();
-    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select");
-    application.i18n.update(this.helpElem);
+    this.scene = scene;
+    this.sunPosition = new THREE.Vector3().copy(sunPosition);
+    this.vertexMap = new Map();
+    this.vertices = [];
+    this.triangles = [];
+    this.shadowVertices = []; // boolean array, true: shadow
+    this.maxLength = 0.1;
+    this.maxArea = 0.00001;
+    this.stepMillis = 10;
+    this.startMillis = 0;
+    this.interrupted = false;
+    this.areaCalculator = new THREE.Triangle();
+    this.maxVertexCount = 15000000;
+    this.lastShadowObject = null;
   }
 
-  getTransform(update = false)
+  addTriangle(p1, p2, p3)
   {
-    if (!this.transform || update)
+    const i1 = this.addVertex(p1);
+    const i2 = this.addVertex(p2);
+    const i3 = this.addVertex(p3);
+
+    const triangle = [i1, i2, i3];
+    this.triangles.push(triangle);
+    return triangle;
+  }
+
+  start()
+  {
+    this.step = 0;
+    this.startMillis = Date.now();
+    setTimeout(() => this.phase1(), 0);
+  }
+
+  stop()
+  {
+    this.interrupted = true;
+  }
+
+  onProgress(message)
+  {
+  }
+
+  onComplete(generator)
+  {
+  }
+
+  addVertex(point)
+  {
+    const decimals = 5;
+    const key = point.x.toFixed(decimals) + "/" +
+                point.y.toFixed(decimals) + "/" +
+                point.z.toFixed(decimals);
+    let index = this.vertexMap.get(key);
+    if (index === undefined)
     {
-      const scaleWidth = 20;
-      const scaleHeight = 20;
-      const width = this.panel.element.clientWidth - 10;
-      const height = 140 + 2 * scaleHeight;
-      const graphWidth = (width - 2 * scaleWidth);
-      const graphHeight = (height - 2 * scaleHeight);
+      index = this.vertices.length;
+      this.vertices.push(point);
+      this.shadowVertices.push(this.isPointShadowed(point));
+      this.vertexMap.set(key, index);
+    }
+    return index;
+  }
 
-      this.transform = {
-        width: width,
-        height: height,
+  isPointShadowed(point)
+  {
+    const direction = new THREE.Vector3();
+    direction.copy(this.sunPosition).normalize();
+    const raycaster = new THREE.Raycaster(point, direction, 0.001);
 
-        graphWidth: graphWidth,
-        graphHeight: graphHeight,
+    if (this.lastShadowObject)
+    {
+      const intersects = [];
+      this.lastShadowObject.raycast(raycaster, intersects);
+      if (intersects.length > 0) return true;
+    }
 
-        scaleWidth: scaleWidth,
-        scaleHeight: scaleHeight,
+    return this.isObjectShadowed(this.scene, raycaster);
+	}
 
-        getX: function(time) // time in hours 0..24
+  isObjectShadowed(object, raycaster)
+  {
+    if (!object.visible) return false;
+
+    const intersects = [];
+    object.raycast(raycaster, intersects);
+    if (intersects.length > 0)
+    {
+      if (!(object instanceof THREE.Line)
+          && object.material?.transparent === false)
+      {
+        this.lastShadowObject = object;
+        return true;
+      }
+    }
+
+    for (let child of object.children)
+    {
+      if (this.isObjectShadowed(child, raycaster)) return true;
+    }
+    return false;
+  }
+
+
+  phase1()
+  {
+    if (this.interrupted)
+    {
+      this.onComplete(this);
+    }
+    else
+    {
+      const triangles = this.triangles;
+      if (this.step < triangles.length)
+      {
+        const t0 = Date.now();
+        while (Date.now() - t0 < this.stepMillis && this.step < triangles.length)
         {
-          return scaleWidth + Math.round(graphWidth * time / 24);
-        },
-
-        getAzimuthY: function(azimuth) // azimuth in degrees (0..360)
-        {
-          return scaleHeight + graphHeight * azimuth / 360;
-        },
-
-        getElevationY: function(elevation) // elevation in degrees (-90..90)
-        {
-          return scaleHeight + graphHeight * (90 - elevation) / 180;
-        },
-
-        getTimeFromX: function(x) // canvas offset x
-        {
-          return 24 * (x - scaleWidth) / graphWidth;
+          this.phase1Step();
         }
-      };
+        this.onProgress("Phase-1: " + triangles.length);
+        setTimeout(() => this.phase1(), 0);
+      }
+      else
+      {
+        this.step = 0;
+        setTimeout(() => this.phase2(), 0);
+      }
     }
-    return this.transform;
   }
 
-  getDate()
+  phase2()
   {
-    let sdate = this.dateElem.value;
-
-    let n = new Date(0,0);
-    n.setSeconds(this.time * 60 * 60);
-    let stime = n.toTimeString().slice(0, 8);
-
-    let dateTime = sdate + "T" + stime;
-
-    return new Date(Date.parse(dateTime));
-  }
-
-  getDateAt0()
-  {
-    let sdate = this.dateElem.value;
-    let dateTime = sdate + "T00:00:00";
-    return new Date(Date.parse(dateTime));
-  }
-
-  setTime(date)
-  {
-    this.time = this.getTimeFromDate(date);
-  }
-
-  getXFromTime()
-  {
-    const { getX } = this.getTransform();
-
-    return getX(this.time);
-  }
-
-  setTimeFromX(offsetX)
-  {
-    const { getTimeFromX } = this.getTransform();
-
-    let time = getTimeFromX(offsetX);
-    if (time < 0) time = 0;
-    else if (time > 24) time = 24;
-
-    this.time = time;
-
-    this.update();
-  }
-
-  getTimeString(time)
-  {
-    const n = new Date(0, 0);
-    n.setSeconds(time * 60 * 60);
-    return n.toTimeString().slice(0, 5);
-  }
-
-  getTimeFromDate(date)
-  {
-    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
-  }
-
-  getHemisphereLight()
-  {
-    const children = this.application.scene.children;
-    for (let child of children)
+    if (this.interrupted)
     {
-      if (child instanceof THREE.HemisphereLight) return child;
+      this.onComplete(this);
     }
-    return null;
+    else
+    {
+      const triangles = this.triangles;
+      if (this.step < triangles.length)
+      {
+        const t0 = Date.now();
+        while (Date.now() - t0 < this.stepMillis && this.step < triangles.length)
+        {
+          this.phase2Step();
+        }
+        this.onProgress("Phase-2: " + triangles.length);
+        setTimeout(() => this.phase2(), 0);
+      }
+      else
+      {
+        this.endMillis = Date.now();
+        this.onComplete(this);
+      }
+    }
   }
 
-  getSunLight()
+  phase1Step()
   {
-    const children = this.application.scene.children;
-    for (let child of children)
+    const maxLength = this.maxLength;
+    const triangles = this.triangles;
+    let triangle = triangles[this.step];
+
+    const i1 = triangle[0];
+    const i2 = triangle[1];
+    const i3 = triangle[2];
+
+    const p1 = this.vertices[i1];
+    const p2 = this.vertices[i2];
+    const p3 = this.vertices[i3];
+
+    const d12 = p1.distanceTo(p2);
+    const d13 = p1.distanceTo(p3);
+    const d23 = p2.distanceTo(p3);
+    if (d12 > maxLength || d13 > maxLength || d23 > maxLength)
     {
-      if (child instanceof THREE.DirectionalLight) return child;
+      const dmax = Math.max(d12, Math.max(d13, d23));
+      if (d12 === dmax)
+      {
+        const p12 = new THREE.Vector3();
+        p12.copy(p1).add(p2).multiplyScalar(0.5);
+        const i12 = this.addVertex(p12);
+        triangle[0] = i1;
+        triangle[1] = i12;
+        triangle[2] = i3;
+        triangles.push([i12, i2, i3]);
+      }
+      else if (d13 === dmax)
+      {
+        const p13 = new THREE.Vector3();
+        p13.copy(p1).add(p3).multiplyScalar(0.5);
+        const i13 = this.addVertex(p13);
+        triangle[0] = i1;
+        triangle[1] = i2;
+        triangle[2] = i13;
+        triangles.push([i2, i3, i13]);
+      }
+      else
+      {
+        const p23 = new THREE.Vector3();
+        p23.copy(p2).add(p3).multiplyScalar(0.5);
+        const i23 = this.addVertex(p23);
+        triangle[0] = i1;
+        triangle[1] = i2;
+        triangle[2] = i23;
+        triangles.push([i1, i23, i3]);
+      }
     }
-    return null;
+    else this.step++;
+  }
+
+  phase2Step()
+  {
+    const maxArea = this.maxArea;
+    const triangles = this.triangles;
+    const areaCalculator = this.areaCalculator;
+    let triangle = triangles[this.step];
+
+    const i1 = triangle[0];
+    const i2 = triangle[1];
+    const i3 = triangle[2];
+
+    const s1 = this.shadowVertices[i1];
+    const s2 = this.shadowVertices[i2];
+    const s3 = this.shadowVertices[i3];
+
+    if (s1 === s2 && s2 === s3)
+    {
+      this.step++;
+      return;
+    }
+
+    const p1 = this.vertices[i1];
+    const p2 = this.vertices[i2];
+    const p3 = this.vertices[i3];
+
+    areaCalculator.a.copy(p1);
+    areaCalculator.b.copy(p2);
+    areaCalculator.c.copy(p3);
+
+    const area = areaCalculator.getArea();
+    if (area < maxArea)
+    {
+      this.step++;
+      return;
+    }
+
+    const d12 = p1.distanceTo(p2);
+    const d13 = p1.distanceTo(p3);
+    const d23 = p2.distanceTo(p3);
+
+    if (s1 === s2 && s1 !== s3)
+    {
+      const pm = new THREE.Vector3();
+      let im;
+      if (d13 > d23)
+      {
+        pm.copy(p1).add(p3).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([im, i2, i3]);
+      }
+      else
+      {
+        pm.copy(p2).add(p3).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([i1, im, i3]);
+      }
+      triangle[0] = i1;
+      triangle[1] = i2;
+      triangle[2] = im;
+    }
+    else if (s1 === s3 && s1 !== s2)
+    {
+      const pm = new THREE.Vector3();
+      let im;
+      if (d12 > d23)
+      {
+        pm.copy(p1).add(p2).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([im, i2, i3]);
+      }
+      else
+      {
+        pm.copy(p2).add(p3).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([i1, i2, im]);
+      }
+      triangle[0] = i1;
+      triangle[1] = im;
+      triangle[2] = i3;
+    }
+    else if (s2 === s3 && s1 !== s2)
+    {
+      const pm = new THREE.Vector3();
+      let im;
+      if (d12 > d13)
+      {
+        pm.copy(p1).add(p2).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([i1, im, i3]);
+      }
+      else
+      {
+        pm.copy(p1).add(p3).multiplyScalar(0.5);
+        im = this.addVertex(pm);
+        triangles.push([i1, i2, im]);
+      }
+      triangle[0] = im;
+      triangle[1] = i2;
+      triangle[2] = i3;
+    }
+    else this.step++;
+  }
+
+  getStatistics()
+  {
+    const vertices = this.vertices;
+
+    let totalArea = 0;
+    let shadowArea = 0;
+    let sunArea = 0;
+    let totalTriangleCount = this.triangles.length;
+    let shadowTriangleCount = 0;
+    let sunTriangleCount = 0;
+
+    const areaCalculator = this.areaCalculator;
+    for (let triangle of this.triangles)
+    {
+      areaCalculator.a.copy(vertices[triangle[0]]);
+      areaCalculator.b.copy(vertices[triangle[1]]);
+      areaCalculator.c.copy(vertices[triangle[2]]);
+      let area = areaCalculator.getArea();
+      totalArea += area;
+      if (this.isShadowTriangle(triangle))
+      {
+        shadowArea += area;
+        shadowTriangleCount++;
+      }
+      else
+      {
+        sunArea += area;
+        sunTriangleCount++;
+      }
+    }
+    const computeTime = (this.endMillis - this.startMillis) / 1000;
+
+    return {
+      totalArea : totalArea,
+      totalTriangleCount : totalTriangleCount,
+
+      shadowArea : shadowArea,
+      shadowAreaPercentage : 100 * shadowArea / totalArea,
+      shadowTriangleCount : shadowTriangleCount,
+
+      sunArea : sunArea,
+      sunAreaPercentage : 100 * sunArea / totalArea,
+      sunTriangleCount : sunTriangleCount,
+
+      computeTime : computeTime
+    };
+  }
+
+  getEdgeGeometry(shadow = true)
+  {
+    const vertices = this.vertices;
+    const edgeVertices = [];
+
+    for (let triangle of this.triangles)
+    {
+      if (this.isShadowTriangle(triangle, shadow))
+      {
+        for (let i = 0; i < 3; i++)
+        {
+          edgeVertices.push(vertices[triangle[i]]);
+          edgeVertices.push(vertices[triangle[(i + 1) % 3]]);
+        }
+        if (edgeVertices.length > this.maxVertexCount) break;
+      }
+    }
+    const bufferGeometry = new THREE.BufferGeometry();
+    bufferGeometry.setFromPoints(edgeVertices);
+    bufferGeometry.setIndex(null);
+    return bufferGeometry;
+  }
+
+  getShadowGeometry(shadow = true)
+  {
+    const vertices = this.vertices;
+    const selectedVertices = [];
+
+    for (let triangle of this.triangles)
+    {
+      if (this.isShadowTriangle(triangle, shadow))
+      {
+        for (let i = 0; i < 3; i++)
+        {
+          selectedVertices.push(vertices[triangle[i]]);
+        }
+        if (selectedVertices.length > this.maxVertexCount) break;
+      }
+    }
+    const bufferGeometry = new THREE.BufferGeometry();
+    bufferGeometry.setFromPoints(selectedVertices);
+    bufferGeometry.setIndex(null);
+    bufferGeometry.computeVertexNormals();
+    return bufferGeometry;
+  }
+
+  isShadowTriangle(triangle, shadow = true)
+  {
+    const shadowVertices = this.shadowVertices;
+
+    let shadowCount = 0;
+    for (let i = 0; i < 3; i++)
+    {
+      if (shadowVertices[triangle[i]]) shadowCount++;
+    }
+    return shadow && shadowCount >= 2 || !shadow && shadowCount <= 1;
   }
 }
+
 
 export { SolarSimulatorTool };

@@ -174,13 +174,13 @@ class SolidGeometry extends THREE.BufferGeometry
 
     if (this.boundingBox !== null)
     {
-			this.computeBoundingBox();
-		}
+      this.computeBoundingBox();
+    }
 
-		if (this.boundingSphere !== null)
+    if (this.boundingSphere !== null)
     {
-			this.computeBoundingSphere();
-		}
+      this.computeBoundingSphere();
+    }
     return this;
   }
 

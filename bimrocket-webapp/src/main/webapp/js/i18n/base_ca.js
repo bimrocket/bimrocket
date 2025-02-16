@@ -12,6 +12,7 @@ export const translations =
   "button.edit" : "Edita",
   "button.open" : "Obre",
   "button.close" : "Tanca",
+  "button.stop" : "Atura",
   "button.create" : "Crea",
   "button.save" : "Desa",
   "button.add" : "Afegeix",
@@ -70,6 +71,8 @@ export const translations =
   "button.finish" : "Finalitza",
   "button.make_profile" : "Crea perfil",
   "button.change_axis" : "Canvia eix",
+
+  "button.exposure" : "Exposició",
 
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "TANCA",
@@ -338,7 +341,7 @@ export const translations =
 
   "tool.solar_simulator.label" : "Simulador solar",
   "tool.solar_simulator.select" : "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
-  "tool.solar_simulator.drag" : "Canvia l'hora arrossegant el punter sobre la gràfica",
+  "tool.solar_simulator.drag_select" : "Canvia l'hora arrossegant el punter sobre la gràfica. Selecciona la cares del model sobre les quals vols calcular l'exposició solar.",
   "tool.solar_simulator.cast_shadows" : "Projecta ombres",
   "tool.solar_simulator.adjust_intensity" : "Ajusta la intensitat solar",
 
@@ -393,6 +396,8 @@ export const translations =
   "label.elevation" : "Elevació:",
   "label.longitude" : "Longitud:",
   "label.latitude" : "Latitud:",
+  "label.max_length" : "Longitud màxima:",
+  "label.max_area" : "Àrea màxima:",
 
   "label.service_type" : "Tipus de servei:",
   "label.service_name" : "Nom del servei:",

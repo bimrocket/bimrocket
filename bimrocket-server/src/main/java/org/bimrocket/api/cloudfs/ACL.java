@@ -49,9 +49,10 @@ public class ACL
 {
   public static String READ_ACTION = "READ";
   public static String WRITE_ACTION = "WRITE";
-  private static final String ACL_FILENAME = ".acl";
-  private static final int MAX_SIZE = 10;
+  public static final String ACL_FILENAME = ".acl";
+  public static final String ANY_FILENAME = "*";
 
+  private static final int MAX_SIZE = 10;
   private static final LRUMap cache = new LRUMap(MAX_SIZE);
 
   private final File directory;
@@ -147,7 +148,11 @@ public class ACL
   {
     prepare();
     ActionMap actionMap = acl.get(filename);
-    if (actionMap == null) return Collections.emptySet();
+    if (actionMap == null)
+    {
+      actionMap = acl.get(ANY_FILENAME);
+      if (actionMap == null) return Collections.emptySet();
+    }
     Set<String> roles = actionMap.get(action);
     return roles == null ? Collections.emptySet() : roles;
   }

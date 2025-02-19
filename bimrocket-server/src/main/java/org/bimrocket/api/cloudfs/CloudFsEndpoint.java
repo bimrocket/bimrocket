@@ -70,18 +70,18 @@ import java.nio.file.FileSystem;
 import java.util.Collections;
 import java.util.Set;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import java.util.Date;
+import org.bimrocket.api.security.User;
+import org.bimrocket.service.security.SecurityService;
+import org.bimrocket.util.URIEncoder;
+import org.eclipse.microprofile.config.Config;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
 import static jakarta.ws.rs.core.Response.Status.CREATED;
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.METHOD_NOT_ALLOWED;
 import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
-import java.util.Date;
-import org.bimrocket.api.security.User;
 import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
-import org.bimrocket.service.security.SecurityService;
-import org.bimrocket.util.URIEncoder;
-import org.eclipse.microprofile.config.Config;
 
 /**
  *
@@ -217,7 +217,7 @@ public class CloudFsEndpoint
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
 
-    if (!isValidFile(file))
+    if (!isValidFile(file) && !isACLFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
     if (!isAccessAllowed(file, ACL.READ_ACTION))
@@ -242,7 +242,7 @@ public class CloudFsEndpoint
     String uri = getPathUri(path);
     File file = new File(getBaseDir(), uri);
 
-    if (!isValidFile(file) || file.isDirectory())
+    if (!isACLFile(file) && (!isValidFile(file) || file.isDirectory()))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
     if (!isAccessAllowed(file, ACL.WRITE_ACTION))
@@ -271,7 +271,7 @@ public class CloudFsEndpoint
     if (!file.exists())
       return Response.status(NOT_FOUND).build();
 
-    if (!isValidFile(file))
+    if (!isValidFile(file) && !isACLFile(file))
       return Response.status(METHOD_NOT_ALLOWED).build();
 
     if (!isAccessAllowed(file, ACL.WRITE_ACTION))
@@ -320,7 +320,14 @@ public class CloudFsEndpoint
 
   private boolean isValidFile(File file)
   {
-    return !file.isHidden() && !file.getName().startsWith(".");
+    return !file.isHidden() &&
+      !file.getName().startsWith(".") &&
+      !file.getName().equals(ACL.ANY_FILENAME);
+  }
+
+  private boolean isACLFile(File file)
+  {
+    return file.getName().equals(ACL.ACL_FILENAME);
   }
 
   private Response sendFileData(File file, boolean withContent)
@@ -452,8 +459,8 @@ public class CloudFsEndpoint
     try
     {
       File baseDir = getBaseDir();
-      String filename = file.getName();
-      File dir = file.getParentFile();
+      String filename = file.isDirectory() ? ACL.ANY_FILENAME : file.getName();
+      File dir = file.isDirectory() ? file : file.getParentFile();
       Set<String> fileRoles = Collections.emptySet();
       while (dir != null)
       {
@@ -505,6 +512,11 @@ public class CloudFsEndpoint
     if (extension.equals("ifcxml")) return "application/xml";
     if (extension.equals("gltf")) return "model/gltf+json";
     if (extension.equals("glb")) return "model/gltf-binary";
+    if (extension.equals("pdf")) return "application/pdf";
+    if (extension.equals("png")) return "image/png";
+    if (extension.equals("jpeg")) return "image/jpeg";
+    if (extension.equals("svg")) return "image/svg+xml";
+    if (extension.equals("tiff")) return "image/tiff";
 
     return "application/octet-stream";
   }

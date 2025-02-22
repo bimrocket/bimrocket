@@ -50,6 +50,9 @@ class SolarSimulatorTool extends Tool
       }
     });
 
+    this._onPointerDown = (event) => this.onPointerDown(event);
+    this._onNodeChanged = (event) => this.onNodeChanged(event);
+
     this.createPanel();
   }
 
@@ -58,13 +61,13 @@ class SolarSimulatorTool extends Tool
     const application = this.application;
 
     this.panel = application.createPanel(this.label, "left", "panel_solar_sim");
-    this.panel.preferredHeight = 490;
+    this.panel.preferredHeight = 550;
     this.panel.minimumHeight = 300;
 
     this.panel.onHide = () => application.useTool(null);
 
     this.helpElem = document.createElement("div");
-    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select");
+    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select_position");
     this.helpElem.style.margin = "4px";
     this.panel.bodyElem.appendChild(this.helpElem);
 
@@ -100,40 +103,56 @@ class SolarSimulatorTool extends Tool
 
     this.shadowsCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
       "solar_cast_shadows", "tool.solar_simulator.cast_shadows", false,
-      "flex align_items_center p_2 text_center");
+      "flex align_items_center p_2");
     this.shadowsCheckBox.addEventListener("change",
       () => setup.shadowsEnabled = this.shadowsCheckBox.checked);
 
     this.intensityCheckBox = Controls.addCheckBoxField(this.panel.bodyElem,
       "solar_intensity", "tool.solar_simulator.adjust_intensity", true,
-      "flex align_items_center p_2 text_center");
+      "flex align_items_center p_2");
     this.intensityCheckBox.addEventListener("change", () => this.update());
 
-    this.maxLengthElem = Controls.addNumberField(this.panel.bodyElem,
+    this.exposureElem = document.createElement("div");
+    this.exposureElem.style.display = "none";
+    this.panel.bodyElem.appendChild(this.exposureElem);
+
+    this.surfaceHelpElem = document.createElement("div");
+    this.surfaceHelpElem.style.margin = "4px";
+    this.exposureElem.appendChild(this.surfaceHelpElem);
+    I18N.set(this.surfaceHelpElem, "textContent", "tool.solar_simulator.select_surfaces");
+
+    this.surfaceCountElem = document.createElement("div");
+    this.surfaceCountElem.className = "mt_4 mb_4";
+    this.surfaceCountElem.style.margin = "4px";
+    this.exposureElem.appendChild(this.surfaceCountElem);
+    I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces", 0);
+
+    this.maxLengthElem = Controls.addNumberField(this.exposureElem,
       "solar_max_length", "label.max_length", 0.1);
     this.maxLengthElem.step = 0.01;
+    this.maxLengthElem.min = 0;
     this.maxLengthElem.style.margin = "4px";
     this.maxLengthElem.style.width = "80px";
+    I18N.set(this.maxLengthElem.previousSibling, "title", "tool.solar_simulator.max_length_info");
 
-    this.maxAreaElem = Controls.addNumberField(this.panel.bodyElem,
+    this.maxAreaElem = Controls.addNumberField(this.exposureElem,
       "solar_max_area", "label.max_area", 0.0001);
     this.maxAreaElem.step = 0.0001;
+    this.maxAreaElem.min = 0;
     this.maxAreaElem.style.margin = "4px";
     this.maxAreaElem.style.width = "80px";
+    I18N.set(this.maxAreaElem.previousSibling, "title", "tool.solar_simulator.max_area_info");
 
-    this.startExposureButton = Controls.addButton(this.panel.bodyElem,
+    this.startExposureButton = Controls.addButton(this.exposureElem,
       "solar_exposure", "button.exposure", () => this.startExposure());
-    this.startExposureButton.style.display = "none";
+    this.startExposureButton.style.display = "";
 
-    this.stopExposureButton = Controls.addButton(this.panel.bodyElem,
+    this.stopExposureButton = Controls.addButton(this.exposureElem,
       "solar_exposure", "button.stop", () => this.stopExposure());
     this.stopExposureButton.style.display = "none";
 
-    this.cancelButton = Controls.addButton(this.panel.bodyElem,
+    this.cancelButton = Controls.addButton(this.exposureElem,
       "solar_cancel", "button.cancel", () => this.cancel());
-    this.cancelButton.style.display = "none";
-
-    this._onPointerDown = (event) => this.onPointerDown(event);
 
     this.timeGraph.setTime(date);
   }
@@ -145,14 +164,17 @@ class SolarSimulatorTool extends Tool
     this.panel.visible = true;
     this.shadowsCheckBox.checked = application.setup.shadowsEnabled;
     container.addEventListener("pointerdown", this._onPointerDown);
+    application.addEventListener("scene", this._onNodeChanged);
     this.resizeObverser.observe(this.panel.element);
   }
 
   deactivate()
   {
-    const container = this.application.container;
+    const application = this.application;
+    const container = application.container;
     this.panel.visible = false;
     container.removeEventListener("pointerdown", this._onPointerDown);
+    application.removeEventListener("scene", this._onNodeChanged);
     this.resizeObverser.unobserve(this.panel.element);
   }
 
@@ -168,9 +190,8 @@ class SolarSimulatorTool extends Tool
       if (this.target.parent === null)
       {
         this.application.overlays.add(this.target);
-        this.startExposureButton.style.display = "";
         this.startExposureButton.disabled = true;
-        this.cancelButton.style.display = "";
+        this.exposureElem.style.display = "";
 
         let object = intersect.object;
         let geolocation = BIMUtils.getGeolocation(object);
@@ -184,7 +205,7 @@ class SolarSimulatorTool extends Tool
         this.target.position.copy(intersect.point);
         this.target.updateMatrix();
         this.update();
-        I18N.set(this.helpElem, "textContent", "tool.solar_simulator.drag_select");
+        I18N.set(this.helpElem, "textContent", "tool.solar_simulator.drag");
         application.i18n.update(this.helpElem);
       }
       else
@@ -202,6 +223,31 @@ class SolarSimulatorTool extends Tool
           this.startExposureButton.disabled = false;
         }
       }
+    }
+  }
+
+  onNodeChanged(event)
+  {
+    const simulationGroup = this.simulationGroup;
+    if (!simulationGroup.parent)
+    {
+      simulationGroup.clear();
+    }
+
+    const surfacesGroup = this.surfacesGroup;
+    if (!surfacesGroup.parent)
+    {
+      surfacesGroup.clear();
+    }
+
+    if ((event.type === "added" || event.type === "removed") &&
+        (event.object === simulationGroup ||
+         event.object === surfacesGroup ||
+         event.parent === surfacesGroup))
+    {
+      I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces",
+        this.surfacesGroup.children.length);
+      this.application.i18n.update(this.surfaceCountElem);
     }
   }
 
@@ -223,19 +269,42 @@ class SolarSimulatorTool extends Tool
     let intersects = raycaster.intersectObjects([baseObject], recursive);
 
     if (intersects.length === 0) return null;
-    for (let intersect of intersects)
-    {
-      if (intersect.object.parent === this.surfacesGroup) return intersect;
-    }
+
+    let firstIntersect = null;
+    let surfaceIntersect = null;
     for (let intersect of intersects)
     {
       if (application.clippingPlane === null ||
           application.clippingPlane.distanceToPoint(intersect.point) > 0)
       {
-        if (this.isSelectableObject(intersect.object)) return intersect;
+        if (this.isSelectableObject(intersect.object))
+        {
+          if (firstIntersect === null)
+          {
+            firstIntersect = intersect;
+          }
+
+          if (intersect.object.parent === this.surfacesGroup)
+          {
+            surfaceIntersect = intersect;
+            break;
+          }
+        }
       }
     }
-    return null;
+    if (firstIntersect === null)
+    {
+      return null;
+    }
+    else if (surfaceIntersect === null)
+    {
+      return firstIntersect;
+    }
+    else
+    {
+      const delta = surfaceIntersect.distance - firstIntersect.distance;
+      return delta < 0.01 ? surfaceIntersect : firstIntersect;
+    }
   }
 
   onResize()
@@ -349,9 +418,10 @@ class SolarSimulatorTool extends Tool
       }
     }
 
-    shadowGenerator.onProgress = (message) =>
+    shadowGenerator.onProgress = (message, progress) =>
     {
       progressBar.message = message;
+      progressBar.progress = progress;
     };
 
     shadowGenerator.onComplete = () =>
@@ -453,11 +523,11 @@ class SolarSimulatorTool extends Tool
 
     application.notifyObjectsChanged([this.target, sunLight, hemisphereLight]);
     application.selection.clear();
-    this.startExposureButton.style.display = "none";
-    this.stopExposureButton.style.display = "none";
-    this.cancelButton.style.display = "none";
+
+    this.exposureElem.style.display = "none";
+
     this.timeGraph.render();
-    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select");
+    I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select_position");
     application.i18n.update(this.helpElem);
 
     const simulationGroup = this.simulationGroup;
@@ -465,10 +535,10 @@ class SolarSimulatorTool extends Tool
     {
       application.removeObject(simulationGroup);
       simulationGroup.clear();
-
-      const surfacesGroup = this.surfacesGroup;
-      surfacesGroup.clear();
     }
+
+    const surfacesGroup = this.surfacesGroup;
+    surfacesGroup.clear();
   }
 
   addSurface(intersect)
@@ -985,11 +1055,14 @@ class ShadowGenerator
     this.shadowVertices = []; // boolean array, true: shadow
     this.maxLength = 0.1;
     this.maxArea = 0.00001;
-    this.stepMillis = 10;
+    this.stepMillis = 20;
     this.startMillis = 0;
     this.interrupted = false;
     this.areaCalculator = new THREE.Triangle();
     this.maxVertexCount = 15000000;
+    this.totalArea = 0;
+    this.nonDefinitiveArea = 0;
+    this.processedArea = 0;
     this.lastShadowObject = null;
   }
 
@@ -1008,6 +1081,7 @@ class ShadowGenerator
   {
     this.step = 0;
     this.startMillis = Date.now();
+    this.totalArea = this.getTotalArea();
     setTimeout(() => this.phase1(), 0);
   }
 
@@ -1016,7 +1090,7 @@ class ShadowGenerator
     this.interrupted = true;
   }
 
-  onProgress(message)
+  onProgress(message, progress)
   {
   }
 
@@ -1090,19 +1164,22 @@ class ShadowGenerator
     else
     {
       const triangles = this.triangles;
-      if (this.step < triangles.length)
+      if (this.step < triangles.length && this.maxLength > 0)
       {
         const t0 = Date.now();
         while (Date.now() - t0 < this.stepMillis && this.step < triangles.length)
         {
           this.phase1Step();
         }
-        this.onProgress("Phase-1: " + triangles.length);
+        let message = "Phase-1, triangles: " + Math.round(triangles.length / 1000) + "K";
+        this.onProgress(message,
+          100 * this.processedArea / this.totalArea);
         setTimeout(() => this.phase1(), 0);
       }
       else
       {
         this.step = 0;
+        this.processedArea = 0;
         setTimeout(() => this.phase2(), 0);
       }
     }
@@ -1117,14 +1194,16 @@ class ShadowGenerator
     else
     {
       const triangles = this.triangles;
-      if (this.step < triangles.length)
+      if (this.step < triangles.length && this.maxArea > 0)
       {
         const t0 = Date.now();
         while (Date.now() - t0 < this.stepMillis && this.step < triangles.length)
         {
           this.phase2Step();
         }
-        this.onProgress("Phase-2: " + triangles.length);
+        let message = "Phase-2, triangles: " + Math.round(triangles.length / 1000) + "K";
+        this.onProgress(message,
+          100 * this.processedArea / this.nonDefinitiveArea);
         setTimeout(() => this.phase2(), 0);
       }
       else
@@ -1139,6 +1218,7 @@ class ShadowGenerator
   {
     const maxLength = this.maxLength;
     const triangles = this.triangles;
+    const areaCalculator = this.areaCalculator;
     let triangle = triangles[this.step];
 
     const i1 = triangle[0];
@@ -1186,7 +1266,24 @@ class ShadowGenerator
         triangles.push([i1, i23, i3]);
       }
     }
-    else this.step++;
+    else // completed triangle
+    {
+      areaCalculator.a.copy(p1);
+      areaCalculator.b.copy(p2);
+      areaCalculator.c.copy(p3);
+      const area = areaCalculator.getArea();
+      this.processedArea += area;
+      if (this.isDefinitiveTriangle(triangle))
+      {
+        triangle.push(1); // definitive
+      }
+      else
+      {
+        this.nonDefinitiveArea += area;
+        triangle.push(0); // non definitive
+      }
+      this.step++;
+    }
   }
 
   phase2Step()
@@ -1199,16 +1296,11 @@ class ShadowGenerator
     const i1 = triangle[0];
     const i2 = triangle[1];
     const i3 = triangle[2];
+    const definitive = triangle[3]; // 0: no, 1: yes, undefined: new
 
     const s1 = this.shadowVertices[i1];
     const s2 = this.shadowVertices[i2];
     const s3 = this.shadowVertices[i3];
-
-    if (s1 === s2 && s2 === s3)
-    {
-      this.step++;
-      return;
-    }
 
     const p1 = this.vertices[i1];
     const p2 = this.vertices[i2];
@@ -1221,6 +1313,20 @@ class ShadowGenerator
     const area = areaCalculator.getArea();
     if (area < maxArea)
     {
+      if (definitive !== 1)
+      {
+        this.processedArea += area;
+      }
+      this.step++;
+      return;
+    }
+
+    if (s1 === s2 && s2 === s3)
+    {
+      if (definitive !== 1)
+      {
+        this.processedArea += area;
+      }
       this.step++;
       return;
     }
@@ -1289,7 +1395,22 @@ class ShadowGenerator
       triangle[1] = i2;
       triangle[2] = i3;
     }
-    else this.step++;
+  }
+
+  getTotalArea()
+  {
+    const vertices = this.vertices;
+
+    let totalArea = 0;
+    const areaCalculator = this.areaCalculator;
+    for (let triangle of this.triangles)
+    {
+      areaCalculator.a.copy(vertices[triangle[0]]);
+      areaCalculator.b.copy(vertices[triangle[1]]);
+      areaCalculator.c.copy(vertices[triangle[2]]);
+      totalArea += areaCalculator.getArea();
+    }
+    return totalArea;
   }
 
   getStatistics()
@@ -1384,6 +1505,18 @@ class ShadowGenerator
     bufferGeometry.setIndex(null);
     bufferGeometry.computeVertexNormals();
     return bufferGeometry;
+  }
+
+  isDefinitiveTriangle(triangle)
+  {
+    const shadowVertices = this.shadowVertices;
+
+    let shadowCount = 0;
+    for (let i = 0; i < 3; i++)
+    {
+      if (shadowVertices[triangle[i]]) shadowCount++;
+    }
+    return shadowCount === 0 || shadowCount === 3;
   }
 
   isShadowTriangle(triangle, shadow = true)

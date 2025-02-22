@@ -340,10 +340,13 @@ export const translations =
   "tool.chatgpt.label" : "ChatGPT",
 
   "tool.solar_simulator.label" : "Solar simulator",
-  "tool.solar_simulator.select" : "Select position in the scene to calculate the sun azimuth and elevation.",
-  "tool.solar_simulator.drag_select" : "Change time by dragging the pointer on the graph. Select the faces of the model on which you want to calculate solar exposure. ",
+  "tool.solar_simulator.select_position" : "Select position in the scene to calculate the sun azimuth and elevation.",
+  "tool.solar_simulator.drag" : "Change time by dragging the pointer on the graph.",
+  "tool.solar_simulator.select_surfaces" : "Select the surfaces on which you want to calculate solar exposure. Select a surface again to deselect it.",
   "tool.solar_simulator.cast_shadows" : "Cast shadows",
   "tool.solar_simulator.adjust_intensity" : "Adjust solar intensity",
+  "tool.solar_simulator.max_length_info" : "Maximum length of triangle sides in phase 1",
+  "tool.solar_simulator.max_area_info" : "Maximum area of ​​the triangles in phase 2",
 
   "tool.start_controllers.label" : "Start controllers",
 
@@ -621,6 +624,8 @@ export const translations =
   "message.select_an_object" : "Select an object to make the link.",
   "message.enter_link_name" : "Enter the link name.",
   "message.link_created" : "Link created.",
+
+  "message.selected_surfaces" : count => `Selected surfaces: ${count}`,
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

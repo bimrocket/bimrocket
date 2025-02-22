@@ -340,10 +340,13 @@ export const translations =
   "tool.chatgpt.label" : "ChatGPT",
 
   "tool.solar_simulator.label" : "Simulador solar",
-  "tool.solar_simulator.select" : "Selecciona una posición en la escena para calcular el azimut y la elevación del sol.",
-  "tool.solar_simulator.drag_select" : "Cambia la hora arrastrando el puntero sobre el gráfico. Selecciona las caras del modelo sobre las que quieres calcular la exposición solar.",
+  "tool.solar_simulator.select_position" : "Selecciona una posición en la escena para calcular el azimut y la elevación del sol.",
+  "tool.solar_simulator.drag" : "Cambia la hora arrastrando el puntero sobre el gráfico.",
+  "tool.solar_simulator.select_surfaces" : "Selecciona las superficies sobre las que quieres calcular la exposición solar. Vuelve a seleccionar una superficie para deseleccionarla.",
   "tool.solar_simulator.cast_shadows" : "Proyectar sombras",
   "tool.solar_simulator.adjust_intensity" : "Ajustar la intensidad solar",
+  "tool.solar_simulator.max_length_info" : "Longitud máxima de los lados de los triángules en la fase 1",
+  "tool.solar_simulator.max_area_info" : "Area máxima de los triángulos en la fase 2",
 
   "tool.start_controllers.label" : "Iniciar controlad.",
 
@@ -621,6 +624,8 @@ export const translations =
   "message.select_an_object" : "Selecciona un objeto para crear el enlace.",
   "message.enter_link_name" : "Introduce el nombre del enlace.",
   "message.link_created" : "Enlace creado.",
+
+  "message.selected_surfaces" : count => `Superficies seleccionadas: ${count}`,
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

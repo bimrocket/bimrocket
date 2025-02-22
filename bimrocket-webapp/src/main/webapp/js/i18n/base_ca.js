@@ -340,10 +340,13 @@ export const translations =
   "tool.chatgpt.label" : "ChatGPT",
 
   "tool.solar_simulator.label" : "Simulador solar",
-  "tool.solar_simulator.select" : "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
-  "tool.solar_simulator.drag_select" : "Canvia l'hora arrossegant el punter sobre la gràfica. Selecciona la cares del model sobre les quals vols calcular l'exposició solar.",
+  "tool.solar_simulator.select_position" : "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
+  "tool.solar_simulator.drag" : "Canvia l'hora arrossegant el punter sobre la gràfica.",
+  "tool.solar_simulator.select_surfaces" : "Selecciona les superfícies sobre les quals vols calcular l'exposició solar. Torna a seleccionar una superfície per deseleccionar-la.",
   "tool.solar_simulator.cast_shadows" : "Projecta ombres",
   "tool.solar_simulator.adjust_intensity" : "Ajusta la intensitat solar",
+  "tool.solar_simulator.max_length_info" : "Longitud màxima dels costats dels triangles en la fase 1",
+  "tool.solar_simulator.max_area_info" : "Àrea màxima dels triangles en la fase 2",
 
   "tool.start_controllers.label" : "Inicia controladors",
 
@@ -621,6 +624,8 @@ export const translations =
   "message.select_an_object" : "Selecciona un objecte per crear l'enllaç.",
   "message.enter_link_name" : "Introdueix el nom de l'enllaç.",
   "message.link_created" : "Enllaç creat.",
+
+  "message.selected_surfaces" : count => `Superfícies seleccionades: ${count}`,
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

@@ -80,7 +80,7 @@ public class BimRocketTomcat extends Tomcat
 
     start();
 
-    String hostAddress = InetAddress.getLocalHost().getHostAddress();
+    String hostAddress = getLocalHostAddress();
     Connector connector = getConnector();
 
     System.out.println("Server started.");
@@ -100,6 +100,18 @@ public class BimRocketTomcat extends Tomcat
     catch (LifecycleException ex)
     {
       // ignore
+    }
+  }
+
+  String getLocalHostAddress()
+  {
+    try
+    {
+      return InetAddress.getLocalHost().getHostAddress();
+    }
+    catch (Exception ex)
+    {
+      return "localhost";
     }
   }
 

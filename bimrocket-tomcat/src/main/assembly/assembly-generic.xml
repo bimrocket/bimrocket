@@ -12,7 +12,13 @@
       <outputDirectory></outputDirectory>
       <includes>
         <include>LICENSE.txt</include>
-        <include>README.md</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/main</directory>
+      <outputDirectory></outputDirectory>
+      <includes>
+        <include>README.txt</include>
       </includes>
     </fileSet>
     <fileSet>

@@ -51,7 +51,7 @@ public class BaseConfigSource implements ConfigSource
 {
   static final Logger LOGGER = Logger.getLogger("BaseConfigSource");
 
-  public static final String BIMROCKET_LOCATION = "bimrocket.location";
+  public static final String BIMROCKET_DATA_PATH = "BIMROCKET_DATA_PATH";
   public static final String BIMROCKET_FOLDER = "bimrocket";
   public static final String BIMROCKET_YAML = "bimrocket-server.yaml";
   public static final String CONFIG_LOCATION = "smallrye.config.locations";
@@ -60,13 +60,14 @@ public class BaseConfigSource implements ConfigSource
 
   static
   {
-    String bimRocketLocation = getBimRocketLocation();
-    String configLocation = bimRocketLocation + "/" + BIMROCKET_YAML;
+    String bimRocketDataPath = getBimRocketDataPath();
+    String configLocation = bimRocketDataPath + "/" + BIMROCKET_YAML;
 
     createDefaultConfig(configLocation);
 
-    configuration.put(BIMROCKET_LOCATION, bimRocketLocation);
+    configuration.put(BIMROCKET_DATA_PATH, bimRocketDataPath);
     configuration.put(CONFIG_LOCATION, configLocation);
+    configuration.put("bimrocket.location", bimRocketDataPath); // deprecated
   }
 
   @Override
@@ -93,13 +94,13 @@ public class BaseConfigSource implements ConfigSource
     return BaseConfigSource.class.getSimpleName();
   }
 
-  static String getBimRocketLocation()
+  static String getBimRocketDataPath()
   {
-    String location = System.getProperty(BIMROCKET_LOCATION);
-    if (location != null) return location;
+    String dataPath = System.getProperty(BIMROCKET_DATA_PATH);
+    if (dataPath != null) return dataPath;
 
-    location = System.getenv(BIMROCKET_LOCATION);
-    if (location != null) return location;
+    dataPath = System.getenv(BIMROCKET_DATA_PATH);
+    if (dataPath != null) return dataPath;
 
     String userHome = System.getProperty("user.home");
     int index = userHome.indexOf(":");

@@ -1,7 +1,7 @@
 # bimrocket-server config
 
-# bimrocket.location is set by default to ${user.home}/bimrocket
-# but can be changed via JVM property or environ variable
+# BIMROCKET_DATA_PATH is set by default to ${user.home}/bimrocket
+# but can be changed via JVM property or environ variable.
 
 # service config
 services:
@@ -39,7 +39,7 @@ services:
 
   # cloudfs service
   cloudfs:
-    directory: ${bimrocket.location}/cloudfs
+    directory: ${BIMROCKET_DATA_PATH}/cloudfs
     folders:
       - models
       - scripts
@@ -51,7 +51,7 @@ services:
 
   # print service
   print:
-    directory: ${bimrocket.location}/printsvc
+    directory: ${BIMROCKET_DATA_PATH}/printsvc
     title: 'Bimrocket print'
     creator: 'Bimrocket PrintService'
 
@@ -81,15 +81,15 @@ services:
 # database config
 databases:
   bimdb:
-    url: embedded:${bimrocket.location}/db/bimdb
+    url: embedded:${BIMROCKET_DATA_PATH}/db/bimdb
     username: root
     password: orientdb
   IFC2X3:
-    url: embedded:${bimrocket.location}/db/IFC2X3
+    url: embedded:${BIMROCKET_DATA_PATH}/db/IFC2X3
     username: root
     password: orientdb
   IFC4:
-    url: embedded:${bimrocket.location}/db/IFC4
+    url: embedded:${BIMROCKET_DATA_PATH}/db/IFC4
     username: root
     password: orientdb
 

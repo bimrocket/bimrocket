@@ -134,6 +134,7 @@
   </dependencies>
 
   <build>
+    <finalName>bimrocket-server</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -141,7 +142,6 @@
         <version>3.3.2</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
-          <warName>bimrocket-server</warName>
         </configuration>
       </plugin>
       <plugin>

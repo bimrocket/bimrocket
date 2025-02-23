@@ -42,6 +42,7 @@
   </dependencies>
 
   <build>
+    <finalName>bimrocket</finalName>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -115,7 +116,6 @@
         <version>3.3.2</version>
         <configuration>
           <failOnMissingWebXml>false</failOnMissingWebXml>
-          <warName>bimrocket</warName>
           <webResources>
             <resource>
               <directory>${basedir}/target</directory>

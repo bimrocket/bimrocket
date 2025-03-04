@@ -3978,14 +3978,18 @@ class IfcPropertySetHelper extends IfcHelper
         ifcClassName : "IfcPropertySet",
         GlobalId : pset.GlobalId
       };
-      for (let i = 0; i < pset.HasProperties.length; i++)
+
+      if (pset.HasProperties)
       {
-        let prop = pset.HasProperties[i];
-        if (prop instanceof schema.IfcPropertySingleValue)
+        for (let i = 0; i < pset.HasProperties.length; i++)
         {
-          let name = loader.unBox(prop.Name);
-          let value = loader.unBox(prop.NominalValue);
-          this.properties[name] = value;
+          let prop = pset.HasProperties[i];
+          if (prop instanceof schema.IfcPropertySingleValue)
+          {
+            let name = loader.unBox(prop.Name);
+            let value = loader.unBox(prop.NominalValue);
+            this.properties[name] = value;
+          }
         }
       }
     }

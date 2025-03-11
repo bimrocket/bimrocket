@@ -73,6 +73,8 @@ export const translations =
   "button.change_axis" : "Change axis",
 
   "button.exposure" : "Exposure",
+  "button.select_position" : "Select position",
+  "button.select_surfaces" : "Select surfaces",
 
   "button.menu_show" : "MENU",
   "button.menu_hide" : "CLOSE",

@@ -41,17 +41,8 @@ class SolarSimulatorTool extends Tool
     this.shadowMaterial = null;
     this.sunMaterial = null;
 
-    application.addEventListener("scene", event =>
-    {
-      if (event.type === "structureChanged"
-          && event.objects[0] instanceof THREE.Scene)
-      {
-        this.cancel();
-      }
-    });
-
     this._onPointerDown = (event) => this.onPointerDown(event);
-    this._onNodeChanged = (event) => this.onNodeChanged(event);
+    this._onSceneChanged = (event) => this.onSceneChanged(event);
 
     this.createPanel();
   }
@@ -61,15 +52,29 @@ class SolarSimulatorTool extends Tool
     const application = this.application;
 
     this.panel = application.createPanel(this.label, "left", "panel_solar_sim");
-    this.panel.preferredHeight = 550;
-    this.panel.minimumHeight = 300;
+    this.panel.minimumHeight = 200;
 
-    this.panel.onHide = () => application.useTool(null);
+    this.panel.onShow = () =>
+    {
+      application.addEventListener("scene", this._onSceneChanged);
+      this.resizeObverser.observe(this.panel.element);
+    };
+
+    this.panel.onHide = () =>
+    {
+      application.removeEventListener("scene", this._onSceneChanged);
+      this.cancel();
+      application.useTool(null);
+      this.resizeObverser.unobserve(this.panel.element);
+    };
 
     this.helpElem = document.createElement("div");
     I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select_position");
     this.helpElem.style.margin = "4px";
     this.panel.bodyElem.appendChild(this.helpElem);
+
+    this.selectPositionButton = Controls.addButton(this.panel.bodyElem,
+      "solar_position", "button.select_position", () => application.useTool(this));
 
     let lon = 2.045;
     let lat = 41.380;
@@ -121,6 +126,10 @@ class SolarSimulatorTool extends Tool
     this.exposureElem.appendChild(this.surfaceHelpElem);
     I18N.set(this.surfaceHelpElem, "textContent", "tool.solar_simulator.select_surfaces");
 
+    this.selectSurfacesButton = Controls.addButton(this.exposureElem,
+      "solar_surcafaces", "button.select_surfaces", () => application.useTool(this));
+    this.selectSurfacesButton.style.display = "none";
+
     this.surfaceCountElem = document.createElement("div");
     this.surfaceCountElem.className = "mt_4 mb_4";
     this.surfaceCountElem.style.margin = "4px";
@@ -152,7 +161,8 @@ class SolarSimulatorTool extends Tool
     this.stopExposureButton.style.display = "none";
 
     this.cancelButton = Controls.addButton(this.exposureElem,
-      "solar_cancel", "button.cancel", () => this.cancel());
+      "solar_cancel", "button.cancel", () =>
+      { this.cancel(); application.useTool(this); });
 
     this.timeGraph.setTime(date);
   }
@@ -161,21 +171,31 @@ class SolarSimulatorTool extends Tool
   {
     const application = this.application;
     const container = this.application.container;
-    this.panel.visible = true;
     this.shadowsCheckBox.checked = application.setup.shadowsEnabled;
     container.addEventListener("pointerdown", this._onPointerDown);
-    application.addEventListener("scene", this._onNodeChanged);
-    this.resizeObverser.observe(this.panel.element);
+
+    this.panel.visible = true;
+    this.panel.minimized = false;
+
+    this.helpElem.style.display = "";
+    this.surfaceHelpElem.style.display = "";
+    this.selectPositionButton.style.display = "none";
+    this.selectSurfacesButton.style.display = "none";
   }
 
   deactivate()
   {
     const application = this.application;
     const container = application.container;
-    this.panel.visible = false;
     container.removeEventListener("pointerdown", this._onPointerDown);
-    application.removeEventListener("scene", this._onNodeChanged);
-    this.resizeObverser.unobserve(this.panel.element);
+
+    this.surfaceHelpElem.style.display = "none";
+    if (!this.target.parent)
+    {
+      this.helpElem.style.display = "none";
+      this.selectPositionButton.style.display = "";
+    }
+    this.selectSurfacesButton.style.display = "";
   }
 
   onPointerDown(event)
@@ -226,28 +246,38 @@ class SolarSimulatorTool extends Tool
     }
   }
 
-  onNodeChanged(event)
+  onSceneChanged(event)
   {
-    const simulationGroup = this.simulationGroup;
-    if (!simulationGroup.parent)
+    if (event.type === "structureChanged")
     {
-      simulationGroup.clear();
+      if (event.objects[0] === this.application.scene)
+      {
+        this.cancel();
+      }
     }
-
-    const surfacesGroup = this.surfacesGroup;
-    if (!surfacesGroup.parent)
+    else
     {
-      surfacesGroup.clear();
-    }
+      const simulationGroup = this.simulationGroup;
+      if (!simulationGroup.parent)
+      {
+        simulationGroup.clear();
+      }
 
-    if ((event.type === "added" || event.type === "removed") &&
-        (event.object === simulationGroup ||
-         event.object === surfacesGroup ||
-         event.parent === surfacesGroup))
-    {
-      I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces",
-        this.surfacesGroup.children.length);
-      this.application.i18n.update(this.surfaceCountElem);
+      const surfacesGroup = this.surfacesGroup;
+      if (!surfacesGroup.parent)
+      {
+        surfacesGroup.clear();
+      }
+
+      if ((event.type === "added" || event.type === "removed") &&
+          (event.object === simulationGroup ||
+           event.object === surfacesGroup ||
+           event.parent === surfacesGroup))
+      {
+        I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces",
+          this.surfacesGroup.children.length);
+        this.application.i18n.update(this.surfaceCountElem);
+      }
     }
   }
 
@@ -570,7 +600,7 @@ class SolarSimulatorTool extends Tool
       {
         ObjectUtils.dispose(simulationGroup);
         simulationGroup.clear();
-        application.addObject(simulationGroup);
+        application.addObject(simulationGroup, application.baseObject);
       }
 
       if (surfacesGroup.parent === null)

@@ -73,6 +73,8 @@ export const translations =
   "button.change_axis" : "Canvia eix",
 
   "button.exposure" : "Exposició",
+  "button.select_position" : "Selecciona posició",
+  "button.select_surfaces" : "Selecciona superfícies",
 
   "button.menu_show" : "MENÚ",
   "button.menu_hide" : "TANCA",

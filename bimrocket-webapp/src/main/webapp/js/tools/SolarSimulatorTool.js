@@ -68,13 +68,13 @@ class SolarSimulatorTool extends Tool
       this.resizeObverser.unobserve(this.panel.element);
     };
 
+    this.selectPositionButton = Controls.addButton(this.panel.bodyElem,
+      "solar_position", "button.select_position", () => application.useTool(this));
+
     this.helpElem = document.createElement("div");
     I18N.set(this.helpElem, "textContent", "tool.solar_simulator.select_position");
     this.helpElem.style.margin = "4px";
     this.panel.bodyElem.appendChild(this.helpElem);
-
-    this.selectPositionButton = Controls.addButton(this.panel.bodyElem,
-      "solar_position", "button.select_position", () => application.useTool(this));
 
     let lon = 2.045;
     let lat = 41.380;
@@ -98,7 +98,7 @@ class SolarSimulatorTool extends Tool
       "solar_date", "label.date", isoDate);
     this.dateElem.style.margin = "4px";
 
-    this.timeGraph = new TimeGraph(this);
+    this.timeGraph = new TimeGraph(this, this.panel.bodyElem);
 
     this.lonElem.addEventListener("input", () => this.update());
     this.latElem.addEventListener("input", () => this.update());
@@ -253,6 +253,8 @@ class SolarSimulatorTool extends Tool
       if (event.objects[0] === this.application.scene)
       {
         this.cancel();
+        this.helpElem.style.display = "none";
+        this.selectPositionButton.style.display = "";
       }
     }
     else
@@ -741,10 +743,9 @@ class SolarSimulatorTool extends Tool
 
 class TimeGraph
 {
-  constructor(tool)
+  constructor(tool, parent)
   {
     this.tool = tool;
-    const parent = tool.panel.bodyElem;
 
     let drag = false;
     this.time = 0; // 0..24

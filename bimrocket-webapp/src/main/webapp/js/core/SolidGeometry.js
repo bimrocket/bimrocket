@@ -34,6 +34,8 @@ class SolidGeometry extends THREE.BufferGeometry
     }
     face.updateNormal();
     this.faces.push(face);
+    this.boundingBox = null;
+    this.boundingSphere = null;
 
     return face;
   }
@@ -311,6 +313,24 @@ class SolidGeometry extends THREE.BufferGeometry
     trianglesGeometry.setFromPoints(edgePositions);
 
     return trianglesGeometry;
+  }
+
+  getBoundingBox()
+  {
+    if (!this.boundingBox)
+    {
+      this.computeBoundingBox();
+    }
+    return this.boundingBox;
+  }
+
+  getBoundingSphere()
+  {
+    if (!this.boundingSphere)
+    {
+      this.computeBoundingSphere();
+    }
+    return this.boundingSphere;
   }
 }
 

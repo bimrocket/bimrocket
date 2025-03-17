@@ -289,7 +289,7 @@ public class FileService
       if (acl != null)
       {
         fileRoles = acl.getRoleIdsForPrivilege(privilege);
-        if (fileRoles != null) break;
+        if (!fileRoles.isEmpty()) break;
       }
       path = path.getParent();
     }

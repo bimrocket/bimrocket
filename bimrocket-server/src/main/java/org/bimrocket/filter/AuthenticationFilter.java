@@ -52,6 +52,7 @@ import org.bimrocket.exception.NotAuthorizedException;
 import org.bimrocket.service.security.SecurityService;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_XML;
+import static org.bimrocket.service.security.SecurityConstants.ANONYMOUS_USER;
 import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
 
 /**
@@ -80,6 +81,9 @@ public class AuthenticationFilter implements ContainerRequestFilter
     try
     {
       user = securityService.getCurrentUser();
+
+      if (ANONYMOUS_USER.equals(user.getId()))
+        throw new NotAuthorizedException();
     }
     catch (NotAuthorizedException ex)
     {

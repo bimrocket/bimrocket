@@ -28,16 +28,17 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.cloudfs;
-
-import jakarta.enterprise.context.ApplicationScoped;
+package org.bimrocket.service.file.exception;
 
 /**
  *
  * @author realor
  */
-@ApplicationScoped
-public class CloudFsService
+public class InsufficientStorageException extends RuntimeException
 {
+  private static final long serialVersionUID = 1L;
 
+  public InsufficientStorageException()
+  {
+  }
 }

@@ -243,7 +243,7 @@ class WebdavService extends FileService
     };
     request.onload = () =>
     {
-      if (request.status === 200)
+      if (request.status === 200 || request.status === 204)
       {
         readyCallback(new Result(OK));
       }
@@ -290,6 +290,7 @@ class WebdavService extends FileService
       url = WebdavService.PROXY_URI + url;
     }
     request.open(method, encodeURI(url), true);
+    request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     const credentials = this.getCredentials();
 

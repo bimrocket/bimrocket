@@ -25,6 +25,18 @@ services:
       orient:
         database: bimdb
 
+  # file service
+  file:
+    store:
+      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
+      filesystem:
+        directory: ${BIMROCKET_DATA_PATH}/cloudfs
+    folders:
+      - models
+      - scripts
+      - reports
+      - ifc_snapshots
+
   # bcf service
   bcf:
     templateProjectName: template
@@ -36,15 +48,6 @@ services:
       createTopic:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
-
-  # cloudfs service
-  cloudfs:
-    directory: ${BIMROCKET_DATA_PATH}/cloudfs
-    folders:
-      - models
-      - scripts
-      - reports
-      - ifc_snapshots
 
   # ifcdb service
   ifcdb:

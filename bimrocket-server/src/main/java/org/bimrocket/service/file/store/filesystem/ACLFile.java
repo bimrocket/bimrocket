@@ -83,12 +83,7 @@ public class ACLFile
   public synchronized ACL getACL(String filename)
   {
     prepare();
-    ACL acl = fileMap.get(filename);
-    if (acl == null && !ANY_FILENAME.equals(filename))
-    {
-      acl = fileMap.get(ANY_FILENAME);
-    }
-    return acl;
+    return fileMap.get(filename);
   }
 
   /* private methods */

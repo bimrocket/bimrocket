@@ -205,9 +205,9 @@ public class FileSystemFileStore implements FileStore
     File file = getFile(path);
     if (!file.exists()) return null;
 
+    ACLFile aclFile = ACLFile.getInstance(file);
     String filename = file.isFile() ? file.getName() : ACLFile.ANY_FILENAME;
 
-    ACLFile aclFile = ACLFile.getInstance(file);
     return aclFile.getACL(filename);
   }
 
@@ -217,9 +217,9 @@ public class FileSystemFileStore implements FileStore
     File file = getFile(path);
     if (!file.exists()) return; // may throw exception
 
+    ACLFile aclFile = ACLFile.getInstance(file);
     String filename = file.isFile() ? file.getName() : ACLFile.ANY_FILENAME;
 
-    ACLFile aclFile = ACLFile.getInstance(file);
     aclFile.setACL(filename, acl);
     aclFile.save();
   }

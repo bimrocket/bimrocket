@@ -150,13 +150,8 @@ public class FileService
 
     checkAccess(path, WRITE);
 
-    Lock lock = store.getLock(path);
-    if (lock != null)
-    {
-      User user = securityService.getCurrentUser();
-      if (!lock.getUserId().equals(user.getId()))
-        throw new LockedFileException(path, lock);
-    }
+    checkLock(path);
+
     return store.write(path, is, contentType);
   }
 
@@ -166,13 +161,8 @@ public class FileService
 
     checkAccess(path, WRITE);
 
-    Lock lock = store.getLock(path);
-    if (lock != null)
-    {
-      User user = securityService.getCurrentUser();
-      if (!lock.getUserId().equals(user.getId()))
-        throw new LockedFileException(path, lock);
-    }
+    checkLock(path);
+
     store.delete(path);
   }
 
@@ -259,9 +249,11 @@ public class FileService
   {
     LOGGER.log(Level.FINE, "move {0} -> {1}", new Object[]{ sourcePath, destPath });
 
-    Lock sourceLock = store.getLock(sourcePath);
-    if (sourceLock != null)
-      throw new LockedFileException(sourcePath, sourceLock);
+    checkAccess(sourcePath, WRITE);
+    checkAccess(destPath, WRITE);
+
+    checkLock(sourcePath);
+    checkLock(destPath);
 
     store.move(sourcePath, destPath);
   }
@@ -270,9 +262,11 @@ public class FileService
   {
     LOGGER.log(Level.FINE, "copy {0} -> {1}", new Object[]{ sourcePath, destPath });
 
-    Lock sourceLock = store.getLock(sourcePath);
-    if (sourceLock != null)
-      throw new LockedFileException(sourcePath, sourceLock);
+    checkAccess(sourcePath, READ);
+    checkAccess(destPath, WRITE);
+
+    checkLock(sourcePath);
+    checkLock(destPath);
 
     store.copy(sourcePath, destPath);
   }
@@ -281,25 +275,36 @@ public class FileService
 
   void checkAccess(Path path, Privilege privilege) throws NotAuthorizedException
   {
-    Set<String> fileRoles = null;
+    User user = securityService.getCurrentUser();
 
-    while (path != null)
+    if (user.getRoleIds().contains(ADMIN_ROLE)) return;
+
+    Set<String> fileRoles = Collections.emptySet();
+
+    while (path != null && fileRoles.isEmpty())
     {
       ACL acl = store.getACL(path);
       if (acl != null)
       {
         fileRoles = acl.getRoleIdsForPrivilege(privilege);
-        if (!fileRoles.isEmpty()) break;
       }
       path = path.getParent();
     }
 
-    User user = securityService.getCurrentUser();
-
-    boolean accessAllowed = fileRoles == null || fileRoles.isEmpty() ||
-      user.getRoleIds().contains(ADMIN_ROLE) ||
+    boolean accessAllowed = fileRoles.isEmpty() ||
       !Collections.disjoint(fileRoles, user.getRoleIds());
 
     if (!accessAllowed) throw new NotAuthorizedException();
+  }
+
+  void checkLock(Path path)
+  {
+    Lock lock = store.getLock(path);
+    if (lock != null)
+    {
+      User user = securityService.getCurrentUser();
+      if (!lock.getUserId().equals(user.getId()))
+        throw new LockedFileException(path, lock);
+    }
   }
 }

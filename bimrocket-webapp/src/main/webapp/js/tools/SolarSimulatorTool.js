@@ -381,8 +381,9 @@ class SolarSimulatorTool extends Tool
     const solarAzimuth = pos.azimuth + Math.PI;
 
     const radius = 1000;
-    const x = Math.cos(0.5 * Math.PI - solarAzimuth) * radius;
-    const y = Math.sin(0.5 * Math.PI - solarAzimuth) * radius;
+    const base = Math.cos(solarElevation) * radius;
+    const x = Math.cos(0.5 * Math.PI - solarAzimuth) * base;
+    const y = Math.sin(0.5 * Math.PI - solarAzimuth) * base;
     const z = Math.sin(solarElevation) * radius;
 
     const sunPosition = sunLight.position;

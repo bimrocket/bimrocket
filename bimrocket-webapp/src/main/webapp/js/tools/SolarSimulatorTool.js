@@ -354,7 +354,7 @@ class SolarSimulatorTool extends Tool
   {
     if (this.target.parent === null) return;
 
-    const point = this.target.position;
+    const targetPosition = this.target.position;
 
     const application = this.application;
     const timeGraph = this.timeGraph;
@@ -380,16 +380,16 @@ class SolarSimulatorTool extends Tool
     const solarElevation = pos.altitude;
     const solarAzimuth = pos.azimuth + Math.PI;
 
-    const radius = 1000;
+    const radius = 100;
     const base = Math.cos(solarElevation) * radius;
     const x = Math.cos(0.5 * Math.PI - solarAzimuth) * base;
     const y = Math.sin(0.5 * Math.PI - solarAzimuth) * base;
     const z = Math.sin(solarElevation) * radius;
 
     const sunPosition = sunLight.position;
-    sunPosition.x = point.x + x;
-    sunPosition.y = point.y + y;
-    sunPosition.z = point.z + z;
+    sunPosition.x = targetPosition.x + x;
+    sunPosition.y = targetPosition.y + y;
+    sunPosition.z = targetPosition.z + z;
     sunLight.updateMatrix();
     sunLight.visible = solarElevation > 0;
 
@@ -417,8 +417,12 @@ class SolarSimulatorTool extends Tool
     const application = this.application;
     const progressBar = application.progressBar;
 
+    const sunDirection = new THREE.Vector3();
+    sunDirection.subVectors(sunLight.position, this.target.position);
+    sunDirection.normalize();
+
     const shadowGenerator =
-      new ShadowGenerator(application.scene, sunLight.position);
+      new ShadowGenerator(application.scene, sunDirection);
     shadowGenerator.maxLength = parseFloat(this.maxLengthElem.value);
     shadowGenerator.maxArea = parseFloat(this.maxAreaElem.value);
 
@@ -1077,10 +1081,10 @@ class TimeGraph
 
 class ShadowGenerator
 {
-  constructor(scene, sunPosition)
+  constructor(scene, sunDirection)
   {
     this.scene = scene;
-    this.sunPosition = new THREE.Vector3().copy(sunPosition);
+    this.sunDirection = sunDirection;
     this.vertexMap = new Map();
     this.vertices = [];
     this.triangles = [];
@@ -1149,9 +1153,8 @@ class ShadowGenerator
 
   isPointShadowed(point)
   {
-    const direction = new THREE.Vector3();
-    direction.copy(this.sunPosition).normalize();
-    const raycaster = new THREE.Raycaster(point, direction, 0.001);
+    const sunDirection = this.sunDirection;
+    const raycaster = new THREE.Raycaster(point, sunDirection, 0.001);
 
     if (this.lastShadowObject)
     {

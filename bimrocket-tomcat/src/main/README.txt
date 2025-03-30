@@ -31,6 +31,11 @@ Default user:
   Other users can be created through the security service endpoint
   (http://localhost:8080/bimrocket-server/swagger/index.html).
 
+Sample models:
+  Once the server is started, run the script
+  <bimrocket-tomcat-home>/bin/download_models(.sh|.bat)
+  to download some sample IFC models to the bimrocket server.
+
 More information:
   https://github.com/bimrocket/bimrocket
 

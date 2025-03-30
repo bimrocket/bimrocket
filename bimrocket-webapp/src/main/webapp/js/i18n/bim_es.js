@@ -31,6 +31,8 @@ export const translations =
 
   "tool.bim_delta.label" : "Detección de cambios",
 
+  "tool.bim_reset_view.label" : "Inicializar vista",
+
   "tab.file" : "Fichero",
   "tab.entity" : "Entidad",
   "tab.definition" : "Definición",

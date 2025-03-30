@@ -31,6 +31,8 @@ export const translations =
 
   "tool.bim_delta.label" : "Detecció de canvis",
 
+  "tool.bim_reset_view.label" : "Inicialitza vista",
+
   "tab.file" : "Fitxer",
   "tab.entity" : "Entitat",
   "tab.definition" : "Definició",

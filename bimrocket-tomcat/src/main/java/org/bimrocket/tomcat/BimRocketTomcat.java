@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.Properties;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
@@ -120,12 +121,28 @@ public class BimRocketTomcat extends Tomcat
     try
     {
       Properties properties = new Properties();
-      properties.load(new FileInputStream("./conf/server.properties"));
+      File config = new File("./conf/catalina.properties");
 
-      String value = properties.getProperty("port", "8080");
+      if (config.exists())
+      {
+        try (FileInputStream fis = new FileInputStream(config))
+        {
+          properties.load(fis);
+
+          Enumeration<?> propertyNames = properties.propertyNames();
+          while (propertyNames.hasMoreElements())
+          {
+            String propetyName = String.valueOf(propertyNames.nextElement());
+            String propertyValue = String.valueOf(properties.get(propetyName));
+            System.setProperty(propetyName, propertyValue);
+          }
+        }
+      }
+
+      String portString = System.getProperty("tomcat.port", "8080");
 
       Connector connector = getConnector();
-      connector.setPort(Integer.parseInt(value));
+      connector.setPort(Integer.parseInt(portString));
     }
     catch (IOException | NumberFormatException ex)
     {

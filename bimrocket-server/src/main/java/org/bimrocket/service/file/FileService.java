@@ -50,9 +50,11 @@ import org.bimrocket.service.security.SecurityService;
 import org.eclipse.microprofile.config.Config;
 import org.bimrocket.service.file.store.FileStore;
 import org.bimrocket.service.file.exception.LockedFileException;
-import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
+import org.bimrocket.service.file.util.MutableACL;
 import static org.bimrocket.service.file.Privilege.READ;
 import static org.bimrocket.service.file.Privilege.WRITE;
+import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
 
 /**
  *
@@ -106,6 +108,15 @@ public class FileService
       {
         store.makeCollection(path);
       }
+    }
+    // set default ACL
+    Path rootPath = new Path("/");
+    ACL acl = store.getACL(rootPath);
+    if (acl == null)
+    {
+      MutableACL macl = new MutableACL();
+      macl.grant(AUTHENTICATED_ROLE, WRITE);
+      store.setACL(rootPath, macl);
     }
   }
 

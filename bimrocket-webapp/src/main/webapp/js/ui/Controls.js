@@ -163,21 +163,33 @@ class Controls
   static setSelectOptions(selectElem, options, value = selectElem.value, create)
   {
     selectElem.innerHTML = "";
-    if (options)
+    if (options instanceof Array)
     {
-      for (let i = 0; i < options.length; i++)
+      for (let option of options)
       {
-        let option = options[i];
-        let optionElem = document.createElement("option");
+        let optionValue;
+        let optionLabel;
+        let optionDisabled;
         if (option instanceof Array)
         {
-          optionElem.value = option[0];
-          I18N.set(optionElem, "textContent", option[1]);
+          optionValue = option[0];
+          optionLabel = option[1] || optionValue;
+          optionDisabled = option[2] || false;
         }
-        else
+        else if (typeof option === "string")
         {
-          optionElem.value = option;
-          I18N.set(optionElem, "textContent", option);
+          optionValue = option;
+          optionLabel = option;
+          optionDisabled = false;
+        }
+        else continue;
+        
+        let optionElem = document.createElement("option");
+        optionElem.value = optionValue;
+        I18N.set(optionElem, "textContent", optionLabel);
+        if (optionDisabled)
+        {
+          optionElem.disabled = true;
         }
         selectElem.appendChild(optionElem);
       }

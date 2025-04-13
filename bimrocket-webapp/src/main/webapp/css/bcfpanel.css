@@ -13,7 +13,7 @@
   text-decoration: none;
 }
 
-.bcf_panel a:focus
+.bcf_panel td a:focus
 {
   outline: none;
   box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
@@ -80,6 +80,25 @@
 .bcf_body > .bcf_topic_nav > span
 {
   text-align: center;
+}
+
+.bcf_body .topic_nav_button
+{
+  width: 16px;
+  height: 16px;
+  margin: 5px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.bcf_body .topic_nav_button.previous
+{
+  background-image: url(images/previous.svg);
+}
+
+.bcf_body .topic_nav_button.next
+{
+  background-image: url(images/next.svg);
 }
 
 .bcf_project_setup

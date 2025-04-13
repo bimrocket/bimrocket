@@ -50,11 +50,16 @@ class BCFService extends Service
 
   getTopics(projectId, filter, onCompleted, onError)
   {
-    let status = filter.status;
+    let type = filter.topic_type;
+    let status = filter.topic_status;
     let priority = filter.priority;
-    let assignedTo = filter.assignedTo;
+    let assignedTo = filter.assigned_to;
 
     let filters = [];
+    if (type)
+    {
+      filters.push("topic_type eq '" + type + "'");
+    }
     if (status)
     {
       filters.push("topic_status eq '" + status + "'");

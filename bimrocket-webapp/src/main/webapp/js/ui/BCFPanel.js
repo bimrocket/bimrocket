@@ -15,6 +15,7 @@ import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { BCFService } from "../io/BCFService.js";
+import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
 class BCFPanel extends Panel
@@ -39,6 +40,7 @@ class BCFPanel extends Panel
     this.comments = null;
     this.docRefs = null;
     this.docRefGuid = null;
+    this.projectMap = new Map();
 
     // search panel
     this.searchPanelElem = document.createElement("div");
@@ -85,6 +87,9 @@ class BCFPanel extends Panel
     this.projectElem = Controls.addSelectField(this.filterPanelElem,
       "bcfProject", "bim|label.project");
     this.projectElem.addEventListener("change", () => this.changeProject());
+
+    this.typeFilterElem = Controls.addSelectField(this.filterPanelElem,
+      "bcfTypeFilter", "bim|label.type");
 
     this.statusFilterElem = Controls.addSelectField(this.filterPanelElem,
       "bcfStatusFilter", "bim|label.status");
@@ -142,13 +147,17 @@ class BCFPanel extends Panel
     this.detailHeaderElem.appendChild(this.topicNavElem);
 
     this.previousTopicButton = Controls.addButton(this.topicNavElem,
-      "previousTopic", "<", () => this.showPreviousTopic());
+      "previousTopic", "", () => this.showPreviousTopic());
+    this.previousTopicButton.className = "topic_nav_button previous";
+    I18N.set(this.previousTopicButton, "title", "button.previous");
 
     this.topicSearchIndexElem = document.createElement("span");
     this.topicNavElem.appendChild(this.topicSearchIndexElem);
 
     this.nextTopicButton = Controls.addButton(this.topicNavElem,
-      "nextTopic", ">", () => this.showNextTopic());
+      "nextTopic", "", () => this.showNextTopic());
+    this.nextTopicButton.className = "topic_nav_button next";
+    I18N.set(this.nextTopicButton, "title", "button.next");
 
     this.detailNewTopicButton = Controls.addButton(this.detailHeaderElem,
       "detailNewTopic", "button.create", () => this.showTopic());
@@ -472,9 +481,10 @@ class BCFPanel extends Panel
     };
 
     let filter = {
-      "status" : this.statusFilterElem.value,
+      "topic_type" : this.typeFilterElem.value,
+      "topic_status" : this.statusFilterElem.value,
       "priority" : this.priorityFilterElem.value,
-      "assignedTo" : this.assignedToFilterElem.value
+      "assigned_to" : this.assignedToFilterElem.value
     };
     this.showProgressBar();
     this.service.getTopics(projectId, filter, onCompleted, onError);
@@ -592,6 +602,9 @@ class BCFPanel extends Panel
 
     matrix.extractBasis(xAxis, yAxis, zAxis);
     position.setFromMatrixPosition(matrix);
+
+    const basePos = application.baseObject.position;
+    position.sub(basePos);
 
     if (camera instanceof THREE.PerspectiveCamera)
     {
@@ -945,7 +958,7 @@ class BCFPanel extends Panel
     }
   }
 
-  updateExtensions()
+  refreshExtensions()
   {
     let projectId = this.getProjectId();
     if (projectId === null) return;
@@ -959,7 +972,7 @@ class BCFPanel extends Panel
 
     const onError = error =>
     {
-      this.handleError(error, () => this.updateExtensions());
+      this.handleError(error, () => this.refreshExtensions());
     };
 
     this.showProgressBar();
@@ -968,45 +981,69 @@ class BCFPanel extends Panel
 
   refreshProjects()
   {
-    const projects = [];
-
     const onCompleted = serverProjects =>
     {
       this.hideProgressBar();
       this.filterPanelElem.style.display = "";
       this.topicTableElem.style.display = "";
 
-      const projectIdSet = new Set();
+      const projectMap = this.projectMap;
+      projectMap.clear();
 
-      for (let serverProject of serverProjects)
-      {
-        let projectId = serverProject.project_id;
-        let projectName = serverProject.name;
-        projectIdSet.add(projectId);
-        projects.push([projectId, projectName]);
-      }
-
-      const scene = this.application.scene;
-      scene.traverse(object =>
+      // add loaded projects first
+      const children = this.application.baseObject.children;
+      for (let object of children)
       {
         if (object.userData.IFC?.ifcClassName === "IfcProject")
         {
           const ifc = object.userData.IFC;
           let projectId = ifc.GlobalId;
           let projectName = ifc.Name || ifc.LongName || object.name;
-          if (!projectIdSet.has(projectId))
-          {
-            projects.push([projectId, projectName]);
-          }
+          let project = {
+            id: projectId,
+            name : projectName,
+            persistent : false,
+            visible : true
+          };
+          projectMap.set(projectId, project);
         }
-      });
+      }
 
-      Controls.setSelectOptions(this.projectElem, projects);
-      const disabled = projects.length === 0;
-      this.searchTopicsButton.disabled = disabled;
-      this.setupProjectButton.disabled = disabled;
-      this.searchNewTopicButton.disabled = disabled;
-      this.updateExtensions();
+      for (let serverProject of serverProjects)
+      {
+        let projectId = serverProject.project_id;
+        let projectName = serverProject.name;
+        let project = projectMap.get(projectId);
+        if (project)
+        {
+          project.name = projectName; // take project name from database
+          project.persistent = true;
+        }
+        else
+        {
+          project = {
+            id: projectId,
+            name : projectName,
+            persistent: true,
+            visible : false
+          };
+          projectMap.set(projectId, project);
+        }
+      }
+
+      const options = [];
+      projectMap.forEach((project, projectId) =>
+      {
+        let name = project.name + " [";
+        if (project.persistent) name += "P";
+        if (project.visible) name += "V";
+        name += "]";
+
+        options.push([projectId, name]);
+      });
+      Controls.setSelectOptions(this.projectElem, options);
+
+      this.updateFilterControls();
     };
 
     const onError = error =>
@@ -1029,9 +1066,10 @@ class BCFPanel extends Panel
     const onCompleted = project =>
     {
       this.hideProgressBar();
-      options[index].label = project.name;
       Toast.create("bim|message.project_saved")
         .setI18N(application.i18n).show();
+      this.refreshProjects();
+      this.showTopicList();
     };
 
     const onError = error =>
@@ -1107,6 +1145,7 @@ class BCFPanel extends Panel
   showViewpoint(viewpoint)
   {
     const application = this.application;
+
     let position, dir, up, camera;
 
     if (viewpoint.perspective_camera)
@@ -1134,8 +1173,8 @@ class BCFPanel extends Panel
       camera.left = -0.5;
       camera.top = 0.1;
       camera.bottom = -0.1;
-      camera.near = -100;
-      camera.far = 100;
+      camera.near = -5000;
+      camera.far = 5000;
     }
     const xAxis = new THREE.Vector3();
     const yAxis = new THREE.Vector3(up.x, up.y, up.z);
@@ -1144,8 +1183,20 @@ class BCFPanel extends Panel
     yAxis.normalize();
     zAxis.normalize();
 
+    const basePos = application.baseObject.position;
+    const cameraPos = new THREE.Vector3();
+
+    if (position)
+    {
+      cameraPos.x = position.x;
+      cameraPos.y = position.y;
+      cameraPos.z = position.z;
+    }
+
+    cameraPos.add(basePos);
+
     camera.matrix.makeBasis(xAxis, yAxis, zAxis);
-    camera.matrix.setPosition(position.x, position.y, position.z);
+    camera.matrix.setPosition(cameraPos.x, cameraPos.y, cameraPos.z);
     camera.matrix.decompose(camera.position, camera.quaternion, camera.scale);
 
     camera.updateMatrixWorld(true);
@@ -1159,9 +1210,8 @@ class BCFPanel extends Panel
     this.detailPanelElem.style.display = "none";
     this.setupPanelElem.style.display = "";
 
-    const index = this.projectElem.selectedIndex;
-    const options = this.projectElem.options;
-    this.projectNameElem.value = options[index].label;
+    const projectId = this.projectElem.value;
+    this.projectNameElem.value = this.projectMap.get(projectId).name;
 
     const json = JSON.stringify(this.extensions, null, 2);
 
@@ -1389,6 +1439,8 @@ class BCFPanel extends Panel
   {
     const ext = this.extensions;
 
+    Controls.setSelectOptions(this.typeFilterElem,
+      [""].concat(ext.topic_type));
     Controls.setSelectOptions(this.statusFilterElem,
       [""].concat(ext.topic_status));
     Controls.setSelectOptions(this.priorityFilterElem,
@@ -1414,7 +1466,7 @@ class BCFPanel extends Panel
   changeProject()
   {
     this.clearTopics();
-    this.updateExtensions();
+    this.updateFilterControls();
   }
 
   formatDate(dateString)
@@ -1538,6 +1590,39 @@ class BCFPanel extends Panel
        .setAcceptLabel("button.delete")
        .setI18N(application.i18n).show();
     }
+  }
+
+  updateFilterControls()
+  {
+    const projectMap = this.projectMap;
+    let projectId = this.projectElem.value;
+    let project = projectMap.get(projectId);
+
+    const noProjects = projectMap.size === 0;
+    this.searchTopicsButton.disabled = noProjects || !project.persistent;
+    this.searchNewTopicButton.disabled = noProjects || !project.persistent;
+    this.setupProjectButton.disabled = noProjects;
+
+    if (project.persistent)
+    {
+      this.refreshExtensions();
+    }
+
+    const enableField = (fieldElem, fieldName) =>
+    {
+      const enabled = this.isFilterFieldEnabled(fieldName);
+      fieldElem.parentElement.style.display = enabled ? "" : "none";
+    };
+
+    enableField(this.typeFilterElem, "topic_type");
+    enableField(this.statusFilterElem, "topic_status");
+    enableField(this.priorityFilterElem, "priority");
+    enableField(this.assignedToFilterElem, "assigned_to");
+  }
+
+  isFilterFieldEnabled(fieldName)
+  {
+    return true; // enable all by default
   }
 
   handleError(error, onLogin)

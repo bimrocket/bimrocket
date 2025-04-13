@@ -93,6 +93,8 @@ public class BcfService
   static final String DELETE = "delete";
 
   // Exceptions
+  static final String PROJECT_NOT_FOUND =
+    "BCF000: Project not found.";
   static final String TOPIC_NOT_FOUND =
     "BCF001: Topic not found.";
   static final String TOPIC_NOT_FOUND_IN_PROJECT =
@@ -177,8 +179,8 @@ public class BcfService
 
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
-      Dao<BcfProject> projectDao = conn.getProjectDao();
-      return projectDao.select(Collections.emptyMap(), asList("name"));
+      Set<String> roleIds = securityService.getCurrentUser().getRoleIds();
+      return conn.findProjects(roleIds);
     }
   }
 
@@ -198,6 +200,7 @@ public class BcfService
   {
     LOGGER.log(Level.FINE, "projectId: {0}", projectId);
 
+    // admin method
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getProjectDao();
@@ -222,6 +225,7 @@ public class BcfService
   {
     LOGGER.log(Level.FINE, "projectId: {0}", projectId);
 
+    // admin method
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getProjectDao();
@@ -264,12 +268,7 @@ public class BcfService
       Dao<BcfProject> projectDao = conn.getProjectDao();
       BcfProject project = projectDao.select(projectId);
       if (project == null)
-      {
-        project = new BcfProject();
-        project.setName("Project " + projectId);
-        project.setId(projectId);
-        projectDao.insert(project);
-      }
+        throw new NotFoundException(PROJECT_NOT_FOUND);
 
       Dao<BcfExtensions> extensionsDao = conn.getExtensionsDao();
       BcfExtensions extensions = extensionsDao.select(projectId);
@@ -307,6 +306,7 @@ public class BcfService
   {
     LOGGER.log(Level.FINE, "projectId: {0}", projectId);
 
+    // admin method
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfProject> projectDao = conn.getProjectDao();
@@ -381,11 +381,7 @@ public class BcfService
       BcfProject project = projectDao.select(projectId);
       if (project == null)
       {
-        project = new BcfProject();
-        project.setName("Project " + projectId);
-        project.setId(projectId);
-        project.incrementLastTopicIndex();
-        project = projectDao.insert(project);
+        throw new NotFoundException(PROJECT_NOT_FOUND);
       }
       else
       {
@@ -823,26 +819,15 @@ public class BcfService
     Set<String> roleIds = user.getRoleIds();
 
     Set<String> actionRoleIds;
-    switch (action)
+    actionRoleIds = switch (action)
     {
-      case READ:
-        actionRoleIds = extensions.getReadRoleIds();
-        break;
-      case COMMENT:
-        actionRoleIds = extensions.getCommentRoleIds();
-        break;
-      case CREATE:
-        actionRoleIds = extensions.getCreateRoleIds();
-        break;
-      case UPDATE:
-        actionRoleIds = extensions.getUpdateRoleIds();
-        break;
-      case DELETE:
-        actionRoleIds = extensions.getDeleteRoleIds();
-        break;
-      default:
-        actionRoleIds = null;
-    }
+      case READ -> extensions.getReadRoleIds();
+      case COMMENT -> extensions.getCommentRoleIds();
+      case CREATE -> extensions.getCreateRoleIds();
+      case UPDATE -> extensions.getUpdateRoleIds();
+      case DELETE -> extensions.getDeleteRoleIds();
+      default -> null;
+    };
 
     if (actionRoleIds == null || actionRoleIds.isEmpty()) return;
 

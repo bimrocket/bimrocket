@@ -30,6 +30,8 @@
  */
 package org.bimrocket.service.bcf.store;
 
+import java.util.List;
+import java.util.Set;
 import org.bimrocket.api.bcf.BcfComment;
 import org.bimrocket.api.bcf.BcfDocumentReference;
 import org.bimrocket.api.bcf.BcfExtensions;
@@ -45,6 +47,8 @@ import org.bimrocket.dao.DaoConnection;
  */
 public interface BcfDaoConnection extends DaoConnection
 {
+  List<BcfProject> findProjects(Set<String> roles);
+
   Dao<BcfProject> getProjectDao();
 
   Dao<BcfExtensions> getExtensionsDao();

@@ -31,6 +31,14 @@
 package org.bimrocket.service.bcf.store.orient;
 
 import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.sql.executor.OResult;
+import com.orientechnologies.orient.core.sql.executor.OResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.bimrocket.api.bcf.BcfComment;
 import org.bimrocket.api.bcf.BcfDocumentReference;
 import org.bimrocket.api.bcf.BcfExtensions;
@@ -41,6 +49,7 @@ import org.bimrocket.dao.Dao;
 import org.bimrocket.dao.orient.OrientDao;
 import org.bimrocket.dao.orient.OrientDaoConnection;
 import org.bimrocket.service.bcf.store.BcfDaoConnection;
+import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 
 /**
  *
@@ -52,6 +61,44 @@ public class BcfOrientDaoConnection extends OrientDaoConnection
   BcfOrientDaoConnection(ODatabaseObject conn)
   {
     super(conn);
+  }
+
+  @Override
+  public List<BcfProject> findProjects(Set<String> roleIds)
+  {
+    String where;
+    Map parameters;
+
+    if (roleIds.contains(ADMIN_ROLE))
+    {
+      where = "";
+      parameters = Collections.emptyMap();
+    }
+    else
+    {
+      where = " where id in (select projectId from BcfExtensions where " +
+      "(readRoleIds is null or readRoleIds.size() = 0 or " +
+      "readRoleIds containsany :roleIds))";
+      parameters = Map.of("roleIds", roleIds);
+    }
+
+    String query = "select * from BcfProject" + where + " order by name";
+
+    List<BcfProject> projects = new ArrayList<>();
+    try (OResultSet rs = conn.query(query, parameters))
+    {
+      while (rs.hasNext())
+      {
+        OResult next = rs.next();
+        OElement element = next.getElement().orElse(null);
+        BcfProject project = new BcfProject();
+        project.setId(element.getProperty("id"));
+        project.setName(element.getProperty("name"));
+        project.setLastTopicIndex(element.getProperty("lastTopicIndex"));
+        projects.add(project);
+      }
+    }
+    return projects;
   }
 
   @Override

@@ -30,6 +30,9 @@
  */
 package org.bimrocket.service.bcf.store.empty;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.bimrocket.api.bcf.BcfComment;
 import org.bimrocket.api.bcf.BcfDocumentReference;
 import org.bimrocket.api.bcf.BcfExtensions;
@@ -52,6 +55,12 @@ public class BcfEmptyDaoConnection extends EmptyDaoConnection
   public Dao<BcfProject> getProjectDao()
   {
     return new EmptyDao<>();
+  }
+
+  @Override
+  public List<BcfProject> findProjects(Set<String> roles)
+  {
+    return Collections.emptyList();
   }
 
   @Override

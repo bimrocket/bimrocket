@@ -1603,10 +1603,7 @@ class BCFPanel extends Panel
     this.searchNewTopicButton.disabled = noProjects || !project.persistent;
     this.setupProjectButton.disabled = noProjects;
 
-    if (project.persistent)
-    {
-      this.refreshExtensions();
-    }
+    this.refreshExtensions();
 
     const enableField = (fieldElem, fieldName) =>
     {

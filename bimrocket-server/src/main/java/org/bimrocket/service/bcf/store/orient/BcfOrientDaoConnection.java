@@ -67,7 +67,7 @@ public class BcfOrientDaoConnection extends OrientDaoConnection
   public List<BcfProject> findProjects(Set<String> roleIds)
   {
     String where;
-    Map parameters;
+    Map<String, Object> parameters;
 
     if (roleIds.contains(ADMIN_ROLE))
     {

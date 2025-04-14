@@ -67,6 +67,7 @@ import org.bimrocket.service.bcf.store.empty.BcfEmptyDaoStore;
 import org.bimrocket.service.security.SecurityService;
 import org.eclipse.microprofile.config.Config;
 import static java.util.Arrays.asList;
+import java.util.Iterator;
 import static org.bimrocket.util.TextUtils.getISODate;
 import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 
@@ -141,6 +142,10 @@ public class BcfService
 
   BcfDaoStore daoStore;
 
+  BcfExtensions defaultExtensions;
+  long lastExtensionsRefresh = 0;
+  long extensionsExpiration = 3 * 60 * 1000; // 3 minutes
+
   @PostConstruct
   public void init()
   {
@@ -180,7 +185,14 @@ public class BcfService
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Set<String> roleIds = securityService.getCurrentUser().getRoleIds();
-      return conn.findProjects(roleIds);
+      List<BcfProject> projects = conn.findProjects(roleIds);
+
+      if (!securityService.getCurrentUser().getRoleIds().contains(ADMIN_ROLE))
+      {
+        // remove template project if user is not ADMIN
+        removeTemplateProject(projects);
+      }
+      return projects;
     }
   }
 
@@ -195,8 +207,7 @@ public class BcfService
     }
   }
 
-  public BcfProject updateProject(
-    String projectId, BcfProject projectUpdate)
+  public BcfProject updateProject(String projectId, BcfProject projectUpdate)
   {
     LOGGER.log(Level.FINE, "projectId: {0}", projectId);
 
@@ -265,39 +276,12 @@ public class BcfService
 
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
-      Dao<BcfProject> projectDao = conn.getProjectDao();
-      BcfProject project = projectDao.select(projectId);
-      if (project == null)
-        throw new NotFoundException(PROJECT_NOT_FOUND);
-
       Dao<BcfExtensions> extensionsDao = conn.getExtensionsDao();
       BcfExtensions extensions = extensionsDao.select(projectId);
-      if (extensions == null)
-      {
-        Optional<String> templateProjectName =
-          config.getOptionalValue(BASE + "templateProjectName", String.class);
+      if (extensions != null) return extensions;
 
-        if (templateProjectName.isPresent())
-        {
-          Map<String, Object> filter = new HashMap<>();
-          filter.put("name", templateProjectName.get());
-          List<BcfProject> projects =
-            projectDao.select(filter, Collections.emptyList());
-          if (!projects.isEmpty())
-          {
-            String templateProjectId = projects.get(0).getId();
-            extensions = extensionsDao.select(templateProjectId);
-          }
-        }
-        if (extensions == null)
-        {
-          extensions = new BcfExtensions();
-          extensions.setDefaultValues();
-        }
-        extensions.setProjectId(projectId);
-        extensions = extensionsDao.insert(extensions);
-      }
-      return extensions;
+      // default extensions are also returned when the project does not exist
+      return getDefaultExtensions(conn);
     }
   }
 
@@ -317,6 +301,11 @@ public class BcfService
         project.setName("Project " + projectId);
         project.setId(projectId);
         projectDao.insert(project);
+      }
+      else if (project.getName().equals(getTemplateProjectName()))
+      {
+        defaultExtensions = extensionsUpdate;
+        lastExtensionsRefresh = System.currentTimeMillis();
       }
 
       Dao<BcfExtensions> extensionsDao = conn.getExtensionsDao();
@@ -808,12 +797,68 @@ public class BcfService
 
   /* private methods */
 
+  private String getTemplateProjectName()
+  {
+    Optional<String> templateProjectName =
+      config.getOptionalValue(BASE + "templateProjectName", String.class);
+    return templateProjectName.orElse(null);
+  }
+
+  private void removeTemplateProject(List<BcfProject> projects)
+  {
+    String templateProjectName = getTemplateProjectName();
+    Iterator<BcfProject> iter = projects.iterator();
+    while (iter.hasNext())
+    {
+      if (iter.next().getName().equals(templateProjectName))
+      {
+        iter.remove();
+        break;
+      }
+    }
+  }
+
+  private BcfExtensions getDefaultExtensions(BcfDaoConnection conn)
+  {
+    long now = System.currentTimeMillis();
+    long ellapsed = now - lastExtensionsRefresh;
+    if (defaultExtensions == null || ellapsed > extensionsExpiration)
+    {
+      lastExtensionsRefresh = now;
+      Dao<BcfProject> projectDao = conn.getProjectDao();
+      Dao<BcfExtensions> extensionsDao = conn.getExtensionsDao();
+
+      BcfExtensions extensions = null;
+      String templateProjectName = getTemplateProjectName();
+      if (templateProjectName != null)
+      {
+        Map<String, Object> filter = new HashMap<>();
+        filter.put("name", templateProjectName);
+        List<BcfProject> projects =
+          projectDao.select(filter, Collections.emptyList());
+        if (!projects.isEmpty())
+        {
+          String templateProjectId = projects.get(0).getId();
+          extensions = extensionsDao.select(templateProjectId);
+        }
+      }
+
+      if (extensions == null)
+      {
+        extensions = new BcfExtensions();
+        extensions.setDefaultValues();
+      }
+      defaultExtensions = extensions;
+    }
+    return defaultExtensions;
+  }
+
   private void checkProjectAccess(BcfDaoConnection conn,
     String projectId, String action)
   {
     Dao<BcfExtensions> extensionsDao = conn.getExtensionsDao();
     BcfExtensions extensions = extensionsDao.select(projectId);
-    if (extensions == null) return;
+    if (extensions == null) extensions = getDefaultExtensions(conn);
 
     User user = securityService.getCurrentUser();
     Set<String> roleIds = user.getRoleIds();

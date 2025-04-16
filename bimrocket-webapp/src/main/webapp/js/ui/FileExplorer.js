@@ -77,11 +77,16 @@ class FileExplorer extends Panel
     }
   }
 
+  isActionEnabled(name)
+  {   
+    return true; 
+  }
+
   addContextButton(name, label, action, isVisible)
   {
     const buttonElem = Controls.addButton(this.buttonsPanelElem,
       name, label, action);
-    buttonElem._isVisible = isVisible;
+    buttonElem._isVisible = () => this.isActionEnabled(name) && isVisible();
   }
 
   addContextButtons()

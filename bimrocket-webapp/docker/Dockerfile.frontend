@@ -1,0 +1,12 @@
+FROM tomcat:10.1
+
+EXPOSE 8181
+
+RUN mkdir -p /root/bimrocket/js
+
+CMD ["catalina.sh", "run"]
+
+
+
+
+

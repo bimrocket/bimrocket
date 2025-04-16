@@ -1,3 +1,5 @@
 /bimrocket-common/target/
 /bimrocket-server/target/
 /bimrocket-webapp/target/
+
+/bimrocket-server/docker/orientdb_data/

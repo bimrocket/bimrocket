@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  bimrocket-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: bimrocket-server
+    container_name: bimrocket-server
+    restart: always
+    environment:
+      - BIMROCKET_DATA_PATH=/root/bimrocket
+    ports:
+      - "9090:8080"
+    volumes:
+      - ../target/bimrocket-server.war:/usr/local/tomcat/webapps/bimrocket-server.war
+      - ../src/main/resources/application.yaml:/root/bimrocket/bimrocket-server.yaml
+    networks:
+      - bimrocket_network
+
+  orientdb:
+    image: orientdb:latest
+    container_name: orientdb
+    restart: always
+    environment:
+      - ORIENTDB_ROOT_PASSWORD=orientdb
+    ports:
+      - "2424:2424" # Binary protocol
+      - "2480:2480" # HTTP protocol
+    volumes:
+      - ./orientdb_data:/orientdb/databases
+      - ./orientdb_backup:/orientdb/backup
+    networks:
+      - bimrocket_network
+
+networks:
+  bimrocket_network:
+    driver: bridge

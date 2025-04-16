@@ -1,0 +1,8 @@
+FROM tomcat:10.1
+
+EXPOSE 9090
+
+CMD ["catalina.sh", "run"]
+
+
+

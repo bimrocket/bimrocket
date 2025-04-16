@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  bimrocket-webapp:
+    image: bimrocket-webapp
+    container_name: bimrocket-webapp
+    restart: always
+    environment:
+      - BIMROCKET_ENV=/root/bimrocket/js/Environment.js
+    ports:
+      - "8181:8080"
+    volumes:
+      - ../src/main/webapp/js/Environment.js:/root/bimrocket/js/Environment.js
+    networks:
+      - bimrocket_network
+
+networks:
+  bimrocket_network:
+    driver: bridge
+

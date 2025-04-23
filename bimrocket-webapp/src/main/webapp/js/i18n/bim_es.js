@@ -120,6 +120,7 @@ export const translations =
   "message.project_extensions_saved" : "Extensiones guardadas.",
   "message.doc_ref_deleted" : "Referencia a documento borrada.",
   "message.doc_ref_saved" : "Referencia a documento guardada.",
+  "message.topic_searched" : "No se han encontrado incidencias.",
 
   "message.bsdd_dictionary_count" : count => `Diccionarios: ${count}`,
   "message.bsdd_class_count" : count => `Clases: ${count}`,

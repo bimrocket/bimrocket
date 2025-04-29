@@ -289,7 +289,7 @@ class FileExplorer extends Panel
   download(path, onSuccess)
   {
     this.showProgressBar("Downloading file...");
-    this.entriesElem.style.pointerEvents = "none";
+    this.setEntriesEnabled(false);
     this.service.open(path,
       result => this.handleDownloadResult(path, result, onSuccess),
       data => this.setProgress(data.progress));
@@ -435,7 +435,7 @@ class FileExplorer extends Panel
   handleDownloadResult(path, result, onSuccess)
   {
     this.showButtonsPanel();
-    this.enableEntriesElem();
+    this.setEntriesEnabled(true);
     if (result.status === Result.OK)
     {
       if (onSuccess) onSuccess();
@@ -677,9 +677,9 @@ class FileExplorer extends Panel
     this.application.progressBar.visible = false;
   }
 
-  enableEntriesElem()
+  setEntriesEnabled(enabled)
   {
-    this.entriesElem.style.pointerEvents = "auto";
+    this.entriesElem.style.pointerEvents = enabled ? "auto" : "none";
   }
 
   showProgressBar(message = "")

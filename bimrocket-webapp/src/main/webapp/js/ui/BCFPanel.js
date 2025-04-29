@@ -116,6 +116,10 @@ class BCFPanel extends Panel
       "setupProject", "button.setup", () => this.showProjectSetup());
     this.setupProjectButton.disabled = true;
 
+    this.exportButton = Controls.addButton(this.filterButtonsElem,
+      "export", "button.export", () => this.exportTopicTable());
+    this.exportButton.disabled = true;
+
     // topic table
 
     this.topicTableElem = Controls.addTable(this.searchPanelElem,
@@ -465,6 +469,7 @@ class BCFPanel extends Panel
 
   searchTopics()
   {
+    this.exportButton.disabled = false;
     let projectId = this.getProjectId();
     if (projectId === null) return;
 
@@ -1226,6 +1231,16 @@ class BCFPanel extends Panel
     const topics = this.topics;
     const topicsElem = this.topicTableElem;
     topicsElem.tBodies[0].innerHTML = "";
+    if (topics.length === 0) {
+      this.exportButton.disabled = true;
+      let rowElem = topicsElem.tBodies[0].insertRow();
+      let cell = rowElem.insertCell(0);
+      cell.colSpan = 3;
+      I18N.set(cell, "textContent", "bim|message.topic_searched");
+      this.application.i18n.update(cell);
+      cell.style.textAlign = "center";
+      return;
+    }
     for (let i = 0; i < topics.length; i++)
     {
       let topic = topics[i];
@@ -1239,6 +1254,40 @@ class BCFPanel extends Panel
         openTopic);
       rowElem.children[2].textContent = topic.topic_status;
     }
+  }
+
+  exportTopicTable()
+  {
+    if (!this.topics) {
+      console.warn("No topics available to export.");
+      return;
+    }
+  
+    const selectedProjectId = this.projectElem?.value;
+ 
+    const topics = this.topics;
+    if (topics.length === 0) {
+      console.warn("No topics to export for the selected project.");
+      return;
+    }
+  
+    let csvContent = "Index;Title;Type;Priority;Status;Stage;Creation Author;Assigned To;Due Date;Description\n";
+    
+    topics.forEach(topic => {
+      let row = `${topic.index};"${topic.title}";${topic.topic_type};${topic.priority};${topic.topic_status};${topic.stage};"${topic.creation_author}";"${topic.assigned_to}";${topic.due_date};"${topic.description}"`;
+      csvContent += row + "\n";
+    });
+    
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    
+    let linkElem = document.createElement("a");
+    linkElem.download = `topics_${selectedProjectId}.csv`;
+    linkElem.href = url;
+    linkElem.style.display = "none";
+    document.body.appendChild(linkElem);
+    linkElem.click();
+    document.body.removeChild(linkElem);
   }
 
   populateCommentList()
@@ -1467,6 +1516,7 @@ class BCFPanel extends Panel
   {
     this.clearTopics();
     this.updateFilterControls();
+    this.exportButton.disabled = true;
   }
 
   formatDate(dateString)

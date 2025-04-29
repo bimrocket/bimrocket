@@ -16,6 +16,8 @@ class Text2D extends CSS2DObject
     this.element.style.color = "rgb(0,0,0)";
     this.element.style.padding = "1px";
     this.element.style.textAlign = "center";
+    this.minDistance = -1;
+    this.maxDistance = -1;
   }
 
   set text(text)

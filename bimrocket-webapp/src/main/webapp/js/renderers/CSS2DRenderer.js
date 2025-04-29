@@ -126,13 +126,31 @@ class CSS2DRenderer {
 
 			if ( object.isCSS2DObject ) {
 
-        _this.cssObjects++; // bimrocket
-
 				_vector.setFromMatrixPosition( object.matrixWorld );
 				_vector.applyMatrix4( _viewProjectionMatrix );
 
-				visible &&= ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true ); // bimrocket
-				object.element.style.display = ( visible === true ) ? '' : 'none';
+        // bimrocket {
+
+				visible &&= ( _vector.z >= - 1 && _vector.z <= 1 ) && ( object.layers.test( camera.layers ) === true );
+
+        const distanceToCameraSquared = getDistanceToSquared( camera, object );
+
+        const haveMinDistance = object.minDistance >= 0;
+        const haveMaxDistance = object.maxDistance >= 0;
+
+        if ( visible === true && ( haveMinDistance || haveMaxDistance ) ) {
+
+          const distanceToCamera = Math.sqrt( distanceToCameraSquared );
+
+          if ( haveMinDistance && distanceToCamera < object.minDistance ||
+               haveMaxDistance && distanceToCamera > object.maxDistance ) visible = false;
+
+        }
+
+        _this.cssObjects++;
+        // } bimrocket
+
+        object.element.style.display = ( visible === true ) ? '' : 'none';
 
 				if ( visible === true ) {
 
@@ -153,7 +171,7 @@ class CSS2DRenderer {
 				}
 
 				const objectData = {
-					distanceToCameraSquared: getDistanceToSquared( camera, object )
+					distanceToCameraSquared: distanceToCameraSquared
 				};
 
 				cache.objects.set( object, objectData );

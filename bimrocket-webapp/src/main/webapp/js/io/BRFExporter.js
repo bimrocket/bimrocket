@@ -6,6 +6,7 @@
 import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
+import { Text2D } from "../core/Text2D.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
@@ -15,7 +16,7 @@ import * as THREE from "three";
 
 class BRFExporter
 {
-  static VERSION = 6;
+  static VERSION = 7;
 
   constructor()
   {
@@ -145,6 +146,17 @@ class BRFExporter
       entry.angle = light.angle;
       entry.penumbra = light.penumbra;
       entry.decay = light.decay;
+    }
+    else if (object instanceof Text2D)
+    {
+      let text2d = object;
+      entry.text = text2d.text;
+      entry.color = text2d.color;
+      entry.backgroundColor = text2d.backgroundColor;
+      entry.fontSize = text2d.fontSize;
+      entry.maxWidth = text2d.maxWidth;
+      entry.minDistance = text2d.minDistance;
+      entry.maxDistance = text2d.maxDistance;
     }
 
     let exportGeometry = Boolean(object.geometry);

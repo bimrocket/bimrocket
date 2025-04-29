@@ -6,6 +6,7 @@
 import { Solid } from "../core/Solid.js";
 import { Profile } from "../core/Profile.js";
 import { Cord } from "../core/Cord.js";
+import { Text2D } from "../core/Text2D.js";
 import { SolidGeometry } from "../core/SolidGeometry.js";
 import { ProfileGeometry } from "../core/ProfileGeometry.js";
 import { CordGeometry } from "../core/CordGeometry.js";
@@ -366,6 +367,17 @@ class BRFLoader extends THREE.Loader
     {
       object = new THREE.SpotLight(entry.color, entry.intensity,
         entry.distance, entry.angle, entry.penumbra, entry.decay);
+    }
+    else if (entry.type === "Text2D")
+    {
+      object = new Text2D();
+      object.text = entry.text;
+      object.color = entry.color;
+      object.backgroundColor = entry.backgroundColor;
+      object.fontSize = entry.fontSize;
+      object.maxWidth = entry.maxWidth;
+      object.minDistance = entry.minDistance;
+      object.maxDistance = entry.maxDistance;
     }
     else
     {

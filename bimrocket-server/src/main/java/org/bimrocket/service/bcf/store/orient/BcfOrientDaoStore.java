@@ -30,9 +30,8 @@
  */
 package org.bimrocket.service.bcf.store.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
-import com.orientechnologies.orient.core.entity.OEntityManager;
-import com.orientechnologies.orient.object.metadata.schema.OSchemaProxyObject;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import jakarta.annotation.PostConstruct;
 import org.bimrocket.api.bcf.*;
 import org.bimrocket.dao.orient.OrientDaoStore;
@@ -58,46 +57,29 @@ public class BcfOrientDaoStore extends OrientDaoStore<BcfDaoConnection>
   }
 
   @Override
-  protected void registerEntityClasses(ODatabaseObject db)
+  protected void registerEntityClasses(OSchema schema)
   {
     // generate schema
-    OSchemaProxyObject schema = db.getMetadata().getSchema();
+    registerEntityClass(schema, BcfColoring.class);
+    registerEntityClass(schema, BcfComment.class);
+    registerEntityClass(schema, BcfComponent.class);
+    registerEntityClass(schema, BcfComponents.class);
+    registerEntityClass(schema, BcfDirection.class);
+    registerEntityClass(schema, BcfLine.class);
+    registerEntityClass(schema, BcfOrthogonalCamera.class);
+    registerEntityClass(schema, BcfPerspectiveCamera.class);
+    registerEntityClass(schema, BcfDocumentReference.class);
+    registerEntityClass(schema, BcfPoint.class);
+    registerEntityClass(schema, BcfVector.class);
+    registerEntityClass(schema, BcfViewpoint.class);
+    registerEntityClass(schema, BcfSnapshot.class);
+    OClass projectClass = registerEntityClass(schema, BcfProject.class);
+    OClass extensionsClass = registerEntityClass(schema, BcfExtensions.class);
+    OClass topicClass = registerEntityClass(schema, BcfTopic.class);
 
-    schema.generateSchema(BcfColoring.class);
-    schema.generateSchema(BcfComment.class);
-    schema.generateSchema(BcfComponent.class);
-    schema.generateSchema(BcfComponents.class);
-    schema.generateSchema(BcfDirection.class);
-    schema.generateSchema(BcfExtensions.class);
-    schema.generateSchema(BcfLine.class);
-    schema.generateSchema(BcfOrthogonalCamera.class);
-    schema.generateSchema(BcfPerspectiveCamera.class);
-    schema.generateSchema(BcfDocumentReference.class);
-    schema.generateSchema(BcfPoint.class);
-    schema.generateSchema(BcfProject.class);
-    schema.generateSchema(BcfTopic.class);
-    schema.generateSchema(BcfVector.class);
-    schema.generateSchema(BcfViewpoint.class);
-    schema.generateSchema(BcfSnapshot.class);
-
-    // register persistent classes
-    OEntityManager entityManager = db.getEntityManager();
-    entityManager.registerEntityClass(BcfColoring.class);
-    entityManager.registerEntityClass(BcfComment.class);
-    entityManager.registerEntityClass(BcfComponent.class);
-    entityManager.registerEntityClass(BcfComponents.class);
-    entityManager.registerEntityClass(BcfDirection.class);
-    entityManager.registerEntityClass(BcfExtensions.class);
-    entityManager.registerEntityClass(BcfLine.class);
-    entityManager.registerEntityClass(BcfOrthogonalCamera.class);
-    entityManager.registerEntityClass(BcfPerspectiveCamera.class);
-    entityManager.registerEntityClass(BcfDocumentReference.class);
-    entityManager.registerEntityClass(BcfPoint.class);
-    entityManager.registerEntityClass(BcfProject.class);
-    entityManager.registerEntityClass(BcfTopic.class);
-    entityManager.registerEntityClass(BcfVector.class);
-    entityManager.registerEntityClass(BcfViewpoint.class);
-    entityManager.registerEntityClass(BcfSnapshot.class);
+    createIndex(projectClass, "BcfProjectIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(extensionsClass, "BcfExtensionsIdIdx", OClass.INDEX_TYPE.UNIQUE, "projectId");
+    createIndex(topicClass, "BcfTopicIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
   }
 
   @Override

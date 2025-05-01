@@ -30,15 +30,15 @@
  */
 package org.bimrocket.service.bcf.store.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
-import com.orientechnologies.orient.core.record.OElement;
-import com.orientechnologies.orient.core.sql.executor.OResult;
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.record.OElement;
+import com.orientechnologies.orient.core.sql.executor.OResult;
+import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import org.bimrocket.api.bcf.BcfComment;
 import org.bimrocket.api.bcf.BcfDocumentReference;
 import org.bimrocket.api.bcf.BcfExtensions;
@@ -58,7 +58,7 @@ import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 public class BcfOrientDaoConnection extends OrientDaoConnection
   implements BcfDaoConnection
 {
-  BcfOrientDaoConnection(ODatabaseObject conn)
+  BcfOrientDaoConnection(ODatabaseDocument conn)
   {
     super(conn);
   }

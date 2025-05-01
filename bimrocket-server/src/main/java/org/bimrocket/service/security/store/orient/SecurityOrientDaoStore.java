@@ -30,10 +30,6 @@
  */
 package org.bimrocket.service.security.store.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
-import com.orientechnologies.orient.core.entity.OEntityManager;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.object.metadata.schema.OSchemaProxyObject;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.bimrocket.api.security.Role;
@@ -43,6 +39,8 @@ import org.bimrocket.service.security.store.SecurityDaoConnection;
 import org.bimrocket.service.security.store.SecurityDaoStore;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OSchema;
 
 /**
  *
@@ -62,29 +60,14 @@ public class SecurityOrientDaoStore extends OrientDaoStore<SecurityDaoConnection
   }
 
   @Override
-  protected void registerEntityClasses(ODatabaseObject db)
+  protected void registerEntityClasses(OSchema schema)
   {
     // generate schema
-    OSchemaProxyObject schema = db.getMetadata().getSchema();
+    OClass userClass = registerEntityClass(schema, User.class);
+    OClass roleClass = registerEntityClass(schema, Role.class);
 
-    schema.generateSchema(User.class);
-    schema.generateSchema(Role.class);
-
-    OClass userClass = schema.getClass(User.class);
-    if (userClass.getIndexes().isEmpty())
-    {
-      userClass.createIndex("UserIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    }
-
-    OClass roleClass = schema.getClass(Role.class);
-    if (roleClass.getIndexes().isEmpty())
-    {
-      roleClass.createIndex("RoleIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    }
-    // register persistent classes
-    OEntityManager entityManager = db.getEntityManager();
-    entityManager.registerEntityClass(User.class);
-    entityManager.registerEntityClass(Role.class);
+    createIndex(userClass, "UserIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(roleClass, "RoleIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
   }
 
   @Override

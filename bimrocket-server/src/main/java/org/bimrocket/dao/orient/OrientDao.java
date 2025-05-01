@@ -30,19 +30,22 @@
  */
 package org.bimrocket.dao.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.record.OElement;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
-import jakarta.persistence.Id;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.beanutils.BeanUtils;
 import org.bimrocket.dao.Dao;
+import static org.bimrocket.dao.orient.OrientDaoStore.MAP_CLASS;
+import org.bimrocket.util.EntityDefinition;
 
 /**
  *
@@ -51,14 +54,15 @@ import org.bimrocket.dao.Dao;
  */
 public class OrientDao<E> implements Dao<E>
 {
-  private final ODatabaseObject db;
+  private final ODatabaseDocument db;
   private final Class<E> cls;
-  private static final Map<Class<?>, Field> idFields = new HashMap<>();
+  private final EntityDefinition definition;
 
-  public OrientDao(ODatabaseObject db, Class<E> cls)
+  public OrientDao(ODatabaseDocument db, Class<E> cls)
   {
     this.db = db;
     this.cls = cls;
+    this.definition = EntityDefinition.getInstance(cls);
   }
 
   @Override
@@ -70,10 +74,16 @@ public class OrientDao<E> implements Dao<E>
 
     if (orderBy != null) query += addOrderBy(orderBy);
 
-    List<E> list = db.objectQuery(query, filter);
-    for (int i = 0; i < list.size(); i++)
+    List<E> list = new ArrayList<>();
+
+    OResultSet rs = db.query(query, filter);
+    while (rs.hasNext())
     {
-      list.set(i, db.detachAll(list.get(i), true));
+      OResult result = rs.next();
+      OElement oelement = result.getElement().orElse(null);
+      E entity = newEntity();
+      copyToEntity(oelement, entity);
+      list.add(entity);
     }
     return list;
   }
@@ -85,11 +95,11 @@ public class OrientDao<E> implements Dao<E>
 
     query += addFilter(filter);
 
-    OResultSet resultSet = db.query(query, filter);
+    OResultSet rs = db.query(query, filter);
 
-    if (resultSet.hasNext())
+    if (rs.hasNext())
     {
-      OResult result = resultSet.next();
+      OResult result = rs.next();
       return result.getProperty(groupExpression);
     }
     return null;
@@ -98,16 +108,20 @@ public class OrientDao<E> implements Dao<E>
   @Override
   public E select(Object id)
   {
-    E dbEntity = internalLoad(id);
-    if (dbEntity == null) return null;
-
-    return db.detachAll(dbEntity, true);
+    OElement oelement = internalSelect(id);
+    if (oelement == null) return null;
+    E entity = newEntity();
+    copyToEntity(oelement, entity);
+    return entity;
   }
 
   @Override
   public E insert(E entity)
   {
-    return db.detachAll(db.save(entity), true);
+    OElement oelement = db.newElement(cls.getSimpleName());
+    copyToElement(entity, oelement);
+    db.save(oelement);
+    return entity;
   }
 
   @Override
@@ -115,35 +129,62 @@ public class OrientDao<E> implements Dao<E>
   {
     try
     {
-      Field idField = getIdField(cls);
+      Field idField = definition.getIdentityField(true);
       Object id = idField.get(entity);
 
-      E dbEntity = internalLoad(id);
-      if (dbEntity == null) return null;
+      OElement oelement = internalSelect(id);
+      if (oelement == null) return null;
 
-      BeanUtils.copyProperties(dbEntity, entity);
-      return db.detachAll(db.save(dbEntity), true);
+      copyToElement(entity, oelement);
+
+      db.save(oelement);
+      return entity;
     }
     catch (Exception ex)
     {
-      return null;
+      throw new RuntimeException(ex);
+    }
+  }
+
+  @Override
+  public E insertOrUpdate(E entity)
+  {
+    try
+    {
+      Field idField = definition.getIdentityField(true);
+      Object id = idField.get(entity);
+
+      OElement oelement = internalSelect(id);
+      if (oelement == null)
+      {
+        oelement = db.newElement(cls.getSimpleName());
+      }
+
+      copyToElement(entity, oelement);
+
+      db.save(oelement);
+      return entity;
+    }
+    catch (Exception ex)
+    {
+      throw new RuntimeException(ex);
     }
   }
 
   @Override
   public boolean delete(Object id)
   {
-    Field idField = getIdField(cls);
+    Field idField = definition.getIdentityField(true);
 
     String query = "select from " + cls.getSimpleName() +
       " where " + idField.getName() + " = ?";
 
-    OResultSet resultSet = db.command(query, id);
+    OResultSet rs = db.query(query, id);
 
-    if (resultSet.hasNext())
+    if (rs.hasNext())
     {
-      OResult result = resultSet.next();
-      removeObject(result.getElement().get());
+      OResult result = rs.next();
+      deleteCascade(result.getElement().get());
       return true;
     }
     return false;
@@ -156,51 +197,61 @@ public class OrientDao<E> implements Dao<E>
 
     query += addFilter(filter);
 
-    OResultSet resultSet = db.command(query, filter);
+    OResultSet rs = db.query(query, filter);
 
     int count = 0;
-    while (resultSet.hasNext())
+    while (rs.hasNext())
     {
-      OResult result = resultSet.next();
-      removeObject(result.getElement().get());
+      OResult result = rs.next();
+      deleteCascade(result.getElement().get());
       count++;
     }
     return count;
   }
 
-  private void removeObject(Object object)
+  protected E newEntity()
   {
-    if (object instanceof OElement)
+    try
     {
-      OElement element = (OElement)object;
-
-      db.delete(element.getIdentity());
-
-      Set<String> propertyNames = element.getPropertyNames();
-
-      for (String propertyName : propertyNames)
-      {
-        Object property = element.getProperty(propertyName);
-        removeObject(property);
-      }
+      return cls.getConstructor().newInstance();
+    }
+    catch (Exception ex)
+    {
+      throw new RuntimeException(ex);
     }
   }
 
-  private E internalLoad(Object id)
+  protected Object newEntity(String className)
   {
-    Field idField = getIdField(cls);
+    try
+    {
+      return Class.forName(className).getConstructor().newInstance();
+    }
+    catch (Exception ex)
+    {
+      throw new RuntimeException(ex);
+    }
+  }
+
+
+  // internal methods
+
+  protected OElement internalSelect(Object id)
+  {
+    Field idField = definition.getIdentityField(true);
 
     String query = "select from " + cls.getSimpleName() +
       " where " + idField.getName() + " = ?";
-    List<E> result = db.objectQuery(query, id);
-    if (!result.isEmpty())
+    OResultSet rs = db.query(query, id);
+    if (rs.hasNext())
     {
-      return result.get(0);
+      OResult result = rs.next();
+      return result.getElement().orElse(null);
     }
     return null;
   }
 
-  private String addFilter(Map<String, Object> filter)
+  protected String addFilter(Map<String, Object> filter)
   {
     StringBuilder buffer = new StringBuilder();
     int i = 0;
@@ -220,7 +271,7 @@ public class OrientDao<E> implements Dao<E>
     return buffer.toString();
   }
 
-  private String addOrderBy(Collection<String> orderBy)
+  protected String addOrderBy(Collection<String> orderBy)
   {
     StringBuilder buffer = new StringBuilder();
     int i = 0;
@@ -239,26 +290,177 @@ public class OrientDao<E> implements Dao<E>
     return buffer.toString();
   }
 
-  private static synchronized Field getIdField(Class<?> cls)
+  protected void deleteCascade(Object object)
   {
-    Field idField = idFields.get(cls);
-    if (idField == null)
+    if (object instanceof OElement)
     {
-      Field[] declaredFields = cls.getDeclaredFields();
-      for (Field field : declaredFields)
+      OElement oelement = (OElement)object;
+
+      db.delete(oelement.getIdentity());
+
+      Set<String> propertyNames = oelement.getPropertyNames();
+
+      for (String propertyName : propertyNames)
       {
-        if (field.isAnnotationPresent(Id.class))
+        Object property = oelement.getProperty(propertyName);
+        deleteCascade(property);
+      }
+    }
+  }
+
+  protected void copyToEntity(OElement oelement, Object entity)
+  {
+    EntityDefinition def = EntityDefinition.getInstance(entity.getClass());
+    for (Field field : def.getFields())
+    {
+      try
+      {
+        String fieldName = field.getName();
+        Object propertyValue = oelement.getProperty(fieldName);
+        field.set(entity, fromDB(propertyValue));
+      }
+      catch (Exception ex)
+      {
+        // ignore
+      }
+    }
+  }
+
+  protected void copyToElement(Object entity, OElement oelement)
+  {
+    EntityDefinition def = EntityDefinition.getInstance(entity.getClass());
+    for (Field field : def.getFields())
+    {
+      try
+      {
+        String fieldName = field.getName();
+        Object fieldValue = field.get(entity);
+        oelement.setProperty(fieldName, toDB(fieldValue));
+      }
+      catch (Exception ex)
+      {
+        // ignore
+      }
+    }
+  }
+
+  protected Object fromDB(Object object)
+  {
+    if (object == null)
+    {
+      return null;
+    }
+    else if (object instanceof Number ||
+             object instanceof Boolean ||
+             object instanceof String)
+    {
+      return object;
+    }
+    else if (object instanceof OElement)
+    {
+      OElement oelement = (OElement)object;
+      OClass oclass = oelement.getSchemaType().orElse(null);
+      String className = null;
+      if (oclass != null)
+      {
+        String oclassName = oclass.getName();
+        if (!oclassName.equals(MAP_CLASS))
         {
-          idField = field;
-          idField.setAccessible(true);
-          idFields.put(cls, idField);
-          break;
+          // assume object class in same package than Dao cls
+          className = cls.getPackageName() + "." + oclassName;
         }
       }
-      if (idField == null)
-        throw new RuntimeException("Not Id field defined for [" +
-          cls.getSimpleName() + "]");
+
+      if (className == null) // no class or MAP_CLASS
+      {
+        Map<String, Object> map = new HashMap<>();
+        for (String propertyName : oelement.getPropertyNames())
+        {
+          Object value = oelement.getProperty(propertyName);
+          map.put(propertyName, fromDB(value));
+        }
+        return map;
+      }
+      else
+      {
+        Object entity = newEntity(className);
+        copyToEntity(oelement, entity);
+        return entity;
+      }
     }
-    return idField;
+    else if (object instanceof List)
+    {
+      List<?> col = (List<?>)object;
+      List<Object> list = new ArrayList<>();
+      for (Object item : col)
+      {
+        list.add(fromDB(item));
+      }
+      return list;
+    }
+    else if (object instanceof Set)
+    {
+      Set<?> col = (Set<?>)object;
+      Set<Object> set = new HashSet<>();
+      for (Object item : col)
+      {
+        set.add(fromDB(item));
+      }
+      return set;
+    }
+    return String.valueOf(object);
+  }
+
+  protected Object toDB(Object object)
+  {
+    if (object == null)
+    {
+      return null;
+    }
+    else if (object instanceof Number ||
+             object instanceof Boolean ||
+             object instanceof String)
+    {
+      return object;
+    }
+    else if (object instanceof Map)
+    {
+      Map<?, ?> map = (Map<?, ?>)object;
+      OElement oelement = db.newEmbeddedElement(MAP_CLASS);
+      for (Object key : map.keySet())
+      {
+        String propertyName = key.toString();
+        Object value = map.get(propertyName);
+        oelement.setProperty(propertyName, toDB(value));
+      }
+      return oelement;
+    }
+    else if (object instanceof List)
+    {
+      List<?> col = (List<?>)object;
+      List<Object> list = new ArrayList<>();
+      for (Object item : col)
+      {
+        list.add(toDB(item));
+      }
+      return list;
+    }
+    else if (object instanceof Set)
+    {
+      Set<?> col = (Set<?>)object;
+      Set<Object> set = new HashSet<>();
+      for (Object item : col)
+      {
+        set.add(toDB(item));
+      }
+      return set;
+    }
+    else // other class
+    {
+      String className = object.getClass().getSimpleName();
+      OElement oelement = db.newElement(className);
+      copyToElement(object, oelement);
+      return oelement;
+    }
   }
 }

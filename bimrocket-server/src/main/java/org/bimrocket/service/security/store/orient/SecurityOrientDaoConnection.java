@@ -30,7 +30,7 @@
  */
 package org.bimrocket.service.security.store.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.bimrocket.api.security.Role;
 import org.bimrocket.api.security.User;
 import org.bimrocket.dao.Dao;
@@ -45,7 +45,7 @@ import org.bimrocket.service.security.store.SecurityDaoConnection;
 public class SecurityOrientDaoConnection extends OrientDaoConnection
   implements SecurityDaoConnection
 {
-  SecurityOrientDaoConnection(ODatabaseObject conn)
+  SecurityOrientDaoConnection(ODatabaseDocument conn)
   {
     super(conn);
   }

@@ -74,6 +74,12 @@ public class EmptyDao<E> implements Dao<E>
   }
 
   @Override
+  public E insertOrUpdate(E entity)
+  {
+    return entity;
+  }
+
+  @Override
   public boolean delete(Object id)
   {
     return false;

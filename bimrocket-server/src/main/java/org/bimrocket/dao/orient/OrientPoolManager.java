@@ -31,16 +31,13 @@
 package org.bimrocket.dao.orient;
 
 import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.db.ODatabaseDocumentInternal;
 import com.orientechnologies.orient.core.db.ODatabasePool;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
 import com.orientechnologies.orient.core.storage.cache.local.OWOWCache;
 import com.orientechnologies.orient.core.storage.impl.local.OAbstractPaginatedStorage;
 import com.orientechnologies.orient.core.storage.impl.local.paginated.wal.cas.CASDiskWriteAheadLog;
-import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -97,12 +94,6 @@ public class OrientPoolManager
   {
     ODatabasePool pool = getPool(dbAlias);
     return pool.acquire();
-  }
-
-  public synchronized ODatabaseObject getObjectConnection(String dbAlias)
-  {
-    ODatabasePool pool = getPool(dbAlias);
-    return new OObjectDatabaseTx((ODatabaseDocumentInternal) pool.acquire());
   }
 
   private ODatabasePool getPool(String dbAlias)

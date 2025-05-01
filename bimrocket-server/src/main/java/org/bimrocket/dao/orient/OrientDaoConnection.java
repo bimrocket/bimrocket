@@ -30,7 +30,7 @@
  */
 package org.bimrocket.dao.orient;
 
-import com.orientechnologies.orient.core.db.object.ODatabaseObject;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import org.bimrocket.dao.DaoConnection;
 
 /**
@@ -39,9 +39,9 @@ import org.bimrocket.dao.DaoConnection;
  */
 public class OrientDaoConnection implements DaoConnection
 {
-  protected ODatabaseObject conn;
+  protected ODatabaseDocument conn;
 
-  protected OrientDaoConnection(ODatabaseObject conn)
+  protected OrientDaoConnection(ODatabaseDocument conn)
   {
     this.conn = conn;
   }

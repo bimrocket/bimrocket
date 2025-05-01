@@ -41,13 +41,12 @@ import java.util.Map;
  */
 public interface Dao<E>
 {
-  public abstract List<E> select(Map<String, Object> filter,
-    Collection<String> orderBy);
-  public abstract Object select(String groupExpression,
-    Map<String, Object> filter);
-  public abstract E select(Object id);
-  public abstract E insert(E entity);
-  public abstract E update(E entity);
-  public abstract boolean delete(Object id);
-  public abstract int delete(Map<String, Object> filter);
+  public List<E> select(Map<String, Object> filter, Collection<String> orderBy);
+  public Object select(String groupExpression, Map<String, Object> filter);
+  public E select(Object id);
+  public E insert(E entity);
+  public E update(E entity);
+  public E insertOrUpdate(E entity);
+  public boolean delete(Object id);
+  public int delete(Map<String, Object> filter);
 }

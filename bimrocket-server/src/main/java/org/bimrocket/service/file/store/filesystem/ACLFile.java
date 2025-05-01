@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import org.apache.commons.collections.map.LRUMap;
+import org.apache.commons.collections4.map.LRUMap;
 import org.bimrocket.service.file.ACL;
 import org.bimrocket.service.file.util.MutableACL;
 import org.bimrocket.service.file.util.MutableACLDeserializer;
@@ -51,8 +51,8 @@ public class ACLFile
   public static final String ACL_FILENAME = ".acl";
   public static final String ANY_FILENAME = "*";
 
-  private static final int MAX_SIZE = 10;
-  private static final LRUMap cache = new LRUMap(MAX_SIZE);
+  private static final int MAX_SIZE = 50;
+  private static final LRUMap<String, ACLFile> cache = new LRUMap<>(MAX_SIZE);
 
   private final File aclFile;
   private FileMap fileMap;
@@ -168,7 +168,7 @@ public class ACLFile
 
     String dirPath = dir.getAbsolutePath();
 
-    ACLFile aclFile = (ACLFile)cache.get(dirPath);
+    ACLFile aclFile = cache.get(dirPath);
     if (aclFile == null)
     {
       aclFile = new ACLFile(dir);

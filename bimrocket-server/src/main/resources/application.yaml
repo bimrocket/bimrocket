@@ -36,6 +36,7 @@ services:
       - scripts
       - reports
       - ifc_snapshots
+      - tasks
 
   # bcf service
   bcf:
@@ -51,6 +52,14 @@ services:
 
   # ifcdb service
   ifcdb:
+
+  # task service
+  task:
+    taskCacheSize: 10
+    store:
+      class: org.bimrocket.service.task.store.orient.TaskOrientDaoStore
+      orient:
+        database: bimdb
 
   # print service
   print:

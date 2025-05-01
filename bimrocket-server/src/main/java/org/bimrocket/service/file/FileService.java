@@ -131,7 +131,14 @@ public class FileService
 
   public Metadata get(Path path)
   {
+    return get(path, null);
+  }
+
+  public Metadata get(Path path, Privilege privilege)
+  {
     LOGGER.log(Level.FINE, "get {0}", path);
+
+    if (privilege != null) checkAccess(path, privilege);
 
     return store.get(path);
   }
@@ -147,9 +154,14 @@ public class FileService
 
   public InputStream read(Path path) throws IOException
   {
+    return read(path, READ);
+  }
+
+  public InputStream read(Path path, Privilege privilege) throws IOException
+  {
     LOGGER.log(Level.FINE, "read {0}", path);
 
-    checkAccess(path, READ);
+    if (privilege != null) checkAccess(path, privilege);
 
     return store.read(path);
   }
@@ -157,9 +169,15 @@ public class FileService
   public Metadata write(Path path, InputStream is, String contentType)
     throws IOException, LockedFileException
   {
+    return write(path, is, contentType, WRITE);
+  }
+
+  public Metadata write(Path path, InputStream is, String contentType,
+    Privilege privilege) throws IOException, LockedFileException
+  {
     LOGGER.log(Level.FINE, "write {0}", path);
 
-    checkAccess(path, WRITE);
+    if (privilege != null) checkAccess(path, privilege);
 
     checkLock(path);
 

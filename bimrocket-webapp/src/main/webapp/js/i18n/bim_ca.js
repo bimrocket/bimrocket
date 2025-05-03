@@ -12,6 +12,7 @@ export const translations =
   "button.upload_image" : "Puja imatge",
   "button.definition" : "Definició",
   "button.references" : "Referències",
+  "button.save_extensions" : "Desa extensions",
 
   "tool.bim_inventory.label" : "Inventari BIM",
   "tool.bim_inventory.help" : "Inventari BIM",

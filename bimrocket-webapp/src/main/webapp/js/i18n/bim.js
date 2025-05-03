@@ -12,6 +12,7 @@ export const translations =
   "button.upload_image" : "Upload image",
   "button.definition" : "Definition",
   "button.references" : "References",
+  "button.save_extensions" : "Save extensions",
 
   "tool.bim_inventory.label" : "BIM inventory",
   "tool.bim_inventory.help" : "BIM inventory setup",

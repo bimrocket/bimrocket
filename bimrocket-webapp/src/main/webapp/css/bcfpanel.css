@@ -6,6 +6,7 @@
 
   overflow: auto;
   text-align: left;
+  height: 100%;
 }
 
 .bcf_panel a
@@ -101,6 +102,12 @@
   background-image: url(images/next.svg);
 }
 
+#bcf_config_panel
+{
+  display: flex;
+  flex-direction: column;
+}
+
 .bcf_project_setup
 {
   padding: 4px;
@@ -131,6 +138,14 @@
   font-family: monospace;
   resize: vertical;
   min-height: 200px;
+}
+
+.bcf_extensions_setup
+{
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  flex-grow: 1;
 }
 
 .bcf_tabs

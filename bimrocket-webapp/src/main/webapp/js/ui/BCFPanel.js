@@ -112,13 +112,13 @@ class BCFPanel extends Panel
       "searchNewTopic", "button.create", () => this.showTopic());
     this.searchNewTopicButton.disabled = true;
 
-    this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
-      "setupProject", "button.setup", () => this.showProjectSetup());
-    this.setupProjectButton.disabled = true;
-
     this.exportButton = Controls.addButton(this.filterButtonsElem,
       "export", "button.export", () => this.exportTopicTable());
     this.exportButton.disabled = true;
+
+    this.setupProjectButton = Controls.addButton(this.filterButtonsElem,
+      "setupProject", "button.setup", () => this.showProjectSetup());
+    this.setupProjectButton.disabled = true;
 
     // topic table
 
@@ -302,19 +302,23 @@ class BCFPanel extends Panel
     this.setupPanelElem.style.display = "none";
     this.bodyElem.appendChild(this.setupPanelElem);
 
-    this.setupBodyElem = document.createElement("div");
-    this.setupBodyElem.className = "bcf_project_setup";
-    this.setupPanelElem.appendChild(this.setupBodyElem);
+    this.projectSetupElem = document.createElement("div");
+    this.projectSetupElem.className = "bcf_project_setup";
+    this.setupPanelElem.appendChild(this.projectSetupElem);
 
-    this.backSetupButton = Controls.addButton(this.setupBodyElem,
+    this.extensionsSetupElem = document.createElement("div");
+    this.extensionsSetupElem.className = "bcf_extensions_setup";
+    this.setupPanelElem.appendChild(this.extensionsSetupElem);
+
+    this.backSetupButton = Controls.addButton(this.projectSetupElem,
       "backSetup", "button.back", () => this.showTopicList());
 
-    this.projectNameElem = Controls.addTextField(this.setupBodyElem,
+    this.projectNameElem = Controls.addTextField(this.projectSetupElem,
       "project_name", "bim|label.project_name");
 
     this.projectButtonsElem = document.createElement("div");
     this.projectButtonsElem.className = "bcf_buttons";
-    this.setupBodyElem.appendChild(this.projectButtonsElem);
+    this.projectSetupElem.appendChild(this.projectButtonsElem);
 
     this.saveProjectButton = Controls.addButton(this.projectButtonsElem,
       "saveProject", "button.save", () => this.saveProject());
@@ -328,16 +332,17 @@ class BCFPanel extends Panel
          .setI18N(this.application.i18n).show();
       });
 
-    this.extensionsView = Controls.addCodeEditor(this.setupBodyElem,
+    this.extensionsView = Controls.addCodeEditor(this.extensionsSetupElem,
       "extensions_json", "bim|label.project_extensions", "",
       { "language" : "json", "height" : "200px" });
+    this.extensionsView.dom.parentElement.parentElement.style.flexGrow = "1";
 
     this.saveExtensionsButtonsElem = document.createElement("div");
     this.saveExtensionsButtonsElem.className = "bcf_buttons";
-    this.setupBodyElem.appendChild(this.saveExtensionsButtonsElem);
+    this.extensionsSetupElem.appendChild(this.saveExtensionsButtonsElem);
 
     this.saveExtensionsButton = Controls.addButton(
-      this.saveExtensionsButtonsElem, "saveExtensions", "button.save",
+      this.saveExtensionsButtonsElem, "saveExtensions", "bim|button.save_extensions",
       () => this.saveProjectExtensions());
   }
 
@@ -1074,7 +1079,7 @@ class BCFPanel extends Panel
       Toast.create("bim|message.project_saved")
         .setI18N(application.i18n).show();
       this.refreshProjects();
-      this.showTopicList();
+//      this.showTopicList();
     };
 
     const onError = error =>
@@ -1262,25 +1267,25 @@ class BCFPanel extends Panel
       console.warn("No topics available to export.");
       return;
     }
-  
+
     const selectedProjectId = this.projectElem?.value;
- 
+
     const topics = this.topics;
     if (topics.length === 0) {
       console.warn("No topics to export for the selected project.");
       return;
     }
-  
+
     let csvContent = "Index;Title;Type;Priority;Status;Stage;Creation Author;Assigned To;Due Date;Description\n";
-    
+
     topics.forEach(topic => {
       let row = `${topic.index};"${topic.title}";${topic.topic_type};${topic.priority};${topic.topic_status};${topic.stage};"${topic.creation_author}";"${topic.assigned_to}";${topic.due_date};"${topic.description}"`;
       csvContent += row + "\n";
     });
-    
+
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
-    
+
     let linkElem = document.createElement("a");
     linkElem.download = `topics_${selectedProjectId}.csv`;
     linkElem.href = url;

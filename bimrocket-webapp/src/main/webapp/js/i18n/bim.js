@@ -31,6 +31,9 @@ export const translations =
 
   "tool.bim_delta.label" : "Change detection",
 
+  "tool.bim_explode.label" : "Explode model",
+  "tool.bim_explode.help" : "Select a building and apply offsets on each axis.",
+
   "tool.bim_reset_view.label" : "Reset view",
 
   "tab.file" : "File",
@@ -89,6 +92,10 @@ export const translations =
   "label.bim_delta_added" : "Object added",
   "label.bim_delta_removed" : "Object removed",
   "label.bim_delta_snapshot_name" : "IFC snapshot name:",
+  "label.bim_explode_building" : "Building:",
+  "label.bim_explode_xoffset" : "X axis offset:",
+  "label.bim_explode_yoffset" : "Y axis offset:",
+  "label.bim_explode_zoffset" : "Z axis offset:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",

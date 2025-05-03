@@ -31,6 +31,9 @@ export const translations =
 
   "tool.bim_delta.label" : "Detección de cambios",
 
+  "tool.bim_explode.label" : "Explotar modelo",
+  "tool.bim_explode.help" : "Selecciona un edficio y aplica desplazamientos en cada eje.",
+
   "tool.bim_reset_view.label" : "Inicializar vista",
 
   "tab.file" : "Fichero",
@@ -89,6 +92,10 @@ export const translations =
   "label.bim_delta_added" : "Objeto añadido",
   "label.bim_delta_removed" : "Objeto borrado",
   "label.bim_delta_snapshot_name" : "Nombre de la captura IFC:",
+  "label.bim_explode_building" : "Edificio:",
+  "label.bim_explode_xoffset" : "Desplazamiento eje X:",
+  "label.bim_explode_yoffset" : "Desplazamiento eje Y:",
+  "label.bim_explode_zoffset" : "Desplazamiento eje Z:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",

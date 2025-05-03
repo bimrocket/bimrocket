@@ -12,6 +12,7 @@ import { BCFTool } from "../tools/BCFTool.js";
 import { BSDDTool } from "../tools/BSDDTool.js";
 import { BIMDeltaTool } from "../tools/BIMDeltaTool.js";
 import { BIMResetViewTool } from "../tools/BIMResetViewTool.js";
+import { BIMExplodeTool } from "../tools/BIMExplodeTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
@@ -54,6 +55,7 @@ export function load(application)
   const bcfTool = new BCFTool(application);
   const bsddTool = new BSDDTool(application);
   const bimDeltaTool = new BIMDeltaTool(application);
+  const bimExplodeTool = new BIMExplodeTool(application);
   const bimResetViewTool = new BIMResetViewTool(application);
 
   // create menus
@@ -67,6 +69,7 @@ export function load(application)
   bimMenu.addMenuItem(bcfTool);
   bimMenu.addMenuItem(bsddTool);
   bimMenu.addMenuItem(bimDeltaTool);
+  bimMenu.addMenuItem(bimExplodeTool);
   bimMenu.addMenuItem(bimResetViewTool);
 
   const toolBar = application.toolBar;

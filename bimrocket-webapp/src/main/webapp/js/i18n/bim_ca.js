@@ -31,6 +31,9 @@ export const translations =
 
   "tool.bim_delta.label" : "Detecció de canvis",
 
+  "tool.bim_explode.label" : "Explota model",
+  "tool.bim_explode.help" : "Selecciona un edfici i aplica desplaçaments en cada eix.",
+
   "tool.bim_reset_view.label" : "Inicialitza vista",
 
   "tab.file" : "Fitxer",
@@ -89,6 +92,10 @@ export const translations =
   "label.bim_delta_added" : "Objecte afegit",
   "label.bim_delta_removed" : "Objecte esborrat",
   "label.bim_delta_snapshot_name" : "Nom de la captura IFC:",
+  "label.bim_explode_building" : "Edifici:",
+  "label.bim_explode_xoffset" : "Desplaçament eix X:",
+  "label.bim_explode_yoffset" : "Desplaçament eix Y:",
+  "label.bim_explode_zoffset" : "Desplaçament eix Z:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",

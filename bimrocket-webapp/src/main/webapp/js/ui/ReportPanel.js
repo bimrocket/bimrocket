@@ -107,16 +107,16 @@ class ReportPanel extends Panel
                          output.count + ") " + perc + "%";
         }
         ruleNode.value = text;
+        if (output.summary)
+        {
+          ruleNode.addNode(output.summary, null, ruleClassName);
+        }
         if (cardinalityError)
         {
           ruleNode.addNode(`Invalid cardinality, expected
             [${minOccurs}..${maxOccurs === null ? "*" : maxOccurs}],
             actual: ${output.count}`,
             null, ruleClassName);
-        }
-        else if (output.summary)
-        {
-          ruleNode.addNode(output.summary, null, ruleClassName);
         }
       }
       I18N.set(headerElem, "textContent",

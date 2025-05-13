@@ -29,6 +29,9 @@ class BRSReportType extends ReportType
     return `let rules = [
   {
     "code" : "rule_code",
+    "description" : "description",
+    "minOccurs" : 0,
+    "maxOccurs" : null,
     "severity" : "info",
     "selectExpression" : $ => $("IFC", "ifcClassName") == "IfcDoor",
     "checkExpression" : $ => $("IFC", "PrefefinedType") == "Basic",

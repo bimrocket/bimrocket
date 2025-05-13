@@ -24,6 +24,8 @@ export class BRSRule extends Rule
     super();
     this.code = ruleDefinition.code || null;
     this.description = ruleDefinition.description || null;
+    this.minOccurs = ruleDefinition.minOccurs || 0;
+    this.maxOccurs = ruleDefinition.maxOccurs || null;
     this.severity = ruleDefinition.severity || "info";
     this.selectExpression = ruleDefinition.selectExpression;
     this.checkExpression = ruleDefinition.checkExpression;
@@ -40,6 +42,16 @@ export class BRSRule extends Rule
   getDescription()
   {
     return this.description;
+  }
+
+  getMinOccurs()
+  {
+    return this.minOccurs;
+  }
+
+  getMaxOccurs()
+  {
+    return this.maxOccurs;
   }
 
   getSeverity()

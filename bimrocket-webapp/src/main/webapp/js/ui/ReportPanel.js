@@ -113,6 +113,10 @@ class ReportPanel extends Panel
         }
         if (cardinalityError)
         {
+          if (severity === "warn") warnCount++;
+          else if (severity === "error") errorCount++;
+          else infoCount++;
+
           ruleNode.addNode(`Invalid cardinality, expected
             [${minOccurs}..${maxOccurs === null ? "*" : maxOccurs}],
             actual: ${output.count}`,

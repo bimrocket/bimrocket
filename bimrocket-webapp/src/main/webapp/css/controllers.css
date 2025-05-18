@@ -39,7 +39,8 @@ div.rounded_button:active
 }
 
 
-span.toggle_button {
+span.toggle_button
+{
   position:relative;
   display:inline-block;
   width:80px;
@@ -51,7 +52,8 @@ span.toggle_button {
   text-align:center;
 }
 
-span.toggle_button input {
+span.toggle_button input
+{
   width:100%;
   height:100%;
   margin:0 0;
@@ -67,7 +69,8 @@ span.toggle_button input {
   filter:alpha(opacity=0);
 }
 
-span.toggle_button label {
+span.toggle_button label
+{
   display:block;
   position:absolute;
   top:1px;
@@ -100,7 +103,8 @@ span.toggle_button label {
   cursor:text;
 }
 
-span.toggle_button label:before {
+span.toggle_button label:before
+{
   content:attr(data-off);
   position:absolute;
   top:14px;
@@ -109,7 +113,8 @@ span.toggle_button label:before {
   z-index:4;
 }
 
-span.toggle_button label:after {
+span.toggle_button label:after
+{
   content:attr(data-on);
   position:absolute;
   right:0;
@@ -118,7 +123,8 @@ span.toggle_button label:after {
   text-shadow:0 -1px 0 #eee;
 }
 
-span.toggle_button input:checked + label {
+span.toggle_button input:checked + label
+{
   background-image:-webkit-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
   background-image:-moz-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
   background-image:-ms-linear-gradient(top,#eee 0%,#ccc 50%,#fff 50%,#eee 100%);
@@ -138,7 +144,8 @@ span.toggle_button input:checked + label {
     inset 0 6px 0 white;
 }
 
-span.toggle_button input:checked:hover + label {
+span.toggle_button input:checked:hover + label
+{
   -webkit-box-shadow:0 1px 3px rgba(0,0,0,0.4),
     inset 0 1px 7px -1px #ccc,
     inset 0 5px 1px #fafafa,
@@ -153,12 +160,14 @@ span.toggle_button input:checked:hover + label {
     inset 0 6px 0 white;
 }
 
-span.toggle_button input:checked + label:before {
+span.toggle_button input:checked + label:before
+{
   z-index:1;
   top:17px;
 }
 
-span.toggle_button input:checked + label:after {
+span.toggle_button input:checked + label:after
+{
   bottom:15px;
   z-index:4;
 }
@@ -173,4 +182,147 @@ button.detail
   position:absolute;
   right: 4px;
   font-size: 11px;
+}
+
+div.knob
+{
+  --color0: #f0f0f0;
+  --color1: #f4f4f4;
+  --color2: #e8e8e8;
+  --color3: #c0c0c0;
+  --color4: #404040;
+  --size: 10em;
+  --font-family: "Montserrat";
+
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  margin: 2em auto;
+  touch-action: none;
+
+  border: solid 0.25em var(--color3);
+  background: var(--color0);
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, var(--color1)), color-stop(1, var(--color2)));
+  background: -ms-linear-gradient(bottom, var(--color1), var(--color2));
+  background: -moz-linear-gradient(center bottom, var(--color1) 0%, var(--color2) 100%);
+  background: -o-linear-gradient(#var(--color1), var(--color2));
+  -webkit-box-shadow: 0 0.2em 0.1em 0.05em rgba(255, 255, 255, 0.1) inset, 0 -0.2em 0.1em 0.05em rgba(0, 0, 0, 0.5) inset, 0 0.5em 0.65em 0 rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 0.2em 0.1em 0.05em rgba(255, 255, 255, 0.1) inset, 0 -0.2em 0.1em 0.05em rgba(0, 0, 0, 0.5) inset, 0 0.5em 0.65em 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0.2em 0.1em 0.05em rgba(255, 255, 255, 0.1) inset, 0 -0.2em 0.1em 0.05em rgba(0, 0, 0, 0.5) inset, 0 0.5em 0.65em 0 rgba(0, 0, 0, 0.3);
+}
+
+div.knob .knob-inner
+{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  transform: rotate(0deg);
+  z-index: 10;
+  user-select: none;
+  touch-action: none;
+}
+
+div.knob .knob-inner:before
+{
+  content: "";
+  position: absolute;
+  bottom: 19%;
+  left: 19%;
+  width: 6%;
+  height: 6%;
+  background-color: #a8d8f8;
+  border-radius: 50%;
+  -webkit-box-shadow: 0 0 0.4em 0 #79c3f4;
+  -moz-box-shadow: 0 0 0.4em 0 #79c3f4;
+  box-shadow: 0 0 0.4em 0 #79c3f4;
+}
+
+div.knob .min, div.knob .max
+{
+  display: block;
+  font-family: var(--font-family);
+  color: var(--color4);
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  position: absolute;
+  opacity: 0.5;
+}
+
+div.knob .min
+{
+  bottom: -1em;
+  left: -1em;
+}
+
+div.knob .max
+{
+  bottom: -1em;
+  right: -1em;
+}
+
+div.knob .tick
+{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  overflow: visible;
+  touch-action: none;
+}
+
+div.knob .tick:after
+{
+  content: "";
+  width: 0.08em;
+  height: 0.6em;
+  background-color: rgba(200, 200, 200, 0.8);
+  position: absolute;
+  top: -1.5em;
+  left: 50%;
+  -webkit-transition: all 180ms ease-out;
+  -moz-transition: all 180ms ease-out;
+  -o-transition: all 180ms ease-out;
+  transition: all 180ms ease-out;
+}
+
+div.knob .activetick:after
+{
+  background-color: #a8d8f8;
+  -webkit-box-shadow: 0 0 0.3em 0.08em #79c3f4;
+  -moz-box-shadow: 0 0 0.3em 0.08em #79c3f4;
+  box-shadow: 0 0 0.3em 0.08em #79c3f4;
+  -webkit-transition: all 50ms ease-in;
+  -moz-transition: all 50ms ease-in;
+  -o-transition: all 50ms ease-in;
+  transition: all 50ms ease-in;
+}
+
+div.knob .current-value
+{
+  display: block;
+  position: absolute;
+  bottom: -2em;
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-family);
+}
+
+div.knob .range
+{
+  display: block;
+  position: absolute;
+  visibility: hidden;
+  top: 0;
+  left: 0;
+  right:0;
+  margin: 0 auto;
 }

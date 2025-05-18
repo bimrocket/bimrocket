@@ -25,6 +25,7 @@ class Brain4itWatchController extends Controller
     this._functionKey = null;
     this._callback = this.callback.bind(this);
     this._onNodeChanged = this.onNodeChanged.bind(this);
+    this.serverTime = 0;
   }
 
   onStart()
@@ -47,11 +48,18 @@ class Brain4itWatchController extends Controller
     }
   }
 
-  callback(name, value)
+  callback(name, value, serverTime)
   {
-    console.info("MONITOR " + name + " = " + value);
-    this.output = value;
-    this.application.notifyObjectsChanged(this.object, this);
+    if (serverTime >= this.serverTime)
+    {
+      console.info("MONITOR " + name, value.elements || value, serverTime);
+      if (value instanceof Brain4it.List)
+      {
+        value = value.elements;
+      }
+      this.output = value;
+      this.application.notifyObjectsChanged(this.object, this);
+    }
   }
 
   watch()

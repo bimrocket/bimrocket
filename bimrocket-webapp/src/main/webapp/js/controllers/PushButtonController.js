@@ -19,6 +19,7 @@ class PushButtonController extends PanelController
     this.label = "PUSH";
     this.buttonClass = "rounded_button";
     this.height = 150;
+    this.controllerToExecute = ""; // name of controller to execute
 
     this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
@@ -45,6 +46,7 @@ class PushButtonController extends PanelController
     this._pressed = true;
     this.output = this.valueDown;
     this.application.notifyObjectsChanged(this.object, this);
+    this.executeController(this.controllerToExecute);
   }
 
   onPointerUp(event)
@@ -52,6 +54,7 @@ class PushButtonController extends PanelController
     this._pressed = false;
     this.output = this.valueUp;
     this.application.notifyObjectsChanged(this.object, this);
+    this.executeController(this.controllerToExecute);
   }
 
   onNodeChanged(event)

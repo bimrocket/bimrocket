@@ -13,13 +13,16 @@ class ToggleButtonController extends PanelController
   {
     super(object, name);
 
+    this.input = 0;
     this.output = 0;
     this.valueOff = 0;
     this.valueOn = 1;
     this.buttonClass = "toggle_button";
     this.height = 150;
+    this.controllerToExecute = ""; // name of controller to execute
 
     this._onValueChange = this.onValueChange.bind(this);
+    this._input = null;
   }
 
   createPanel()
@@ -51,6 +54,7 @@ class ToggleButtonController extends PanelController
   {
     this.output = this.inputElem.checked ? this.valueOn : this.valueOff;
     this.application.notifyObjectsChanged(this.object, this);
+    this.executeController(this.controllerToExecute);
   }
 
   onNodeChanged(event)
@@ -65,11 +69,22 @@ class ToggleButtonController extends PanelController
   {
     this.panel.title = this.title || "";
     this.buttonElem.className = this.buttonClass || "toggle_button";
-    let output = this.inputElem.checked ? this.valueOn : this.valueOff;
-    if (output !== this.output)
+
+    if (this._input !== this.input)
     {
-      this.output = output;
+      this.inputElem.checked = this.input === this.valueOn;
+      this.output = this.input;
+      this._input = this.input;
       this.application.notifyObjectsChanged(this.object, this);
+    }
+    else
+    {
+      let value = this.inputElem.checked ? this.valueOn : this.valueOff;
+      if (value !== this.output)
+      {
+        this.output = value;
+        this.application.notifyObjectsChanged(this.object, this);
+      }
     }
   }
 }

@@ -6,6 +6,7 @@
 
 import { Controller } from "./Controller.js";
 import { Brain4it } from "../lib/Brain4it.js"
+import { Brain4itWatchController } from "./Brain4itWatchController.js"
 
 class Brain4itPostController extends Controller
 {
@@ -17,38 +18,59 @@ class Brain4itPostController extends Controller
     this.module = "your_module";
     this.accessKey = "access_key";
     this.func = "@function_to_call";
-    this.input = 0;
+    this.input = "";
+    this.watchController = ""; // Brain4itWatchController name
+    this.autoSend = true;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
-    this._value = null;
+    this._data = null; // last Brain4it data sent
+    this._invoker = null;
+
+    this._callback = this.callback.bind(this);
   }
 
   onStart()
   {
     this.application.addEventListener('scene', this._onNodeChanged, false);
+    this._invoker = new Brain4it.Invoker(this.getClient(), this.module);
+    this._invoker.logging = true;
   }
 
   onStop()
   {
     this.application.removeEventListener('scene', this._onNodeChanged, false);
+    this._invoker = null;
   }
 
   onNodeChanged(event)
   {
     if (event.type === "nodeChanged" && this.hasChanged(event))
     {
-      let value = this.input;
-      if (value !== this._value)
+      if (this.autoSend)
       {
-        this.postData(value);
+        let data = this.getDataToSend();
+
+        if (this._data === null)
+        {
+          // first time
+          this._data = data;
+        }
+        else if (!this.equalsData(data, this._data))
+        {
+          this.postData(data);
+        }
       }
     }
   }
 
-  postData(value)
+  execute()
   {
-    this._value = value;
+    let data = this.getDataToSend();
+    this.postData(data);
+  }
 
+  getClient()
+  {
     let url = this.url;
     if (url.trim().length === 0) return;
 
@@ -56,12 +78,62 @@ class Brain4itPostController extends Controller
     {
       url = document.location.protocol + "//" + document.location.host + url;
     }
-    let module = this.module;
-    let func = this.func;
-    console.info("POST " + url + " -> " + value);
+    return new Brain4it.Client(url, "");
+  }
 
-    let client = new Brain4it.Client(url, module + "/" + func);
-    client.send(value);
+  callback(status, responseText, serverTime)
+  {
+    if (this.watchController && typeof this.object.controllers === "object")
+    {
+      let controller = this.object.controllers[this.watchController];
+      if (controller instanceof Brain4itWatchController)
+      {
+        controller.serverTime = serverTime;
+      }
+    }
+  }
+
+  postData(data)
+  {
+    this._data = data;
+    this._invoker.invoke(this.func, data, true, this._callback);
+  }
+
+  getDataToSend()
+  {
+    let data = this.input;
+    if (data instanceof Array)
+    {
+      let list = new Brain4it.List();
+      for (let item of data)
+      {
+        let type = typeof item;
+        if (type === "string" ||
+            type === "number" ||
+            type === "boolean" ||
+            item === null)
+        {
+          list.add(item);
+        }
+      }
+      data = list;
+    }
+    return data;
+  }
+
+  equalsData(data1, data2)
+  {
+    if (data1 === data2) return true;
+    if (data1 instanceof Array && data2 instanceof Array)
+    {
+      if (data1.length !== data2.length) return false;
+      for (let i = 0; i < data1.length; i++)
+      {
+        if (data1[i] !== data2[i]) return false;
+      }
+      return true;
+    }
+    return false;
   }
 }
 

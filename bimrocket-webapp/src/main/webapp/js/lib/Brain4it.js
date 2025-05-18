@@ -2074,6 +2074,7 @@ Brain4it.Invoker = function(client, moduleName)
   this.moduleName = moduleName;
   this.queue = [];
   this.sending = false;
+  this.logging = false;
 };
 
 Brain4it.Invoker.prototype =
@@ -2146,6 +2147,10 @@ Brain4it.Invoker.prototype =
         scope.internalInvoke();
       };
       scope.sending = true;
+      if (this.logging)
+      {
+        console.info("POST " + functionName + " " + valueString);
+      }
       client.send(valueString);
     }
   }

@@ -67,6 +67,18 @@ class Controller
     return Formula.update(this.object, "controllers." + this.name, true);
   }
 
+  executeController(controllerName)
+  {
+    if (controllerName && typeof this.object.controllers === "object")
+    {
+      let controller = this.object.controllers[controllerName];
+      if (controller && typeof controller.execute === "function")
+      {
+        controller.execute();
+      }
+    }
+  }
+
   /* static methods */
 
   static addClass(controllerClass)

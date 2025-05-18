@@ -541,9 +541,10 @@ class BRFLoader extends THREE.Loader
       }
     }
 
-    if (actualType === "string" && type === "string")
+    if (actualType === "string")
     {
-      element[property] = value;
+      element[property] = value === null || value === undefined ?
+        "" : String(value);
     }
     else if (actualType === "number" && type === "number")
     {

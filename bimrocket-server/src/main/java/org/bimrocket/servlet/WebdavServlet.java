@@ -36,10 +36,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -51,6 +48,7 @@ import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
+import org.bimrocket.api.security.User;
 import org.bimrocket.exception.AccessDeniedException;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotAuthorizedException;
@@ -60,6 +58,9 @@ import org.bimrocket.service.file.FindOptions;
 import org.bimrocket.service.file.Metadata;
 import org.bimrocket.service.file.Path;
 import org.bimrocket.service.file.exception.LockedFileException;
+import org.bimrocket.service.file.util.MutableACL;
+import org.bimrocket.service.file.util.MutableACLXMLDeserializer;
+import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.URIEncoder;
 
 /**
@@ -82,6 +83,9 @@ public class WebdavServlet extends HttpServlet
 
   @Inject
   transient FileService fileService;
+
+  @Inject
+  transient SecurityService securityService;
 
   @Override
   protected void doOptions(HttpServletRequest request, HttpServletResponse response)
@@ -134,6 +138,9 @@ public class WebdavServlet extends HttpServlet
     if (metadatas.isEmpty())
     {
       response.setStatus(404);
+      response.setContentType("text/plain");
+      response.getWriter().println("The requested resource was not found on this server.");
+
     }
     else
     {
@@ -216,8 +223,28 @@ public class WebdavServlet extends HttpServlet
   }
 
   protected void doAcl(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
+    throws ServletException, IOException, Exception
   {
+    StringBuilder requestBody = new StringBuilder();
+    String line;
+    try (BufferedReader reader = request.getReader()) {
+      while ((line = reader.readLine()) != null) {
+        requestBody.append(line).append("\n");
+      }
+    }
+
+    Path path = getPath(request);
+    logParameters(request, path);
+
+    String requestXmlData = requestBody.toString();
+
+    User user = securityService.getCurrentUser();
+
+    MutableACL acl = MutableACLXMLDeserializer.deserialize(requestXmlData, user.getId());
+
+    fileService.setACL(path, acl);
+
+    response.setStatus(HttpServletResponse.SC_OK);
   }
 
   protected void doLock(HttpServletRequest request, HttpServletResponse response)

@@ -37,5 +37,7 @@ package org.bimrocket.service.file;
 public enum Privilege
 {
   READ,
-  WRITE;
+  WRITE,
+  READ_ACL,
+  WRITE_ACL;
 }

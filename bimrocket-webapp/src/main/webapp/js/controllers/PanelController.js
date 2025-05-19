@@ -12,7 +12,8 @@ class PanelController extends Controller
   {
     super(object, name);
     this.title = "Title";
-    this.alwaysVisible = false;
+    this.visibleOnSelectionCount = 1;
+    this.height = 100;
 
     this._onNodeChanged = this.onNodeChanged.bind(this);
     this._onSelection = this.onSelection.bind(this);
@@ -25,12 +26,14 @@ class PanelController extends Controller
     this.createPanel();
     if (this.autoStart) this.start();
   }
-
+  
   onStart()
   {
     const application = this.application;
     application.addEventListener("scene", this._onNodeChanged);
     application.addEventListener("selection", this._onSelection);
+    this.panel.preferredHeight = this.height;
+    this.panel.minimumHeight = this.height;
     this.panel.visible = this.isPanelVisible();
     if (this.panel.visible)
     {
@@ -46,10 +49,11 @@ class PanelController extends Controller
     this.panel.visible = false;
   }
 
-  createPanel(position = "left", height = 100)
+  createPanel(position = "left")
   {
     this.panel = this.application.createPanel(this.name, position);
-    this.panel.preferredHeight = height;
+    this.panel.preferredHeight = this.height;
+    this.panel.minimumHeight = this.height;
     this.panel.bodyElem.classList.add("center");
   }
 
@@ -76,7 +80,9 @@ class PanelController extends Controller
     const application = this.application;
     const selection = application.selection;
 
-    return this.alwaysVisible || selection.contains(this.object);
+    return this.visibleOnSelectionCount === 0 || 
+      (selection.contains(this.object) &&
+       this.visibleOnSelectionCount >= selection.size);
   }
 }
 

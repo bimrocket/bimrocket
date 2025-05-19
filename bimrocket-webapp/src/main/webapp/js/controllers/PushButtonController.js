@@ -28,7 +28,7 @@ class PushButtonController extends PanelController
 
   createPanel()
   {
-    super.createPanel("left", 150);
+    super.createPanel("left");
 
     let buttonElem = document.createElement("div");
     this.buttonElem = buttonElem;

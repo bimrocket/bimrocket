@@ -19,7 +19,7 @@ class KnobController extends PanelController
     this.maxValue = 100;
     this.step = 5;
     this.knobClass = "knob";
-    this.height = 200;
+    this.height = 220;
     this.controllerToExecute = ""; // name of controller to execute
 
     this._onRangeChange = this.onRangeChange.bind(this);
@@ -28,7 +28,7 @@ class KnobController extends PanelController
 
   createPanel()
   {
-    super.createPanel("left", 200);
+    super.createPanel("left");
 
     this.knobElem = document.createElement("div");
     this.knobElem.className = "knob";

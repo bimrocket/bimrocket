@@ -26,7 +26,7 @@ class DisplayController extends PanelController
 
   createPanel()
   {
-    super.createPanel("left", 80);
+    super.createPanel("left");
 
     let panelElem = document.createElement("div");
     panelElem.className = "display " + (this.displayClass || "default");

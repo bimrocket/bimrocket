@@ -27,7 +27,7 @@ class ToggleButtonController extends PanelController
 
   createPanel()
   {
-    super.createPanel("left", 150);
+    super.createPanel("left");
 
     let buttonElem = document.createElement("span");
     this.buttonElem = buttonElem;

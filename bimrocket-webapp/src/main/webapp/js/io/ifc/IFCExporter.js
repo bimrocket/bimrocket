@@ -44,10 +44,11 @@ class IFCExporter
   {
     this.options = Object.assign({}, IFCExporter.options, options);
 
-    this.schema = IFC.SCHEMAS[this.options.ifcSchema];
-    if (!this.schema) throw "Supported IFC schema: " + this.options.ifcSchema;
+    const schemaName = this.options.ifcSchema;
+    this.schema = IFC.SCHEMAS[schemaName];
+    if (!this.schema) throw "Supported IFC schema: " + schemaName;
 
-    console.info("IFC schema: " + this.options.ifcSchema);
+    console.info("IFC schema: " + schemaName);
 
     const reuseIfcFile = this.options.reuseIfcFile;
     if (reuseIfcFile === undefined)
@@ -69,7 +70,7 @@ class IFCExporter
       header.filename = object.userData.IFC?.Name || "";
       header.description = [object.userData.IFC?.Description || ""];
 
-      IFC.initIfcObject(object, true);
+      IFC.initIfcObject(object, true, this.schema);
 
       this.createIfcRepresentationContexts();
 
@@ -477,6 +478,15 @@ class IFCExporter
         ifcFile.add(this.createIfcStyledItem(reprObject3D.material, item));
         return item;
       }
+    }
+    else if (reprObject3D instanceof THREE.Mesh)
+    {
+      const mesh = reprObject3D;
+      let solid = new Solid();
+      solid.updateGeometry(mesh.geometry, true);
+      const item = this.createIfcFacetedBrep(solid, matrix);
+      ifcFile.add(this.createIfcStyledItem(reprObject3D.material, item));
+      return item;
     }
     else if (reprObject3D instanceof THREE.Group) // export as IfcFacetedBreps
     {

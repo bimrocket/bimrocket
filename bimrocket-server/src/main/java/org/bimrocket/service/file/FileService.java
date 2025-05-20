@@ -42,12 +42,12 @@ import java.util.logging.Logger;
 import org.bimrocket.api.security.User;
 import org.bimrocket.exception.AccessDeniedException;
 import org.bimrocket.exception.NotAuthorizedException;
-import static org.bimrocket.service.file.Privilege.READ;
-import static org.bimrocket.service.file.Privilege.WRITE;
 import org.bimrocket.service.file.exception.LockedFileException;
 import org.bimrocket.service.file.store.FileStore;
 import org.bimrocket.service.file.store.filesystem.FileSystemFileStore;
 import org.bimrocket.service.file.util.MutableACL;
+
+import static org.bimrocket.service.file.Privilege.*;
 import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
 import org.bimrocket.service.security.SecurityService;

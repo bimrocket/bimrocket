@@ -592,7 +592,7 @@ class Application
     if (this.scene)
     {
       ObjectUtils.dispose(this.scene);
-      this.stopControllers();
+      this.destroyControllers();
       this.destroyBatchedGroup();
     }
 
@@ -1314,7 +1314,7 @@ class Application
     }
     if (object && object !== this.baseObject && object !== this.scene)
     {
-      this.stopControllers(object);
+      this.destroyControllers(object);
 
       let parent = object.parent;
       if (parent)
@@ -1741,6 +1741,11 @@ class Application
   initControllers(object)
   {
     this.handleControllers(controller => controller.init(this), object);
+  }
+  
+  destroyControllers(object)
+  {
+    this.handleControllers(controller => controller.destroy(this), object);    
   }
 
   startControllers(object)

@@ -24,6 +24,11 @@ class Controller
     this.application = application;
     if (this.autoStart) this.start();
   }
+  
+  destroy(application)
+  {
+    this.stop();
+  }
 
   start()
   {

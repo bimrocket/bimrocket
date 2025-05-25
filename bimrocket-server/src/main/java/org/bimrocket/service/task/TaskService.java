@@ -365,7 +365,7 @@ public class TaskService
       execution.setTaskName(task.getName());
       execution.setStartTime(System.currentTimeMillis());
       execution.setInput(invocation.getInput());
-      execution.setInvokerUserId(securityService.getCurrentUser().getId());
+      execution.setInvokerUserId(securityService.getCurrentUserId());
       execution.setHostname(hostname);
     }
 
@@ -383,6 +383,7 @@ public class TaskService
     {
       try
       {
+        securityService.setCurrentUserId(execution.getInvokerUserId());
         task.execute(execution);
         execution.setStatus(COMPLETED_STATUS);
       }
@@ -393,6 +394,7 @@ public class TaskService
       }
       finally
       {
+        securityService.setCurrentUserId(null);
         executors.remove(execution.getId());
         execution.setEndTime(System.currentTimeMillis());
         updateInStore(execution);

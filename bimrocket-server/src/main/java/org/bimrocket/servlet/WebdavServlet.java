@@ -246,7 +246,11 @@ public class WebdavServlet extends HttpServlet
     Metadata metadata = fileService.get(path);
     if (metadata.isCollection())
     {
+      try {
         doPropfind(request, response);
+      } catch (XMLStreamException e) {
+        throw new RuntimeException(e);
+      }
     }
     else
     {

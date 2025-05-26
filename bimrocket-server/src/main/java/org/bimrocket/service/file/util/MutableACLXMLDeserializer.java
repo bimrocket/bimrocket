@@ -1,13 +1,21 @@
 package org.bimrocket.service.file.util;
 
-import org.bimrocket.exception.InvalidRequestException;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.bimrocket.service.file.Privilege;
 import org.bimrocket.service.security.SecurityConstants;
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 // i2CAT: Deserialize XML to MutableACL object
 public class MutableACLXMLDeserializer {
@@ -46,7 +54,10 @@ public class MutableACLXMLDeserializer {
 
             for (int j = 0; j < privileges.getLength(); j++) {
                 Element privilege = (Element) privileges.item(j);
-                String privilegeType = privilege.getFirstChild().getNodeName();
+                
+                Element privilegeElement = getFirstElementChild(privilege);
+                if (privilegeElement == null) continue;
+                String privilegeType = privilegeElement.getNodeName();
 
                 switch (privilegeType) {
                     case "D:read-acl":
@@ -72,6 +83,18 @@ public class MutableACLXMLDeserializer {
         });
 
         return acl;
+    }
+
+    //Get First Element for Privileges
+    private static Element getFirstElementChild(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
+                return (Element) child;
+            }
+        }
+        return null;
     }
 
     // Check role type

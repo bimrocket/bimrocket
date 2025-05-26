@@ -121,6 +121,7 @@ public class SecurityService
   ExpiringCache<String> authorizationCache;
   ExpiringCache<User> userCache;
   ExpiringCache<Role> roleCache;
+  ConcurrentHashMap<Thread, String> userIdByThread;
 
   long authorizationCacheTimeout; // seconds
   long userCacheTimeout; // seconds
@@ -172,6 +173,8 @@ public class SecurityService
     roleCacheTimeout = config.getValue(BASE + "roleCacheTimeout", Long.class);
     roleCache = new ExpiringCache<>(roleCacheTimeout * 1000);
     LOGGER.log(Level.INFO, "roleCacheTimeout: {0}", roleCacheTimeout);
+    
+    userIdByThread = new ConcurrentHashMap<>();
 
     anonymousUser = new User();
     anonymousUser.setId(ANONYMOUS_USER);
@@ -367,13 +370,47 @@ public class SecurityService
     }
   }
 
+  public void setCurrentUserId(String userId)
+  {
+    Thread currentThread = Thread.currentThread();
+    if (userId == null)
+    {
+      userIdByThread.remove(currentThread);      
+    }
+    else
+    {
+      userIdByThread.put(currentThread, userId);
+    }
+  }
+
+  public String getCurrentUserId()
+  {
+    User user = getCurrentUser();
+    return user.getId();
+  }
+
   public User getCurrentUser()
   {
     User user;
     String authorization;
     HttpServletRequest request;
 
-    if (requestInstance.isResolvable())
+    // get User from thread map
+    String userId = userIdByThread.get(Thread.currentThread());
+    if (userId != null)
+    {
+      user = userCache.get(userId);
+      if (user != null) return user;
+
+      user = getUser(userId);
+      addUserRoles(user);
+      userCache.put(userId, user);
+
+      return user;
+    }
+
+    // get User from http request
+    try
     {
       request = requestInstance.get();
       user = (User)request.getAttribute(USER_REQUEST_ATTRIBUTE);
@@ -386,12 +423,12 @@ public class SecurityService
         return anonymousUser;
       }
     }
-    else // not in servlet context
+    catch (Exception ex) // not in servlet context
     {
       return anonymousUser;
     }
 
-    String userId = authorizationCache.get(authorization);
+    userId = authorizationCache.get(authorization);
 
     if (userId != null)
     {
@@ -400,18 +437,12 @@ public class SecurityService
     }
 
     user = getUserFromAuthorization(authorization);
-    userId =  user.getId().trim();
+    userId = user.getId().trim();
 
     if (ANONYMOUS_USER.equals(userId)) return anonymousUser;
 
-    explodeRoles(user.getRoleIds()); // explodeRoles
-    user.getRoleIds().add(userId); // add nominal role;
-    user.getRoleIds().add(EVERYONE_ROLE);
-    user.getRoleIds().add(AUTHENTICATED_ROLE);
-    if (ADMIN_USER.equals(userId))
-    {
-      user.getRoleIds().add(ADMIN_ROLE);
-    }
+    addUserRoles(user);
+
     authorizationCache.put(authorization, userId);
     userCache.put(userId, user);
     request.setAttribute(USER_REQUEST_ATTRIBUTE, user);
@@ -478,6 +509,19 @@ public class SecurityService
       }
     }
     return anonymousUser;
+  }
+
+  private void addUserRoles(User user)
+  {
+    String userId = user.getId();
+    explodeRoles(user.getRoleIds()); // explodeRoles
+    user.getRoleIds().add(userId); // add nominal role;
+    user.getRoleIds().add(EVERYONE_ROLE);
+    user.getRoleIds().add(AUTHENTICATED_ROLE);
+    if (ADMIN_USER.equals(userId))
+    {
+      user.getRoleIds().add(ADMIN_ROLE);
+    }
   }
 
   private void validateUser(User user)

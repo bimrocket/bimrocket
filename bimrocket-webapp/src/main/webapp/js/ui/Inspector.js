@@ -2204,7 +2204,7 @@ class RemoveControllerAction extends InspectorAction
     ConfirmDialog.create("title.remove_controller",
       "question.remove_controller", controller.name).setAction(() =>
     {
-      controller.stop();
+      controller.destroy(application);
       let object = controller.object;
       delete object.controllers[controller.name];
 

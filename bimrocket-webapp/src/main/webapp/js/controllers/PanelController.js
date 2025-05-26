@@ -27,6 +27,15 @@ class PanelController extends Controller
     if (this.autoStart) this.start();
   }
   
+  destroy(application)
+  {
+    super.destroy();
+    if (this.panel)
+    {
+      application.panelManager.removePanel(this.panel);
+    }
+  }
+  
   onStart()
   {
     const application = this.application;

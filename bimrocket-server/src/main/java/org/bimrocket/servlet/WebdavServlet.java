@@ -36,31 +36,41 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
+import org.bimrocket.api.security.User;
 import org.bimrocket.exception.AccessDeniedException;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotAuthorizedException;
 import org.bimrocket.exception.NotFoundException;
-import org.bimrocket.service.file.FileService;
-import org.bimrocket.service.file.FindOptions;
-import org.bimrocket.service.file.Metadata;
-import org.bimrocket.service.file.Path;
+import org.bimrocket.service.file.*;
 import org.bimrocket.service.file.exception.LockedFileException;
+import org.bimrocket.service.file.util.JsonToXmlAcl;
+import org.bimrocket.service.file.util.MutableACL;
+import org.bimrocket.service.file.util.MutableACLXMLDeserializer;
+import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.URIEncoder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamException;
+
 
 /**
  *
@@ -82,6 +92,9 @@ public class WebdavServlet extends HttpServlet
 
   @Inject
   transient FileService fileService;
+
+  @Inject
+  transient SecurityService securityService;
 
   @Override
   protected void doOptions(HttpServletRequest request, HttpServletResponse response)
@@ -105,14 +118,25 @@ public class WebdavServlet extends HttpServlet
   }
 
   protected void doPropfind(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
+    throws ServletException, IOException, XMLStreamException
   {
     Path path = getPath(request);
 
     logParameters(request, path);
 
-//    String body = IOUtils.toString(request.getReader());
-//    System.out.println("\n\nPROPFIND " + path + "\n" + body);
+    List<String> requestedProperties = parsePropfindBody(request);
+    boolean aclRequested = requestedProperties.contains("{DAV:}acl");
+    if (aclRequested) 
+    {
+      ACL acl = fileService.getACL(path);
+      String xml = JsonToXmlAcl.convertJsonToAclXml(acl.toString());
+      try (Writer writer = response.getWriter()) 
+      {
+          writer.write(xml);
+      }
+    return;
+    }
+
 
     FindOptions options = new FindOptions();
 
@@ -134,6 +158,9 @@ public class WebdavServlet extends HttpServlet
     if (metadatas.isEmpty())
     {
       response.setStatus(404);
+      response.setContentType("text/plain");
+      response.getWriter().println("The requested resource was not found on this server.");
+
     }
     else
     {
@@ -148,6 +175,44 @@ public class WebdavServlet extends HttpServlet
         writer.write("</D:multistatus>");
       }
     }
+  }
+
+  private List<String> parsePropfindBody(HttpServletRequest request) throws IOException 
+  {
+    List<String> properties = new ArrayList<>();
+    byte[] requestBody = request.getInputStream().readAllBytes();
+    if (requestBody.length == 0) 
+    {
+        return properties; 
+    }
+
+    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(requestBody)) 
+    {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document doc = builder.parse(inputStream);
+
+      NodeList propElements = doc.getElementsByTagNameNS("DAV:", "prop");
+      if (propElements.getLength() == 0) {
+        return properties; 
+      }
+
+      NodeList propNodes = propElements.item(0).getChildNodes();
+
+      for (int i = 0; i < propNodes.getLength(); i++) 
+      {
+        Node node = propNodes.item(i);
+        if (node.getNodeType() == Node.ELEMENT_NODE) 
+        {
+          properties.add("{" + node.getNamespaceURI() + "}" + node.getLocalName());
+        }
+      }
+    } catch (Exception e) 
+    {
+      throw new IOException("Failed to parse PROPFIND body", e);
+    }
+    return properties;
   }
 
   protected void doProppatch(HttpServletRequest request, HttpServletResponse response)
@@ -177,7 +242,11 @@ public class WebdavServlet extends HttpServlet
     Metadata metadata = fileService.get(path);
     if (metadata.isCollection())
     {
-      doPropfind(request, response);
+      try {
+        doPropfind(request, response);
+      } catch (XMLStreamException e) {
+        throw new RuntimeException(e);
+      }
     }
     else
     {
@@ -216,8 +285,28 @@ public class WebdavServlet extends HttpServlet
   }
 
   protected void doAcl(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
+    throws ServletException, IOException, Exception
   {
+    StringBuilder requestBody = new StringBuilder();
+    String line;
+    try (BufferedReader reader = request.getReader()) {
+      while ((line = reader.readLine()) != null) {
+        requestBody.append(line).append("\n");
+      }
+    }
+
+    Path path = getPath(request);
+    logParameters(request, path);
+
+    String requestXmlData = requestBody.toString();
+
+    User user = securityService.getCurrentUser();
+
+    MutableACL acl = MutableACLXMLDeserializer.deserialize(requestXmlData, user.getId());
+
+    fileService.setACL(path, acl);
+
+    response.setStatus(HttpServletResponse.SC_OK);
   }
 
   protected void doLock(HttpServletRequest request, HttpServletResponse response)

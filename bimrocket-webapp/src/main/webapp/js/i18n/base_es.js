@@ -50,6 +50,7 @@ export const translations =
   "button.update" : "Actualizar",
   "button.reset" : "Restablecer",
   "button.link" : "Enlazar",
+  "button.edit_acl": "Editar ACL",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -115,10 +116,15 @@ export const translations =
   "tool.cloud_explorer.help" : "Explorador",
 
   "tool.openlocal.label" : "Abrir del disco local",
+  "tool.openComputer.label" : "Abre desde tu ordenador",
   "tool.openlocal.help" : "Abrir del disco local",
 
   "tool.savelocal.label" : "Guardar en local",
+  "tool.saveComputer.label" : "Guarda en tu ordenador",
   "tool.savelocal.help" : "Guardar en local",
+
+  "tool.upload_model.label" : "Guarda el modelo original",
+  "tool.upload_model.help" : "Guarda el modelo original",
 
   "tool.select.label" : "Seleccionar",
   "tool.select.help" : "Puntero: selección por punto",
@@ -529,6 +535,8 @@ export const translations =
   "label.inspector_links_tab" : "Enlaces",
   "label.inspector_featured_tab" : "Propiedades destacadas",
 
+  "label.acl_permissions": "Definición de permisos (formato JSON)",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -573,6 +581,9 @@ export const translations =
   "title.rename_material" : "Renombrar material",
   "title.delete_conversation" : "Borrar conversación",
   "title.chatgpt_setup" : "Configuración de ChatGPT",
+  "title.acl_editor" : "Editor de permisos ACL",
+  "title.acl_editor_success" : "Permisos guardados",
+  "title.acl_editor_error" : "Error al guardar",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Área: ${area} ${units}2`,
@@ -628,6 +639,10 @@ export const translations =
   "message.link_created" : "Enlace creado.",
 
   "message.selected_surfaces" : count => `Superficies seleccionadas: ${count}`,
+
+  "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
+  "message.edit_acl_denied" : result => `No se pudieron guardar los permisos: \n${result}`,
+  "message.edit_acl_error" : "Ocurrió un error al procesar los permisos. Intenta nuevamente.",
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

@@ -650,6 +650,7 @@ export const translations =
   "controller.PushButtonController" : "Muestra un pulsador.",
   "controller.RotationController" : "Rota un objeto.",
   "controller.ToggleButtonController" : "Muestra un interruptor.",
+  "controller.SelectListController" : "Muestra una lista de selección.",
   "controller.KnobController" : "Muestra una perilla.",
   "controller.TranslationController" : "Desplaza un objeto.",
   "controller.ScriptController" : "Ejecuta un programa en lenguaje JavaScript.",

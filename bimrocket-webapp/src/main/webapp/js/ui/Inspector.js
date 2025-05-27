@@ -68,6 +68,7 @@ class Inspector extends Panel
     this.addEditor(EulerEditor);
     this.addEditor(FormulaEditor);
     this.addEditor(ColorEditor);
+    this.addEditor(ArrayEditor);
     this.addEditor(TextureEditor);
 
     this.addContextAction(EditFormulaAction);
@@ -670,7 +671,8 @@ class Inspector extends Panel
     for (let propertyName in userData)
     {
       let propertyValue = userData[propertyName];
-      if (propertyValue !== null && typeof propertyValue === "object")
+      if (propertyValue !== null && typeof propertyValue === "object" 
+          && !(propertyValue instanceof Array))
       {
         let dictName = propertyName;
         let dictionary = propertyValue;
@@ -1372,19 +1374,29 @@ class ArrayRenderer extends PropertyRenderer
 
   render(array, disabled)
   {
-    const maxNumbers = 4;
-
     let valueElem = document.createElement("span");
     valueElem.className = "value";
-
-    if (array.length > maxNumbers)
-    {
-      array = array.slice(0, maxNumbers);
-      array.push("...");
-    }
-    valueElem.innerHTML = "[ " + array.join(" ") + " ]";
-
+    valueElem.textContent = ArrayRenderer.arrayToString(array, 4);
     return valueElem;
+  }
+  
+  static arrayToString(array, maxElements = array.length)
+  {
+    let outArray = [];
+    for (let i = 0; i < array.length && i < maxElements; i++)
+    {
+      let value = array[i];
+      if (typeof value === "string")
+      {
+        value = '"' + value.replace(/"/g, '\\"') + '"';
+      }
+      outArray.push(value);
+    }
+    if (array.length > maxElements)
+    {
+      outArray.push("...");
+    }
+    return "[ " + outArray.join(", ") + " ]";
   }
 }
 
@@ -1838,6 +1850,50 @@ class ColorEditor extends PropertyEditor
     groupElem.focus = () => { colorElem.focus(); colorElem.click(); };
 
     return groupElem;
+  }
+}
+
+class ArrayEditor extends PropertyEditor
+{
+  constructor(inspector)
+  {
+    super(inspector);
+  }
+
+  isSupported(value)
+  {
+    return ObjectUtils.isBasicArray(value) && value.length > 0;
+  }
+
+  edit(object, propertyName, array)
+  {
+    let valueElem = document.createElement("input");
+    valueElem.className = "value";
+    valueElem.value = ArrayRenderer.arrayToString(array);
+    valueElem.setAttribute("spellcheck", "false");
+    valueElem.addEventListener("keydown", event =>
+    {
+      if (event.keyCode === 13)
+      {
+        try
+        {
+          let array = JSON.parse(valueElem.value);
+          if (ObjectUtils.isBasicArray(array) && array.length > 0)
+          {
+            object[propertyName] = array;
+            this.inspector.endEdition();
+          }
+        }
+        catch (ex)
+        {          
+        }
+      }
+      else if (event.keyCode === 27)
+      {
+        this.inspector.stopEdition();
+      }
+    }, false);
+    return valueElem;
   }
 }
 

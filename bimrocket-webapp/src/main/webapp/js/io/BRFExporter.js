@@ -16,7 +16,7 @@ import * as THREE from "three";
 
 class BRFExporter
 {
-  static VERSION = 7;
+  static VERSION = 8;
 
   constructor()
   {
@@ -452,6 +452,10 @@ class BRFExporter
         else if (value instanceof THREE.Object3D)
         {
           entry[property] = { type: "#object", id : String(value.id) };
+        }
+        else if (value instanceof Array && ObjectUtils.isBasicArray(value))
+        {
+          entry[property] = value;
         }
       }
     }

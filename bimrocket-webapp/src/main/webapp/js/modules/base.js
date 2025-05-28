@@ -93,6 +93,7 @@ import { LoadController } from "../controllers/LoadController.js";
 import { ProximityController } from "../controllers/ProximityController.js";
 import { PushButtonController } from "../controllers/PushButtonController.js";
 import { ToggleButtonController } from "../controllers/ToggleButtonController.js";
+import { SelectListController } from "../controllers/SelectListController.js";
 import { KnobController } from "../controllers/KnobController.js";
 import { RotationController } from "../controllers/RotationController.js";
 import { ScriptController } from "../controllers/ScriptController.js";

@@ -116,15 +116,10 @@ export const translations =
   "tool.cloud_explorer.help" : "Explorador",
 
   "tool.openlocal.label" : "Obre del disc local",
-  "tool.openComputer.label" : "Obre des del teu ordinador",
   "tool.openlocal.help" : "Obre del disc local",
 
   "tool.savelocal.label" : "Desa en disc local",
-  "tool.saveComputer.label" : "Desa al teu ordinador",
   "tool.savelocal.help" : "Desa en disc local",
-
-  "tool.upload_model.label" : "Guarda el model original",
-  "tool.upload_model.help" : "Guarda el model original",
 
   "tool.select.label" : "Selecciona",
   "tool.select.help" : "Punter: selecció per punt",

@@ -347,19 +347,23 @@ class WebdavService extends FileService
 
   convertACLToXML(acl) 
   {
-    const privilegesMap = {
+    const privilegesMap = 
+    {
       "READ": "read",
       "WRITE": "write",
       "READ_ACL": "read-acl",
       "WRITE_ACL": "write-acl"
     };
-    const roleToPrincipal = {
+
+    const roleToPrincipal = 
+    {
       "EVERYONE": { type: "all" },
     };
 
     let xml = `<?xml version="1.0" encoding="utf-8" ?>\n<D:acl xmlns:D="DAV:">\n`;
 
-    for (const role in acl) {
+    for (const role in acl) 
+    {
       const privileges = acl[role];
       if (!privileges || privileges.length === 0) continue;
 
@@ -391,7 +395,8 @@ class WebdavService extends FileService
     return xml;
   }
 
-  setACL(path, acl, readyCallback) {
+  setACL(path, acl, readyCallback) 
+  {
     
     const OK = Result.OK;
     const ERROR = Result.ERROR;

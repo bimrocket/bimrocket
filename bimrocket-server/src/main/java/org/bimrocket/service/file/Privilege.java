@@ -39,5 +39,5 @@ public enum Privilege
   READ,
   WRITE,
   READ_ACL,
-  WRITE_ACL;
+  WRITE_ACL
 }

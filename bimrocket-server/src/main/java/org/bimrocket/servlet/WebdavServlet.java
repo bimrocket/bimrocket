@@ -36,7 +36,28 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.bimrocket.api.security.User;
+import org.bimrocket.exception.AccessDeniedException;
+import org.bimrocket.exception.InvalidRequestException;
+import org.bimrocket.exception.NotAuthorizedException;
+import org.bimrocket.exception.NotFoundException;
+import org.bimrocket.service.file.FileService;
+import org.bimrocket.service.file.FindOptions;
+import org.bimrocket.service.file.Metadata;
+import org.bimrocket.service.file.Path;
+import org.bimrocket.service.file.exception.LockedFileException;
+import org.bimrocket.service.file.util.MutableACL;
+import org.bimrocket.service.file.util.MutableACLXMLDeserializer;
+import org.bimrocket.service.security.SecurityService;
+import org.bimrocket.util.URIEncoder;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -49,27 +70,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.commons.io.IOUtils;
-import org.bimrocket.api.security.User;
-import org.bimrocket.exception.AccessDeniedException;
-import org.bimrocket.exception.InvalidRequestException;
-import org.bimrocket.exception.NotAuthorizedException;
-import org.bimrocket.exception.NotFoundException;
-import org.bimrocket.service.file.*;
-import org.bimrocket.service.file.exception.LockedFileException;
-import org.bimrocket.service.file.util.JsonToXmlAcl;
-import org.bimrocket.service.file.util.MutableACL;
-import org.bimrocket.service.file.util.MutableACLXMLDeserializer;
-import org.bimrocket.service.security.SecurityService;
-import org.bimrocket.util.URIEncoder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLStreamException;
 
 
 /**
@@ -123,20 +123,6 @@ public class WebdavServlet extends HttpServlet
     Path path = getPath(request);
 
     logParameters(request, path);
-
-    List<String> requestedProperties = parsePropfindBody(request);
-    boolean aclRequested = requestedProperties.contains("{DAV:}acl");
-    if (aclRequested) 
-    {
-      ACL acl = fileService.getACL(path);
-      String xml = JsonToXmlAcl.convertJsonToAclXml(acl.toString());
-      try (Writer writer = response.getWriter()) 
-      {
-          writer.write(xml);
-      }
-    return;
-    }
-
 
     FindOptions options = new FindOptions();
 

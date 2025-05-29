@@ -181,9 +181,9 @@ public class WebdavServlet extends HttpServlet
     }
     else
     {
-      sendMetadata(metadata, request, response);
       try (InputStream is = fileService.read(path))
       {
+        sendMetadata(metadata, request, response);
         IOUtils.copy(is, response.getOutputStream());
       }
     }

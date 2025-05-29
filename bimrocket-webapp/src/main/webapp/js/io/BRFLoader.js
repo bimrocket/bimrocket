@@ -577,6 +577,10 @@ class BRFLoader extends THREE.Loader
         element[property].set(value.r, value.g, value.b);
       }
     }
+    else if (actualType === "Array")
+    {
+      element[property] = value;
+    }
     else if (type === "#object")
     {
       let entry = model.objects[value.id];

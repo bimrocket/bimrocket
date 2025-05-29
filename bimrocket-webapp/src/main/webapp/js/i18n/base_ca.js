@@ -116,15 +116,10 @@ export const translations =
   "tool.cloud_explorer.help" : "Explorador",
 
   "tool.openlocal.label" : "Obre del disc local",
-  "tool.openComputer.label" : "Obre des del teu ordinador",
   "tool.openlocal.help" : "Obre del disc local",
 
   "tool.savelocal.label" : "Desa en disc local",
-  "tool.saveComputer.label" : "Desa al teu ordinador",
   "tool.savelocal.help" : "Desa en disc local",
-
-  "tool.upload_model.label" : "Guarda el model original",
-  "tool.upload_model.help" : "Guarda el model original",
 
   "tool.select.label" : "Selecciona",
   "tool.select.help" : "Punter: selecció per punt",
@@ -665,6 +660,7 @@ export const translations =
   "controller.PushButtonController" : "Mostra un botó.",
   "controller.RotationController" : "Rota un objecte.",
   "controller.ToggleButtonController" : "Mostra un interruptor.",
+  "controller.SelectListController" : "Mostra una llista de selecció.",
   "controller.KnobController" : "Mostra una perilla.",
   "controller.TranslationController" : "Desplaça un objecte.",
   "controller.ScriptController" : "Executa un programa en llenguatge JavaScript.",

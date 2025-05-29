@@ -119,14 +119,7 @@ export const translations =
   "tool.openlocal.help" : "Open from local disk",
 
   "tool.savelocal.label" : "Save to local disk",
-  "tool.saveComputer.label" : "Save to your computer",
   "tool.savelocal.help" : "Save to local disk",
-
-  "tool.upload_model.label" : "Upload model",
-  "tool.upload_model.help" : "Upload model",
-  "tool.upload_model.select_process" : "Selecciona el tipus de procediment",
-  "tool.upload_model.select_option" : "Selecciona el  procediment",
-  "button.validate" : "Valida",
 
   "tool.select.label" : "Select",
   "tool.select.help" : "Pointer: select by point",
@@ -668,6 +661,7 @@ export const translations =
   "controller.PushButtonController" : "Shows a push button.",
   "controller.RotationController" : "Rotates an object.",
   "controller.ToggleButtonController" : "Shows a toggle button.",
+  "controller.SelectListController" : "Shows a selection list.",  
   "controller.KnobController" : "Shows a knob.",
   "controller.TranslationController" : "Translates an object.",
   "controller.ScriptController" : "Executes a program in JavaScript language.",

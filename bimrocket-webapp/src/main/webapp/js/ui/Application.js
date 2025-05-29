@@ -2006,11 +2006,13 @@ class Application
 
   loadModelFromUrl()
   {
+    const application = this;
     const params = this.params;
     const url = params.get("url");
     if (!url) return;
 
-    const application = this;
+    let dialog = new LoginDialog(application);
+
     const intent =
     {
       url : url,
@@ -2037,9 +2039,7 @@ class Application
       onError : error =>
       {
         application.progressBar.visible = false;
-        MessageDialog.create("ERROR", error)
-          .setClassName("error")
-          .setI18N(application.i18n).show();
+        dialog.show();
       },
       options : { units : application.setup.units }
     };
@@ -2047,21 +2047,21 @@ class Application
     application.progressBar.progress = undefined;
     application.progressBar.visible = true;
 
-    const auth = params["auth"];
-    if (auth === "Basic")
+    dialog.login = (username, password) =>
     {
-      let dialog = new LoginDialog(application);
-      dialog.login = (username, password) =>
-      {
-        intent.basicAuthCredentials =
-        { "username" : username, "password" : password };
-        IOManager.load(intent);
-      };
-      dialog.onCancel = () =>
-      {
-        dialog.hide();
-        application.progressBar.visible = false;
-      };
+      intent.basicAuthCredentials =
+      { "username" : username, "password" : password };
+      IOManager.load(intent);
+    };
+    dialog.onCancel = () =>
+    {
+      dialog.hide();
+      application.progressBar.visible = false;
+    };
+
+    const auth = params.get("auth");
+    if (auth && auth.toLowerCase() === "basic")
+    {
       dialog.show();
     }
     else

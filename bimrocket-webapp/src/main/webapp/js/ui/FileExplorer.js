@@ -11,9 +11,10 @@ import { LoginDialog } from "./LoginDialog.js";
 import { ServiceDialog } from "./ServiceDialog.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { AclEditorDialog } from "./AclEditorDialog.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
-import { FileService, Metadata, Result } from "../io/FileService.js";
+import { FileService, Metadata, Result, ACL } from "../io/FileService.js";
 import { IOManager } from "../io/IOManager.js";
 import { I18N } from "../i18n/I18N.js";
 
@@ -97,6 +98,7 @@ class FileExplorer extends Panel
 
     this.addCommonContextButtons();
     this.addServiceContextButtons();
+    this.addAclContextButton();
   }
 
   addCommonContextButtons()
@@ -116,6 +118,13 @@ class FileExplorer extends Panel
     this.addContextButton("download", "button.download",
       () => this.download(this.basePath + "/" + this.entryName),
       () => this.isDirectoryList() && this.isFileEntrySelected());
+  }
+
+  addAclContextButton()
+  {
+    this.addContextButton("acl", "button.edit_acl",
+      () => this.showAclDialog(),
+      () => this.isDirectoryList());
   }
 
   addServiceContextButtons()
@@ -257,6 +266,14 @@ class FileExplorer extends Panel
     inputFile.addEventListener("change",
       event => this.upload(inputFile.files));
     inputFile.click();
+  }
+
+  showAclDialog()
+  {
+    const application = this.application;
+    const aclFilePath = this.basePath;
+    const dialog = new AclEditorDialog(application, this.service, aclFilePath);
+    dialog.load();
   }
 
   openPath(path, onSuccess)

@@ -50,6 +50,7 @@ export const translations =
   "button.update" : "Actualitza",
   "button.reset" : "Restableix",
   "button.link" : "Enllaça",
+  "button.edit_acl": "Editar ACL",
 
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
@@ -529,6 +530,8 @@ export const translations =
   "label.inspector_links_tab" : "Enllaços",
   "label.inspector_featured_tab" : "Propietats destacades",
 
+  "label.acl_permissions": "Definició de permisos (format JSON)",
+
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
   "option.value_desc" : "Valor (descendent)",
@@ -573,6 +576,9 @@ export const translations =
   "title.rename_material" : "Reanomena material",
   "title.delete_conversation" : "Esborra conversa",
   "title.chatgpt_setup" : "Configuració de ChatGPT",
+  "title.acl_editor" : "Editor de permisos ACL",
+  "title.acl_editor_success": "Permisos desats",
+  "title.acl_editor_error": "Error en desar",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Àrea: ${area} ${units}2`,
@@ -628,6 +634,10 @@ export const translations =
   "message.link_created" : "Enllaç creat.",
 
   "message.selected_surfaces" : count => `Superfícies seleccionades: ${count}`,
+
+  "message.edit_acl_success": "Els permisos s'han actualitzat correctament.",
+  "message.edit_acl_denied": result => `No s'han pogut desar els permisos: \n${result}`,
+  "message.edit_acl_error": "S'ha produït un error en processar els permisos. Torna-ho a intentar.",
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

@@ -50,6 +50,7 @@ export const translations =
   "button.update" : "Update",
   "button.reset" : "Reset",
   "button.link" : "Link",
+  "button.edit_acl": "Edit ACL",
 
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
@@ -529,6 +530,8 @@ export const translations =
   "label.inspector_links_tab" : "Links",
   "label.inspector_featured_tab" : "Featured properties",
 
+  "label.acl_permissions": "Definition of permissions (JSON format)",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -573,6 +576,10 @@ export const translations =
   "title.rename_material" : "Rename material",
   "title.delete_conversation" : "Delete conversation",
   "title.chatgpt_setup" : "ChatGPT setup",
+  "title.acl_editor" : "ACL Permissions Editor",
+  "title.acl_editor_success": "Permissions saved",
+  "title.acl_editor_error": "Error saving",
+
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Area: ${area} ${units}2`,
@@ -628,6 +635,10 @@ export const translations =
   "message.link_created" : "Link created.",
 
   "message.selected_surfaces" : count => `Selected surfaces: ${count}`,
+
+  "message.edit_acl_success": "Permissions were updated successfully.",
+  "message.edit_acl_denied": result => `Permissions could not be saved: \n${result}`,
+  "message.edit_acl_error": "An error occurred while processing the permissions. Please try again.",
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

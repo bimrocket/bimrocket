@@ -127,6 +127,11 @@ public class WebdavServlet extends HttpServlet
     {
       ACL acl = fileService.getACL(path);
       String xml = MutableACLXMLDeserializer.deserialize(acl);
+
+      response.setContentType("application/xml");
+      response.setCharacterEncoding("UTF-8");
+      response.setStatus(207);
+
       try (Writer writer = response.getWriter())
       {
         writer.write(xml);
@@ -171,44 +176,6 @@ public class WebdavServlet extends HttpServlet
         writer.write("</D:multistatus>");
       }
     }
-  }
-
-  private List<String> parsePropfindBody(HttpServletRequest request) throws IOException
-  {
-    List<String> properties = new ArrayList<>();
-    byte[] requestBody = request.getInputStream().readAllBytes();
-    if (requestBody.length == 0) {
-      return properties;
-    }
-
-    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(requestBody))
-    {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      Document doc = builder.parse(inputStream);
-
-      NodeList propElements = doc.getElementsByTagNameNS("DAV:", "prop");
-      if (propElements.getLength() == 0)
-      {
-        return properties;
-      }
-
-      NodeList propNodes = propElements.item(0).getChildNodes();
-
-      for (int i = 0; i < propNodes.getLength(); i++)
-      {
-        Node node = propNodes.item(i);
-        if (node.getNodeType() == Node.ELEMENT_NODE)
-        {
-          properties.add("{" + node.getNamespaceURI() + "}" + node.getLocalName());
-        }
-      }
-    } catch (Exception e)
-    {
-      throw new IOException("Failed to parse PROPFIND body", e);
-    }
-    return properties;
   }
 
   protected void doProppatch(HttpServletRequest request, HttpServletResponse response)
@@ -300,7 +267,7 @@ public class WebdavServlet extends HttpServlet
 
     User user = securityService.getCurrentUser();
 
-    MutableACL acl = MutableACLXMLSerializer.deserialize(requestXmlData, user.getId());
+    MutableACL acl = MutableACLXMLSerializer.serialize(requestXmlData, user.getId());
 
     fileService.setACL(path, acl);
 
@@ -543,4 +510,43 @@ public class WebdavServlet extends HttpServlet
       response.setHeader("WWW-Authenticate", "Basic realm=\"bimrocket realm\"");
     }
   }
+
+  private List<String> parsePropfindBody(HttpServletRequest request) throws IOException
+  {
+    List<String> properties = new ArrayList<>();
+    byte[] requestBody = request.getInputStream().readAllBytes();
+    if (requestBody.length == 0) {
+      return properties;
+    }
+
+    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(requestBody))
+    {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      Document doc = builder.parse(inputStream);
+
+      NodeList propElements = doc.getElementsByTagNameNS("DAV:", "prop");
+      if (propElements.getLength() == 0)
+      {
+        return properties;
+      }
+
+      NodeList propNodes = propElements.item(0).getChildNodes();
+
+      for (int i = 0; i < propNodes.getLength(); i++)
+      {
+        Node node = propNodes.item(i);
+        if (node.getNodeType() == Node.ELEMENT_NODE)
+        {
+          properties.add("{" + node.getNamespaceURI() + "}" + node.getLocalName());
+        }
+      }
+    } catch (Exception e)
+    {
+      throw new IOException("Failed to parse PROPFIND body", e);
+    }
+    return properties;
+  }
+
 }

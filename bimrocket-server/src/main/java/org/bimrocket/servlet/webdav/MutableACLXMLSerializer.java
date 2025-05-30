@@ -31,7 +31,7 @@ public class MutableACLXMLSerializer
   private static final String BAD_ROLE = "Unknown Role ";
 
   // i2CAT: Receives current user to replace when tag is D:owner
-  public static MutableACL deserialize(String xml, String userId) throws Exception
+  public static MutableACL serialize(String xml, String userId) throws Exception
   {
     MutableACL acl = new MutableACL();
 

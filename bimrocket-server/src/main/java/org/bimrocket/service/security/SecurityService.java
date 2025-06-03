@@ -466,10 +466,10 @@ public class SecurityService
         String userPassword = authoParts[1].trim();
         String decoded = new String(Base64.getDecoder().decode(userPassword));
         String[] userPasswordParts = decoded.split(":");
-        String userId = userPasswordParts[0];
-        String password = userPasswordParts[1];
+        String userId = userPasswordParts.length > 0 ? userPasswordParts[0] : null;
+        String password = userPasswordParts.length > 1 ? userPasswordParts[1] : null;
 
-        if (ANONYMOUS_USER.equals(userId)) return anonymousUser;
+        if (userId == null || ANONYMOUS_USER.equals(userId)) return anonymousUser;
 
         User user = getUser(userId); // get from store
         if (user == null)
@@ -482,7 +482,7 @@ public class SecurityService
         if (FALSE.equals(user.getActive()))
           throw new NotAuthorizedException(USER_IS_NOT_ACTIVE);
 
-        if (userId.equals(ADMIN_USER)) // admin user
+        if (ADMIN_USER.equals(userId)) // admin user
         {
           if (!adminPassword.equals(password))
             throw new NotAuthorizedException();

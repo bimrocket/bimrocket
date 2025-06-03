@@ -2022,7 +2022,7 @@ class Application
         application.progressBar.message = data.message;
       },
       onCompleted : object =>
-      {
+      {        
         const baseObject = application.baseObject;
 
         object.updateMatrix();
@@ -2049,6 +2049,11 @@ class Application
 
     dialog.login = (username, password) =>
     {
+      let credentialAlias = params.get("credential_alias");
+      if (credentialAlias)
+      {
+        CredentialsManager.setCredentials(credentialAlias, username, password);      
+      }      
       intent.basicAuthCredentials =
       { "username" : username, "password" : password };
       IOManager.load(intent);

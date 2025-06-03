@@ -163,7 +163,7 @@ class IOManager
         let length = -1;
         request.onreadystatechange = () =>
         {
-          if (request.readyState === 4)
+          if (request.readyState === XMLHttpRequest.DONE)
           {
             if (onProgress) onProgress({progress : 100, message : ""});
 
@@ -190,7 +190,7 @@ class IOManager
               }
             }
           }
-          else if (request.readyState === 3)
+          else if (request.readyState === XMLHttpRequest.LOADING)
           {
             if (onProgress)
             {
@@ -222,6 +222,7 @@ class IOManager
           WebUtils.setBasicAuthorization(request,
             basicAuthCredentials.username, basicAuthCredentials.password);
         }
+        request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         request.send();
       }
     }

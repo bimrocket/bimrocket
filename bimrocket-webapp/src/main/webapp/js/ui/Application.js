@@ -2043,9 +2043,6 @@ class Application
       },
       options : { units : application.setup.units }
     };
-    application.progressBar.message = "Loading file...";
-    application.progressBar.progress = undefined;
-    application.progressBar.visible = true;
 
     dialog.login = (username, password) =>
     {
@@ -2056,6 +2053,7 @@ class Application
       }      
       intent.basicAuthCredentials =
       { "username" : username, "password" : password };
+      application.progressBar.visible = true;
       IOManager.load(intent);
     };
     dialog.onCancel = () =>
@@ -2071,6 +2069,9 @@ class Application
     }
     else
     {
+      application.progressBar.message = "Loading file...";
+      application.progressBar.progress = undefined;
+      application.progressBar.visible = true;
       IOManager.load(intent); // async load
     }
   }

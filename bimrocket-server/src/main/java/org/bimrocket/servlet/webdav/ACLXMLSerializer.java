@@ -1,5 +1,6 @@
 package org.bimrocket.servlet.webdav;
 
+import org.bimrocket.service.file.ACL;
 import org.bimrocket.service.file.Privilege;
 import org.bimrocket.service.file.util.MutableACL;
 import org.bimrocket.service.security.SecurityConstants;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 // i2CAT: Deserialize XML to MutableACL object
-public class MutableACLXMLSerializer
+public class ACLXMLSerializer
 {
 
   // Map of privileges
@@ -31,7 +32,7 @@ public class MutableACLXMLSerializer
   private static final String BAD_ROLE = "Unknown Role ";
 
   // i2CAT: Receives current user to replace when tag is D:owner
-  public static MutableACL serialize(String xml, String userId) throws Exception
+  public static ACL serialize(String xml, String userId) throws Exception
   {
     MutableACL acl = new MutableACL();
 
@@ -117,10 +118,12 @@ public class MutableACLXMLSerializer
       if (principalElement.getElementsByTagName("D:all").getLength() > 0)
       {
         return SecurityConstants.EVERYONE_ROLE;
-      } else if (principalElement.getElementsByTagName("D:authenticated").getLength() > 0)
+      }
+      else if (principalElement.getElementsByTagName("D:authenticated").getLength() > 0)
       {
         return SecurityConstants.AUTHENTICATED_ROLE;
-      } else if (principalElement.getElementsByTagName("D:href").getLength() > 0)
+      }
+      else if (principalElement.getElementsByTagName("D:href").getLength() > 0)
       {
         return principalElement.getElementsByTagName("D:href").item(0).getTextContent();
       }

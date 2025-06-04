@@ -14,7 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class MutableACLXMLDeserializer
+public class ACLXMLDeserializer
 {
 
   public static String deserialize(ACL acl) throws Exception

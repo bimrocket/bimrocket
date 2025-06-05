@@ -479,7 +479,7 @@ class WebdavService extends FileService
 
       request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
       request.onload = () => {
-        if (request.status === 200) 
+        if (request.status === 200 || request.status === 207) 
         {
           try 
           {

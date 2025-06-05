@@ -345,6 +345,55 @@ class WebdavService extends FileService
     return url + path;
   }
 
+  convertXMLToACL(xmlString) 
+  {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+    const privilegesMap = {
+        "read": "READ",
+        "write": "WRITE",
+        "read-acl": "READ_ACL",
+        "write-acl": "WRITE_ACL"
+    };
+
+    const acl = {};
+
+    const aceElements = xmlDoc.getElementsByTagNameNS("DAV", "ace");
+
+    for (const aceElement of aceElements) {
+
+      let role = null;
+      const hrefElement = aceElement.getElementsByTagNameNS("DAV", "href")[0];
+      const allElement = aceElement.getElementsByTagNameNS("DAV", "all")[0];
+
+      if (hrefElement) 
+      {
+        role = hrefElement.textContent.trim();
+      } else if (allElement) {
+        role = "EVERYONE";
+      }
+      if (!role) continue;
+
+      const privileges = [];
+      const privilegeElements = aceElement.getElementsByTagNameNS("DAV", "privilege");
+      for (const privElement of privilegeElements) {
+        const privName = privElement.firstElementChild?.localName;
+        if (privName && privilegesMap[privName]) 
+        {
+            privileges.push(privilegesMap[privName]);
+        }
+      }
+
+      if (privileges.length > 0) 
+      {
+        acl[role] = privileges;
+      }
+    }
+
+    return acl;
+  }
+
   convertACLToXML(acl) 
   {
     const privilegesMap = 
@@ -361,6 +410,7 @@ class WebdavService extends FileService
     };
 
     let xml = `<?xml version="1.0" encoding="utf-8" ?>\n<D:acl xmlns:D="DAV:">\n`;
+    const invalidEntries = [];
 
     for (const role in acl) 
     {
@@ -368,6 +418,7 @@ class WebdavService extends FileService
       if (!privileges || privileges.length === 0) continue;
 
       const principal = roleToPrincipal[role] || { type: "href", value: role };
+      let hasValidPrivileges = false;
 
       xml += `  <D:ace>\n`;
       if (principal.type === "href") 
@@ -385,14 +436,84 @@ class WebdavService extends FileService
         if (privName) 
         {
           xml += `      <D:privilege><D:${privName}/></D:privilege>\n`;
+          hasValidPrivileges = true;
+        } 
+        else 
+        {
+          invalidEntries.push({
+            role: role,
+            invalidPrivilege: priv,
+            validOptions: Object.keys(privilegesMap)
+          });
         }
       }
       xml += `    </D:grant>\n`;
       xml += `  </D:ace>\n`;
+
+      if (!hasValidPrivileges) {
+        throw new Error(`Role "${role}" has no valid privileges`);
+      }
     }
 
     xml += `</D:acl>`;
+
+    if (invalidEntries.length > 0) 
+    {
+      const error = new Error("acl.invalid_privileges");
+      error.details = invalidEntries;
+      throw error;
+    }
     return xml;
+  }
+
+  getACL(path, readyCallback) 
+  {
+
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
+    
+    try 
+    {
+      const url = this.getUrl(path);
+      const request = new XMLHttpRequest();
+
+      request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
+      request.onload = () => {
+        if (request.status === 200) 
+        {
+          try 
+          {
+            const acl = this.convertXMLToACL(request.response);
+            readyCallback(new Result(OK, acl));
+          } 
+          catch (error) 
+          {
+            readyCallback(new Result(ERROR, `Failed to parse ACL: ${error.message}`));
+          }
+        } 
+        else 
+        {
+          readyCallback(this.createError("ACL retrieval failed", request.status));
+        }
+      };
+
+      this.openRequest("PROPFIND", url, request);
+      request.setRequestHeader("Depth", "0");
+      request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
+      request.send(
+        '<?xml version="1.0" encoding="utf-8" ?>' +
+        '<d:propfind xmlns:d="DAV:">' +
+        '  <d:prop>' +
+        '    <d:acl/>' +
+        '    <d:owner/>' +
+        '  </d:prop>' +
+        '</d:propfind>'
+      );
+    } 
+    catch (error) 
+    {
+      readyCallback(new Result(ERROR, `ACL request failed: ${error.message}`));
+    }
   }
 
   setACL(path, acl, readyCallback) 
@@ -421,9 +542,16 @@ class WebdavService extends FileService
       this.openRequest("ACL", url, request);
       request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
       request.send(aclXML);
-    } catch (error) 
+    } catch (error)
     {
-      readyCallback(new Result(ERROR, `Invalid ACL: ${error.message}`));
+      const errorMsg = error.message.includes('Invalid privileges detected') 
+        ? "" 
+        : error.message;
+
+      const path = error.message === "acl.invalid_privileges" ? "message.invalid_acl_privileges" : "";
+      const metadata = error.details ? { entries: error.details } : {};
+
+      readyCallback(new Result(ERROR, errorMsg, path, metadata));
     }
   }
 }

@@ -579,7 +579,8 @@ export const translations =
   "title.acl_editor" : "ACL Permissions Editor",
   "title.acl_editor_success": "Permissions saved",
   "title.acl_editor_error": "Error saving",
-
+  "title.acl_not_found": "ACL not found",
+  "title.confirm_save": "Confirmation",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Area: ${area} ${units}2`,
@@ -639,6 +640,9 @@ export const translations =
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.edit_acl_denied": result => `Permissions could not be saved: \n${result}`,
   "message.edit_acl_error": "An error occurred while processing the permissions. Please try again.",
+  "message.invalid_privilege_detail": ({ privilege, options }) => `The value "${privilege}" is not valid. Valid values are: ${options}.`,
+  "message.acl_not_found_create_new": "ACL not found. Do you want to create a new one?",
+
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
@@ -649,6 +653,7 @@ export const translations =
   "question.remove_featured_properties" : "Remove all featured properties?",
   "question.create_new_scene" : "Do you want to create a new scene?",
   "question.delete_conversation" : "Do you want to delete the conversation?",
+  "question.confirm_save_changes": "Do you want to confirm the changes?",
 
   "controller.AutoPilotController" : "Drives an object.",
   "controller.Brain4itPostController" : "Posts a value to Brain4it.",

@@ -272,7 +272,7 @@ class FileExplorer extends Panel
   {
     const application = this.application;
     const aclFilePath = this.basePath;
-    const dialog = new ACLEditorDialog(application, this.service, aclFilePath);
+    const dialog = new ACLEditorDialog(application, this.service, aclFilePath, this);
     dialog.load();
   }
 

@@ -579,6 +579,8 @@ export const translations =
   "title.acl_editor" : "Editor de permisos ACL",
   "title.acl_editor_success": "Permisos desats",
   "title.acl_editor_error": "Error en desar",
+  "title.acl_not_found": "No s'ha trobat l'ACL",
+  "title.confirm_save": "Confirmació",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Àrea: ${area} ${units}2`,
@@ -638,6 +640,8 @@ export const translations =
   "message.edit_acl_success": "Els permisos s'han actualitzat correctament.",
   "message.edit_acl_denied": result => `No s'han pogut desar els permisos: \n${result}`,
   "message.edit_acl_error": "S'ha produït un error en processar els permisos. Torna-ho a intentar.",
+  "message.invalid_privilege_detail": ({ privilege, options }) => `El valor "${privilege}" no es vàlid. Els valors vàlids són: ${options}.`,
+  "message.acl_not_found_create_new": "No s'ha trobat l'ACL per a aquest directori. Vols crear-ne un de nou?",
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,
@@ -648,6 +652,7 @@ export const translations =
   "question.remove_featured_properties" : "Vols esborrar totes les propietats destacades?",
   "question.create_new_scene" : "Vols crear una nova escena?",
   "question.delete_conversation" : "Vols esborrar la conversa?",
+  "question.confirm_save_changes": "Vols confirmar els canvis?",
 
   "controller.AutoPilotController" : "Condueix un objecte.",
   "controller.Brain4itPostController" : "Fa un POST a Brain4it.",

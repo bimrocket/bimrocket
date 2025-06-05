@@ -579,6 +579,8 @@ export const translations =
   "title.acl_editor" : "Editor de permisos ACL",
   "title.acl_editor_success" : "Permisos guardados",
   "title.acl_editor_error" : "Error al guardar",
+  "title.acl_not_found": "No se ha encontrado el ACL",
+  "title.confirm_save": "Confirmación",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Área: ${area} ${units}2`,
@@ -638,6 +640,8 @@ export const translations =
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.edit_acl_denied" : result => `No se pudieron guardar los permisos: \n${result}`,
   "message.edit_acl_error" : "Ocurrió un error al procesar los permisos. Intenta nuevamente.",
+  "message.invalid_privilege_detail": ({ privilege, options }) => `El valor "${privilege}" no es válido. Los valores válidos son: ${options}.`,
+  "message.acl_not_found_create_new": "No se ha encontrado el ACL. ¿Quieres crear uno nuevo?",
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
@@ -648,6 +652,7 @@ export const translations =
   "question.remove_featured_properties" : "Quieres borrar todas las propiedades destacadas?",
   "question.create_new_scene" : "Quieres crear una nueva escena?",
   "question.delete_conversation" : "Quieres borrar la conversación?",
+  "question.confirm_save_changes": "Quieres confirmar los cambios?",
 
   "controller.AutoPilotController" : "Conduce un objeto.",
   "controller.Brain4itPostController" : "Hace un POST a Brain4it.",

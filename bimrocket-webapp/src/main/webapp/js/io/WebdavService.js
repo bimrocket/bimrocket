@@ -344,6 +344,88 @@ class WebdavService extends FileService
     }
     return url + path;
   }
+
+  convertACLToXML(acl) 
+  {
+    const privilegesMap = 
+    {
+      "READ": "read",
+      "WRITE": "write",
+      "READ_ACL": "read-acl",
+      "WRITE_ACL": "write-acl"
+    };
+
+    const roleToPrincipal = 
+    {
+      "EVERYONE": { type: "all" },
+    };
+
+    let xml = `<?xml version="1.0" encoding="utf-8" ?>\n<D:acl xmlns:D="DAV:">\n`;
+
+    for (const role in acl) 
+    {
+      const privileges = acl[role];
+      if (!privileges || privileges.length === 0) continue;
+
+      const principal = roleToPrincipal[role] || { type: "href", value: role };
+
+      xml += `  <D:ace>\n`;
+      if (principal.type === "href") 
+      {
+        xml += `    <D:principal><D:href>${principal.value}</D:href></D:principal>\n`;
+      } else 
+      {
+        xml += `    <D:principal><D:${principal.type}/></D:principal>\n`;
+      }
+      xml += `    <D:grant>\n`;
+      
+      for (const priv of privileges)
+      {
+        const privName = privilegesMap[priv];
+        if (privName) 
+        {
+          xml += `      <D:privilege><D:${privName}/></D:privilege>\n`;
+        }
+      }
+      xml += `    </D:grant>\n`;
+      xml += `  </D:ace>\n`;
+    }
+
+    xml += `</D:acl>`;
+    return xml;
+  }
+
+  setACL(path, acl, readyCallback) 
+  {
+    
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
+    
+    try 
+    {
+      const aclXML = this.convertACLToXML(acl);
+      const url = this.getUrl(path);
+      const request = new XMLHttpRequest();
+
+      request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
+      request.onload = () => {
+        if (request.status === 200 || request.status === 201) 
+        {
+          readyCallback(new Result(OK));
+        } else 
+        {
+          readyCallback(this.createError("ACL failed", request.status));
+        }
+      };
+
+      this.openRequest("ACL", url, request);
+      request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
+      request.send(aclXML);
+    } catch (error) 
+    {
+      readyCallback(new Result(ERROR, `Invalid ACL: ${error.message}`));
+    }
+  }
 }
 
 ServiceManager.addClass(WebdavService);

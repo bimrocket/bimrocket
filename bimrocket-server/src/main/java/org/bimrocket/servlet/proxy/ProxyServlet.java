@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.servlet;
+package org.bimrocket.servlet.proxy;
 
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;

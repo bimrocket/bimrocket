@@ -1,6 +1,7 @@
 package org.bimrocket.servlet.webdav;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +12,11 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.bimrocket.service.file.ACL;
 import org.bimrocket.service.file.Privilege;
@@ -84,20 +90,8 @@ public class ACLXMLSerializer
             aclMap.get("WRITE").add(principal);
             break;
           default:
-            ObjectMapper mapper = new ObjectMapper();
-
-            Map<String, Object> info = new LinkedHashMap<>();
-            info.put("validPriveleges", Arrays.asList("read", "write", "read-acl", "write-acl"));
-
-            Map<String, Object> message = new LinkedHashMap<>();
-            message.put("unknownPrivilege", privilegeType);
-            message.put("info", info);
-
-            Map<String, Object> root = new LinkedHashMap<>();
-            root.put("message", message);
-
-            String jsonError = mapper.writeValueAsString(root);
-            throw new IllegalArgumentException(jsonError);
+            String xmlError = generateXMLBadPrivilege(privilegeType);
+            throw new IllegalArgumentException(xmlError);
         }
       }
     }
@@ -149,5 +143,28 @@ public class ACLXMLSerializer
       }
     }
     return "UNKNOWN";
+  }
+
+  private static String generateXMLBadPrivilege(String privilegeType) throws Exception
+  {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.newDocument();
+
+    // Create element <d:error xmlns:D="DAV:">
+    Element errorElement = doc.createElementNS("DAV:", "D:error");
+    errorElement.setTextContent("unsupported_privilege");
+    doc.appendChild(errorElement);
+
+    // XML to string
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+    StringWriter writer = new StringWriter();
+    transformer.transform(new DOMSource(doc), new StreamResult(writer));
+    return writer.toString();
   }
 }

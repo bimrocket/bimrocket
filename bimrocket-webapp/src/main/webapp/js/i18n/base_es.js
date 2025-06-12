@@ -640,9 +640,7 @@ export const translations =
 
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.edit_acl_denied" : result => `No se pudieron guardar los permisos: \n${result}`,
-  "message.edit_acl_error" : "Ocurrió un error al procesar los permisos. Intenta nuevamente.",
   "message.invalid_privileges": "Hay errores en los privilegios introducidos.",
-  "message.acl_not_found_create_new": "No se ha encontrado el ACL. ¿Quieres crear uno nuevo?",
   "message.edit_acl_json_error": "Error al procesar el JSON. Comprueba que la sintaxis es correcta.",
 
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,

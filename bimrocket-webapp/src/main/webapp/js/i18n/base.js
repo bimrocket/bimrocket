@@ -640,9 +640,7 @@ export const translations =
 
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.edit_acl_denied": result => `Permissions could not be saved: \n${result}`,
-  "message.edit_acl_error": "An error occurred while processing the permissions. Please try again.",
   "message.invalid_privileges": "Errors found in the input privileges.",
-  "message.acl_not_found_create_new": "ACL not found. Do you want to create a new one?",
   "message.edit_acl_json_error": "JSON parsing error. Please validate your syntax.",
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,

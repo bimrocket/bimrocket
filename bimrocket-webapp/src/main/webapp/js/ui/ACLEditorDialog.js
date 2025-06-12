@@ -50,23 +50,17 @@ class ACLEditorDialog extends Dialog
               .setI18N(this.application.i18n).show();
             this.hide();
           }
-          else if (result.status === Result.BAD_REQUEST) 
-          { 
-            MessageDialog.create("title.acl_editor_error", "message.invalid_privileges")
-              .setClassName("error")
-              .setI18N(this.application.i18n).show();
-          }
-          else 
+          else
           {
-            MessageDialog.create("title.acl_editor_error", "message.edit_acl_denied", result.message)
-              .setClassName("error")
-              .setI18N(this.application.i18n).show();
+            this.handleError(result,
+              saveAction);
           }
+          
         });
       } 
       catch (error) 
       {
-        MessageDialog.create("title.acl_editor_error", "message.edit_acl_json_error", error.message)
+        MessageDialog.create("ERROR", "message.edit_acl_json_error", error.message)
           .setClassName("error")
           .setI18N(this.application.i18n).show();
       }
@@ -82,6 +76,29 @@ class ACLEditorDialog extends Dialog
     });
   }
 
+  handleError(result, onLogin, onFailed) 
+  {
+    if (result.status === Result.INVALID_CREDENTIALS || result.status === Result.FORBIDDEN) 
+    {
+      this.fileExplorer.requestCredentials(
+        result.status === Result.INVALID_CREDENTIALS ? 
+        "message.invalid_credentials" : "message.action_denied",
+        onLogin, onFailed);
+    }
+    else if (result.status === Result.BAD_REQUEST) 
+    { 
+      MessageDialog.create("title.acl_editor_error", "message.invalid_privileges")
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
+    else 
+    {
+      MessageDialog.create("ERROR", result.message)
+        .setClassName("error")
+        .setI18N(this.application.i18n).show();
+    }
+  }
+
   setACL(data)
   {
     const json = JSON.stringify(data, null, 2);
@@ -92,37 +109,19 @@ class ACLEditorDialog extends Dialog
   
   load() 
   {
-    const loadACL = () => {
-      this.fileService.getACL(this.aclFilePath, result => 
+    this.fileService.getACL(this.aclFilePath, result => 
+    {
+      if (result.status === Result.OK) 
       {
-        if (result.status === Result.OK) 
-        {
-          this.setACL(result.message);
-          this.show();
-        } 
-        else if (result.status === Result.INVALID_CREDENTIALS || result.status === Result.FORBIDDEN) 
-        {
-          this.fileExplorer.requestCredentials(
-            result.status === Result.INVALID_CREDENTIALS ? 
-              "message.invalid_credentials" : "message.action_denied",
-            () => loadACL()
-          );
-        }
-        else if (result.status === Result.ERROR) 
-        {
-          MessageDialog.create("Error", result.message)
-            .setClassName("error")
-            .setI18N(this.application.i18n).show();
-        }
-        else 
-        {
-          MessageDialog.create("message.action_denied", result.message)
-            .setClassName("error")
-            .setI18N(this.application.i18n).show();
-        }
-      });
-    };
-    loadACL();
+        this.setACL(result.message);
+        this.show();
+      } 
+      else
+      {
+        this.handleError(result, 
+          () => this.load());
+      }
+    });
   }
 }
 

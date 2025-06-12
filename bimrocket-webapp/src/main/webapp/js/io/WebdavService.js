@@ -346,30 +346,24 @@ class WebdavService extends FileService
     return url + path;
   }
 
-  convertXMLToACL(xmlString) 
-  {
+  convertXMLToACL(xmlString) {
+
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
-    const privilegesMap = {
-        "read": "READ",
-        "write": "WRITE",
-        "read-acl": "READ_ACL",
-        "write-acl": "WRITE_ACL"
-    };
-
     const acl = {};
 
-    const aceElements = xmlDoc.getElementsByTagNameNS("DAV", "ace");
+    const aceElements = xmlDoc.getElementsByTagNameNS("DAV:", "ace");
 
-    for (const aceElement of aceElements) {
-
+    for (let i = 0; i < aceElements.length; i++) 
+    {
+      const aceElement = aceElements[i];
       let role = null;
-      const hrefElement = aceElement.getElementsByTagNameNS("DAV", "href")[0];
-      const allElement = aceElement.getElementsByTagNameNS("DAV", "all")[0];
 
-      if (hrefElement) 
-      {
+      const hrefElement = aceElement.getElementsByTagNameNS("DAV:", "href")[0];
+      const allElement = aceElement.getElementsByTagNameNS("DAV:", "all")[0];
+
+      if (hrefElement) {
         role = hrefElement.textContent.trim();
       } else if (allElement) {
         role = "EVERYONE";
@@ -377,33 +371,29 @@ class WebdavService extends FileService
       if (!role) continue;
 
       const privileges = [];
-      const privilegeElements = aceElement.getElementsByTagNameNS("DAV", "privilege");
-      for (const privElement of privilegeElements) {
-        const privName = privElement.firstElementChild?.localName;
-        if (privName && privilegesMap[privName]) 
-        {
-            privileges.push(privilegesMap[privName]);
+      const privilegeElements = aceElement.getElementsByTagNameNS("DAV:", "privilege");
+
+      for (let j = 0; j < privilegeElements.length; j++) 
+      {
+        const privElement = privilegeElements[j];
+        const privilegeNode = privElement.firstElementChild;
+        if (privilegeNode) {
+          let privName = privilegeNode.localName;
+          if (privName) {
+            privileges.push(privName);
+          }
         }
       }
 
-      if (privileges.length > 0) 
-      {
+      if (privileges.length > 0) {
         acl[role] = privileges;
       }
     }
-
     return acl;
   }
 
   convertACLToXML(acl) 
   {
-    const privilegesMap = 
-    {
-      "READ": "read",
-      "WRITE": "write",
-      "READ_ACL": "read-acl",
-      "WRITE_ACL": "write-acl"
-    };
 
     const roleToPrincipal = 
     {
@@ -411,7 +401,6 @@ class WebdavService extends FileService
     };
 
     let xml = `<?xml version="1.0" encoding="utf-8" ?>\n<D:acl xmlns:D="DAV:">\n`;
-    const invalidEntries = [];
 
     for (const role in acl) 
     {
@@ -419,7 +408,6 @@ class WebdavService extends FileService
       if (!privileges || privileges.length === 0) continue;
 
       const principal = roleToPrincipal[role] || { type: "href", value: role };
-      let hasValidPrivileges = false;
 
       xml += `  <D:ace>\n`;
       if (principal.type === "href") 
@@ -431,39 +419,22 @@ class WebdavService extends FileService
       }
       xml += `    <D:grant>\n`;
       
-      for (const priv of privileges)
+      for (let priv of privileges) 
       {
-        const privName = privilegesMap[priv];
+        let privName = priv;
         if (privName) 
         {
+          privName = privName.toLowerCase();
           xml += `      <D:privilege><D:${privName}/></D:privilege>\n`;
-          hasValidPrivileges = true;
-        } 
-        else 
-        {
-          invalidEntries.push({
-            role: role,
-            invalidPrivilege: priv,
-            validOptions: Object.keys(privilegesMap)
-          });
         }
       }
       xml += `    </D:grant>\n`;
       xml += `  </D:ace>\n`;
 
-      if (!hasValidPrivileges) {
-        throw new Error(`Role "${role}" has no valid privileges`);
-      }
     }
 
     xml += `</D:acl>`;
 
-    if (invalidEntries.length > 0) 
-    {
-      const error = new Error("acl.invalid_privileges");
-      error.details = invalidEntries;
-      throw error;
-    }
     return xml;
   }
 
@@ -479,7 +450,9 @@ class WebdavService extends FileService
       const request = new XMLHttpRequest();
 
       request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
-      request.onload = () => {
+      request.onload = () => 
+      {
+        
         if (request.status === 200 || request.status === 207) 
         {
           try 
@@ -530,11 +503,13 @@ class WebdavService extends FileService
       const request = new XMLHttpRequest();
 
       request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
-      request.onload = () => {
+      request.onload = () => 
+      {
         if (request.status === 200 || request.status === 201) 
         {
           readyCallback(new Result(OK));
-        } else 
+        } 
+        else 
         {
           readyCallback(this.createError("ACL failed", request.status));
         }
@@ -543,16 +518,10 @@ class WebdavService extends FileService
       this.openRequest("ACL", url, request);
       request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
       request.send(aclXML);
-    } catch (error)
+    } 
+    catch (error)
     {
-      const errorMsg = error.message.includes('Invalid privileges detected') 
-        ? "" 
-        : error.message;
-
-      const path = error.message === "acl.invalid_privileges" ? "message.invalid_acl_privileges" : "";
-      const metadata = error.details ? { entries: error.details } : {};
-
-      readyCallback(new Result(ERROR, errorMsg, path, metadata));
+      readyCallback(new Result(ERROR, path));
     }
   }
 }

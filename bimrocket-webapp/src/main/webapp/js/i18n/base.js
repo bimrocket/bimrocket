@@ -530,6 +530,7 @@ export const translations =
   "label.inspector_links_tab" : "Links",
   "label.inspector_featured_tab" : "Featured properties",
 
+  "label.acl_path_editing": "ACL path editing:",
   "label.acl_permissions": "Definition of permissions (JSON format)",
 
   "option.no_groups" : "Without groups",
@@ -640,9 +641,9 @@ export const translations =
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.edit_acl_denied": result => `Permissions could not be saved: \n${result}`,
   "message.edit_acl_error": "An error occurred while processing the permissions. Please try again.",
-  "message.invalid_privilege_detail": ({ privilege, options }) => `The value "${privilege}" is not valid. Valid values are: ${options}.`,
+  "message.invalid_privileges": "Errors found in the input privileges.",
   "message.acl_not_found_create_new": "ACL not found. Do you want to create a new one?",
-
+  "message.edit_acl_json_error": "JSON parsing error. Please validate your syntax.",
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

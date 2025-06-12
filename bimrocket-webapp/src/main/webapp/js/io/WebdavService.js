@@ -322,6 +322,7 @@ class WebdavService extends FileService
     let resultStatus;
     switch (status)
     {
+      case 400: resultStatus = Result.BAD_REQUEST; break;
       case 401: resultStatus = Result.INVALID_CREDENTIALS; break;
       case 403: resultStatus = Result.FORBIDDEN; break;
       default: resultStatus = Result.ERROR;

@@ -50,6 +50,7 @@ class Result
   static ERROR = 1; // unknown error
   static INVALID_CREDENTIALS = 2;
   static FORBIDDEN = 3;
+  static BAD_REQUEST = 4;
 
   constructor(status, message, path, metadata, entries, data)
   {

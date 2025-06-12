@@ -639,7 +639,6 @@ export const translations =
   "message.selected_surfaces" : count => `Selected surfaces: ${count}`,
 
   "message.edit_acl_success": "Permissions were updated successfully.",
-  "message.edit_acl_denied": result => `Permissions could not be saved: \n${result}`,
   "message.invalid_privileges": "Errors found in the input privileges.",
   "message.edit_acl_json_error": "JSON parsing error. Please validate your syntax.",
 

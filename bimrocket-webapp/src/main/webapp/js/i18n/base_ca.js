@@ -639,7 +639,6 @@ export const translations =
   "message.selected_surfaces" : count => `Superfícies seleccionades: ${count}`,
 
   "message.edit_acl_success": "Els permisos s'han actualitzat correctament.",
-  "message.edit_acl_denied": result => `No s'han pogut desar els permisos: \n${result}`,
   "message.invalid_privileges": "Hi ha errors en els privilegis introduïts.",
   "message.edit_acl_json_error": "Error en processar el JSON. Comprova que la sintaxi és correcta.",
 

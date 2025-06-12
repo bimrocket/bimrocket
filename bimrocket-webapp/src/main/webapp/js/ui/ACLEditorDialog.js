@@ -42,7 +42,6 @@ class ACLEditorDialog extends Dialog
       {
         const json = this.editorView.state.doc.toString();
         const data = JSON.parse(json);
-        
         this.fileService.setACL(this.aclFilePath, data, result => {
           if (result.status === Result.OK) 
           {
@@ -50,40 +49,24 @@ class ACLEditorDialog extends Dialog
               .setClassName("info")
               .setI18N(this.application.i18n).show();
             this.hide();
-          } else 
-          {
-          let dialog;
-          if (result.path === "message.invalid_acl_privileges") 
-          {
-            const details = result.metadata.entries.map(entry =>
-              this.application.i18n.get("message.invalid_privilege_detail", {
-                role: entry.role,
-                privilege: entry.invalidPrivilege,
-                options: entry.validOptions.join(', ')
-              })
-            ).join('\n');
-            console.log(details);
-            dialog = MessageDialog.create(
-              "title.acl_editor_error",
-              details
-            );
-          } 
+          }
+          else if (result.status === Result.BAD_REQUEST) 
+          { 
+            MessageDialog.create("title.acl_editor_error", "message.invalid_privileges")
+              .setClassName("error")
+              .setI18N(this.application.i18n).show();
+          }
           else 
           {
-            dialog = MessageDialog.create(
-              "title.acl_editor_error",
-              result.message
-            );
-          }
-          dialog.setClassName("error")
-            .setI18N(this.application.i18n)
-            .show();
-
+            MessageDialog.create("title.acl_editor_error", "message.edit_acl_denied", result.message)
+              .setClassName("error")
+              .setI18N(this.application.i18n).show();
           }
         });
-      } catch (error) 
+      } 
+      catch (error) 
       {
-        MessageDialog.create("Error", "message.edit_acl_error", error.message)
+        MessageDialog.create("title.acl_editor_error", "message.edit_acl_json_error", error.message)
           .setClassName("error")
           .setI18N(this.application.i18n).show();
       }
@@ -99,7 +82,6 @@ class ACLEditorDialog extends Dialog
     });
   }
 
-
   setACL(data)
   {
     const json = JSON.stringify(data, null, 2);
@@ -107,8 +89,8 @@ class ACLEditorDialog extends Dialog
       changes: { from: 0, to: this.editorView.state.doc.length, insert: json }
     });
   }
-
-  load()
+  
+  load() 
   {
     const loadACL = () => {
       this.fileService.getACL(this.aclFilePath, result => 
@@ -128,22 +110,15 @@ class ACLEditorDialog extends Dialog
         }
         else if (result.status === Result.ERROR) 
         {
-          ConfirmDialog.create("title.acl_not_found", "message.acl_not_found_create_new")
-            .setI18N(this.application.i18n)
-            .setAcceptLabel("button.yes")
-            .setCancelLabel("button.no")
-            .setAction(() => {
-              this.setACL({});
-              this.show();
-            })
-            .show();
+          MessageDialog.create("Error", result.message)
+            .setClassName("error")
+            .setI18N(this.application.i18n).show();
         }
         else 
         {
           MessageDialog.create("message.action_denied", result.message)
             .setClassName("error")
-            .setI18N(this.application.i18n)
-            .show();
+            .setI18N(this.application.i18n).show();
         }
       });
     };

@@ -363,14 +363,17 @@ class WebdavService extends FileService
       const hrefElement = aceElement.getElementsByTagNameNS("DAV:", "href")[0];
       const allElement = aceElement.getElementsByTagNameNS("DAV:", "all")[0];
 
-      if (hrefElement) {
+      if (hrefElement) 
+      {
         role = hrefElement.textContent.trim();
-      } else if (allElement) {
+      } 
+      else if (allElement) 
+      {
         role = "EVERYONE";
       }
       if (!role) continue;
 
-      const privileges = [];
+      let privileges = [];
       const privilegeElements = aceElement.getElementsByTagNameNS("DAV:", "privilege");
 
       for (let j = 0; j < privilegeElements.length; j++) 
@@ -385,7 +388,8 @@ class WebdavService extends FileService
         }
       }
 
-      if (privileges.length > 0) {
+      if (privileges.length > 0) 
+      {
         acl[role] = privileges;
       }
     }

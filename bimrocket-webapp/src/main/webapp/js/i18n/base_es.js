@@ -50,6 +50,7 @@ export const translations =
   "button.update" : "Actualizar",
   "button.reset" : "Restablecer",
   "button.link" : "Enlazar",
+  "button.edit_acl": "Editar ACL",
 
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
@@ -529,6 +530,9 @@ export const translations =
   "label.inspector_links_tab" : "Enlaces",
   "label.inspector_featured_tab" : "Propiedades destacadas",
 
+  "label.acl_path_editing": "Editando ruta ACL:",
+  "label.acl_permissions": "Definición de permisos (formato JSON)",
+
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
   "option.value_desc" : "Valor (descendente)",
@@ -573,6 +577,11 @@ export const translations =
   "title.rename_material" : "Renombrar material",
   "title.delete_conversation" : "Borrar conversación",
   "title.chatgpt_setup" : "Configuración de ChatGPT",
+  "title.acl_editor" : "Editor de permisos ACL",
+  "title.acl_editor_success" : "Permisos guardados",
+  "title.acl_editor_error" : "Error al guardar",
+  "title.acl_not_found": "No se ha encontrado el ACL",
+  "title.confirm_save": "Confirmación",
 
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Área: ${area} ${units}2`,
@@ -629,6 +638,10 @@ export const translations =
 
   "message.selected_surfaces" : count => `Superficies seleccionadas: ${count}`,
 
+  "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
+  "message.invalid_privileges": "Hay errores en los privilegios introducidos.",
+  "message.edit_acl_json_error": "Error al procesar el JSON. Comprueba que la sintaxis es correcta.",
+  
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,
@@ -638,6 +651,7 @@ export const translations =
   "question.remove_featured_properties" : "Quieres borrar todas las propiedades destacadas?",
   "question.create_new_scene" : "Quieres crear una nueva escena?",
   "question.delete_conversation" : "Quieres borrar la conversación?",
+  "question.confirm_save_changes": "Quieres confirmar los cambios?",
 
   "controller.AutoPilotController" : "Conduce un objeto.",
   "controller.Brain4itPostController" : "Hace un POST a Brain4it.",

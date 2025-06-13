@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import org.bimrocket.api.task.TaskData;
+import org.bimrocket.service.bcf.BcfService;
 import org.bimrocket.service.file.FileService;
 import org.bimrocket.service.ifcdb.IfcDatabaseService;
 import org.bimrocket.service.mail.MailService;
@@ -98,6 +99,11 @@ public class Host
   public IfcDatabaseService getIfcDatabaseService()
   {
     return CDI.current().select(IfcDatabaseService.class).get();
+  }
+
+  public BcfService getBcfService()
+  {
+    return CDI.current().select(BcfService.class).get();
   }
 
   public static Object toJava(Value value)

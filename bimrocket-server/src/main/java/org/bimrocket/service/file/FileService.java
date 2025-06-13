@@ -30,10 +30,6 @@
  */
 package org.bimrocket.service.file;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.CDI;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -42,19 +38,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.bimrocket.api.security.User;
 import org.bimrocket.exception.AccessDeniedException;
 import org.bimrocket.exception.NotAuthorizedException;
-import org.bimrocket.service.file.store.filesystem.FileSystemFileStore;
-import org.bimrocket.service.security.SecurityService;
-import org.eclipse.microprofile.config.Config;
-import org.bimrocket.service.file.store.FileStore;
 import org.bimrocket.service.file.exception.LockedFileException;
+import org.bimrocket.service.file.store.FileStore;
+import org.bimrocket.service.file.store.filesystem.FileSystemFileStore;
 import org.bimrocket.service.file.util.MutableACL;
-import static org.bimrocket.service.file.Privilege.READ;
-import static org.bimrocket.service.file.Privilege.WRITE;
+
+import static org.bimrocket.service.file.Privilege.*;
 import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
 import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
+import org.bimrocket.service.security.SecurityService;
+import org.eclipse.microprofile.config.Config;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 
 /**
  *
@@ -149,7 +151,15 @@ public class FileService
 
     checkAccess(path, WRITE);
 
-    return store.makeCollection(path);
+    Metadata metadata = store.makeCollection(path);
+
+    MutableACL acl = new MutableACL();
+
+    acl.grant(securityService.getCurrentUser().getId(), List.of(READ, WRITE, READ_ACL, WRITE_ACL));
+
+    store.setACL(path, acl);
+
+    return metadata;
   }
 
   public InputStream read(Path path) throws IOException
@@ -213,7 +223,7 @@ public class FileService
   {
     LOGGER.log(Level.FINE, "getAcl {0}", path);
 
-    checkAccess(path, READ);
+    checkAccess(path, READ_ACL);
 
     return store.getACL(path);
   }
@@ -222,7 +232,7 @@ public class FileService
   {
     LOGGER.log(Level.FINE, "setAcl {0}", path);
 
-    checkAccess(path, WRITE);
+    checkAccess(path, WRITE_ACL);
 
     store.setACL(path, acl);
   }

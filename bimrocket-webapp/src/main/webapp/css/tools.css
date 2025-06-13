@@ -852,6 +852,25 @@ div.field_flex > select
   flex-grow: 1;
 }
 
+.dialog .body div.acl_directory > input[type=text]
+{
+  display: inline-block;
+  width: 80%;
+  flex-grow: 1;
+  font-size:13px;
+  font-weight:normal;
+  text-align: left;
+  line-height: 20px;
+  padding:1px;
+  padding-left: 2px;
+  color: #804040;
+  border: 1px solid #c0c0c0;
+  overflow: hidden;
+  margin-left: 8px;
+  cursor: not-allowed; 
+  pointer-events: none;
+}
+
 .dialog .footer button
 {
   min-width: 40px;

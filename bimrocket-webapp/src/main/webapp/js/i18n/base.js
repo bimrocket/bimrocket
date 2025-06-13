@@ -50,6 +50,7 @@ export const translations =
   "button.update" : "Update",
   "button.reset" : "Reset",
   "button.link" : "Link",
+  "button.edit_acl": "Edit ACL",
 
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
@@ -529,6 +530,9 @@ export const translations =
   "label.inspector_links_tab" : "Links",
   "label.inspector_featured_tab" : "Featured properties",
 
+  "label.acl_path_editing": "ACL path editing:",
+  "label.acl_permissions": "Definition of permissions (JSON format)",
+
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
   "option.value_desc" : "Value (descending)",
@@ -573,6 +577,11 @@ export const translations =
   "title.rename_material" : "Rename material",
   "title.delete_conversation" : "Delete conversation",
   "title.chatgpt_setup" : "ChatGPT setup",
+  "title.acl_editor" : "ACL Permissions Editor",
+  "title.acl_editor_success": "Permissions saved",
+  "title.acl_editor_error": "Error saving",
+  "title.acl_not_found": "ACL not found",
+  "title.confirm_save": "Confirmation",
 
   "message.measure_length" : (length, units) => `Length: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Area: ${area} ${units}2`,
@@ -629,6 +638,10 @@ export const translations =
 
   "message.selected_surfaces" : count => `Selected surfaces: ${count}`,
 
+  "message.edit_acl_success": "Permissions were updated successfully.",
+  "message.invalid_privileges": "Errors found in the input privileges.",
+  "message.edit_acl_json_error": "JSON parsing error. Please validate your syntax.",
+
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_folder" : name => `Do you want to delete the ${name} folder?`,
@@ -638,6 +651,7 @@ export const translations =
   "question.remove_featured_properties" : "Remove all featured properties?",
   "question.create_new_scene" : "Do you want to create a new scene?",
   "question.delete_conversation" : "Do you want to delete the conversation?",
+  "question.confirm_save_changes": "Do you want to confirm the changes?",
 
   "controller.AutoPilotController" : "Drives an object.",
   "controller.Brain4itPostController" : "Posts a value to Brain4it.",

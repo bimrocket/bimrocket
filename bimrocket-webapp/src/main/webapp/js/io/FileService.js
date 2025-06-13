@@ -32,6 +32,16 @@ class FileService extends Service
   {
     readyCallback(new Result(Result.ERROR, "Not implemented."));
   }
+
+  setACL(path, acl, readyCallback)
+  {
+    readyCallback(new Result(Result.ERROR, "Not implemented.")); // by default, not implemented
+  }
+
+  getACL(path, readyCallback)
+  {
+    readyCallback(new Result(Result.ERROR, "Not implemented."));
+  }
 }
 
 class Result
@@ -40,6 +50,7 @@ class Result
   static ERROR = 1; // unknown error
   static INVALID_CREDENTIALS = 2;
   static FORBIDDEN = 3;
+  static BAD_REQUEST = 4;
 
   constructor(status, message, path, metadata, entries, data)
   {
@@ -67,4 +78,22 @@ class Metadata
   }
 }
 
-export {FileService, Result, Metadata };
+class ACL
+{
+  constructor()
+  {
+    this.roles = {};
+  }
+  grant(roleId, privilege)
+  {
+    let roles = this.roles[roleId];
+    if (!roles)
+    {
+      roles = [];
+      this.roles[roleId] = roles;
+    }
+    if (!roles.includes(privilege)) roles.push(privilege);
+ }
+}
+
+export {FileService, Result, Metadata, ACL };

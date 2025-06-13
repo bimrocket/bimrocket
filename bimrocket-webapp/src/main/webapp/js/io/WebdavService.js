@@ -322,6 +322,7 @@ class WebdavService extends FileService
     let resultStatus;
     switch (status)
     {
+      case 400: resultStatus = Result.BAD_REQUEST; break;
       case 401: resultStatus = Result.INVALID_CREDENTIALS; break;
       case 403: resultStatus = Result.FORBIDDEN; break;
       default: resultStatus = Result.ERROR;
@@ -343,6 +344,189 @@ class WebdavService extends FileService
       path = "/" + path;
     }
     return url + path;
+  }
+
+  convertXMLToACL(xmlString) {
+
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+    const acl = {};
+
+    const aceElements = xmlDoc.getElementsByTagNameNS("DAV:", "ace");
+
+    for (let i = 0; i < aceElements.length; i++) 
+    {
+      const aceElement = aceElements[i];
+      let role = null;
+
+      const hrefElement = aceElement.getElementsByTagNameNS("DAV:", "href")[0];
+      const allElement = aceElement.getElementsByTagNameNS("DAV:", "all")[0];
+
+      if (hrefElement) 
+      {
+        role = hrefElement.textContent.trim();
+      } 
+      else if (allElement) 
+      {
+        role = "EVERYONE";
+      }
+      if (!role) continue;
+
+      let privileges = [];
+      const privilegeElements = aceElement.getElementsByTagNameNS("DAV:", "privilege");
+
+      for (let j = 0; j < privilegeElements.length; j++) 
+      {
+        const privElement = privilegeElements[j];
+        const privilegeNode = privElement.firstElementChild;
+        if (privilegeNode) {
+          let privName = privilegeNode.localName;
+          if (privName) {
+            privileges.push(privName);
+          }
+        }
+      }
+
+      if (privileges.length > 0) 
+      {
+        acl[role] = privileges;
+      }
+    }
+    return acl;
+  }
+
+  convertACLToXML(acl) 
+  {
+
+    const roleToPrincipal = 
+    {
+      "EVERYONE": { type: "all" },
+    };
+
+    let xml = `<?xml version="1.0" encoding="utf-8" ?>\n<D:acl xmlns:D="DAV:">\n`;
+
+    for (const role in acl) 
+    {
+      const privileges = acl[role];
+      if (!privileges || privileges.length === 0) continue;
+
+      const principal = roleToPrincipal[role] || { type: "href", value: role };
+
+      xml += `  <D:ace>\n`;
+      if (principal.type === "href") 
+      {
+        xml += `    <D:principal><D:href>${principal.value}</D:href></D:principal>\n`;
+      } else 
+      {
+        xml += `    <D:principal><D:${principal.type}/></D:principal>\n`;
+      }
+      xml += `    <D:grant>\n`;
+      
+      for (let priv of privileges) 
+      {
+        let privName = priv;
+        if (privName) 
+        {
+          privName = privName.toLowerCase();
+          xml += `      <D:privilege><D:${privName}/></D:privilege>\n`;
+        }
+      }
+      xml += `    </D:grant>\n`;
+      xml += `  </D:ace>\n`;
+
+    }
+
+    xml += `</D:acl>`;
+
+    return xml;
+  }
+
+  getACL(path, readyCallback) 
+  {
+
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
+    
+    try 
+    {
+      const url = this.getUrl(path);
+      const request = new XMLHttpRequest();
+
+      request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
+      request.onload = () => 
+      {
+        
+        if (request.status === 200 || request.status === 207) 
+        {
+          try 
+          {
+            const acl = this.convertXMLToACL(request.response);
+            readyCallback(new Result(OK, acl));
+          } 
+          catch (error) 
+          {
+            readyCallback(new Result(ERROR, `Failed to parse ACL: ${error.message}`));
+          }
+        } 
+        else 
+        {
+          readyCallback(this.createError("ACL retrieval failed", request.status));
+        }
+      };
+
+      this.openRequest("PROPFIND", url, request);
+      request.setRequestHeader("Depth", "0");
+      request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
+      request.send(
+        '<?xml version="1.0" encoding="utf-8" ?>' +
+        '<d:propfind xmlns:d="DAV:">' +
+        '  <d:prop>' +
+        '    <d:acl/>' +
+        '    <d:owner/>' +
+        '  </d:prop>' +
+        '</d:propfind>'
+      );
+    } 
+    catch (error) 
+    {
+      readyCallback(new Result(ERROR, `ACL request failed: ${error.message}`));
+    }
+  }
+
+  setACL(path, acl, readyCallback) 
+  {
+    
+    const OK = Result.OK;
+    const ERROR = Result.ERROR;
+    
+    try 
+    {
+      const aclXML = this.convertACLToXML(acl);
+      const url = this.getUrl(path);
+      const request = new XMLHttpRequest();
+
+      request.onerror = () => readyCallback(new Result(ERROR, "Connection error"));
+      request.onload = () => 
+      {
+        if (request.status === 200 || request.status === 201) 
+        {
+          readyCallback(new Result(OK));
+        } 
+        else 
+        {
+          readyCallback(this.createError("ACL failed", request.status));
+        }
+      };
+
+      this.openRequest("ACL", url, request);
+      request.setRequestHeader("Content-Type", "application/xml; charset=utf-8");
+      request.send(aclXML);
+    } 
+    catch (error)
+    {
+      readyCallback(new Result(ERROR, path));
+    }
   }
 }
 

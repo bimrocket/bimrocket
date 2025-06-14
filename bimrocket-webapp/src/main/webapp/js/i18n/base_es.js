@@ -531,7 +531,7 @@ export const translations =
   "label.inspector_featured_tab" : "Propiedades destacadas",
 
   "label.acl_path_editing": "Editando ruta ACL:",
-  "label.acl_permissions": "Definición de permisos (formato JSON)",
+  "label.acl_permissions": "Definición de permisos (formato JSON):",
 
   "option.no_groups" : "Sin agrupaciones",
   "option.value_asc" : "Valor (ascendente)",
@@ -640,7 +640,7 @@ export const translations =
 
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.invalid_privileges": "Hay errores en los privilegios introducidos.",
-  "message.edit_acl_json_error": "Error al procesar el JSON. Comprueba que la sintaxis es correcta.",
+  "message.edit_acl_json_error": detail => `Error al procesar el JSON. Revisa la sintaxis. (${detail})`,
   
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,

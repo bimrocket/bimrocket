@@ -116,7 +116,7 @@ class FileExplorer extends Panel
       () => this.isDirectoryList());
 
     this.addContextButton("download", "button.download",
-      () => this.download(this.basePath + "/" + this.entryName),
+      () => this.download(this.getFullPath(this.entryName)),
       () => this.isDirectoryList() && this.isFileEntrySelected());
   }
 
@@ -223,7 +223,7 @@ class FileExplorer extends Panel
         "question.delete_file" : "question.delete_folder";
 
       ConfirmDialog.create("title.delete_from_cloud", question, name)
-        .setAction(() => this.deletePath(this.basePath + "/" + name))
+        .setAction(() => this.deletePath(this.getFullPath(name)))
         .setAcceptLabel("button.delete")
         .setI18N(application.i18n).show();
     }
@@ -243,7 +243,7 @@ class FileExplorer extends Panel
 
     dialog.onAccept = () =>
     {
-      this.makeFolder(this.basePath + "/" + nameElem.value);
+      this.makeFolder(this.getFullPath(nameElem.value));
       dialog.hide();
     };
     dialog.onCancel = () =>
@@ -271,7 +271,7 @@ class FileExplorer extends Panel
   showAclDialog()
   {
     const application = this.application;
-    const aclFilePath = this.basePath;
+    const aclFilePath = this.getFullPath(this.entryName);
     const dialog = new ACLEditorDialog(application, this.service, aclFilePath, this);
     dialog.load();
   }
@@ -327,7 +327,7 @@ class FileExplorer extends Panel
       reader.onload = event =>
       {
         const data = event.target.result;
-        const path = this.basePath + "/" + file.name;
+        const path = this.getFullPath(file.name);
         this.showProgressBar("Uploading file...");
         this.service.save(path, data, result =>
         {
@@ -804,6 +804,12 @@ class FileExplorer extends Panel
     service.setParameters(parameters);
     this.application.addService(service, this.group);
     this.refreshServices();
+  }
+  
+  getFullPath(name)
+  {
+    if (this.basePath === "/") return this.basePath + name;
+    else return this.basePath + "/" + name;
   }
 };
 

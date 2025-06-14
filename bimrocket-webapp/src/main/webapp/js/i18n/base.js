@@ -531,7 +531,7 @@ export const translations =
   "label.inspector_featured_tab" : "Featured properties",
 
   "label.acl_path_editing": "ACL path editing:",
-  "label.acl_permissions": "Definition of permissions (JSON format)",
+  "label.acl_permissions": "Definition of permissions (JSON format):",
 
   "option.no_groups" : "Without groups",
   "option.value_asc" : "Value (ascending)",
@@ -640,7 +640,7 @@ export const translations =
 
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.invalid_privileges": "Errors found in the input privileges.",
-  "message.edit_acl_json_error": "JSON parsing error. Please validate your syntax.",
+  "message.edit_acl_json_error": detail => `JSON parsing error. Please check the syntax. (${detail})`,
 
   "question.discard_changes" : name => `Discard unsaved changes in ${name || 'editor'}?`,
   "question.delete_service" : name => `Do you want to delete the ${name} service?`,

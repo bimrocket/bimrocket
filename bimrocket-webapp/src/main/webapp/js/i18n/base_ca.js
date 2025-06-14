@@ -50,7 +50,7 @@ export const translations =
   "button.update" : "Actualitza",
   "button.reset" : "Restableix",
   "button.link" : "Enllaça",
-  "button.edit_acl": "Editar ACL",
+  "button.edit_acl": "Edita ACL",
 
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
@@ -531,7 +531,7 @@ export const translations =
   "label.inspector_featured_tab" : "Propietats destacades",
 
   "label.acl_path_editing": "Editant ruta ACL:",
-  "label.acl_permissions": "Definició de permisos (format JSON)",
+  "label.acl_permissions": "Definició de permisos (format JSON):",
 
   "option.no_groups" : "Sense agrupacions",
   "option.value_asc" : "Valor (ascendent)",
@@ -640,7 +640,7 @@ export const translations =
 
   "message.edit_acl_success": "Els permisos s'han actualitzat correctament.",
   "message.invalid_privileges": "Hi ha errors en els privilegis introduïts.",
-  "message.edit_acl_json_error": "Error en processar el JSON. Comprova que la sintaxi és correcta.",
+  "message.edit_acl_json_error": detail => `Error al processar el JSON. Revisa la sintaxi. (${detail})`,
 
   "question.discard_changes" : name => `Vols descartar els canvis no desats en ${name || " l'editor"}?`,
   "question.delete_service" : name => `Vols esborrar el servei ${name}?`,

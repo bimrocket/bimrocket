@@ -1,97 +1,107 @@
 package org.bimrocket.servlet.webdav;
 
-import org.bimrocket.service.file.ACL;
-import org.bimrocket.service.file.Privilege;
-import org.w3c.dom.*;
-import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.bimrocket.service.file.ACL;
+import org.bimrocket.service.file.util.MutableACL;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
+import static org.bimrocket.service.security.SecurityConstants.EVERYONE_ROLE;
+import static org.bimrocket.servlet.webdav.WebdavUtils.*;
 
+
+// Deserialize XML to MutableACL object
 public class ACLXMLDeserializer
-{
-
-  public static String deserialize(ACL acl) throws Exception
+{  
+  // Receives current user to replace when tag is D:owner
+  public static ACL deserialize(String xml, String userId) throws IOException
   {
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db = dbf.newDocumentBuilder();
-    Document doc = db.newDocument();
-
-    Element root = doc.createElementNS("DAV:", "D:acl");
-    doc.appendChild(root);
-
-    // Map rol → privileges
-    Map<String, Set<Privilege>> roleToPrivileges = new HashMap<>();
-
-    for (Privilege priv : acl.getPrivileges())
+    try
     {
-      Set<String> roleIds = acl.getRoleIdsForPrivilege(priv);
-      if (roleIds == null) continue;
-      for (String role : roleIds)
-      {
-        roleToPrivileges.computeIfAbsent(role, k -> new LinkedHashSet<>()).add(priv);
-      }
-    }
+      MutableACL acl = new MutableACL();
 
-    // Generate ACE by role
-    for (Map.Entry<String, Set<Privilege>> entry : roleToPrivileges.entrySet())
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      // Assume xml is UTF-8 encoded!
+      ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+      Document doc = builder.parse(is);
+
+      NodeList aceList = doc.getElementsByTagNameNS(DAV_NS, "ace");
+
+      for (int i = 0; i < aceList.getLength(); i++)
+      {
+        Element ace = (Element) aceList.item(i);
+        String principal = getPrincipal(ace, userId);
+        if (principal == null) continue;
+        
+        NodeList privilegeList = ace.getElementsByTagNameNS(DAV_NS, "privilege");
+
+        for (int j = 0; j < privilegeList.getLength(); j++)
+        {
+          Element privilegeElement = getFirstElementChild(privilegeList.item(j));
+          if (privilegeElement == null) continue;
+
+          String privilegeTag = privilegeElement.getLocalName();          
+          acl.grant(principal, mapXmlTagToPrivilege(privilegeTag));
+        }
+      }
+      return acl;
+    }
+    catch (ParserConfigurationException | SAXException ex)
     {
-      String roleId = entry.getKey();
-      Set<Privilege> privileges = entry.getValue();
-      if (privileges == null || privileges.isEmpty()) continue;
-
-      Element ace = doc.createElementNS("DAV:", "D:ace");
-      Element principal = doc.createElementNS("DAV:", "D:principal");
-
-      switch (roleId.toUpperCase()) {
-        case "EVERYONE":
-          principal.appendChild(doc.createElementNS("DAV:", "D:all"));
-          break;
-        case "AUTHENTICATED":
-          principal.appendChild(doc.createElementNS("DAV:", "D:authenticated"));
-          break;
-        default:
-          Element href = doc.createElementNS("DAV:", "D:href");
-          href.setTextContent(roleId);
-          principal.appendChild(href);
-          break;
-      }
-
-      ace.appendChild(principal);
-
-      Element grant = doc.createElementNS("DAV:", "D:grant");
-      for (Privilege priv : privileges)
-      {
-        Element privilege = doc.createElementNS("DAV:", "D:privilege");
-        Element privElement = doc.createElementNS("DAV:", "D:" + mapPrivilegeToXmlTag(priv));
-        privilege.appendChild(privElement);
-        grant.appendChild(privilege);
-      }
-
-      ace.appendChild(grant);
-      root.appendChild(ace);
+      throw new RuntimeException(ex);
     }
-
-    // Output XML
-    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-    StringWriter writer = new StringWriter();
-    transformer.transform(new DOMSource(doc), new StreamResult(writer));
-    return writer.toString();
+    catch (IllegalArgumentException ex)
+    {
+      throw ex;
+    }
   }
 
-  private static String mapPrivilegeToXmlTag(Privilege priv)
+  //Get First Element for Privileges
+  private static Element getFirstElementChild(Node node)
   {
-    return priv.name().toLowerCase().replace('_', '-');
+    NodeList children = node.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++)
+    {
+      Node child = children.item(i);
+      if (child.getNodeType() == Node.ELEMENT_NODE)
+      {
+        return (Element) child;
+      }
+    }
+    return null;
+  }
+
+  // Check role type
+  private static String getPrincipal(Element ace, String userId)
+  {
+    NodeList principalNodes = ace.getElementsByTagNameNS(DAV_NS, "principal");
+    if (principalNodes.getLength() > 0)
+    {
+      Element principalElement = (Element) principalNodes.item(0);
+
+      if (principalElement.getElementsByTagNameNS(DAV_NS, "all").getLength() > 0)
+      {
+        return EVERYONE_ROLE;
+      }
+      else if (principalElement.getElementsByTagNameNS(DAV_NS, "authenticated").getLength() > 0)
+      {
+        return AUTHENTICATED_ROLE;
+      }
+      else if (principalElement.getElementsByTagNameNS(DAV_NS, "href").getLength() > 0)
+      {
+        return principalElement.getElementsByTagNameNS(DAV_NS, "href").item(0).getTextContent();
+      }
+    }
+    return null;
   }
 }

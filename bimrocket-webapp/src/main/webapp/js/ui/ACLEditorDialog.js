@@ -2,8 +2,9 @@ import { Dialog } from "./Dialog.js";
 import { Controls } from "./Controls.js";
 import { MessageDialog } from "./MessageDialog.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
+import { Toast } from "./Toast.js";
 import { I18N } from "../i18n/I18N.js";
-import { Result } from "../io/FileService.js";
+import { Result, ACL } from "../io/FileService.js";
 
 class ACLEditorDialog extends Dialog
 {
@@ -16,82 +17,91 @@ class ACLEditorDialog extends Dialog
     this.aclFilePath = aclFilePath;
     this.fileExplorer = fileExplorer;
 
-    this.setSize(600, 500);
+    this.setSize(500, 500);
+    
+    this.bodyElem.classList.add("flex");
+    this.bodyElem.classList.add("flex_column");
 
-    this.nameField = this.addTextField("name", "label.acl_path_editing", aclFilePath === "/" ? "/Remote" : aclFilePath,
+    this.nameField = this.addTextField("name", "label.acl_path_editing", aclFilePath,
       "acl_directory");
+    this.nameField.readOnly = true;
 
     this.editorView = Controls.addCodeEditor(
       this.bodyElem,
       "acl_json",
       "label.acl_permissions",
       "",
-      { language: "json", height: "calc(100% - 8px)" }
+      { language: "json", height: "100%" }
     );
 
-    this.createSaveButton();
+    this.createButtons();
   }
 
-  createSaveButton() 
+  createButtons()
   {
+    const application = this.application;
     const buttonContainer = document.createElement("div");
     this.bodyElem.appendChild(buttonContainer);
 
     const saveAction = () => {
-      try 
+      try
       {
+        const acl = new ACL();
         const json = this.editorView.state.doc.toString();
-        const data = JSON.parse(json);
-        this.fileService.setACL(this.aclFilePath, data, result => {
-          if (result.status === Result.OK) 
+        acl.fromJSON(json);
+
+        this.fileService.setACL(this.aclFilePath, acl, result => {
+          if (result.status === Result.OK)
           {
-            MessageDialog.create("title.acl_editor_success", "message.edit_acl_success")
-              .setClassName("info")
-              .setI18N(this.application.i18n).show();
+            Toast.create("message.edit_acl_success")
+              .setI18N(application.i18n).show();            
             this.hide();
           }
           else
           {
-            this.handleError(result,
-              saveAction);
+            this.handleError(result, saveAction);
           }
-          
         });
-      } 
-      catch (error) 
+      }
+      catch (error)
       {
-        MessageDialog.create("ERROR", "message.edit_acl_json_error", error.message)
+        MessageDialog.create("ERROR", "message.edit_acl_json_error", error)
           .setClassName("error")
-          .setI18N(this.application.i18n).show();
+          .setI18N(application.i18n).show();
       }
     };
 
     this.addButton("saveACL", "button.save", () => {
       ConfirmDialog.create("title.confirm_save", "question.confirm_save_changes")
-        .setI18N(this.application.i18n)
+        .setI18N(application.i18n)
         .setAcceptLabel("button.yes")
         .setCancelLabel("button.no")
         .setAction(saveAction)
         .show();
     });
+
+    this.addButton("cancelACL", "button.cancel", () => {
+      this.hide();
+    });
   }
 
-  handleError(result, onLogin, onFailed) 
+  handleError(result, onLogin, onFailed)
   {
-    if (result.status === Result.INVALID_CREDENTIALS || result.status === Result.FORBIDDEN) 
+    console.info(result);
+    if (result.status === Result.INVALID_CREDENTIALS || result.status === Result.FORBIDDEN)
     {
       this.fileExplorer.requestCredentials(
-        result.status === Result.INVALID_CREDENTIALS ? 
+        result.status === Result.INVALID_CREDENTIALS ?
         "message.invalid_credentials" : "message.action_denied",
         onLogin, onFailed);
     }
-    else if (result.status === Result.BAD_REQUEST) 
-    { 
-      MessageDialog.create("title.acl_editor_error", "message.invalid_privileges")
+    else if (result.status === Result.BAD_REQUEST)
+    {
+      MessageDialog.create("title.acl_editor_error", result.message)
         .setClassName("error")
         .setI18N(this.application.i18n).show();
     }
-    else 
+    else
     {
       MessageDialog.create("ERROR", result.message)
         .setClassName("error")
@@ -99,26 +109,26 @@ class ACLEditorDialog extends Dialog
     }
   }
 
-  setACL(data)
+  setACL(acl)
   {
-    const json = JSON.stringify(data, null, 2);
+    const json = acl.toJSON();
     this.editorView.dispatch({
       changes: { from: 0, to: this.editorView.state.doc.length, insert: json }
     });
   }
-  
-  load() 
+
+  load()
   {
-    this.fileService.getACL(this.aclFilePath, result => 
+    this.fileService.getACL(this.aclFilePath, result =>
     {
-      if (result.status === Result.OK) 
+      if (result.status === Result.OK)
       {
-        this.setACL(result.message);
+        this.setACL(result.data);
         this.show();
-      } 
+      }
       else
       {
-        this.handleError(result, 
+        this.handleError(result,
           () => this.load());
       }
     });

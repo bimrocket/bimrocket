@@ -1,170 +1,88 @@
 package org.bimrocket.servlet.webdav;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.bimrocket.service.file.ACL;
 import org.bimrocket.service.file.Privilege;
-import org.bimrocket.service.file.util.MutableACL;
-import org.bimrocket.service.security.SecurityConstants;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
+import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
+import static org.bimrocket.service.security.SecurityConstants.AUTHENTICATED_ROLE;
+import static org.bimrocket.service.security.SecurityConstants.EVERYONE_ROLE;
+import static org.bimrocket.servlet.webdav.WebdavUtils.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-// Deserialize XML to MutableACL object
 public class ACLXMLSerializer
 {
-
-  // Map of privileges
-  private static final Map<String, Privilege> PRIVILEGE_MAP = Map.of(
-        "READ", Privilege.READ,
-        "WRITE", Privilege.WRITE,
-        "READ_ACL", Privilege.READ_ACL,
-        "WRITE_ACL", Privilege.WRITE_ACL
-  );
-  private static final String BAD_ROLE = "Unknown Role ";
-
-  // Receives current user to replace when tag is D:owner
-  public static ACL serialize(String xml, String userId) throws Exception
+  public static String serialize(ACL acl)
   {
-    MutableACL acl = new MutableACL();
-
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-
-    // Map to group permissions
-    Map<String, List<String>> aclMap = new HashMap<>();
-    aclMap.put("READ_ACL", new ArrayList<>());
-    aclMap.put("WRITE_ACL", new ArrayList<>());
-    aclMap.put("READ", new ArrayList<>());
-    aclMap.put("WRITE", new ArrayList<>());
-
-    NodeList aceList = doc.getElementsByTagName("D:ace");
-
-    for (int i = 0; i < aceList.getLength(); i++)
+    try
     {
-      Element ace = (Element) aceList.item(i);
-      String principal = getPrincipal(ace, userId);
-      NodeList privileges = ace.getElementsByTagName("D:privilege");
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      Document doc = db.newDocument();
 
-      for (int j = 0; j < privileges.getLength(); j++)
+      Element root = doc.createElementNS(DAV_NS, "D:acl");
+      doc.appendChild(root);
+
+      // Generate ACE by role
+      for (String roleId : acl.getRoleIds())
       {
-        Element privilege = (Element) privileges.item(j);
+        Set<Privilege> privileges = acl.getPrivilegesForRoleId(roleId);
+        if (privileges.isEmpty()) continue;
 
-        Element privilegeElement = getFirstElementChild(privilege);
-        if (privilegeElement == null) continue;
-        String privilegeType = privilegeElement.getNodeName();
+        Element ace = doc.createElementNS(DAV_NS, "D:ace");
+        Element principal = doc.createElementNS(DAV_NS, "D:principal");
 
-        switch (privilegeType)
+        switch (roleId.toUpperCase()) 
         {
-          case "D:read-acl":
-            aclMap.get("READ_ACL").add(principal);
+          case EVERYONE_ROLE:
+            principal.appendChild(doc.createElementNS(DAV_NS, "D:all"));
             break;
-          case "D:write-acl":
-            aclMap.get("WRITE_ACL").add(principal);
-            break;
-          case "D:read":
-            aclMap.get("READ").add(principal);
-            break;
-          case "D:write":
-            aclMap.get("WRITE").add(principal);
+          case AUTHENTICATED_ROLE:
+            principal.appendChild(doc.createElementNS(DAV_NS, "D:authenticated"));
             break;
           default:
-            String xmlError = generateXMLBadPrivilege(privilegeType);
-            throw new IllegalArgumentException(xmlError);
+            Element href = doc.createElementNS(DAV_NS, "D:href");
+            href.setTextContent(roleId);
+            principal.appendChild(href);
+            break;
         }
+
+        ace.appendChild(principal);
+
+        Element grant = doc.createElementNS(DAV_NS, "D:grant");
+        for (Privilege privilege : privileges)
+        {
+          Element privilegeElement = doc.createElementNS(DAV_NS, "D:privilege");
+          Element privElement = doc.createElementNS(DAV_NS, 
+            "D:" + mapPrivilegeToXmlTag(privilege));
+          privilegeElement.appendChild(privElement);
+          grant.appendChild(privilegeElement);
+        }
+
+        ace.appendChild(grant);
+        root.appendChild(ace);
       }
+
+      // Indent output XML
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+      transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+
+      StringWriter writer = new StringWriter();
+      transformer.transform(new DOMSource(doc), new StreamResult(writer));
+      return writer.toString();
     }
-
-    // Retrieve results over acl object
-    aclMap.forEach((key, value) ->
+    catch (IllegalArgumentException | ParserConfigurationException | 
+          TransformerException | DOMException ex)
     {
-      Privilege priv = PRIVILEGE_MAP.getOrDefault(key, null);
-      acl.grant(value, priv);
-    });
-
-    return acl;
-  }
-
-  //Get First Element for Privileges
-  private static Element getFirstElementChild(Node node)
-  {
-    NodeList children = node.getChildNodes();
-    for (int i = 0; i < children.getLength(); i++)
-    {
-      Node child = children.item(i);
-      if (child.getNodeType() == Node.ELEMENT_NODE)
-      {
-        return (Element) child;
-      }
+      throw new RuntimeException(ex);
     }
-    return null;
-  }
-
-  // Check role type
-  private static String getPrincipal(Element ace, String userId) throws Exception
-  {
-    NodeList principalNodes = ace.getElementsByTagName("D:principal");
-    if (principalNodes.getLength() > 0)
-    {
-      Element principalElement = (Element) principalNodes.item(0);
-
-      if (principalElement.getElementsByTagName("D:all").getLength() > 0)
-      {
-        return SecurityConstants.EVERYONE_ROLE;
-      }
-      else if (principalElement.getElementsByTagName("D:authenticated").getLength() > 0)
-      {
-        return SecurityConstants.AUTHENTICATED_ROLE;
-      }
-      else if (principalElement.getElementsByTagName("D:href").getLength() > 0)
-      {
-        return principalElement.getElementsByTagName("D:href").item(0).getTextContent();
-      }
-    }
-    return "UNKNOWN";
-  }
-
-  private static String generateXMLBadPrivilege(String privilegeType) throws Exception
-  {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.newDocument();
-
-    // Create element <d:error xmlns:D="DAV:">
-    Element errorElement = doc.createElementNS("DAV:", "D:error");
-    errorElement.setTextContent("unsupported_privilege");
-    doc.appendChild(errorElement);
-
-    // XML to string
-    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-    StringWriter writer = new StringWriter();
-    transformer.transform(new DOMSource(doc), new StreamResult(writer));
-    return writer.toString();
   }
 }

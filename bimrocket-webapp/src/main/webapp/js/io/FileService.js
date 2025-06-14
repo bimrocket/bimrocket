@@ -57,9 +57,9 @@ class Result
     this.status = status;
     this.message = message;
     this.path = path;
-    this.metadata = metadata;
-    this.entries = entries; // Metadata
-    this.data = data; // file data
+    this.metadata = metadata; // Metadata
+    this.entries = entries; // array of Metadata
+    this.data = data; // file data or ACL
   }
 }
 
@@ -80,20 +80,69 @@ class Metadata
 
 class ACL
 {
-  constructor()
+  constructor(roles = {})
   {
-    this.roles = {};
+    this.roles = roles;
   }
+
+  getPrivileges(roleId)
+  {
+    return this.roles[roleId] || [];
+  }
+
   grant(roleId, privilege)
   {
-    let roles = this.roles[roleId];
-    if (!roles)
+    // At this point assume privilege has an indentifier format
+    if (typeof privilege !== "string" ||
+        !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(privilege))
+      throw "Invalid privilege: " + privilege;
+
+    let privileges = this.roles[roleId];
+    if (!privileges)
     {
-      roles = [];
-      this.roles[roleId] = roles;
+      privileges = [];
+      this.roles[roleId] = privileges;
     }
-    if (!roles.includes(privilege)) roles.push(privilege);
- }
+    if (!privileges.includes(privilege)) privileges.push(privilege);
+  }
+
+  revoke(roleId, privilege)
+  {
+    let privileges = this.roles[roleId];
+    if (privileges)
+    {
+      let index = privileges.indexOf(privilege);
+      if (index !== -1)
+      {
+        privileges.splice(index, 1);
+      }
+    }
+  }
+
+  fromJSON(json)
+  {
+    let roles = JSON.parse(json);
+    let acl = new ACL();
+
+    // check structure
+    for (const roleId in roles)
+    {
+      const privileges = roles[roleId];
+      if (!(privileges instanceof Array))
+        throw "An array of privileges was expected for this role: " + roleId;
+
+      for (const privilege of privileges)
+      {
+        acl.grant(roleId, privilege);
+      }
+    }
+    this.roles = acl.roles;
+  }
+
+  toJSON()
+  {
+    return JSON.stringify(this.roles, null, 2);
+  }
 }
 
-export {FileService, Result, Metadata, ACL };
+export { FileService, Result, Metadata, ACL };

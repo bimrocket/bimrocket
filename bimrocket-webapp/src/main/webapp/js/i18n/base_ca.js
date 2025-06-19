@@ -50,8 +50,9 @@ export const translations =
   "button.update" : "Actualitza",
   "button.reset" : "Restableix",
   "button.link" : "Enllaça",
-  "button.edit_acl": "Edita ACL",
+  "button.copy" : "Copia",
 
+  "button.edit_acl": "Edita ACL",
   "button.preview_material" : "Prova material",
   "button.apply_material" : "Aplica material",
   "button.restore_materials" : "Restaura materials",
@@ -93,6 +94,7 @@ export const translations =
   "menu.view.style" : "Estil",
   "menu.view.projection" : "Projecció",
   "menu.select" : "Selecció",
+  "menu.select_context" : "Selecciona per context",
   "menu.design" : "Disseny",
   "menu.design.add" : "Afegir",
   "menu.design.add_solid" : "Sòlid",
@@ -121,14 +123,16 @@ export const translations =
   "tool.savelocal.label" : "Desa en disc local",
   "tool.savelocal.help" : "Desa en disc local",
 
-  "tool.select.label" : "Selecciona",
+  "tool.select.label" : "Selecciona per punt",
   "tool.select.help" : "Punter: selecció per punt",
+
+  "tool.select_faces.label" : "Selecciona cares",
 
   "tool.select_by_name.label" : "Selecciona per nom",
 
-  "tool.select_by_property.label" : "Selec. per propietat",
+  "tool.select_by_property.label" : "Selecciona per propietat",
 
-  "tool.select_by_qrcode.label" : "Selec. per codi QR",
+  "tool.select_by_qrcode.label" : "Selecciona per codi QR",
 
   "tool.select_parent.label" : "Selecciona el pare",
 
@@ -455,6 +459,10 @@ export const translations =
   "label.selection_properties" : "Propietats de la selecció:",
   "label.exported_properties" : "Propietats a exportar:",
 
+  "label.select_faces_mode" : "Mode:",
+  "label.select_faces_angle" : "Angle màxim (graus):",  
+  "label.select_faces_depth" : "Profunditat màxima:",
+
   "label.material_list" : "Materials:",
   "label.color" : "Color difús:",
   "label.specular" : "Color especular:",
@@ -550,6 +558,10 @@ export const translations =
   "option.render_mode.normal" : "Normal",
   "option.render_mode.simplified" : "Simplificat",
   "option.render_mode.batch" : "Batch",
+
+  "option.select_faces.select_plane" : "Selecciona pla de referència",
+  "option.select_faces.add_faces" : "Afegeix cares per rectangle",
+  "option.select_faces.remove_faces" : "Treu cares per rectangle",
 
   "title.add_cloud_service": "Afegeix servei del núvol",
   "title.edit_cloud_service": "Edita servei del núvol",

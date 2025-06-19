@@ -50,8 +50,9 @@ export const translations =
   "button.update" : "Update",
   "button.reset" : "Reset",
   "button.link" : "Link",
-  "button.edit_acl": "Edit ACL",
+  "button.copy" : "Copy",
 
+  "button.edit_acl": "Edit ACL",
   "button.preview_material" : "Preview material",
   "button.apply_material" : "Apply material",
   "button.restore_materials" : "Restore materials",
@@ -93,6 +94,7 @@ export const translations =
   "menu.view.style" : "Style",
   "menu.view.projection" : "Projection",
   "menu.select" : "Select",
+  "menu.select_context" : "Select by context",
   "menu.design" : "Design",
   "menu.design.add" : "Add",
   "menu.design.add_solid" : "Solid",
@@ -121,8 +123,10 @@ export const translations =
   "tool.savelocal.label" : "Save to local disk",
   "tool.savelocal.help" : "Save to local disk",
 
-  "tool.select.label" : "Select",
+  "tool.select.label" : "Select by point",
   "tool.select.help" : "Pointer: select by point",
+
+  "tool.select_faces.label" : "Select faces",
 
   "tool.select_by_name.label" : "Select by name",
 
@@ -455,6 +459,10 @@ export const translations =
   "label.selection_properties" : "Selection properties:",
   "label.exported_properties" : "Properties to export:",
 
+  "label.select_faces_mode" : "Mode:",
+  "label.select_faces_angle" : "Maximum angle (degrees):",  
+  "label.select_faces_depth" : "Maximum depth:",
+
   "label.material_list" : "Materials:",
   "label.color" : "Diffuse color:",
   "label.specular" : "Specular color:",
@@ -550,6 +558,10 @@ export const translations =
   "option.render_mode.normal" : "Normal",
   "option.render_mode.simplified" : "Simplified",
   "option.render_mode.batch" : "Batch",
+  
+  "option.select_faces.select_plane" : "Select reference plane",
+  "option.select_faces.add_faces" : "Add faces by rectangle",
+  "option.select_faces.remove_faces" : "Remove faces by rectangle",
 
   "title.add_cloud_service" : "Add cloud service",
   "title.edit_cloud_service" : "Edit cloud service",

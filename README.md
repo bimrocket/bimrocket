@@ -16,9 +16,11 @@ BIMROCKET is an open source platform for BIM project management. It features a w
 - Orbit-Pan-Zoom tool.
 - Fly tool (with collision detection and ground distance control).
 - Multiple selection of objects.
+- Face selection tool.
 - Editing of model structure and object properties.
 - Dynamic sectioning of models.
 - Realistic shading: shadow casting and ambient occlusion.
+- Solar simulation tool.
 - Vertex, egde and face snapping in the drawing, measurement and transformation tools.
 - Scripting tool (using javascript language).
 - Reporting tool to check conditions on the model objects (supported reporting formats: BRS and [IDS](https://www.buildingsmart.org/what-is-information-delivery-specification-ids/)).

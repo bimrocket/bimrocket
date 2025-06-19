@@ -639,7 +639,7 @@ class SolarSimulatorTool extends Tool
       this.surfaceMaterial.name = "surface";
       this.surfaceMaterial.polygonOffset = true;
       this.surfaceMaterial.polygonOffsetUnits = -1;
-      this.surfaceMaterial.side = 2;
+      this.surfaceMaterial.side = THREE.DoubleSide;
     }
     return this.surfaceMaterial;
   }
@@ -652,7 +652,7 @@ class SolarSimulatorTool extends Tool
       this.shadowMaterial.name = "shadow";
       this.shadowMaterial.polygonOffset = true;
       this.shadowMaterial.polygonOffsetUnits = -3;
-      this.shadowMaterial.side = 2;
+      this.shadowMaterial.side = THREE.DoubleSide;
     }
     return this.shadowMaterial;
   }
@@ -665,7 +665,7 @@ class SolarSimulatorTool extends Tool
       this.sunMaterial.name = "sun";
       this.sunMaterial.polygonOffset = true;
       this.sunMaterial.polygonOffsetUnits = -3;
-      this.sunMaterial.side = 2;
+      this.sunMaterial.side = THREE.DoubleSide;
     }
     return this.sunMaterial;
   }
@@ -1163,10 +1163,10 @@ class ShadowGenerator
       if (intersects.length > 0) return true;
     }
 
-    return this.isObjectShadowed(this.scene, raycaster);
+    return this.isCastShadowObject(this.scene, raycaster);
 	}
 
-  isObjectShadowed(object, raycaster)
+  isCastShadowObject(object, raycaster)
   {
     if (!object.visible) return false;
 
@@ -1184,7 +1184,7 @@ class ShadowGenerator
 
     for (let child of object.children)
     {
-      if (this.isObjectShadowed(child, raycaster)) return true;
+      if (this.isCastShadowObject(child, raycaster)) return true;
     }
     return false;
   }

@@ -50,8 +50,9 @@ export const translations =
   "button.update" : "Actualizar",
   "button.reset" : "Restablecer",
   "button.link" : "Enlazar",
-  "button.edit_acl": "Editar ACL",
+  "button.copy" : "Copiar",
 
+  "button.edit_acl": "Editar ACL",
   "button.preview_material" : "Probar material",
   "button.apply_material" : "Aplicar material",
   "button.restore_materials" : "Restaurar materiales",
@@ -93,6 +94,7 @@ export const translations =
   "menu.view.style" : "Estilo",
   "menu.view.projection" : "Proyección",
   "menu.select" : "Selección",
+  "menu.select_context" : "Seleccionar por contexto",
   "menu.design" : "Diseño",
   "menu.design.add" : "Añadir",
   "menu.design.add_solid" : "Sólido",
@@ -121,14 +123,16 @@ export const translations =
   "tool.savelocal.label" : "Guardar en local",
   "tool.savelocal.help" : "Guardar en local",
 
-  "tool.select.label" : "Seleccionar",
+  "tool.select.label" : "Seleccionar por punto",
   "tool.select.help" : "Puntero: selección por punto",
 
-  "tool.select_by_name.label" : "Selección por nombre",
+  "tool.select_faces.label" : "Seleccionar caras",
 
-  "tool.select_by_property.label" : "Selec. por propiedad",
+  "tool.select_by_name.label" : "Seleccionar por nombre",
 
-  "tool.select_by_qrcode.label" : "Selec. por código QR",
+  "tool.select_by_property.label" : "Seleccionar por propiedad",
+
+  "tool.select_by_qrcode.label" : "Seleccionar por código QR",
 
   "tool.select_parent.label" : "Seleccionar padre",
 
@@ -455,6 +459,10 @@ export const translations =
   "label.selection_properties" : "Propiedades de la selección:",
   "label.exported_properties" : "Propiedades a exportar:",
 
+  "label.select_faces_mode" : "Modo:",
+  "label.select_faces_angle" : "Ángulo máximo (grados):",  
+  "label.select_faces_depth" : "Profundidad máxima:",
+
   "label.material_list" : "Materiales:",
   "label.color" : "Color difuso:",
   "label.specular" : "Color especular:",
@@ -550,6 +558,10 @@ export const translations =
   "option.render_mode.normal" : "Normal",
   "option.render_mode.simplified" : "Simplificado",
   "option.render_mode.batch" : "Batch",
+
+  "option.select_faces.select_plane" : "Seleccionar plano de referència",
+  "option.select_faces.add_faces" : "Añadir caras por rectángulo",
+  "option.select_faces.remove_faces" : "Quitar caras por rectángulo",
 
   "title.add_cloud_service": "Añadir servicio de nube",
   "title.edit_cloud_service": "Editar servicio de nube",

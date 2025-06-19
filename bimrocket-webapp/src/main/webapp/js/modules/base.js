@@ -12,6 +12,7 @@ import { OptionsTool } from "../tools/OptionsTool.js";
 import { PrintTool } from "../tools/PrintTool.js";
 import { SVGExporterTool } from "../tools/SVGExporterTool.js";
 import { SelectTool } from "../tools/SelectTool.js";
+import { SelectFacesTool } from "../tools/SelectFacesTool.js";
 import { SelectParentTool } from "../tools/SelectParentTool.js";
 import { SelectByNameTool } from "../tools/SelectByNameTool.js";
 import { SelectByPropertyTool } from "../tools/SelectByPropertyTool.js";
@@ -273,6 +274,7 @@ export function load(application)
   const printTool = new PrintTool(application);
   const svgExporterTool = new SVGExporterTool(application);
   const selectTool = new SelectTool(application);
+  const selectFacesTool = new SelectFacesTool(application);
   const selectParentTool = new SelectParentTool(application);
   const selectByPropertyTool = new SelectByPropertyTool(application);
   const selectByQRCodeTool = new SelectByQRCodeTool(application);
@@ -522,11 +524,13 @@ export function load(application)
 
   const selectMenu = menuBar.addMenu("menu.select");
   selectMenu.addMenuItem(selectTool);
-  selectMenu.addMenuItem(selectParentTool);
-  selectMenu.addMenuItem(selectReprTool);
   selectMenu.addMenuItem(selectByPropertyTool);
   selectMenu.addMenuItem(selectByQRCodeTool);
+  const selectContextMenu = selectMenu.addMenu("menu.select_context");
+  selectContextMenu.addMenuItem(selectParentTool);
+  selectContextMenu.addMenuItem(selectReprTool);
   selectMenu.addMenuItem(exportSelectionTool);
+  selectMenu.addMenuItem(selectFacesTool);
 
   const designMenu = menuBar.addMenu("menu.design");
   const addMenu = designMenu.addMenu("menu.design.add");

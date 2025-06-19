@@ -144,6 +144,32 @@ class GeometryUtils
     normal.normalize();
     return normal;
   }
+  
+  /**
+   * Converts a local normal to WCS
+   * 
+   * @param {THREE.Vector3} normal - vector to convert to WCS
+   * @param {THREE.Matrix4} matrixWorld - the matrix where normal is referenced
+   * @param {THREE.Vector3} worldNormal - the output normal
+   * @returns {THREE.Vector3} the worldNormal
+   */
+  static getWorldNormal(normal, matrixWorld, worldNormal)
+  {
+    if (!(worldNormal instanceof THREE.Vector3))
+    {
+      worldNormal = new THREE.Vector3();
+    }
+
+    const v0 = this._vector1;
+    const v1 = this._vector2;
+
+    v0.setFromMatrixPosition(matrixWorld);
+    v1.copy(normal).applyMatrix4(matrixWorld);
+    v1.sub(v0).normalize();
+    worldNormal.copy(v1);
+    
+    return worldNormal;    
+  }
 
   /**
    * Returns the center of a circle that passes through the 3 given points.
@@ -233,7 +259,7 @@ class GeometryUtils
   /**
    * Clones an array of Vector2 or Vector3
    *
-   * @param {Vector2[] | Vector3[]} ring the array of vectors
+   * @param {Vector2[] | Vector3[]} ring - the array of vectors
    * @returns {Vector2[] | Vector3} the cloned ring
    */
   static cloneRing(ring)
@@ -252,8 +278,8 @@ class GeometryUtils
   /**
    * Add nextPoints to points without repeating vertices
    *
-   * @param {Vector2[] | Vector3[]} points the array of vectors
-   * @param {Vector2[] | Vector3[]} nextPoints the array of vectors
+   * @param {Vector2[] | Vector3[]} points - the array of vectors
+   * @param {Vector2[] | Vector3[]} nextPoints - the array of vectors
    */
   static joinPointArrays(points, nextPoints)
   {
@@ -334,6 +360,13 @@ class GeometryUtils
     return v21.multiplyScalar(t).add(v1);
   }
 
+  /**
+   * Returns an orthogonal vector
+   * 
+   * @param {THREE.Vector3} vector - the input vector
+   * @param {THREE.Vector3} orthoVector - the output vector
+   * @returns {THREE.Vector3} an orthogonal vector of the given vector.
+   */
   static orthogonalVector(vector, orthoVector)
   {
     if (!(orthoVector instanceof THREE.Vector3))

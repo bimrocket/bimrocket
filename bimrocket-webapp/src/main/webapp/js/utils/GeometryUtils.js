@@ -389,6 +389,37 @@ class GeometryUtils
     return orthoVector.cross(vector);
   }
 
+  /**
+   * Calculates the area of a BufferGeometry
+   * 
+   * @param {type} geometry - the mesh BufferGeometry
+   * @returns {Number} the area of the BufferGeometry
+   */
+  static getBufferGeometryArea(geometry)
+  {
+    const triangle = new THREE.Triangle();
+    const position = this._vector1;
+    const vertices = geometry.attributes.position.array;
+    
+    function getVertex(index)
+    {
+      position.x = vertices[3 * index];
+      position.y = vertices[3 * index + 1];
+      position.z = vertices[3 * index + 2];
+      return position;      
+    }
+
+    let area = 0;
+  
+    this.getBufferGeometryFaces(geometry, (va, vb, vc) => {
+      triangle.a.copy(getVertex(va));
+      triangle.b.copy(getVertex(vb));
+      triangle.c.copy(getVertex(vc));
+      area += triangle.getArea();
+    });
+    return area;
+  }
+
   static traverseBufferGeometryVertices(geometry, callback)
   {
     const position = this._vector1;

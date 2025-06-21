@@ -598,10 +598,10 @@ export const translations =
   "message.measure_area" : (area, units) => `Àrea: ${area} ${units}2`,
   "message.measure_angle" : angle => `Angle: ${angle} graus`,
 
-  "message.solids_count" : count => `Sòlids: ${count}`,
-  "message.solids_area" : (area, units) => `Àrea: ${area} ${units}2`,
-  "message.solids_volume" : (volume, units) => `Volum: ${volume} ${units}3`,
-  "message.solids_area_volume" : ratio => `Àrea/Volum: ${ratio}`,
+  "message.object_count" : count => `Objectes: ${count}`,
+  "message.total_area" : (area, units) => `Àrea: ${area} ${units}2`,
+  "message.total_volume" : (volume, units) => `Volum: ${volume} ${units}3`,
+  "message.area_volume_ratio" : ratio => `Àrea/Volum: ${ratio}`,
 
   "message.invalid_service" : service => `Servei no vàlid: [${service}].`,
   "message.objects_selected" : count => `${count} objecte${count === 1 ? '' : 's'} seleccionat${count === 1 ? '' : 's'}${count > 0 ? ':' : '.'}`,

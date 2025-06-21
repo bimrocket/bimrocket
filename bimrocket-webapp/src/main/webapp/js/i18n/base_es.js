@@ -336,7 +336,7 @@ export const translations =
 
   "tool.center_selection.label" : "Centrar selección",
 
-  "tool.focus_selection.label" : "Focalizar selection",
+  "tool.focus_selection.label" : "Focalizar selección",
 
   "tool.inspect_geometry.label" : "Analizar geometría",
 
@@ -349,7 +349,6 @@ export const translations =
   "tool.solar_simulator.label" : "Simulador solar",
   "tool.solar_simulator.select_position" : "Selecciona una posición en la escena para calcular el azimut y la elevación del sol.",
   "tool.solar_simulator.drag" : "Cambia la hora arrastrando el puntero sobre el gráfico.",
-  "tool.solar_simulator.select_surfaces" : "Selecciona las superficies sobre las que quieres calcular la exposición solar. Vuelve a seleccionar una superficie para deseleccionarla.",
   "tool.solar_simulator.cast_shadows" : "Proyectar sombras",
   "tool.solar_simulator.adjust_intensity" : "Ajustar la intensidad solar",
   "tool.solar_simulator.max_length_info" : "Longitud máxima de los lados de los triángules en la fase 1",
@@ -648,7 +647,7 @@ export const translations =
   "message.enter_link_name" : "Introduce el nombre del enlace.",
   "message.link_created" : "Enlace creado.",
 
-  "message.selected_surfaces" : count => `Superficies seleccionadas: ${count}`,
+  "message.solar_simulator_select_faces" : "Selecciona la superficie sobre la que quieres calcular la exposición solar mediante la herramienta de selección de caras.",
 
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.invalid_privileges": "Hay errores en los privilegios introducidos.",

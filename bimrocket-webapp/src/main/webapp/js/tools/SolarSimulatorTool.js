@@ -7,6 +7,7 @@
 import { Tool } from "./Tool.js";
 import { Controls } from "../ui/Controls.js";
 import { Application } from "../ui/Application.js";
+import { MessageDialog } from "../ui/MessageDialog.js";
 import { I18N } from "../i18n/I18N.js";
 import { Solid } from "../core/Solid.js";
 import { BIMUtils } from "../utils/BIMUtils.js";
@@ -33,13 +34,27 @@ class SolarSimulatorTool extends Tool
     this.simulationGroup = new THREE.Group();
     this.simulationGroup.name = "SolarSimulation";
 
-    this.surfacesGroup = new THREE.Group();
-    this.surfacesGroup.name = "Surfaces";
+    this.edgeMaterial = new THREE.LineBasicMaterial({
+      name : "shadow_edge",
+      color : 0x0,
+      linewidth : 1
+    });
 
-    this.edgeMaterial = null;
-    this.surfaceMaterial = null;
-    this.shadowMaterial = null;
-    this.sunMaterial = null;
+    this.shadowMaterial = new THREE.MeshPhongMaterial({
+      color : 0x606060,
+      name: "shadow_area",
+      polygonOffset : true,
+      polygonOffsetUnits : -3,
+      side : THREE.DoubleSide
+    });
+
+    this.sunMaterial = new THREE.MeshPhongMaterial({
+      color : 0xffff00,
+      name: "sun_area",
+      polygonOffset : true,
+      polygonOffsetUnits : -3,
+      side : THREE.DoubleSide
+    });
 
     this._onPointerDown = (event) => this.onPointerDown(event);
     this._onSceneChanged = (event) => this.onSceneChanged(event);
@@ -121,21 +136,6 @@ class SolarSimulatorTool extends Tool
     this.exposureElem.style.display = "none";
     this.panel.bodyElem.appendChild(this.exposureElem);
 
-    this.surfaceHelpElem = document.createElement("div");
-    this.surfaceHelpElem.style.margin = "4px";
-    this.exposureElem.appendChild(this.surfaceHelpElem);
-    I18N.set(this.surfaceHelpElem, "textContent", "tool.solar_simulator.select_surfaces");
-
-    this.selectSurfacesButton = Controls.addButton(this.exposureElem,
-      "solar_surcafaces", "button.select_surfaces", () => application.useTool(this));
-    this.selectSurfacesButton.style.display = "none";
-
-    this.surfaceCountElem = document.createElement("div");
-    this.surfaceCountElem.className = "mt_4 mb_4";
-    this.surfaceCountElem.style.margin = "4px";
-    this.exposureElem.appendChild(this.surfaceCountElem);
-    I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces", 0);
-
     this.maxLengthElem = Controls.addNumberField(this.exposureElem,
       "solar_max_length", "label.max_length", 0.1);
     this.maxLengthElem.step = 0.01;
@@ -154,7 +154,6 @@ class SolarSimulatorTool extends Tool
 
     this.startExposureButton = Controls.addButton(this.exposureElem,
       "solar_exposure", "button.exposure", () => this.startExposure());
-    this.startExposureButton.style.display = "";
 
     this.stopExposureButton = Controls.addButton(this.exposureElem,
       "solar_exposure", "button.stop", () => this.stopExposure());
@@ -178,9 +177,7 @@ class SolarSimulatorTool extends Tool
     this.panel.minimized = false;
 
     this.helpElem.style.display = "";
-    this.surfaceHelpElem.style.display = "";
     this.selectPositionButton.style.display = "none";
-    this.selectSurfacesButton.style.display = "none";
   }
 
   deactivate()
@@ -189,13 +186,11 @@ class SolarSimulatorTool extends Tool
     const container = application.container;
     container.removeEventListener("pointerdown", this._onPointerDown);
 
-    this.surfaceHelpElem.style.display = "none";
     if (!this.target.parent)
     {
       this.helpElem.style.display = "none";
       this.selectPositionButton.style.display = "";
     }
-    this.selectSurfacesButton.style.display = "";
   }
 
   onPointerDown(event)
@@ -210,7 +205,6 @@ class SolarSimulatorTool extends Tool
       if (this.target.parent === null)
       {
         this.application.overlays.add(this.target);
-        this.startExposureButton.disabled = true;
         this.exposureElem.style.display = "";
 
         let object = intersect.object;
@@ -227,21 +221,6 @@ class SolarSimulatorTool extends Tool
         this.update();
         I18N.set(this.helpElem, "textContent", "tool.solar_simulator.drag");
         application.i18n.update(this.helpElem);
-      }
-      else
-      {
-        let object = intersect.object;
-        if (object.parent === this.surfacesGroup)
-        {
-          application.removeObject(object);
-          this.startExposureButton.disabled =
-            this.surfacesGroup.children.length === 0;
-        }
-        else
-        {
-          this.addSurface(intersect);
-          this.startExposureButton.disabled = false;
-        }
       }
     }
   }
@@ -264,78 +243,6 @@ class SolarSimulatorTool extends Tool
       {
         simulationGroup.clear();
       }
-
-      const surfacesGroup = this.surfacesGroup;
-      if (!surfacesGroup.parent)
-      {
-        surfacesGroup.clear();
-      }
-
-      if ((event.type === "added" || event.type === "removed") &&
-          (event.object === simulationGroup ||
-           event.object === surfacesGroup ||
-           event.parent === surfacesGroup))
-      {
-        I18N.set(this.surfaceCountElem, "textContent", "message.selected_surfaces",
-          this.surfacesGroup.children.length);
-        this.application.i18n.update(this.surfaceCountElem);
-      }
-    }
-  }
-
-  intersect(pointerPosition, baseObject, recursive)
-  {
-    const application = this.application;
-    const camera = application.camera;
-    const container = application.container;
-    const raycaster = new THREE.Raycaster();
-
-    let pointercc = new THREE.Vector2();
-    pointercc.x = (pointerPosition.x / container.clientWidth) * 2 - 1;
-    pointercc.y = -(pointerPosition.y / container.clientHeight) * 2 + 1;
-
-    raycaster.setFromCamera(pointercc, camera);
-    raycaster.camera = camera;
-    raycaster.params.Line.threshold = 0.1;
-
-    let intersects = raycaster.intersectObjects([baseObject], recursive);
-
-    if (intersects.length === 0) return null;
-
-    let firstIntersect = null;
-    let surfaceIntersect = null;
-    for (let intersect of intersects)
-    {
-      if (application.clippingPlane === null ||
-          application.clippingPlane.distanceToPoint(intersect.point) > 0)
-      {
-        if (this.isSelectableObject(intersect.object))
-        {
-          if (firstIntersect === null)
-          {
-            firstIntersect = intersect;
-          }
-
-          if (intersect.object.parent === this.surfacesGroup)
-          {
-            surfaceIntersect = intersect;
-            break;
-          }
-        }
-      }
-    }
-    if (firstIntersect === null)
-    {
-      return null;
-    }
-    else if (surfaceIntersect === null)
-    {
-      return firstIntersect;
-    }
-    else
-    {
-      const delta = surfaceIntersect.distance - firstIntersect.distance;
-      return delta < 0.01 ? surfaceIntersect : firstIntersect;
     }
   }
 
@@ -428,31 +335,50 @@ class SolarSimulatorTool extends Tool
 
     this.shadowGenerator = shadowGenerator;
 
-    const surfacesGroup = this.surfacesGroup;
-    for (let surface of surfacesGroup.children)
+    const selectFacesTool = application.tools["select_faces"];
+    const mesh = selectFacesTool?.mesh;
+
+    if (!mesh || 
+        !ObjectUtils.isObjectDescendantOf(mesh, application.scene))
     {
-      const array = surface.geometry.getAttribute("position").array;
-      for (let i = 0; i < array.length; i += 9)
-      {
-        const x1 = array[i];
-        const y1 = array[i + 1];
-        const z1 = array[i + 2];
-        const p1 = new THREE.Vector3(x1, y1, z1);
-        p1.applyMatrix4(surface.matrixWorld);
+      MessageDialog.create("tool.solar_simulator.label", 
+       "message.solar_simulator_select_faces")
+       .setClassName("info")
+       .setI18N(application.i18n).show();
+      return;
+    }
 
-        const x2 = array[i + 3];
-        const y2 = array[i + 4];
-        const z2 = array[i + 5];
-        const p2 = new THREE.Vector3(x2, y2, z2);
-        p2.applyMatrix4(surface.matrixWorld);
+    const simulationGroup = this.simulationGroup;
+    simulationGroup.visible = true;
+    
+    if (simulationGroup.parent === null)
+    {
+      ObjectUtils.dispose(simulationGroup);
+      simulationGroup.clear();
+      application.addObject(simulationGroup, application.baseObject);
+    }
 
-        const x3 = array[i + 6];
-        const y3 = array[i + 7];
-        const z3 = array[i + 8];
-        const p3 = new THREE.Vector3(x3, y3, z3);
-        p3.applyMatrix4(surface.matrixWorld);
-        shadowGenerator.addTriangle(p1, p2, p3);
-      }
+    const array = mesh.geometry.getAttribute("position").array;
+    for (let i = 0; i < array.length; i += 9)
+    {
+      const x1 = array[i];
+      const y1 = array[i + 1];
+      const z1 = array[i + 2];
+      const p1 = new THREE.Vector3(x1, y1, z1);
+      p1.applyMatrix4(mesh.matrixWorld);
+
+      const x2 = array[i + 3];
+      const y2 = array[i + 4];
+      const z2 = array[i + 5];
+      const p2 = new THREE.Vector3(x2, y2, z2);
+      p2.applyMatrix4(mesh.matrixWorld);
+
+      const x3 = array[i + 6];
+      const y3 = array[i + 7];
+      const z3 = array[i + 8];
+      const p3 = new THREE.Vector3(x3, y3, z3);
+      p3.applyMatrix4(mesh.matrixWorld);
+      shadowGenerator.addTriangle(p1, p2, p3);
     }
 
     shadowGenerator.onProgress = (message, progress) =>
@@ -467,27 +393,24 @@ class SolarSimulatorTool extends Tool
       progressBar.progress = undefined;
       progressBar.message = "";
 
-      this.startExposureButton.style.display = "";
       this.stopExposureButton.style.display = "none";
 
       if (shadowGenerator.interrupted) return;
-
-      const simulationGroup = this.simulationGroup;
-      for (let child of simulationGroup.children)
-      {
-        if (child !== this.surfacesGroup)
-        {
-          child.visible = false;
-          application.notifyObjectsChanged(child);
-        }
-      }
 
       const exposureGroup = new THREE.Group();
       exposureGroup.name = "Exposure-" + this.getDate().toISOString();
       exposureGroup.userData = shadowGenerator.getStatistics();
 
+      const surface = new THREE.Mesh(mesh.geometry, Solid.FaceMaterial);
+      surface.name = "Surface";
+      surface.visible = false;
+      surface.raycast = function(){};
+      surface.position.sub(application.baseObject.position);
+      surface.updateMatrix();
+      exposureGroup.add(surface);      
+
       const shadowEdgesGeometry = shadowGenerator.getEdgeGeometry();
-      const shadowLines = new THREE.LineSegments(shadowEdgesGeometry, this.getEdgeMaterial());
+      const shadowLines = new THREE.LineSegments(shadowEdgesGeometry, this.edgeMaterial);
       shadowLines.name = "ShadowEdges";
       shadowLines.position.sub(application.baseObject.position);
       shadowLines.updateMatrix();
@@ -496,7 +419,7 @@ class SolarSimulatorTool extends Tool
       exposureGroup.add(shadowLines);
 
       const sunEdgesGeometry = shadowGenerator.getEdgeGeometry(false);
-      const sunLines = new THREE.LineSegments(sunEdgesGeometry, this.getEdgeMaterial());
+      const sunLines = new THREE.LineSegments(sunEdgesGeometry, this.edgeMaterial);
       sunLines.name = "SunEdges";
       sunLines.position.sub(application.baseObject.position);
       sunLines.updateMatrix();
@@ -505,7 +428,7 @@ class SolarSimulatorTool extends Tool
       exposureGroup.add(sunLines);
 
       const shadowGeometry = shadowGenerator.getShadowGeometry();
-      const shadowMesh = new THREE.Mesh(shadowGeometry, this.getShadowMaterial());
+      const shadowMesh = new THREE.Mesh(shadowGeometry, this.shadowMaterial);
       shadowMesh.position.sub(application.baseObject.position);
       shadowMesh.name = "Shadow";
       shadowMesh.updateMatrix();
@@ -513,7 +436,7 @@ class SolarSimulatorTool extends Tool
       exposureGroup.add(shadowMesh);
 
       const sunGeometry = shadowGenerator.getShadowGeometry(false);
-      const sunMesh = new THREE.Mesh(sunGeometry, this.getSunMaterial());
+      const sunMesh = new THREE.Mesh(sunGeometry, this.sunMaterial);
       sunMesh.position.sub(application.baseObject.position);
       sunMesh.name = "Sun";
       sunMesh.updateMatrix();
@@ -526,7 +449,6 @@ class SolarSimulatorTool extends Tool
     progressBar.visible = true;
     progressBar.progress = undefined;
 
-    this.startExposureButton.style.display = "none";
     this.stopExposureButton.style.display = "";
 
     shadowGenerator.start();
@@ -573,136 +495,6 @@ class SolarSimulatorTool extends Tool
       application.removeObject(simulationGroup);
       simulationGroup.clear();
     }
-
-    const surfacesGroup = this.surfacesGroup;
-    surfacesGroup.clear();
-  }
-
-  addSurface(intersect)
-  {
-    const object = intersect.object;
-    if (object instanceof Solid)
-    {
-      const application = this.application;
-      const point = intersect.point;
-      const normal = intersect.normal.clone();
-      const matrixWorld = object.matrixWorld;
-
-      const geometry = this.getSurfaceGeometry(object.geometry, normal);
-      if (!geometry) return;
-
-      const mesh = new THREE.Mesh(geometry, this.getSurfaceMaterial());
-      matrixWorld.decompose(mesh.position, mesh.rotation, mesh.scale);
-      mesh.position.sub(application.baseObject.position);
-      mesh.receiveShadow = true;
-      mesh.name = "Surface-" + mesh.id;
-      mesh.updateMatrix();
-
-      const simulationGroup = this.simulationGroup;
-      const surfacesGroup = this.surfacesGroup;
-      simulationGroup.visible = true;
-      surfacesGroup.visible = true;
-
-      if (simulationGroup.parent === null)
-      {
-        ObjectUtils.dispose(simulationGroup);
-        simulationGroup.clear();
-        application.addObject(simulationGroup, application.baseObject);
-      }
-
-      if (surfacesGroup.parent === null)
-      {
-        ObjectUtils.dispose(surfacesGroup);
-        surfacesGroup.clear();
-        application.addObject(surfacesGroup, simulationGroup);
-      }
-
-      application.addObject(mesh, surfacesGroup);
-    }
-  }
-
-  getEdgeMaterial()
-  {
-    if (!this.edgeMaterial)
-    {
-      this.edgeMaterial = new THREE.LineBasicMaterial(
-        { color: 0x0, linewidth: 1 });
-    }
-    return this.edgeMaterial;
-  }
-
-  getSurfaceMaterial()
-  {
-    if (!this.surfaceMaterial)
-    {
-      this.surfaceMaterial = new THREE.MeshPhongMaterial({ color : 0x8080ff });
-      this.surfaceMaterial.name = "surface";
-      this.surfaceMaterial.polygonOffset = true;
-      this.surfaceMaterial.polygonOffsetUnits = -1;
-      this.surfaceMaterial.side = THREE.DoubleSide;
-    }
-    return this.surfaceMaterial;
-  }
-
-  getShadowMaterial()
-  {
-    if (!this.shadowMaterial)
-    {
-      this.shadowMaterial = new THREE.MeshPhongMaterial({ color : 0x606060 });
-      this.shadowMaterial.name = "shadow";
-      this.shadowMaterial.polygonOffset = true;
-      this.shadowMaterial.polygonOffsetUnits = -3;
-      this.shadowMaterial.side = THREE.DoubleSide;
-    }
-    return this.shadowMaterial;
-  }
-
-  getSunMaterial()
-  {
-    if (!this.sunMaterial)
-    {
-      this.sunMaterial = new THREE.MeshPhongMaterial({ color : 0xffff00 });
-      this.sunMaterial.name = "sun";
-      this.sunMaterial.polygonOffset = true;
-      this.sunMaterial.polygonOffsetUnits = -3;
-      this.sunMaterial.side = THREE.DoubleSide;
-    }
-    return this.sunMaterial;
-  }
-
-  getSurfaceGeometry(geometry, normal)
-  {
-    const bufferGeometry = new THREE.BufferGeometry();
-    const positions = [];
-    const normals = [];
-    const factor = 0.8;
-
-    for (let face of geometry.faces)
-    {
-      if (face.normal === null) face.updateNormal();
-
-      if (face.normal.dot(normal) > factor)
-      {
-        let triangles = face.getTriangles();
-        for (let triangle of triangles)
-        {
-          for (let i = 0; i < 3; i++)
-          {
-            let vertex = geometry.vertices[triangle[i]];
-            positions.push(vertex.x, vertex.y, vertex.z);
-            normals.push(normal.x, normal.y, normal.z);
-          }
-        }
-      }
-    }
-    if (positions.length < 3) return null;
-
-    bufferGeometry.setAttribute('position',
-      new THREE.Float32BufferAttribute(positions, 3));
-    bufferGeometry.setAttribute('normal',
-      new THREE.Float32BufferAttribute(normals, 3));
-    bufferGeometry.setIndex(null);
-    return bufferGeometry;
   }
 
   getDate()

@@ -349,7 +349,6 @@ export const translations =
   "tool.solar_simulator.label" : "Solar simulator",
   "tool.solar_simulator.select_position" : "Select position in the scene to calculate the sun azimuth and elevation.",
   "tool.solar_simulator.drag" : "Change time by dragging the pointer on the graph.",
-  "tool.solar_simulator.select_surfaces" : "Select the surfaces on which you want to calculate solar exposure. Select a surface again to deselect it.",
   "tool.solar_simulator.cast_shadows" : "Cast shadows",
   "tool.solar_simulator.adjust_intensity" : "Adjust solar intensity",
   "tool.solar_simulator.max_length_info" : "Maximum length of triangle sides in phase 1",
@@ -648,7 +647,7 @@ export const translations =
   "message.enter_link_name" : "Enter the link name.",
   "message.link_created" : "Link created.",
 
-  "message.selected_surfaces" : count => `Selected surfaces: ${count}`,
+  "message.solar_simulator_select_faces" : "Select the surface for which you want to calculate solar exposure using the face selection tool.",
 
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.invalid_privileges": "Errors found in the input privileges.",

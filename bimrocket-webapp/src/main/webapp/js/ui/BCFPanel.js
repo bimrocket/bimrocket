@@ -605,6 +605,7 @@ class BCFPanel extends Panel
     const viewpoint = {};
     const camera = application.camera;
     const matrix = camera.matrixWorld;
+    console.log(THREE)
     const xAxis = new THREE.Vector3();
     const yAxis = new THREE.Vector3();
     const zAxis = new THREE.Vector3();
@@ -616,6 +617,19 @@ class BCFPanel extends Panel
     const basePos = application.baseObject.position;
     position.sub(basePos);
 
+    const userData = application.selection.object.userData;
+    let globalId = null;
+
+    if (userData.IFC?.GlobalId) {
+      globalId = userData.IFC.GlobalId;
+      console.log("GlobalId:", globalId);
+    }
+    if (globalId && !viewpoint.components) {
+      viewpoint.components = {
+          selection: [{ ifc_guid: globalId }]
+      };
+    }
+    
     if (camera instanceof THREE.PerspectiveCamera)
     {
       viewpoint.perspective_camera =
@@ -643,9 +657,18 @@ class BCFPanel extends Panel
       };
     }
 
+    // console.log("Selected object:", selectedObject.userData.IFC.GlobalId);
+    // if (selectedObject || selectedObject.userData && selectedObject.userData.IFC && selectedObject.userData.IFC.GlobalId) {
+    //   viewpoint.components = {
+    //       selection: [{
+    //           ifc_guid: selectedObject.userData.IFC.GlobalId
+    //       }]
+    //   };
+    // }
     const onCompleted = viewpoint =>
     {
       this.hideProgressBar();
+      console.log(viewpoint)
       this.loadViewpoints(true);
       Toast.create("bim|message.viewpoint_saved")
         .setI18N(application.i18n).show();
@@ -1703,7 +1726,7 @@ class BCFPanel extends Panel
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.setCredentials(username, password);
+      this.service.setCredentials("admin", "bimrocket");
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>

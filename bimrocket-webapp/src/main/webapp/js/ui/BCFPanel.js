@@ -282,6 +282,11 @@ class BCFPanel extends Panel
       "topic_creation_date", "bim|label.creation_date");
      this.creationDateElem.setAttribute("readonly", true);
 
+    // Añadir este bloque nuevo para mostrar los IDs seleccionados
+    this.selectedComponentsElem = document.createElement("div");
+    this.selectedComponentsElem.className = "selected_components";
+    this.auditPanelElem.appendChild(this.selectedComponentsElem);
+
     this.creationAuthorElem = Controls.addTextField(this.auditPanelElem,
       "topic_creation_author", "bim|label.creation_author");
      this.creationAuthorElem.setAttribute("readonly", true);
@@ -617,16 +622,17 @@ class BCFPanel extends Panel
     const basePos = application.baseObject.position;
     position.sub(basePos);
 
-    const userData = application.selection.object.userData;
-    let globalId = null;
+    const selection = bimrocket.selection.objects || [bimrocket.selection.object].filter(Boolean);
+    const globalIds = selection
+      .map(obj => obj?.userData?.IFC?.GlobalId)
+      .filter(Boolean)
+      .map(globalId => ({ ifc_guid: globalId }));
 
-    if (userData.IFC?.GlobalId) {
-      globalId = userData.IFC.GlobalId;
-      console.log("GlobalId:", globalId);
-    }
-    if (globalId && !viewpoint.components) {
-      viewpoint.components = {
-          selection: [{ ifc_guid: globalId }]
+    if (globalIds.length > 0) 
+    {
+      viewpoint.components = 
+      { 
+        selection: globalIds 
       };
     }
     
@@ -657,14 +663,6 @@ class BCFPanel extends Panel
       };
     }
 
-    // console.log("Selected object:", selectedObject.userData.IFC.GlobalId);
-    // if (selectedObject || selectedObject.userData && selectedObject.userData.IFC && selectedObject.userData.IFC.GlobalId) {
-    //   viewpoint.components = {
-    //       selection: [{
-    //           ifc_guid: selectedObject.userData.IFC.GlobalId
-    //       }]
-    //   };
-    // }
     const onCompleted = viewpoint =>
     {
       this.hideProgressBar();
@@ -1410,6 +1408,11 @@ class BCFPanel extends Panel
     {
       let itemListElem = document.createElement("li");
 
+      // Contenedor principal para el viewpoint
+      let viewpointContainer = document.createElement("div");
+      viewpointContainer.className = "viewpoint-container";
+      itemListElem.appendChild(viewpointContainer);
+
       let spanElem = document.createElement("span");
       spanElem.className = "icon viewpoint";
       itemListElem.appendChild(spanElem);
@@ -1425,6 +1428,30 @@ class BCFPanel extends Panel
       }
       Controls.addTextWithArgs(itemListElem, "bim|message.viewpoint",
         [(viewpoint.index || ""), vpType], "bcf_viewpoint_text");
+
+      // llistat Ids
+      if (viewpoint.components && viewpoint.components.selection) {
+        let componentsContainer = document.createElement("div");
+        componentsContainer.className = "components-container";
+        
+        let componentsLabel = document.createElement("div");
+        componentsLabel.textContent = "Ids dels components:";
+        componentsContainer.appendChild(componentsLabel);
+        
+        let componentsList = document.createElement("ul");
+        componentsList.className = "components-list";
+        
+        viewpoint.components.selection.forEach(component => {
+          let componentItem = document.createElement("li");
+          componentItem.textContent = component.ifc_guid || "No GUID";
+          componentsList.appendChild(componentItem);
+        });
+        
+        componentsContainer.appendChild(componentsList);
+        viewpointContainer.appendChild(componentsContainer);
+      }
+      // fin llistat Ids
+
       Controls.addButton(itemListElem, "showViewpoint", "button.view",
         () => this.showViewpoint(viewpoint), "bcf_show_viewpoint");
 

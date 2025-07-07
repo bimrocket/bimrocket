@@ -52,8 +52,8 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -414,18 +414,24 @@ public class WebdavServlet extends HttpServlet
   }
 
   Path getDestinationPath(HttpServletRequest request)
-    throws MalformedURLException, UnsupportedEncodingException
   {
     String destination = request.getHeader("Destination");
     if (destination == null)
       throw new InvalidRequestException("Missing destination");
 
-    URL url = new URL(destination);
+    URI uri;
+    try
+    {
+      uri = new URI(destination);
+    }
+    catch (URISyntaxException ex)
+    {
+      throw new InvalidRequestException("Invalid destination: " + destination);
+    }
     int contextPathLength = request.getContextPath().length();
     int servletPathLength = request.getServletPath().length();
     int baseLength = contextPathLength + servletPathLength;
-    String spath = url.getPath().substring(baseLength);
-    spath = URLDecoder.decode(spath, "UTF-8");
+    String spath = uri.getPath().substring(baseLength);
 
     return new Path(spath);
   }

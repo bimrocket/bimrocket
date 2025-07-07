@@ -28,6 +28,7 @@ class Outliner extends Panel
     this.tree.getNodeLabel = object =>
     {
       let objectLabel = object.name;
+      console.log(objectLabel)
       if (objectLabel === null || objectLabel.trim().length === 0)
       {
         objectLabel = object.id;
@@ -146,6 +147,7 @@ class Outliner extends Panel
     this.tree.clear();
     this.map.clear();
     let treeNode = this.populateObject(this.application.scene);
+    console.log('update', treeNode)
     this.createMap(treeNode);
   }
 
@@ -176,22 +178,24 @@ class Outliner extends Panel
   {
     let onClick = event =>
     {
+      console.log(object)
       this.autoScroll = false;
       this.application.userSelectObjects([object], event);
     };
-
     let treeNode;
     if (parentTreeNode)
     {
       treeNode = parentTreeNode.addNode(object, onClick);
+      console.log('if', treeNode)
     }
     else
     {
       treeNode = this.tree.addNode(object, onClick);
+      console.log('else', treeNode)
     }
     this.updateNodeStyle(treeNode);
     this.populateChildren(treeNode);
-
+    console.log('final', treeNode)
     return treeNode;
   }
 
@@ -204,6 +208,7 @@ class Outliner extends Panel
       if (!name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
       {
         this.populateObject(child, treeNode);
+        console.log('populateChildren', name, treeNode)
       }
     }
   }

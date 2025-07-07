@@ -1441,9 +1441,46 @@ class BCFPanel extends Panel
         let componentsList = document.createElement("ul");
         componentsList.className = "components-list";
         
+        // viewpoint.components.selection.forEach(component => {
+        //   let componentItem = document.createElement("li");
+        //   componentItem.textContent = component.ifc_guid || "No GUID";
+        //   componentsList.appendChild(componentItem);
+        // });
+
         viewpoint.components.selection.forEach(component => {
           let componentItem = document.createElement("li");
           componentItem.textContent = component.ifc_guid || "No GUID";
+          
+          componentItem.style.cursor = "pointer";
+          componentItem.style.textDecoration = "underline";
+          componentItem.style.color = "#0066cc";
+          
+          componentItem.addEventListener("click", async (event) => {
+            event.stopPropagation();
+            if (viewpoint.components && viewpoint.components.selection) {
+              const firstComponent = viewpoint.components.selection[0];
+              if (firstComponent && firstComponent.ifc_guid) {
+                
+                if (bimrocket.selection.selectObject) {
+                  bimrocket.selection.selectObject({
+                    userData: {
+                      IFC: {
+                        GlobalId: firstComponent.ifc_guid
+                      }
+                    }
+                  });
+                  console.log(`Selected object with GUID: ${firstComponent.ifc_guid}`);
+                } else {
+                  console.error("No method found to select the object.");
+                }
+              } else {
+                console.warn("No valid IFC GUID found in the selection.");
+              }
+            } else {
+              console.warn("No components found in the viewpoint selection.");
+            }
+          });
+          
           componentsList.appendChild(componentItem);
         });
         
@@ -1497,6 +1534,53 @@ class BCFPanel extends Panel
     }
   }
 
+  selectIfcComponentByGuid(ifcGuid) {
+    if (!ifcGuid) return null;
+  
+    try {
+      const foundObjects = this.findObjectsByIfcGuid(ifcGuid);
+      
+      if (foundObjects.length === 0 && this.application.loadIFCElementByGuid) {
+        this.application.loadIFCElementByGuid(ifcGuid);
+        return this.findObjectsByIfcGuid(ifcGuid);
+      }
+      
+      return foundObjects;
+    } catch (error) {
+      console.error("Error in selectIfcComponentByGuid:", error);
+      return null;
+    }
+  }
+  
+  findObjectsByIfcGuid(ifcGuid) {
+    const foundObjects = [];
+    
+    const normalizedGuid = ifcGuid.replace(/-/g, '').toUpperCase();
+    
+    this.application.scene.traverse(object => {
+      const objectGuid = this.extractGuidFromObject(object);
+      if (objectGuid && objectGuid.replace(/-/g, '').toUpperCase() === normalizedGuid) {
+        foundObjects.push(object);
+      }
+    });
+    
+    return foundObjects;
+  }
+  
+  extractGuidFromObject(object) {
+    if (object.userData?.ifc_guid) return object.userData.ifc_guid;
+    
+    
+    if (object.properties?.GlobalId) return object.properties.GlobalId;
+    
+    if (object.metadata?.guid) return object.metadata.guid;
+    
+    if (object.userData?.expressID && this.application.getGlobalId) {
+      return this.application.getGlobalId(object.userData.expressID);
+    }
+    
+    return null;
+  }
   zoomSnapshot(source)
   {
     const dialog = new Dialog("bim|title.viewpoint");

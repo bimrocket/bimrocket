@@ -1472,8 +1472,8 @@ class BCFPanel extends Panel
               this.application.userSelectObjects([foundObject], event); // quan el troba el selecciona a l'escena
             } else {
               console.warn("Object with GUID", component.ifc_guid, "not found");
-              Toast.create("GUID not found")
-                .setI18N(application.i18n).show();
+              Toast.create("No s'ha trobat l'objecte del GUID seleccionat")
+                .setI18N(this.application.i18n).show();
             }
           });
           

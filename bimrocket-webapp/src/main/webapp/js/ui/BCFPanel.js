@@ -1786,7 +1786,7 @@ class BCFPanel extends Panel
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.setCredentials("admin", "bimrocket");
+      this.service.setCredentials(username, password);
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>

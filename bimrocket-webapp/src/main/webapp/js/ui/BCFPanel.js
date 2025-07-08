@@ -42,6 +42,7 @@ class BCFPanel extends Panel
     this.docRefGuid = null;
     this.projectMap = new Map();
 
+    
     // search panel
     this.searchPanelElem = document.createElement("div");
     this.searchPanelElem.id = "bcf_search_panel";
@@ -349,6 +350,22 @@ class BCFPanel extends Panel
     this.saveExtensionsButton = Controls.addButton(
       this.saveExtensionsButtonsElem, "saveExtensions", "bim|button.save_extensions",
       () => this.saveProjectExtensions());
+
+    // mapa per associar els GUIDs d'objectes IFC amb les seves instancies d'objectes 3D corresponents
+    // això permet accedir ràpidament als objectes 3D: key = GlobalId, value = object 3D
+
+    this.guidMap = new Map();
+
+    application.addEventListener("scene", event => {
+      if (event.type === "added") { // nou objecte agregat a l'escena
+        event.object.traverse(obj => { // recorre tot l'objecte
+          if (obj.userData?.IFC?.GlobalId) {
+            this.guidMap.set(obj.userData.IFC.GlobalId, obj);
+          }
+        });
+      }
+    });
+
   }
 
   clearTopics()
@@ -610,7 +627,6 @@ class BCFPanel extends Panel
     const viewpoint = {};
     const camera = application.camera;
     const matrix = camera.matrixWorld;
-    console.log(THREE)
     const xAxis = new THREE.Vector3();
     const yAxis = new THREE.Vector3();
     const zAxis = new THREE.Vector3();
@@ -621,8 +637,7 @@ class BCFPanel extends Panel
 
     const basePos = application.baseObject.position;
     position.sub(basePos);
-
-    const selection = bimrocket.selection.objects || [bimrocket.selection.object].filter(Boolean);
+    const selection = application.selection.objects || [application.selection.object].filter(Boolean);
     const globalIds = selection
       .map(obj => obj?.userData?.IFC?.GlobalId)
       .filter(Boolean)
@@ -666,7 +681,6 @@ class BCFPanel extends Panel
     const onCompleted = viewpoint =>
     {
       this.hideProgressBar();
-      console.log(viewpoint)
       this.loadViewpoints(true);
       Toast.create("bim|message.viewpoint_saved")
         .setI18N(application.i18n).show();
@@ -1396,11 +1410,12 @@ class BCFPanel extends Panel
     }
   }
 
-  populateViewpointList()
+
+  populateViewpointList(event)
   {
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
-
+    
     const viewpoints = this.viewpoints;
     const viewpointsElem = this.viewpointListElem;
     viewpointsElem.innerHTML = "";
@@ -1440,12 +1455,6 @@ class BCFPanel extends Panel
         
         let componentsList = document.createElement("ul");
         componentsList.className = "components-list";
-        
-        // viewpoint.components.selection.forEach(component => {
-        //   let componentItem = document.createElement("li");
-        //   componentItem.textContent = component.ifc_guid || "No GUID";
-        //   componentsList.appendChild(componentItem);
-        // });
 
         viewpoint.components.selection.forEach(component => {
           let componentItem = document.createElement("li");
@@ -1455,29 +1464,16 @@ class BCFPanel extends Panel
           componentItem.style.textDecoration = "underline";
           componentItem.style.color = "#0066cc";
           
-          componentItem.addEventListener("click", async (event) => {
+          componentItem.addEventListener("click", (event) => {
             event.stopPropagation();
-            if (viewpoint.components && viewpoint.components.selection) {
-              const firstComponent = viewpoint.components.selection[0];
-              if (firstComponent && firstComponent.ifc_guid) {
-                
-                if (bimrocket.selection.selectObject) {
-                  bimrocket.selection.selectObject({
-                    userData: {
-                      IFC: {
-                        GlobalId: firstComponent.ifc_guid
-                      }
-                    }
-                  });
-                  console.log(`Selected object with GUID: ${firstComponent.ifc_guid}`);
-                } else {
-                  console.error("No method found to select the object.");
-                }
-              } else {
-                console.warn("No valid IFC GUID found in the selection.");
-              }
+            // l'event "click" busca al guidMap l'objecte 3D corresponent amb el GUID del component
+            const foundObject = this.guidMap.get(component.ifc_guid);
+            if (foundObject) {
+              this.application.userSelectObjects([foundObject], event); // quan el troba el selecciona a l'escena
             } else {
-              console.warn("No components found in the viewpoint selection.");
+              console.warn("Object with GUID", component.ifc_guid, "not found");
+              Toast.create("GUID not found")
+                .setI18N(application.i18n).show();
             }
           });
           
@@ -1487,7 +1483,7 @@ class BCFPanel extends Panel
         componentsContainer.appendChild(componentsList);
         viewpointContainer.appendChild(componentsContainer);
       }
-      // fin llistat Ids
+      // fi llistat Ids
 
       Controls.addButton(itemListElem, "showViewpoint", "button.view",
         () => this.showViewpoint(viewpoint), "bcf_show_viewpoint");
@@ -1534,53 +1530,6 @@ class BCFPanel extends Panel
     }
   }
 
-  selectIfcComponentByGuid(ifcGuid) {
-    if (!ifcGuid) return null;
-  
-    try {
-      const foundObjects = this.findObjectsByIfcGuid(ifcGuid);
-      
-      if (foundObjects.length === 0 && this.application.loadIFCElementByGuid) {
-        this.application.loadIFCElementByGuid(ifcGuid);
-        return this.findObjectsByIfcGuid(ifcGuid);
-      }
-      
-      return foundObjects;
-    } catch (error) {
-      console.error("Error in selectIfcComponentByGuid:", error);
-      return null;
-    }
-  }
-  
-  findObjectsByIfcGuid(ifcGuid) {
-    const foundObjects = [];
-    
-    const normalizedGuid = ifcGuid.replace(/-/g, '').toUpperCase();
-    
-    this.application.scene.traverse(object => {
-      const objectGuid = this.extractGuidFromObject(object);
-      if (objectGuid && objectGuid.replace(/-/g, '').toUpperCase() === normalizedGuid) {
-        foundObjects.push(object);
-      }
-    });
-    
-    return foundObjects;
-  }
-  
-  extractGuidFromObject(object) {
-    if (object.userData?.ifc_guid) return object.userData.ifc_guid;
-    
-    
-    if (object.properties?.GlobalId) return object.properties.GlobalId;
-    
-    if (object.metadata?.guid) return object.metadata.guid;
-    
-    if (object.userData?.expressID && this.application.getGlobalId) {
-      return this.application.getGlobalId(object.userData.expressID);
-    }
-    
-    return null;
-  }
   zoomSnapshot(source)
   {
     const dialog = new Dialog("bim|title.viewpoint");

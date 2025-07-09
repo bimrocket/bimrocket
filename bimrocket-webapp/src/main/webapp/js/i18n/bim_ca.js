@@ -97,6 +97,7 @@ export const translations =
   "label.bim_explode_xoffset" : "Desplaçament eix X:",
   "label.bim_explode_yoffset" : "Desplaçament eix Y:",
   "label.bim_explode_zoffset" : "Desplaçament eix Z:",
+  "label.select_components" : "Selecciona els objectes de la vista:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
@@ -110,6 +111,7 @@ export const translations =
   "title.delete_ifcdb_service" : "Esborra servei IFCDB",
   "title.viewpoint" : "Vista de la incidència",
   "title.delete_doc_ref" : "Esborra referència a document",
+  "title.select_components" : "Selecciona objectes",
 
   "title.bim_delta_snapshots" : "Captures IFC",
 

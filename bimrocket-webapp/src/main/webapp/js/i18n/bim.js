@@ -97,6 +97,7 @@ export const translations =
   "label.bim_explode_xoffset" : "X axis offset:",
   "label.bim_explode_yoffset" : "Y axis offset:",
   "label.bim_explode_zoffset" : "Z axis offset:",
+  "label.select_components" : "Select components in view:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -110,6 +111,7 @@ export const translations =
   "title.delete_ifcdb_service" : "Delete IFCDB service",
   "title.viewpoint" : "Topic viewpoint",
   "title.delete_doc_ref" : "Delete document reference",
+  "title.select_components" : "Select components",
 
   "title.bim_delta_snapshots" : "IFC snapshots",
 

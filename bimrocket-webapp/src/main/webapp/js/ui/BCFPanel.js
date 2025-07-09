@@ -1427,10 +1427,7 @@ class BCFPanel extends Panel
     {
       let itemListElem = document.createElement("li");
 
-      // Contenedor principal para el viewpoint
-      let viewpointContainer = document.createElement("div");
-      viewpointContainer.className = "viewpoint-container";
-      itemListElem.appendChild(viewpointContainer);
+      
 
       let spanElem = document.createElement("span");
       spanElem.className = "icon viewpoint";
@@ -1448,51 +1445,6 @@ class BCFPanel extends Panel
       Controls.addTextWithArgs(itemListElem, "bim|message.viewpoint",
         [(viewpoint.index || ""), vpType], "bcf_viewpoint_text");
 
-      // llistat Ids
-      if (viewpoint.components && viewpoint.components.selection) 
-      {
-        let componentsContainer = document.createElement("div");
-        componentsContainer.className = "components-container";
-        
-        let componentsLabel = document.createElement("div");
-        componentsLabel.textContent = "Ids dels components:";
-        componentsLabel.style.cursor = "pointer";
-        componentsLabel.style.textDecoration = "underline";
-        componentsLabel.style.color = "#0066cc";
-        componentsLabel.style.marginBottom = "5px";
-
-        componentsLabel.addEventListener("click", (event) => 
-        {
-          this.handleSelectComponent(viewpoint.components.selection, event);
-        });
-
-        componentsContainer.appendChild(componentsLabel);
-        
-        let componentsList = document.createElement("ul");
-        componentsList.className = "components-list";
-
-        viewpoint.components.selection.forEach(component => 
-        {
-          let componentItem = document.createElement("li");
-          componentItem.textContent = component.ifc_guid || "No GUID";
-          
-          componentItem.style.cursor = "pointer";
-          componentItem.style.textDecoration = "underline";
-          componentItem.style.color = "#0066cc";
-          
-          componentItem.addEventListener("click", (event) => 
-          {
-            this.handleSelectComponent(component, event);
-          });
-          
-          componentsList.appendChild(componentItem);
-        });
-        
-        componentsContainer.appendChild(componentsList);
-        viewpointContainer.appendChild(componentsContainer);
-      }
-      // fi llistat Ids
-
       Controls.addButton(itemListElem, "showViewpoint", "button.view",
         () => this.showViewpoint(viewpoint), "bcf_show_viewpoint");
 
@@ -1506,6 +1458,53 @@ class BCFPanel extends Panel
             .setI18N(this.application.i18n).show();
         }, "bcf_delete_viewpoint");
       this.application.i18n.updateTree(itemListElem);
+
+      let viewpointContainer = document.createElement("div");
+      viewpointContainer.className = "viewpoint_container";
+      itemListElem.appendChild(viewpointContainer);
+
+      if (viewpoint.components && viewpoint.components.selection) 
+      {
+        let componentsContainer = document.createElement("div");
+      
+        let componentsLabel = Controls.addLink(componentsContainer, "bim|label.select_components", "#",
+          "bim|title.select_components", "select_components", 
+          (event) => 
+          {
+            event.preventDefault();
+            this.handleSelectComponent(viewpoint.components.selection, event);
+          }
+        );
+
+        componentsContainer.appendChild(componentsLabel);
+        
+        let componentsList = document.createElement("ul");
+        componentsList.className = "components_list";
+
+        viewpoint.components.selection.forEach(component => 
+        {
+          let componentItem = document.createElement("li");
+          componentItem.className = "component_item";
+          
+          Controls.addLink(componentItem, component.ifc_guid || "No GUID", "#",
+            component.ifc_guid || "No GUID",
+            (event) => 
+            {
+              if (event) 
+              {
+                event.preventDefault();
+              }
+              this.handleSelectComponent(component, event);
+            }
+          );
+          componentsList.appendChild(componentItem);
+        });
+        
+        componentsContainer.appendChild(componentsList);
+        viewpointContainer.appendChild(componentsContainer);
+      }
+
+      
 
       if (viewpoint.snapshot)
       {

@@ -129,6 +129,7 @@ export const translations =
   "message.doc_ref_deleted" : "Referència a document esborrada.",
   "message.doc_ref_saved" : "Referència a document desada.",
   "message.topic_searched" : "No s'ha trobat cap incidència.",
+  "message.no_components_selected": "No s'han trobat objectes per a aquesta vista",
 
   "message.bsdd_dictionary_count" : count => `Diccionaris: ${count}`,
   "message.bsdd_class_count" : count => `Classes: ${count}`,

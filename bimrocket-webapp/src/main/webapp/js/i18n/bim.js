@@ -129,6 +129,7 @@ export const translations =
   "message.doc_ref_deleted" : "Document reference deleted.",
   "message.doc_ref_saved" : "Document reference saved.",
   "message.topic_searched" : "No topics found.",
+  "message.no_components_selected": "No objects were found for this view",
 
   "message.bsdd_dictionary_count" : count => `Dictionaries: ${count}`,
   "message.bsdd_class_count" : count => `Classes: ${count}`,

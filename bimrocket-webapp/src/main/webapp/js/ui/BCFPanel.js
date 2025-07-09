@@ -356,10 +356,14 @@ class BCFPanel extends Panel
 
     this.guidMap = new Map();
 
-    application.addEventListener("scene", event => {
-      if (event.type === "added") { // nou objecte agregat a l'escena
-        event.object.traverse(obj => { // recorre tot l'objecte
-          if (obj.userData?.IFC?.GlobalId) {
+    application.addEventListener("scene", event => 
+    {
+      if (event.type === "added") 
+      {
+        event.object.traverse(obj => 
+        {
+          if (obj.userData?.IFC?.GlobalId) 
+          {
             this.guidMap.set(obj.userData.IFC.GlobalId, obj);
           }
         });
@@ -1445,18 +1449,30 @@ class BCFPanel extends Panel
         [(viewpoint.index || ""), vpType], "bcf_viewpoint_text");
 
       // llistat Ids
-      if (viewpoint.components && viewpoint.components.selection) {
+      if (viewpoint.components && viewpoint.components.selection) 
+      {
         let componentsContainer = document.createElement("div");
         componentsContainer.className = "components-container";
         
         let componentsLabel = document.createElement("div");
         componentsLabel.textContent = "Ids dels components:";
+        componentsLabel.style.cursor = "pointer";
+        componentsLabel.style.textDecoration = "underline";
+        componentsLabel.style.color = "#0066cc";
+        componentsLabel.style.marginBottom = "5px";
+
+        componentsLabel.addEventListener("click", (event) => 
+        {
+          this.handleSelectComponent(viewpoint.components.selection, event);
+        });
+
         componentsContainer.appendChild(componentsLabel);
         
         let componentsList = document.createElement("ul");
         componentsList.className = "components-list";
 
-        viewpoint.components.selection.forEach(component => {
+        viewpoint.components.selection.forEach(component => 
+        {
           let componentItem = document.createElement("li");
           componentItem.textContent = component.ifc_guid || "No GUID";
           
@@ -1464,17 +1480,9 @@ class BCFPanel extends Panel
           componentItem.style.textDecoration = "underline";
           componentItem.style.color = "#0066cc";
           
-          componentItem.addEventListener("click", (event) => {
-            event.stopPropagation();
-            // l'event "click" busca al guidMap l'objecte 3D corresponent amb el GUID del component
-            const foundObject = this.guidMap.get(component.ifc_guid);
-            if (foundObject) {
-              this.application.userSelectObjects([foundObject], event); // quan el troba el selecciona a l'escena
-            } else {
-              console.warn("Object with GUID", component.ifc_guid, "not found");
-              Toast.create("No s'ha trobat l'objecte del GUID seleccionat")
-                .setI18N(this.application.i18n).show();
-            }
+          componentItem.addEventListener("click", (event) => 
+          {
+            this.handleSelectComponent(component, event);
           });
           
           componentsList.appendChild(componentItem);
@@ -1527,6 +1535,34 @@ class BCFPanel extends Panel
         linkElem.appendChild(imageElem);
       }
       viewpointsElem.appendChild(itemListElem);
+    }
+  }
+
+  handleSelectComponent(components, event) 
+  {
+    if (!components) 
+    {
+      console.warn("No components provided for selection");
+      return;
+    }
+
+    event.stopPropagation();
+
+    let componentsArray = Array.isArray(components) ? components : [components];
+
+    const foundObjects = componentsArray
+      .map(component => this.guidMap?.get(component.ifc_guid))
+      .filter(Boolean);
+
+    if (foundObjects.length > 0) 
+    {
+      this.application.userSelectObjects(foundObjects, event);
+    } 
+    else 
+    {
+      console.warn("No objects found for the selected component(s)");
+      Toast.create("bim|message.no_components_selected")
+        .setI18N(this.application.i18n).show();
     }
   }
 

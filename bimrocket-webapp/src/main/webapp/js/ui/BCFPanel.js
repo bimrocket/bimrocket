@@ -1485,18 +1485,17 @@ class BCFPanel extends Panel
         {
           let componentItem = document.createElement("li");
           componentItem.className = "component_item";
-          
+
           Controls.addLink(componentItem, component.ifc_guid || "No GUID", "#",
-            component.ifc_guid || "No GUID",
+            component.ifc_guid || "No GUID", null,
             (event) => 
             {
-              if (event) 
-              {
-                event.preventDefault();
-              }
+              event.preventDefault();
+              event.stopPropagation();
               this.handleSelectComponent(component, event);
             }
           );
+          
           componentsList.appendChild(componentItem);
         });
         
@@ -1544,15 +1543,14 @@ class BCFPanel extends Panel
       console.warn("No components provided for selection");
       return;
     }
-
+    event.preventDefault();
     event.stopPropagation();
 
     let componentsArray = Array.isArray(components) ? components : [components];
-
+  
     const foundObjects = componentsArray
       .map(component => this.guidMap?.get(component.ifc_guid))
       .filter(Boolean);
-
     if (foundObjects.length > 0) 
     {
       this.application.userSelectObjects(foundObjects, event);

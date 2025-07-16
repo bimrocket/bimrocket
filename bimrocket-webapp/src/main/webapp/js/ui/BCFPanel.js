@@ -351,9 +351,6 @@ class BCFPanel extends Panel
       this.saveExtensionsButtonsElem, "saveExtensions", "bim|button.save_extensions",
       () => this.saveProjectExtensions());
 
-    // mapa per associar els GUIDs d'objectes IFC amb les seves instancies d'objectes 3D corresponents
-    // això permet accedir ràpidament als objectes 3D: key = GlobalId, value = object 3D
-
     this.guidMap = new Map();
 
     application.addEventListener("scene", event => 

@@ -13,6 +13,7 @@ export const translations =
   "button.definition" : "Definition",
   "button.references" : "References",
   "button.save_extensions" : "Save extensions",
+  "button.new_user": "New user",
 
   "tool.bim_inventory.label" : "BIM inventory",
   "tool.bim_inventory.help" : "BIM inventory setup",
@@ -36,6 +37,8 @@ export const translations =
   "tool.bim_explode.help" : "Select a building and apply offsets on each axis.",
 
   "tool.bim_reset_view.label" : "Reset view",
+
+  "tool.server_admin.label" : "Admin Service",
 
   "tab.file" : "File",
   "tab.entity" : "Entity",
@@ -97,10 +100,21 @@ export const translations =
   "label.bim_explode_xoffset" : "X axis offset:",
   "label.bim_explode_yoffset" : "Y axis offset:",
   "label.bim_explode_zoffset" : "Z axis offset:",
+  "label.admin_service": "Admin server:",
+  "label.users": "User management",
+  "label.roles_management": "Roles management",
+  "label.configuration": "Configuration",
+  "label.id": "Id:",
+  "label.email": "Email:",
+  "label.roles": "Roles:",
+  "label.confirm_password": "Confirm password:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
   "col.status" : "Status",
+  "col.id" : "Id",
+  "col.name" : "Name",
+  "col.role" : "Role",
 
   "title.delete_project" : "Delete project",
   "title.delete_topic" : "Delete topic",
@@ -110,8 +124,11 @@ export const translations =
   "title.delete_ifcdb_service" : "Delete IFCDB service",
   "title.viewpoint" : "Topic viewpoint",
   "title.delete_doc_ref" : "Delete document reference",
+  "title.delete_user" : "Delete user",
 
   "title.bim_delta_snapshots" : "IFC snapshots",
+
+  "title.admin_service": "Admin service",
 
   "message.no_bim_object_selected" : "No BIM object selected.",
 
@@ -139,11 +156,22 @@ export const translations =
   "message.bim_delta_cannot_compare" : "This IFC snapshot is not comparable with the current model or it was generated with a previous version of the application.",
   "message.bim_delta_not_ifc_object" : "Select the IFC object you want to generate the snapshot of.",
 
+  "message.user_saved" : "User saved.",
+  "message.user_deleted" : "User deleted.",
+  "message.confirm_password_error" : "The passwords do not match.",
+  "message.user_searched" : "No user found.",
+  "message.fields_required": "Name and email are required.",
+
   "question.delete_project" : "Do you want to delete this project and all its topics?",
   "question.delete_topic" : "Do you want to delete this topic?",
   "question.delete_comment" : "Do you want to delete this comment?",
   "question.delete_viewpoint" : "Do you want to delete this viewpoint?",
   "question.delete_doc_ref" : "Do you want to delete this document reference?",
   "question.delete_bcf_service" : name => `Do you want to delete the ${name} service?`,
-  "question.delete_ifcdb_service" : name => `Do you want to delete the ${name} service?`
+  "question.delete_ifcdb_service" : name => `Do you want to delete the ${name} service?`,
+  "question.delete_user" : "Do you want to delete this usuar?",
+
+  "placeholder.keep_password": "Leave blank to keep current password",
+  "placeholder.confirm_password": "Repeat new password",
+  "placeholder.add_tags": "Write and press Enter to add tags"
 };

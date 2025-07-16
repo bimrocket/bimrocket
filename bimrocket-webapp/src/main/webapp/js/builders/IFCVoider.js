@@ -26,7 +26,7 @@ class IFCVoider extends SolidBuilder
         || !productRepr.hasComponents()) return;
 
     const unvoidedRepr = productRepr.getComponent(0);
-    if (!unvoidedRepr instanceof Solid) return;
+    if (!(unvoidedRepr instanceof Solid)) return;
 
     let productObject3D = this.findIfcProduct(productRepr);
     if (productObject3D === null) return;
@@ -52,7 +52,7 @@ class IFCVoider extends SolidBuilder
         || !productRepr.hasComponents()) return true;
 
     const unvoidedRepr = productRepr.getComponent(0);
-    if (!unvoidedRepr instanceof Solid) return true;
+    if (!(unvoidedRepr instanceof Solid)) return true;
 
     let productObject3D = this.findIfcProduct(productRepr);
     if (productObject3D === null) return true;

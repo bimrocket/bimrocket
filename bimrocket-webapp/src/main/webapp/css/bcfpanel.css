@@ -238,6 +238,22 @@ ul.bcf_list li
   border: 1px dotted #404040;
 }
 
+.bcf_tabs .bcf_list .viewpoint_container .components_list
+{
+  padding: 0 0 0 21px;
+}
+
+a.select_components
+{
+  margin-bottom: 4px;
+  display: inline-block; 
+}
+
+.component-link 
+{
+  cursor: pointer;
+}
+
 .viewpoint_dialog
 {
   display: flex;
@@ -260,3 +276,4 @@ ul.bcf_list li
   padding-left: 6px;
   padding-right: 6px;
 }
+

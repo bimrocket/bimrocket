@@ -100,6 +100,8 @@ export const translations =
   "label.bim_explode_xoffset" : "Desplaçament eix X:",
   "label.bim_explode_yoffset" : "Desplaçament eix Y:",
   "label.bim_explode_zoffset" : "Desplaçament eix Z:",
+  "label.select_components" : "Selecciona els objectes de la vista:",
+
   "label.admin_service" : "Servidor Admin:",
   "label.users": "Gestió d'usuaris",
   "label.roles_management": "Gestió de rols",
@@ -124,6 +126,8 @@ export const translations =
   "title.delete_ifcdb_service" : "Esborra servei IFCDB",
   "title.viewpoint" : "Vista de la incidència",
   "title.delete_doc_ref" : "Esborra referència a document",
+  "title.select_components" : "Selecciona objectes",
+
   "title.delete_user" : "Esborra usuari",
 
   "title.bim_delta_snapshots" : "Captures IFC",
@@ -146,6 +150,8 @@ export const translations =
   "message.doc_ref_deleted" : "Referència a document esborrada.",
   "message.doc_ref_saved" : "Referència a document desada.",
   "message.topic_searched" : "No s'ha trobat cap incidència.",
+  "message.no_components_selected": "No s'han trobat objectes per a aquesta vista",
+
   "message.extensions_phase_started": "Fase de revisió iniciada correctament.",
   "message.extensions_phase_ended": "Fase de revisió finalitzada correctament.",
   "message.extensions_phase_published": "Fase pública iniciada correctament.",

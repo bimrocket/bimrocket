@@ -100,6 +100,8 @@ export const translations =
   "label.bim_explode_xoffset" : "X axis offset:",
   "label.bim_explode_yoffset" : "Y axis offset:",
   "label.bim_explode_zoffset" : "Z axis offset:",
+  "label.select_components" : "Select components in view:",
+
   "label.admin_service": "Admin server:",
   "label.users": "User management",
   "label.roles_management": "Roles management",
@@ -124,6 +126,8 @@ export const translations =
   "title.delete_ifcdb_service" : "Delete IFCDB service",
   "title.viewpoint" : "Topic viewpoint",
   "title.delete_doc_ref" : "Delete document reference",
+  "title.select_components" : "Select components",
+
   "title.delete_user" : "Delete user",
 
   "title.bim_delta_snapshots" : "IFC snapshots",
@@ -146,6 +150,7 @@ export const translations =
   "message.doc_ref_deleted" : "Document reference deleted.",
   "message.doc_ref_saved" : "Document reference saved.",
   "message.topic_searched" : "No topics found.",
+  "message.no_components_selected": "No objects were found for this view",
 
   "message.bsdd_dictionary_count" : count => `Dictionaries: ${count}`,
   "message.bsdd_class_count" : count => `Classes: ${count}`,

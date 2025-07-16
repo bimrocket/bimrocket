@@ -179,7 +179,6 @@ class Outliner extends Panel
       this.autoScroll = false;
       this.application.userSelectObjects([object], event);
     };
-
     let treeNode;
     if (parentTreeNode)
     {
@@ -191,7 +190,6 @@ class Outliner extends Panel
     }
     this.updateNodeStyle(treeNode);
     this.populateChildren(treeNode);
-
     return treeNode;
   }
 

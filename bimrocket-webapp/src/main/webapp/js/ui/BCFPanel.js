@@ -15,6 +15,7 @@ import { TabbedPane } from "./TabbedPane.js";
 import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { BCFService } from "../io/BCFService.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
@@ -283,7 +284,6 @@ class BCFPanel extends Panel
       "topic_creation_date", "bim|label.creation_date");
      this.creationDateElem.setAttribute("readonly", true);
 
-    // Añadir este bloque nuevo para mostrar los IDs seleccionados
     this.selectedComponentsElem = document.createElement("div");
     this.selectedComponentsElem.className = "selected_components";
     this.auditPanelElem.appendChild(this.selectedComponentsElem);
@@ -350,22 +350,6 @@ class BCFPanel extends Panel
     this.saveExtensionsButton = Controls.addButton(
       this.saveExtensionsButtonsElem, "saveExtensions", "bim|button.save_extensions",
       () => this.saveProjectExtensions());
-
-    this.guidMap = new Map();
-
-    application.addEventListener("scene", event => 
-    {
-      if (event.type === "added") 
-      {
-        event.object.traverse(obj => 
-        {
-          if (obj.userData?.IFC?.GlobalId) 
-          {
-            this.guidMap.set(obj.userData.IFC.GlobalId, obj);
-          }
-        });
-      }
-    });
 
   }
 
@@ -1535,6 +1519,7 @@ class BCFPanel extends Panel
 
   handleSelectComponent(components, event) 
   {
+    const application = this.application;
     if (!components) 
     {
       console.warn("No components provided for selection");
@@ -1543,18 +1528,20 @@ class BCFPanel extends Panel
     event.preventDefault();
     event.stopPropagation();
 
+    let elements = [];
     let componentsArray = Array.isArray(components) ? components : [components];
-  
-    const foundObjects = componentsArray
-      .map(component => this.guidMap?.get(component.ifc_guid))
-      .filter(Boolean);
-    if (foundObjects.length > 0) 
+    for (let component of componentsArray) 
     {
-      this.application.userSelectObjects(foundObjects, event);
-    } 
+      let element = application.findObjects($ => $("IFC", "GlobalId") === component.ifc_guid, application.baseObject, true);
+      elements.push(...element);
+    }
+    if (elements.length > 0) 
+    {
+      application.selectObjects(elements, event.type);
+    }
     else 
     {
-      console.warn("No objects found for the selected component(s)");
+      console.warn("No objects found with the provided GlobalID(s)");
       Toast.create("bim|message.no_components_selected")
         .setI18N(this.application.i18n).show();
     }

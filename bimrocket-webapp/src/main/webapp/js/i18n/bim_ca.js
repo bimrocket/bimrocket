@@ -13,6 +13,7 @@ export const translations =
   "button.definition" : "Definició",
   "button.references" : "Referències",
   "button.save_extensions" : "Desa extensions",
+  "button.new_user": "Usuari nou",
 
   "tool.bim_inventory.label" : "Inventari BIM",
   "tool.bim_inventory.help" : "Inventari BIM",
@@ -36,6 +37,8 @@ export const translations =
   "tool.bim_explode.help" : "Selecciona un edfici i aplica desplaçaments en cada eix.",
 
   "tool.bim_reset_view.label" : "Inicialitza vista",
+
+  "tool.server_admin.label" : "Admin. del servei",
 
   "tab.file" : "Fitxer",
   "tab.entity" : "Entitat",
@@ -98,10 +101,21 @@ export const translations =
   "label.bim_explode_yoffset" : "Desplaçament eix Y:",
   "label.bim_explode_zoffset" : "Desplaçament eix Z:",
   "label.select_components" : "Selecciona els objectes de la vista:",
+  "label.admin_service" : "Servidor Admin:",
+  "label.users": "Gestió d'usuaris",
+  "label.roles_management": "Gestió de rols",
+  "label.id": "Id:",
+  "label.email": "Email:",
+  "label.roles": "Rols:",
+  "label.configuration": "Configuració",
+  "label.confirm_password": "Confirma paraula de pas:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
   "col.sta servicetus" : "Estat",
+  "col.id" : "Id",
+  "col.name" : "Nom",
+  "col.role" : "Rol",
 
   "title.delete_project" : "Esborra projecte",
   "title.delete_topic" : "Esborra incidència",
@@ -112,8 +126,11 @@ export const translations =
   "title.viewpoint" : "Vista de la incidència",
   "title.delete_doc_ref" : "Esborra referència a document",
   "title.select_components" : "Selecciona objectes",
+  "title.delete_user" : "Esborra usuari",
 
   "title.bim_delta_snapshots" : "Captures IFC",
+
+  "title.admin_service": "Administració del servei",
 
   "message.no_bim_object_selected" : "Cap objecte BIM seleccionat.",
 
@@ -132,6 +149,10 @@ export const translations =
   "message.doc_ref_saved" : "Referència a document desada.",
   "message.topic_searched" : "No s'ha trobat cap incidència.",
   "message.no_components_selected": "No s'han trobat objectes per a aquesta vista",
+  "message.extensions_phase_started": "Fase de revisió iniciada correctament.",
+  "message.extensions_phase_ended": "Fase de revisió finalitzada correctament.",
+  "message.extensions_phase_published": "Fase pública iniciada correctament.",
+  "message.operation_completed": "Operació completada",
 
   "message.bsdd_dictionary_count" : count => `Diccionaris: ${count}`,
   "message.bsdd_class_count" : count => `Classes: ${count}`,
@@ -142,11 +163,22 @@ export const translations =
   "message.bim_delta_cannot_compare" : "Aquesta captura IFC no és comparable amb el model actual o s'ha generat amb una versió anterior de l'aplicació.",
   "message.bim_delta_not_ifc_object" : "Selecciona l'objecte IFC del qual vols generar la captura.",
 
+  "message.user_saved" : "Usuari desat.",
+  "message.user_deleted" : "Usuari esborrat.",
+  "message.confirm_password_error" : "Les contrasenyes no coincideixen.",
+  "message.user_searched" : "No s'ha trobat cap usuari.",
+  "message.fields_required": "El nom i l'email són obligatoris.",
+
   "question.delete_project" : "Vols esborrar aquest projecte i totes les seves incidències?",
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
   "question.delete_comment" : "Vols esborrar aquest comentari?",
   "question.delete_viewpoint" : "Vols esborrar aquest punt de vista?",
   "question.delete_doc_ref" : "Vols esborrar aquesta referència a document?",
   "question.delete_bcf_service" : name => `Vols esborrar el servei ${name}?`,
-  "question.delete_ifcdb_service" : name => `Vols esborrar el servei ${name}?`
+  "question.delete_ifcdb_service" : name => `Vols esborrar el servei ${name}?`,
+  "question.delete_user" : "Vols esborrar aquest usuari?",
+
+  "placeholder.keep_password": "Deixa en blanc per mantenir la paraula de pas actual",
+  "placeholder.confirm_password": "Repeteix la nova paraula de pas",
+  "placeholder.add_tags": "Escriu i prem Enter per afegir etiquetes"
 };

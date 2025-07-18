@@ -96,6 +96,8 @@ public class SecurityService
     "SEC005: User id is required.";
   static final String INVALID_PASSWORD_FORMAT =
     "SEC006: Invalid password format.";
+  static final String PASSWORD_IS_REQUIRED =
+    "SEC007: Password is required.";
 
   static
   {
@@ -129,12 +131,14 @@ public class SecurityService
 
   User anonymousUser;
 
+  boolean ldapEnabled;
+
   @PostConstruct
   public void init()
   {
     LOGGER.log(Level.INFO, "Init SecurityService");
 
-    boolean ldapEnabled = config.getValue(BASE + "ldap.enabled", Boolean.class);
+    ldapEnabled = config.getValue(BASE + "ldap.enabled", Boolean.class);
 
     CDI<Object> cdi = CDI.current();
 
@@ -219,7 +223,8 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "userId: {0}", user.getId());
 
-    validateUser(user);
+    //Send true to parameter isNewUser
+    validateUser(user, true);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
@@ -246,7 +251,8 @@ public class SecurityService
     String userId = userUpdate.getId();
     LOGGER.log(Level.FINE, "userId: {0}", userId);
 
-    validateUser(userUpdate);
+    //Send false to parameter isNewUser
+    validateUser(userUpdate, false);
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
@@ -263,7 +269,10 @@ public class SecurityService
         user.setActive(userUpdate.getActive());
       }
       user.setRoleIds(userUpdate.getRoleIds());
-      user.setPasswordHash(userUpdate.getPasswordHash());
+      if (!StringUtils.isBlank(userUpdate.getPasswordHash()))
+      {
+        user.setPasswordHash(userUpdate.getPasswordHash());
+      }
       String dateString = getISODate();
       user.setModifyDate(dateString);
       user = userDao.update(user);
@@ -524,12 +533,17 @@ public class SecurityService
     }
   }
 
-  private void validateUser(User user)
+  private void validateUser(User user, boolean isNewUser)
   {
     if (StringUtils.isBlank(user.getId()))
       throw new InvalidRequestException(ID_IS_REQUIRED);
 
     String password = user.getPassword();
+    if (!ldapEnabled && StringUtils.isBlank(password) && isNewUser)
+    {
+      throw new InvalidRequestException(PASSWORD_IS_REQUIRED);
+    }
+
     if (!StringUtils.isBlank(password))
     {
       checkPasswordFormat(password);
@@ -593,4 +607,5 @@ public class SecurityService
       }
     }
   }
+
 }

@@ -13,12 +13,14 @@ import { BSDDTool } from "../tools/BSDDTool.js";
 import { BIMDeltaTool } from "../tools/BIMDeltaTool.js";
 import { BIMResetViewTool } from "../tools/BIMResetViewTool.js";
 import { BIMExplodeTool } from "../tools/BIMExplodeTool.js";
+import { ServerAdminTool } from "../tools/ServerAdminTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
 import { IFCDBService } from "../io/IFCDBService.js";
 import { WebdavService } from "../io/WebdavService.js";
 import { IDBFileService } from "../io/IDBFileService.js";
+import { SecurityService } from "../io/SecurityService.js";
 import { IOManager } from "../io/IOManager.js";
 import { IDSReportType } from "../reports/IDSReportType.js";
 import { BundleManager } from "../i18n/BundleManager.js";
@@ -57,6 +59,7 @@ export function load(application)
   const bimDeltaTool = new BIMDeltaTool(application);
   const bimExplodeTool = new BIMExplodeTool(application);
   const bimResetViewTool = new BIMResetViewTool(application);
+  const adminTool = new ServerAdminTool(application);
 
   // create menus
   const menuBar = application.menuBar;
@@ -71,6 +74,7 @@ export function load(application)
   bimMenu.addMenuItem(bimDeltaTool);
   bimMenu.addMenuItem(bimExplodeTool);
   bimMenu.addMenuItem(bimResetViewTool);
+  bimMenu.addMenuItem(adminTool);
 
   const toolBar = application.toolBar;
   toolBar.addToolButton(bimLayoutTool);
@@ -126,6 +130,17 @@ export function load(application)
       url : "idb_snapshots"
     });
     application.addService(idbfs, "ifc_snapshots", false);
+  }
+
+  if (application.services.security === undefined)
+  {
+    const security = new SecurityService({
+      name : "security",
+      description : "Security",
+      url: Environment.SERVER_URL  + "/api/security",
+      credentialsAlias : Environment.SERVER_ALIAS
+    });
+    application.addService(security, "security", false);
   }
 
   // load bundles

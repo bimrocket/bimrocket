@@ -13,6 +13,7 @@ export const translations =
   "button.definition" : "Definición",
   "button.references" : "Referencias",
   "button.save_extensions" : "Guardar extensiones",
+  "button.new_user": "Usuario nuevo",
 
   "tool.bim_inventory.label" : "Inventario BIM",
   "tool.bim_inventory.help" : "Inventario BIM",
@@ -36,6 +37,8 @@ export const translations =
   "tool.bim_explode.help" : "Selecciona un edficio y aplica desplazamientos en cada eje.",
 
   "tool.bim_reset_view.label" : "Inicializar vista",
+
+  "tool.server_admin.label" : "Admin. del servicio",
 
   "tab.file" : "Fichero",
   "tab.entity" : "Entidad",
@@ -98,10 +101,21 @@ export const translations =
   "label.bim_explode_yoffset" : "Desplazamiento eje Y:",
   "label.bim_explode_zoffset" : "Desplazamiento eje Z:",
   "label.select_components" : "Selecciona los objetos de la vista:",
+  "label.admin_service" : "Servidor Admin:",
+  "label.users": "Gestión de usuarios",
+  "label.roles_management": "Gestión de roles",
+  "label.configuration": "Configuración",
+  "label.id": "Id:",
+  "label.email": "Email:  ",
+  "label.roles": "Roles:",
+  "label.confirm_password": "Confirmar contraseña:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
   "col.status" : "Estado",
+  "col.id" : "Id",
+  "col.name" : "Nombre",
+  "col.role" : "Rol",
 
   "title.delete_project" : "Borrar proyecto",
   "title.delete_topic" : "Borrar incidencia",
@@ -112,8 +126,11 @@ export const translations =
   "title.viewpoint" : "Vista de la incidencia",
   "title.delete_doc_ref" : "Borrar referencia a documento",
   "title.select_components" : "Selecciona objetos",
+  "title.delete_user" : "Borrar usuario",
 
   "title.bim_delta_snapshots" : "Capturas IFC",
+
+  "title.admin_service": "Administración de servicio",
 
   "message.no_bim_object_selected" : "Ningún objeto BIM seleccionado.",
 
@@ -132,6 +149,7 @@ export const translations =
   "message.doc_ref_saved" : "Referencia a documento guardada.",
   "message.topic_searched" : "No se han encontrado incidencias.",
   "message.no_components_selected": "No se han encontrado objetos para esta vista",
+  "message.operation_completed": "Operación completada",
 
   "message.bsdd_dictionary_count" : count => `Diccionarios: ${count}`,
   "message.bsdd_class_count" : count => `Clases: ${count}`,
@@ -142,11 +160,22 @@ export const translations =
   "message.bim_delta_cannot_compare" : "Esta captura IFC no es comparable con el modelo actual o se ha generado con una versión anterior de la aplicación.",
   "message.bim_delta_not_ifc_object" : "Selecciona el objeto IFC del cual quieres generar la captura.",
 
+  "message.user_saved" : "Usuario guardado.",
+  "message.user_deleted" : "Usuario borrado.",
+  "message.confirm_password_error" : "Las contraseñas no coinciden.",
+  "message.user_searched" : "No se ha encontrado ningún usuario.",
+  "message.fields_required": "Nombre y email son obligatorios.",
+
   "question.delete_project" : "Quieres borrar este proyecto y todas sus incidencias?",
   "question.delete_topic" : "Quieres borrar esta incidencia?",
   "question.delete_comment" : "Quieres borrar este comentario?",
   "question.delete_viewpoint" : "Quieres borrar este punto de vista?",
   "question.delete_doc_ref" : "Quieres borrar esta referencia a documento?",
   "question.delete_bcf_service" : name => `Quieres borrar el servicio ${name}?`,
-  "question.delete_ifcdb_service" : name => `Quieres borrar el servicio ${name}?`
+  "question.delete_ifcdb_service" : name => `Quieres borrar el servicio ${name}?`,
+  "question.delete_user" : "Quieres borrar este usuario?",
+
+  "placeholder.keep_password": "Dejar en blanco para mantener la contraseña actual",
+  "placeholder.confirm_password": "Repite la nueva contraseña",
+  "placeholder.add_tags": "Escribe y pulsa Enter para añadir etiquetas",
 };

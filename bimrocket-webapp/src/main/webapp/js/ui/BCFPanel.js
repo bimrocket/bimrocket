@@ -1520,21 +1520,22 @@ class BCFPanel extends Panel
   handleSelectComponent(components, event) 
   {
     const application = this.application;
+
     if (!components) 
     {
       console.warn("No components provided for selection");
       return;
     }
+
     event.preventDefault();
     event.stopPropagation();
 
-    let elements = [];
-    let componentsArray = Array.isArray(components) ? components : [components];
-    for (let component of componentsArray) 
-    {
-      let element = application.findObjects($ => $("IFC", "GlobalId") === component.ifc_guid, application.baseObject, true);
-      elements.push(...element);
-    }
+    const componentsArray = Array.isArray(components) ? components : [components];
+    const targetIds = new Set(componentsArray.map(component => component.ifc_guid)); 
+
+    const elements = application.findObjects($ => targetIds.has($("IFC", "GlobalId")), application.baseObject, true)
+
+    
     if (elements.length > 0) 
     {
       application.selectObjects(elements, event.type);

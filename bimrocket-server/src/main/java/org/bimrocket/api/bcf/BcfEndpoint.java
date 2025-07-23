@@ -52,6 +52,10 @@ import org.bimrocket.service.bcf.BcfService;
 import static org.bimrocket.api.bcf.BcfSnapshot.PNG_TYPE;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.bimrocket.api.ApiResult.OK;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.odata.ODataParser;
+import static org.bimrocket.service.bcf.BcfService.topicFieldMap;
 
 /**
  *
@@ -158,7 +162,11 @@ public class BcfEndpoint
     @QueryParam("$filter") String odataFilter,
     @QueryParam("$orderBy") String odataOrderBy)
   {
-    return bcfService.getTopics(projectId, odataFilter, odataOrderBy);
+    ODataParser parser = new ODataParser(topicFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
+
+    return bcfService.getTopics(projectId, filter, orderBy);
   }
 
   @GET

@@ -28,60 +28,52 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
+package org.bimrocket.dao.expression.io;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
-import org.bimrocket.dao.Dao;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import org.bimrocket.dao.expression.Expression;
 import org.bimrocket.dao.expression.OrderByExpression;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public abstract class ExpressionParser
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  public abstract Expression parseFilter(Reader filter) throws IOException;
+
+  public abstract List<OrderByExpression> parseOrderBy(Reader orderBy)
+    throws IOException;
+
+  public Expression parseFilter(String filter)
   {
-    return Collections.emptyList();
+    try
+    {
+      if (isBlank(filter)) return null;
+      return parseFilter(new StringReader(filter));
+    }
+    catch (IOException ex)
+    {
+      // never happen
+      return null;
+    }
   }
 
-  @Override
-  public E select(Object id)
+  public List<OrderByExpression> parseOrderBy(String orderBy)
   {
-    return null;
-  }
-
-  @Override
-  public E insert(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E update(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E insertOrUpdate(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public boolean delete(Object id)
-  {
-    return false;
-  }
-
-  @Override
-  public int delete(Expression filter)
-  {
-    return 0;
+    try
+    {
+      if (isBlank(orderBy)) return null;
+      return parseOrderBy(new StringReader(orderBy));
+    }
+    catch (IOException ex)
+    {
+      // never happen
+      return null;
+    }
   }
 }

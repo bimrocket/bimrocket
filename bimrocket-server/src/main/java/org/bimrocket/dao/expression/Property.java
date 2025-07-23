@@ -28,60 +28,37 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
-
-import java.util.Collections;
-import java.util.List;
-import org.bimrocket.dao.Dao;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
+package org.bimrocket.dao.expression;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class Property extends Expression
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  final String name;
+  final String type;
+
+  public Property(String name)
   {
-    return Collections.emptyList();
+    this.name = name;
+    this.type = ANY;
+  }
+
+  public Property(String name, String type)
+  {
+    this.name = name;
+    this.type = type;
+  }
+
+  public String getName()
+  {
+    return name;
   }
 
   @Override
-  public E select(Object id)
+  public String getType()
   {
-    return null;
-  }
-
-  @Override
-  public E insert(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E update(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E insertOrUpdate(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public boolean delete(Object id)
-  {
-    return false;
-  }
-
-  @Override
-  public int delete(Expression filter)
-  {
-    return 0;
+    return type;
   }
 }

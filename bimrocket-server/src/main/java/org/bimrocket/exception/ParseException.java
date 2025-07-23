@@ -28,60 +28,37 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
-
-import java.util.Collections;
-import java.util.List;
-import org.bimrocket.dao.Dao;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
+package org.bimrocket.exception;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class ParseException extends InvalidRequestException
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  int errorOffset = -1;
+
+  public ParseException(String message)
   {
-    return Collections.emptyList();
+    super(message);
+
+  }
+
+  public ParseException(String message, int errorOffset)
+  {
+    super(message);
+    this.errorOffset = errorOffset;
   }
 
   @Override
-  public E select(Object id)
+  public String getMessage()
   {
-    return null;
+    String message = super.getMessage();
+    if (errorOffset >= 0)
+    {
+      return message + " (offset: " + errorOffset + ")";
+    }
+    return message;
   }
 
-  @Override
-  public E insert(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E update(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E insertOrUpdate(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public boolean delete(Object id)
-  {
-    return false;
-  }
-
-  @Override
-  public int delete(Expression filter)
-  {
-    return 0;
-  }
 }

@@ -30,9 +30,9 @@
  */
 package org.bimrocket.dao;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
 
 /**
  *
@@ -41,12 +41,11 @@ import java.util.Map;
  */
 public interface Dao<E>
 {
-  public List<E> select(Map<String, Object> filter, Collection<String> orderBy);
-  public Object select(String groupExpression, Map<String, Object> filter);
+  public List<E> select(Expression filter, List<OrderByExpression> orderBy);
   public E select(Object id);
   public E insert(E entity);
   public E update(E entity);
   public E insertOrUpdate(E entity);
   public boolean delete(Object id);
-  public int delete(Map<String, Object> filter);
+  public int delete(Expression filter);
 }

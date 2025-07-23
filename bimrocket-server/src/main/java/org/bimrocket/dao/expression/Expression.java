@@ -28,60 +28,41 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
-
-import java.util.Collections;
-import java.util.List;
-import org.bimrocket.dao.Dao;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
+package org.bimrocket.dao.expression;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public abstract class Expression
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  // expression types
+  public static final String STRING = "STRING";
+  public static final String NUMBER = "NUMBER";
+  public static final String BOOLEAN = "BOOLEAN";
+  public static final String NULL = "NULL";
+  public static final String ANY = "ANY";
+
+  public abstract String getType();
+
+  public static Expression toExpression(Object value)
   {
-    return Collections.emptyList();
+    if (value instanceof Expression) return (Expression)value;
+    return Literal.valueOf(value);
   }
 
-  @Override
-  public E select(Object id)
+  public static Expression property(String name)
   {
-    return null;
+    return new Property(name);
   }
 
-  @Override
-  public E insert(E entity)
+  public static Expression fn(Function function, Object ...arguments)
   {
-    return entity;
-  }
-
-  @Override
-  public E update(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public E insertOrUpdate(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public boolean delete(Object id)
-  {
-    return false;
-  }
-
-  @Override
-  public int delete(Expression filter)
-  {
-    return 0;
+    FunctionCall functionCall = new FunctionCall(function);
+    for (Object argument : arguments)
+    {
+      functionCall.getArguments().add(toExpression(argument));
+    }
+    return functionCall;
   }
 }

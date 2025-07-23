@@ -28,60 +28,57 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
-
-import java.util.Collections;
-import java.util.List;
-import org.bimrocket.dao.Dao;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
+package org.bimrocket.dao.expression;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class Literal extends Expression
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  public static final Literal NULL_VALUE = new Literal(NULL, null);
+  public static final Literal TRUE_VALUE = new Literal(BOOLEAN, true);
+  public static final Literal FALSE_VALUE = new Literal(BOOLEAN, false);
+
+  String type;
+  Object value;
+
+  public Literal(String type, Object value)
   {
-    return Collections.emptyList();
+    this.type = type;
+    this.value = value;
   }
 
   @Override
-  public E select(Object id)
+  public String getType()
   {
-    return null;
+    return type;
   }
 
-  @Override
-  public E insert(E entity)
+  public Object getValue()
   {
-    return entity;
+    return value;
   }
 
-  @Override
-  public E update(E entity)
+  public static Literal valueOf(Object value)
   {
-    return entity;
-  }
-
-  @Override
-  public E insertOrUpdate(E entity)
-  {
-    return entity;
-  }
-
-  @Override
-  public boolean delete(Object id)
-  {
-    return false;
-  }
-
-  @Override
-  public int delete(Expression filter)
-  {
-    return 0;
+    if (value == null)
+    {
+      return NULL_VALUE;
+    }
+    else if (value instanceof String)
+    {
+      return new Literal(STRING, value);
+    }
+    else if (value instanceof Number)
+    {
+      return new Literal(NUMBER, value);
+    }
+    else if (value instanceof Boolean)
+    {
+      Boolean boolValue = (Boolean)value;
+      return boolValue ? TRUE_VALUE : FALSE_VALUE;
+    }
+    else throw new RuntimeException("Invalid literal " + value);
   }
 }

@@ -35,6 +35,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,13 +52,11 @@ import org.bimrocket.api.bcf.BcfViewpoint;
 import org.bimrocket.dao.Dao;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotFoundException;
-import org.bimrocket.odata.SimpleODataParser;
 import org.bimrocket.service.mail.MailService;
 import java.util.logging.Logger;
 import org.apache.commons.text.StringSubstitutor;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import org.bimrocket.api.security.User;
 import org.bimrocket.exception.AccessDeniedException;
@@ -68,8 +67,15 @@ import org.bimrocket.service.security.SecurityService;
 import org.eclipse.microprofile.config.Config;
 import static java.util.Arrays.asList;
 import java.util.Iterator;
+import org.bimrocket.dao.expression.Expression;
+import static org.bimrocket.dao.expression.Expression.fn;
+import static org.bimrocket.dao.expression.Expression.property;
+import static org.bimrocket.dao.expression.Function.AND;
+import static org.bimrocket.dao.expression.Function.EQ;
+import org.bimrocket.dao.expression.OrderByExpression;
 import static org.bimrocket.util.TextUtils.getISODate;
 import static org.bimrocket.service.security.SecurityConstants.ADMIN_ROLE;
+import org.bimrocket.util.EntityDefinition;
 
 
 /**
@@ -84,7 +90,8 @@ public class BcfService
 
   static final String BASE = "services.bcf.";
 
-  static final Map<String, String> topicFieldMap = new ConcurrentHashMap<>();
+  public static final Map<String, Field> topicFieldMap =
+    EntityDefinition.getInstance(BcfTopic.class).getFieldMap();
 
   // Topic actions
   static final String READ = "read";
@@ -120,16 +127,6 @@ public class BcfService
     "BCF011: Can not set both document guid and url.";
   static final String GUID_OR_URL_REQUIRED =
     "BCF012: Document guid or url are required.";
-
-  static
-  {
-    topicFieldMap.put("topic_status", "topicStatus");
-    topicFieldMap.put("topic_type", "topicType");
-    topicFieldMap.put("priority", "priority");
-    topicFieldMap.put("assigned_to", "assignedTo");
-    topicFieldMap.put("creation_date", "creationDate");
-    topicFieldMap.put("index", "index");
-  }
 
   @Inject
   Config config;
@@ -250,8 +247,7 @@ public class BcfService
 
       extensionsDao.delete(projectId);
 
-      Map<String, Object> filter = new HashMap<>();
-      filter.put("projectId", projectId);
+      Expression filter = fn(EQ, property("projectId"), projectId);
 
       Map<String, Object> topicFilter = new HashMap<>();
 
@@ -326,7 +322,7 @@ public class BcfService
   /* Topics */
 
   public List<BcfTopic> getTopics(String projectId,
-    String odataFilter, String odataOrderBy)
+    Expression filter, List<OrderByExpression> orderBy)
   {
     LOGGER.log(Level.FINE, "projectId: {0}", projectId);
 
@@ -335,11 +331,12 @@ public class BcfService
       checkProjectAccess(conn, projectId, READ);
 
       Dao<BcfTopic> topicDao = conn.getTopicDao();
-      SimpleODataParser parser = new SimpleODataParser(topicFieldMap);
-      Map<String, Object> filter = parser.parseFilter(odataFilter);
-      filter.put("projectId", projectId);
-      List<String> orderBy = parser.parseOrderBy(odataOrderBy);
-      return topicDao.select(filter, orderBy);
+      Expression finalFilter = fn(EQ, property("projectId"), projectId);
+      if (filter != null)
+      {
+        finalFilter = fn(AND, finalFilter, filter);
+      }
+      return topicDao.select(finalFilter, orderBy);
     }
   }
 
@@ -494,9 +491,9 @@ public class BcfService
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfComment> commentDao = conn.getCommentDao();
-      Map<String, Object> filter = new HashMap<>();
-      filter.put("topicId", topicId);
-      return commentDao.select(filter, asList("date"));
+      Expression filter = fn(EQ, property("topicId"), topicId);
+      OrderByExpression orderBy = new OrderByExpression(property("date"));
+      return commentDao.select(filter, asList(orderBy));
     }
   }
 
@@ -602,9 +599,9 @@ public class BcfService
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfViewpoint> viewpointDao = conn.getViewpointDao();
-      Map<String, Object> filter = new HashMap<>();
-      filter.put("topicId", topicId);
-      return viewpointDao.select(filter, asList("index"));
+      Expression filter = fn(EQ, property("topicId"), topicId);
+      OrderByExpression orderBy = new OrderByExpression(property("index"));
+      return viewpointDao.select(filter, asList(orderBy));
     }
   }
 
@@ -703,10 +700,9 @@ public class BcfService
     try (BcfDaoConnection conn = daoStore.getConnection())
     {
       Dao<BcfDocumentReference> docRefDao = conn.getDocumentReferenceDao();
-      Map<String, Object> filter = new HashMap<>();
-      filter.put("topicId", topicId);
+      Expression filter = fn(EQ, property("topicId"), topicId);
 
-      return docRefDao.select(filter, null);
+      return docRefDao.select(filter, Collections.emptyList());
     }
   }
 
@@ -832,8 +828,7 @@ public class BcfService
       String templateProjectName = getTemplateProjectName();
       if (templateProjectName != null)
       {
-        Map<String, Object> filter = new HashMap<>();
-        filter.put("name", templateProjectName);
+        Expression filter = fn(EQ, property("name"), templateProjectName);
         List<BcfProject> projects =
           projectDao.select(filter, Collections.emptyList());
         if (!projects.isEmpty())

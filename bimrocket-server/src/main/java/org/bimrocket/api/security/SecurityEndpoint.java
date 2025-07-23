@@ -48,7 +48,12 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import static org.bimrocket.api.ApiResult.OK;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.odata.ODataParser;
 import org.bimrocket.service.security.SecurityService;
+import static org.bimrocket.service.security.SecurityService.roleFieldMap;
+import static org.bimrocket.service.security.SecurityService.userFieldMap;
 
 /**
  *
@@ -71,7 +76,11 @@ public class SecurityEndpoint
   public List<User> getUsers(@QueryParam("$filter") String odataFilter,
     @QueryParam("$orderBy") String odataOrderBy)
   {
-    return securityService.getUsers(odataFilter, odataOrderBy);
+    ODataParser parser = new ODataParser(userFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
+
+    return securityService.getUsers(filter, orderBy);
   }
 
   @GET
@@ -143,7 +152,11 @@ public class SecurityEndpoint
   public List<Role> getRoles(@QueryParam("$filter") String odataFilter,
     @QueryParam("$orderBy") String odataOrderBy)
   {
-    return securityService.getRoles(odataFilter, odataOrderBy);
+    ODataParser parser = new ODataParser(roleFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
+
+    return securityService.getRoles(filter, orderBy);
   }
 
   @GET

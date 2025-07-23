@@ -28,60 +28,55 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.empty;
+package org.bimrocket.dao.expression.io.odata;
 
-import java.util.Collections;
-import java.util.List;
-import org.bimrocket.dao.Dao;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.Function;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class ODataOperator
 {
-  @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  final String name;
+  final Function function;
+  final int precedence;
+
+  public ODataOperator(String name, Function function, int precedence)
   {
-    return Collections.emptyList();
+    this.name = name;
+    this.function = function;
+    this.precedence = precedence;
   }
 
-  @Override
-  public E select(Object id)
+  public String getName()
   {
-    return null;
+    return name;
   }
 
-  @Override
-  public E insert(E entity)
+  public Function getFunction()
   {
-    return entity;
+    return function;
   }
 
-  @Override
-  public E update(E entity)
+  public int getPrecedence()
   {
-    return entity;
+    return precedence;
   }
 
-  @Override
-  public E insertOrUpdate(E entity)
+  public boolean isUnary()
   {
-    return entity;
+    return function.isSingleArgument();
   }
 
-  @Override
-  public boolean delete(Object id)
+  public boolean isChainable()
   {
-    return false;
+    return function.getChainableArgument() != null;
   }
 
-  @Override
-  public int delete(Expression filter)
+  public boolean equals(ODataOperator operator)
   {
-    return 0;
+    if (operator == null) return false;
+    return function.equals(operator.function);
   }
 }

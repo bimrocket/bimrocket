@@ -459,7 +459,7 @@ export const translations =
   "label.exported_properties" : "Properties to export:",
 
   "label.select_faces_mode" : "Mode:",
-  "label.select_faces_angle" : "Maximum angle (degrees):",  
+  "label.select_faces_angle" : "Maximum angle (degrees):",
   "label.select_faces_depth" : "Maximum depth:",
 
   "label.material_list" : "Materials:",
@@ -557,7 +557,7 @@ export const translations =
   "option.render_mode.normal" : "Normal",
   "option.render_mode.simplified" : "Simplified",
   "option.render_mode.batch" : "Batch",
-  
+
   "option.select_faces.select_plane" : "Select reference plane",
   "option.select_faces.add_faces" : "Add faces by rectangle",
   "option.select_faces.remove_faces" : "Remove faces by rectangle",
@@ -598,7 +598,8 @@ export const translations =
   "message.measure_area" : (area, units) => `Area: ${area} ${units}2`,
   "message.measure_angle" : angle => `Angle: ${angle} degrees`,
 
-  "message.object_count" : count => `Objects: ${count}`,
+  "message.solid_count" : count => `Solid count: ${count}`,
+  "message.mesh_count" : count => `Mesh count: ${count}`,
   "message.total_area" : (area, units) => `Area: ${area} ${units}2`,
   "message.total_volume" : (volume, units) => `Volume: ${volume} ${units}3`,
   "message.area_volume_ratio" : ratio => `Area/Volume: ${ratio}`,
@@ -675,7 +676,7 @@ export const translations =
   "controller.PushButtonController" : "Shows a push button.",
   "controller.RotationController" : "Rotates an object.",
   "controller.ToggleButtonController" : "Shows a toggle button.",
-  "controller.SelectListController" : "Shows a selection list.",  
+  "controller.SelectListController" : "Shows a selection list.",
   "controller.KnobController" : "Shows a knob.",
   "controller.TranslationController" : "Translates an object.",
   "controller.ScriptController" : "Executes a program in JavaScript language.",

@@ -459,7 +459,7 @@ export const translations =
   "label.exported_properties" : "Propiedades a exportar:",
 
   "label.select_faces_mode" : "Modo:",
-  "label.select_faces_angle" : "Ángulo máximo (grados):",  
+  "label.select_faces_angle" : "Ángulo máximo (grados):",
   "label.select_faces_depth" : "Profundidad máxima:",
 
   "label.material_list" : "Materiales:",
@@ -598,7 +598,8 @@ export const translations =
   "message.measure_area" : (area, units) => `Área: ${area} ${units}2`,
   "message.measure_angle" : angle => `Ángulo: ${angle} grados`,
 
-  "message.object_count" : count => `Objetos: ${count}`,
+  "message.solid_count" : count => `Número de sólidos: ${count}`,
+  "message.mesh_count" : count => `Número de mallas: ${count}`,
   "message.total_area" : (area, units) => `Area: ${area} ${units}2`,
   "message.total_volume" : (volume, units) => `Volumen: ${volume} ${units}3`,
   "message.area_volume_ratio" : ratio => `Area/Volumen: ${ratio}`,
@@ -652,7 +653,7 @@ export const translations =
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.invalid_privileges": "Hay errores en los privilegios introducidos.",
   "message.edit_acl_json_error": detail => `Error al procesar el JSON. Revisa la sintaxis. (${detail})`,
-  
+
   "question.discard_changes" : name => `Descartar los cambios no guardados en ${name || 'el editor'}?`,
   "question.delete_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_folder" : name => `Quieres borrar la carpeta ${name}?`,

@@ -27,7 +27,8 @@ class MeasureSelectionTool extends Tool
   {
     let area = 0;
     let volume = 0;
-    let objectCount = 0;
+    let solidCount = 0;
+    let meshCount = 0;
 
     const application = this.application;
     const roots = application.selection.roots;
@@ -38,14 +39,14 @@ class MeasureSelectionTool extends Tool
 
       if (obj instanceof Solid)
       {
-        objectCount++;
+        solidCount++;
         area += obj.getArea();
         volume += obj.getVolume();
       }
       else if (obj instanceof THREE.Mesh)
       {
-        objectCount++;
-        area += GeometryUtils.getBufferGeometryArea(obj.geometry);
+        meshCount++;
+        area += GeometryUtils.getBufferGeometryArea(obj.geometry, obj.matrixWorld);
       }
       else
       {
@@ -56,16 +57,30 @@ class MeasureSelectionTool extends Tool
       }
     }
 
+    // traverse selection roots
     for (let object of roots)
     {
       traverse(object);
     }
+
+    // measure area of selected faces
+    const selectFacesTool = application.tools["select_faces"];
+    const mesh = selectFacesTool?.mesh;
+
+    if (mesh &&
+        ObjectUtils.isObjectDescendantOf(mesh, application.scene))
+    {
+      meshCount++;
+      area += GeometryUtils.getBufferGeometryArea(mesh.geometry, mesh.matrixWorld);
+    }
+
     const decimals = application.setup.decimals;
     const units = " " + application.setup.units;
     const dialog = new Dialog(this.label);
     dialog.setSize(240, 160);
     dialog.setI18N(application.i18n);
-    dialog.addTextWithArgs("message.object_count", [objectCount], "row");
+    dialog.addTextWithArgs("message.solid_count", [solidCount], "row");
+    dialog.addTextWithArgs("message.mesh_count", [meshCount], "row");
     dialog.addTextWithArgs("message.total_area",
       [area.toFixed(decimals), units], "row");
     dialog.addTextWithArgs("message.total_volume",

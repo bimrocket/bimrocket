@@ -31,15 +31,25 @@
 package org.bimrocket.dao;
 
 /**
+ * Connection to a DatStore
  *
  * @author realor
  */
 public interface DaoConnection extends AutoCloseable
 {
+  /**
+   * Commit changes performed in the current transaction
+   */
   void commit();
 
+  /**
+   * Abort changes performed in the current transaction
+   */
   void rollback();
 
+  /**
+   * Close the connection
+   */
   @Override
   void close();
 }

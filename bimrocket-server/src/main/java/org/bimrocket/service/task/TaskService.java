@@ -151,8 +151,8 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      Dao<TaskExecution> executionDao = conn.getTaskExecutionDao();
-      return executionDao.select(filter, orderBy);
+      Dao<TaskExecution, String> executionDao = conn.getTaskExecutionDao();
+      return executionDao.find(filter, orderBy);
     }
   }
 
@@ -167,8 +167,8 @@ public class TaskService
     {
       try (TaskDaoConnection conn = daoStore.getConnection())
       {
-        Dao<TaskExecution> taskExecutionDao = conn.getTaskExecutionDao();
-        return taskExecutionDao.select(executionId);
+        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        return taskExecutionDao.findById(executionId);
       }
     }
   }
@@ -207,8 +207,8 @@ public class TaskService
     {
       try (TaskDaoConnection conn = daoStore.getConnection())
       {
-        Dao<TaskExecution> taskExecutionDao = conn.getTaskExecutionDao();
-        TaskExecution execution = taskExecutionDao.select(executionId);
+        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        TaskExecution execution = taskExecutionDao.findById(executionId);
         if (RUNNING_STATUS.equals(execution.getStatus()))
         {
           execution.setStatus(CANCELLING_STATUS);
@@ -223,7 +223,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      return conn.getTaskDataDao().select(dataId);
+      return conn.getTaskDataDao().findById(dataId);
     }
   }
 
@@ -231,7 +231,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      Dao<TaskData> taskDataDao = conn.getTaskDataDao();
+      Dao<TaskData, String> taskDataDao = conn.getTaskDataDao();
 
       if (data.getId() == null)
       {
@@ -240,7 +240,7 @@ public class TaskService
       }
       else
       {
-        return taskDataDao.insertOrUpdate(data);
+        return taskDataDao.save(data);
       }
     }
   }
@@ -249,7 +249,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      return conn.getTaskDataDao().delete(dataId);
+      return conn.getTaskDataDao().deleteById(dataId);
     }
   }
 

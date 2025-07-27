@@ -118,6 +118,19 @@ public class EntityDefinition
     return map;
   }
 
+  public Object getEntityId(Object entity)
+  {
+    try
+    {
+      Field idField = getIdentityField(true);
+      return idField.get(entity);
+    }
+    catch (Exception ex)
+    {
+      throw new RuntimeException(ex);
+    }
+  }
+
   private void build()
   {
     List<Class<?>> classList = new ArrayList<>();

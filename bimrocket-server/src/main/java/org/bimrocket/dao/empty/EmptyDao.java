@@ -41,16 +41,16 @@ import org.bimrocket.dao.expression.OrderByExpression;
  * @author realor
  * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class EmptyDao<E, ID> implements Dao<E, ID>
 {
   @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  public List<E> find(Expression filter, List<OrderByExpression> orderBy)
   {
     return Collections.emptyList();
   }
 
   @Override
-  public E select(Object id)
+  public E findById(ID id)
   {
     return null;
   }
@@ -68,13 +68,13 @@ public class EmptyDao<E> implements Dao<E>
   }
 
   @Override
-  public E insertOrUpdate(E entity)
+  public E save(E entity)
   {
     return entity;
   }
 
   @Override
-  public boolean delete(Object id)
+  public boolean deleteById(ID id)
   {
     return false;
   }

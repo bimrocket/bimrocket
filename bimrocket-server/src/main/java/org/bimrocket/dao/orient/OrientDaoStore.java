@@ -51,6 +51,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author realor
+ * @param <C> the Dao connection
+ */
 public abstract class OrientDaoStore<C extends DaoConnection>
   implements DaoStore<C>
 {
@@ -104,11 +109,10 @@ public abstract class OrientDaoStore<C extends DaoConnection>
     return db;
   }
 
-
   @Override
   public void close()
   {
-    // pool is closed by OrientPoolManager
+    // store is closed by OrientPoolManager
   }
 
   protected void registerEntityClasses(OSchema schema)

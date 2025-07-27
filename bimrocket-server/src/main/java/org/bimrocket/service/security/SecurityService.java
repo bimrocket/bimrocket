@@ -196,8 +196,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.select(filter, orderBy);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.find(filter, orderBy);
     }
   }
 
@@ -207,8 +207,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.select(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.findById(userId);
     }
   }
 
@@ -221,8 +221,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User prevUser = userDao.select(user.getId());
+      Dao<User, String> userDao = conn.getUserDao();
+      User prevUser = userDao.findById(user.getId());
       if (prevUser != null)
         throw new InvalidRequestException(USER_ALREADY_EXISTS);
 
@@ -249,8 +249,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User user = userDao.select(userUpdate.getId());
+      Dao<User, String> userDao = conn.getUserDao();
+      User user = userDao.findById(userUpdate.getId());
       if (user == null) throw new NotFoundException(USER_NOT_FOUND);
 
       userCache.remove(userId);
@@ -280,8 +280,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.delete(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.deleteById(userId);
     }
   }
 
@@ -291,8 +291,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> userDao = conn.getRoleDao();
-      return userDao.select(filter, orderBy);
+      Dao<Role, String> userDao = conn.getRoleDao();
+      return userDao.find(filter, orderBy);
     }
   }
 
@@ -302,8 +302,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
-      return roleDao.select(roleId);
+      Dao<Role, String> roleDao = conn.getRoleDao();
+      return roleDao.findById(roleId);
     }
   }
 
@@ -313,7 +313,7 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
+      Dao<Role, String> roleDao = conn.getRoleDao();
       return roleDao.insert(role);
     }
   }
@@ -325,7 +325,7 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
+      Dao<Role, String> roleDao = conn.getRoleDao();
       return roleDao.update(role);
     }
   }
@@ -337,8 +337,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
-      return roleDao.delete(roleId);
+      Dao<Role, String> roleDao = conn.getRoleDao();
+      return roleDao.deleteById(roleId);
     }
   }
 
@@ -354,8 +354,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User user = userDao.select(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      User user = userDao.findById(userId);
 
       if (user == null ||
           !Objects.equals(hash(oldPassword), user.getPasswordHash()))

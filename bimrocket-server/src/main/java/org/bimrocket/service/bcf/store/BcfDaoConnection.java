@@ -49,15 +49,15 @@ public interface BcfDaoConnection extends DaoConnection
 {
   List<BcfProject> findProjects(Set<String> roles);
 
-  Dao<BcfProject> getProjectDao();
+  Dao<BcfProject, String> getProjectDao();
 
-  Dao<BcfExtensions> getExtensionsDao();
+  Dao<BcfExtensions, String> getExtensionsDao();
 
-  Dao<BcfTopic> getTopicDao();
+  Dao<BcfTopic, String> getTopicDao();
 
-  Dao<BcfComment> getCommentDao();
+  Dao<BcfComment, String> getCommentDao();
 
-  Dao<BcfViewpoint> getViewpointDao();
+  Dao<BcfViewpoint, String> getViewpointDao();
 
-  Dao<BcfDocumentReference> getDocumentReferenceDao();
+  Dao<BcfDocumentReference, String> getDocumentReferenceDao();
 }

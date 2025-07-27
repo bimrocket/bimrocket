@@ -85,7 +85,7 @@ public class BcfOrientDaoConnection extends OrientDaoConnection
     String query = "select * from BcfProject" + where + " order by name";
 
     List<BcfProject> projects = new ArrayList<>();
-    try (OResultSet rs = conn.query(query, parameters))
+    try (OResultSet rs = db.query(query, parameters))
     {
       while (rs.hasNext())
       {
@@ -102,38 +102,38 @@ public class BcfOrientDaoConnection extends OrientDaoConnection
   }
 
   @Override
-  public Dao<BcfProject> getProjectDao()
+  public Dao<BcfProject, String> getProjectDao()
   {
-    return new OrientDao<>(conn, BcfProject.class);
+    return new OrientDao<>(db, BcfProject.class);
   }
 
   @Override
-  public Dao<BcfExtensions> getExtensionsDao()
+  public Dao<BcfExtensions, String> getExtensionsDao()
   {
-    return new OrientDao<>(conn, BcfExtensions.class);
+    return new OrientDao<>(db, BcfExtensions.class);
   }
 
   @Override
-  public Dao<BcfTopic> getTopicDao()
+  public Dao<BcfTopic, String> getTopicDao()
   {
-    return new OrientDao<>(conn, BcfTopic.class);
+    return new OrientDao<>(db, BcfTopic.class);
   }
 
   @Override
-  public Dao<BcfComment> getCommentDao()
+  public Dao<BcfComment, String> getCommentDao()
   {
-    return new OrientDao<>(conn, BcfComment.class);
+    return new OrientDao<>(db, BcfComment.class);
   }
 
   @Override
-  public Dao<BcfViewpoint> getViewpointDao()
+  public Dao<BcfViewpoint, String> getViewpointDao()
   {
-    return new OrientDao<>(conn, BcfViewpoint.class);
+    return new OrientDao<>(db, BcfViewpoint.class);
   }
 
   @Override
-  public Dao<BcfDocumentReference> getDocumentReferenceDao()
+  public Dao<BcfDocumentReference, String> getDocumentReferenceDao()
   {
-    return new OrientDao<>(conn, BcfDocumentReference.class);
+    return new OrientDao<>(db, BcfDocumentReference.class);
   }
 }

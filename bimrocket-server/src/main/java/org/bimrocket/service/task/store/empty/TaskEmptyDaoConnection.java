@@ -45,13 +45,13 @@ public class TaskEmptyDaoConnection extends EmptyDaoConnection
   implements TaskDaoConnection
 {
   @Override
-  public Dao<TaskExecution> getTaskExecutionDao()
+  public Dao<TaskExecution, String> getTaskExecutionDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<TaskData> getTaskDataDao()
+  public Dao<TaskData, String> getTaskDataDao()
   {
     return new EmptyDao<>();
   }

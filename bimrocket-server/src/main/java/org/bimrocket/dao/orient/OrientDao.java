@@ -52,9 +52,10 @@ import org.bimrocket.util.EntityDefinition;
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
+ * @param <E> the entity type managed by this DAO
+ * @param <ID> the entity identifier type
  */
-public class OrientDao<E> implements Dao<E>
+public class OrientDao<E, ID> implements Dao<E, ID>
 {
   private final ODatabaseDocument db;
   private final Class<E> cls;
@@ -68,7 +69,7 @@ public class OrientDao<E> implements Dao<E>
   }
 
   @Override
-  public List<E> select(Expression filter, List<OrderByExpression> orderBy)
+  public List<E> find(Expression filter, List<OrderByExpression> orderBy)
   {
     String query = "select * from " + cls.getSimpleName();
 
@@ -99,7 +100,7 @@ public class OrientDao<E> implements Dao<E>
   }
 
   @Override
-  public E select(Object id)
+  public E findById(ID id)
   {
     OElement oelement = internalSelect(id);
     if (oelement == null) return null;
@@ -120,52 +121,36 @@ public class OrientDao<E> implements Dao<E>
   @Override
   public E update(E entity)
   {
-    try
-    {
-      Field idField = definition.getIdentityField(true);
-      Object id = idField.get(entity);
+    Object id = definition.getEntityId(entity);
 
-      OElement oelement = internalSelect(id);
-      if (oelement == null) return null;
+    OElement oelement = internalSelect(id);
+    if (oelement == null) return null;
 
-      copyToElement(entity, oelement);
+    copyToElement(entity, oelement);
 
-      db.save(oelement);
-      return entity;
-    }
-    catch (Exception ex)
-    {
-      throw new RuntimeException(ex);
-    }
+    db.save(oelement);
+    return entity;
   }
 
   @Override
-  public E insertOrUpdate(E entity)
+  public E save(E entity)
   {
-    try
+    Object id = definition.getEntityId(entity);
+
+    OElement oelement = internalSelect(id);
+    if (oelement == null)
     {
-      Field idField = definition.getIdentityField(true);
-      Object id = idField.get(entity);
-
-      OElement oelement = internalSelect(id);
-      if (oelement == null)
-      {
-        oelement = db.newElement(cls.getSimpleName());
-      }
-
-      copyToElement(entity, oelement);
-
-      db.save(oelement);
-      return entity;
+      oelement = db.newElement(cls.getSimpleName());
     }
-    catch (Exception ex)
-    {
-      throw new RuntimeException(ex);
-    }
+
+    copyToElement(entity, oelement);
+
+    db.save(oelement);
+    return entity;
   }
 
   @Override
-  public boolean delete(Object id)
+  public boolean deleteById(ID id)
   {
     Field idField = definition.getIdentityField(true);
 

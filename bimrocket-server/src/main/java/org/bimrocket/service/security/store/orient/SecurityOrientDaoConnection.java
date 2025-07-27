@@ -51,14 +51,14 @@ public class SecurityOrientDaoConnection extends OrientDaoConnection
   }
 
   @Override
-  public Dao<User> getUserDao()
+  public Dao<User, String> getUserDao()
   {
-    return new OrientDao<>(conn, User.class);
+    return new OrientDao<>(db, User.class);
   }
 
   @Override
-  public Dao<Role> getRoleDao()
+  public Dao<Role, String> getRoleDao()
   {
-    return new OrientDao<>(conn, Role.class);
+    return new OrientDao<>(db, Role.class);
   }
 }

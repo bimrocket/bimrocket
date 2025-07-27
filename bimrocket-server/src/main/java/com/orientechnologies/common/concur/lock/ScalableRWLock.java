@@ -128,7 +128,7 @@ public class ScalableRWLock implements ReadWriteLock, java.io.Serializable {
       this.state = state;
     }
 
-    @SuppressWarnings({"checkstyle:NoFinalizer", "deprecation"})
+    @SuppressWarnings({"checkstyle:NoFinalizer"})
     protected void finalize() throws Throwable {
       removeState(state);
       super.finalize();
@@ -298,7 +298,7 @@ public class ScalableRWLock implements ReadWriteLock, java.io.Serializable {
    */
   public void sharedUnlock() {
     final ReadersEntry localEntry = entry.get();
-    entry.remove(); // Added by realor@santfeliu.cat to prevent memory leaks when reloading application in Tomcat
+    entry.remove(); // Added by realor@santfeliu.cat to prevent memory leaks when reloading application in servlet container
     if (localEntry == null) {
       // ERROR: Tried to unlock a non read-locked lock
       throw new IllegalMonitorStateException();

@@ -31,14 +31,23 @@
 package org.bimrocket.dao;
 
 /**
+ * General interface to access a data store
  *
  * @author realor
- * @param <C> DaoConnection
+ * @param <C> DaoConnection a connection to the store
  */
 public interface DaoStore<C extends DaoConnection> extends AutoCloseable
 {
+  /**
+   * Gets a connection to the store
+   *
+   * @return a connection to the store
+   */
   C getConnection();
 
+  /**
+   * Closes the store
+   */
   @Override
   void close();
 }

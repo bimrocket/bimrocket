@@ -41,7 +41,7 @@ import org.bimrocket.api.task.TaskExecution;
  */
 public interface TaskDaoConnection extends DaoConnection
 {
-  Dao<TaskExecution> getTaskExecutionDao();
+  Dao<TaskExecution, String> getTaskExecutionDao();
 
-  Dao<TaskData> getTaskDataDao();
+  Dao<TaskData, String> getTaskDataDao();
 }

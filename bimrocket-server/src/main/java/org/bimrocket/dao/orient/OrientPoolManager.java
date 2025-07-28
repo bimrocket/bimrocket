@@ -42,12 +42,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static org.bimrocket.util.Cleaner.shutdownStaticExecutor;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -150,26 +149,9 @@ public class OrientPoolManager
 
   private void shutdownExecutors()
   {
-    shutdownExecutor(OWOWCache.class, "commitExecutor");
-    shutdownExecutor(OAbstractPaginatedStorage.class, "fuzzyCheckpointExecutor");
-    shutdownExecutor(CASDiskWriteAheadLog.class, "commitExecutor");
-    shutdownExecutor(CASDiskWriteAheadLog.class, "writeExecutor");
-  }
-
-  private void shutdownExecutor(Class<?> cls, String fieldName)
-  {
-    try
-    {
-      LOGGER.log(Level.INFO, "Shutting down executor {0}",
-        cls.getSimpleName() + "." + fieldName);
-      Field field = cls.getDeclaredField(fieldName);
-      field.setAccessible(true);
-      ExecutorService executorService = (ExecutorService)field.get(null);
-      executorService.shutdownNow();
-    }
-    catch (Exception ex)
-    {
-      // ignore
-    }
+    shutdownStaticExecutor(OWOWCache.class, "commitExecutor");
+    shutdownStaticExecutor(OAbstractPaginatedStorage.class, "fuzzyCheckpointExecutor");
+    shutdownStaticExecutor(CASDiskWriteAheadLog.class, "commitExecutor");
+    shutdownStaticExecutor(CASDiskWriteAheadLog.class, "writeExecutor");
   }
 }

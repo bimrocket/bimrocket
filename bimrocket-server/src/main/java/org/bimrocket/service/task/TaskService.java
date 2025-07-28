@@ -133,8 +133,11 @@ public class TaskService
     }
     catch (Exception ex)
     {
-      LOGGER.log(Level.SEVERE, "Invalid TaskDaoStore: {0}",
-        config.getOptionalValue(BASE + "store.class", String.class).orElse(null));
+      LOGGER.log(Level.SEVERE, "Error initializing TaskDaoStore [{0}]: {1}",
+        new Object[] {
+          config.getOptionalValue(BASE + "store.class", String.class).orElse(null),
+          ex.toString()
+        });
       daoStore = cdi.select(TaskEmptyDaoStore.class).get();
     }
     LOGGER.log(Level.INFO, "TaskDaoStore: {0}", daoStore.getClass());

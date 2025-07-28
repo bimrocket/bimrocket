@@ -159,8 +159,11 @@ public class BcfService
     }
     catch (Exception ex)
     {
-      LOGGER.log(Level.SEVERE, "Invalid BcfDaoStore: {0}",
-        config.getOptionalValue(BASE + "store.class", String.class).orElse(null));
+      LOGGER.log(Level.SEVERE, "Error initializing BcfDaoStore [{0}]: {1}",
+        new Object[] {
+          config.getOptionalValue(BASE + "store.class", String.class).orElse(null),
+          ex.toString()
+        });
       daoStore = new BcfEmptyDaoStore();
     }
     LOGGER.log(Level.INFO, "BcfDaoStore: {0}", daoStore.getClass());

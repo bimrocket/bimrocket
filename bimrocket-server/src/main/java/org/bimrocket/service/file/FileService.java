@@ -94,8 +94,11 @@ public class FileService
     }
     catch (Exception ex)
     {
-      LOGGER.log(Level.SEVERE, "Invalid ResourceStore: {0}",
-        config.getOptionalValue(BASE + "store.class", String.class).orElse(null));
+      LOGGER.log(Level.SEVERE, "Error initializing FileStore: {0}: {1}",
+        new Object[] {
+          config.getOptionalValue(BASE + "store.class", String.class).orElse(null),
+          ex.toString()
+      });
       store = new FileSystemFileStore();
     }
     // create default folders

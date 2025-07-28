@@ -154,8 +154,11 @@ public class SecurityService
     }
     catch (Exception ex)
     {
-      LOGGER.log(Level.SEVERE, "Invalid SecurityDaoStore: {0}",
-        config.getOptionalValue(BASE + "store.class", String.class).orElse(null));
+      LOGGER.log(Level.SEVERE, "Error initializing SecurityDaoStore [{0}]: {1}",
+        new Object[] {
+          config.getOptionalValue(BASE + "store.class", String.class).orElse(null),
+          ex.toString()
+        });
       daoStore = new SecurityEmptyDaoStore();
     }
 

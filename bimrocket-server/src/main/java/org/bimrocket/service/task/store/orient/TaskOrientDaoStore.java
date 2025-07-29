@@ -70,6 +70,7 @@ public class TaskOrientDaoStore extends OrientDaoStore<TaskDaoConnection>
     OClass taskDataClass = registerEntityClass(schema, TaskData.class);
 
     createIndex(taskExecutionClass, "TaskExecutionIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(taskExecutionClass, "TaskExecutionTaskNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "taskName");
     createIndex(taskDataClass, "TaskDataIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
   }
 

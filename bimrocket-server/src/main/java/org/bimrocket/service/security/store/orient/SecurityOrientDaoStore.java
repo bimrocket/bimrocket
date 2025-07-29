@@ -65,7 +65,9 @@ public class SecurityOrientDaoStore extends OrientDaoStore<SecurityDaoConnection
     OClass roleClass = registerEntityClass(schema, Role.class);
 
     createIndex(userClass, "UserIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(userClass, "UserNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "name");
     createIndex(roleClass, "RoleIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(roleClass, "RoleDescriptionIdx", OClass.INDEX_TYPE.NOTUNIQUE, "description");
   }
 
   @Override

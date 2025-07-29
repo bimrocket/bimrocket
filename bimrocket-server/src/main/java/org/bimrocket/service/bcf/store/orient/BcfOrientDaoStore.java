@@ -61,7 +61,6 @@ public class BcfOrientDaoStore extends OrientDaoStore<BcfDaoConnection>
   {
     // generate schema
     registerEntityClass(schema, BcfColoring.class);
-    registerEntityClass(schema, BcfComment.class);
     registerEntityClass(schema, BcfComponent.class);
     registerEntityClass(schema, BcfComponents.class);
     registerEntityClass(schema, BcfDirection.class);
@@ -71,15 +70,21 @@ public class BcfOrientDaoStore extends OrientDaoStore<BcfDaoConnection>
     registerEntityClass(schema, BcfDocumentReference.class);
     registerEntityClass(schema, BcfPoint.class);
     registerEntityClass(schema, BcfVector.class);
-    registerEntityClass(schema, BcfViewpoint.class);
     registerEntityClass(schema, BcfSnapshot.class);
     OClass projectClass = registerEntityClass(schema, BcfProject.class);
     OClass extensionsClass = registerEntityClass(schema, BcfExtensions.class);
     OClass topicClass = registerEntityClass(schema, BcfTopic.class);
+    OClass commentClass = registerEntityClass(schema, BcfComment.class);
+    OClass viewpointClass = registerEntityClass(schema, BcfViewpoint.class);
 
     createIndex(projectClass, "BcfProjectIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
     createIndex(extensionsClass, "BcfExtensionsIdIdx", OClass.INDEX_TYPE.UNIQUE, "projectId");
     createIndex(topicClass, "BcfTopicIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(topicClass, "BcfTopicTitleIdx", OClass.INDEX_TYPE.NOTUNIQUE, "title");
+    createIndex(commentClass, "BcfCommentIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(commentClass, "BcfCommentTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
+    createIndex(viewpointClass, "BcfViewpointIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    createIndex(viewpointClass, "BcfViewpointTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
   }
 
   @Override

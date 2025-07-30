@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.bson.codecs.pojo.annotations.BsonId;
 
 /**
  *
@@ -45,6 +46,7 @@ import java.util.Set;
 public class BcfExtensions
 {
   @Id
+  @BsonId
   @JsonIgnore
   private String projectId;
 

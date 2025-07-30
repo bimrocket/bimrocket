@@ -28,48 +28,38 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.expression;
+package org.bimrocket.service.security.store.mongo;
+
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoDatabase;
+import org.bimrocket.api.security.Role;
+import org.bimrocket.api.security.User;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.mongo.MongoDao;
+import org.bimrocket.dao.mongo.MongoDaoConnection;
+import org.bimrocket.service.security.store.SecurityDaoConnection;
 
 /**
  *
  * @author realor
  */
-public class OrderByExpression
+public class SecurityMongoDaoConnection extends MongoDaoConnection
+  implements SecurityDaoConnection
 {
-  public static final String ASC = "ASC";
-  public static final String DESC = "DESC";
-
-  private final Expression expression;
-  private final String direction;
-
-  public OrderByExpression(Expression expression)
+  protected SecurityMongoDaoConnection(ClientSession session, MongoDatabase db)
   {
-    this(expression, ASC);
+    super(session, db);
   }
 
-  public OrderByExpression(Expression expression, String direction)
+  @Override
+  public Dao<User, String> getUserDao()
   {
-    this.expression = expression;
-    this.direction = direction;
+    return new MongoDao<>(session, db, User.class);
   }
 
-  public Expression getExpression()
+  @Override
+  public Dao<Role, String> getRoleDao()
   {
-    return expression;
-  }
-
-  public String getDirection()
-  {
-    return direction;
-  }
-
-  public boolean isAscending()
-  {
-    return ASC.endsWith(direction);
-  }
-
-  public boolean isDescending()
-  {
-    return DESC.endsWith(direction);
+    return new MongoDao<>(session, db, Role.class);
   }
 }

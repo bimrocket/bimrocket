@@ -28,48 +28,36 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.expression;
+package org.bimrocket.service.task.store.mongo;
+
+import jakarta.annotation.PostConstruct;
+import org.bimrocket.dao.mongo.MongoDaoStore;
+import org.bimrocket.service.task.store.TaskDaoConnection;
+import org.bimrocket.service.task.store.TaskDaoStore;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 /**
  *
  * @author realor
  */
-public class OrderByExpression
+public class TaskMongoDaoStore extends MongoDaoStore<TaskDaoConnection>
+  implements TaskDaoStore
 {
-  public static final String ASC = "ASC";
-  public static final String DESC = "DESC";
+  static final String BASE = "services.task.store.mongo.";
 
-  private final Expression expression;
-  private final String direction;
-
-  public OrderByExpression(Expression expression)
+  @PostConstruct
+  public void init()
   {
-    this(expression, ASC);
+    Config config = ConfigProvider.getConfig();
+    setDbAlias(config.getValue(BASE + "database", String.class));
+
+    // TODO: create indexes
   }
 
-  public OrderByExpression(Expression expression, String direction)
+  @Override
+  public TaskDaoConnection getConnection()
   {
-    this.expression = expression;
-    this.direction = direction;
-  }
-
-  public Expression getExpression()
-  {
-    return expression;
-  }
-
-  public String getDirection()
-  {
-    return direction;
-  }
-
-  public boolean isAscending()
-  {
-    return ASC.endsWith(direction);
-  }
-
-  public boolean isDescending()
-  {
-    return DESC.endsWith(direction);
+    return new TaskMongoDaoConnection(getSession(), getDatabase());
   }
 }

@@ -22,6 +22,7 @@
     <weld.version>5.1.5.Final</weld.version>
     <smallrye.config.version>3.9.1</smallrye.config.version>
     <orientdb.version>3.2.42</orientdb.version>
+    <mongodb.version>5.5.1</mongodb.version>
   </properties>
 
   <dependencies>
@@ -120,6 +121,11 @@
       <groupId>com.orientechnologies</groupId>
       <artifactId>orientdb-client</artifactId>
       <version>${orientdb.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongodb-driver-sync</artifactId>
+      <version>${mongodb.version}</version>
     </dependency>
   </dependencies>
 

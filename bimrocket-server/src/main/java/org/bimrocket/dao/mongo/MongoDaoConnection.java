@@ -28,48 +28,49 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.expression;
+package org.bimrocket.dao.mongo;
+
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoDatabase;
+import org.bimrocket.dao.DaoConnection;
 
 /**
  *
  * @author realor
  */
-public class OrderByExpression
+public class MongoDaoConnection implements DaoConnection
 {
-  public static final String ASC = "ASC";
-  public static final String DESC = "DESC";
+  protected final ClientSession session;
+  protected final MongoDatabase db;
 
-  private final Expression expression;
-  private final String direction;
-
-  public OrderByExpression(Expression expression)
+  protected MongoDaoConnection(ClientSession session, MongoDatabase db)
   {
-    this(expression, ASC);
+    this.session = session;
+    this.db = db;
+    // TODO: session.startTransaction() depending on database configuration
   }
 
-  public OrderByExpression(Expression expression, String direction)
+  @Override
+  public void commit()
   {
-    this.expression = expression;
-    this.direction = direction;
+    if (session.hasActiveTransaction())
+    {
+      session.commitTransaction();
+    }
   }
 
-  public Expression getExpression()
+  @Override
+  public void rollback()
   {
-    return expression;
+    if (session.hasActiveTransaction())
+    {
+      session.abortTransaction();
+    }
   }
 
-  public String getDirection()
+  @Override
+  public void close()
   {
-    return direction;
-  }
-
-  public boolean isAscending()
-  {
-    return ASC.endsWith(direction);
-  }
-
-  public boolean isDescending()
-  {
-    return DESC.endsWith(direction);
+    session.close();
   }
 }

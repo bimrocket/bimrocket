@@ -28,48 +28,38 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.dao.expression;
+package org.bimrocket.service.task.store.mongo;
+
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoDatabase;
+import org.bimrocket.api.task.TaskData;
+import org.bimrocket.api.task.TaskExecution;
+import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.mongo.MongoDao;
+import org.bimrocket.dao.mongo.MongoDaoConnection;
+import org.bimrocket.service.task.store.TaskDaoConnection;
 
 /**
  *
  * @author realor
  */
-public class OrderByExpression
+public class TaskMongoDaoConnection extends MongoDaoConnection
+  implements TaskDaoConnection
 {
-  public static final String ASC = "ASC";
-  public static final String DESC = "DESC";
-
-  private final Expression expression;
-  private final String direction;
-
-  public OrderByExpression(Expression expression)
+  protected TaskMongoDaoConnection(ClientSession session, MongoDatabase db)
   {
-    this(expression, ASC);
+    super(session, db);
   }
 
-  public OrderByExpression(Expression expression, String direction)
+  @Override
+  public Dao<TaskExecution, String> getTaskExecutionDao()
   {
-    this.expression = expression;
-    this.direction = direction;
+    return new MongoDao<>(session, db, TaskExecution.class);
   }
 
-  public Expression getExpression()
+  @Override
+  public Dao<TaskData, String> getTaskDataDao()
   {
-    return expression;
-  }
-
-  public String getDirection()
-  {
-    return direction;
-  }
-
-  public boolean isAscending()
-  {
-    return ASC.endsWith(direction);
-  }
-
-  public boolean isDescending()
-  {
-    return DESC.endsWith(direction);
+    return new MongoDao<>(session, db, TaskData.class);
   }
 }

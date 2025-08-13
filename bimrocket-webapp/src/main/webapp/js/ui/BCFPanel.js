@@ -43,7 +43,7 @@ class BCFPanel extends Panel
     this.docRefGuid = null;
     this.projectMap = new Map();
 
-    
+
     // search panel
     this.searchPanelElem = document.createElement("div");
     this.searchPanelElem.id = "bcf_search_panel";
@@ -628,14 +628,14 @@ class BCFPanel extends Panel
       .filter(Boolean)
       .map(globalId => ({ ifc_guid: globalId }));
 
-    if (globalIds.length > 0) 
+    if (globalIds.length > 0)
     {
-      viewpoint.components = 
-      { 
-        selection: globalIds 
+      viewpoint.components =
+      {
+        selection: globalIds
       };
     }
-    
+
     if (camera instanceof THREE.PerspectiveCamera)
     {
       viewpoint.perspective_camera =
@@ -1256,7 +1256,8 @@ class BCFPanel extends Panel
     const topics = this.topics;
     const topicsElem = this.topicTableElem;
     topicsElem.tBodies[0].innerHTML = "";
-    if (topics.length === 0) {
+    if (topics.length === 0)
+    {
       this.exportButton.disabled = true;
       let rowElem = topicsElem.tBodies[0].insertRow();
       let cell = rowElem.insertCell(0);
@@ -1283,7 +1284,8 @@ class BCFPanel extends Panel
 
   exportTopicTable()
   {
-    if (!this.topics) {
+    if (!this.topics)
+    {
       console.warn("No topics available to export.");
       return;
     }
@@ -1291,14 +1293,16 @@ class BCFPanel extends Panel
     const selectedProjectId = this.projectElem?.value;
 
     const topics = this.topics;
-    if (topics.length === 0) {
+    if (topics.length === 0)
+    {
       console.warn("No topics to export for the selected project.");
       return;
     }
 
     let csvContent = "Index;Title;Type;Priority;Status;Stage;Creation Author;Assigned To;Due Date;Description\n";
 
-    topics.forEach(topic => {
+    topics.forEach(topic =>
+    {
       let row = `${topic.index};"${topic.title}";${topic.topic_type};${topic.priority};${topic.topic_status};${topic.stage};"${topic.creation_author}";"${topic.assigned_to}";${topic.due_date};"${topic.description}"`;
       csvContent += row + "\n";
     });
@@ -1400,7 +1404,7 @@ class BCFPanel extends Panel
   {
     let projectId = this.getProjectId();
     let topicGuid = this.guidElem.value;
-    
+
     const viewpoints = this.viewpoints;
     const viewpointsElem = this.viewpointListElem;
     viewpointsElem.innerHTML = "";
@@ -1408,7 +1412,7 @@ class BCFPanel extends Panel
     {
       let itemListElem = document.createElement("li");
 
-      
+
 
       let spanElem = document.createElement("span");
       spanElem.className = "icon viewpoint";
@@ -1444,13 +1448,13 @@ class BCFPanel extends Panel
       viewpointContainer.className = "viewpoint_container";
       itemListElem.appendChild(viewpointContainer);
 
-      if (viewpoint.components && viewpoint.components.selection) 
+      if (viewpoint.components && viewpoint.components.selection)
       {
         let componentsContainer = document.createElement("div");
-      
+
         let componentsLabel = Controls.addLink(componentsContainer, "bim|label.select_components", "#",
-          "bim|title.select_components", "select_components", 
-          (event) => 
+          "bim|title.select_components", "select_components",
+          (event) =>
           {
             event.preventDefault();
             this.handleSelectComponent(viewpoint.components.selection, event);
@@ -1458,33 +1462,33 @@ class BCFPanel extends Panel
         );
 
         componentsContainer.appendChild(componentsLabel);
-        
+
         let componentsList = document.createElement("ul");
         componentsList.className = "components_list";
 
-        viewpoint.components.selection.forEach(component => 
+        viewpoint.components.selection.forEach(component =>
         {
           let componentItem = document.createElement("li");
           componentItem.className = "component_item";
 
           Controls.addLink(componentItem, component.ifc_guid || "No GUID", "#",
             component.ifc_guid || "No GUID", null,
-            (event) => 
+            (event) =>
             {
               event.preventDefault();
               event.stopPropagation();
               this.handleSelectComponent(component, event);
             }
           );
-          
+
           componentsList.appendChild(componentItem);
         });
-        
+
         componentsContainer.appendChild(componentsList);
         viewpointContainer.appendChild(componentsContainer);
       }
 
-      
+
 
       if (viewpoint.snapshot)
       {
@@ -1517,11 +1521,11 @@ class BCFPanel extends Panel
     }
   }
 
-  handleSelectComponent(components, event) 
+  handleSelectComponent(components, event)
   {
     const application = this.application;
 
-    if (!components) 
+    if (!components)
     {
       console.warn("No components provided for selection");
       return;
@@ -1531,16 +1535,16 @@ class BCFPanel extends Panel
     event.stopPropagation();
 
     const componentsArray = Array.isArray(components) ? components : [components];
-    const targetIds = new Set(componentsArray.map(component => component.ifc_guid)); 
+    const targetIds = new Set(componentsArray.map(component => component.ifc_guid));
 
     const elements = application.findObjects($ => targetIds.has($("IFC", "GlobalId")), application.baseObject, true)
 
-    
-    if (elements.length > 0) 
+
+    if (elements.length > 0)
     {
       application.selectObjects(elements, event.type);
     }
-    else 
+    else
     {
       console.warn("No objects found with the provided GlobalID(s)");
       Toast.create("bim|message.no_components_selected")

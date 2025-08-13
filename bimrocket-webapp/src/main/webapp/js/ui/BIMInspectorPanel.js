@@ -203,6 +203,7 @@ class BIMInspectorPanel extends Panel
 
   populateArray(node, array, start, recursive = false)
   {
+    const isExpanded = node.isExpanded();
     const pageSize = this.pageSize;
     node.clear();
     if (start >= pageSize)
@@ -223,6 +224,7 @@ class BIMInspectorPanel extends Panel
         event => this.populateArray(node, array, start + pageSize, recursive),
         "next");
     }
+    if (isExpanded) node.expand();
   }
 
   populateEntityTree(ifcEntity)

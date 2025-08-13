@@ -10,16 +10,44 @@ class Tree
 {
   constructor(element)
   {
+    this.parentElem = element;
     this.rootsElem = document.createElement("ul");
     element.appendChild(this.rootsElem);
     this.rootsElem.className = "tree";
     this.roots = [];
     this.translateLabels = false;
+    this.listeners =
+    {
+      "click" : [],
+      "dblclick" : [],
+      "contextmenu" : [],
+      "expand" : [],
+      "collapse" : [],
+      "add" : [],
+      "remove": []
+    };
+
+    for (let type of ["click", "dblclick", "contextmenu"])
+    {
+      this.rootsElem.addEventListener(type, event =>
+      {
+        const node = this.getNodeForElement(event.target);
+        if (node && this.hasEventListenersFor(type))
+        {
+          this.notifyEventListeners(type,
+          {
+            "type" : type,
+            "node" : node,
+            "originalEvent" : event
+          });
+        }
+      });
+    }
   }
 
-  addNode(object, action, className)
+  addNode(object, action, className, hasChildren)
   {
-    const treeNode = new TreeNode(this, null, object, action, className);
+    const treeNode = new TreeNode(this, null, object, action, className, hasChildren);
     this.roots.push(treeNode);
     this.rootsElem.appendChild(treeNode.itemElem);
 
@@ -36,69 +64,148 @@ class Tree
     this.rootsElem.innerHTML = "";
     this.roots = [];
   }
-};
+
+  addEventListener(type, listener)
+  {
+    const listeners = this.listeners;
+    let typeListeners = listeners[type];
+    if (typeListeners instanceof Array)
+    {
+      typeListeners.push(listener);
+    }
+  }
+
+  removeEventListener(type, listener)
+  {
+    const listeners = this.listeners;
+    let typeListeners = listeners[type];
+    if (typeListeners instanceof Array)
+    {
+      let index = typeListeners.indexOf(listener);
+      if (index !== 1)
+      {
+        typeListeners.splice(index, 1);
+      }
+    }
+  }
+
+  hasEventListenersFor(type)
+  {
+    return this.listeners[type]?.length > 0;
+  }
+
+  notifyEventListeners(type, event)
+  {
+    let typeListeners = this.listeners[type];
+    if (typeListeners)
+    {
+      for (let listener of typeListeners)
+      {
+        listener(event);
+      }
+    }
+  }
+
+  getNodeForElement(element)
+  {
+    while (element)
+    {
+      let nodeName = element.nodeName.toLowerCase();
+      if (nodeName === "a")
+      {
+        return element.parentElement?._treeNode || null;
+      }
+      else if (nodeName === "li")
+      {
+        return null;
+      }
+      element = element.parentElement;
+    }
+    return null;
+  }
+}
 
 class TreeNode
 {
-  constructor(tree, parentTreeNode, value, action, className)
+  constructor(tree, parentTreeNode, value, action, className, hasChildren)
   {
     this.tree = tree;
     this.parent = parentTreeNode;
-    this._value = value;
     this.children = [];
+    this._value = value;
+
+    // list item
     this.itemElem = document.createElement("li");
+    this.itemElem._treeNode = this;
+
+    // link item
     this.linkElem = document.createElement("a");
     this.linkElem.href = "#";
     this.itemElem.appendChild(this.linkElem);
+
+    // expand button
+    this.buttonElem = null;
+
+    // children list
+    this.childrenElem = null;
+
     this.updateLabel();
 
     if (action)
     {
-      this.linkElem.addEventListener("click", action);
+      this.addEventListener("click", action);
     }
-    this.childrenElem = null;
-    this.buttonElem = null;
-    if (className) this.itemElem.className = className;
+    if (className)
+    {
+      this.itemElem.className = className;
+    }
+    if (hasChildren)
+    {
+      this.addExpandButton();
+    }
   }
 
-  addNode(value, action, className)
+  hasChildren()
   {
-    if (this.childrenElem === null)
-    {
-      this.itemElem.innerHTML = "";
-      this.itemElem.classList.add("collapsed");
-      this.buttonElem = document.createElement("button");
-      this.buttonElem.addEventListener("click", () => this.toggle());
-      this.itemElem.appendChild(this.buttonElem);
-      this.itemElem.appendChild(this.linkElem);
-      this.childrenElem = document.createElement("ul");
-      this.itemElem.appendChild(this.childrenElem);
-    }
-    else
-    {
-      this.buttonElem.style.display = "";
-    }
+    return this.children.length > 0;
+  }
 
-    const treeNode = new TreeNode(this.tree, this, value, action, className);
+  addNode(value, action = null, className = null, hasChildren  = false)
+  {
+    this.addExpandButton();
+    this.addChildrenList();
+
+    const tree = this.tree;
+    const treeNode = new TreeNode(tree, this, value, action,
+      className, hasChildren);
     this.childrenElem.appendChild(treeNode.itemElem);
     this.children.push(treeNode);
+
+    if (tree.hasEventListenersFor("add"))
+    {
+      tree.notifyEventListeners("add", { type : "add", node : this });
+    }
 
     return treeNode;
   }
 
   remove()
   {
-    if (this.parent)
+    const tree = this.tree;
+    const parent = this.parent;
+
+    if (parent)
     {
       let index = this.parent.children.indexOf(this);
       if (index > -1)
       {
-        this.parent.children.splice(index, 1);
-        this.parent.childrenElem.removeChild(this.itemElem);
+        parent.children.splice(index, 1);
+        parent.childrenElem.removeChild(this.itemElem);
 
-        if (this.parent.children.length === 0)
+        if (parent.children.length === 0)
         {
-          this.parent.buttonElem.style.display = "none";
+          parent.removeExpandButton();
+          parent.removeChildrenList();
         }
       }
     }
@@ -107,10 +214,26 @@ class TreeNode
       let index = this.tree.roots.indexOf(this);
       if (index > -1)
       {
-        this.tree.roots.splice(index, 1);
-        this.tree.rootsElem.removeChild(this.itemElem);
+        tree.roots.splice(index, 1);
+        tree.rootsElem.removeChild(this.itemElem);
       }
     }
+
+    if (tree.hasEventListenersFor("remove"))
+    {
+      tree.notifyEventListeners("remove",
+        { type : "remove", node : this, parent : parent });
+    }
+  }
+
+  addEventListener(type, listener)
+  {
+    this.linkElem.addEventListener(type, listener);
+  }
+
+  removeEventListener(type, listener)
+  {
+    this.linkElem.removeEventListener(type, listener);
   }
 
   set value(value)
@@ -173,18 +296,28 @@ class TreeNode
 
   toggle()
   {
+    const tree = this.tree;
     if (this.isExpanded())
     {
+      if (tree.hasEventListenersFor("collapse"))
+      {
+        tree.notifyEventListeners("collapse", { type : "collapse", node : this });
+      }
       this.collapse();
     }
     else
     {
+      if (tree.hasEventListenersFor("expand"))
+      {
+        tree.notifyEventListeners("expand", { type : "expand", node : this });
+      }
       this.expand();
     }
   }
 
   expand(levels = 1)
   {
+    const tree = this.tree;
     if (levels > 0)
     {
       this.itemElem.classList.remove("collapsed");
@@ -235,10 +368,44 @@ class TreeNode
   {
     if (this.childrenElem)
     {
-      this.childrenElem.innerHTML = "";
-      this.buttonElem.style.display = "none";
+      this.removeExpandButton();
+      this.removeChildrenList();
     }
     this.children = [];
+  }
+
+  addExpandButton()
+  {
+    if (this.buttonElem === null)
+    {
+      this.buttonElem = document.createElement("button");
+      this.buttonElem.addEventListener("click", () => this.toggle());
+      this.itemElem.insertBefore(this.buttonElem, this.linkElem);
+      this.itemElem.classList.add("collapsed");
+    }
+  }
+
+  removeExpandButton()
+  {
+    this.itemElem.removeChild(this.buttonElem);
+    this.buttonElem = null;
+    this.itemElem.classList.remove("collapsed");
+    this.itemElem.classList.remove("expanded");
+  }
+
+  addChildrenList()
+  {
+    if (this.childrenElem === null)
+    {
+      this.childrenElem = document.createElement("ul");
+      this.itemElem.appendChild(this.childrenElem);
+    }
+  }
+
+  removeChildrenList()
+  {
+    this.itemElem.removeChild(this.childrenElem);
+    this.childrenElem = null;
   }
 }
 

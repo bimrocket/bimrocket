@@ -71,7 +71,7 @@ public abstract class StepExporter
     this.schema = schema;
   }
 
-  public void export(Writer writer, List objects)
+  public void export(Writer writer, List<?> objects)
   {
     tagCount = 0;
     entityMap.clear();
@@ -170,9 +170,8 @@ public abstract class StepExporter
     {
       buffer.append("$");
     }
-    else if (object instanceof Boolean)
+    else if (object instanceof Boolean booleanValue)
     {
-      Boolean booleanValue = (Boolean)object;
       if (Boolean.TRUE.equals(booleanValue))
       {
         buffer.append(".T.");
@@ -182,29 +181,26 @@ public abstract class StepExporter
         buffer.append(".F.");
       }
     }
-    else if (object instanceof String)
+    else if (object instanceof String text)
     {
-      String text = (String)object;
       if (type instanceof ExpressEnumeration)
       {
-        buffer.append(text);
+        buffer.append(text); // save as .<enum_value>.
       }
-      else if (text.equals(".T.") || text.equals(".F.")) // boolean
+      else if (".T".equals(text) || ".F.".equals(text) || ".U.".equals(text))
       {
-        buffer.append(text);
+        buffer.append(text); // assume type is logical
       }
-      else
+      else // literal string
       {
-        // TODO: encode text
         buffer.append("'").append(encodeString(text)).append("'");
       }
     }
-    else if (object instanceof Number)
+    else if (object instanceof Number number)
     {
-      Number number = (Number)object;
       buffer.append(formatNumber(number, type));
     }
-    else if (object instanceof Collection)
+    else if (object instanceof Collection<?> col)
     {
       ExpressType elementType = null;
       if (type instanceof ExpressCollection)
@@ -212,9 +208,8 @@ public abstract class StepExporter
         ExpressCollection collectionType = (ExpressCollection)type;
         elementType = collectionType.getElementType();
       }
-      Collection col = (Collection)object;
       buffer.append('(');
-      Iterator iter = col.iterator();
+      Iterator<?> iter = col.iterator();
       if (iter.hasNext())
       {
         buffer.append(exportObjectWithTag(iter.next(), elementType));
@@ -226,7 +221,7 @@ public abstract class StepExporter
       }
       buffer.append(')');
     }
-    else
+    else // named type
     {
       String typeName = getTypeName(object);
       if (typeName != null)
@@ -234,9 +229,8 @@ public abstract class StepExporter
         buffer.append(typeName.toUpperCase());
         buffer.append("(");
         ExpressNamedType namedType = schema.getNamedType(typeName);
-        if (namedType instanceof ExpressEntity) // Entity
+        if (namedType instanceof ExpressEntity entityType)
         {
-          ExpressEntity entityType = (ExpressEntity)namedType;
           List<ExpressAttribute> attributes = entityType.getAllAttributes();
           Iterator<ExpressAttribute> iter = attributes.iterator();
           if (iter.hasNext())
@@ -253,9 +247,9 @@ public abstract class StepExporter
             }
           }
         }
-        else // DefinedType
+        else if (namedType instanceof ExpressDefinedType definedType)
         {
-          buffer.append(exportObject(getValue(object), type));
+          buffer.append(exportObject(getValue(object), definedType.getDefinition()));
         }
         buffer.append(')');
       }
@@ -324,15 +318,31 @@ public abstract class StepExporter
     {
       switch (primitive.getName())
       {
-        case INTEGER: return String.valueOf(number.longValue());
+        case INTEGER: return String.valueOf(number.intValue());
         default: return String.valueOf(number.doubleValue());
       }
     }
   }
 
+  /**
+   *
+   * @param object a named type object
+   * @return the name of the object type
+   */
   protected abstract String getTypeName(Object object);
 
+  /**
+   *
+   * @param object the entity object
+   * @param propertyName the property name of the entity
+   * @return the value of the property for the given object
+   */
   protected abstract Object getPropertyValue(Object object, String propertyName);
 
+  /**
+   *
+   * @param object defined type object
+   * @return the value of this defined type
+   */
   protected abstract Object getValue(Object object);
 }

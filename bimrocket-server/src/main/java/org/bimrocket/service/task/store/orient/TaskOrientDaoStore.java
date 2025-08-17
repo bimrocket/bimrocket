@@ -31,20 +31,16 @@
 package org.bimrocket.service.task.store.orient;
 
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import jakarta.annotation.PostConstruct;
 import org.bimrocket.api.task.TaskData;
 import org.bimrocket.dao.orient.OrientDaoStore;
 import org.bimrocket.api.task.TaskExecution;
+import org.bimrocket.dao.orient.OrientSetup;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.bimrocket.service.task.store.TaskDaoStore;
 import org.bimrocket.service.task.store.TaskDaoConnection;
 
-/**
- *
- * @author realor
- */
 /**
  *
  * @author realor
@@ -62,16 +58,19 @@ public class TaskOrientDaoStore extends OrientDaoStore<TaskDaoConnection>
   }
 
   @Override
-  protected void registerEntityClasses(OSchema schema)
+  protected void createClasses(OrientSetup orientSetup)
   {
     // generate schema
 
-    OClass taskExecutionClass = registerEntityClass(schema, TaskExecution.class);
-    OClass taskDataClass = registerEntityClass(schema, TaskData.class);
+    OClass taskExecutionClass = orientSetup.createClass(TaskExecution.class);
+    OClass taskDataClass = orientSetup.createClass(TaskData.class);
 
-    createIndex(taskExecutionClass, "TaskExecutionIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(taskExecutionClass, "TaskExecutionTaskNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "taskName");
-    createIndex(taskDataClass, "TaskDataIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(taskExecutionClass,
+      "TaskExecutionIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(taskExecutionClass,
+      "TaskExecutionTaskNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "taskName");
+    orientSetup.createIndex(taskDataClass,
+      "TaskDataIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
   }
 
   @Override

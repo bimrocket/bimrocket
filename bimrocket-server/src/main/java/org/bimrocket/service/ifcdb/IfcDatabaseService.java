@@ -30,32 +30,33 @@
  */
 package org.bimrocket.service.ifcdb;
 
-import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.OElement;
-import com.orientechnologies.orient.core.sql.executor.OResult;
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bimrocket.api.ifcdb.IfcDeleteResult;
-import org.bimrocket.api.ifcdb.IfcCommand;
-import org.bimrocket.api.ifcdb.IfcUploadResult;
-import org.bimrocket.dao.orient.OrientPoolManager;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.bimrocket.api.ifcdb.IfcdbCommand;
+import org.bimrocket.api.ifcdb.IfcdbModel;
+import org.bimrocket.api.ifcdb.IfcdbVersion;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.log.LogExpressionPrinter;
 import org.bimrocket.exception.InvalidRequestException;
-import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.io.ExpressLoader;
+import org.bimrocket.service.ifcdb.store.IfcStore;
+import org.bimrocket.service.ifcdb.store.empty.EmptyIfcStore;
+import org.bimrocket.service.security.SecurityService;
+import org.bimrocket.util.EntityDefinition;
 import org.eclipse.microprofile.config.Config;
 
 /**
@@ -70,183 +71,180 @@ public class IfcDatabaseService
 
   static final String BASE = "services.ifcdb.";
 
+  public static final Map<String, Field> modelFieldMap =
+    EntityDefinition.getInstance(IfcdbModel.class).getFieldMap();
+
+  Map<String, ExpressSchema> schemas = new HashMap<>();
+
   // Exceptions
 
-  static final String MODEL_NOT_FOUND =
+  public static final String MODEL_NOT_FOUND =
     "IFC001: Model not found.";
-  static final String MODEL_ALREADY_EXISTS =
-    "IFC002: Model already exists.";
+  public static final String UNSUPPORTED_SCHEMA =
+    "IFC001: Unsupported schema.";
+  public static final String MODEL_ID_IS_REQUIRED =
+    "IFC002: Model id is required.";
+  public static final String MODEL_NAME_IS_REQUIRED =
+    "IFC003: Model name is required.";
+  public static final String INVALID_IFC =
+    "IFC004: Invalid IFC file.";
+  public static final String INSUFFICIENT_PRIVILEGES =
+    "IFC005: Insufficient privileges.";
+  public static final String MODEL_TOO_LARGE =
+    "IFC006: Model too large.";
 
   @Inject
   Config config;
 
+  IfcStore store;
+
   @Inject
-  OrientPoolManager poolManager;
+  SecurityService securityService;
 
   @PostConstruct
   public void init()
   {
-    LOGGER.log(Level.INFO, "Init IfcdbService");
+    LOGGER.log(Level.INFO, "Init IfcDatabaseService");
+
+    CDI<Object> cdi = CDI.current();
+
+    try
+    {
+      @SuppressWarnings("unchecked")
+      Class<IfcStore> storeClass =
+        config.getValue(BASE + "store.class", Class.class);
+      store = cdi.select(storeClass).get();
+    }
+    catch (Exception ex)
+    {
+      LOGGER.log(Level.SEVERE, "Error initializing IfcStore: {0}: {1}",
+        new Object[] {
+          config.getOptionalValue(BASE + "store.class", String.class).orElse(null),
+          ex.toString()
+      });
+      store = new EmptyIfcStore();
+    }
+    LOGGER.log(Level.INFO, "IfcStore: {0}", store.getClass());
+
+    List<String> schemaNames =
+      config.getOptionalValues(BASE + "schemas", String.class)
+        .orElse(List.of("IFC4"));
+
+    for (String schemaName : schemaNames)
+    {
+      try
+      {
+        ExpressLoader expressParser = new ExpressLoader();
+        ExpressSchema schema = expressParser.load("schema:" + schemaName);
+        LOGGER.log(Level.INFO, "{0} schema loaded: {1} named types",
+          new Object[]{ schema.getName(), schema.getNamedTypes().size()});
+        store.createSchema(schema);
+        schemas.put(schemaName, schema);
+      }
+      catch (Exception ex)
+      {
+        LOGGER.log(Level.SEVERE, "Error initializing schema : {0}: {1}",
+          new Object[]{schemaName, ex});
+      }
+    }
   }
 
-  public void execute(String schemaName, IfcCommand command, File file)
-    throws Exception
+  public List<IfcdbModel> getModels(String schemaName,
+    Expression filter, List<OrderByExpression> orderByList)
+  {
+    LOGGER.log(Level.FINE, "schema: {0}, filter: {1}",
+      new Object[] { schemaName, LogExpressionPrinter.toString(filter) });
+
+    Set<String> roleIds = securityService.getCurrentUser().getRoleIds();
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    return store.getModels(schema, filter, orderByList, roleIds);
+  }
+
+  public List<IfcdbVersion> getModelVersions(String schemaName, String modelId)
+    throws IOException
+  {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    return store.getModelVersions(schema, modelId);
+  }
+
+  public void downloadModel(String schemaName, String modelId, int version,
+    File ifcFile) throws IOException
+  {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    store.downloadModel(schema, modelId, version, ifcFile);
+  }
+
+  public IfcdbModel uploadModel(String schemaName, File ifcFile)
+    throws IOException
+  {
+    LOGGER.log(Level.FINE, "schema: {0}", schemaName);
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    long maxFileSizeMb =
+      config.getOptionalValue(BASE + "maxFileSizeMb", Long.class).orElse(0L);
+
+    if (maxFileSizeMb > 0)
+    {
+      long fileSizeMb = ifcFile.length() / 1048576L;
+
+      if (fileSizeMb > maxFileSizeMb)
+        throw new InvalidRequestException(MODEL_TOO_LARGE);
+    }
+    return store.uploadModel(schema, ifcFile);
+  }
+
+  public IfcdbModel updateModel(String schemaName, IfcdbModel model)
+  {
+    LOGGER.log(Level.FINE, "schema: {0}, modelName: {1}",
+      new Object[] { schemaName, model.getName() });
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    if (isBlank(model.getId()))
+      throw new InvalidRequestException(MODEL_ID_IS_REQUIRED);
+
+    if (isBlank(model.getName()))
+      throw new InvalidRequestException(MODEL_NAME_IS_REQUIRED);
+
+    return store.updateModel(schema, model);
+  }
+
+  public boolean deleteModel(String schemaName, String modelId, int version)
+  {
+    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
+      new Object[] { schemaName, modelId });
+
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
+
+    boolean deleted = store.deleteModel(schema, modelId, version);
+    return deleted;
+  }
+
+  public void execute(String schemaName, IfcdbCommand command, File file)
+    throws IOException
   {
     LOGGER.log(Level.FINE, "command: {0}", command.getQuery());
 
-    ExpressLoader expressParser = new ExpressLoader();
-    ExpressSchema schema = expressParser.load("schema:" + schemaName);
+    ExpressSchema schema = schemas.get(schemaName);
+    if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    String dbAlias = schemaName;
-
-    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
-    {
-      registerModelClass(db);
-
-      String outputFormat = command.getOutputFormat();
-
-      if ("json".equals(outputFormat))
-      {
-        ArrayList<OResult> results = new ArrayList<>();
-        try (OResultSet rs = db.command(command.getQuery()))
-        {
-          rs.stream().forEach(result -> results.add(result));
-        }
-        exportToJson(results, file);
-      }
-      else
-      {
-        ArrayList<OElement> elements = new ArrayList<>();
-        try (OResultSet rs = db.query(command.getQuery()))
-        {
-          rs.elementStream().forEach(element -> elements.add(element));
-        }
-        OrientStepExporter exporter = new OrientStepExporter(schema);
-        exporter.export(new OutputStreamWriter(
-          new FileOutputStream(file)), elements);
-      }
-    }
-  }
-
-  public void getModel(String schemaName, String modelId, File ifcFile)
-    throws Exception
-  {
-    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
-      new Object[] { schemaName, modelId });
-
-    ExpressLoader expressParser = new ExpressLoader();
-    ExpressSchema schema = expressParser.load("schema:" + schemaName);
-
-    String dbAlias = schemaName;
-
-    ArrayList<OElement> elements = new ArrayList<>();
-
-    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
-    {
-      registerModelClass(db);
-
-      try (OResultSet rs = db.query("select expand(Entities) from IfcModel where Id = ?", modelId))
-      {
-        rs.elementStream().forEach(element -> elements.add(element));
-      }
-      if (elements.isEmpty())
-        throw new NotFoundException(MODEL_NOT_FOUND);
-
-      OrientStepExporter exporter = new OrientStepExporter(schema);
-      exporter.export(new OutputStreamWriter(
-        new FileOutputStream(ifcFile)), elements);
-    }
-  }
-
-  public IfcUploadResult putModel(String schemaName, String modelId, File ifcFile)
-    throws Exception
-  {
-    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
-      new Object[] { schemaName, modelId });
-
-    ExpressLoader expressParser = new ExpressLoader();
-    ExpressSchema schema = expressParser.load("schema:" + schemaName);
-
-    String dbAlias = schemaName;
-
-    IfcUploadResult uploadResult = new IfcUploadResult();
-
-    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
-    {
-      registerModelClass(db);
-
-      try (OResultSet rs = db.query("select 1 from IfcModel where Id = ?", modelId))
-      {
-        if (rs.hasNext())
-          throw new InvalidRequestException(MODEL_ALREADY_EXISTS);
-      }
-
-      OrientStepLoader loader = new OrientStepLoader(db, schema);
-      OElement model = loader.load(ifcFile);
-
-      model.setProperty("Id", modelId);
-      db.save(model);
-
-      List<? extends Object> elements =
-        (List<? extends Object>)model.getProperty("Entities");
-      uploadResult.setCount(elements.size());
-    }
-    return uploadResult;
-  }
-
-  public IfcDeleteResult deleteModel(String schemaName, String modelId)
-    throws Exception
-  {
-    LOGGER.log(Level.FINE, "schema: {0}, modelId: {1}",
-      new Object[] { schemaName, modelId });
-
-    String dbAlias = schemaName;
-    IfcDeleteResult deleteResult = new IfcDeleteResult();
-
-    try (ODatabaseDocument db = poolManager.getDocumentConnection(dbAlias))
-    {
-      registerModelClass(db);
-
-      try (OResultSet rs = db.command(
-        "delete from (select expand(Entities) from IfcModel where Id = ?)", modelId))
-      {
-        if (rs.hasNext())
-        {
-          OResult row = rs.next();
-          Number count = (Number)row.getProperty("count");
-          deleteResult.setCount(count.intValue());
-        }
-        db.command("delete from IfcModel where Id = ?", modelId);
-      }
-    }
-    return deleteResult;
-  }
-
-  /* private methods */
-
-  private void exportToJson(List<OResult> results, File file) throws IOException
-  {
-    try (PrintWriter writer = new PrintWriter(file, "UTF-8"))
-    {
-      writer.print("[");
-      for (int i = 0; i < results.size(); i++)
-      {
-        OResult result = results.get(i);
-        if (i > 0) writer.println(",");
-        writer.print(result.toJSON());
-      }
-      writer.print("]");
-    }
-  }
-
-  private void registerModelClass(ODatabaseDocument db)
-  {
-    if (db.getClass("IfcModel") == null)
-    {
-      OClass modelClass = db.createClass("IfcModel");
-      modelClass.createProperty("Id", OType.STRING);
-      modelClass.createProperty("Name", OType.STRING);
-      modelClass.createProperty("Entities", OType.LINKLIST);
-    }
+    store.execute(schema, command, file);
   }
 }

@@ -12,7 +12,9 @@ import { ConfirmDialog } from "./ConfirmDialog.js";
 import { LoginDialog } from "./LoginDialog.js";
 import { Dialog } from "./Dialog.js";
 import { TabbedPane } from "./TabbedPane.js";
+import { Tree } from "./Tree.js";
 import { Toast } from "./Toast.js";
+import { I18N } from "../i18n/I18N.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IFCDBService } from "../io/IFCDBService.js";
 import * as THREE from "three";
@@ -30,23 +32,29 @@ class IFCDBPanel extends Panel
 
     this.service = null;
     this.inputFile = null;
+    this.processing = false;
+
+    // main panel
+    this.mainPanelElem = document.createElement("div");
+    this.bodyElem.appendChild(this.mainPanelElem);
 
     // connect panel
-
     this.bodyElem.classList.add("ifcdb_panel");
 
     this.connPanelElem = document.createElement("div");
     this.connPanelElem.className = "ifcdb_conn";
-    this.bodyElem.appendChild(this.connPanelElem);
+    this.mainPanelElem.appendChild(this.connPanelElem);
 
     this.ifcdbServiceElem = Controls.addSelectField(this.connPanelElem,
       "ifcdbService", "bim|label.ifcdb_service", []);
-    this.ifcdbServiceElem.parentElement.className = "ifcdb_service";
-    this.ifcdbServiceElem.addEventListener("change",
-      event => {
-        let name = this.ifcdbServiceElem.value;
-        this.service = this.application.services[this.group][name];
-      });
+    this.ifcdbServiceElem.parentElement.className = "ifcdb_field";
+    this.ifcdbServiceElem.addEventListener("change", event =>
+    {
+      let name = this.ifcdbServiceElem.value;
+      this.service = this.application.services[this.group][name];
+      this.modelTree.clear();
+      this.messageElem.textContent = "";
+    });
 
     this.connButtonsElem = document.createElement("div");
     this.connPanelElem.appendChild(this.connButtonsElem);
@@ -54,12 +62,14 @@ class IFCDBPanel extends Panel
 
     this.addServiceButton = Controls.addButton(this.connButtonsElem,
       "ifcdbAdd", "button.add", () => this.showAddDialog());
+
     this.editServiceButton = Controls.addButton(this.connButtonsElem,
       "ifcdbEdit", "button.edit", () => this.showEditDialog());
+
     this.deleteServiceButton = Controls.addButton(this.connButtonsElem,
       "ifcdbDelete", "button.delete", () => this.showDeleteDialog());
 
-    this.tabbedPane = new TabbedPane(this.bodyElem);
+    this.tabbedPane = new TabbedPane(this.mainPanelElem);
     this.tabbedPane.paneElem.classList.add("ifcdb_tabs");
 
     this.modelTabElem =
@@ -70,23 +80,62 @@ class IFCDBPanel extends Panel
 
     this.commandTabElem.style.textAlign = "left";
 
-    this.modelIdElem = Controls.addTextField(this.modelTabElem, "ifc_modelid", "bim|label.ifcdb_modelid");
-    this.modelIdElem.parentElement.className = "ifcdb_modelid";
-    this.modelIdElem.spellcheck = false;
-    this.modelIdElem.addEventListener("keyup", () => this.updateButtons());
+    this.modelNameFilterElem = Controls.addTextField(this.modelTabElem,
+      "ifc_modelnamefilter", "bim|label.ifcdb_modelname");
+    this.modelNameFilterElem.parentElement.className = "ifcdb_field";
+    this.modelNameFilterElem.spellcheck = false;
+    this.modelNameFilterElem.addEventListener("keyup", (event) =>
+    {
+      if (event.keyCode === 13) this.searchModels();
+    });
 
     const modelButtonsElem = document.createElement("div");
     modelButtonsElem.className = "ifcdb_buttons";
     this.modelTabElem.appendChild(modelButtonsElem);
 
-    this.getModelButton = Controls.addButton(modelButtonsElem, "get_ifc",
-      "button.open", () => this.getModel());
+    this.searchModelsButton = Controls.addButton(modelButtonsElem, "search_ifc",
+      "button.search", () => this.searchModels());
 
-    this.putModelButton = Controls.addButton(modelButtonsElem, "put_ifc",
+    this.messageElem = document.createElement("div");
+    this.modelTabElem.appendChild(this.messageElem);
+
+    this.modelTree = new Tree(this.modelTabElem);
+    this.selectedNode = null;
+    this.modelTree.getNodeLabel = (value) =>
+    {
+      if (value.id) // IfcModel
+      {
+        return `${value.name} (v${value.last_version})`;
+      }
+      else // IfcModelVersion
+      {
+        const modelVersion = value;
+        const elementCount =
+          new Intl.NumberFormat("es-ES").format(modelVersion.element_count);
+        return `v${modelVersion.version} - ${modelVersion.creation_date} -
+          ${modelVersion.creation_author}  (${elementCount})`;
+      }
+    };
+    this.modelTree.addEventListener("expand",
+      event => this.expandVersions(event));
+    this.modelTree.addEventListener("click",
+      event => this.selectNode(event));
+    this.modelTree.addEventListener("dblclick",
+      event => this.openModelByDblClick(event));
+    this.modelTree.addEventListener("contextmenu",
+      event => event.originalEvent.preventDefault());
+
+    this.uploadModelButton = Controls.addButton(modelButtonsElem, "up_ifc",
       "button.upload", () => this.selectFile());
 
+    this.openModelButton = Controls.addButton(modelButtonsElem, "down_ifc",
+      "button.open", () => this.openSelectedModel());
+
     this.deleteModelButton = Controls.addButton(modelButtonsElem, "del_ifc",
-      "button.delete", () => this.deleteModel());
+      "button.delete", () => this.deleteSelectedModel());
+
+    this.editModelButton = Controls.addButton(modelButtonsElem, "edit_ifc",
+      "button.edit", () => this.editSelectedModel());
 
     const commandPanelElem = document.createElement("div");
     commandPanelElem.className = "ifcdb_command";
@@ -94,7 +143,7 @@ class IFCDBPanel extends Panel
 
     const { SQLDialect } = CM["@codemirror/lang-sql"];
 
-    const OrientDB = SQLDialect.define({
+    const OrientDBSQL = SQLDialect.define({
       keywords: "after and as asc batch before between breadth_first by " +
         "cluster contains containsall containskey containstext containsvalue " +
         "create default defined delete depth_first desc distinct edge " +
@@ -111,32 +160,75 @@ class IFCDBPanel extends Panel
       slashComments: false
     });
 
-    const sqlConfig = { dialect : OrientDB };
+    this.queryOptions =
+    {
+      "language" : "sql",
+      "height" : "200px",
+      sqlConfig : { dialect : OrientDBSQL }
+    };
 
-    this.extensionsView = Controls.addCodeEditor(commandPanelElem,
-      "command", "bim|label.ifcdb_command", "",
-      { "language" : "sql", "height" : "200px", sqlConfig : sqlConfig });
+    this.queryView = Controls.addCodeEditor(commandPanelElem,
+      "command", "bim|label.ifcdb_command", "", this.queryOptions);
 
     const commandButtonsElem = document.createElement("div");
     commandButtonsElem.className = "ifcdb_buttons";
     commandPanelElem.appendChild(commandButtonsElem);
 
-    this.executeButton = Controls.addButton(commandButtonsElem, "exec_ifcstep",
+    this.executeStepButton = Controls.addButton(commandButtonsElem, "exec_ifcstep",
       "button.open", () => this.execute("step"));
 
-    this.executeButton = Controls.addButton(commandButtonsElem, "exec_ifcjson",
+    this.executeJsonButton = Controls.addButton(commandButtonsElem, "exec_ifcjson",
       "button.run", () => this.execute("json"));
+
+    this.clearExecutionButton = Controls.addButton(commandButtonsElem, "exec_clear",
+      "button.clear", () => this.clearExecution());
 
     this.resultElem = document.createElement("pre");
     this.resultElem.className = "ifcdb_result";
     this.resultElem.tabIndex = -1;
     commandPanelElem.appendChild(this.resultElem);
+
+    // model panel
+    this.modelPanelElem = document.createElement("div");
+    this.bodyElem.appendChild(this.modelPanelElem);
+    this.modelPanelElem.classList.add("hidden");
+
+    const modelHeaderPanelElem = document.createElement("div");
+    this.modelPanelElem.appendChild(modelHeaderPanelElem);
+
+    this.backButton = Controls.addButton(modelHeaderPanelElem,
+      "backTopics", "button.back", () => this.showPanel("main"));
+
+    this.modelIdElem = Controls.addTextField(this.modelPanelElem,
+      "ifc_modelid", "bim|label.ifcdb_modelid", null, "ifcdb_field");
+    this.modelIdElem.readOnly = true;
+
+    this.modelNameElem = Controls.addTextField(this.modelPanelElem,
+      "ifc_modelname", "bim|label.ifcdb_modelname", null, "ifcdb_field");
+
+    this.modelDescElem = Controls.addTextAreaField(this.modelPanelElem,
+      "ifc_modeldesc", "bim|label.ifcdb_modeldesc", null, "flex flex_column p_4");
+    this.modelDescElem.rows = 5;
+
+    this.modelReadRoles = Controls.addTagsInput(this.modelPanelElem,
+      "ifc_readroles", "bim|label.ifcdb_read_roles", "bim|placeholder.add_tags", [], "p_4");
+
+    this.modelUploadRoles = Controls.addTagsInput(this.modelPanelElem,
+      "ifc_uploadroles", "bim|label.ifcdb_upload_roles", "bim|placeholder.add_tags", [], "p_4");
+
+    const modelFooterPanelElem = document.createElement("div");
+    modelFooterPanelElem.className = "ifcdb_buttons";
+    this.modelPanelElem.appendChild(modelFooterPanelElem);
+
+    this.saveButton = Controls.addButton(modelFooterPanelElem,
+      "updateModel", "button.save", () => this.updateModel());
+
+    this.updateButtons();
   }
 
   onShow()
   {
     this.refreshServices();
-    this.updateButtons();
   }
 
   refreshServices()
@@ -165,14 +257,6 @@ class IFCDBPanel extends Panel
     this.addServiceButton.style.display = "";
     this.editServiceButton.style.display = service ? "" : "none";
     this.deleteServiceButton.style.display = service ? "" : "none";
-  }
-
-  updateButtons()
-  {
-    const disabled = this.modelIdElem.value.trim().length === 0;
-    this.getModelButton.disabled = disabled;
-    this.putModelButton.disabled = disabled;
-    this.deleteModelButton.disabled = disabled;
   }
 
   showAddDialog()
@@ -234,11 +318,61 @@ class IFCDBPanel extends Panel
     }
   }
 
-  async execute(format = "step")
+  async searchModels()
   {
+    if (this.processing) return;
+
     try
     {
-      const sql = this.extensionsView.state.doc.toString();
+      this.showProgressBar("Searching models...");
+
+      const modelTree = this.modelTree;
+      modelTree.clear();
+      this.messageElem.textContent = "";
+      this.selectedNode = null;
+      this.updateButtons();
+
+      let odataFilter = null;
+      const modelNameFilterElem = this.modelNameFilterElem;
+      let modelName = modelNameFilterElem.value;
+      if (modelName)
+      {
+        let pattern = modelName.toUpperCase().replace(/'/g, "''");
+        odataFilter = `contains(toupper(name), '${pattern}')`;
+      }
+      let odataOrderBy = "name";
+
+      const models = await this.service.getModels(odataFilter, odataOrderBy);
+      if (models.length === 0)
+      {
+        I18N.set(this.messageElem, "textContent", "bim|message.no_model_found");
+        this.application.i18n.update(this.messageElem);
+      }
+      else
+      {
+        for (let model of models)
+        {
+          modelTree.addNode(model, null, "IfcProject", true);
+        }
+      }
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.searchModels());
+    }
+    finally
+    {
+      this.hideProgressBar();
+    }
+  }
+
+  async execute(format = "step")
+  {
+    if (this.processing) return;
+
+    try
+    {
+      const sql = this.queryView.state.doc.toString();
       const command = {
         "language" : "sql",
         "query" : sql,
@@ -267,18 +401,114 @@ class IFCDBPanel extends Panel
     }
   }
 
-  async getModel()
+  selectNode(event)
   {
+    event.originalEvent.preventDefault();
+    const node = event.node;
+    if (node.value instanceof HTMLElement) return;
+
+    if (this.selectedNode)
+    {
+      this.selectedNode.removeClass("selected");
+    }
+    this.selectedNode = node;
+    node.addClass("selected");
+    this.updateButtons();
+  }
+
+  openModelByDblClick(event)
+  {
+    event.originalEvent.preventDefault();
+    this.openSelectedModel();
+  }
+
+  openSelectedModel()
+  {
+    const node = this.selectedNode;
+    if (node.value.id)
+    {
+      const modelId = node.value.id;
+      this.openModel(modelId, 0);
+    }
+    else
+    {
+      const version = node.value.version;
+      const modelId = node.parent.value.id;
+      this.openModel(modelId, version);
+    }
+  }
+
+  deleteSelectedModel()
+  {
+    const application = this.application;
+    const node = this.selectedNode;
+
+    if (node.value.id)
+    {
+      const model = node.value;
+
+      ConfirmDialog.create("bim|title.delete_ifcdb_model",
+        "bim|question.delete_ifcdb_model", model.name)
+        .setAction(() =>
+        {
+          const modelId = model.id;
+          this.deleteModel(modelId, 0);
+        })
+        .setAcceptLabel("button.delete")
+        .setI18N(application.i18n).show();
+    }
+    else
+    {
+      const model = node.parent.value;
+      const version = node.value.version;
+
+      ConfirmDialog.create("bim|title.delete_ifcdb_model",
+        "bim|question.delete_ifcdb_model", model.name + " - v" + version)
+        .setAction(() =>
+        {
+          const modelId = model.id;
+          this.deleteModel(modelId, version);
+        })
+        .setAcceptLabel("button.delete")
+        .setI18N(application.i18n).show();
+    }
+  }
+
+  async uploadModel(data)
+  {
+    if (this.processing) return;
+
+    try
+    {
+      this.showProgressBar("Uploading model...");
+      const response = await this.service.uploadModel(data);
+      Toast.create("bim|message.model_saved")
+       .setI18N(this.application.i18n).show();
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.uploadModel(data));
+    }
+    finally
+    {
+      this.hideProgressBar();
+    }
+    this.searchModels();
+  }
+
+  async openModel(modelId, version = 0)
+  {
+    if (this.processing) return;
+
     try
     {
       this.showProgressBar("Downloading model...");
-      const modelId = this.modelIdElem.value.trim();
-      const data = await this.service.getModel(modelId);
+      const data = await this.service.downloadModel(modelId, version);
       this.loadModel(data);
     }
     catch (ex)
     {
-      this.handleError(ex, () => this.getModel());
+      this.handleError(ex, () => this.openModel(modelId, version));
     }
     finally
     {
@@ -286,46 +516,118 @@ class IFCDBPanel extends Panel
     }
   }
 
-  async putModel(data)
+  async deleteModel(modelId, version = 0)
   {
-    try
-    {
-      this.showProgressBar("Uploading model...");
-      const modelId = this.modelIdElem.value.trim();
-      const response = await this.service.putModel(modelId, data);
-      console.info(response);
-    }
-    catch (ex)
-    {
-      this.handleError(ex, () => this.putModel());
-    }
-    finally
-    {
-      this.hideProgressBar();
-    }
-  }
+    if (this.processing) return;
 
-  async deleteModel()
-  {
     try
     {
       this.showProgressBar("Deleting model...");
-      const modelId = this.modelIdElem.value.trim();
-      const response = await this.service.deleteModel(modelId);
-      console.info(response);
+      const response = await this.service.deleteModel(modelId, version);
+      Toast.create("bim|message.model_deleted")
+       .setI18N(this.application.i18n).show();
     }
     catch (ex)
     {
-      this.handleError(ex, () => this.deleteModel());
+      this.handleError(ex, () => this.deleteModel(modelId, version));
     }
     finally
     {
       this.hideProgressBar();
+    }
+    this.searchModels();
+  }
+
+  async expandVersions(event)
+  {
+    const node = event.node;
+    if (this.processing || node.hasChildren()) return;
+
+    try
+    {
+      const modelId = node.value.id;
+      this.showProgressBar("Obtaining model versions...");
+      const modelVersions = await this.service.getModelVersions(modelId);
+      modelVersions.reverse();
+      for (let modelVersion of modelVersions)
+      {
+        node.addNode(modelVersion, null, "IfcModelVersion");
+      }
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.expandVersions(event));
+    }
+    finally
+    {
+      this.hideProgressBar();
+    }
+  }
+
+  async updateModel()
+  {
+    const model = {
+      id : this.modelIdElem.value,
+      name : this.modelNameElem.value,
+      description : this.modelDescElem.value,
+      read_roles : this.modelReadRoles.getTags(),
+      upload_roles : this.modelUploadRoles.getTags()
+    };
+
+    try
+    {
+      this.showProgressBar("Updating model...");
+      const response = await this.service.updateModel(model);
+      Toast.create("bim|message.model_updated")
+       .setI18N(this.application.i18n).show();
+      this.showPanel("main");
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.updateModel());
+    }
+    finally
+    {
+      this.hideProgressBar();
+    }
+    this.searchModels();
+  }
+
+  editSelectedModel()
+  {
+    const model = this.selectedNode.value;
+    this.modelIdElem.value = model.id;
+    this.modelNameElem.value = model.name;
+    this.modelDescElem.value = model.description;
+    if (model.read_roles)
+    {
+      this.modelReadRoles.setTags(model.read_roles);
+    }
+    if (model.upload_roles)
+    {
+      this.modelUploadRoles.setTags(model.upload_roles);
+    }
+    this.showPanel("model");
+  }
+
+  showPanel(panelName)
+  {
+    if (panelName === "main")
+    {
+      this.mainPanelElem.classList.remove("hidden");
+      this.modelPanelElem.classList.add("hidden");
+    }
+    else
+    {
+      this.mainPanelElem.classList.add("hidden");
+      this.modelPanelElem.classList.remove("hidden");
     }
   }
 
   selectFile()
   {
+    if (this.processing) return;
+
     this.removeInputFile();
 
     let inputFile = document.createElement("input");
@@ -364,7 +666,7 @@ class IFCDBPanel extends Panel
       reader.onload = evt =>
       {
         let data = evt.target.result;
-        this.putModel(data);
+        this.uploadModel(data);
       };
       reader.readAsText(file);
     }
@@ -373,11 +675,10 @@ class IFCDBPanel extends Panel
   loadModel(data)
   {
     const application = this.application;
-    const modelId = this.modelIdElem.value;
 
     let intent =
     {
-      url : "file://" + modelId + ".ifc",
+      url : "file://model.ifc",
       data : data,
       onProgress : data =>
       {
@@ -462,11 +763,42 @@ class IFCDBPanel extends Panel
     this.application.progressBar.message = message;
     this.application.progressBar.progress = undefined;
     this.application.progressBar.visible = true;
+    this.processing = true;
+    this.updateButtons();
   }
 
   hideProgressBar()
   {
     this.application.progressBar.visible = false;
+    this.processing = false;
+    this.updateButtons();
+  }
+
+  updateButtons()
+  {
+    const processing = this.processing;
+    const node = this.selectedNode;
+    const isNodeSelected = Boolean(node);
+    const isModel = isNodeSelected && node.value.id;
+
+    let display = isNodeSelected ? "" : "none";
+    this.openModelButton.style.display = display;
+    this.deleteModelButton.style.display = display;
+    this.editModelButton.style.display = isModel ? "" : "none";
+
+    this.searchModelsButton.disabled = processing;
+    this.uploadModelButton.disabled = processing;
+    this.openModelButton.disabled = processing;
+    this.deleteModelButton.disabled = processing;
+    this.editModelButton.disabled = processing;
+    this.executeStepButton.disabled = processing;
+    this.executeJsonButton.disabled = processing;
+  }
+
+  clearExecution()
+  {
+    Controls.setCodeEditorDocument(this.queryView, "", this.queryOptions);
+    this.resultElem.innerHTML = "";
   }
 }
 

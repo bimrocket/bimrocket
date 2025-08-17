@@ -15,31 +15,66 @@ class IFCDBService extends Service
     super(parameters);
   }
 
+  async getModels(odataFilter, odataOrderBy)
+  {
+    let query = "";
+    if (odataFilter || odataOrderBy)
+    {
+      query = "?";
+      if (odataFilter)
+      {
+        query += "$filter=" + odataFilter;
+      }
+      if (odataOrderBy)
+      {
+        if (!query.endsWith("?")) query += "&";
+        query += "$orderBy=" + odataOrderBy;
+      }
+    }
+    const response = await this.invoke("GET", query);
+    return await response.json();
+  }
+
+  async getModelVersions(modelId)
+  {
+    const response = await this.invoke("GET", modelId + "/versions");
+    return await response.json();
+  }
+
+  async downloadModel(modelId, version = 0)
+  {
+    const response = await this.invoke("GET", modelId + "?version=" + version);
+    return await response.text();
+  }
+
+  async uploadModel(data)
+  {
+    const response = await this.invoke("POST", "",
+      {"Content-Type" : "application/x-step"}, data);
+    return await response.json();
+  }
+
+  async updateModel(model)
+  {
+    const response = await this.invoke("PUT", "",
+      {"Content-Type" : "application/json"}, JSON.stringify(model));
+    return await response.json();
+  }
+
+  async deleteModel(modelId, version = 0)
+  {
+    const response = await this.invoke("DELETE", modelId + "?version=" + version);
+    return await response.json();
+  }
+
   async execute(command)
   {
-    const response = await this.invoke("POST", "", "application/json", JSON.stringify(command));
+    const response = await this.invoke("POST", "execute",
+      {"Content-Type" : "application/json"}, JSON.stringify(command));
     return await response.text();
   }
 
-  async getModel(modelId)
-  {
-    const response = await this.invoke("GET", modelId);
-    return await response.text();
-  }
-
-  async putModel(modelId, data)
-  {
-    const response = await this.invoke("PUT", modelId, "application/x-step", data);
-    return await response.json();
-  }
-
-  async deleteModel(modelId)
-  {
-    const response = await this.invoke("DELETE", modelId);
-    return await response.json();
-  }
-
-  async invoke(method, path = "", contentType, body)
+  async invoke(method, path = "", headers = {}, body)
   {
     const username = this.username;
     const password = this.password;
@@ -49,14 +84,9 @@ class IFCDBService extends Service
     url += path;
 
     const fetchOptions = {
-      method: method,
-      headers: {}
+      method : method,
+      headers : headers
     };
-
-    if (contentType)
-    {
-      fetchOptions.headers["Content-Type"] = contentType;
-    }
 
     if (body)
     {

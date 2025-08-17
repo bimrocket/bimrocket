@@ -34,17 +34,39 @@ package org.bimrocket.api.ifcdb;
  *
  * @author realor
  */
-public class IfcDeleteResult
+public class IfcdbCommand
 {
-  int count = 0;
+  String language;
+  String query;
+  String outputFormat;
 
-  public int getCount()
+  public String getLanguage()
   {
-    return count;
+    return language;
   }
 
-  public void setCount(int count)
+  public void setLanguage(String language)
   {
-    this.count = count;
+    this.language = language;
+  }
+
+  public String getQuery()
+  {
+    return query;
+  }
+
+  public void setQuery(String query)
+  {
+    this.query = query;
+  }
+
+  public String getOutputFormat()
+  {
+    return outputFormat;
+  }
+
+  public void setOutputFormat(String outputFormat)
+  {
+    this.outputFormat = outputFormat;
   }
 }

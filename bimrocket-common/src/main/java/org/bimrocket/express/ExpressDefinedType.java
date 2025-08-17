@@ -1,31 +1,31 @@
 /*
  * BIMROCKET
- *  
+ *
  * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
- *  
- * This program is licensed and may be used, modified and redistributed under 
- * the terms of the European Public License (EUPL), either version 1.1 or (at 
- * your option) any later version as soon as they are approved by the European 
+ *
+ * This program is licensed and may be used, modified and redistributed under
+ * the terms of the European Public License (EUPL), either version 1.1 or (at
+ * your option) any later version as soon as they are approved by the European
  * Commission.
- *  
- * Alternatively, you may redistribute and/or modify this program under the 
- * terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either  version 3 of the License, or (at your option) 
- * any later version. 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *    
- * See the licenses for the specific language governing permissions, limitations 
+ *
+ * Alternatively, you may redistribute and/or modify this program under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either  version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the licenses for the specific language governing permissions, limitations
  * and more details.
- *    
- * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along 
- * with this program; if not, you may find them at: 
- *    
+ *
+ * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along
+ * with this program; if not, you may find them at:
+ *
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * http://www.gnu.org/licenses/ 
- * and 
+ * http://www.gnu.org/licenses/
+ * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
@@ -43,7 +43,7 @@ public class ExpressDefinedType extends ExpressNamedType
   {
     super(name);
   }
-  
+
   public ExpressType getDefinition()
   {
     return definition;
@@ -54,22 +54,26 @@ public class ExpressDefinedType extends ExpressNamedType
     this.definition = definition;
   }
 
+  public ExpressType getRootType()
+  {
+    ExpressType type = definition;
+    while (type instanceof ExpressDefinedType definedType)
+    {
+      type = definedType.getDefinition();
+    }
+    return type;
+  }
+
   public ExpressPrimitive getPrimitive()
   {
-    if (definition instanceof ExpressPrimitive)
-    {
-      return (ExpressPrimitive)definition;
-    }
-    else if (definition instanceof ExpressDefinedType)
-    {
-      return ((ExpressDefinedType)definition).getPrimitive();
-    }
+    ExpressType type = getRootType();
+    if (type instanceof ExpressPrimitive primitive) return primitive;
     return null;
   }
-  
+
   @Override
   public String toString()
   {
     return "TYPE " + getName() + " = " + definition;
-  }  
+  }
 }

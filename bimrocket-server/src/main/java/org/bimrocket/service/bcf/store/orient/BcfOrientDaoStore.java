@@ -31,10 +31,10 @@
 package org.bimrocket.service.bcf.store.orient;
 
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import jakarta.annotation.PostConstruct;
 import org.bimrocket.api.bcf.*;
 import org.bimrocket.dao.orient.OrientDaoStore;
+import org.bimrocket.dao.orient.OrientSetup;
 import org.bimrocket.service.bcf.store.BcfDaoConnection;
 import org.bimrocket.service.bcf.store.BcfDaoStore;
 import org.eclipse.microprofile.config.Config;
@@ -57,34 +57,42 @@ public class BcfOrientDaoStore extends OrientDaoStore<BcfDaoConnection>
   }
 
   @Override
-  protected void registerEntityClasses(OSchema schema)
+  protected void createClasses(OrientSetup orientSetup)
   {
     // generate schema
-    registerEntityClass(schema, BcfColoring.class);
-    registerEntityClass(schema, BcfComponent.class);
-    registerEntityClass(schema, BcfComponents.class);
-    registerEntityClass(schema, BcfDirection.class);
-    registerEntityClass(schema, BcfLine.class);
-    registerEntityClass(schema, BcfOrthogonalCamera.class);
-    registerEntityClass(schema, BcfPerspectiveCamera.class);
-    registerEntityClass(schema, BcfDocumentReference.class);
-    registerEntityClass(schema, BcfPoint.class);
-    registerEntityClass(schema, BcfVector.class);
-    registerEntityClass(schema, BcfSnapshot.class);
-    OClass projectClass = registerEntityClass(schema, BcfProject.class);
-    OClass extensionsClass = registerEntityClass(schema, BcfExtensions.class);
-    OClass topicClass = registerEntityClass(schema, BcfTopic.class);
-    OClass commentClass = registerEntityClass(schema, BcfComment.class);
-    OClass viewpointClass = registerEntityClass(schema, BcfViewpoint.class);
+    orientSetup.createClass(BcfColoring.class);
+    orientSetup.createClass(BcfComponent.class);
+    orientSetup.createClass(BcfComponents.class);
+    orientSetup.createClass(BcfDirection.class);
+    orientSetup.createClass(BcfLine.class);
+    orientSetup.createClass(BcfOrthogonalCamera.class);
+    orientSetup.createClass(BcfPerspectiveCamera.class);
+    orientSetup.createClass(BcfDocumentReference.class);
+    orientSetup.createClass(BcfPoint.class);
+    orientSetup.createClass(BcfVector.class);
+    orientSetup.createClass(BcfSnapshot.class);
+    OClass projectClass = orientSetup.createClass(BcfProject.class);
+    OClass extensionsClass = orientSetup.createClass(BcfExtensions.class);
+    OClass topicClass = orientSetup.createClass(BcfTopic.class);
+    OClass commentClass = orientSetup.createClass(BcfComment.class);
+    OClass viewpointClass = orientSetup.createClass(BcfViewpoint.class);
 
-    createIndex(projectClass, "BcfProjectIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(extensionsClass, "BcfExtensionsIdIdx", OClass.INDEX_TYPE.UNIQUE, "projectId");
-    createIndex(topicClass, "BcfTopicIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(topicClass, "BcfTopicTitleIdx", OClass.INDEX_TYPE.NOTUNIQUE, "title");
-    createIndex(commentClass, "BcfCommentIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(commentClass, "BcfCommentTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
-    createIndex(viewpointClass, "BcfViewpointIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(viewpointClass, "BcfViewpointTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
+    orientSetup.createIndex(projectClass,
+      "BcfProjectIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(extensionsClass,
+      "BcfExtensionsIdIdx", OClass.INDEX_TYPE.UNIQUE, "projectId");
+    orientSetup.createIndex(topicClass,
+      "BcfTopicIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(topicClass,
+      "BcfTopicTitleIdx", OClass.INDEX_TYPE.NOTUNIQUE, "title");
+    orientSetup.createIndex(commentClass,
+      "BcfCommentIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(commentClass,
+      "BcfCommentTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
+    orientSetup.createIndex(viewpointClass,
+      "BcfViewpointIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(viewpointClass,
+      "BcfViewpointTopicIdIdx", OClass.INDEX_TYPE.NOTUNIQUE, "topicId");
   }
 
   @Override

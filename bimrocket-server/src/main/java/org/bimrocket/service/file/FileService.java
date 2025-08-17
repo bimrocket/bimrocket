@@ -81,7 +81,7 @@ public class FileService
   @PostConstruct
   public void init()
   {
-    LOGGER.log(Level.FINE, "Init ResourceService");
+    LOGGER.log(Level.FINE, "Init FileService");
 
     CDI<Object> cdi = CDI.current();
 

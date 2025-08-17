@@ -27,31 +27,37 @@ services:
 
   # file service
   file:
-    store:
-      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
-      filesystem:
-        directory: ${BIMROCKET_DATA_PATH}/cloudfs
     folders:
       - models
       - scripts
       - reports
       - ifc_snapshots
       - tasks
+    store:
+      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
+      filesystem:
+        directory: ${BIMROCKET_DATA_PATH}/cloudfs
 
   # bcf service
   bcf:
     templateProjectName: template
-    store:
-      class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
-      orient:
-        database: bimdb
     mail:
       createTopic:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
+    store:
+      class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
+      orient:
+        database: bimdb
 
   # ifcdb service
   ifcdb:
+    schemas:
+      - IFC2X3
+      - IFC4
+    maxFileSizeMb: 200
+    store:
+      class: org.bimrocket.service.ifcdb.store.orient.OrientIfcStore
 
   # task service
   task:

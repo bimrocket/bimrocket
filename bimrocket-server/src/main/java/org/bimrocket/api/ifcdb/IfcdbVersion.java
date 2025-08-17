@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -30,21 +30,62 @@
  */
 package org.bimrocket.api.ifcdb;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  *
  * @author realor
  */
-public class IfcUploadResult
+public class IfcdbVersion
 {
-  int count = 0;
+  private int version;
 
-  public int getCount()
+  @JsonProperty("creation_date")
+  private String creationDate;
+
+  @JsonProperty("creation_author")
+  private String creationAuthor;
+
+  @JsonProperty("element_count")
+  int elementCount;
+
+  public int getVersion()
   {
-    return count;
+    return version;
   }
 
-  public void setCount(int count)
+  public void setVersion(int version)
   {
-    this.count = count;
+    this.version = version;
+  }
+
+  public String getCreationDate()
+  {
+    return creationDate;
+  }
+
+  public void setCreationDate(String creationDate)
+  {
+    this.creationDate = creationDate;
+  }
+
+  public String getCreationAuthor()
+  {
+    return creationAuthor;
+  }
+
+  public void setCreationAuthor(String creationAuthor)
+  {
+    this.creationAuthor = creationAuthor;
+  }
+
+  public int getElementCount()
+  {
+    return elementCount;
+  }
+
+  public void setElementCount(int elementCount)
+  {
+    this.elementCount = elementCount;
   }
 }

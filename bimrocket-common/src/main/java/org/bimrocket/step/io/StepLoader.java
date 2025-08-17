@@ -1,31 +1,31 @@
 /*
  * BIMROCKET
- *  
+ *
  * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
- *  
- * This program is licensed and may be used, modified and redistributed under 
- * the terms of the European Public License (EUPL), either version 1.1 or (at 
- * your option) any later version as soon as they are approved by the European 
+ *
+ * This program is licensed and may be used, modified and redistributed under
+ * the terms of the European Public License (EUPL), either version 1.1 or (at
+ * your option) any later version as soon as they are approved by the European
  * Commission.
- *  
- * Alternatively, you may redistribute and/or modify this program under the 
- * terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either  version 3 of the License, or (at your option) 
- * any later version. 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *    
- * See the licenses for the specific language governing permissions, limitations 
+ *
+ * Alternatively, you may redistribute and/or modify this program under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either  version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the licenses for the specific language governing permissions, limitations
  * and more details.
- *    
- * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along 
- * with this program; if not, you may find them at: 
- *    
+ *
+ * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along
+ * with this program; if not, you may find them at:
+ *
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * http://www.gnu.org/licenses/ 
- * and 
+ * http://www.gnu.org/licenses/
+ * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import org.bimrocket.express.ExpressNamedType;
@@ -53,7 +54,7 @@ import org.bimrocket.express.ExpressType;
 public abstract class StepLoader<M>
 {
   private StepLexer lexer;
-  private ExpressSchema schema;
+  protected ExpressSchema schema;
   protected M model;
 
   public StepLoader()
@@ -69,17 +70,17 @@ public abstract class StepLoader<M>
   {
     return load(new File(filename));
   }
-  
+
   public M load(File file) throws IOException
   {
     try
-    (BufferedReader reader = 
+    (BufferedReader reader =
       new BufferedReader(new InputStreamReader(new FileInputStream(file))))
     {
       return load(reader);
     }
-  }  
-  
+  }
+
   public M load(Reader reader) throws IOException
   {
     model = createModel();
@@ -188,23 +189,26 @@ public abstract class StepLoader<M>
 
   protected abstract M createModel();
 
-  protected StepBuilder<? extends Object> createBuilder(String section, 
+  protected StepBuilder<? extends Object> createBuilder(String section,
     String typeName, StepBuilder<? extends Object> builder)
   {
     if ("DATA".equals(section))
     {
-      ExpressType type;
+      ExpressType type = null;
+      ExpressType expectedType = null;
+
       if (schema != null && typeName != null)
       {
         type = schema.getNamedType(typeName);
       }
-      else if (builder != null)
+      if (builder != null)
       {
-        type = builder.getExpectedType();
+        expectedType = builder.getExpectedType();
+        if (type == null) type = expectedType;
       }
-      else type = null;
 
-      return type == null ? createBuilder(typeName) : createBuilder(type);
+      return type == null ?
+        createBuilder(typeName, expectedType) : createBuilder(type, expectedType);
     }
     else if ("HEADER".equals(section))
     {
@@ -213,27 +217,48 @@ public abstract class StepLoader<M>
     return null;
   }
 
-  protected StepBuilder<? extends Object> createBuilder(String typeName)
+  protected StepBuilder<? extends Object> createBuilder(String typeName,
+    ExpressType expectedType)
   {
     return new GenericStepBuilder(typeName);
   }
-  
-  protected StepBuilder<? extends Object> createBuilder(ExpressType type)
+
+  protected StepBuilder<? extends Object> createBuilder(ExpressType type,
+    ExpressType expectedType)
   {
-    String typeName = type instanceof ExpressNamedType ? 
+    String typeName = type instanceof ExpressNamedType ?
       ((ExpressNamedType)type).getName() : null;
-    return new GenericStepBuilder(typeName);    
+    return new GenericStepBuilder(typeName);
   }
 
-  protected void processTaggedInstance(String tag, 
+  protected void processTaggedInstance(String tag,
     String typeName, Object instance)
   {
   }
 
   protected void processHeader(String typeName, Object header)
   {
+    if (schema != null && "FILE_SCHEMA".equals(typeName))
+    {
+      if (header instanceof List<?> headerList) // [FILE_SCHEMA, [IFC4]]
+      {
+        if (headerList.size() > 1)
+        {
+          Object schemaDef = headerList.get(1);
+          if (schemaDef instanceof List<?> schemaList)
+          {
+            if (!schemaList.isEmpty())
+            {
+              String schemaName = String.valueOf(schemaList.get(0));
+              if (schema.getName().equals(schemaName)) return;
+            }
+          }
+        }
+        throw new RuntimeException("Invalid file schema");
+      }
+    }
   }
-  
+
   protected class Reference
   {
     StepBuilder<? extends Object> builder;

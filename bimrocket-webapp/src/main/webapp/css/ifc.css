@@ -135,6 +135,11 @@ ul.tree li.IfcPile
   background-image: url(images/ifc/IfcPile.svg);
 }
 
+ul.tree li.IfcProject
+{
+  background-image: url(images/ifc/IfcProject.svg);
+}
+
 ul.tree li.IfcRailing
 {
   background-image: url(images/ifc/IfcRailing.svg);

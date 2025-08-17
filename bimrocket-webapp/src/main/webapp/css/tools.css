@@ -1174,6 +1174,7 @@ div.script_code
 {
   flex-grow: 1;
   background-color: #F0A0A0;
+  color: black;
 }
 
 .property_selector .tree li.property_set

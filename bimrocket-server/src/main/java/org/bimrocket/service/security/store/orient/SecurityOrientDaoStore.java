@@ -39,7 +39,7 @@ import org.bimrocket.service.security.store.SecurityDaoStore;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OSchema;
+import org.bimrocket.dao.orient.OrientSetup;
 
 /**
  *
@@ -58,16 +58,20 @@ public class SecurityOrientDaoStore extends OrientDaoStore<SecurityDaoConnection
   }
 
   @Override
-  protected void registerEntityClasses(OSchema schema)
+  protected void createClasses(OrientSetup orientSetup)
   {
     // generate schema
-    OClass userClass = registerEntityClass(schema, User.class);
-    OClass roleClass = registerEntityClass(schema, Role.class);
+    OClass userClass = orientSetup.createClass(User.class);
+    OClass roleClass = orientSetup.createClass(Role.class);
 
-    createIndex(userClass, "UserIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(userClass, "UserNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "name");
-    createIndex(roleClass, "RoleIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
-    createIndex(roleClass, "RoleDescriptionIdx", OClass.INDEX_TYPE.NOTUNIQUE, "description");
+    orientSetup.createIndex(userClass,
+      "UserIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(userClass,
+      "UserNameIdx", OClass.INDEX_TYPE.NOTUNIQUE, "name");
+    orientSetup.createIndex(roleClass,
+      "RoleIdIdx", OClass.INDEX_TYPE.UNIQUE, "id");
+    orientSetup.createIndex(roleClass,
+      "RoleDescriptionIdx", OClass.INDEX_TYPE.NOTUNIQUE, "description");
   }
 
   @Override

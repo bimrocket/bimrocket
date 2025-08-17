@@ -32,6 +32,7 @@ package org.bimrocket.api.ifcdb;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -41,6 +42,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -49,13 +51,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.bimrocket.service.ifcdb.IfcDatabaseService;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
+import org.bimrocket.api.ApiResult;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.odata.ODataParser;
+import static org.bimrocket.service.ifcdb.IfcDatabaseService.modelFieldMap;
 
 /**
  *
@@ -76,17 +82,124 @@ public class IfcDatabaseEndpoint
   @Operation(summary = "Get authorization schemes")
   public List<String> getAuth()
   {
-    if (true) throw new RuntimeException("NO_AUTH");
-    return new ArrayList<>();
+    return List.of("Basic");
+  }
+
+  @GET
+  @Path("/models/{schema}")
+  @Produces(APPLICATION_JSON)
+  @Operation(summary = "Find models")
+  public List<IfcdbModel> getModels(@PathParam("schema") String schemaName,
+    @QueryParam("$filter") String odataFilter,
+    @QueryParam("$orderBy") String odataOrderBy)
+  {
+    ODataParser parser = new ODataParser(modelFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderByList = parser.parseOrderBy(odataOrderBy);
+
+    return ifcDatabaseService.getModels(schemaName, filter, orderByList);
+  }
+
+  @GET
+  @Path("/models/{schema}/{modelId}/versions")
+  @Produces(APPLICATION_JSON)
+  @Operation(summary = "Get IFC model versions")
+  public List<IfcdbVersion> getModelVersions(
+    @PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId)
+  {
+    try
+    {
+      return ifcDatabaseService.getModelVersions(schemaName, modelId);
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
+    }
+  }
+
+  @GET
+  @Path("/models/{schema}/{modelId}")
+  @Produces({ APPLICATION_JSON, TEXT_PLAIN })
+  @Operation(summary = "Download IFC model")
+  public Response downloadModel(@PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId, @QueryParam("version") int version)
+  {
+    try
+    {
+      File ifcFile = File.createTempFile("file", ".ifc");
+
+      ifcDatabaseService.downloadModel(schemaName, modelId, version, ifcFile);
+
+      return sendFile(ifcFile, "application/x-step");
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
+    }
   }
 
   @POST
   @Path("/models/{schema}")
+  @Produces(APPLICATION_JSON)
+  @Operation(summary = "Upload IFC model")
+  public IfcdbModel uploadModel(@PathParam("schema") String schemaName,
+    InputStream input)
+  {
+    try
+    {
+      File ifcFile = File.createTempFile("file", ".ifc");
+      try (FileOutputStream output = new FileOutputStream(ifcFile))
+      {
+        IOUtils.copy(input, output);
+      }
+
+      return ifcDatabaseService.uploadModel(schemaName, ifcFile);
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
+    }
+  }
+
+  @PUT
+  @Path("/models/{schema}")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @RolesAllowed("ADMIN")
+  @Operation(summary = "Update model metadata")
+  public IfcdbModel updateModel(@PathParam("schema") String schemaName, IfcdbModel model)
+  {
+    return ifcDatabaseService.updateModel(schemaName, model);
+  }
+
+  @DELETE
+  @Path("/models/{schema}/{modelId}")
+  @Produces(APPLICATION_JSON)
+  @RolesAllowed("ADMIN")
+  @Operation(summary = "Delete model")
+  public ApiResult deleteModel(@PathParam("schema") String schemaName,
+    @PathParam("modelId") String modelId, @QueryParam("version") int version)
+  {
+    try
+    {
+      boolean deleted = ifcDatabaseService.deleteModel(schemaName, modelId, version);
+      return new ApiResult(200, deleted ? "Deleted." : "Not deleted.");
+    }
+    catch (Exception ex)
+    {
+      throw createException(ex);
+    }
+  }
+
+  @POST
+  @Path("/models/{schema}/execute")
   @Consumes(APPLICATION_JSON)
   @Produces({ APPLICATION_JSON, TEXT_PLAIN })
+  @RolesAllowed("ADMIN")
   @Operation(summary = "Execute command")
   public Response execute(@PathParam("schema") String schemaName,
-    IfcCommand command)
+    IfcdbCommand command)
   {
     try
     {
@@ -113,66 +226,7 @@ public class IfcDatabaseEndpoint
     }
   }
 
-  @GET
-  @Path("/models/{schema}/{modelId}")
-  @Produces({ APPLICATION_JSON, TEXT_PLAIN })
-  @Operation(summary = "Get model")
-  public Response getModel(@PathParam("schema") String schemaName,
-    @PathParam("modelId") String modelId)
-  {
-    try
-    {
-      File ifcFile = File.createTempFile("file", ".ifc");
-
-      ifcDatabaseService.getModel(schemaName, modelId, ifcFile);
-
-      return sendFile(ifcFile, "application/x-step");
-    }
-    catch (Exception ex)
-    {
-      throw createException(ex);
-    }
-  }
-
-  @PUT
-  @Path("/models/{schema}/{modelId}")
-  @Produces(APPLICATION_JSON)
-  @Operation(summary = "Save model")
-  public IfcUploadResult putModel(@PathParam("schema") String schemaName,
-    @PathParam("modelId") String modelId, InputStream input)
-  {
-    try
-    {
-      File ifcFile = File.createTempFile("file", ".ifc");
-      try (FileOutputStream output = new FileOutputStream(ifcFile))
-      {
-        IOUtils.copy(input, output);
-      }
-
-      return ifcDatabaseService.putModel(schemaName, modelId, ifcFile);
-    }
-    catch (Exception ex)
-    {
-      throw createException(ex);
-    }
-  }
-
-  @DELETE
-  @Path("/models/{schema}/{modelId}")
-  @Produces(APPLICATION_JSON)
-  @Operation(summary = "Delete model")
-  public IfcDeleteResult deleteModel(@PathParam("schema") String schemaName,
-    @PathParam("modelId") String modelId)
-  {
-    try
-    {
-      return ifcDatabaseService.deleteModel(schemaName, modelId);
-    }
-    catch (Exception ex)
-    {
-      throw createException(ex);
-    }
-  }
+  // internal methods
 
   private Response sendFile(File file, String contentType)
   {

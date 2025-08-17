@@ -29,7 +29,7 @@
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
-package org.bimrocket.service.ifcdb;
+package org.bimrocket.service.ifcdb.store.orient;
 
 import com.orientechnologies.orient.core.record.OElement;
 import org.bimrocket.express.ExpressSchema;

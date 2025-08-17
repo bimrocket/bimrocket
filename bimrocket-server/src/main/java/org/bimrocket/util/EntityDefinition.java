@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -99,7 +98,7 @@ public class EntityDefinition
 
   public Map<String, Field> getFieldMap()
   {
-    Map<String, Field> map = new ConcurrentHashMap<>();
+    Map<String, Field> map = new HashMap<>();
     for (Field field : fields)
     {
       if (field.getAnnotation(JsonIgnore.class) != null) continue;

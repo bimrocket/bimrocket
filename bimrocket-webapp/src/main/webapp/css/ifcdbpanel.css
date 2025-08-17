@@ -24,22 +24,35 @@
   flex-grow: 0;
 }
 
-.ifcdb_panel > .tabbed_pane
+.ifcdb_panel > div
+{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.ifcdb_panel .tabbed_pane
 {
   flex-grow: 1;
 }
 
-.ifcdb_service,
-.ifcdb_modelid
+.ifcdb_field
 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--labelWidth), max-content));
   align-items:center;
-  margin-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 4px;
 }
 
-.ifcdb_service select,
-.ifcdb_modelid input
+.ifcdb_field input[readonly]
+{
+  color: #404040;
+}
+
+.ifcdb_field select,
+.ifcdb_field input
 {
   box-sizing: border-box;
   max-width: 100%;
@@ -74,6 +87,17 @@
   flex-grow:1;
   min-height: 100px;
   overflow-x: auto;
+}
+
+.ifcdb_panel ul.tree a.selected
+{
+  background-color: #F0A0A0;
+  color: black;
+}
+
+.ifcdb_panel ul.tree li.IfcModelVersion
+{
+  background-image: url(images/file.svg);
 }
 
 

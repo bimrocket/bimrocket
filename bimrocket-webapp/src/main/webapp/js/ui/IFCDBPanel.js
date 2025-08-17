@@ -797,7 +797,11 @@ class IFCDBPanel extends Panel
 
   clearExecution()
   {
-    Controls.setCodeEditorDocument(this.queryView, "", this.queryOptions);
+    const queryView = this.queryView;
+    queryView.dispatch(
+    {
+      changes: { from: 0, to: queryView.state.doc.length, insert: "" }
+    });
     this.resultElem.innerHTML = "";
   }
 }

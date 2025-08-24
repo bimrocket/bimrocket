@@ -72,8 +72,10 @@ public abstract class MongoDaoStore<C extends DaoConnection>
     {
       Config config = ConfigProvider.getConfig();
 
-      String url = config.getOptionalValue(BASE + dbAlias + ".url", String.class).orElse(null);
-      if (url == null) throw new RuntimeException("Missing server url for " + dbAlias);
+      String url = config.getOptionalValue(BASE + dbAlias + ".url",
+        String.class).orElse(null);
+      if (url == null)
+        throw new RuntimeException("Missing server url for " + dbAlias);
 
       mongoClient = clientManager.getMongoClient(url);
     }
@@ -90,7 +92,8 @@ public abstract class MongoDaoStore<C extends DaoConnection>
     if (database == null)
     {
       Config config = ConfigProvider.getConfig();
-      String dbName = config.getOptionalValue(BASE + dbAlias + ".name", String.class).orElse(null);
+      String dbName = config.getOptionalValue(BASE + dbAlias + ".name",
+        String.class).orElse(null);
       if (dbName == null) dbName = dbAlias;
 
       database = getMongoClient().getDatabase(dbName);

@@ -125,28 +125,32 @@ public class MongoExpressionGenerator
       }
     }
 
-    int index = 1;
-    for (OrderByExpression orderBy : orderByList)
+    if (orderByList != null)
     {
-      Object orderExpression = generateExpression(orderBy.getExpression());
-      if (orderExpression instanceof Document)
+      int index = 1;
+      for (OrderByExpression orderBy : orderByList)
       {
-        if (addFields == null) addFields = new Document();
-        if (sort == null) sort = new Document();
-
-        addFields.append("_field" + index, orderExpression);
-        sort.append("_field" + index, orderBy.isAscending() ? 1 : -1);
-        index++;
-      }
-      else if (orderExpression instanceof String value)
-      {
-        if (value.startsWith("$"))
+        Object orderExpression = generateExpression(orderBy.getExpression());
+        if (orderExpression instanceof Document)
         {
+          if (addFields == null) addFields = new Document();
           if (sort == null) sort = new Document();
-          sort.append(value, orderBy.isAscending() ? 1 : -1);
+
+          addFields.append("_field" + index, orderExpression);
+          sort.append("_field" + index, orderBy.isAscending() ? 1 : -1);
+          index++;
+        }
+        else if (orderExpression instanceof String value)
+        {
+          if (value.startsWith("$"))
+          {
+            if (sort == null) sort = new Document();
+            sort.append(value, orderBy.isAscending() ? 1 : -1);
+          }
         }
       }
     }
+
     List<Document> aggregate = new ArrayList<>();
     if (match != null)
     {

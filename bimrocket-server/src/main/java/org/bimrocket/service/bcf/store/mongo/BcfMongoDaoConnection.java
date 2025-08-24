@@ -31,7 +31,6 @@
 package org.bimrocket.service.bcf.store.mongo;
 
 import com.mongodb.client.ClientSession;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -72,7 +71,6 @@ public class BcfMongoDaoConnection extends MongoDaoConnection
     MongoCursor<BcfProject> cursor;
     if (roles.contains(ADMIN_ROLE))
     {
-      FindIterable<BcfProject> find = collection.find(session);
       cursor = collection.find(session).cursor();
     }
     else

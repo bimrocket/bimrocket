@@ -32,8 +32,8 @@
 package org.bimrocket.service.ifcdb.store.orient;
 
 import java.util.ArrayList;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,14 +51,20 @@ import org.bimrocket.step.io.StepLoader;
  */
 public class OrientStepLoader extends StepLoader<OrientElements>
 {
-  ODatabaseDocument db;
   OrientIfcSetup orientSetup;
+  Set<String> forcedRootClasses;
 
-  public OrientStepLoader(ODatabaseDocument db, ExpressSchema schema)
+  public OrientStepLoader(ExpressSchema schema, OrientIfcSetup orientSetup)
+  {
+    this(schema, orientSetup, Collections.emptySet());
+  }
+
+  public OrientStepLoader(ExpressSchema schema, OrientIfcSetup orientSetup,
+    Set<String> forcedRootClasses)
   {
     super(schema);
-    this.db = db;
-    orientSetup = new OrientIfcSetup(db);
+    this.orientSetup = orientSetup;
+    this.forcedRootClasses = forcedRootClasses;
   }
 
   @Override
@@ -131,10 +137,8 @@ public class OrientStepLoader extends StepLoader<OrientElements>
     @Override
     public void set(int index, Object item)
     {
-      if (item instanceof ODocument oelement)
-      {
-        model.rootElements.remove(oelement);
-      }
+      removeFromRoots(item);
+
       List<ExpressAttribute> attributes = type.getAllAttributes();
       if (index < attributes.size())
       {
@@ -167,10 +171,8 @@ public class OrientStepLoader extends StepLoader<OrientElements>
     @Override
     public void set(int index, Object item)
     {
-      if (item instanceof ODocument oelement)
-      {
-        model.rootElements.remove(oelement);
-      }
+      removeFromRoots(item);
+
       item = convertValue(item, type.getPrimitive());
       instance.setProperty("value", item);
     }
@@ -190,7 +192,7 @@ public class OrientStepLoader extends StepLoader<OrientElements>
     }
   }
 
-  public class OCollectionBuilder extends ListBuilder
+  class OCollectionBuilder extends ListBuilder
   {
     public OCollectionBuilder(ExpressCollection type, List<Object> list)
     {
@@ -200,10 +202,8 @@ public class OrientStepLoader extends StepLoader<OrientElements>
     @Override
     public int add(Object item)
     {
-      if (item instanceof ODocument oelement)
-      {
-        model.rootElements.remove(oelement);
-      }
+      removeFromRoots(item);
+
       item = convertValue(item, type.getElementType());
       instance.add(item);
       return instance.size() - 1;
@@ -212,10 +212,8 @@ public class OrientStepLoader extends StepLoader<OrientElements>
     @Override
     public void set(int index, Object item)
     {
-      if (item instanceof ODocument oelement)
-      {
-        model.rootElements.remove(oelement);
-      }
+      removeFromRoots(item);
+
       item = convertValue(item, type.getElementType());
       instance.set(index, item);
     }
@@ -257,5 +255,16 @@ public class OrientStepLoader extends StepLoader<OrientElements>
       }
     }
     return value;
+  }
+
+  private void removeFromRoots(Object item)
+  {
+    if (item instanceof ODocument oelement)
+    {
+      if (!forcedRootClasses.contains(oelement.getClassName()))
+      {
+        model.rootElements.remove(oelement);
+      }
+    }
   }
 }

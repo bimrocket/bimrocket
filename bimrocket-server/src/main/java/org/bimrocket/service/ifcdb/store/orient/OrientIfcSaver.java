@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,41 +28,36 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-
 package org.bimrocket.service.ifcdb.store.orient;
 
+import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.record.OElement;
-import org.bimrocket.express.ExpressAttribute;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.step.io.StepExporter;
 
 /**
  *
  * @author realor
  */
-public class OrientStepExporter extends StepExporter<OElement>
+public class OrientIfcSaver extends OrientIfcTraverser
 {
-  public OrientStepExporter(ExpressSchema schema)
+  public OrientIfcSaver(ODatabaseDocument db)
   {
-    super(schema, OElement.class);
+    super(db);
+  }
+
+  public int save(OElement oelement)
+  {
+    return traverse(oelement);
   }
 
   @Override
-  protected String getTypeName(OElement oelement)
+  protected boolean isProcessable(OElement oelement)
   {
-    return oelement.getSchemaType().get().getName();
+    return !oelement.getIdentity().isValid();
   }
 
   @Override
-  protected Object getPropertyValue(OElement oelement,
-    ExpressAttribute attribute, int index)
+  protected void process(OElement oelement)
   {
-    return oelement.getProperty(attribute.getName());
-  }
-
-  @Override
-  protected Object getValue(OElement oelement)
-  {
-    return oelement.getProperty("value");
+    db.save(oelement);
   }
 }

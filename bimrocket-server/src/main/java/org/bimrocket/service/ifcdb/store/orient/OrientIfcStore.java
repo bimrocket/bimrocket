@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.bimrocket.api.ifcdb.IfcdbCommand;
 import org.bimrocket.api.ifcdb.IfcdbModel;
@@ -85,12 +86,17 @@ public class OrientIfcStore implements IfcStore
   static final Logger LOGGER =
     Logger.getLogger(OrientIfcStore.class.getName());
 
-  static final List<String> supportedQueryLanguages = List.of("OrientDBSQL");
+  static final List<String> supportedQueryLanguages = List.of("OrientSQL");
+  static final Set<String> bsplineSurfaceClasses = Set.of(
+    "IfcBSplineSurface",
+    "IfcBSplineSurfaceWithKnots",
+    "IfcRationalBSplineSurfaceWithKnots");
 
   @Inject
   OrientPoolManager poolManager;
 
-  int commitSize = 10000;
+  int saveBlockSize = 10000;
+  int deleteBlockSize = 5000;
 
   @Override
   public void createSchema(ExpressSchema schema) throws IOException
@@ -133,7 +139,7 @@ public class OrientIfcStore implements IfcStore
 
       if (filter != null)
       {
-        query += parameters.isEmpty() ? " where" : " and";
+        query += parameters.isEmpty() ? " where " : " and ";
         query += OrientExpressionPrinter.toString(filter);
       }
 
@@ -166,8 +172,7 @@ public class OrientIfcStore implements IfcStore
     try (ODatabaseDocument db = getConnection(dbAlias))
     {
       OResultSet rs = db.query(
-        "select version, creationAuthor, creationDate, " +
-        "out('IfcE').size() as elementCount " +
+        "select version, creationAuthor, creationDate, elementCount " +
         "from IfcdbVersion where model.id = ? order by version", modelId);
       while (rs.hasNext())
       {
@@ -229,6 +234,8 @@ public class OrientIfcStore implements IfcStore
       chrono.mark();
 
       OrientStepExporter exporter = new OrientStepExporter(schema);
+      exporter.getFileDescription().getDescription().add("Project " + modelId);
+
       exporter.export(new OutputStreamWriter(
         new FileOutputStream(ifcFile)), elements);
 
@@ -248,10 +255,12 @@ public class OrientIfcStore implements IfcStore
     String dbAlias = schema.getName();
     try (ODatabaseDocument db = getConnection(dbAlias))
     {
-      OrientStepLoader loader = new OrientStepLoader(db, schema);
+      // orient schema is created during model loading
+      var orientSetup = new OrientIfcSetup(db);
+
+      var loader = new OrientStepLoader(schema, orientSetup, bsplineSurfaceClasses);
       OrientElements oelements = loader.load(ifcFile);
 
-      var orientSetup = new OrientIfcSetup(db);
       for (ODocument oelement : oelements.getRootElements())
       {
         String className = oelement.getSchemaType().get().getName() + "E";
@@ -309,6 +318,7 @@ public class OrientIfcStore implements IfcStore
       oversion.setProperty("version", lastVersion + 1);
       oversion.setProperty("creationDate", getISODate());
       oversion.setProperty("creationAuthor", getCurrentUserId());
+      oversion.setProperty("elementCount", 0);
 
       db.save(oversion);
 
@@ -316,33 +326,37 @@ public class OrientIfcStore implements IfcStore
         "Version saved in {0} seconds.", chrono.seconds());
       chrono.mark();
 
-      var orientGraphSaver = new OrientGraphSaver(db);
+      var orientIfcSaver = new OrientIfcSaver(db);
 
       // save root elements and link them to the model version
       int saveCount = 0;
       for (ODocument oelement : oelements.getRootElements())
       {
-        saveCount += orientGraphSaver.save(oelement);
+        saveCount += orientIfcSaver.save(oelement);
 
         String className = oelement.getSchemaType().get().getName() + "E";
         OEdge oedge = db.newEdge(oversion, oelement.asVertex().get(), className);
 
         db.save(oedge);
 
-        if (saveCount > commitSize)
+        if (saveCount > saveBlockSize)
         {
-          LOGGER.log(Level.INFO, "Commiting {0} objects.", saveCount);
+          LOGGER.log(Level.INFO, "{0} objects saved.", saveCount);
           db.commit();
           db.begin();
           saveCount = 0;
         }
       }
 
+      // update the number of elements saved
+      oversion.setProperty("elementCount", orientIfcSaver.getTotalCount());
+      db.save(oversion);
+
       db.commit();
 
       LOGGER.log(Level.INFO,
         "{0} IFC objects saved in {1} seconds.",
-        new Object[]{ orientGraphSaver.getTotalCount(), chrono.seconds() });
+        new Object[]{ orientIfcSaver.getTotalCount(), chrono.seconds() });
       chrono.mark();
 
       IfcdbModel model = new IfcdbModel();
@@ -388,49 +402,64 @@ public class OrientIfcStore implements IfcStore
 
     try (ODatabaseDocument db = getConnection(dbAlias))
     {
-      int count;
       db.begin();
+
+      String versionFilter = version == 0 ? "" : " and version = " + version;
+
+      // Remove recursivelly all instances of IfcBSplineSurface.
+      // The property ControlPointsList of this class has references to
+      // IfcCartesianPoints that can not be deleted with the traverse command.
+
+      String classListString = bsplineSurfaceClasses.stream()
+        .map(s -> "'" + s + "E'")
+        .collect(Collectors.joining(","));
+
+      String query = "select expand(out(" + classListString + ")) " +
+        " from IfcdbVersion where model.id = ? " + versionFilter;
+
+      var orientIfcDeleter = new OrientIfcDeleter(db);
+      try (OResultSet rs = db.query(query, modelId))
+      {
+        rs.elementStream().forEach(element -> orientIfcDeleter.delete(element));
+      }
+
+      int totalCount = orientIfcDeleter.getTotalCount();
+
+      query = "delete vertex from " +
+        "(traverse * from " +
+        " (select expand(*) from " +
+        "  (select out('IfcE') from IfcdbVersion " +
+        "   where model.id = ? " + versionFilter + ") " +
+        "  limit " + deleteBlockSize + ") " +
+        " while @this instanceof IfcV)";
+
+      int deleteCount = count(db.command(query, modelId));
+      while (deleteCount > 0)
+      {
+        LOGGER.log(Level.INFO, "{0} objects deleted.", deleteCount);
+        totalCount += deleteCount;
+        db.commit();
+
+        deleteCount = count(db.command(query, modelId));
+      }
+
+      LOGGER.log(Level.INFO,
+        "{0} objects deleted in {1} seconds.",
+        new Object[]{ totalCount, chrono.seconds() });
+      chrono.mark();
+
       if (version == 0) // remove all versions
       {
-        db.command("delete vertex from " +
-          "(traverse * from " +
-          " (select expand(out('IfcE')) " +
-          "  from IfcdbVersion where model.id = ?)" +
-          " while @this instanceof IfcV)", modelId);
-
-        LOGGER.log(Level.INFO,
-          "Objects removed in {0} seconds.", chrono.seconds());
-        chrono.mark();
-
-        count = count(db.command("delete vertex from IfcdbVersion " +
-          "where model.id = ?", modelId));
+        db.command("delete vertex from IfcdbVersion " +
+          "where model.id = ?", modelId);
 
         db.command("delete vertex from IfcdbModel " +
           "where id = ?", modelId);
       }
       else // remove the specified version
       {
-        db.command("delete vertex from " +
-          "(select expand(*) from " +
-          " (select expand(difference(" +
-          "  (select set(@rid) from " +
-          "   (traverse * from " +
-          "     (select expand(out('IfcE')) " +
-          "      from IfcdbVersion where model.id = :id and version = :version) " +
-          "    while @this instanceof IfcV)), " +
-          "  (select set(@rid) from " +
-          "   (traverse * from " +
-          "    (select expand(out('IfcE')) " +
-          "     from IfcdbVersion where model.id = :id and version <> :version) " +
-          "    while @this instanceof IfcV))))))",
-          Map.of("id", modelId, "version", version));
-
-        LOGGER.log(Level.INFO,
-          "Objects removed in {0} seconds.", chrono.seconds());
-        chrono.mark();
-
-        count = count(db.command("delete vertex from IfcdbVersion " +
-          "where model.id = ? and version = ?", modelId, version));
+        db.command("delete vertex from IfcdbVersion " +
+          "where model.id = ? and version = ?", modelId, version);
 
         try (OResultSet rs = db.query("select max(version) as lastVersion " +
              "from IfcdbVersion where model.id = ?", modelId))
@@ -443,8 +472,7 @@ public class OrientIfcStore implements IfcStore
           }
           else
           {
-            db.command("delete vertex from IfcdbModel " +
-             "where id = ?", modelId);
+            db.command("delete vertex from IfcdbModel where id = ?", modelId);
           }
         }
       }
@@ -457,7 +485,7 @@ public class OrientIfcStore implements IfcStore
       LOGGER.log(Level.INFO,
         "Total time: {0} seconds.", chrono.totalSeconds());
 
-      return count > 0;
+      return totalCount > 0;
     }
   }
 
@@ -466,6 +494,8 @@ public class OrientIfcStore implements IfcStore
     throws IOException
   {
     String dbAlias = schema.getName();
+
+    var chrono = new Chronometer();
 
     try (ODatabaseDocument db = getConnection(dbAlias))
     {
@@ -479,7 +509,11 @@ public class OrientIfcStore implements IfcStore
         {
           rs.stream().forEach(result -> results.add(result));
         }
+        LOGGER.log(Level.INFO, "Query execution: {0} seconds", chrono.seconds());
+        chrono.mark();
+
         exportToJson(results, file);
+        LOGGER.log(Level.INFO,"JSON export: {0} seconds", chrono.seconds());
       }
       else
       {
@@ -488,11 +522,24 @@ public class OrientIfcStore implements IfcStore
         {
           rs.elementStream().forEach(element -> elements.add(element));
         }
+        LOGGER.log(Level.INFO, "Query execution: {0} seconds", chrono.seconds());
+        chrono.mark();
+
+        // add elements to the local cache to speed up traversal
+        for (OElement element : elements)
+        {
+          db.getLocalCache().updateRecord(element);
+        }
+
         OrientStepExporter exporter = new OrientStepExporter(schema);
         exporter.export(new OutputStreamWriter(
           new FileOutputStream(file)), elements);
+
+        LOGGER.log(Level.INFO,"IFC export: {0} seconds", chrono.seconds());
       }
       db.commit();
+
+      LOGGER.log(Level.INFO,"Total time: {0} seconds", chrono.totalSeconds());
     }
   }
 
@@ -557,6 +604,7 @@ public class OrientIfcStore implements IfcStore
       versionClass.createProperty("version", OType.INTEGER);
       versionClass.createProperty("creationDate", OType.STRING);
       versionClass.createProperty("creationUserId", OType.STRING);
+      versionClass.createProperty("elementCount", OType.INTEGER);
     }
 
     OClass ifcVClass = setup.getClass("IfcV");

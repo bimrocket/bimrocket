@@ -32,76 +32,32 @@ package org.bimrocket.service.ifcdb.store.orient;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.record.OElement;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  *
  * @author realor
  */
-public class OrientGraphSaver
+public class OrientIfcDeleter extends OrientIfcTraverser
 {
-  final ODatabaseDocument db;
-  int count;
-  int totalCount;
-
-  public OrientGraphSaver(ODatabaseDocument db)
+  public OrientIfcDeleter(ODatabaseDocument db)
   {
-    this.db = db;
+    super(db);
   }
 
-  public int save(OElement oelement)
+  public int delete(OElement oelement)
   {
-    count = 0;
-    saveElement(oelement);
-    return count;
+    return traverse(oelement);
   }
 
-  public int getTotalCount()
+  @Override
+  protected boolean isProcessable(OElement olement)
   {
-    return totalCount;
+    return true;
   }
 
-  public void reset()
+  @Override
+  protected void process(OElement oelement)
   {
-    totalCount = 0;
-  }
-
-  void saveElement(OElement oelement)
-  {
-    if (!oelement.getIdentity().isValid())
-    {
-      Set<String> propertyNames = oelement.getPropertyNames();
-      for (String propertyName : propertyNames)
-      {
-        Object object = oelement.getProperty(propertyName);
-        if (object instanceof OElement osubElement)
-        {
-          saveElement(osubElement);
-        }
-        else if (object instanceof Collection<?> col)
-        {
-          saveCollection(col);
-        }
-      }
-      db.save(oelement);
-      count++;
-      totalCount++;
-    }
-  }
-
-  void saveCollection(Collection<?> col)
-  {
-    for (Object item : col)
-    {
-      if (item instanceof OElement osubElement)
-      {
-        saveElement(osubElement);
-      }
-      else if (item instanceof Collection<?> subCol)
-      {
-        saveCollection(subCol);
-      }
-    }
+    db.delete(oelement);
   }
 }

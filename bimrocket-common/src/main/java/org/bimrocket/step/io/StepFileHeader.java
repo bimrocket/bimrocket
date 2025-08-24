@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,41 +28,29 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
+package org.bimrocket.step.io;
 
-package org.bimrocket.service.ifcdb.store.orient;
-
-import com.orientechnologies.orient.core.record.OElement;
-import org.bimrocket.express.ExpressAttribute;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.step.io.StepExporter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author realor
  */
-public class OrientStepExporter extends StepExporter<OElement>
+public abstract class StepFileHeader
 {
-  public OrientStepExporter(ExpressSchema schema)
+  protected String toString(List<String> values)
   {
-    super(schema, OElement.class);
+    if (values.isEmpty()) return "('')";
+
+    return "(" + values.stream()
+      .map(s -> quote(s))
+      .collect(Collectors.joining(",")) + ")";
   }
 
-  @Override
-  protected String getTypeName(OElement oelement)
+  protected String quote(String text)
   {
-    return oelement.getSchemaType().get().getName();
-  }
-
-  @Override
-  protected Object getPropertyValue(OElement oelement,
-    ExpressAttribute attribute, int index)
-  {
-    return oelement.getProperty(attribute.getName());
-  }
-
-  @Override
-  protected Object getValue(OElement oelement)
-  {
-    return oelement.getProperty("value");
+    if (text == null) return "''";
+    return "'" + text.replaceAll("'", "`") + "'";
   }
 }

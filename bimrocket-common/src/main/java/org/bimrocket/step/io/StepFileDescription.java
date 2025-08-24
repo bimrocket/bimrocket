@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,41 +28,44 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
+package org.bimrocket.step.io;
 
-package org.bimrocket.service.ifcdb.store.orient;
-
-import com.orientechnologies.orient.core.record.OElement;
-import org.bimrocket.express.ExpressAttribute;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.step.io.StepExporter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author realor
  */
-public class OrientStepExporter extends StepExporter<OElement>
+public class StepFileDescription extends StepFileHeader
 {
-  public OrientStepExporter(ExpressSchema schema)
+  private final List<String> description = new ArrayList<>();
+  private String implementationLevel = "2;1";
+
+  public List<String> getDescription()
   {
-    super(schema, OElement.class);
+    return description;
+  }
+
+  public String getImplementationLevel()
+  {
+    return implementationLevel;
+  }
+
+  public void setImplementationLevel(String implementationLevel)
+  {
+    this.implementationLevel = implementationLevel;
   }
 
   @Override
-  protected String getTypeName(OElement oelement)
+  public String toString()
   {
-    return oelement.getSchemaType().get().getName();
-  }
-
-  @Override
-  protected Object getPropertyValue(OElement oelement,
-    ExpressAttribute attribute, int index)
-  {
-    return oelement.getProperty(attribute.getName());
-  }
-
-  @Override
-  protected Object getValue(OElement oelement)
-  {
-    return oelement.getProperty("value");
+    StringBuilder buffer = new StringBuilder();
+    buffer.append("FILE_DESCRIPTION(");
+    buffer.append(toString(description));
+    buffer.append(",");
+    buffer.append(quote(implementationLevel));
+    buffer.append(");");
+    return buffer.toString();
   }
 }

@@ -65,4 +65,14 @@ public class OrientStepExporter extends StepExporter<OElement>
   {
     return oelement.getProperty("value");
   }
+
+  @Override
+  protected OElement dereference(Object value)
+  {
+    if (value instanceof OElement oelement)
+    {
+      return oelement;
+    }
+    return null;
+  }
 }

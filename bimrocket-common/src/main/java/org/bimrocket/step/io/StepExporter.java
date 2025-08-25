@@ -64,7 +64,7 @@ import static org.bimrocket.express.ExpressPrimitive.INTEGER;
 public abstract class StepExporter<E>
 {
   protected ExpressSchema schema;
-  protected Map<E, Integer> elementMap = new HashMap<>();
+  protected Map<E, Integer> elementTags = new HashMap<>();
   protected List<E> elementList = new ArrayList<>();
   protected int tagCount;
   protected Class<E> cls;
@@ -90,7 +90,7 @@ public abstract class StepExporter<E>
   public void export(Writer writer, List<E> elements)
   {
     tagCount = 0;
-    elementMap.clear();
+    elementTags.clear();
     elementList.clear();
     for (E element : elements)
     {
@@ -126,7 +126,7 @@ public abstract class StepExporter<E>
   {
     for (E element : elementList)
     {
-      String tag = "#" + elementMap.get(element);
+      String tag = "#" + elementTags.get(element);
       ExpressType entityType = getEntityType(element);
       printer.println(tag + "= " + exportObject(element, entityType) + ";");
     }
@@ -161,23 +161,25 @@ public abstract class StepExporter<E>
         registerObject(value);
       }
     }
-    else if (cls.isInstance(object))
+    else
     {
-      @SuppressWarnings("unchecked")
-      E element = dereference((E)object);
-      ExpressEntity entityType = getEntityType(element);
-      if (entityType != null)
+      E element = dereference(object);
+      if (element != null)
       {
-        if (elementMap.containsKey(element)) return;
-
-        int index = 1;
-        for (ExpressAttribute attribute : entityType.getAllAttributes())
+        ExpressEntity entityType = getEntityType(element);
+        if (entityType != null)
         {
-          Object value = getPropertyValue(element, attribute, index++);
-          registerObject(value);
+          if (elementTags.containsKey(element)) return;
+
+          int index = 1;
+          for (ExpressAttribute attribute : entityType.getAllAttributes())
+          {
+            Object value = getPropertyValue(element, attribute, index++);
+            registerObject(value);
+          }
+          elementTags.put(element, ++tagCount);
+          elementList.add(element);
         }
-        elementMap.put(element, ++tagCount);
-        elementList.add(element);
       }
     }
   }
@@ -285,13 +287,10 @@ public abstract class StepExporter<E>
   {
     Integer tag = null;
 
-    if (cls.isInstance(object))
+    E element = dereference(object);
+    if (element != null)
     {
-      // ExpressEntity or ExpressDefinedTpe
-      @SuppressWarnings("unchecked")
-      E element = (E)object;
-      element = dereference(element);
-      tag = elementMap.get(element); // tag is not null for ExpressEntity objects
+      tag = elementTags.get(element);
     }
     return tag == null ? exportObject(object, type) : "#" + tag;
   }
@@ -379,11 +378,9 @@ public abstract class StepExporter<E>
   /**
    * Dereference an element
    *
-   * @param element to dereference
-   * @return the referenced element (the actual element)
+   * @param value a value that may reference an element
+   * @return the element referenced by value or null if value does not
+   * reference any element.
    */
-  protected E dereference(E element)
-  {
-    return element;
-  }
+  protected abstract E dereference(Object value);
 }

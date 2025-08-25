@@ -38,6 +38,7 @@ import org.bimrocket.express.ExpressAttribute;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.step.io.StepExporter;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 /**
  *
@@ -46,7 +47,7 @@ import org.bson.Document;
 public class MongoStepExporter extends StepExporter<Document>
 {
   protected MongoCollection<Document> collection;
-  protected Map<String, Document> cache = new HashMap<>();
+  protected Map<ObjectId, Document> cache = new HashMap<>();
 
   public MongoStepExporter(ExpressSchema schema, MongoCollection<Document> col)
   {
@@ -58,7 +59,7 @@ public class MongoStepExporter extends StepExporter<Document>
   {
     for (Document document : documents)
     {
-      String id = document.getString("_id");
+      ObjectId id = document.getObjectId("_id");
       cache.put(id, document);
     }
   }
@@ -83,20 +84,23 @@ public class MongoStepExporter extends StepExporter<Document>
   }
 
   @Override
-  protected Document dereference(Document element)
+  protected Document dereference(Object value)
   {
-    String ref = element.getString("_ref");
-    if (ref != null) // element is a reference to other element
+    if (value instanceof ObjectId id)
     {
-      return lookupObject(ref);
+      return lookupObject(id);
     }
-    return element;
+    else if (value instanceof Document element)
+    {
+      return element;
+    }
+    return null;
   }
 
-  protected Document lookupObject(String id)
+  protected Document lookupObject(ObjectId id)
   {
     Document element = cache.get(id);
-    if (element == null)
+    if (element == null) // not found in cache
     {
       element = collection.find(new Document("_id", id)).first();
       cache.put(id, element);

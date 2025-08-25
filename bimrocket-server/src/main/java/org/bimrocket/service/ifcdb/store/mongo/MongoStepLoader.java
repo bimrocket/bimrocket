@@ -46,6 +46,7 @@ import org.bimrocket.step.io.ListBuilder;
 import org.bimrocket.step.io.StepBuilder;
 import org.bimrocket.step.io.StepLoader;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 /**
  *
@@ -116,7 +117,7 @@ public class MongoStepLoader extends StepLoader<MongoElements>
       this.type = type;
       String id = UUID.randomUUID().toString();
       this.instance = new Document();
-      this.instance.put("_id", id);
+      this.instance.put("_id", new ObjectId());
       this.instance.put("_class", type.getName());
       this.instance.put("_modelId", null);
       this.instance.put("_version", null);
@@ -211,13 +212,10 @@ public class MongoStepLoader extends StepLoader<MongoElements>
     }
   }
 
-  Document getReferenceTo(Document document)
+  Object getReferenceTo(Document document)
   {
     if (document.containsKey("_value")) return document;
 
-    Document ref = new Document();
-    ref.put("_class", document.getString("_class"));
-    ref.put("_ref", document.get("_id"));
-    return ref;
+    return document.get("_id");
   }
 }

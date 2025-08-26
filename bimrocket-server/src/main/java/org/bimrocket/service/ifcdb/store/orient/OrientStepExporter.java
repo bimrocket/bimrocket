@@ -31,6 +31,7 @@
 
 package org.bimrocket.service.ifcdb.store.orient;
 
+import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.record.OElement;
 import org.bimrocket.express.ExpressAttribute;
 import org.bimrocket.express.ExpressSchema;
@@ -40,11 +41,11 @@ import org.bimrocket.step.io.StepExporter;
  *
  * @author realor
  */
-public class OrientStepExporter extends StepExporter<OElement>
+public class OrientStepExporter extends StepExporter<OElement, ORID>
 {
   public OrientStepExporter(ExpressSchema schema)
   {
-    super(schema, OElement.class);
+    super(schema);
   }
 
   @Override
@@ -69,10 +70,17 @@ public class OrientStepExporter extends StepExporter<OElement>
   @Override
   protected OElement dereference(Object value)
   {
+    // OrientDB automatically dereference LINK properties
     if (value instanceof OElement oelement)
     {
       return oelement;
     }
     return null;
+  }
+
+  @Override
+  protected ORID getIdentifier(OElement entity)
+  {
+    return entity.getIdentity();
   }
 }

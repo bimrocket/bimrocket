@@ -44,14 +44,14 @@ import org.bson.types.ObjectId;
  *
  * @author realor
  */
-public class MongoStepExporter extends StepExporter<Document>
+public class MongoStepExporter extends StepExporter<Document, ObjectId>
 {
   protected MongoCollection<Document> collection;
   protected Map<ObjectId, Document> cache = new HashMap<>();
 
   public MongoStepExporter(ExpressSchema schema, MongoCollection<Document> col)
   {
-    super(schema, Document.class);
+    super(schema);
     this.collection = col;
   }
 
@@ -95,6 +95,12 @@ public class MongoStepExporter extends StepExporter<Document>
       return element;
     }
     return null;
+  }
+
+  @Override
+  protected ObjectId getIdentifier(Document entity)
+  {
+    return entity.getObjectId("_id");
   }
 
   protected Document lookupObject(ObjectId id)

@@ -59,22 +59,21 @@ import static org.bimrocket.express.ExpressPrimitive.INTEGER;
  * Exports objects to STEP format for the given ExpressSchema.
  *
  * @author realor
- * @param <E> the class of objects to be exported
+ * @param <E> the class of elements to be exported
+ * @param <ID> the entity identifier class
  */
-public abstract class StepExporter<E>
+public abstract class StepExporter<E, ID>
 {
   protected ExpressSchema schema;
-  protected Map<E, Integer> elementTags = new HashMap<>();
-  protected List<E> elementList = new ArrayList<>();
+  protected Map<ID, Integer> entityTags = new HashMap<>();
+  protected List<E> entityList = new ArrayList<>();
   protected int tagCount;
-  protected Class<E> cls;
   protected StepFileDescription fileDescription = new StepFileDescription();
   protected StepFileName fileName = new StepFileName();
 
-  public StepExporter(ExpressSchema schema, Class<E> cls)
+  public StepExporter(ExpressSchema schema)
   {
     this.schema = schema;
-    this.cls = cls;
   }
 
   public StepFileDescription getFileDescription()
@@ -90,8 +89,8 @@ public abstract class StepExporter<E>
   public void export(Writer writer, List<E> elements)
   {
     tagCount = 0;
-    elementTags.clear();
-    elementList.clear();
+    entityTags.clear();
+    entityList.clear();
     for (E element : elements)
     {
       ExpressEntity entityType = getEntityType(element);
@@ -124,11 +123,12 @@ public abstract class StepExporter<E>
 
   protected void printData(PrintWriter printer)
   {
-    for (E element : elementList)
+    for (E entity : entityList)
     {
-      String tag = "#" + elementTags.get(element);
-      ExpressType entityType = getEntityType(element);
-      printer.println(tag + "= " + exportObject(element, entityType) + ";");
+      ID id = getIdentifier(entity);
+      String tag = "#" + entityTags.get(id);
+      ExpressType entityType = getEntityType(entity);
+      printer.println(tag + "= " + exportObject(entity, entityType) + ";");
     }
   }
 
@@ -169,16 +169,18 @@ public abstract class StepExporter<E>
         ExpressEntity entityType = getEntityType(element);
         if (entityType != null)
         {
-          if (elementTags.containsKey(element)) return;
+          E entity = element;
+          ID id = getIdentifier(entity);
+          if (entityTags.containsKey(id)) return;
 
           int index = 1;
           for (ExpressAttribute attribute : entityType.getAllAttributes())
           {
-            Object value = getPropertyValue(element, attribute, index++);
+            Object value = getPropertyValue(entity, attribute, index++);
             registerObject(value);
           }
-          elementTags.put(element, ++tagCount);
-          elementList.add(element);
+          entityTags.put(id, ++tagCount);
+          entityList.add(entity);
         }
       }
     }
@@ -241,45 +243,47 @@ public abstract class StepExporter<E>
       }
       buffer.append(')');
     }
-    else if (cls.isInstance(object))
+    else
     {
-      @SuppressWarnings("unchecked")
-      E element = (E)object;
-      String typeName = getTypeName(element);
-      if (typeName != null)
+      E element = dereference(object);
+      if (element != null)
       {
-        buffer.append(typeName.toUpperCase());
-        buffer.append("(");
-        ExpressNamedType namedType = schema.getNamedType(typeName);
-        if (namedType instanceof ExpressEntity entityType)
+        String typeName = getTypeName(element);
+        if (typeName != null)
         {
-          List<ExpressAttribute> attributes = entityType.getAllAttributes();
-          Iterator<ExpressAttribute> iter = attributes.iterator();
-          if (iter.hasNext())
+          buffer.append(typeName.toUpperCase());
+          buffer.append("(");
+          ExpressNamedType namedType = schema.getNamedType(typeName);
+          if (namedType instanceof ExpressEntity entityType)
           {
-            int index = 1;
-            ExpressAttribute attribute = iter.next();
-            Object value = getPropertyValue(element, attribute, index++);
-            buffer.append(exportObjectWithTag(value, attribute.getType()));
-            while (iter.hasNext())
+            List<ExpressAttribute> attributes = entityType.getAllAttributes();
+            Iterator<ExpressAttribute> iter = attributes.iterator();
+            if (iter.hasNext())
             {
-              buffer.append(",");
-              attribute = iter.next();
-              value = getPropertyValue(element, attribute, index++);
+              int index = 1;
+              ExpressAttribute attribute = iter.next();
+              Object value = getPropertyValue(element, attribute, index++);
               buffer.append(exportObjectWithTag(value, attribute.getType()));
+              while (iter.hasNext())
+              {
+                buffer.append(",");
+                attribute = iter.next();
+                value = getPropertyValue(element, attribute, index++);
+                buffer.append(exportObjectWithTag(value, attribute.getType()));
+              }
             }
           }
+          else if (namedType instanceof ExpressDefinedType definedType)
+          {
+            buffer.append(exportObject(getValue(element),
+              definedType.getDefinition()));
+          }
+          buffer.append(')');
         }
-        else if (namedType instanceof ExpressDefinedType definedType)
-        {
-          buffer.append(exportObject(getValue(element), definedType.getDefinition()));
-        }
-        buffer.append(')');
+        else buffer.append("*");
       }
       else buffer.append("*");
     }
-    else buffer.append("*");
-
     return buffer.toString();
   }
 
@@ -290,7 +294,8 @@ public abstract class StepExporter<E>
     E element = dereference(object);
     if (element != null)
     {
-      tag = elementTags.get(element);
+      ID id = getIdentifier(element);
+      tag = entityTags.get(id);
     }
     return tag == null ? exportObject(object, type) : "#" + tag;
   }
@@ -359,12 +364,12 @@ public abstract class StepExporter<E>
   /**
    * Gets the value of a property of an entity
    *
-   * @param element the ExpressEntity instance
+   * @param entity the ExpressEntity instance
    * @param attribute the entity attribute to be set
    * @param index the position of the attribute (1-based)
    * @return the value of the specified attribute of element
    */
-  protected abstract Object getPropertyValue(E element,
+  protected abstract Object getPropertyValue(E entity,
     ExpressAttribute attribute, int index);
 
   /**
@@ -383,4 +388,12 @@ public abstract class StepExporter<E>
    * reference any element.
    */
   protected abstract E dereference(Object value);
+
+  /**
+   * Gets the entity identifier
+   *
+   * @param entity the entity to get the identifier from
+   * @return the entity identifier
+   */
+  protected abstract ID getIdentifier(E entity);
 }

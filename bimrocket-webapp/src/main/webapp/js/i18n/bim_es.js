@@ -107,13 +107,13 @@ export const translations =
   "label.select_components" : "Selecciona los objetos de la vista:",
 
   "label.admin_service" : "Servidor Admin:",
-  "label.users": "Gestión de usuarios",
-  "label.roles_management": "Gestión de roles",
-  "label.configuration": "Configuración",
-  "label.id": "Id:",
-  "label.email": "Email:  ",
-  "label.roles": "Roles:",
-  "label.confirm_password": "Confirmar contraseña:",
+  "label.users" : "Gestión de usuarios",
+  "label.roles_management" : "Gestión de roles",
+  "label.configuration" : "Configuración",
+  "label.id" : "Id:",
+  "label.email" : "Email:  ",
+  "label.roles" : "Roles:",
+  "label.confirm_password" : "Confirmar contraseña:",
 
   "col.index" : "Índ.",
   "col.topic" : "Incidencia",
@@ -138,6 +138,11 @@ export const translations =
   "title.bim_delta_snapshots" : "Capturas IFC",
 
   "title.admin_service": "Administración de servicio",
+
+  "action.open_model" : "Abrir modelo",
+  "action.edit_model" : "Editar modelo",
+  "action.delete_model" : "Borrar modelo",
+  "action.download_model" : "Descargar modelo",
 
   "message.no_bim_object_selected" : "Ningún objeto BIM seleccionado.",
 

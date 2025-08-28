@@ -14,6 +14,9 @@ import { Dialog } from "./Dialog.js";
 import { TabbedPane } from "./TabbedPane.js";
 import { Tree } from "./Tree.js";
 import { Toast } from "./Toast.js";
+import { Action } from "./Action.js";
+import { ContextMenu } from "./ContextMenu.js";
+import { WebUtils } from "../utils/WebUtils.js";
 import { I18N } from "../i18n/I18N.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { IFCDBService } from "../io/IFCDBService.js";
@@ -33,6 +36,16 @@ class IFCDBPanel extends Panel
     this.service = null;
     this.inputFile = null;
     this.processing = false;
+
+    this.contextActions = [];
+
+    this.addContextAction(OpenModelAction);
+    this.addContextAction(EditModelAction);
+    this.addContextAction(DeleteModelAction);
+    this.addContextAction(DownloadModelAction);
+
+    this.contextMenu = new ContextMenu(this.application);
+    this.contextMenu.actions = this.contextActions;
 
     // main panel
     this.mainPanelElem = document.createElement("div");
@@ -122,20 +135,16 @@ class IFCDBPanel extends Panel
       event => this.selectNode(event));
     this.modelTree.addEventListener("dblclick",
       event => this.openModelByDblClick(event));
-    this.modelTree.addEventListener("contextmenu",
-      event => event.originalEvent.preventDefault());
+    this.modelTree.addEventListener("contextmenu", event =>
+      {
+        const originalEvent = event.originalEvent;
+        this.selectNode(event);
+        originalEvent.preventDefault();
+        this.contextMenu.show(originalEvent);
+      });
 
     this.uploadModelButton = Controls.addButton(modelButtonsElem, "up_ifc",
       "button.upload", () => this.selectFile());
-
-    this.openModelButton = Controls.addButton(modelButtonsElem, "down_ifc",
-      "button.open", () => this.openSelectedModel());
-
-    this.deleteModelButton = Controls.addButton(modelButtonsElem, "del_ifc",
-      "button.delete", () => this.deleteSelectedModel());
-
-    this.editModelButton = Controls.addButton(modelButtonsElem, "edit_ifc",
-      "button.edit", () => this.editSelectedModel());
 
     const commandPanelElem = document.createElement("div");
     commandPanelElem.className = "ifcdb_command";
@@ -224,6 +233,11 @@ class IFCDBPanel extends Panel
       "updateModel", "button.save", () => this.updateModel());
 
     this.updateButtons();
+  }
+
+  addContextAction(contextActionClass)
+  {
+    this.contextActions.push(new contextActionClass(this));
   }
 
   onShow()
@@ -438,6 +452,26 @@ class IFCDBPanel extends Panel
     }
   }
 
+  downloadSelectedModel()
+  {
+    const node = this.selectedNode;
+    if (node.value.id)
+    {
+      const modelId = node.value.id;
+      const filename = node.value.name.replace(/ /g, "_") + ".ifc";
+      this.downloadModel(modelId, 0, filename);
+    }
+    else
+    {
+      const parentNode = node.parent;
+      const version = node.value.version;
+      const modelId = parentNode.value.id;
+      const filename = parentNode.value.name.replace(/ /g, "_") +
+        "-v" + version + ".ifc";
+      this.downloadModel(modelId, version, filename);
+    }
+  }
+
   deleteSelectedModel()
   {
     const application = this.application;
@@ -509,6 +543,24 @@ class IFCDBPanel extends Panel
     catch (ex)
     {
       this.handleError(ex, () => this.openModel(modelId, version));
+    }
+    finally
+    {
+      this.hideProgressBar();
+    }
+  }
+
+  async downloadModel(modelId, version = 0, filename)
+  {
+    try
+    {
+      this.showProgressBar("Downloading model...");
+      const data = await this.service.downloadModel(modelId, version);
+      WebUtils.downloadFile(data, filename, "application/x-step");
+    }
+    catch (ex)
+    {
+      this.handleError(ex, () => this.downloadModel(modelId, version, filename));
     }
     finally
     {
@@ -777,20 +829,8 @@ class IFCDBPanel extends Panel
   updateButtons()
   {
     const processing = this.processing;
-    const node = this.selectedNode;
-    const isNodeSelected = Boolean(node);
-    const isModel = isNodeSelected && node.value.id;
-
-    let display = isNodeSelected ? "" : "none";
-    this.openModelButton.style.display = display;
-    this.deleteModelButton.style.display = display;
-    this.editModelButton.style.display = isModel ? "" : "none";
-
     this.searchModelsButton.disabled = processing;
     this.uploadModelButton.disabled = processing;
-    this.openModelButton.disabled = processing;
-    this.deleteModelButton.disabled = processing;
-    this.editModelButton.disabled = processing;
     this.executeStepButton.disabled = processing;
     this.executeJsonButton.disabled = processing;
   }
@@ -803,6 +843,131 @@ class IFCDBPanel extends Panel
       changes: { from: 0, to: queryView.state.doc.length, insert: "" }
     });
     this.resultElem.innerHTML = "";
+  }
+}
+
+class OpenModelAction extends Action
+{
+  constructor(panel)
+  {
+    super();
+    this.panel = panel;
+  }
+
+  getLabel()
+  {
+    return "bim|action.open_model";
+  }
+
+  getClassName()
+  {
+    return "open";
+  }
+
+  isEnabled()
+  {
+    const panel = this.panel;
+    return panel.selectedNode !== null;
+  }
+
+  perform()
+  {
+    const panel = this.panel;
+    panel.openSelectedModel();
+  }
+}
+
+class EditModelAction extends Action
+{
+  constructor(panel)
+  {
+    super();
+    this.panel = panel;
+  }
+
+  getLabel()
+  {
+    return "bim|action.edit_model";
+  }
+
+  getClassName()
+  {
+    return "edit";
+  }
+
+  isEnabled()
+  {
+    const panel = this.panel;
+    const node = panel.selectedNode;
+    return node && node.value.id !== undefined;
+  }
+
+  perform()
+  {
+    const panel = this.panel;
+    panel.editSelectedModel();
+  }
+}
+
+class DeleteModelAction extends Action
+{
+  constructor(panel)
+  {
+    super();
+    this.panel = panel;
+  }
+
+  getLabel()
+  {
+    return "bim|action.delete_model";
+  }
+
+  getClassName()
+  {
+    return "delete";
+  }
+
+  isEnabled()
+  {
+    const panel = this.panel;
+    return panel.selectedNode !== null;
+  }
+
+  perform()
+  {
+    const panel = this.panel;
+    panel.deleteSelectedModel();
+  }
+}
+
+class DownloadModelAction extends Action
+{
+  constructor(panel)
+  {
+    super();
+    this.panel = panel;
+  }
+
+  getLabel()
+  {
+    return "bim|action.download_model";
+  }
+
+  getClassName()
+  {
+    return "download";
+  }
+
+  isEnabled()
+  {
+    const panel = this.panel;
+    return panel.selectedNode !== null;
+  }
+
+  perform()
+  {
+    const panel = this.panel;
+    panel.downloadSelectedModel();
   }
 }
 

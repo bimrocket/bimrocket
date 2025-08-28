@@ -106,14 +106,14 @@ export const translations =
   "label.bim_explode_zoffset" : "Z axis offset:",
   "label.select_components" : "Select components in view:",
 
-  "label.admin_service": "Admin server:",
-  "label.users": "User management",
-  "label.roles_management": "Roles management",
-  "label.configuration": "Configuration",
-  "label.id": "Id:",
-  "label.email": "Email:",
-  "label.roles": "Roles:",
-  "label.confirm_password": "Confirm password:",
+  "label.admin_service" : "Admin server:",
+  "label.users" : "User management",
+  "label.roles_management" : "Roles management",
+  "label.configuration" : "Configuration",
+  "label.id" : "Id:",
+  "label.email" : "Email:",
+  "label.roles" : "Roles:",
+  "label.confirm_password" : "Confirm password:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -137,7 +137,12 @@ export const translations =
 
   "title.bim_delta_snapshots" : "IFC snapshots",
 
-  "title.admin_service": "Admin service",
+  "title.admin_service" : "Admin service",
+
+  "action.open_model" : "Open model",
+  "action.edit_model" : "Edit model",
+  "action.delete_model" : "Delete model",
+  "action.download_model" : "Download model",
 
   "message.no_bim_object_selected" : "No BIM object selected.",
 

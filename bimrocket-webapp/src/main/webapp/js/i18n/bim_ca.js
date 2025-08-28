@@ -107,13 +107,13 @@ export const translations =
   "label.select_components" : "Selecciona els objectes de la vista:",
 
   "label.admin_service" : "Servidor Admin:",
-  "label.users": "Gestió d'usuaris",
-  "label.roles_management": "Gestió de rols",
-  "label.id": "Id:",
-  "label.email": "Email:",
-  "label.roles": "Rols:",
-  "label.configuration": "Configuració",
-  "label.confirm_password": "Confirma paraula de pas:",
+  "label.users" : "Gestió d'usuaris",
+  "label.roles_management" : "Gestió de rols",
+  "label.id" : "Id:",
+  "label.email" : "Email:",
+  "label.roles" : "Rols:",
+  "label.configuration" : "Configuració",
+  "label.confirm_password" : "Confirma paraula de pas:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
@@ -137,7 +137,12 @@ export const translations =
 
   "title.bim_delta_snapshots" : "Captures IFC",
 
-  "title.admin_service": "Administració del servei",
+  "title.admin_service" : "Administració del servei",
+
+  "action.open_model" : "Obre model",
+  "action.edit_model" : "Edita model",
+  "action.delete_model" : "Esborra model",
+  "action.download_model" : "Baixa model",
 
   "message.no_bim_object_selected" : "Cap objecte BIM seleccionat.",
 

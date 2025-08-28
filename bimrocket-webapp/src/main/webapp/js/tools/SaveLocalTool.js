@@ -8,6 +8,7 @@ import { Tool } from "./Tool.js";
 import { SaveDialog } from "../ui/SaveDialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { IOManager } from "../io/IOManager.js";
+import { WebUtils } from "../utils/WebUtils.js";
 
 class SaveLocalTool extends Tool
 {
@@ -18,7 +19,6 @@ class SaveLocalTool extends Tool
     this.label = "tool.savelocal.label";
     this.help = "tool.savelocal.help";
     this.className = "savelocal";
-    this.url = null;
     this.setOptions(options);
     application.addTool(this);
   }
@@ -48,23 +48,13 @@ class SaveLocalTool extends Tool
   onSave(name, formatName, onlySelection)
   {
     const application = this.application;
-    if (this.url)
-    {
-      window.URL.revokeObjectURL(this.url);
-    }
     const object = application.getModelRoot(onlySelection);
 
     const onCompleted = data =>
     {
       try
       {
-        this.url = window.URL.createObjectURL(data);
-        let linkElem = document.createElement("a");
-        linkElem.download = intent.name;
-        linkElem.target = "_blank";
-        linkElem.href = this.url;
-        linkElem.style.display = "block";
-        linkElem.click();
+        WebUtils.downloadFile(data, intent.name);
       }
       catch (ex)
       {

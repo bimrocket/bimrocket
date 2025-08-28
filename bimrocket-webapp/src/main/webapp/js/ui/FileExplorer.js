@@ -16,6 +16,7 @@ import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { FileService, Metadata, Result, ACL } from "../io/FileService.js";
 import { IOManager } from "../io/IOManager.js";
+import { WebUtils } from "../utils/WebUtils.js";
 import { I18N } from "../i18n/I18N.js";
 
 class FileExplorer extends Panel
@@ -79,8 +80,8 @@ class FileExplorer extends Panel
   }
 
   isActionEnabled(name)
-  {   
-    return true; 
+  {
+    return true;
   }
 
   addContextButton(name, label, action, isVisible)
@@ -463,18 +464,7 @@ class FileExplorer extends Panel
       if (onSuccess) onSuccess();
 
       const data = result.data;
-      if (this.downloadUrl)
-      {
-        window.URL.revokeObjectURL(this.downloadUrl);
-      }
-      const blob = new Blob([data], {type : 'application/octet-stream'});
-      this.downloadUrl = window.URL.createObjectURL(blob);
-      let linkElem = document.createElement("a");
-      linkElem.download = this.entryName;
-      linkElem.target = "_blank";
-      linkElem.href = this.downloadUrl;
-      linkElem.style.display = "block";
-      linkElem.click();
+      WebUtils.downloadFile(data, this.entryName);
     }
     else
     {
@@ -805,7 +795,7 @@ class FileExplorer extends Panel
     this.application.addService(service, this.group);
     this.refreshServices();
   }
-  
+
   getFullPath(name)
   {
     if (this.basePath === "/") return this.basePath + name;

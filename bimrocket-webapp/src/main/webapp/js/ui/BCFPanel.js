@@ -16,6 +16,7 @@ import { Toast } from "./Toast.js";
 import { ServiceManager } from "../io/ServiceManager.js";
 import { BCFService } from "../io/BCFService.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { WebUtils } from "../utils/WebUtils.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
@@ -1307,16 +1308,11 @@ class BCFPanel extends Panel
       csvContent += row + "\n";
     });
 
-    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const data = "\uFEFF" + csvContent;
+    const filename = `topics_${selectedProjectId}.csv`;
+    const contentType = "text/csv";
 
-    let linkElem = document.createElement("a");
-    linkElem.download = `topics_${selectedProjectId}.csv`;
-    linkElem.href = url;
-    linkElem.style.display = "none";
-    document.body.appendChild(linkElem);
-    linkElem.click();
-    document.body.removeChild(linkElem);
+    WebUtils.downloadFile(data, filename, contentType);
   }
 
   populateCommentList()

@@ -9,6 +9,7 @@ import { Controls } from "../ui/Controls.js";
 import { PropertySelectorDialog } from "../ui/PropertySelectorDialog.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { WebUtils } from "../utils/WebUtils.js";
 import * as THREE from "three";
 
 class ExportSelectionTool extends Tool
@@ -125,15 +126,8 @@ class ExportSelectionTool extends Tool
         exportedData.push(this.toCSVRow(fn(object)));
       }
       let csv = "\uFEFF" + exportedData.join("\n");
-      const blob = new Blob([csv], {type : 'text/csv'});
-      let url = window.URL.createObjectURL(blob);
 
-      let linkElem = document.createElement("a");
-      linkElem.download = "export.csv";
-      linkElem.target = "_blank";
-      linkElem.href = url;
-      linkElem.style.display = "block";
-      linkElem.click();
+      WebUtils.downloadFile(csv, "export.csv", "text/csv");
 
       dialog.hide();
     }

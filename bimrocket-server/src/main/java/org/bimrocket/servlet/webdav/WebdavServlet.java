@@ -365,12 +365,9 @@ public class WebdavServlet extends HttpServlet
     }
     catch (IOException ex)
     {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> body = Map.of("error", ex.getMessage());
-
         response.setStatus(HttpServletResponse.SC_CONFLICT);
-        response.setContentType("application/json");
-        response.getWriter().write(mapper.writeValueAsString(body));
+        response.setContentType("text/plain");
+        response.getWriter().write(ex.getMessage());
     }
     catch (LockedFileException ex)
     {

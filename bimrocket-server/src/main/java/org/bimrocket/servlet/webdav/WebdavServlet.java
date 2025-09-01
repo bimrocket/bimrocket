@@ -30,6 +30,7 @@
  */
 package org.bimrocket.servlet.webdav;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -57,12 +58,7 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bimrocket.service.file.util.MutableACL;
@@ -366,6 +362,15 @@ public class WebdavServlet extends HttpServlet
     catch (NotFoundException ex)
     {
       response.sendError(404, ex.getMessage());
+    }
+    catch (IOException ex)
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> body = Map.of("error", ex.getMessage());
+
+        response.setStatus(HttpServletResponse.SC_CONFLICT);
+        response.setContentType("application/json");
+        response.getWriter().write(mapper.writeValueAsString(body));
     }
     catch (LockedFileException ex)
     {

@@ -168,8 +168,7 @@ public class FileSystemFileStore implements FileStore
   }
 
   @Override
-  public void delete(Path path)
-  {
+  public void delete(Path path) throws IOException {
     File file = getFile(path);
 
     if (file.exists())
@@ -184,7 +183,7 @@ public class FileSystemFileStore implements FileStore
       }
 
       if (!file.delete())
-        throw new InvalidRequestException("Delete failed.");
+        throw new IOException("Folder not Empty.");
     }
   }
 

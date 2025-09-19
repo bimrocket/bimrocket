@@ -124,6 +124,8 @@ public class ProxyService
     HttpServletResponse servletResponse) throws Exception
   {
     String url = servletRequest.getParameter("url");
+    sendCORSHeaders(servletResponse);
+
     if (url == null)
     {
       servletResponse.getWriter().print("proxy service");
@@ -302,5 +304,13 @@ public class ProxyService
       IOUtils.copy(httpResponse.body(), os);
       os.flush();
     }
+  }
+
+  private void sendCORSHeaders(HttpServletResponse servletResponse)
+  {
+    servletResponse.setHeader("Access-Control-Allow-Origin", "*");
+    servletResponse.setHeader("Access-Control-Allow-Credentials", "true");
+    servletResponse.setHeader("Access-Control-Allow-Headers", "*");
+    servletResponse.setHeader("Access-Control-Allow-Methods", "*");
   }
 }

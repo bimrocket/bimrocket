@@ -58,6 +58,6 @@ public class TaskMongoDaoStore extends MongoDaoStore<TaskDaoConnection>
   @Override
   public TaskDaoConnection getConnection()
   {
-    return new TaskMongoDaoConnection(getSession(), getDatabase());
+    return new TaskMongoDaoConnection(getMongoClient(), getDatabase());
   }
 }

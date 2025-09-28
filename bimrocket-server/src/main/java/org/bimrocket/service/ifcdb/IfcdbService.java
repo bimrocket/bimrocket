@@ -52,22 +52,29 @@ import org.bimrocket.dao.expression.OrderByExpression;
 import org.bimrocket.dao.expression.io.log.LogExpressionPrinter;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.express.ExpressSchema;
+import org.bimrocket.express.data.ExpressCursor;
 import org.bimrocket.express.io.ExpressLoader;
-import org.bimrocket.service.ifcdb.store.IfcStore;
+import org.bimrocket.service.ifcdb.store.IfcData;
+import org.bimrocket.service.ifcdb.store.IfcdbConnection;
 import org.bimrocket.service.ifcdb.store.empty.EmptyIfcStore;
 import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.util.EntityDefinition;
 import org.eclipse.microprofile.config.Config;
+import org.bimrocket.step.io.StepExporter;
+import org.bimrocket.step.io.StepLoader;
+import org.bimrocket.service.ifcdb.store.IfcdbStore;
+import org.bimrocket.util.Chronometer;
+import static org.bimrocket.util.TextUtils.getISODate;
 
 /**
  *
  * @author realor
  */
 @ApplicationScoped
-public class IfcDatabaseService
+public class IfcdbService
 {
   static final Logger LOGGER =
-    Logger.getLogger(IfcDatabaseService.class.getName());
+    Logger.getLogger(IfcdbService.class.getName());
 
   static final String BASE = "services.ifcdb.";
 
@@ -96,7 +103,7 @@ public class IfcDatabaseService
   @Inject
   Config config;
 
-  IfcStore store;
+  IfcdbStore store;
 
   @Inject
   SecurityService securityService;
@@ -111,7 +118,7 @@ public class IfcDatabaseService
     try
     {
       @SuppressWarnings("unchecked")
-      Class<IfcStore> storeClass =
+      Class<IfcdbStore> storeClass =
         config.getValue(BASE + "store.class", Class.class);
       store = cdi.select(storeClass).get();
     }
@@ -138,8 +145,12 @@ public class IfcDatabaseService
         ExpressSchema schema = expressParser.load("schema:" + schemaName);
         LOGGER.log(Level.INFO, "{0} schema loaded: {1} named types",
           new Object[]{ schema.getName(), schema.getNamedTypes().size()});
-        store.createSchema(schema);
-        schemas.put(schemaName, schema);
+
+        try (IfcdbConnection conn = store.getConnection(schema))
+        {
+          conn.createSchema();
+          schemas.put(schemaName, schema);
+        }
       }
       catch (Exception ex)
       {
@@ -160,7 +171,10 @@ public class IfcDatabaseService
     ExpressSchema schema = schemas.get(schemaName);
     if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    return store.getModels(schema, filter, orderByList, roleIds);
+    try (var conn = store.getConnection(schema))
+    {
+      return conn.findModels(filter, orderByList, roleIds);
+    }
   }
 
   public List<IfcdbVersion> getModelVersions(String schemaName, String modelId)
@@ -172,7 +186,10 @@ public class IfcDatabaseService
     ExpressSchema schema = schemas.get(schemaName);
     if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    return store.getModelVersions(schema, modelId);
+    try (var conn = store.getConnection(schema))
+    {
+      return conn.getModelVersions(modelId);
+    }
   }
 
   public void downloadModel(String schemaName, String modelId, int version,
@@ -184,7 +201,49 @@ public class IfcDatabaseService
     ExpressSchema schema = schemas.get(schemaName);
     if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    store.downloadModel(schema, modelId, version, ifcFile);
+    try (var conn = store.getConnection(schema))
+    {
+      var chrono = new Chronometer();
+
+      IfcdbModel ifcdbModel = conn.getModel(modelId);
+      if (version == 0)
+      {
+        version = ifcdbModel.getLastVersion();
+      }
+
+      IfcData data = conn.loadData(modelId, version);
+
+      LOGGER.log(Level.INFO,
+        "IFC objects loaded in {0} seconds.", chrono.seconds());
+      chrono.mark();
+
+      var exporter = new StepExporter(data);
+
+      var headerData = exporter.getHeaderData();
+
+      String fileName = ifcdbModel.getName();
+      if (fileName != null && fileName.trim().length() > 0)
+      {
+        fileName = fileName.trim().replace(" ", "_");
+        if (version > 0) fileName += "-v" + version;
+        fileName += ".ifc";
+        headerData.getFileName().setName(fileName);
+      }
+
+      String description = ifcdbModel.getDescription();
+      if (description != null)
+      {
+        headerData.getFileDescription().setDescription(List.of(description));
+      }
+
+      exporter.export(ifcFile);
+
+      LOGGER.log(Level.INFO,
+        "IFC file created in {0} seconds.", chrono.seconds());
+
+      LOGGER.log(Level.INFO,
+        "Total time: {0} seconds.", chrono.totalSeconds());
+    }
   }
 
   public IfcdbModel uploadModel(String schemaName, File ifcFile)
@@ -205,7 +264,64 @@ public class IfcDatabaseService
       if (fileSizeMb > maxFileSizeMb)
         throw new InvalidRequestException(MODEL_TOO_LARGE);
     }
-    return store.uploadModel(schema, ifcFile);
+
+    try (var conn = store.getConnection(schema))
+    {
+      var chrono = new Chronometer();
+
+      IfcData data = conn.createData();
+
+      var loader = new StepLoader(data);
+
+      loader.load(ifcFile);
+
+      LOGGER.log(Level.INFO,
+        "IFC file loaded in {0} seconds.", chrono.seconds());
+      chrono.mark();
+
+      ExpressCursor project = data.getIfcProject();
+      if (project == null) throw new IOException(INVALID_IFC);
+
+      String modelId = project.get("GlobalId");
+      if (modelId == null) throw new IOException(INVALID_IFC);
+
+      int version;
+      IfcdbModel ifcdbModel = conn.getModel(modelId);
+      if (ifcdbModel == null)
+      {
+        String modelName = project.get("Name");
+        if (modelName == null || modelName.trim().length() == 0)
+        {
+          modelName = "New model";
+        }
+        ifcdbModel = new IfcdbModel();
+        ifcdbModel.setId(modelId);
+        ifcdbModel.setName(modelName);
+        ifcdbModel.setDescription(project.get("Description"));
+        ifcdbModel.setReadRoleIds(Set.of(getCurrentUserId()));
+        ifcdbModel.setUploadRoleIds(Set.of(getCurrentUserId()));
+        ifcdbModel = conn.createModel(ifcdbModel);
+      }
+      IfcdbVersion ifcdbVersion = new IfcdbVersion();
+      ifcdbVersion.setCreationDate(getISODate());
+      ifcdbVersion.setCreationAuthor(getCurrentUserId());
+      ifcdbVersion = conn.createModelVersion(modelId, ifcdbVersion);
+      version = ifcdbVersion.getVersion();
+
+      LOGGER.log(Level.INFO,
+        "Version created in {0} seconds.", chrono.seconds());
+      chrono.mark();
+
+      conn.saveData(modelId, version, data);
+
+      LOGGER.log(Level.INFO,
+        "IFC objects saved in {0} seconds.", chrono.seconds());
+
+      LOGGER.log(Level.INFO,
+        "Total time: {0} seconds.", chrono.totalSeconds());
+
+      return ifcdbModel;
+    }
   }
 
   public IfcdbModel updateModel(String schemaName, IfcdbModel model)
@@ -222,7 +338,10 @@ public class IfcDatabaseService
     if (isBlank(model.getName()))
       throw new InvalidRequestException(MODEL_NAME_IS_REQUIRED);
 
-    return store.updateModel(schema, model);
+    try (var conn = store.getConnection(schema))
+    {
+      return conn.updateModel(model);
+    }
   }
 
   public boolean deleteModel(String schemaName, String modelId, int version)
@@ -233,8 +352,17 @@ public class IfcDatabaseService
     ExpressSchema schema = schemas.get(schemaName);
     if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    boolean deleted = store.deleteModel(schema, modelId, version);
-    return deleted;
+    try (var conn = store.getConnection(schema))
+    {
+      var chrono = new Chronometer();
+
+      boolean deleted = conn.deleteModel(modelId, version);
+
+      LOGGER.log(Level.INFO,
+        "Total time: {0} seconds.", chrono.totalSeconds());
+
+      return deleted;
+    }
   }
 
   public void execute(String schemaName, IfcdbCommand command, File file)
@@ -245,6 +373,43 @@ public class IfcDatabaseService
     ExpressSchema schema = schemas.get(schemaName);
     if (schema == null) throw new InvalidRequestException(UNSUPPORTED_SCHEMA);
 
-    store.execute(schema, command, file);
+    String query = command.getQuery();
+    String language = command.getLanguage();
+    String outputFormat = command.getOutputFormat();
+
+    try (var conn = store.getConnection(schema))
+    {
+      var chrono = new Chronometer();
+
+      if (outputFormat.equals("json"))
+      {
+        conn.execute(query, language, file);
+      }
+      else // ifc
+      {
+        IfcData data = conn.queryData(query, language);
+
+        LOGGER.log(Level.INFO,
+          "IFC objects loaded in {0} seconds.", chrono.seconds());
+        chrono.mark();
+
+        var exporter = new StepExporter(data);
+
+        var headerData = exporter.getHeaderData();
+        headerData.getFileName().setName("query.ifc");
+
+        exporter.export(file);
+
+        LOGGER.log(Level.INFO,
+          "IFC file created in {0} seconds.", chrono.seconds());
+      }
+      LOGGER.log(Level.INFO,
+        "Total time: {0} seconds.", chrono.totalSeconds());
+    }
+  }
+
+  private String getCurrentUserId()
+  {
+    return securityService.getCurrentUserId();
   }
 }

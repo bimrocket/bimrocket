@@ -47,9 +47,9 @@ public class OrientDaoConnection implements DaoConnection
   }
 
   @Override
-  public void close()
+  public void begin()
   {
-    db.close();
+    db.begin();
   }
 
   @Override
@@ -62,5 +62,11 @@ public class OrientDaoConnection implements DaoConnection
   public void rollback()
   {
     db.rollback();
+  }
+
+  @Override
+  public void close()
+  {
+    db.close();
   }
 }

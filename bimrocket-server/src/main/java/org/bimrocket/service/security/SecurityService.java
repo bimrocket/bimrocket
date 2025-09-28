@@ -197,9 +197,9 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "filter: {0}", LogExpressionPrinter.toString(filter));
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<User, String> userDao = conn.getUserDao();
+      var userDao = conn.getUserDao();
       return userDao.find(filter, orderBy);
     }
   }
@@ -208,9 +208,9 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "userId: {0}", userId);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<User, String> userDao = conn.getUserDao();
+      var userDao = conn.getUserDao();
       return userDao.findById(userId);
     }
   }
@@ -222,9 +222,9 @@ public class SecurityService
     //Send true to parameter isNewUser
     validateUser(user, true);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<User, String> userDao = conn.getUserDao();
+      var userDao = conn.getUserDao();
       User prevUser = userDao.findById(user.getId());
       if (prevUser != null)
         throw new InvalidRequestException(USER_ALREADY_EXISTS);
@@ -250,9 +250,9 @@ public class SecurityService
     //Send false to parameter isNewUser
     validateUser(userUpdate, false);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<User, String> userDao = conn.getUserDao();
+      var userDao = conn.getUserDao();
       User user = userDao.findById(userUpdate.getId());
       if (user == null) throw new NotFoundException(USER_NOT_FOUND);
 
@@ -281,9 +281,9 @@ public class SecurityService
     LOGGER.log(Level.FINE, "userId: {0}", userId);
     userCache.remove(userId);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<User, String> userDao = conn.getUserDao();
+      var userDao = conn.getUserDao();
       return userDao.deleteById(userId);
     }
   }
@@ -292,9 +292,9 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "filter: {0}", LogExpressionPrinter.toString(filter));
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<Role, String> userDao = conn.getRoleDao();
+      var userDao = conn.getRoleDao();
       return userDao.find(filter, orderBy);
     }
   }
@@ -303,9 +303,9 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "roleId: {0}", roleId);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<Role, String> roleDao = conn.getRoleDao();
+      var roleDao = conn.getRoleDao();
       return roleDao.findById(roleId);
     }
   }
@@ -314,9 +314,9 @@ public class SecurityService
   {
     LOGGER.log(Level.FINE, "roleId: {0}", role.getId());
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<Role, String> roleDao = conn.getRoleDao();
+      var roleDao = conn.getRoleDao();
       return roleDao.insert(role);
     }
   }
@@ -326,9 +326,9 @@ public class SecurityService
     LOGGER.log(Level.FINE, "roleId: {0}", role.getId());
     roleCache.remove(role.getId());
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<Role, String> roleDao = conn.getRoleDao();
+      var roleDao = conn.getRoleDao();
       return roleDao.update(role);
     }
   }
@@ -338,9 +338,9 @@ public class SecurityService
     LOGGER.log(Level.FINE, "roleId: {0}", roleId);
     roleCache.remove(roleId);
 
-    try (SecurityDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<Role, String> roleDao = conn.getRoleDao();
+      var roleDao = conn.getRoleDao();
       return roleDao.deleteById(roleId);
     }
   }

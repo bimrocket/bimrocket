@@ -30,7 +30,6 @@
  */
 package org.bimrocket.dao.mongo;
 
-import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import jakarta.inject.Inject;
@@ -80,11 +79,6 @@ public abstract class MongoDaoStore<C extends DaoConnection>
       mongoClient = clientManager.getMongoClient(url);
     }
     return mongoClient;
-  }
-
-  public ClientSession getSession()
-  {
-    return getMongoClient().startSession();
   }
 
   public MongoDatabase getDatabase()

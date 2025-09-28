@@ -54,14 +54,14 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
-import org.bimrocket.service.ifcdb.IfcDatabaseService;
+import org.bimrocket.service.ifcdb.IfcdbService;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 import org.bimrocket.api.ApiResult;
 import org.bimrocket.dao.expression.Expression;
 import org.bimrocket.dao.expression.OrderByExpression;
 import org.bimrocket.dao.expression.io.odata.ODataParser;
-import static org.bimrocket.service.ifcdb.IfcDatabaseService.modelFieldMap;
+import static org.bimrocket.service.ifcdb.IfcdbService.modelFieldMap;
 
 /**
  *
@@ -72,7 +72,7 @@ import static org.bimrocket.service.ifcdb.IfcDatabaseService.modelFieldMap;
 public class IfcDatabaseEndpoint
 {
   @Inject
-  IfcDatabaseService ifcDatabaseService;
+  IfcdbService ifcDatabaseService;
 
   /* Auth */
 

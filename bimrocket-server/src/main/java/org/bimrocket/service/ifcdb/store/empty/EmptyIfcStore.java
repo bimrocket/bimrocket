@@ -30,30 +30,18 @@
  */
 package org.bimrocket.service.ifcdb.store.empty;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import org.bimrocket.api.ifcdb.IfcdbCommand;
-import org.bimrocket.api.ifcdb.IfcdbModel;
-import org.bimrocket.api.ifcdb.IfcdbVersion;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
 import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.service.ifcdb.store.IfcStore;
+import org.bimrocket.service.ifcdb.store.IfcdbConnection;
+import org.bimrocket.service.ifcdb.store.IfcdbStore;
 
 /**
  *
  * @author realor
  */
-public class EmptyIfcStore implements IfcStore
+public class EmptyIfcStore implements IfcdbStore
 {
-  @Override
-  public void createSchema(ExpressSchema schema) throws IOException
-  {
-  }
-
   @Override
   public List<String> getSupportedQueryLanguages()
   {
@@ -61,47 +49,19 @@ public class EmptyIfcStore implements IfcStore
   }
 
   @Override
-    public List<IfcdbModel> getModels(ExpressSchema schema,
-    Expression filter, List<OrderByExpression> orderByList,
-    Set<String> roleIds)
+  public IfcdbConnection getConnection(ExpressSchema schema)
   {
-    return Collections.emptyList();
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public List<IfcdbVersion> getModelVersions(ExpressSchema schema, String modelId)
-  {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public void downloadModel(ExpressSchema schema, String modelId, int version, File ifcFile)
-    throws IOException
+  public void close()
   {
   }
 
   @Override
-  public IfcdbModel uploadModel(ExpressSchema schema, File ifcFile)
-    throws IOException
+  public IfcdbConnection getConnection()
   {
-    return new IfcdbModel();
-  }
-
-  @Override
-  public IfcdbModel updateModel(ExpressSchema schema, IfcdbModel model)
-  {
-    return model;
-  }
-
-  @Override
-  public boolean deleteModel(ExpressSchema schema, String modelId, int version)
-  {
-    return false;
-  }
-
-  @Override
-  public void execute(ExpressSchema schema, IfcdbCommand command, File file)
-    throws IOException
-  {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

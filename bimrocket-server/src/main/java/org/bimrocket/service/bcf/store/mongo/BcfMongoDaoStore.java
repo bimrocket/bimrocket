@@ -58,6 +58,6 @@ public class BcfMongoDaoStore extends MongoDaoStore<BcfDaoConnection>
   @Override
   public BcfDaoConnection getConnection()
   {
-    return new BcfMongoDaoConnection(getSession(), getDatabase());
+    return new BcfMongoDaoConnection(getMongoClient(), getDatabase());
   }
 }

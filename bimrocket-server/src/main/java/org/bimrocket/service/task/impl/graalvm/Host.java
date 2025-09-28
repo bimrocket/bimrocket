@@ -39,7 +39,7 @@ import java.util.Set;
 import org.bimrocket.api.task.TaskData;
 import org.bimrocket.service.bcf.BcfService;
 import org.bimrocket.service.file.FileService;
-import org.bimrocket.service.ifcdb.IfcDatabaseService;
+import org.bimrocket.service.ifcdb.IfcdbService;
 import org.bimrocket.service.mail.MailService;
 import org.bimrocket.service.security.SecurityService;
 import org.bimrocket.service.task.TaskService;
@@ -96,9 +96,15 @@ public class Host
     return CDI.current().select(MailService.class).get();
   }
 
-  public IfcDatabaseService getIfcDatabaseService()
+  public IfcdbService getIfcdbService()
   {
-    return CDI.current().select(IfcDatabaseService.class).get();
+    return CDI.current().select(IfcdbService.class).get();
+  }
+
+  @Deprecated
+  public IfcdbService getIfcDatabaseService()
+  {
+    return CDI.current().select(IfcdbService.class).get();
   }
 
   public BcfService getBcfService()

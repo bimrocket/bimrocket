@@ -30,28 +30,11 @@
  */
 package org.bimrocket.service.ifcdb.store.mongo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.bimrocket.express.ExpressAttribute;
-import org.bimrocket.express.ExpressCollection;
-import org.bimrocket.express.ExpressDefinedType;
-import org.bimrocket.express.ExpressEntity;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.express.ExpressType;
-import org.bimrocket.service.ifcdb.store.mongo.MongoStepLoader.MongoElements;
-import org.bimrocket.step.io.DefinedTypeStepBuilder;
-import org.bimrocket.step.io.EntityStepBuilder;
-import org.bimrocket.step.io.ListBuilder;
-import org.bimrocket.step.io.StepBuilder;
-import org.bimrocket.step.io.StepLoader;
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
 /**
  *
  * @author realor
  */
+/*
 public class MongoStepLoader extends StepLoader<MongoElements>
 {
   public MongoStepLoader(ExpressSchema schema)
@@ -118,12 +101,12 @@ public class MongoStepLoader extends StepLoader<MongoElements>
       String id = UUID.randomUUID().toString();
       this.instance = new Document();
       this.instance.put("_id", new ObjectId());
-      this.instance.put("_class", type.getName());
+      this.instance.put("_class", type.getTypeName());
       this.instance.put("_modelId", null);
       this.instance.put("_version", null);
 
       model.elements.add(instance);
-      if (type.getName().equals("IfcProject"))
+      if (type.getTypeName().equals("IfcProject"))
       {
         model.project = instance;
       }
@@ -159,7 +142,7 @@ public class MongoStepLoader extends StepLoader<MongoElements>
     {
       this.type = definedType;
       this.instance = new Document();
-      this.instance.put("_class", definedType.getName());
+      this.instance.put("_class", definedType.getTypeName());
     }
 
     @Override
@@ -219,3 +202,4 @@ public class MongoStepLoader extends StepLoader<MongoElements>
     return document.get("_id");
   }
 }
+*/

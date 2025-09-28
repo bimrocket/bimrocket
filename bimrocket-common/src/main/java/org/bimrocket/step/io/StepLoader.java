@@ -39,76 +39,85 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import org.bimrocket.express.ExpressNamedType;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.express.ExpressType;
+import org.bimrocket.express.data.ExpressCursor;
+import static org.bimrocket.express.ExpressCollection.LIST;
+import org.bimrocket.express.ExpressConstant;
+import org.bimrocket.express.data.ExpressData;
+import org.bimrocket.step.header.StepFileHeaderData;
 
 /**
+ * Loads objects into a ExpressData from a STEP file.
  *
  * @author realor
- * @param <M> the model type
  */
-public abstract class StepLoader<M>
+
+public class StepLoader
 {
-  private StepLexer lexer;
-  protected ExpressSchema schema;
-  protected M model;
+  protected ExpressData data;
+  protected StepFileHeaderData headerData = new StepFileHeaderData();
+  protected ExpressData currentData;
 
-  public StepLoader()
+  public StepLoader(ExpressData data)
   {
+    this.data = data;
   }
 
-  public StepLoader(ExpressSchema schema)
+  public ExpressData getData()
   {
-    this.schema = schema;
+    return data;
   }
 
-  public M load(String filename) throws IOException
+  public StepFileHeaderData getHeaderData()
   {
-    return load(new File(filename));
+    return headerData;
   }
 
-  public M load(File file) throws IOException
+  public void load(String filename) throws IOException
   {
-    try
-    (BufferedReader reader =
-      new BufferedReader(new InputStreamReader(new FileInputStream(file))))
+    load(new File(filename));
+  }
+
+  public void load(File file) throws IOException
+  {
+    try (BufferedReader reader =
+          new BufferedReader(new InputStreamReader(new FileInputStream(file))))
     {
-      return load(reader);
+      load(reader);
     }
   }
 
-  public M load(Reader reader) throws IOException
+  public void load(Reader reader) throws IOException
   {
-    model = createModel();
-    lexer = new StepLexer(reader);
+    StepLexer lexer = new StepLexer(reader);
     String typeName = null;
-    StepBuilder<? extends Object> builder = null;
+    ExpressCursor rootCursor = data.getRoot();
+    ExpressCursor cursor = null;
     String currentTag = null;
-    Map<String, Object> tags = new HashMap<>();
-    ArrayList<Reference> references = new ArrayList<>();
-    String section = null;
+    Map<String, Integer> backwardRefMap = new HashMap<>();
+    Map<String, ArrayList<Reference>> forwardRefMap = new HashMap<>();
+    Stack<Integer> indexStack = new Stack<>();
+    int index = 0;
 
-    Stack<StepBuilder<? extends Object>> stack = new Stack<>();
-    try
+    try (reader)
     {
       StepToken token = lexer.readToken();
       while (!token.isEOF())
       {
         if (token.isKeyword("HEADER"))
         {
-          section = "HEADER";
+          cursor = headerData.getRoot();
+          index = 0;
         }
         else if (token.isKeyword("DATA"))
         {
-          section = "DATA";
+          cursor = data.getRoot();
+          index = 0;
         }
         else if (token.isKeyword("ENDSEC"))
         {
-          section = null;
+          cursor = null;
         }
         else if (token.isIdentifier())
         {
@@ -116,165 +125,116 @@ public abstract class StepLoader<M>
         }
         else if (token.isOpenParenthesis())
         {
-          if (builder != null)
+          if (cursor == null)
+            throw new IOException("Unexcepted open parethesis");
+
+          indexStack.push(index);
+
+          if (typeName != null)
           {
-            stack.push(builder);
+            cursor.create(index, typeName);
           }
-          builder = createBuilder(section, typeName, builder);
+          else
+          {
+            cursor.create(index, LIST);
+          }
+          index = 0;
           typeName = null;
         }
         else if (token.isCloseParenthesis())
         {
-          if (!stack.isEmpty() && builder != null)
-          {
-            Object instance = builder.getInstance();
-            builder = stack.pop();
-            builder.add(instance);
-          }
+          if (cursor == null)
+            throw new IOException("Unexcepted close parenthesis");
+
+          cursor.exit();
+          index = indexStack.pop();
+          index++;
         }
         else if (token.isReference())
         {
           String tag = (String)token.getValue();
-          if (builder == null)
+          if (indexStack.isEmpty()) // start line
           {
             currentTag = tag;
           }
-          else
+          else if (cursor != null)
           {
-            int index = builder.add(null);
-            references.add(new Reference(builder, tag, index));
+            Integer tagIndex = backwardRefMap.get(tag);
+            if (tagIndex == null) // forward reference
+            {
+              ArrayList<Reference> references = forwardRefMap.get(tag);
+              if (references == null)
+              {
+                references = new ArrayList<>();
+                forwardRefMap.put(tag, references);
+              }
+              references.add(new Reference(cursor, index));
+              cursor.set(index++, (String)null);
+            }
+            else // backward reference
+            {
+              rootCursor.enter(tagIndex);
+              cursor.set(index++, rootCursor);
+              rootCursor.exit();
+            }
+          }
+          else throw new IOException("Unexcepted tag");
+        }
+        else if (token.isColon()) // end of line
+        {
+          if (indexStack.isEmpty() && currentTag != null)
+          {
+            backwardRefMap.put(currentTag, rootCursor.size() - 1);
+            ArrayList<Reference> references = forwardRefMap.remove(currentTag);
+            if (references != null)
+            {
+              rootCursor.enter(rootCursor.size() - 1);
+              for (Reference reference : references)
+              {
+                reference.dereference(rootCursor);
+              }
+              rootCursor.exit();
+            }
           }
         }
-        else if (token.isColon())
+        else if (cursor != null)
         {
-          if (builder != null)
+          if (token.isNumber())
           {
-            Object instance = builder.getInstance();
-            if ("DATA".equals(section) && currentTag != null)
-            {
-              tags.put(currentTag, instance);
-              String tagTypeName = builder.getTypeName();
-              processTaggedInstance(currentTag, tagTypeName, instance);
-            }
-            else if ("HEADER".equals(section))
-            {
-              processHeader(builder.getTypeName(), instance);
-            }
-            builder = null;
+            cursor.set(index++, (Number)token.getValue());
           }
-        }
-        else if (builder != null)
-        {
-          if (token.isNumber() || token.isText() || token.isDollar() ||
-            token.isAsterisc() || token.isConstant())
+          else if (token.isText())
           {
-            builder.add(token.getValue());
+            cursor.set(index++, (String)token.getValue());
+          }
+          else if (token.isConstant())
+          {
+            cursor.set(index++, (ExpressConstant)token.getValue());
+          }
+          else if (token.isAsterisc() || token.isDollar())
+          {
+            cursor.set(index++, (String)null);
           }
         }
         token = lexer.readToken();
       }
     }
-    finally
-    {
-      reader.close();
-    }
-
-    for (Reference reference: references)
-    {
-      reference.dereference(tags);
-    }
-
-    return model;
   }
 
-  protected abstract M createModel();
-
-  protected StepBuilder<? extends Object> createBuilder(String section,
-    String typeName, StepBuilder<? extends Object> builder)
+  static class Reference
   {
-    if ("DATA".equals(section))
-    {
-      ExpressType type = null;
-      ExpressType expectedType = null;
-
-      if (schema != null && typeName != null)
-      {
-        type = schema.getNamedType(typeName);
-      }
-      if (builder != null)
-      {
-        expectedType = builder.getExpectedType();
-        if (type == null) type = expectedType;
-      }
-
-      return type == null ?
-        createBuilder(typeName, expectedType) : createBuilder(type, expectedType);
-    }
-    else if ("HEADER".equals(section))
-    {
-      return new GenericStepBuilder(typeName);
-    }
-    return null;
-  }
-
-  protected StepBuilder<? extends Object> createBuilder(String typeName,
-    ExpressType expectedType)
-  {
-    return new GenericStepBuilder(typeName);
-  }
-
-  protected StepBuilder<? extends Object> createBuilder(ExpressType type,
-    ExpressType expectedType)
-  {
-    String typeName = type instanceof ExpressNamedType ?
-      ((ExpressNamedType)type).getName() : null;
-    return new GenericStepBuilder(typeName);
-  }
-
-  protected void processTaggedInstance(String tag,
-    String typeName, Object instance)
-  {
-  }
-
-  protected void processHeader(String typeName, Object header)
-  {
-    if (schema != null && "FILE_SCHEMA".equals(typeName))
-    {
-      if (header instanceof List<?> headerList) // [FILE_SCHEMA, [IFC4]]
-      {
-        if (headerList.size() > 1)
-        {
-          Object schemaDef = headerList.get(1);
-          if (schemaDef instanceof List<?> schemaList)
-          {
-            if (!schemaList.isEmpty())
-            {
-              String schemaName = String.valueOf(schemaList.get(0));
-              if (schema.getName().equals(schemaName)) return;
-            }
-          }
-        }
-        throw new RuntimeException("Invalid file schema");
-      }
-    }
-  }
-
-  protected class Reference
-  {
-    StepBuilder<? extends Object> builder;
-    String tag;
+    ExpressCursor cursor;
     int index;
 
-    Reference(StepBuilder<? extends Object> builder, String tag, int index)
+    Reference(ExpressCursor cursor, int index)
     {
-      this.builder = builder;
-      this.tag = tag;
+      this.cursor = cursor.copy();
       this.index = index;
     }
 
-    void dereference(Map<String, Object> tags)
+    void dereference(ExpressCursor refCursor)
     {
-      builder.set(index, tags.get(tag));
+      cursor.set(index, refCursor);
     }
   }
 }

@@ -58,6 +58,6 @@ public class SecurityMongoDaoStore extends MongoDaoStore<SecurityDaoConnection>
   @Override
   public SecurityDaoConnection getConnection()
   {
-    return new SecurityMongoDaoConnection(getSession(), getDatabase());
+    return new SecurityMongoDaoConnection(getMongoClient(), getDatabase());
   }
 }

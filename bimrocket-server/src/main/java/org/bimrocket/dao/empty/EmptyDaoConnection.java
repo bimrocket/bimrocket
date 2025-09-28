@@ -39,6 +39,11 @@ import org.bimrocket.dao.DaoConnection;
 public class EmptyDaoConnection implements DaoConnection
 {
   @Override
+  public void begin()
+  {
+  }
+
+  @Override
   public void commit()
   {
   }

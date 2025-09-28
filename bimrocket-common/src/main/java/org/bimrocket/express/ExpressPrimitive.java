@@ -31,8 +31,8 @@
 
 package org.bimrocket.express;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -48,80 +48,90 @@ public class ExpressPrimitive extends ExpressType
   public static final String LOGICAL = "LOGICAL";
   public static final String BINARY = "BINARY";
 
-  public static final Map<String, ExpressPrimitive> SIMPLE_TYPES =
-    new ConcurrentHashMap<>();
+  public static final ExpressPrimitive STRING_TYPE = new ExpressPrimitive(STRING);
+  public static final ExpressPrimitive INTEGER_TYPE = new ExpressPrimitive(INTEGER);
+  public static final ExpressPrimitive REAL_TYPE = new ExpressPrimitive(REAL);
+  public static final ExpressPrimitive NUMBER_TYPE = new ExpressPrimitive(NUMBER);
+  public static final ExpressPrimitive BOOLEAN_TYPE = new ExpressPrimitive(BOOLEAN);
+  public static final ExpressPrimitive LOGICAL_TYPE = new ExpressPrimitive(LOGICAL);
+  public static final ExpressPrimitive BINARY_TYPE = new ExpressPrimitive(BINARY);
+
+  public static final Map<String, ExpressPrimitive> TYPES = new HashMap<>();
 
   static
   {
-    SIMPLE_TYPES.put(STRING, new ExpressPrimitive(STRING));
-    SIMPLE_TYPES.put(INTEGER, new ExpressPrimitive(INTEGER));
-    SIMPLE_TYPES.put(REAL, new ExpressPrimitive(REAL));
-    SIMPLE_TYPES.put(NUMBER, new ExpressPrimitive(NUMBER));
-    SIMPLE_TYPES.put(BOOLEAN, new ExpressPrimitive(BOOLEAN));
-    SIMPLE_TYPES.put(LOGICAL, new ExpressPrimitive(LOGICAL));
-    SIMPLE_TYPES.put(BINARY, new ExpressPrimitive(BINARY));
+    TYPES.put(STRING, STRING_TYPE);
+    TYPES.put(INTEGER, INTEGER_TYPE);
+    TYPES.put(REAL, REAL_TYPE);
+    TYPES.put(NUMBER, NUMBER_TYPE);
+    TYPES.put(BOOLEAN, BOOLEAN_TYPE);
+    TYPES.put(LOGICAL, LOGICAL_TYPE);
+    TYPES.put(BINARY, BINARY_TYPE);
   }
 
-  private final String name;
-
-  public ExpressPrimitive(String name)
+  public ExpressPrimitive(String typeName)
   {
-    this.name = name;
+    super(typeName);
   }
 
-  public String getName()
+  public static ExpressPrimitive getPrimitive(String typeName)
   {
-    return name;
+    return TYPES.get(typeName);
   }
 
-  public static ExpressPrimitive getPrimitive(String name)
+  public static boolean isPrimitive(String typeName)
   {
-    return SIMPLE_TYPES.get(name);
-  }
-
-  public static boolean isPrimitive(String name)
-  {
-    return SIMPLE_TYPES.containsKey(name);
+    return TYPES.containsKey(typeName);
   }
 
   public boolean isString()
   {
-    return STRING.equals(name);
+    return STRING.equals(getTypeName());
   }
 
   public boolean isInteger()
   {
-    return INTEGER.equals(name);
+    return INTEGER.equals(getTypeName());
   }
 
   public boolean isReal()
   {
-    return REAL.equals(name);
+    return REAL.equals(getTypeName());
   }
 
   public boolean isNumber()
   {
-    return NUMBER.equals(name);
+    return NUMBER.equals(getTypeName());
   }
 
   public boolean isBoolean()
   {
-    return BOOLEAN.equals(name);
+    return BOOLEAN.equals(getTypeName());
   }
 
   public boolean isLogical()
   {
-    return LOGICAL.equals(name);
+    return LOGICAL.equals(getTypeName());
   }
 
   public boolean isBinary()
   {
-    return BINARY.equals(name);
+    return BINARY.equals(getTypeName());
   }
-  
+
   @Override
-  public String toString()
+  public boolean equals(Object other)
   {
-    return name;
+    if (other instanceof ExpressPrimitive primitive)
+    {
+      return getTypeName().equals(primitive.getTypeName());
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return getTypeName().hashCode();
   }
 }

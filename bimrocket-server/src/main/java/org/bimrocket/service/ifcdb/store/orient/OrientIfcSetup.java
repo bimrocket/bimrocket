@@ -59,9 +59,9 @@ public class OrientIfcSetup extends OrientSetup
 
   public OClass createClass(ExpressDefinedType definedType)
   {
-    String typeName = definedType.getName();
+    String typeName = definedType.getTypeName();
     OSchema oschema = getSchema();
-    OClass oclass = oschema.getClass(definedType.getName());
+    OClass oclass = oschema.getClass(definedType.getTypeName());
     if (oclass == null)
     {
       LOGGER.log(Level.INFO, "Creating class {0}", typeName);
@@ -82,7 +82,7 @@ public class OrientIfcSetup extends OrientSetup
 
   public OClass createClass(ExpressEntity entity)
   {
-    String entityName = entity.getName();
+    String entityName = entity.getTypeName();
 
     OSchema oschema = getSchema();
     OClass oclass = oschema.getClass(entityName);
@@ -113,6 +113,7 @@ public class OrientIfcSetup extends OrientSetup
     {
       String propertyName = attribute.getName();
       ExpressType attributeType = attribute.getType();
+      boolean isMandatory = !attribute.isOptional();
 
       OProperty property = null;
 
@@ -120,6 +121,10 @@ public class OrientIfcSetup extends OrientSetup
       {
         OType otype = getBasicType(primitive);
         property = oclass.createProperty(propertyName, otype);
+        if (primitive.equals(ExpressPrimitive.LOGICAL_TYPE))
+        {
+          isMandatory = false;
+        }
       }
       else if (attributeType instanceof ExpressDefinedType definedType)
       {
@@ -128,6 +133,10 @@ public class OrientIfcSetup extends OrientSetup
         {
           OType otype = getBasicType(primitive);
           property = oclass.createProperty(propertyName, otype);
+          if (primitive.equals(ExpressPrimitive.LOGICAL_TYPE))
+          {
+            isMandatory = false;
+          }
         }
       }
       else if (attributeType instanceof ExpressEntity subEntity)
@@ -141,7 +150,7 @@ public class OrientIfcSetup extends OrientSetup
       }
       else if (attributeType instanceof ExpressCollection collection)
       {
-        ExpressType elementType = collection.getElementType();
+        ExpressType elementType = collection.getItemType();
         if (elementType instanceof ExpressPrimitive primitive)
         {
           OType otype = getBasicType(primitive);
@@ -167,21 +176,21 @@ public class OrientIfcSetup extends OrientSetup
       {
         property = oclass.createProperty(propertyName, OType.ANY);
       }
-      property.setMandatory(!attribute.isOptional());
+      property.setMandatory(isMandatory);
     }
     return oclass;
   }
 
   protected OType getBasicType(ExpressPrimitive primitive)
   {
-    switch (primitive.getName())
+    switch (primitive.getTypeName())
     {
       case ExpressPrimitive.STRING: return OType.STRING; // java.lang.String
       case ExpressPrimitive.INTEGER: return OType.INTEGER; // java.lang.Integer
       case ExpressPrimitive.REAL: return OType.DOUBLE; // java.lang.Double
       case ExpressPrimitive.NUMBER: return OType.DOUBLE; // java.lang.Double
       case ExpressPrimitive.BOOLEAN: return OType.BOOLEAN; // java.lang.Boolean (true or false)
-      case ExpressPrimitive.LOGICAL: return OType.STRING; // java.lang.String (.T., .F., .U.)
+      case ExpressPrimitive.LOGICAL: return OType.BOOLEAN; // java.lang.Boolen (true, false, null)
       case ExpressPrimitive.BINARY: return OType.BINARY; // java.lang.byte[]
     }
     return OType.ANY;

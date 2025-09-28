@@ -30,7 +30,7 @@
  */
 package org.bimrocket.service.bcf.store.mongo;
 
-import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -58,9 +58,9 @@ import org.bson.conversions.Bson;
 public class BcfMongoDaoConnection extends MongoDaoConnection
   implements BcfDaoConnection
 {
-  protected BcfMongoDaoConnection(ClientSession session, MongoDatabase db)
+  protected BcfMongoDaoConnection(MongoClient mongoClient, MongoDatabase db)
   {
-    super(session, db);
+    super(mongoClient, db);
   }
 
   @Override

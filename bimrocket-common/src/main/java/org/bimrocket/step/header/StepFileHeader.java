@@ -1,7 +1,7 @@
 /*
  * BIMROCKET
  *
- * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
+ * Copyright (C) 2021-2025, Ajuntament de Sant Feliu de Llobregat
  *
  * This program is licensed and may be used, modified and redistributed under
  * the terms of the European Public License (EUPL), either version 1.1 or (at
@@ -28,34 +28,13 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-
-package org.bimrocket.step.io;
-
-import java.util.List;
-import org.bimrocket.express.ExpressCollection;
+package org.bimrocket.step.header;
 
 /**
  *
  * @author realor
  */
-public class ListBuilder extends CollectionStepBuilder<List<Object>>
+public abstract class StepFileHeader
 {
-  public ListBuilder(ExpressCollection type, List<Object> list)
-  {
-    this.type = type;
-    this.instance = list;
-  }
-
-  @Override
-  public int add(Object item)
-  {
-    instance.add(item);
-    return instance.size() - 1;
-  }
-
-  @Override
-  public void set(int index, Object item)
-  {
-    instance.set(index, item);
-  }
+  public abstract String getTypeName();
 }

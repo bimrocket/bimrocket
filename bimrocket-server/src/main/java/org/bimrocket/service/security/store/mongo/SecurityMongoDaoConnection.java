@@ -30,7 +30,7 @@
  */
 package org.bimrocket.service.security.store.mongo;
 
-import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bimrocket.api.security.Role;
 import org.bimrocket.api.security.User;
@@ -46,9 +46,9 @@ import org.bimrocket.service.security.store.SecurityDaoConnection;
 public class SecurityMongoDaoConnection extends MongoDaoConnection
   implements SecurityDaoConnection
 {
-  protected SecurityMongoDaoConnection(ClientSession session, MongoDatabase db)
+  protected SecurityMongoDaoConnection(MongoClient mongoClient, MongoDatabase db)
   {
-    super(session, db);
+    super(mongoClient, db);
   }
 
   @Override

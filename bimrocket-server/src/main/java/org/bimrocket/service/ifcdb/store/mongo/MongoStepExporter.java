@@ -30,20 +30,12 @@
  */
 package org.bimrocket.service.ifcdb.store.mongo;
 
-import com.mongodb.client.MongoCollection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.bimrocket.express.ExpressAttribute;
-import org.bimrocket.express.ExpressSchema;
-import org.bimrocket.step.io.StepExporter;
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
 /**
  *
  * @author realor
  */
+
+/*
 public class MongoStepExporter extends StepExporter<Document, ObjectId>
 {
   protected MongoCollection<Document> collection;
@@ -114,3 +106,4 @@ public class MongoStepExporter extends StepExporter<Document, ObjectId>
     return element;
   }
 }
+*/

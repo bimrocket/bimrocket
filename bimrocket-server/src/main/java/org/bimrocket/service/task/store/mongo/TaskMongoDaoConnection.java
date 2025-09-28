@@ -30,7 +30,7 @@
  */
 package org.bimrocket.service.task.store.mongo;
 
-import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bimrocket.api.task.TaskData;
 import org.bimrocket.api.task.TaskExecution;
@@ -46,9 +46,9 @@ import org.bimrocket.service.task.store.TaskDaoConnection;
 public class TaskMongoDaoConnection extends MongoDaoConnection
   implements TaskDaoConnection
 {
-  protected TaskMongoDaoConnection(ClientSession session, MongoDatabase db)
+  protected TaskMongoDaoConnection(MongoClient mongoClient, MongoDatabase db)
   {
-    super(session, db);
+    super(mongoClient, db);
   }
 
   @Override

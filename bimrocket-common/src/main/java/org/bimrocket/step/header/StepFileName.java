@@ -28,7 +28,7 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.step.io;
+package org.bimrocket.step.header;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -42,13 +42,20 @@ import java.util.List;
  */
 public class StepFileName extends StepFileHeader
 {
-  private String name;
-  private long timestamp = System.currentTimeMillis();
-  private final List<String> author = new ArrayList<>();
-  private final List<String> organization = new ArrayList<>();
+  private String name = "";
+  private String timestamp;
+  private List<String> author = new ArrayList<>();
+  private List<String> organization = new ArrayList<>();
   private String preprocessorVersion = "BIMROCKET Express preprocessor 1.0";
   private String authorization = "BIMROCKET STEP Exporter";
-  private String other;
+  private String other = "";
+
+  public StepFileName()
+  {
+    setTimestampMillis(System.currentTimeMillis());
+    author.add("");
+    organization.add("");
+  }
 
   public String getName()
   {
@@ -60,14 +67,14 @@ public class StepFileName extends StepFileHeader
     this.name = name;
   }
 
-  public long getTimestamp()
+  public String getTimestamp()
   {
     return timestamp;
   }
 
-  public void setTimestamp(long timestamp)
+  public String setTimestamp(String timestamp)
   {
-    this.timestamp = timestamp;
+    return timestamp;
   }
 
   public List<String> getAuthor()
@@ -75,9 +82,19 @@ public class StepFileName extends StepFileHeader
     return author;
   }
 
+  public void setAuthor(List<String> author)
+  {
+    this.author = author;
+  }
+
   public List<String> getOrganization()
   {
     return organization;
+  }
+
+  public void setOrganization(List<String> organization)
+  {
+    this.organization = organization;
   }
 
   public String getPreprocessorVersion()
@@ -110,30 +127,19 @@ public class StepFileName extends StepFileHeader
     this.other = other;
   }
 
-  @Override
-  public String toString()
+  public final void setTimestampMillis(long timestamp)
   {
     String isoDate = Instant.ofEpochMilli((timestamp / 1000) * 1000)
       .atZone(ZoneId.systemDefault())
       .toLocalDateTime()
       .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-    StringBuilder buffer = new StringBuilder();
-    buffer.append("FILE_NAME(");
-    buffer.append(quote(name));
-    buffer.append(",");
-    buffer.append(quote(isoDate));
-    buffer.append(",");
-    buffer.append(toString(author));
-    buffer.append(",");
-    buffer.append(toString(organization));
-    buffer.append(",");
-    buffer.append(quote(preprocessorVersion));
-    buffer.append(",");
-    buffer.append(quote(authorization));
-    buffer.append(",");
-    buffer.append(quote(other));
-    buffer.append(");");
-    return buffer.toString();
+    this.timestamp = isoDate;
+  }
+
+  @Override
+  public String getTypeName()
+  {
+    return "FILE_NAME";
   }
 }

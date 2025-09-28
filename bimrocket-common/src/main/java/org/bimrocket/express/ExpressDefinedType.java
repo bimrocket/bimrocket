@@ -39,11 +39,11 @@ public class ExpressDefinedType extends ExpressNamedType
 {
   private ExpressType definition;
 
-  public ExpressDefinedType(String name)
+  public ExpressDefinedType(String typeName)
   {
-    super(name);
+    super(typeName);
   }
-
+  
   public ExpressType getDefinition()
   {
     return definition;
@@ -74,6 +74,6 @@ public class ExpressDefinedType extends ExpressNamedType
   @Override
   public String toString()
   {
-    return "TYPE " + getName() + " = " + definition;
+    return "TYPE " + getTypeName() + " = " + definition;
   }
 }

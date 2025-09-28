@@ -28,45 +28,27 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.service.ifcdb.store;
+package org.bimrocket.service.ifcdb.store.empty;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-import org.bimrocket.api.ifcdb.IfcdbCommand;
-import org.bimrocket.api.ifcdb.IfcdbModel;
-import org.bimrocket.api.ifcdb.IfcdbVersion;
-import org.bimrocket.dao.expression.Expression;
-import org.bimrocket.dao.expression.OrderByExpression;
 import org.bimrocket.express.ExpressSchema;
+import org.bimrocket.express.data.ExpressCursor;
+import org.bimrocket.express.data.GenericData;
+import org.bimrocket.service.ifcdb.store.IfcData;
 
 /**
  *
  * @author realor
  */
-public interface IfcStore
+public class GenericIfcData extends GenericData implements IfcData
 {
-  void createSchema(ExpressSchema schema)throws IOException;
+  public GenericIfcData(ExpressSchema schema)
+  {
+    super(schema);
+  }
 
-  List<String> getSupportedQueryLanguages();
-
-  List<IfcdbModel> getModels(ExpressSchema schema,
-    Expression filter, List<OrderByExpression> orderByList,
-    Set<String> roleIds);
-
-  List<IfcdbVersion> getModelVersions(ExpressSchema schema, String modelId);
-
-  void downloadModel(ExpressSchema schema, String modelId, int version, File ifcFile)
-    throws IOException;
-
-  IfcdbModel uploadModel(ExpressSchema schema, File ifcFile)
-    throws IOException;
-
-  IfcdbModel updateModel(ExpressSchema schema, IfcdbModel model);
-
-  boolean deleteModel(ExpressSchema schema, String modelId, int version);
-
-  void execute(ExpressSchema schema, IfcdbCommand command, File file)
-    throws IOException;
+  @Override
+  public ExpressCursor getIfcProject()
+  {
+    return null;
+  }
 }

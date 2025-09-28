@@ -43,9 +43,9 @@ public class ExpressSelect extends ExpressNamedType
 {
   private final List<ExpressNamedType> options = new ArrayList<>();
 
-  public ExpressSelect(String name)
+  public ExpressSelect(String typeName)
   {
-    super(name);
+    super(typeName);
   }
 
   public List<ExpressNamedType> getOptions()
@@ -86,13 +86,13 @@ public class ExpressSelect extends ExpressNamedType
     Iterator<ExpressNamedType> iter = options.iterator();
     if (iter.hasNext())
     {
-      buffer.append(iter.next().getName());
+      buffer.append(iter.next().getTypeName());
       while (iter.hasNext())
       {
         buffer.append(", ");
-        buffer.append(iter.next().getName());
+        buffer.append(iter.next().getTypeName());
       }
     }
-    return "TYPE " + getName() + " = SELECT [" + buffer.toString() + "]";
+    return "TYPE " + getTypeName() + " = SELECT [" + buffer.toString() + "]";
   }
 }

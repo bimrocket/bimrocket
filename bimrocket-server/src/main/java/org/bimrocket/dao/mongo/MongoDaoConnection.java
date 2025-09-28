@@ -31,7 +31,9 @@
 package org.bimrocket.dao.mongo;
 
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import static com.mongodb.connection.ClusterType.REPLICA_SET;
 import org.bimrocket.dao.DaoConnection;
 
 /**
@@ -41,13 +43,24 @@ import org.bimrocket.dao.DaoConnection;
 public class MongoDaoConnection implements DaoConnection
 {
   protected final ClientSession session;
+  protected final boolean transactionEnabled;
   protected final MongoDatabase db;
 
-  protected MongoDaoConnection(ClientSession session, MongoDatabase db)
+  protected MongoDaoConnection(MongoClient mongoClient, MongoDatabase db)
   {
-    this.session = session;
+    this.session = mongoClient.startSession();
+    this.transactionEnabled = mongoClient.getClusterDescription()
+      .getType().equals(REPLICA_SET);
     this.db = db;
-    // TODO: session.startTransaction() depending on database configuration
+  }
+
+  @Override
+  public void begin()
+  {
+    if (transactionEnabled)
+    {
+      session.startTransaction();
+    }
   }
 
   @Override

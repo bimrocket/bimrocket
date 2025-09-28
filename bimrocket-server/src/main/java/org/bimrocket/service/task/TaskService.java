@@ -54,7 +54,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.map.LRUMap;
 import org.bimrocket.api.task.TaskData;
-import org.bimrocket.dao.Dao;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.service.file.FileService;
@@ -152,9 +151,9 @@ public class TaskService
   public List<TaskExecution> getTaskExecutions(
     Expression filter, List<OrderByExpression> orderBy)
   {
-    try (TaskDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<TaskExecution, String> executionDao = conn.getTaskExecutionDao();
+      var executionDao = conn.getTaskExecutionDao();
       return executionDao.find(filter, orderBy);
     }
   }
@@ -168,9 +167,9 @@ public class TaskService
     }
     else
     {
-      try (TaskDaoConnection conn = daoStore.getConnection())
+      try (var conn = daoStore.getConnection())
       {
-        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        var taskExecutionDao = conn.getTaskExecutionDao();
         return taskExecutionDao.findById(executionId);
       }
     }
@@ -208,9 +207,9 @@ public class TaskService
     }
     else
     {
-      try (TaskDaoConnection conn = daoStore.getConnection())
+      try (var conn = daoStore.getConnection())
       {
-        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        var taskExecutionDao = conn.getTaskExecutionDao();
         TaskExecution execution = taskExecutionDao.findById(executionId);
         if (RUNNING_STATUS.equals(execution.getStatus()))
         {
@@ -224,7 +223,7 @@ public class TaskService
 
   public TaskData loadTaskData(String dataId)
   {
-    try (TaskDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
       return conn.getTaskDataDao().findById(dataId);
     }
@@ -232,9 +231,9 @@ public class TaskService
 
   public TaskData saveTaskData(TaskData data)
   {
-    try (TaskDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
-      Dao<TaskData, String> taskDataDao = conn.getTaskDataDao();
+      var taskDataDao = conn.getTaskDataDao();
 
       if (data.getId() == null)
       {
@@ -250,7 +249,7 @@ public class TaskService
 
   public boolean deleteTaskData(String dataId)
   {
-    try (TaskDaoConnection conn = daoStore.getConnection())
+    try (var conn = daoStore.getConnection())
     {
       return conn.getTaskDataDao().deleteById(dataId);
     }

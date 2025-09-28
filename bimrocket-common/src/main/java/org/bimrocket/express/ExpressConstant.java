@@ -28,44 +28,49 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.step.io;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.bimrocket.express;
 
 /**
  *
  * @author realor
  */
-public class StepFileDescription extends StepFileHeader
+public class ExpressConstant
 {
-  private final List<String> description = new ArrayList<>();
-  private String implementationLevel = "2;1";
+  public static final ExpressConstant TRUE = new ExpressConstant("T");
+  public static final ExpressConstant FALSE = new ExpressConstant("F");
+  public static final ExpressConstant UNKNOWN = new ExpressConstant("U");
 
-  public List<String> getDescription()
-  {
-    return description;
-  }
+  final String value;
 
-  public String getImplementationLevel()
+  public ExpressConstant(String value)
   {
-    return implementationLevel;
-  }
-
-  public void setImplementationLevel(String implementationLevel)
-  {
-    this.implementationLevel = implementationLevel;
+    this.value = value;
   }
 
   @Override
   public String toString()
   {
-    StringBuilder buffer = new StringBuilder();
-    buffer.append("FILE_DESCRIPTION(");
-    buffer.append(toString(description));
-    buffer.append(",");
-    buffer.append(quote(implementationLevel));
-    buffer.append(");");
-    return buffer.toString();
+    return value;
+  }
+
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other instanceof ExpressConstant constant)
+    {
+      return value.equals(constant.value);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return value.hashCode();
+  }
+
+  public static final ExpressConstant C(String value)
+  {
+    return new ExpressConstant(value);
   }
 }

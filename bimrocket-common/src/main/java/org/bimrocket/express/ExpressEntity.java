@@ -32,6 +32,7 @@
 package org.bimrocket.express;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -47,9 +48,9 @@ public class ExpressEntity extends ExpressNamedType
   private List<ExpressAttribute> allAttributes;
   private List<ExpressInverseAttribute> allInverseAttributes;
 
-  public ExpressEntity(String name)
+  public ExpressEntity(String typeName)
   {
-    super(name);
+    super(typeName);
   }
 
   public boolean isAbstract()
@@ -98,6 +99,30 @@ public class ExpressEntity extends ExpressNamedType
     return allAttributes;
   }
 
+  public ExpressAttribute getAttribute(String name)
+  {
+    Iterator<ExpressAttribute> iter = getAllAttributes().iterator();
+    while (iter.hasNext())
+    {
+      ExpressAttribute attribute = iter.next();
+      if (attribute.getName().equals(name)) return attribute;
+    }
+    return null;
+  }
+
+  public int getAttributeIndex(String name)
+  {
+    Iterator<ExpressAttribute> iter = getAllAttributes().iterator();
+    int index = 0;
+    while (iter.hasNext())
+    {
+      ExpressAttribute attribute = iter.next();
+      if (attribute.getName().equals(name)) return index;
+      index++;
+    }
+    return -1;
+  }
+
   private void collectAttributes(List<ExpressAttribute> list)
   {
     if (superEntity != null)
@@ -140,8 +165,8 @@ public class ExpressEntity extends ExpressNamedType
   @Override
   public String toString()
   {
-    String value = "ENTITY " + getName();
-    if (superEntity != null) value += " SUBTYPE OF " + superEntity.getName();
+    String value = "ENTITY " + getTypeName();
+    if (superEntity != null) value += " SUBTYPE OF " + superEntity.getTypeName();
     return value;
   }
 }

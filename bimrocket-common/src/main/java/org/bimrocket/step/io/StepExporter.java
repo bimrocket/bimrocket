@@ -31,273 +31,321 @@
 
 package org.bimrocket.step.io;
 
-/**
- *
- * @author realor
- */
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.bimrocket.express.ExpressAttribute;
 import org.bimrocket.express.ExpressCollection;
+import org.bimrocket.express.ExpressConstant;
 import org.bimrocket.express.ExpressDefinedType;
 import org.bimrocket.express.ExpressEntity;
-import org.bimrocket.express.ExpressEnumeration;
-import org.bimrocket.express.ExpressNamedType;
 import org.bimrocket.express.ExpressPrimitive;
+import static org.bimrocket.express.ExpressPrimitive.INTEGER;
 import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.ExpressType;
-import static org.bimrocket.express.ExpressPrimitive.INTEGER;
+import org.bimrocket.express.data.ExpressCursor;
+import static org.bimrocket.express.data.ExpressCursor.CONTAINER;
+import org.bimrocket.express.data.ExpressData;
+import org.bimrocket.step.header.StepFileHeaderData;
+import org.bimrocket.step.header.StepFileSchema;
+
 
 /**
  * Exports objects to STEP format for the given ExpressSchema.
  *
  * @author realor
- * @param <E> the class of elements to be exported
- * @param <ID> the entity identifier class
  */
-public abstract class StepExporter<E, ID>
+
+public class StepExporter
 {
+  protected ExpressData data;
+  protected StepFileHeaderData headerData = new StepFileHeaderData();
   protected ExpressSchema schema;
-  protected Map<ID, Integer> entityTags = new HashMap<>();
-  protected List<E> entityList = new ArrayList<>();
+  protected Map<String, Integer> entityTags = new HashMap<>();
+  protected List<ExpressCursor> entityList = new LinkedList<>();
   protected int tagCount;
-  protected StepFileDescription fileDescription = new StepFileDescription();
-  protected StepFileName fileName = new StepFileName();
+  protected PrintWriter printer;
+  protected boolean backwardReferences;
 
-  public StepExporter(ExpressSchema schema)
+  public StepExporter(ExpressData data)
   {
-    this.schema = schema;
+    this.data = data;
+    this.schema = data.getSchema();
   }
 
-  public StepFileDescription getFileDescription()
+  public ExpressData getData()
   {
-    return fileDescription;
+    return data;
   }
 
-  public StepFileName getFileName()
+  public StepFileHeaderData getHeaderData()
   {
-    return fileName;
+    return headerData;
   }
 
-  public void export(Writer writer, List<E> elements)
+  public void setHeaderData(StepFileHeaderData headerData)
+  {
+    this.headerData = headerData;
+  }
+
+  public boolean isBackwardReferences()
+  {
+    return backwardReferences;
+  }
+
+  public void setBackwardReferences(boolean backwardReferences)
+  {
+    this.backwardReferences = backwardReferences;
+  }
+
+  public void export(String filename) throws IOException
+  {
+    export(new File(filename));
+  }
+
+  public void export(File file) throws IOException
+  {
+    try (BufferedWriter writer =
+          new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file))))
+    {
+      export(writer);
+    }
+  }
+
+  public void export(Writer writer)
   {
     tagCount = 0;
     entityTags.clear();
     entityList.clear();
-    for (E element : elements)
+
+    StepFileSchema fileSchema = headerData.getFileSchema();
+    if (!fileSchema.getSchemas().contains(schema.getName()))
     {
-      ExpressEntity entityType = getEntityType(element);
-      if (entityType != null) // is entity
-      {
-        registerObject(element);
-      }
+      fileSchema.getSchemas().add(schema.getName());
     }
 
-    try (PrintWriter printer = new PrintWriter(writer))
+    registerEntities(data.getRoot());
+
+    printer = new PrintWriter(writer);
+    try
     {
-      printHeader(printer);
-      printData(printer);
-      printFooter(printer);
+      printHeader();
+      printData();
+      printFooter();
+    }
+    finally
+    {
+      printer.close();
     }
   }
 
-  protected void printHeader(PrintWriter printer)
+  protected void printHeader()
   {
     printer.println("ISO-10303-21;");
     printer.println("HEADER;");
-    printer.println(fileDescription);
-    printer.println(fileName);
-    printer.println("FILE_SCHEMA(('" + schema.getName() + "'));");
-
+    printHeaderData();
     printer.println("ENDSEC;");
     printer.println();
     printer.println("DATA;");
   }
 
-  protected void printData(PrintWriter printer)
+  protected void printHeaderData()
   {
-    for (E entity : entityList)
+    ExpressCursor cursor = headerData.getRoot();
+    for (int i = 0; i < cursor.size(); i++)
     {
-      ID id = getIdentifier(entity);
-      String tag = "#" + entityTags.get(id);
-      ExpressType entityType = getEntityType(entity);
-      printer.println(tag + "= " + exportObject(entity, entityType) + ";");
+      cursor.enter(i);
+      exportEntity(cursor);
+      cursor.exit();
+      printer.println(";");
     }
   }
 
-  protected void printFooter(PrintWriter printer)
+  protected void printData()
+  {
+    int tag = 1;
+    for (ExpressCursor entityCursor : entityList)
+    {
+      printer.print("#" + tag + "= ");
+      exportEntity(entityCursor);
+      printer.println(";");
+      tag++;
+    }
+  }
+
+  protected void printFooter()
   {
     printer.println("ENDSEC;");
     printer.println("END-ISO-10303-21;");
   }
 
-  protected ExpressEntity getEntityType(E element)
+  protected void registerEntities(ExpressCursor cursor)
   {
-    String typeName = getTypeName(element);
-    if (typeName != null)
-    {
-      ExpressNamedType namedType = schema.getNamedType(typeName);
-      if (namedType instanceof ExpressEntity entityType)
-      {
-        return entityType;
-      }
-    }
-    return null;
-  }
+    String id = null;
 
-  protected void registerObject(Object object)
-  {
-    if (object instanceof Collection<?> col)
+    ExpressType type = cursor.getType();
+    if (type instanceof ExpressEntity)
     {
-      for (Object value : col)
-      {
-        registerObject(value);
-      }
-    }
-    else
-    {
-      E element = dereference(object);
-      if (element != null)
-      {
-        ExpressEntity entityType = getEntityType(element);
-        if (entityType != null)
-        {
-          E entity = element;
-          ID id = getIdentifier(entity);
-          if (entityTags.containsKey(id)) return;
+      id = cursor.getId();
+      if (id == null) throw new RuntimeException("Entity id is null");
 
-          int index = 1;
-          for (ExpressAttribute attribute : entityType.getAllAttributes())
-          {
-            Object value = getPropertyValue(entity, attribute, index++);
-            registerObject(value);
-          }
-          entityTags.put(id, ++tagCount);
-          entityList.add(entity);
-        }
-      }
-    }
-  }
+      if (entityTags.containsKey(id)) return; // already visited
 
-  protected String exportObject(Object object, ExpressType type)
-  {
-    StringBuilder buffer = new StringBuilder();
-    if (object == null)
-    {
-      buffer.append("$");
-    }
-    else if (object instanceof Boolean booleanValue)
-    {
-      if (Boolean.TRUE.equals(booleanValue))
+      if (backwardReferences)
       {
-        buffer.append(".T.");
+        // provisional value
+        entityTags.put(id, 0);
       }
       else
       {
-        buffer.append(".F.");
+        // final value
+        entityTags.put(id, ++tagCount);
+        entityList.add(cursor.copy());
       }
     }
-    else if (object instanceof String text)
+
+    int size = cursor.size();
+    for (int index = 0; index < size; index++)
     {
-      if (type instanceof ExpressEnumeration)
+      Object value = cursor.get(index);
+      if (CONTAINER.equals(value))
       {
-        buffer.append(text); // save as .<enum_value>.
-      }
-      else if (".T.".equals(text) || ".F.".equals(text) || ".U.".equals(text))
-      {
-        buffer.append(text); // assume type is logical
-      }
-      else // literal string
-      {
-        buffer.append("'").append(encodeString(text)).append("'");
+        cursor.enter(index);
+        registerEntities(cursor);
+        cursor.exit();
       }
     }
-    else if (object instanceof Number number)
+
+    if (backwardReferences && id != null)
     {
-      buffer.append(formatNumber(number, type));
+      // final value
+      entityTags.put(id, ++tagCount);
+      entityList.add(cursor.copy());
     }
-    else if (object instanceof Collection<?> col)
+  }
+
+  protected void exportEntity(ExpressCursor cursor)
+  {
+    ExpressType type = cursor.getType();
+    if (type instanceof ExpressEntity entity)
     {
-      ExpressType elementType = null;
-      if (type instanceof ExpressCollection collectionType)
+      List<ExpressAttribute> attributes = entity.getAllAttributes();
+
+      printer.print(type.getTypeName().toUpperCase());
+      printer.print("(");
+
+      int size = cursor.size();
+      for (int index = 0; index < size; index++)
       {
-        elementType = collectionType.getElementType();
+        ExpressType expectedType = attributes.get(index).getType();
+        exportItem(cursor, index, expectedType);
       }
-      buffer.append('(');
-      Iterator<?> iter = col.iterator();
-      if (iter.hasNext())
+      printer.print(")");
+    }
+    else throw new RuntimeException("Not an entity type");
+  }
+
+  protected void exportDefinedType(ExpressCursor cursor)
+  {
+    ExpressType type = cursor.getType();
+    if (type instanceof ExpressDefinedType definedType)
+    {
+      printer.print(type.getTypeName().toUpperCase());
+      printer.print("(");
+      exportItem(cursor, 0, definedType.getRootType());
+      printer.print(")");
+    }
+    else throw new RuntimeException("Not a defined type");
+  }
+
+  protected void exportCollection(ExpressCursor cursor)
+  {
+    ExpressType type = cursor.getType();
+    if (type instanceof ExpressCollection colType)
+    {
+      printer.print("(");
+      ExpressType expectedType = colType.getItemType();
+      for (int index = 0; index < cursor.size(); index++)
       {
-        buffer.append(exportObjectWithTag(iter.next(), elementType));
-        while (iter.hasNext())
-        {
-          buffer.append(",");
-          buffer.append(exportObjectWithTag(iter.next(), elementType));
-        }
+        exportItem(cursor, index, expectedType);
       }
-      buffer.append(')');
+      printer.print(")");
+    }
+    else throw new RuntimeException("Not a collection");
+  }
+
+  protected void exportItem(ExpressCursor cursor, int index,
+    ExpressType expectedType)
+  {
+    if (index > 0) printer.print(",");
+
+    Object value = cursor.get(index);
+
+    if (CONTAINER.equals(value))
+    {
+      cursor.enter(index);
+      ExpressType type = cursor.getType();
+
+      if (type instanceof ExpressEntity)
+      {
+        String id = cursor.getId();
+        Integer tag = entityTags.get(id);
+        printer.print("#" + tag);
+      }
+      else if (type instanceof ExpressDefinedType)
+      {
+        exportDefinedType(cursor);
+      }
+      else // Collection
+      {
+        exportCollection(cursor);
+      }
+      cursor.exit();
     }
     else
     {
-      E element = dereference(object);
-      if (element != null)
-      {
-        String typeName = getTypeName(element);
-        if (typeName != null)
-        {
-          buffer.append(typeName.toUpperCase());
-          buffer.append("(");
-          ExpressNamedType namedType = schema.getNamedType(typeName);
-          if (namedType instanceof ExpressEntity entityType)
-          {
-            List<ExpressAttribute> attributes = entityType.getAllAttributes();
-            Iterator<ExpressAttribute> iter = attributes.iterator();
-            if (iter.hasNext())
-            {
-              int index = 1;
-              ExpressAttribute attribute = iter.next();
-              Object value = getPropertyValue(element, attribute, index++);
-              buffer.append(exportObjectWithTag(value, attribute.getType()));
-              while (iter.hasNext())
-              {
-                buffer.append(",");
-                attribute = iter.next();
-                value = getPropertyValue(element, attribute, index++);
-                buffer.append(exportObjectWithTag(value, attribute.getType()));
-              }
-            }
-          }
-          else if (namedType instanceof ExpressDefinedType definedType)
-          {
-            buffer.append(exportObject(getValue(element),
-              definedType.getDefinition()));
-          }
-          buffer.append(')');
-        }
-        else buffer.append("*");
-      }
-      else buffer.append("*");
+      exportBasicType(value, expectedType);
     }
-    return buffer.toString();
   }
 
-  protected String exportObjectWithTag(Object object, ExpressType type)
+  protected void exportBasicType(Object object, ExpressType type)
   {
-    Integer tag = null;
-
-    E element = dereference(object);
-    if (element != null)
+    if (object == null)
     {
-      ID id = getIdentifier(element);
-      tag = entityTags.get(id);
+      printer.print("$");
     }
-    return tag == null ? exportObject(object, type) : "#" + tag;
+    else if (object instanceof ExpressConstant constant)
+    {
+      printer.print("." + constant + ".");
+    }
+    else if (object instanceof String text)
+    {
+      printer.print("'" + encodeString(text) + "'");
+    }
+    else if (object instanceof Number number)
+    {
+      printer.print(formatNumber(number, type));
+    }
+    else if (object instanceof Boolean booleanValue) // unnecessary
+    {
+      if (Boolean.TRUE.equals(booleanValue))
+      {
+        printer.print(".T.");
+      }
+      else
+      {
+        printer.print(".F.");
+      }
+    }
+    else printer.print("$");
   }
 
   protected String encodeString(String text)
@@ -345,55 +393,11 @@ public abstract class StepExporter<E, ID>
     }
     else
     {
-      switch (primitive.getName())
+      switch (primitive.getTypeName())
       {
         case INTEGER: return String.valueOf(number.intValue());
         default: return String.valueOf(number.doubleValue());
       }
     }
   }
-
-  /**
-   * Gets the type name of a NamedType instance
-   *
-   * @param element the element instance (ExpressEntity or ExpressDefinedType)
-   * @return the type name of the element
-   */
-  protected abstract String getTypeName(E element);
-
-  /**
-   * Gets the value of a property of an entity
-   *
-   * @param entity the ExpressEntity instance
-   * @param attribute the entity attribute to be set
-   * @param index the position of the attribute (1-based)
-   * @return the value of the specified attribute of element
-   */
-  protected abstract Object getPropertyValue(E entity,
-    ExpressAttribute attribute, int index);
-
-  /**
-   * Gets the value of an ExpressDefinedType instance
-   *
-   * @param element an ExpressDefinedType instance
-   * @return the value of this defined type instance
-   */
-  protected abstract Object getValue(E element);
-
-  /**
-   * Dereference an element
-   *
-   * @param value a value that may reference an element
-   * @return the element referenced by value or null if value does not
-   * reference any element.
-   */
-  protected abstract E dereference(Object value);
-
-  /**
-   * Gets the entity identifier
-   *
-   * @param entity the entity to get the identifier from
-   * @return the entity identifier
-   */
-  protected abstract ID getIdentifier(E entity);
 }

@@ -42,29 +42,31 @@ public class ExpressCollection extends ExpressType
   public static final String ARRAY = "ARRAY";
   public static final String BAG = "BAG";
 
-  private final String collectionType;
-  private ExpressType elementType;
+  private ExpressType itemType;
   private int minOccurrences;
   private int maxOccurrences;
 
-  public ExpressCollection(String collectionType)
+  public ExpressCollection(String typeName)
   {
-    this.collectionType = collectionType;
+    super(typeName);
   }
 
-  public String getCollectionType()
+  public static boolean isCollection(String typeName)
   {
-    return collectionType;
+    return LIST.equals(typeName) ||
+           SET.equals(typeName) ||
+           ARRAY.equals(typeName) ||
+           BAG.equals(typeName);
   }
 
-  public ExpressType getElementType()
+  public ExpressType getItemType()
   {
-    return elementType;
+    return itemType;
   }
 
-  public void setElementType(ExpressType elementType)
+  public void setItemType(ExpressType itemType)
   {
-    this.elementType = elementType;
+    this.itemType = itemType;
   }
 
   public int getMinOccurrences()
@@ -90,20 +92,14 @@ public class ExpressCollection extends ExpressType
   @Override
   public String toString()
   {
-    String elementTypeName = elementType instanceof ExpressNamedType ?
-      ((ExpressNamedType)elementType).getName() : elementType.toString();
+    String elementTypeName = itemType instanceof ExpressNamedType namedType ?
+      namedType.getTypeName() :
+      (itemType == null ? "?" : itemType.toString());
 
     String maxOccurText = maxOccurrences == 0 ?
       "?" : String.valueOf(maxOccurrences);
 
-    return collectionType +
+    return getTypeName() +
       "[" + minOccurrences + ":" + maxOccurText + "] OF " + elementTypeName;
-  }
-
-  public static boolean isCollection(String name)
-  {
-    return LIST.equals(name) ||
-      SET.equals(name) ||
-      ARRAY.equals(name);
   }
 }

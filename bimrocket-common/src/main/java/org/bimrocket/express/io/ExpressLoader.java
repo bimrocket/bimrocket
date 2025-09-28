@@ -187,10 +187,10 @@ public class ExpressLoader
 
   protected void solveReferences(ExpressCollection collectionType)
   {
-    ExpressType elementType = collectionType.getElementType();
+    ExpressType elementType = collectionType.getItemType();
     if (elementType instanceof ExpressNamedType)
     {
-      collectionType.setElementType(
+      collectionType.setItemType(
         getRealNamedType((ExpressNamedType)elementType));
     }
     else if (elementType instanceof ExpressCollection)
@@ -201,7 +201,7 @@ public class ExpressLoader
 
   protected ExpressNamedType getRealNamedType(ExpressNamedType namedType)
   {
-    String typeName = namedType.getName();
+    String typeName = namedType.getTypeName();
     if (typeName.startsWith("#"))
     {
       typeName = typeName.substring(1);
@@ -315,7 +315,7 @@ public class ExpressLoader
                 String value = readIdentifier();
                 while (value != null)
                 {
-                  enumType.getValues().add(value);
+                  enumType.getValues().add(new ExpressConstant(value));
                   value = skip(SYMBOL, ",") ? readIdentifier() : null;
                 }
                 skipUntil(SYMBOL, ";");
@@ -370,7 +370,7 @@ public class ExpressLoader
     if (skip(KEYWORD, "OF"))
     {
       ExpressType elementType = readType();
-      collectionType.setElementType(elementType);
+      collectionType.setItemType(elementType);
     }
   }
 

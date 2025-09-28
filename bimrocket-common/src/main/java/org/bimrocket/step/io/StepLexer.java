@@ -1,31 +1,31 @@
 /*
  * BIMROCKET
- *  
+ *
  * Copyright (C) 2021, Ajuntament de Sant Feliu de Llobregat
- *  
- * This program is licensed and may be used, modified and redistributed under 
- * the terms of the European Public License (EUPL), either version 1.1 or (at 
- * your option) any later version as soon as they are approved by the European 
+ *
+ * This program is licensed and may be used, modified and redistributed under
+ * the terms of the European Public License (EUPL), either version 1.1 or (at
+ * your option) any later version as soon as they are approved by the European
  * Commission.
- *  
- * Alternatively, you may redistribute and/or modify this program under the 
- * terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either  version 3 of the License, or (at your option) 
- * any later version. 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *    
- * See the licenses for the specific language governing permissions, limitations 
+ *
+ * Alternatively, you may redistribute and/or modify this program under the
+ * terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either  version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ * See the licenses for the specific language governing permissions, limitations
  * and more details.
- *    
- * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along 
- * with this program; if not, you may find them at: 
- *    
+ *
+ * You should have received a copy of the EUPL1.1 and the LGPLv3 licenses along
+ * with this program; if not, you may find them at:
+ *
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * http://www.gnu.org/licenses/ 
- * and 
+ * http://www.gnu.org/licenses/
+ * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
 
@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.bimrocket.express.ExpressConstant;
 import static org.bimrocket.step.io.StepToken.*;
 
 /**
@@ -56,7 +57,7 @@ public class StepLexer
   private static final LookupTable KEYWORDS = new LookupTable();
   private static final Pattern TEXT_PATTERN =
     Pattern.compile("\\\\X2\\\\[\\dA-F]{4}\\\\X0\\\\|\\\\X\\\\[\\dA-F]{2}");
-  
+
   static
   {
     KEYWORDS.add("ISO-10303-21");
@@ -64,7 +65,6 @@ public class StepLexer
     KEYWORDS.add("DATA");
     KEYWORDS.add("ENDSEC");
     KEYWORDS.add("END-ISO-10303-21");
-
   }
 
   public StepLexer(Reader reader)
@@ -88,31 +88,31 @@ public class StepLexer
       switch (ch)
       {
         case -1:
-          token = new StepToken(EOF);
+          token = EOF_TOKEN;
+          break;
+        case '=':
+          token = EQUAL_TOKEN;
+          break;
+        case ',':
+          token = COMMA_TOKEN;
+          break;
+        case ';':
+          token = COLON_TOKEN;
+          break;
+        case '(':
+          token = OPEN_PARENTHESIS_TOKEN;
+          break;
+        case ')':
+          token = CLOSE_PARENTHESIS_TOKEN;
+          break;
+        case '*':
+          token = ASTERISC_TOKEN;
+          break;
+        case '$':
+          token = DOLLAR_TOKEN;
           break;
         case '\'':
           token = readText();
-          break;
-        case '=':
-          token = new StepToken(EQUAL);
-          break;
-        case ',':
-          token = new StepToken(COMMA);
-          break;
-        case ';':
-          token = new StepToken(COLON);
-          break;
-        case '(':
-          token = new StepToken(OPEN_PARENTHESIS);
-          break;
-        case ')':
-          token = new StepToken(CLOSE_PARENTHESIS);
-          break;
-        case '*':
-          token = new StepToken(ASTERISC);
-          break;
-        case '$':
-          token = new StepToken(DOLLAR);
           break;
         case '/':
           token = readComment();
@@ -154,6 +154,7 @@ public class StepLexer
 
   protected StepToken readText() throws IOException
   {
+    boolean decode = false;
     int ch = read();
     while (ch != -1)
     {
@@ -173,18 +174,20 @@ public class StepLexer
       else
       {
         buffer.append((char)ch);
+        if ((char)ch == '\\') decode = true;
       }
       ch = read();
     }
 
-    Matcher matcher;
-    matcher = TEXT_PATTERN.matcher(buffer.toString());
+    if (!decode) return new StepToken(TEXT, buffer.toString());
+
+    Matcher matcher = TEXT_PATTERN.matcher(buffer.toString());
     StringBuffer sb = new StringBuffer();
     while (matcher.find())
     {
       String group = matcher.group();
-      String code = (group.length() == 12) ? 
-        group.substring(4, 8) : group.substring(3, 5);        
+      String code = (group.length() == 12) ?
+        group.substring(4, 8) : group.substring(3, 5);
       matcher.appendReplacement(sb,
         String.valueOf((char)Integer.parseInt(code, 16)));
     }
@@ -229,7 +232,7 @@ public class StepLexer
         buffer.append((char)ch);
         ch = read();
       }
-    }    
+    }
     unread(ch);
     String value = buffer.toString();
     StepToken token;
@@ -243,7 +246,7 @@ public class StepLexer
       else
       {
         long number = Long.parseLong(value);
-        token = new StepToken(NUMBER, number);        
+        token = new StepToken(NUMBER, number);
       }
     }
     catch (NumberFormatException ex)
@@ -277,7 +280,6 @@ public class StepLexer
 
   protected StepToken readConstant() throws IOException
   {
-    buffer.append(".");
     int ch = read();
     while (Character.isLetterOrDigit(ch) || ch == '_')
     {
@@ -287,9 +289,8 @@ public class StepLexer
     StepToken token;
     if (ch == '.')
     {
-      buffer.append((char)ch);
       String value = buffer.toString();
-      token = new StepToken(CONSTANT, value);
+      token = new StepToken(CONSTANT, new ExpressConstant(value));
     }
     else
     {
@@ -359,6 +360,8 @@ public class StepLexer
 
   static class LookupTable extends HashMap<String, String>
   {
+    private static final long serialVersionUID = 1L;
+
     public void add(String value)
     {
       put(value, value);

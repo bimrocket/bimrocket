@@ -38,17 +38,23 @@ package org.bimrocket.dao;
 public interface DaoConnection extends AutoCloseable
 {
   /**
-   * Commit changes performed in the current transaction
+   * Starts a new transaction.
+   */
+  void begin();
+
+  /**
+   * Commit changes performed in the current transaction.
    */
   void commit();
 
   /**
-   * Abort changes performed in the current transaction
+   * Abort changes performed in the current transaction.
    */
   void rollback();
 
   /**
-   * Close the connection
+   * Close the connection.
+   * All uncommit work will be aborted.
    */
   @Override
   void close();

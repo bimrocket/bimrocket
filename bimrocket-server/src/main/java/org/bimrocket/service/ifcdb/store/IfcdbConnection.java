@@ -28,29 +28,53 @@
  * and
  * https://www.gnu.org/licenses/lgpl.txt
  */
-package org.bimrocket.step.io;
+package org.bimrocket.service.ifcdb.store;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+import org.bimrocket.api.ifcdb.IfcdbModel;
+import org.bimrocket.api.ifcdb.IfcdbVersion;
+import org.bimrocket.dao.DaoConnection;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.express.ExpressSchema;
 
 /**
  *
  * @author realor
  */
-public abstract class StepFileHeader
+public interface IfcdbConnection extends DaoConnection
 {
-  protected String toString(List<String> values)
-  {
-    if (values.isEmpty()) return "('')";
+  ExpressSchema getSchema();
 
-    return "(" + values.stream()
-      .map(s -> quote(s))
-      .collect(Collectors.joining(",")) + ")";
-  }
+  void createSchema();
 
-  protected String quote(String text)
-  {
-    if (text == null) return "''";
-    return "'" + text.replaceAll("'", "`") + "'";
-  }
+  List<IfcdbModel> findModels(Expression filter,
+    List<OrderByExpression> orderByList,
+    Set<String> roles);
+
+  List<IfcdbVersion> getModelVersions(String modelId);
+
+  IfcdbModel createModel(IfcdbModel model);
+
+  IfcdbVersion createModelVersion(String modelId, IfcdbVersion version);
+
+  IfcdbModel getModel(String modelId);
+
+  IfcdbModel updateModel(IfcdbModel model);
+
+  boolean deleteModel(String modelId, int version);
+
+  IfcData createData();
+
+  IfcData loadData(String modelId, int version);
+
+  void saveData(String modelId, int version, IfcData data);
+
+  IfcData queryData(String query, String language);
+
+  void execute(String query, String language,
+    File outputFile) throws IOException;
 }

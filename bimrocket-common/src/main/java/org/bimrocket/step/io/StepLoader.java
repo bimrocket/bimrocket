@@ -39,12 +39,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import org.bimrocket.express.data.ExpressCursor;
 import static org.bimrocket.express.ExpressCollection.LIST;
 import org.bimrocket.express.ExpressConstant;
+import org.bimrocket.express.ExpressSchema;
 import org.bimrocket.express.data.ExpressData;
+import org.bimrocket.express.data.GenericData;
+import org.bimrocket.express.io.ExpressLoader;
 import org.bimrocket.step.header.StepFileHeaderData;
 
 /**
@@ -58,6 +62,10 @@ public class StepLoader
   protected ExpressData data;
   protected StepFileHeaderData headerData = new StepFileHeaderData();
   protected ExpressData currentData;
+
+  public StepLoader()
+  {
+  }
 
   public StepLoader(ExpressData data)
   {
@@ -112,6 +120,7 @@ public class StepLoader
         }
         else if (token.isKeyword("DATA"))
         {
+          processFileSchema();
           cursor = data.getRoot();
           index = 0;
         }
@@ -219,6 +228,34 @@ public class StepLoader
         token = lexer.readToken();
       }
     }
+  }
+
+  protected void processFileSchema() throws IOException
+  {
+    List<String> schemaNames = headerData.getFileSchema().getSchemas();
+    if (schemaNames.isEmpty())
+      throw new IOException("Undefined schema.");
+
+    String schemaName = schemaNames.get(0);
+    if (data == null)
+    {
+      ExpressLoader loader = new ExpressLoader();
+      ExpressSchema schema = loader.load("schema:" + schemaName);
+      data = createData(schema);
+    }
+    else
+    {
+      String expectedSchemaName = data.getSchema().getName();
+
+      if (!expectedSchemaName.equals(schemaName))
+        throw new IOException("The file schema is " + schemaName +
+          " but " + expectedSchemaName + " was expected.");
+    }
+  }
+
+  protected ExpressData createData(ExpressSchema schema)
+  {
+    return new GenericData(schema);
   }
 
   static class Reference

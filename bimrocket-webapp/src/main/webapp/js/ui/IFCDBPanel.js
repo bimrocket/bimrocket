@@ -140,7 +140,10 @@ class IFCDBPanel extends Panel
         const originalEvent = event.originalEvent;
         this.selectNode(event);
         originalEvent.preventDefault();
-        this.contextMenu.show(originalEvent);
+        if (!this.processing)
+        {
+          this.contextMenu.show(originalEvent);
+        }
       });
 
     this.uploadModelButton = Controls.addButton(modelButtonsElem, "up_ifc",

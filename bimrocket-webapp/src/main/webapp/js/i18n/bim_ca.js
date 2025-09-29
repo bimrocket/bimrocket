@@ -114,6 +114,9 @@ export const translations =
   "label.roles" : "Rols:",
   "label.configuration" : "Configuració",
   "label.confirm_password" : "Confirma paraula de pas:",
+  "label.search_users": "Cercar usuaris:",
+  "label.search_id": "Cercar per id:",
+  "label.search_name": "Cercar per nom:",
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",

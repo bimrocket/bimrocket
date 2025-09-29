@@ -274,7 +274,7 @@ class WebdavService extends FileService
       }
       else
       {
-        readyCallback(this.createError("Delete failed", request.status));
+        readyCallback(this.createError(request.responseText, request.status));
       }
     };
     this.openRequest("DELETE", url, request);

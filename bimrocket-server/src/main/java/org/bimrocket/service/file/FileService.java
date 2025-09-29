@@ -197,8 +197,7 @@ public class FileService
     return store.write(path, is, contentType);
   }
 
-  public void delete(Path path) throws LockedFileException
-  {
+  public void delete(Path path) throws LockedFileException, IOException {
     LOGGER.log(Level.FINE, "delete {0}", path);
 
     checkAccess(path, WRITE);

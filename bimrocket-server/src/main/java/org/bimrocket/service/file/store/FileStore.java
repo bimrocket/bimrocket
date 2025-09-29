@@ -57,7 +57,7 @@ public interface FileStore
   Metadata write(Path path, InputStream is, String contentType)
     throws IOException;
 
-  void delete(Path path);
+  void delete(Path path) throws IOException;
 
   Map<String, Object> getProperties(Path path, String ...names);
 

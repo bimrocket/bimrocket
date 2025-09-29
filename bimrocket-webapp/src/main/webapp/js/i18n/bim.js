@@ -114,6 +114,9 @@ export const translations =
   "label.email" : "Email:",
   "label.roles" : "Roles:",
   "label.confirm_password" : "Confirm password:",
+  "label.search_users": "Search users:",
+  "label.search_id": "Search by id:",
+  "label.search_name": "Search by name:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",

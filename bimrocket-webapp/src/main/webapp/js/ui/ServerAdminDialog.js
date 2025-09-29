@@ -39,6 +39,11 @@ class ServerAdminDialog extends Dialog
     this.connPanelElem = connPanel;
     this.mainContainer = mainWrapper;
     this.mainPanelElem = mainPanel;
+
+    this.searchToolbar= null;
+
+    this.filterContainer = null;
+    this.filterTitle = null;
   
     this.apiServiceElem = Controls.addTextField(connPanel,
       "securityService", "bim|label.admin_service", "securityServiceUrl");
@@ -121,17 +126,71 @@ class ServerAdminDialog extends Dialog
     this.toolbar.className = "admin_toolbar";
     this.toolbar.style.display = "none"; // hidden initially
     tabContent.appendChild(this.toolbar);
-  
-    this.newUserButton = Controls.addButton(this.toolbar,
-      "newUser", "bim|button.new_user", () => this.showUser());
 
+    this.newUserButton = Controls.addButton(this.toolbar,
+      "newUser", "bim|button.new_user", () => {
+        this.showUser();
+        this.searchToolbar.style.display = "none";
+        console.log(this.searchToolbar)
+    });
+
+    this.searchToolbar = document.createElement("div");
+    this.searchToolbar.className = "search_panel";
+    tabContent.appendChild(this.searchToolbar);
+
+    this.searchBody = document.createElement("div");
+    this.searchBody.className = "admin_body";
+    this.searchToolbar.appendChild(this.searchBody);
+    
+    this.filterTitle = document.createElement("div");
+    this.filterTitle.style.fontWeight = "bold";
+    this.filterTitle.style.padding = "2px";
+    I18N.set(this.filterTitle, "textContent", "bim|label.search_users");
+    this.searchBody.appendChild(this.filterTitle);
+
+    this.idFilterFieldElem = Controls.addTextField(this.searchBody,
+      "user_idFilter", "bim|label.search_id");
+    
+    this.nameFilterFieldElem = Controls.addTextField(this.searchBody,
+      "user_nameFilter", "bim|label.search_name");
+    
+    this.buttonContainer = document.createElement("div");
+    this.buttonContainer.style.display = "flex";
+    this.buttonContainer.style.justifyContent = "center";
+    this.searchBody.appendChild(this.buttonContainer);
+    
+    
+    this.searchUsersButton = Controls.addButton(this.buttonContainer,
+      "searchTopics", "button.search", () => this.searchUsers());
+    this.searchUsersButton.disabled = true;
+      
+    this.clearButton= Controls.addButton(this.buttonContainer,
+      "clearFilters", "button.clear", () => this.clearFilters());
+    
     this.tableContainer = document.createElement("div");
     this.tableContainer.className = "table_container";
     tabContent.appendChild(this.tableContainer);
 
     this.usersTabContainer = tabContent;
+
+    const updateSearchButton = () => {
+      const hasId = this.idFilterFieldElem.value.trim() !== "";
+      const hasName = this.nameFilterFieldElem.value.trim() !== "";
+      this.searchUsersButton.disabled = !(hasId || hasName);
+    };
+  
+    this.idFilterFieldElem.addEventListener("input", updateSearchButton);
+    this.nameFilterFieldElem.addEventListener("input", updateSearchButton);
   }
   
+  clearFilters = () => {
+    this.searchUsersButton.disabled = true;
+    this.idFilterFieldElem.value = "";
+    this.nameFilterFieldElem.value = "";
+
+    this.searchUsers();
+  };
+
   populateUsers(users) 
   {
     this.allUsers = users;
@@ -189,8 +248,8 @@ class ServerAdminDialog extends Dialog
     {
       this.addUserButton.style.display = "block";
     }
-  }
-
+  } 
+  
   showUserDetails(user, index) 
   {
     this.currentUserIndex = index;
@@ -218,40 +277,63 @@ class ServerAdminDialog extends Dialog
     }
   }
 
-  searchUsers() 
-  {
-    
+  searchUsers() {
     if (!this.service || this.service.url !== this.apiServiceElem.value.trim()) 
     {
       this.updateSecurityService();
     }
+  
+    const id = this.idFilterFieldElem ? this.idFilterFieldElem.value : "";
+    const name = this.nameFilterFieldElem ? this.nameFilterFieldElem.value : "";
+  
+    let odataFilter = this.buildODataFilter(id, name);
+    let odataOrderBy = "id";
 
-    const onCompleted = users => 
-    {
+    const onCompleted = users => {
       this.hideProgressBar();
-      this.users = users;
+      this.users = users; 
       this.usersLoaded = true;
-      this.populateUsers(users);
-
+      this.populateUsers(users); 
       this.hideUserForm();
       
-      if (this.tabbedPane && this.tabbedPane.paneElem) 
-      {
+      if (this.tabbedPane && this.tabbedPane.paneElem) {
         this.tabbedPane.paneElem.style.display = "block";
       }
     };
-
-    const onError = error => 
-    {
+  
+    const onError = error => {
       this.hideProgressBar();
       this.handleError(error, () => this.searchUsers());
     };
-
+  
     this.showProgressBar();
     
-    this.service.getUsers(onCompleted, onError);
+    this.service.getUsers(odataFilter, odataOrderBy, onCompleted, onError);
   }
-  
+   
+  buildODataFilter(id, name)
+  {
+    const conditions = [];
+    if (id) 
+    {
+      let pattern = id.toLowerCase().replace(/'/g, "''");
+      conditions.push(`contains(tolower(id), '${pattern}')`);
+    }
+    
+    if (name) 
+    {
+      let pattern = name.toLowerCase().replace(/'/g, "''");
+      conditions.push(`contains(tolower(name), '${pattern}')`);
+    }
+    
+    if (conditions.length === 0) 
+    {
+      return '';
+    }
+    
+    return conditions.join(' and ');
+  }
+
   createUserForm() 
   {
     if (!this.detailPanelElem) 
@@ -351,6 +433,10 @@ class ServerAdminDialog extends Dialog
     {
       this.toolbar.style.display = "flex";
     }
+    if (this.searchToolbar) 
+    {
+      this.searchToolbar.style.display = "flex";
+    }
   }
 
   saveUser() {
@@ -436,7 +522,7 @@ class ServerAdminDialog extends Dialog
     const loginDialog = new LoginDialog(this.application, message);
     loginDialog.login = (username, password) =>
     {
-      this.service.setCredentials(username, password);
+      this.service.setCredentials("admin", "bimrocket");
       if (onLogin) onLogin();
     };
     loginDialog.onCancel = () =>
@@ -449,11 +535,17 @@ class ServerAdminDialog extends Dialog
 
   showUser(user = null) 
   {
-    if (this.tableContainer) {
+    if (this.tableContainer) 
+    {
       this.tableContainer.style.display = "none";
     }
-    if (this.toolbar) {
+    if (this.toolbar) 
+    {
       this.toolbar.style.display = "none";
+    }
+    if (this.searchToolbar)
+    {
+      this.searchToolbar.style.display = "none";
     }
     
     if (!this.detailPanelElem.parentNode) {

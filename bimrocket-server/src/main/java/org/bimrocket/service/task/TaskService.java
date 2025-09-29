@@ -38,6 +38,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -56,7 +57,6 @@ import org.bimrocket.api.task.TaskData;
 import org.bimrocket.dao.Dao;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotFoundException;
-import org.bimrocket.odata.SimpleODataParser;
 import org.bimrocket.service.file.FileService;
 import org.bimrocket.service.file.Metadata;
 import org.bimrocket.service.file.Path;
@@ -71,6 +71,9 @@ import static org.bimrocket.api.task.TaskExecution.RUNNING_STATUS;
 import static org.bimrocket.api.task.TaskExecution.COMPLETED_STATUS;
 import static org.bimrocket.api.task.TaskExecution.FAILED_STATUS;
 import static org.bimrocket.api.task.TaskExecution.CANCELLING_STATUS;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.util.EntityDefinition;
 
 /**
  *
@@ -84,7 +87,8 @@ public class TaskService
 
   static final String BASE = "services.task.";
 
-  static final Map<String, String> executionsFieldMap = new ConcurrentHashMap<>();
+  public static final Map<String, Field> executionFieldMap =
+     EntityDefinition.getInstance(TaskExecution.class).getFieldMap();
 
   ExecutorService executorService;
 
@@ -104,18 +108,6 @@ public class TaskService
   TaskDaoStore daoStore;
 
   String hostname;
-
-  static
-  {
-    executionsFieldMap.put("id", "id");
-    executionsFieldMap.put("task_name", "taskName");
-    executionsFieldMap.put("status", "status");
-    executionsFieldMap.put("invoker", "invokerUserId");
-    executionsFieldMap.put("hostname", "hostname");
-    executionsFieldMap.put("start_time", "startTime");
-    executionsFieldMap.put("end_time", "endTime");
-  }
-
 
   @PostConstruct
   public void init()
@@ -155,15 +147,12 @@ public class TaskService
   }
 
   public List<TaskExecution> getTaskExecutions(
-    String odataFilter, String odataOrderBy)
+    Expression filter, List<OrderByExpression> orderBy)
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      Dao<TaskExecution> executionDao = conn.getTaskExecutionDao();
-      SimpleODataParser parser = new SimpleODataParser(executionsFieldMap);
-      Map<String, Object> filter = parser.parseFilter(odataFilter);
-      List<String> orderBy = parser.parseOrderBy(odataOrderBy);
-      return executionDao.select(filter, orderBy);
+      Dao<TaskExecution, String> executionDao = conn.getTaskExecutionDao();
+      return executionDao.find(filter, orderBy);
     }
   }
 
@@ -178,8 +167,8 @@ public class TaskService
     {
       try (TaskDaoConnection conn = daoStore.getConnection())
       {
-        Dao<TaskExecution> taskExecutionDao = conn.getTaskExecutionDao();
-        return taskExecutionDao.select(executionId);
+        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        return taskExecutionDao.findById(executionId);
       }
     }
   }
@@ -218,8 +207,8 @@ public class TaskService
     {
       try (TaskDaoConnection conn = daoStore.getConnection())
       {
-        Dao<TaskExecution> taskExecutionDao = conn.getTaskExecutionDao();
-        TaskExecution execution = taskExecutionDao.select(executionId);
+        Dao<TaskExecution, String> taskExecutionDao = conn.getTaskExecutionDao();
+        TaskExecution execution = taskExecutionDao.findById(executionId);
         if (RUNNING_STATUS.equals(execution.getStatus()))
         {
           execution.setStatus(CANCELLING_STATUS);
@@ -234,7 +223,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      return conn.getTaskDataDao().select(dataId);
+      return conn.getTaskDataDao().findById(dataId);
     }
   }
 
@@ -242,7 +231,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      Dao<TaskData> taskDataDao = conn.getTaskDataDao();
+      Dao<TaskData, String> taskDataDao = conn.getTaskDataDao();
 
       if (data.getId() == null)
       {
@@ -251,7 +240,7 @@ public class TaskService
       }
       else
       {
-        return taskDataDao.insertOrUpdate(data);
+        return taskDataDao.save(data);
       }
     }
   }
@@ -260,7 +249,7 @@ public class TaskService
   {
     try (TaskDaoConnection conn = daoStore.getConnection())
     {
-      return conn.getTaskDataDao().delete(dataId);
+      return conn.getTaskDataDao().deleteById(dataId);
     }
   }
 

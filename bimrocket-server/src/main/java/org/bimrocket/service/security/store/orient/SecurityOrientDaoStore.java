@@ -31,7 +31,6 @@
 package org.bimrocket.service.security.store.orient;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
 import org.bimrocket.api.security.Role;
 import org.bimrocket.api.security.User;
 import org.bimrocket.dao.orient.OrientDaoStore;
@@ -46,7 +45,6 @@ import com.orientechnologies.orient.core.metadata.schema.OSchema;
  *
  * @author realor
  */
-@ApplicationScoped
 public class SecurityOrientDaoStore extends OrientDaoStore<SecurityDaoConnection>
   implements SecurityDaoStore
 {

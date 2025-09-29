@@ -37,22 +37,25 @@ import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.expression.Expression;
+import static org.bimrocket.dao.expression.Expression.BOOLEAN;
+import org.bimrocket.dao.expression.OrderByExpression;
 import static org.bimrocket.dao.orient.OrientDaoStore.MAP_CLASS;
 import org.bimrocket.util.EntityDefinition;
 
 /**
  *
  * @author realor
- * @param <E> the type managed by this DAO
+ * @param <E> the entity type managed by this DAO
+ * @param <ID> the entity identifier type
  */
-public class OrientDao<E> implements Dao<E>
+public class OrientDao<E, ID> implements Dao<E, ID>
 {
   private final ODatabaseDocument db;
   private final Class<E> cls;
@@ -66,17 +69,25 @@ public class OrientDao<E> implements Dao<E>
   }
 
   @Override
-  public List<E> select(Map<String, Object> filter, Collection<String> orderBy)
+  public List<E> find(Expression filter, List<OrderByExpression> orderBy)
   {
     String query = "select * from " + cls.getSimpleName();
 
-    query += addFilter(filter);
+    if (filter != null)
+    {
+      if (!filter.getType().equals(BOOLEAN))
+        throw new RuntimeException("Not a boolean expression");
+      query += " where " + OrientExpressionPrinter.toString(filter);
+    }
 
-    if (orderBy != null) query += addOrderBy(orderBy);
+    if (orderBy != null && !orderBy.isEmpty())
+    {
+      query += " order by " + OrientExpressionPrinter.toString(orderBy);
+    }
 
     List<E> list = new ArrayList<>();
 
-    OResultSet rs = db.query(query, filter);
+    OResultSet rs = db.query(query);
     while (rs.hasNext())
     {
       OResult result = rs.next();
@@ -89,24 +100,7 @@ public class OrientDao<E> implements Dao<E>
   }
 
   @Override
-  public Object select(String groupExpression, Map<String, Object> filter)
-  {
-    String query = "select " + groupExpression + " from " + cls.getSimpleName();
-
-    query += addFilter(filter);
-
-    OResultSet rs = db.query(query, filter);
-
-    if (rs.hasNext())
-    {
-      OResult result = rs.next();
-      return result.getProperty(groupExpression);
-    }
-    return null;
-  }
-
-  @Override
-  public E select(Object id)
+  public E findById(ID id)
   {
     OElement oelement = internalSelect(id);
     if (oelement == null) return null;
@@ -127,52 +121,36 @@ public class OrientDao<E> implements Dao<E>
   @Override
   public E update(E entity)
   {
-    try
-    {
-      Field idField = definition.getIdentityField(true);
-      Object id = idField.get(entity);
+    Object id = definition.getEntityId(entity);
 
-      OElement oelement = internalSelect(id);
-      if (oelement == null) return null;
+    OElement oelement = internalSelect(id);
+    if (oelement == null) return null;
 
-      copyToElement(entity, oelement);
+    copyToElement(entity, oelement);
 
-      db.save(oelement);
-      return entity;
-    }
-    catch (Exception ex)
-    {
-      throw new RuntimeException(ex);
-    }
+    db.save(oelement);
+    return entity;
   }
 
   @Override
-  public E insertOrUpdate(E entity)
+  public E save(E entity)
   {
-    try
+    Object id = definition.getEntityId(entity);
+
+    OElement oelement = internalSelect(id);
+    if (oelement == null)
     {
-      Field idField = definition.getIdentityField(true);
-      Object id = idField.get(entity);
-
-      OElement oelement = internalSelect(id);
-      if (oelement == null)
-      {
-        oelement = db.newElement(cls.getSimpleName());
-      }
-
-      copyToElement(entity, oelement);
-
-      db.save(oelement);
-      return entity;
+      oelement = db.newElement(cls.getSimpleName());
     }
-    catch (Exception ex)
-    {
-      throw new RuntimeException(ex);
-    }
+
+    copyToElement(entity, oelement);
+
+    db.save(oelement);
+    return entity;
   }
 
   @Override
-  public boolean delete(Object id)
+  public boolean deleteById(ID id)
   {
     Field idField = definition.getIdentityField(true);
 
@@ -191,13 +169,14 @@ public class OrientDao<E> implements Dao<E>
   }
 
   @Override
-  public int delete(Map<String, Object> filter)
+  public int delete(Expression filter)
   {
-    String query = "select from " + cls.getSimpleName();
+    if (filter == null) throw new RuntimeException("filter is required");
 
-    query += addFilter(filter);
+    String query = "select from " + cls.getSimpleName() +
+      " where " + OrientExpressionPrinter.toString(filter);
 
-    OResultSet rs = db.query(query, filter);
+    OResultSet rs = db.query(query);
 
     int count = 0;
     while (rs.hasNext())
@@ -249,45 +228,6 @@ public class OrientDao<E> implements Dao<E>
       return result.getElement().orElse(null);
     }
     return null;
-  }
-
-  protected String addFilter(Map<String, Object> filter)
-  {
-    StringBuilder buffer = new StringBuilder();
-    int i = 0;
-    for (String field : filter.keySet())
-    {
-      if (i == 0)
-      {
-        buffer.append(" where ");
-      }
-      else
-      {
-        buffer.append(" and ");
-      }
-      buffer.append(field).append(" = :").append(field);
-      i++;
-    }
-    return buffer.toString();
-  }
-
-  protected String addOrderBy(Collection<String> orderBy)
-  {
-    StringBuilder buffer = new StringBuilder();
-    int i = 0;
-    for (String field : orderBy)
-    {
-      if (i == 0)
-      {
-        buffer.append(" order by ").append(field);
-      }
-      else
-      {
-        buffer.append(", ").append(field);
-      }
-      i++;
-    }
-    return buffer.toString();
   }
 
   protected void deleteCascade(Object object)

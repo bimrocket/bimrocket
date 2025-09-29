@@ -183,7 +183,7 @@ class Controls
           optionDisabled = false;
         }
         else continue;
-        
+
         let optionElem = document.createElement("option");
         optionElem.value = optionValue;
         I18N.set(optionElem, "textContent", optionLabel);
@@ -493,6 +493,127 @@ class Controls
     return editorView;
   }
 
+  static addTagsInput(parent, name, label, placeholderKey, initialTags = [], className)
+  {
+    const id = this.getNextId();
+    const groupElem = document.createElement("div");
+    groupElem.id = id;
+    if (className) groupElem.className = className;
+    parent.appendChild(groupElem);
+
+    const labelElem = document.createElement("label");
+    I18N.set(labelElem, "textContent", label);
+    groupElem.appendChild(labelElem);
+    labelElem.htmlFor = id + "_input";
+
+    const tagsContainer = document.createElement("div");
+    tagsContainer.className = "tags-container";
+    groupElem.appendChild(tagsContainer);
+
+    const tagsInput = document.createElement("input");
+    tagsInput.id = id + "_input";
+    tagsInput.type = "text";
+    I18N.set(tagsInput, "placeholder", placeholderKey);
+    tagsContainer.appendChild(tagsInput);
+
+    const tagsDisplay = document.createElement("div");
+    tagsDisplay.className = "tags-display";
+    tagsContainer.appendChild(tagsDisplay);
+
+    const removeElem = document.createElement("div");
+    removeElem.className = "hidden";
+    I18N.set(removeElem, "textContent", "button.delete");
+    tagsContainer.appendChild(removeElem);
+
+    const tags = [...initialTags];
+
+    const updateTagsDisplay = () =>
+    {
+      tagsDisplay.innerHTML = "";
+
+      tags.forEach((tag, index) =>
+      {
+        const tagElement = document.createElement("span");
+        tagElement.className = "tag";
+        tagElement.textContent = tag;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "tag-remove";
+        removeBtn.title = removeElem.textContent;
+        removeBtn.addEventListener("click", (e) =>
+        {
+          e.stopPropagation();
+          tags.splice(index, 1);
+          updateTagsDisplay();
+        });
+
+        tagElement.appendChild(removeBtn);
+        tagsDisplay.appendChild(tagElement);
+      });
+    };
+
+    tagsInput.addEventListener("keydown", (e) =>
+    {
+      if (e.key === "Enter" || e.key === ",")
+      {
+        e.preventDefault();
+        const tagText = tagsInput.value.trim();
+        if (tagText && !tags.includes(tagText))
+        {
+          tags.push(tagText);
+          tagsInput.value = "";
+          updateTagsDisplay();
+        }
+      }
+    });
+
+    tagsInput.addEventListener("blur", (e) =>
+    {
+      const tagText = tagsInput.value.trim();
+      if (tagText && !tags.includes(tagText))
+      {
+        tags.push(tagText);
+        tagsInput.value = "";
+        updateTagsDisplay();
+      }
+    });
+
+    updateTagsDisplay();
+
+    return {
+      element: groupElem,
+      getTags: () => [...tags],
+      setTags: (newTags) =>
+      {
+        tags.length = 0;
+        tags.push(...newTags);
+        updateTagsDisplay();
+      },
+      addTag: (tag) =>
+      {
+        if (!tags.includes(tag))
+        {
+          tags.push(tag);
+          updateTagsDisplay();
+        }
+      },
+      removeTag: (tag) =>
+      {
+        const index = tags.indexOf(tag);
+        if (index !== -1)
+        {
+          tags.splice(index, 1);
+          updateTagsDisplay();
+        }
+      },
+      clearTags: () =>
+      {
+        tags.length = 0;
+        updateTagsDisplay();
+      }
+    };
+  }
+
   static addField(parent, id, label, className)
   {
     const groupElem = document.createElement("div");
@@ -616,97 +737,6 @@ class Controls
     return element;
   }
 
-  static addTagsInput(parent, name, label, placeholderKey, initialTags = [], className) {
-    const id = this.getNextId();
-    const groupElem = this.addField(parent, id, label, className);
-    
-    const tagsContainer = document.createElement("div");
-    tagsContainer.className = "tags-container";
-    groupElem.appendChild(tagsContainer);
-
-    const tagsInput = document.createElement("input");
-    tagsInput.type = "text";
-    I18N.set(tagsInput, "placeholder", placeholderKey);
-    tagsContainer.appendChild(tagsInput);
-
-    const tagsDisplay = document.createElement("div");
-    tagsDisplay.className = "tags-display";
-    tagsContainer.appendChild(tagsDisplay);
-
-    const tags = [...initialTags];
-
-    const updateTagsDisplay = () => {
-      tagsDisplay.innerHTML = "";
-      
-      tags.forEach((tag, index) => {
-        const tagElement = document.createElement("span");
-        tagElement.className = "tag";
-        tagElement.textContent = tag;
-        
-        const removeBtn = document.createElement("span");
-        removeBtn.className = "tag-remove";
-        removeBtn.innerHTML = "&times;";
-        removeBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          tags.splice(index, 1);
-          updateTagsDisplay();
-        });
-        
-        tagElement.appendChild(removeBtn);
-        tagsDisplay.appendChild(tagElement);
-      });
-    };
-
-    tagsInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === ",") {
-        e.preventDefault();
-        const tagText = tagsInput.value.trim();
-        if (tagText && !tags.includes(tagText)) {
-          tags.push(tagText);
-          tagsInput.value = "";
-          updateTagsDisplay();
-        }
-      }
-    });
-
-    tagsInput.addEventListener("blur", (e) => {
-      const tagText = tagsInput.value.trim();
-      if (tagText && !tags.includes(tagText)) {
-        tags.push(tagText);
-        tagsInput.value = "";
-        updateTagsDisplay();
-      }
-    });
-
-    updateTagsDisplay();
-
-    return {
-      element: groupElem,
-      getTags: () => [...tags],
-      setTags: (newTags) => {
-        tags.length = 0;
-        tags.push(...newTags);
-        updateTagsDisplay();
-      },
-      addTag: (tag) => {
-        if (!tags.includes(tag)) {
-          tags.push(tag);
-          updateTagsDisplay();
-        }
-      },
-      removeTag: (tag) => {
-        const index = tags.indexOf(tag);
-        if (index !== -1) {
-          tags.splice(index, 1);
-          updateTagsDisplay();
-        }
-      },
-      clearTags: () => {
-        tags.length = 0;
-        updateTagsDisplay();
-      }
-    };
-}
 
 /**
  * const html = Controls.template():

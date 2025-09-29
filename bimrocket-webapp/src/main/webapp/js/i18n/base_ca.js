@@ -459,7 +459,7 @@ export const translations =
   "label.exported_properties" : "Propietats a exportar:",
 
   "label.select_faces_mode" : "Mode:",
-  "label.select_faces_angle" : "Angle màxim (graus):",  
+  "label.select_faces_angle" : "Angle màxim (graus):",
   "label.select_faces_depth" : "Profunditat màxima:",
 
   "label.material_list" : "Materials:",
@@ -598,7 +598,8 @@ export const translations =
   "message.measure_area" : (area, units) => `Àrea: ${area} ${units}2`,
   "message.measure_angle" : angle => `Angle: ${angle} graus`,
 
-  "message.object_count" : count => `Objectes: ${count}`,
+  "message.solid_count" : count => `Nombre de sòlids: ${count}`,
+  "message.mesh_count" : count => `Nombre de malles: ${count}`,
   "message.total_area" : (area, units) => `Àrea: ${area} ${units}2`,
   "message.total_volume" : (volume, units) => `Volum: ${volume} ${units}3`,
   "message.area_volume_ratio" : ratio => `Àrea/Volum: ${ratio}`,

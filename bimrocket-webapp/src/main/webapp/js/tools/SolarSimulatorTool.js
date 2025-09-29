@@ -12,6 +12,7 @@ import { I18N } from "../i18n/I18N.js";
 import { Solid } from "../core/Solid.js";
 import { BIMUtils } from "../utils/BIMUtils.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
+import { GeometryUtils } from "../utils/GeometryUtils.js";
 import "../lib/suncalc.js";
 import * as THREE from "three";
 
@@ -338,10 +339,10 @@ class SolarSimulatorTool extends Tool
     const selectFacesTool = application.tools["select_faces"];
     const mesh = selectFacesTool?.mesh;
 
-    if (!mesh || 
+    if (!mesh ||
         !ObjectUtils.isObjectDescendantOf(mesh, application.scene))
     {
-      MessageDialog.create("tool.solar_simulator.label", 
+      MessageDialog.create("tool.solar_simulator.label",
        "message.solar_simulator_select_faces")
        .setClassName("info")
        .setI18N(application.i18n).show();
@@ -350,7 +351,7 @@ class SolarSimulatorTool extends Tool
 
     const simulationGroup = this.simulationGroup;
     simulationGroup.visible = true;
-    
+
     if (simulationGroup.parent === null)
     {
       ObjectUtils.dispose(simulationGroup);
@@ -358,28 +359,18 @@ class SolarSimulatorTool extends Tool
       application.addObject(simulationGroup, application.baseObject);
     }
 
-    const array = mesh.geometry.getAttribute("position").array;
-    for (let i = 0; i < array.length; i += 9)
+    const meshVertices = GeometryUtils.getBufferGeometryVertices(mesh.geometry);
+
+    const addFace = (va, vb, vc) =>
     {
-      const x1 = array[i];
-      const y1 = array[i + 1];
-      const z1 = array[i + 2];
-      const p1 = new THREE.Vector3(x1, y1, z1);
-      p1.applyMatrix4(mesh.matrixWorld);
+      const matrixWorld = mesh.matrixWorld;
+      const p1 = meshVertices[va].applyMatrix4(matrixWorld);
+      const p2 = meshVertices[vb].applyMatrix4(matrixWorld);
+      const p3 = meshVertices[vc].applyMatrix4(matrixWorld);
 
-      const x2 = array[i + 3];
-      const y2 = array[i + 4];
-      const z2 = array[i + 5];
-      const p2 = new THREE.Vector3(x2, y2, z2);
-      p2.applyMatrix4(mesh.matrixWorld);
-
-      const x3 = array[i + 6];
-      const y3 = array[i + 7];
-      const z3 = array[i + 8];
-      const p3 = new THREE.Vector3(x3, y3, z3);
-      p3.applyMatrix4(mesh.matrixWorld);
       shadowGenerator.addTriangle(p1, p2, p3);
-    }
+    };
+    GeometryUtils.getBufferGeometryFaces(mesh.geometry, addFace);
 
     shadowGenerator.onProgress = (message, progress) =>
     {
@@ -407,7 +398,7 @@ class SolarSimulatorTool extends Tool
       surface.raycast = function(){};
       surface.position.sub(application.baseObject.position);
       surface.updateMatrix();
-      exposureGroup.add(surface);      
+      exposureGroup.add(surface);
 
       const shadowEdgesGeometry = shadowGenerator.getEdgeGeometry();
       const shadowLines = new THREE.LineSegments(shadowEdgesGeometry, this.edgeMaterial);

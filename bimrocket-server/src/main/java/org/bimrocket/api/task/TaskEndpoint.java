@@ -47,6 +47,10 @@ import org.bimrocket.service.task.TaskService;
 import org.bimrocket.api.ApiResult;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import java.util.List;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.odata.ODataParser;
+import static org.bimrocket.service.task.TaskService.executionFieldMap;
 
 /**
  *
@@ -69,7 +73,11 @@ public class TaskEndpoint
     @QueryParam("$filter") String odataFilter,
     @QueryParam("$orderBy") String odataOrderBy)
   {
-    return taskService.getTaskExecutions(odataFilter, odataOrderBy);
+    ODataParser parser = new ODataParser(executionFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
+
+    return taskService.getTaskExecutions(filter, orderBy);
   }
 
   @GET

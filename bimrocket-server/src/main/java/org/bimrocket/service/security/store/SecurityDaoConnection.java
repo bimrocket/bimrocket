@@ -41,7 +41,7 @@ import org.bimrocket.dao.DaoConnection;
  */
 public interface SecurityDaoConnection extends DaoConnection
 {
-  Dao<User> getUserDao();
-  
-  Dao<Role> getRoleDao();
+  Dao<User, String> getUserDao();
+
+  Dao<Role, String> getRoleDao();
 }

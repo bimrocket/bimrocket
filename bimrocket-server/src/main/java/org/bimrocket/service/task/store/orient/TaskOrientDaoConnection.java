@@ -51,14 +51,14 @@ public class TaskOrientDaoConnection extends OrientDaoConnection
   }
 
   @Override
-  public Dao<TaskExecution> getTaskExecutionDao()
+  public Dao<TaskExecution, String> getTaskExecutionDao()
   {
-    return new OrientDao<>(conn, TaskExecution.class);
+    return new OrientDao<>(db, TaskExecution.class);
   }
 
   @Override
-  public Dao<TaskData> getTaskDataDao()
+  public Dao<TaskData, String> getTaskDataDao()
   {
-    return new OrientDao<>(conn, TaskData.class);
+    return new OrientDao<>(db, TaskData.class);
   }
 }

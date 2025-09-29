@@ -3,3 +3,5 @@
 /bimrocket-webapp/target/
 
 /bimrocket-server/docker/orientdb_data/
+/bimrocket-server/nbproject/
+/bimrocket-common/nbproject/

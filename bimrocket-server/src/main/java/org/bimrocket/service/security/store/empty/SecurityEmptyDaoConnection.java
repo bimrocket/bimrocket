@@ -45,13 +45,13 @@ public class SecurityEmptyDaoConnection extends EmptyDaoConnection
   implements SecurityDaoConnection
 {
   @Override
-  public Dao<User> getUserDao()
+  public Dao<User, String> getUserDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<Role> getRoleDao()
+  public Dao<Role, String> getRoleDao()
   {
     return new EmptyDao<>();
   }

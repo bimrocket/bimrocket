@@ -56,7 +56,6 @@ import org.bimrocket.dao.Dao;
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotAuthorizedException;
 import org.bimrocket.exception.NotFoundException;
-import org.bimrocket.odata.SimpleODataParser;
 import org.bimrocket.service.security.store.SecurityDaoStore;
 import org.bimrocket.service.security.store.empty.SecurityEmptyDaoStore;
 import org.eclipse.microprofile.config.Config;
@@ -65,6 +64,11 @@ import org.bimrocket.util.ExpiringCache;
 import static org.bimrocket.service.security.SecurityConstants.*;
 import static org.bimrocket.util.TextUtils.getISODate;
 import static java.lang.Boolean.FALSE;
+import java.lang.reflect.Field;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
+import org.bimrocket.dao.expression.io.log.LogExpressionPrinter;
+import org.bimrocket.util.EntityDefinition;
 
 /**
  *
@@ -79,10 +83,13 @@ public class SecurityService
   static final String BASE = "services.security.";
   static final String USER_REQUEST_ATTRIBUTE = "_user";
 
-  static final Map<String, String> userFieldMap = new ConcurrentHashMap<>();
-  static final Map<String, String> roleFieldMap = new ConcurrentHashMap<>();
+  public static final Map<String, Field> userFieldMap =
+    EntityDefinition.getInstance(User.class).getFieldMap();
 
-  // Exceptions
+  public static final Map<String, Field> roleFieldMap =
+    EntityDefinition.getInstance(Role.class).getFieldMap();
+
+// Exceptions
 
   static final String USER_ALREADY_EXISTS =
     "SEC001: User already exists.";
@@ -98,16 +105,6 @@ public class SecurityService
     "SEC006: Invalid password format.";
   static final String PASSWORD_IS_REQUIRED =
     "SEC007: Password is required.";
-
-  static
-  {
-    userFieldMap.put("id", "id");
-    userFieldMap.put("display_name", "displayName");
-    userFieldMap.put("email", "email");
-
-    roleFieldMap.put("id", "id");
-    roleFieldMap.put("description", "description");
-  }
 
   @Inject
   Instance<HttpServletRequest> requestInstance;
@@ -177,7 +174,7 @@ public class SecurityService
     roleCacheTimeout = config.getValue(BASE + "roleCacheTimeout", Long.class);
     roleCache = new ExpiringCache<>(roleCacheTimeout * 1000);
     LOGGER.log(Level.INFO, "roleCacheTimeout: {0}", roleCacheTimeout);
-    
+
     userIdByThread = new ConcurrentHashMap<>();
 
     anonymousUser = new User();
@@ -193,18 +190,14 @@ public class SecurityService
     daoStore.close();
   }
 
-  public List<User> getUsers(String odataFilter, String odataOrderBy)
+  public List<User> getUsers(Expression filter, List<OrderByExpression> orderBy)
   {
-    LOGGER.log(Level.FINE, "filter: {0}", odataFilter);
+    LOGGER.log(Level.FINE, "filter: {0}", LogExpressionPrinter.toString(filter));
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      SimpleODataParser parser = new SimpleODataParser(userFieldMap);
-      Map<String, Object> filter = parser.parseFilter(odataFilter);
-      List<String> orderBy = parser.parseOrderBy(odataOrderBy);
-
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.select(filter, orderBy);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.find(filter, orderBy);
     }
   }
 
@@ -214,8 +207,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.select(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.findById(userId);
     }
   }
 
@@ -228,8 +221,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User prevUser = userDao.select(user.getId());
+      Dao<User, String> userDao = conn.getUserDao();
+      User prevUser = userDao.findById(user.getId());
       if (prevUser != null)
         throw new InvalidRequestException(USER_ALREADY_EXISTS);
 
@@ -256,8 +249,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User user = userDao.select(userUpdate.getId());
+      Dao<User, String> userDao = conn.getUserDao();
+      User user = userDao.findById(userUpdate.getId());
       if (user == null) throw new NotFoundException(USER_NOT_FOUND);
 
       userCache.remove(userId);
@@ -287,23 +280,19 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      return userDao.delete(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      return userDao.deleteById(userId);
     }
   }
 
-  public List<Role> getRoles(String odataFilter, String odataOrderBy)
+  public List<Role> getRoles(Expression filter, List<OrderByExpression> orderBy)
   {
-    LOGGER.log(Level.FINE, "filter: {0}", odataFilter);
+    LOGGER.log(Level.FINE, "filter: {0}", LogExpressionPrinter.toString(filter));
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      SimpleODataParser parser = new SimpleODataParser(roleFieldMap);
-      Map<String, Object> filter = parser.parseFilter(odataFilter);
-      List<String> orderBy = parser.parseOrderBy(odataOrderBy);
-
-      Dao<Role> userDao = conn.getRoleDao();
-      return userDao.select(filter, orderBy);
+      Dao<Role, String> userDao = conn.getRoleDao();
+      return userDao.find(filter, orderBy);
     }
   }
 
@@ -313,8 +302,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
-      return roleDao.select(roleId);
+      Dao<Role, String> roleDao = conn.getRoleDao();
+      return roleDao.findById(roleId);
     }
   }
 
@@ -324,7 +313,7 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
+      Dao<Role, String> roleDao = conn.getRoleDao();
       return roleDao.insert(role);
     }
   }
@@ -336,7 +325,7 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
+      Dao<Role, String> roleDao = conn.getRoleDao();
       return roleDao.update(role);
     }
   }
@@ -348,8 +337,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<Role> roleDao = conn.getRoleDao();
-      return roleDao.delete(roleId);
+      Dao<Role, String> roleDao = conn.getRoleDao();
+      return roleDao.deleteById(roleId);
     }
   }
 
@@ -365,8 +354,8 @@ public class SecurityService
 
     try (SecurityDaoConnection conn = daoStore.getConnection())
     {
-      Dao<User> userDao = conn.getUserDao();
-      User user = userDao.select(userId);
+      Dao<User, String> userDao = conn.getUserDao();
+      User user = userDao.findById(userId);
 
       if (user == null ||
           !Objects.equals(hash(oldPassword), user.getPasswordHash()))
@@ -384,7 +373,7 @@ public class SecurityService
     Thread currentThread = Thread.currentThread();
     if (userId == null)
     {
-      userIdByThread.remove(currentThread);      
+      userIdByThread.remove(currentThread);
     }
     else
     {

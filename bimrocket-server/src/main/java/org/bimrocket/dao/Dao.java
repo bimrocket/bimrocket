@@ -30,23 +30,72 @@
  */
 package org.bimrocket.dao;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
 
 /**
+ * General interface for managing the persistance of an entity
  *
  * @author realor
- * @param <E> type to manage persistence
+ * @param <E> entity type
+ * @param <ID> entity identifier type
  */
-public interface Dao<E>
+public interface Dao<E, ID>
 {
-  public List<E> select(Map<String, Object> filter, Collection<String> orderBy);
-  public Object select(String groupExpression, Map<String, Object> filter);
-  public E select(Object id);
+  /**
+   * Returns the entities that satisfy a search filter sorted by
+   * orderBy expressions
+   *
+   * @param filter the filter
+   * @param orderBy the list of order expression
+   * @return
+   */
+  public List<E> find(Expression filter, List<OrderByExpression> orderBy);
+
+  /**
+   * Returns the entity identified by id
+   *
+   * @param id the entity identifier
+   * @return the entity identified by id or null if it does not exists
+   */
+  public E findById(ID id);
+
+  /**
+   * Inserts a new entity
+   *
+   * @param entity the entity to insert
+   * @return the inserted entity
+   */
   public E insert(E entity);
+
+  /**
+   * Updates an existing entity
+   *
+   * @param entity the entity to update
+   * @return the updated entity or null if the entity was not found
+   */
   public E update(E entity);
-  public E insertOrUpdate(E entity);
-  public boolean delete(Object id);
-  public int delete(Map<String, Object> filter);
+
+  /** Saves an entity
+   *
+   * @param entity the entity to save
+   * @return the saved entity
+   */
+  public E save(E entity);
+
+  /**
+   * Deletes an entity
+   *
+   * @param id the identifier of the entity to delete
+   * @return true id the entity was delete or false if the entity was not found
+   */
+  public boolean deleteById(ID id);
+
+  /**
+   * Deletes the entities that satisfy a search filter
+   * @param filter the filter
+   * @return the number of entities deleted
+   */
+  public int delete(Expression filter);
 }

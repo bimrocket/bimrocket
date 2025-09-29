@@ -30,6 +30,8 @@
  */
 package org.bimrocket.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Id;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -92,6 +95,40 @@ public class EntityDefinition
         "Entity " + entityClass.getName() + " has no identity");
 
     return identityField;
+  }
+
+  public Map<String, Field> getFieldMap()
+  {
+    Map<String, Field> map = new ConcurrentHashMap<>();
+    for (Field field : fields)
+    {
+      if (field.getAnnotation(JsonIgnore.class) != null) continue;
+
+      JsonProperty annotation = field.getAnnotation(JsonProperty.class);
+      if (annotation == null)
+      {
+        map.put(field.getName(), field);
+      }
+      else
+      {
+        String externalName = annotation.value();
+        map.put(externalName, field);
+      }
+    }
+    return map;
+  }
+
+  public Object getEntityId(Object entity)
+  {
+    try
+    {
+      Field idField = getIdentityField(true);
+      return idField.get(entity);
+    }
+    catch (Exception ex)
+    {
+      throw new RuntimeException(ex);
+    }
   }
 
   private void build()

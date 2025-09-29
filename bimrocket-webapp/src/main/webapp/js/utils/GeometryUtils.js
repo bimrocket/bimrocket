@@ -144,10 +144,10 @@ class GeometryUtils
     normal.normalize();
     return normal;
   }
-  
+
   /**
    * Converts a local normal to WCS
-   * 
+   *
    * @param {THREE.Vector3} normal - vector to convert to WCS
    * @param {THREE.Matrix4} matrixWorld - the matrix where normal is referenced
    * @param {THREE.Vector3} worldNormal - the output normal
@@ -167,8 +167,8 @@ class GeometryUtils
     v1.copy(normal).applyMatrix4(matrixWorld);
     v1.sub(v0).normalize();
     worldNormal.copy(v1);
-    
-    return worldNormal;    
+
+    return worldNormal;
   }
 
   /**
@@ -362,10 +362,10 @@ class GeometryUtils
 
   /**
    * Returns an orthogonal vector
-   * 
+   *
    * @param {THREE.Vector3} vector - the input vector
    * @param {THREE.Vector3} orthoVector - the output vector
-   * @returns {THREE.Vector3} an orthogonal vector of the given vector.
+   * @returns {THREE.Vector3} ortho - an orthogonal vector of the given vector.
    */
   static orthogonalVector(vector, orthoVector)
   {
@@ -391,27 +391,30 @@ class GeometryUtils
 
   /**
    * Calculates the area of a BufferGeometry
-   * 
-   * @param {type} geometry - the mesh BufferGeometry
-   * @returns {Number} the area of the BufferGeometry
+   *
+   * @param {BufferGeometry} geometry - the BufferGeometry
+   * @param {Matrix4} matrix - the matrix to apply to geometry vertices
+   * @returns {Number} area - the area of the BufferGeometry
    */
-  static getBufferGeometryArea(geometry)
+  static getBufferGeometryArea(geometry, matrix)
   {
     const triangle = new THREE.Triangle();
     const position = this._vector1;
     const vertices = geometry.attributes.position.array;
-    
+
     function getVertex(index)
     {
       position.x = vertices[3 * index];
       position.y = vertices[3 * index + 1];
       position.z = vertices[3 * index + 2];
-      return position;      
+      if (matrix) position.applyMatrix4(matrix);
+      return position;
     }
 
     let area = 0;
-  
-    this.getBufferGeometryFaces(geometry, (va, vb, vc) => {
+
+    this.getBufferGeometryFaces(geometry, (va, vb, vc) =>
+    {
       triangle.a.copy(getVertex(va));
       triangle.b.copy(getVertex(vb));
       triangle.c.copy(getVertex(vc));

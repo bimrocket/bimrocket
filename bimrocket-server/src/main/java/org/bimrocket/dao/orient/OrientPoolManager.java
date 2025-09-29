@@ -57,8 +57,7 @@ import org.eclipse.microprofile.config.Config;
 @ApplicationScoped
 public class OrientPoolManager
 {
-  static final Logger LOGGER = Logger.getLogger("OrientPoolManager");
-
+  static final Logger LOGGER = Logger.getLogger(OrientPoolManager.class.getName());
   static final String BASE = "databases.";
 
   @Inject
@@ -69,16 +68,17 @@ public class OrientPoolManager
   @PostConstruct
   public void init()
   {
-    LOGGER.log(Level.INFO, "Init OrientPoolManager");
+    LOGGER.log(Level.INFO, "Init {0}", OrientPoolManager.class.getName());
     Orient.instance().removeShutdownHook();
   }
 
   @PreDestroy
   public void destroy()
   {
-    LOGGER.log(Level.INFO, "Destroying OrientPoolManager");
+    LOGGER.log(Level.INFO, "Destroying {0}", OrientPoolManager.class.getName());
 
-    poolCache.forEach((dbAlias, db) -> {
+    poolCache.forEach((dbAlias, db) ->
+    {
       LOGGER.log(Level.INFO, "Closing pool {0}", dbAlias);
       db.close();
     });
@@ -110,7 +110,7 @@ public class OrientPoolManager
   private synchronized ODatabasePool createPool(String dbAlias)
   {
     String url = config.getOptionalValue(BASE + dbAlias + ".url", String.class).orElse(null);
-    if (url == null) throw new RuntimeException("Invalid dbAlias: " + dbAlias);
+    if (url == null) throw new RuntimeException("Missing database url for " + dbAlias);
 
     String username =
       config.getOptionalValue(BASE + dbAlias + ".username", String.class).orElse(null);

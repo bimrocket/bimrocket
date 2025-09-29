@@ -52,7 +52,7 @@ public class BcfEmptyDaoConnection extends EmptyDaoConnection
   implements BcfDaoConnection
 {
   @Override
-  public Dao<BcfProject> getProjectDao()
+  public Dao<BcfProject, String> getProjectDao()
   {
     return new EmptyDao<>();
   }
@@ -64,31 +64,31 @@ public class BcfEmptyDaoConnection extends EmptyDaoConnection
   }
 
   @Override
-  public Dao<BcfExtensions> getExtensionsDao()
+  public Dao<BcfExtensions, String> getExtensionsDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<BcfTopic> getTopicDao()
+  public Dao<BcfTopic, String> getTopicDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<BcfComment> getCommentDao()
+  public Dao<BcfComment, String> getCommentDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<BcfViewpoint> getViewpointDao()
+  public Dao<BcfViewpoint, String> getViewpointDao()
   {
     return new EmptyDao<>();
   }
 
   @Override
-  public Dao<BcfDocumentReference> getDocumentReferenceDao()
+  public Dao<BcfDocumentReference, String> getDocumentReferenceDao()
   {
     return new EmptyDao<>();
   }

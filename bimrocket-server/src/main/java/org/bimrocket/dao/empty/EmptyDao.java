@@ -30,33 +30,27 @@
  */
 package org.bimrocket.dao.empty;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.bimrocket.dao.Dao;
+import org.bimrocket.dao.expression.Expression;
+import org.bimrocket.dao.expression.OrderByExpression;
 
 /**
  *
  * @author realor
  * @param <E> the type managed by this DAO
  */
-public class EmptyDao<E> implements Dao<E>
+public class EmptyDao<E, ID> implements Dao<E, ID>
 {
   @Override
-  public List<E> select(Map<String, Object> filter, Collection<String> orderBy)
+  public List<E> find(Expression filter, List<OrderByExpression> orderBy)
   {
     return Collections.emptyList();
   }
 
   @Override
-  public Object select(String groupExpression, Map<String, Object> filter)
-  {
-    return null;
-  }
-
-  @Override
-  public E select(Object id)
+  public E findById(ID id)
   {
     return null;
   }
@@ -74,19 +68,19 @@ public class EmptyDao<E> implements Dao<E>
   }
 
   @Override
-  public E insertOrUpdate(E entity)
+  public E save(E entity)
   {
     return entity;
   }
 
   @Override
-  public boolean delete(Object id)
+  public boolean deleteById(ID id)
   {
     return false;
   }
 
   @Override
-  public int delete(Map<String, Object> filter)
+  public int delete(Expression filter)
   {
     return 0;
   }

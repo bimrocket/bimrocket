@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -67,6 +69,7 @@ public class BimRocketTomcat extends Tomcat
     System.out.println("OS name: " + System.getProperty("os.name"));
     System.out.println("OS arch: " + System.getProperty("os.arch"));
     System.out.println("OS version: " + System.getProperty("os.version"));
+    System.out.println("Java version: " + System.getProperty("java.version"));
     System.out.println("Tomcat home: " + baseDir.getAbsolutePath());
 
     setBaseDir(".");
@@ -106,13 +109,31 @@ public class BimRocketTomcat extends Tomcat
 
   String getLocalHostAddress()
   {
+    String hostAddress = "127.0.0.1";
     try
     {
-      return InetAddress.getLocalHost().getHostAddress();
+      Enumeration<NetworkInterface> ifEnum = NetworkInterface.getNetworkInterfaces();
+      while (ifEnum.hasMoreElements())
+      {
+        NetworkInterface netif = ifEnum.nextElement();
+        if (netif.isLoopback()) continue;
+
+        for (InterfaceAddress ifAddress : netif.getInterfaceAddresses())
+        {
+          InetAddress address = ifAddress.getAddress();
+          if (!address.isLinkLocalAddress() &&
+              !address.isMulticastAddress())
+          {
+            hostAddress = address.getHostAddress();
+            break;
+          }
+        }
+      }
+      return hostAddress;
     }
     catch (Exception ex)
     {
-      return "localhost";
+      return hostAddress;
     }
   }
 

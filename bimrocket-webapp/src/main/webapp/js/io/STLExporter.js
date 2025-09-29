@@ -1,21 +1,38 @@
-import {
-	Vector3
-} from 'three';
+import { Vector3 } from 'three';
 
 /**
- * Usage:
- *  const exporter = new STLExporter();
+ * An exporter for STL.
  *
- *  // second argument is a list of options
- *  const data = exporter.parse( mesh, { binary: true } );
+ * STL files describe only the surface geometry of a three-dimensional object without
+ * any representation of color, texture or other common model attributes. The STL format
+ * specifies both ASCII and binary representations, with binary being more compact.
+ * STL files contain no scale information or indexes, and the units are arbitrary.
  *
+ * ```js
+ * const exporter = new STLExporter();
+ * const data = exporter.parse( mesh, { binary: true } );
+ * ```
+ *
+ * @three_import import { STLExporter } from 'three/addons/exporters/STLExporter.js';
  */
-
 class STLExporter {
 
+	/**
+	 * Parses the given 3D object and generates the STL output.
+	 *
+	 * If the 3D object is composed of multiple children and geometry, they are merged into a single mesh in the file.
+	 *
+	 * @param {Object3D} scene - A scene, mesh or any other 3D object containing meshes to encode.
+	 * @param {STLExporter~Options} options - The export options.
+	 * @return {string|ArrayBuffer} The exported STL.
+	 */
 	parse( scene, options = {} ) {
 
-		const binary = options.binary !== undefined ? options.binary : false;
+		options = Object.assign( {
+			binary: false
+		}, options );
+
+		const binary = options.binary;
 
 		//
 
@@ -24,15 +41,9 @@ class STLExporter {
 
 		scene.traverse( function ( object ) {
 
-			if ( object.isMesh && object.visible) {
+			if ( object.isMesh ) {
 
 				const geometry = object.geometry;
-
-				if ( geometry.isBufferGeometry !== true ) {
-
-					throw new Error( 'THREE.STLExporter: Geometry is not of type THREE.BufferGeometry.' );
-
-				}
 
 				const index = geometry.index;
 				const positionAttribute = geometry.getAttribute( 'position' );
@@ -128,9 +139,9 @@ class STLExporter {
 
 			if ( object.isSkinnedMesh === true ) {
 
-				object.boneTransform( a, vA );
-				object.boneTransform( b, vB );
-				object.boneTransform( c, vC );
+				object.applyBoneTransform( a, vA );
+				object.applyBoneTransform( b, vB );
+				object.applyBoneTransform( c, vC );
 
 			}
 
@@ -199,5 +210,12 @@ class STLExporter {
 	}
 
 }
+
+/**
+ * Export options of `STLExporter`.
+ *
+ * @typedef {Object} STLExporter~Options
+ * @property {boolean} [binary=false] - Whether to export in binary format or ASCII.
+ **/
 
 export { STLExporter };

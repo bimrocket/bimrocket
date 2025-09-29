@@ -39,28 +39,28 @@ import org.bimrocket.dao.DaoConnection;
  */
 public class OrientDaoConnection implements DaoConnection
 {
-  protected ODatabaseDocument conn;
+  protected final ODatabaseDocument db;
 
-  protected OrientDaoConnection(ODatabaseDocument conn)
+  protected OrientDaoConnection(ODatabaseDocument db)
   {
-    this.conn = conn;
+    this.db = db;
   }
 
   @Override
   public void close()
   {
-    conn.close();
+    db.close();
   }
 
   @Override
   public void commit()
   {
-    conn.commit();
+    db.commit();
   }
 
   @Override
   public void rollback()
   {
-    conn.rollback();
+    db.rollback();
   }
 }

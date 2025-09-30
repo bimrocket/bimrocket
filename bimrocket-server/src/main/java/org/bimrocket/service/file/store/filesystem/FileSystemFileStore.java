@@ -168,7 +168,8 @@ public class FileSystemFileStore implements FileStore
   }
 
   @Override
-  public void delete(Path path) throws IOException {
+  public void delete(Path path) throws IOException
+  {
     File file = getFile(path);
 
     if (file.exists())
@@ -176,14 +177,27 @@ public class FileSystemFileStore implements FileStore
       if (file.isDirectory())
       {
         File[] childFiles = file.listFiles();
-        if (childFiles.length == 1 && isACLFile(childFiles[0]))
+        int fileCount = childFiles.length;
+        if (fileCount == 1 && isACLFile(childFiles[0]))
         {
-          childFiles[0].delete();
+          if (childFiles[0].delete())
+          {
+            fileCount--;
+          }
+          else
+            throw new IOException("Can't delete ACL file.");
         }
-      }
+        if (fileCount > 0)
+          throw new IOException("Folder not empty.");
 
-      if (!file.delete())
-        throw new IOException("Folder not Empty.");
+        if (!file.delete())
+          throw new IOException("Can't delete folder.");
+      }
+      else // is a file
+      {
+        if (!file.delete())
+          throw new IOException("Can't delete file.");
+      }
     }
   }
 

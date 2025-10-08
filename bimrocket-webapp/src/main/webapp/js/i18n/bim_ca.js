@@ -13,7 +13,8 @@ export const translations =
   "button.definition" : "Definició",
   "button.references" : "Referències",
   "button.save_extensions" : "Desa extensions",
-  "button.new_user": "Usuari nou",
+  "button.new_user" : "Usuari nou",
+  "button.new_role" : "Rol nou",
 
   "tool.bim_inventory.label" : "Inventari BIM",
   "tool.bim_inventory.help" : "Inventari BIM",
@@ -109,10 +110,12 @@ export const translations =
   "label.admin_service" : "Servidor Admin:",
   "label.users" : "Gestió d'usuaris",
   "label.roles_management" : "Gestió de rols",
+  "label.configuration" : "Configuració",
   "label.id" : "Id:",
   "label.email" : "Email:",
   "label.roles" : "Rols:",
-  "label.configuration" : "Configuració",
+  "label.inherited_roles" : "Rols heretats:",
+  "label.select_role" : "Selecciona rol",
   "label.confirm_password" : "Confirma paraula de pas:",
   "label.search_users": "Cercar usuaris:",
   "label.search_id": "Cercar per id:",
@@ -120,10 +123,12 @@ export const translations =
 
   "col.index" : "Ídx.",
   "col.topic" : "Incidència",
-  "col.sta servicetus" : "Estat",
+  "col.status" : "Estat",
   "col.id" : "Id",
   "col.name" : "Nom",
   "col.role" : "Rol",
+  "col.inherited_role" : "Rol heretat",
+  "col.description" : "Descripció",
 
   "title.delete_project" : "Esborra projecte",
   "title.delete_topic" : "Esborra incidència",
@@ -137,6 +142,7 @@ export const translations =
   "title.select_components" : "Selecciona objectes",
 
   "title.delete_user" : "Esborra usuari",
+  "title.delete_role" : "Esborra rol",
 
   "title.bim_delta_snapshots" : "Captures IFC",
 
@@ -188,6 +194,10 @@ export const translations =
   "message.model_saved" : "Model desat.",
   "message.model_updated" : "Model actualitzat.",
   "message.model_deleted" : "Model esborrat.",
+  "message.id_field_required": "L'id és obligatori.",
+  "message.role_saved" : "Rol desat.",
+  "message.role_deleted" : "Rol esborrat.",
+  "message.role_searched" : "No s'ha trobat cap rol.",
 
   "question.delete_project" : "Vols esborrar aquest projecte i totes les seves incidències?",
   "question.delete_topic" : "Vols esborrar aquesta incidència?",
@@ -198,6 +208,7 @@ export const translations =
   "question.delete_ifcdb_service" : name => `Vols esborrar el servei ${name}?`,
   "question.delete_ifcdb_model" : name => `Vols esborrar el model ${name}?`,
   "question.delete_user" : "Vols esborrar aquest usuari?",
+  "question.delete_role" : "Vols esborrar aquest rol?",
 
   "placeholder.keep_password": "Deixa en blanc per mantenir la paraula de pas actual",
   "placeholder.confirm_password": "Repeteix la nova paraula de pas",

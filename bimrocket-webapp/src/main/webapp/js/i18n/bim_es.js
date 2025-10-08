@@ -13,7 +13,8 @@ export const translations =
   "button.definition" : "Definición",
   "button.references" : "Referencias",
   "button.save_extensions" : "Guardar extensiones",
-  "button.new_user": "Usuario nuevo",
+  "button.new_user" : "Usuario nuevo",
+  "button.new_role" : "Rol nuevo",
 
   "tool.bim_inventory.label" : "Inventario BIM",
   "tool.bim_inventory.help" : "Inventario BIM",
@@ -113,6 +114,8 @@ export const translations =
   "label.id" : "Id:",
   "label.email" : "Email:  ",
   "label.roles" : "Roles:",
+  "label.inherited_roles" : "Roles heredados:",
+  "label.select_role" : "Selecciona rol",
   "label.confirm_password" : "Confirmar contraseña:",
   "label.search_users": "Buscar usuarios:",
   "label.search_id": "Buscar por id:",
@@ -124,6 +127,8 @@ export const translations =
   "col.id" : "Id",
   "col.name" : "Nombre",
   "col.role" : "Rol",
+  "col.inherited_role" : "Rol heredado",
+  "col.description" : "Descripción",
 
   "title.delete_project" : "Borrar proyecto",
   "title.delete_topic" : "Borrar incidencia",
@@ -137,6 +142,7 @@ export const translations =
   "title.select_components" : "Selecciona objetos",
 
   "title.delete_user" : "Borrar usuario",
+  "title.delete_role" : "Borrar rol",
 
   "title.bim_delta_snapshots" : "Capturas IFC",
 
@@ -185,6 +191,10 @@ export const translations =
   "message.model_saved" : "Modelo guardado.",
   "message.model_updated" : "Modelo actualizado.",
   "message.model_deleted" : "Modelo borrado.",
+  "message.id_field_required": "El id es obligatorio.",
+  "message.role_saved" : "Rol guardado.",
+  "message.role_deleted" : "Rol borrado.",
+  "message.role_searched" : "No se ha encontrado ningún rol.",
 
   "question.delete_project" : "Quieres borrar este proyecto y todas sus incidencias?",
   "question.delete_topic" : "Quieres borrar esta incidencia?",
@@ -195,6 +205,7 @@ export const translations =
   "question.delete_ifcdb_service" : name => `Quieres borrar el servicio ${name}?`,
   "question.delete_ifcdb_model" : name => `Quieres borrar el modelo ${name}?`,
   "question.delete_user" : "Quieres borrar este usuario?",
+  "question.delete_role" : "Quieres borrar este rol?",
 
   "placeholder.keep_password": "Dejar en blanco para mantener la contraseña actual",
   "placeholder.confirm_password": "Repite la nueva contraseña",

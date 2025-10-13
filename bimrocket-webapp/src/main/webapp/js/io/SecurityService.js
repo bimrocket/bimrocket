@@ -15,9 +15,24 @@ class SecurityService extends Service
     super(parameters);
   }
 
-  getRoles(onCompleted, onError)
+  getRoles(odataFilter, odataOrderBy, onCompleted, onError)
   {
-    this.invoke("GET", "roles", null, onCompleted, onError);
+    let query = "";
+    if (odataFilter || odataOrderBy)
+    {
+      query = "?";
+      if (odataFilter)
+      {
+        query += "$filter=" + odataFilter;
+      }
+      if (odataOrderBy)
+      {
+        if (!query.endsWith("?")) query += "&";
+        query += "$orderBy=" + odataOrderBy;
+      }
+    }
+
+    this.invoke("GET", "roles" + query, null, onCompleted, onError);
   }
 
   getRole(roleId, onCompleted, onError)

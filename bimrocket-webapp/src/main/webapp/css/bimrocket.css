@@ -63,7 +63,7 @@ body input, textarea, table *
 .logo_panel
 {
   z-index: 20000;
-  background-image: linear-gradient(#500000, black);
+  background-image: linear-gradient(black, #600000);
   position:absolute;
   top:0;
   bottom:0;

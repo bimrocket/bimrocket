@@ -192,6 +192,9 @@ class IFCDBPanel extends Panel
     this.executeJsonButton = Controls.addButton(commandButtonsElem, "exec_ifcjson",
       "button.run", () => this.execute("json"));
 
+    this.downloadStepButton = Controls.addButton(commandButtonsElem, "download_ifcstep",
+      "button.download", () => this.execute("step", true));
+
     this.clearExecutionButton = Controls.addButton(commandButtonsElem, "exec_clear",
       "button.clear", () => this.clearExecution());
 
@@ -383,16 +386,16 @@ class IFCDBPanel extends Panel
     }
   }
 
-  async execute(format = "step")
+  async execute(format = "step", download = false)
   {
     if (this.processing) return;
 
     try
     {
-      const sql = this.queryView.state.doc.toString();
+      const query = this.queryView.state.doc.toString();
       const command = {
         "language" : "sql",
-        "query" : sql,
+        "query" : query,
         "outputFormat" : format
       };
 
@@ -400,12 +403,27 @@ class IFCDBPanel extends Panel
       const data = await this.service.execute(command);
       if (format === "json")
       {
-        this.resultElem.innerHTML = "";
-        this.resultElem.textContent = JSON.stringify(JSON.parse(data), null, 2);
+        const json = JSON.stringify(JSON.parse(data), null, 2);
+        if (download)
+        {
+          WebUtils.downloadFile(json, "query.json", "application/json");
+        }
+        else
+        {
+          this.resultElem.innerHTML = "";
+          this.resultElem.textContent = json;
+        }
       }
       else
       {
-        this.loadModel(data);
+        if (download)
+        {
+          WebUtils.downloadFile(data, "query.ifc", "application/x-step");
+        }
+        else
+        {
+          this.loadModel(data);
+        }
       }
     }
     catch (ex)
@@ -836,6 +854,7 @@ class IFCDBPanel extends Panel
     this.uploadModelButton.disabled = processing;
     this.executeStepButton.disabled = processing;
     this.executeJsonButton.disabled = processing;
+    this.downloadStepButton.disabled = processing;
   }
 
   clearExecution()

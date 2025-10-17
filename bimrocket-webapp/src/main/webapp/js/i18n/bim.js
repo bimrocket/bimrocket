@@ -13,7 +13,8 @@ export const translations =
   "button.definition" : "Definition",
   "button.references" : "References",
   "button.save_extensions" : "Save extensions",
-  "button.new_user": "New user",
+  "button.new_user" : "New user",
+  "button.new_role" : "New role",
 
   "tool.bim_inventory.label" : "BIM inventory",
   "tool.bim_inventory.help" : "BIM inventory setup",
@@ -113,10 +114,14 @@ export const translations =
   "label.id" : "Id:",
   "label.email" : "Email:",
   "label.roles" : "Roles:",
+  "label.inherited_roles" : "Inherited roles:",
+  "label.select_role" : "Select role",
   "label.confirm_password" : "Confirm password:",
-  "label.search_users": "Search users:",
-  "label.search_id": "Search by id:",
-  "label.search_name": "Search by name:",
+  "label.search_users" : "Search users:",
+  "label.search_id" : "Search by id:",
+  "label.search_name" : "Search by name:",
+  "label.search_roles" : "Search roles:",
+  "label.search_description" : "Search by description:",
 
   "col.index" : "Idx.",
   "col.topic" : "Topic",
@@ -124,6 +129,8 @@ export const translations =
   "col.id" : "Id",
   "col.name" : "Name",
   "col.role" : "Role",
+  "col.inherited_role" : "Inherited Role",
+  "col.description" : "Description",
 
   "title.delete_project" : "Delete project",
   "title.delete_topic" : "Delete topic",
@@ -137,6 +144,7 @@ export const translations =
   "title.select_components" : "Select components",
 
   "title.delete_user" : "Delete user",
+  "title.delete_role" : "Delete role",
 
   "title.bim_delta_snapshots" : "IFC snapshots",
 
@@ -179,10 +187,16 @@ export const translations =
   "message.confirm_password_error" : "The passwords do not match.",
   "message.user_searched" : "No user found.",
   "message.fields_required" : "Name and email are required.",
+  "message.connection_success": "Connection successful.",
+  "message.connected": "Already connected.",
   "message.no_model_found" : "No model found.",
   "message.model_saved" : "Model saved.",
   "message.model_updated" : "Model updated.",
   "message.model_deleted" : "Model deleted.",
+  "message.id_field_required": "Id is required.",
+  "message.role_saved" : "Role saved.",
+  "message.role_deleted" : "Role deleted.",
+  "message.role_searched" : "No role found.",
 
   "question.delete_project" : "Do you want to delete this project and all its topics?",
   "question.delete_topic" : "Do you want to delete this topic?",
@@ -192,7 +206,8 @@ export const translations =
   "question.delete_bcf_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_ifcdb_service" : name => `Do you want to delete the ${name} service?`,
   "question.delete_ifcdb_model" : name => `Do you want to delete the ${name} model?`,
-  "question.delete_user" : "Do you want to delete this usuar?",
+  "question.delete_user" : "Do you want to delete this user?",
+  "question.delete_role" : "Do you want to delete this role?",
 
   "placeholder.keep_password": "Leave blank to keep current password",
   "placeholder.confirm_password": "Repeat new password",

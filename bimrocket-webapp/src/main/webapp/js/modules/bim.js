@@ -83,6 +83,7 @@ export function load(application)
   // restore services
   application.restoreServices("bcf");
   application.restoreServices("ifcdb");
+  application.restoreServices("security");
 
   // create default services
   if (application.services.bcf === undefined)

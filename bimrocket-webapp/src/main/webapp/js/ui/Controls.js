@@ -493,7 +493,7 @@ class Controls
     return editorView;
   }
 
-  static addTagsInput(parent, name, label, placeholderKey, initialTags = [], className)
+  static addTagsInput(parent, name, label, placeholderKey, initialTags = [], className, showInput = true)
   {
     const id = this.getNextId();
     const groupElem = document.createElement("div");
@@ -508,6 +508,12 @@ class Controls
 
     const tagsContainer = document.createElement("div");
     tagsContainer.className = "tags-container";
+
+    if (!showInput) 
+    {
+      tagsContainer.classList.add("hidden-input");
+    }
+    
     groupElem.appendChild(tagsContainer);
 
     const tagsInput = document.createElement("input");

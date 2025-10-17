@@ -281,6 +281,11 @@ ul.admin_list li
   box-sizing: border-box;
 }
 
+.tags-container.hidden-input input 
+{
+  display: none;
+}
+
 .tags-input:focus
 {
   outline: none;

@@ -126,6 +126,9 @@ export const translations =
   "tool.select.label" : "Select by point",
   "tool.select.help" : "Pointer: select by point",
 
+  "tool.select_by_box.label" : "Select by box",
+  "tool.select_by_box.help" : "Drag pointer to draw the selection box",
+
   "tool.select_faces.label" : "Select faces",
 
   "tool.select_by_name.label" : "Select by name",

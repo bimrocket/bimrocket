@@ -126,6 +126,9 @@ export const translations =
   "tool.select.label" : "Selecciona per punt",
   "tool.select.help" : "Punter: selecció per punt",
 
+  "tool.select_by_box.label" : "Selecciona per caixa",
+  "tool.select_by_box.help" : "Arrossega el punter per dibuixar la caixa de selecció",
+
   "tool.select_faces.label" : "Selecciona cares",
 
   "tool.select_by_name.label" : "Selecciona per nom",

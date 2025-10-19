@@ -5,6 +5,7 @@
  */
 
 import { Tool } from "./Tool.js";
+import { BoxHandler } from "../ui/BoxHandler.js";
 import { Controls } from "../ui/Controls.js";
 import { Application } from "../ui/Application.js";
 import { Solid } from "../core/Solid.js";
@@ -28,18 +29,14 @@ class SelectFacesTool extends Tool
     this.setOptions(options);
     application.addTool(this);
 
-    this._onPointerDown = this.onPointerDown.bind(this);
     this._onPointerUp = this.onPointerUp.bind(this);
-    this._onPointerMove = this.onPointerMove.bind(this);
-
-    this.dragging = false;
 
     this.plane = new THREE.Plane();
     this.triangleMap = new Map();
 
     this.mesh = null;
-    
-    this.meshMaterial = new THREE.MeshPhongMaterial({ 
+
+    this.meshMaterial = new THREE.MeshPhongMaterial({
       color : 0x8080ff,
       name : "face_selection",
       polygonOffset : true,
@@ -47,7 +44,7 @@ class SelectFacesTool extends Tool
       side : THREE.DoubleSide
     });
 
-    this.copyMaterial = new THREE.MeshPhongMaterial({ 
+    this.copyMaterial = new THREE.MeshPhongMaterial({
       color : 0xff8080,
       name : "face_copy",
       polygonOffset : false,
@@ -62,26 +59,14 @@ class SelectFacesTool extends Tool
       depthWrite: false,
       transparent : true
     });
-    
+
     this.planeHelper = null;
     this.raycaster = new THREE.Raycaster();
 
     this.createPanel();
 
-    this.startPoint = new THREE.Vector2();
-    this.box = new THREE.Box2();
-
-    this.boxElem = document.createElement("div");
-    const boxElem = this.boxElem;
-    boxElem.style.position = "absolute";
-    boxElem.style.display = "none";
-    boxElem.style.width = "0";
-    boxElem.style.height = "0";
-    boxElem.style.left = "0";
-    boxElem.style.top = "0";
-    boxElem.style.border = "2px dotted red";
-    boxElem.style.backgroundColor = "transparent";
-    application.container.appendChild(boxElem);
+    this.boxHandler = new BoxHandler(this);
+    this.boxHandler.onBoxDrawn = (box, event) => this.onBoxDrawn(box, event);
   }
 
   createPanel()
@@ -98,6 +83,8 @@ class SelectFacesTool extends Tool
        [SelectFacesTool.REMOVE_FACES, "option.select_faces.remove_faces"]],
         SelectFacesTool.SET_PLANE);
     this.selectModeElem.style.margin = "4px";
+
+    this.selectModeElem.addEventListener("change", () => this.updateBoxHandler());
 
     this.angleInputElem = Controls.addNumberField(this.panel.bodyElem,
       "select_faces_angle", "label.select_faces_angle", 20);
@@ -118,7 +105,6 @@ class SelectFacesTool extends Tool
       "select_faces_clear", "button.clear", event => this.clear());
     this.copyButton = Controls.addButton(this.buttonsElem,
       "select_faces_copy", "button.copy", event => this.copy());
-
   }
 
   activate()
@@ -126,26 +112,24 @@ class SelectFacesTool extends Tool
     this.panel.visible = true;
     const application = this.application;
     const container = application.container;
-    container.addEventListener("pointerdown", this._onPointerDown, false);
     container.addEventListener("pointerup", this._onPointerUp, false);
-    if (this.mesh && 
+    if (this.mesh &&
         !ObjectUtils.isObjectDescendantOf(this.mesh, application.scene))
     {
       this.clear();
     }
+    this.updateBoxHandler();
   }
 
   deactivate()
   {
     this.panel.visible = false;
     const container = this.application.container;
-    container.removeEventListener("pointerdown", this._onPointerDown, false);
     container.removeEventListener("pointerup", this._onPointerUp, false);
-
-    this.stopDragging();
+    this.boxHandler.disable();
   }
 
-  onPointerDown(event)
+  onPointerUp(event)
   {
     const application = this.application;
 
@@ -163,42 +147,13 @@ class SelectFacesTool extends Tool
       {
         this.updatePlane(intersect);
         this.selectModeElem.value = SelectFacesTool.ADD_FACES;
+        this.boxHandler.enable();
       }
-    }
-    else if (this.planeHelper)
-    {
-      const boxElem = this.boxElem;
-
-      this.startDragging();
-
-      let startPoint = application.getPointerPosition(event);
-
-      this.startPoint.copy(startPoint);
-
-      boxElem.style.left = startPoint.x + "px";
-      boxElem.style.top = startPoint.y + "px";
-      boxElem.style.width = "0";
-      boxElem.style.height = "0";
-      boxElem.style.display = "";
     }
   }
 
-  onPointerUp(event)
+  onBoxDrawn(box, event)
   {
-    if (!this.dragging) return;
-
-    event.preventDefault();
-
-    this.stopDragging();
-
-    const application = this.application;
-    const boxElem = this.boxElem;
-
-    if (!application.isCanvasEvent(event)) return;
-
-    let endPoint = application.getPointerPosition(event);
-
-    let box = this.getBox(this.startPoint, endPoint);
     let boxProjected = new THREE.Box2();
     boxProjected.expandByPoint(this.toCamera(box.min));
     boxProjected.expandByPoint(this.toCamera(box.max));
@@ -206,54 +161,17 @@ class SelectFacesTool extends Tool
     this.selectFaces(boxProjected, event);
   }
 
-  onPointerMove(event)
+  updateBoxHandler()
   {
-    const boxElem = this.boxElem;
-    const application = this.application;
-
-    let endPoint = application.getPointerPosition(event);
-
-    let box = this.getBox(this.startPoint, endPoint);
-    let size = new THREE.Vector2();
-    box.getSize(size);
-
-    boxElem.style.left = box.min.x + "px";
-    boxElem.style.top = box.min.y + "px";
-    boxElem.style.width = size.x + "px";
-    boxElem.style.height = size.y + "px";
-  }
-
-  startDragging()
-  {
-    const container = this.application.container;
-    container.addEventListener("pointermove", this._onPointerMove, false);
-
-    this.dragging = true;
-  }
-
-  stopDragging()
-  {
-    const container = this.application.container;
-    container.removeEventListener("pointermove", this._onPointerMove, false);
-
-    this.dragging = false;
-
-    const boxElem = this.boxElem;
-    boxElem.style.display = "none";
-    boxElem.style.left = "0";
-    boxElem.style.top = "0";
-    boxElem.style.width = "0";
-    boxElem.style.height = "0";
-  }
-
-  getBox(startPoint, endPoint)
-  {
-    const box = this.box;
-    box.makeEmpty();
-    box.expandByPoint(startPoint);
-    box.expandByPoint(endPoint);
-
-    return box;
+    const mode = this.selectModeElem.value;
+    if (mode === SelectFacesTool.SET_PLANE)
+    {
+      this.boxHandler.disable();
+    }
+    else
+    {
+      this.boxHandler.enable();
+    }
   }
 
   toCamera(screenPoint)
@@ -310,11 +228,11 @@ class SelectFacesTool extends Tool
             explore(child);
           }
         }
-      }      
+      }
     };
 
     explore(baseObject);
-    
+
     this.updateMeshGeometry();
   }
 
@@ -345,7 +263,7 @@ class SelectFacesTool extends Tool
     const worldTriangle = new THREE.Triangle();
     const faceNormal = new THREE.Vector3();
     const planeNormal = this.plane.normal;
-    
+
     for (let face of faces)
     {
       if (!face.normal) face.updateNormal();
@@ -367,12 +285,12 @@ class SelectFacesTool extends Tool
         worldTriangle.a.copy(worldVertices[i0]);
         worldTriangle.b.copy(worldVertices[i1]);
         worldTriangle.c.copy(worldVertices[i2]);
-        
+
         this.addTriangle(worldTriangle, cameraTriangle, box, selectMode, depth);
       }
     }
   }
-  
+
   selectMeshFaces(mesh, box, selectMode, cosAngle, depth)
   {
     const camera = this.application.camera;
@@ -387,25 +305,25 @@ class SelectFacesTool extends Tool
 
       const worldTriangle = new THREE.Triangle();
       const cameraTriangle = new THREE.Triangle();
-      
+
       worldTriangle.a.copy(va).applyMatrix4(mesh.matrixWorld);
       worldTriangle.b.copy(vb).applyMatrix4(mesh.matrixWorld);
       worldTriangle.c.copy(vc).applyMatrix4(mesh.matrixWorld);
-      
+
       const triangleNormal = GeometryUtils.calculateNormal(
         [worldTriangle.a, worldTriangle.b, worldTriangle.c]);
-      
-      if (planeNormal.dot(triangleNormal) < cosAngle) return;      
-      
+
+      if (planeNormal.dot(triangleNormal) < cosAngle) return;
+
       cameraTriangle.a.copy(worldTriangle.a).project(camera);
       cameraTriangle.b.copy(worldTriangle.b).project(camera);
       cameraTriangle.c.copy(worldTriangle.c).project(camera);
-      
-      this.addTriangle(worldTriangle, cameraTriangle, box, selectMode, depth);      
+
+      this.addTriangle(worldTriangle, cameraTriangle, box, selectMode, depth);
     };
     GeometryUtils.getBufferGeometryFaces(mesh.geometry, addFace);
   }
-  
+
   addTriangle(worldTriangle, cameraTriangle, box, selectMode, depth)
   {
     if (Math.abs(this.plane.distanceToPoint(worldTriangle.a)) < depth &&
@@ -416,7 +334,7 @@ class SelectFacesTool extends Tool
       {
         this.mergeTriangle(worldTriangle.clone(), selectMode);
       }
-    }    
+    }
   }
 
   mergeTriangle(triangle, selectMode)
@@ -460,7 +378,7 @@ class SelectFacesTool extends Tool
 
     if (this.mesh)
     {
-      application.removeObject(this.mesh);      
+      application.removeObject(this.mesh);
     }
     this.mesh = new THREE.Mesh(bufferGeometry, this.meshMaterial);
     this.mesh.raycast = function(){};
@@ -532,8 +450,9 @@ class SelectFacesTool extends Tool
       this.planeHelper = null;
     }
     this.selectModeElem.value = SelectFacesTool.SET_PLANE;
+    this.boxHandler.disable();
   }
-  
+
   copy()
   {
     const application = this.application;

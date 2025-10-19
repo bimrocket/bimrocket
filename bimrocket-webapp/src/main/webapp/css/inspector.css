@@ -6,6 +6,11 @@ div.inspector_card
   overflow: hidden;
 }
 
+div.inspector_card.list
+{
+  height: auto;
+}
+
 div.inspector_toolbar
 {
   border-bottom: 1px solid #b0b0b0;

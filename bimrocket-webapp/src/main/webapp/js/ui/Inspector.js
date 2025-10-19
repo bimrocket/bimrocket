@@ -91,7 +91,7 @@ class Inspector extends Panel
 
     this.listCardElem = document.createElement("div");
     this.bodyElem.appendChild(this.listCardElem);
-    this.listCardElem.className = "inspector_card";
+    this.listCardElem.className = "inspector_card list";
 
     this.toolBarElem = document.createElement("div");
     this.objectCardElem.appendChild(this.toolBarElem);
@@ -671,7 +671,7 @@ class Inspector extends Panel
     for (let propertyName in userData)
     {
       let propertyValue = userData[propertyName];
-      if (propertyValue !== null && typeof propertyValue === "object" 
+      if (propertyValue !== null && typeof propertyValue === "object"
           && !(propertyValue instanceof Array))
       {
         let dictName = propertyName;
@@ -1379,7 +1379,7 @@ class ArrayRenderer extends PropertyRenderer
     valueElem.textContent = ArrayRenderer.arrayToString(array, 4);
     return valueElem;
   }
-  
+
   static arrayToString(array, maxElements = array.length)
   {
     let outArray = [];
@@ -1796,7 +1796,6 @@ class ColorEditor extends PropertyEditor
     groupElem.appendChild(codeElem);
 
     let hexString = "#" + color.getHexString();
-    console.info("COLOR1", hexString);
     const sampleElem = document.createElement("label");
     sampleElem.className = "color";
     sampleElem.style.backgroundColor = hexString;
@@ -1816,8 +1815,6 @@ class ColorEditor extends PropertyEditor
 
     colorElem.addEventListener("change", () =>
     {
-      console.info("COLOR2", colorElem.value);
-
       object[propertyName].set(colorElem.value);
       document.body.removeEventListener("keydown", keyDownListener);
       document.body.removeEventListener("pointerdown", pointerDownListener);
@@ -1885,7 +1882,7 @@ class ArrayEditor extends PropertyEditor
           }
         }
         catch (ex)
-        {          
+        {
         }
       }
       else if (event.keyCode === 27)

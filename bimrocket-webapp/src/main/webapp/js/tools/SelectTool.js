@@ -55,7 +55,7 @@ class SelectTool extends Tool
 
     const helpElem = document.createElement("div");
     I18N.set(helpElem, "textContent", this.help);
-    helpElem.style.marginBottom = "4px";
+    helpElem.style.margin = "4px 0 4px 0";
     this.panel.bodyElem.appendChild(helpElem);
 
     this.selectModeElem = Controls.addRadioButtons(this.panel.bodyElem,

@@ -1099,13 +1099,13 @@ class Application
 
     let elem = event.target;
 
-    while (elem !== this.container)
+    while (elem && elem !== this.container)
     {
       if (elem.classList.contains("panel") ||
           elem.classList.contains("resizer")) return false;
       elem = elem.parentElement;
     }
-    return true;
+    return elem === this.container;
   }
 
   getPointerPosition(event)
@@ -1742,10 +1742,10 @@ class Application
   {
     this.handleControllers(controller => controller.init(this), object);
   }
-  
+
   destroyControllers(object)
   {
-    this.handleControllers(controller => controller.destroy(this), object);    
+    this.handleControllers(controller => controller.destroy(this), object);
   }
 
   startControllers(object)
@@ -2022,7 +2022,7 @@ class Application
         application.progressBar.message = data.message;
       },
       onCompleted : object =>
-      {        
+      {
         const baseObject = application.baseObject;
 
         object.updateMatrix();
@@ -2049,8 +2049,8 @@ class Application
       let credentialAlias = params.get("credential_alias");
       if (credentialAlias)
       {
-        CredentialsManager.setCredentials(credentialAlias, username, password);      
-      }      
+        CredentialsManager.setCredentials(credentialAlias, username, password);
+      }
       intent.basicAuthCredentials =
       { "username" : username, "password" : password };
       application.progressBar.visible = true;

@@ -43,10 +43,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bimrocket.util.Cleaner;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+
+import static org.bson.codecs.configuration.CodecRegistries.*;
 
 /**
  *
@@ -94,7 +94,7 @@ public class MongoClientManager
           .build());
 
       CodecRegistry codecRegistry = fromRegistries(
-        MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
+        MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry, fromCodecs(new ObjectCodec()));
 
       MongoClientSettings clientSettings = MongoClientSettings.builder()
         .applyConnectionString(connectionString)

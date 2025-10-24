@@ -2,99 +2,109 @@ package org.bimrocket.dao.mongo;
 
 import org.bson.*;
 import org.bson.codecs.*;
+import java.util.*;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.types.ObjectId;
 
-import java.util.HashMap;
-import java.util.Map;
+public class ObjectCodec implements Codec<Object> {
 
-public class ObjectCodec implements Codec<Object>
-{
+  private final CodecRegistry registry;
+
+  public ObjectCodec(CodecRegistry registry)
+  {
+    this.registry = registry;
+  }
+
   @Override
   public void encode(BsonWriter writer, Object value, EncoderContext encoderContext)
   {
-    if (value instanceof Map<?, ?> map)
+    if (value == null)
+    {
+      writer.writeNull();
+    }
+    else if (value instanceof Map<?, ?> map)
     {
       writer.writeStartDocument();
-      for (Map.Entry<?, ?> entry : map.entrySet())
+      for (Map.Entry<?, ?> e : map.entrySet())
       {
-        writer.writeName(entry.getKey().toString());
-        Object entryValue = entry.getValue();
-
-        if (entryValue instanceof Map<?, ?>)
-        {
-          // recursive call for nested Maps
-          encode(writer, entryValue, encoderContext);
-        }
-        else if (entryValue instanceof String s)
-        {
-          writer.writeString(s);
-        }
-        else if (entryValue instanceof Integer i)
-        {
-          writer.writeInt32(i);
-        }
-        else if (entryValue instanceof Long l)
-        {
-          writer.writeInt64(l);
-        }
-        else if (entryValue instanceof Boolean b)
-        {
-          writer.writeBoolean(b);
-        }
-        else if (entryValue instanceof Double d)
-        {
-          writer.writeDouble(d);
-        }
-        else
-        {
-          // fallback: write as string
-          writer.writeString(entryValue.toString());
-        }
+        writer.writeName(e.getKey().toString());
+        encode(writer, e.getValue(), encoderContext);
       }
       writer.writeEndDocument();
     }
-    else
+    else if (value instanceof List<?> list)
     {
-      // If not Map, fallback like string
-      writer.writeString(value.toString());
+      writer.writeStartArray();
+      for (Object item : list)
+      {
+        encode(writer, item, encoderContext);
+      }
+      writer.writeEndArray();
+    } else if (value instanceof String s)
+    {
+      writer.writeString(s);
+    } else if (value instanceof Integer i)
+    {
+      writer.writeInt32(i);
+    } else if (value instanceof Long l)
+    {
+      writer.writeInt64(l);
+    } else if (value instanceof Double d)
+    {
+      writer.writeDouble(d);
+    } else if (value instanceof Boolean b)
+    {
+      writer.writeBoolean(b);
+    } else if (value instanceof ObjectId oid)
+    {
+      writer.writeObjectId(oid);
+    } else
+    {
+      // Si es otro tipo, intentamos usar un codec ya existente
+      @SuppressWarnings("unchecked")
+      Codec<Object> codec = (Codec<Object>) registry.get(value.getClass());
+      codec.encode(writer, value, encoderContext);
     }
   }
 
   @Override
   public Object decode(BsonReader reader, DecoderContext decoderContext)
   {
-    BsonType currentType = reader.getCurrentBsonType();
-
-    if (currentType == BsonType.DOCUMENT) {
-      Map<String, Object> map = new HashMap<>();
-      reader.readStartDocument();
-      while (reader.readBsonType() != BsonType.END_OF_DOCUMENT)
+    BsonType type = reader.getCurrentBsonType();
+    return switch (type)
+    {
+      case NULL -> { reader.readNull(); yield null; }
+      case STRING -> reader.readString();
+      case INT32 -> reader.readInt32();
+      case INT64 -> reader.readInt64();
+      case DOUBLE -> reader.readDouble();
+      case BOOLEAN -> reader.readBoolean();
+      case OBJECT_ID -> reader.readObjectId();
+      case ARRAY ->
       {
-        String key = reader.readName();
-        BsonType type = reader.getCurrentBsonType();
-
-        switch (type)
+        List<Object> list = new ArrayList<>();
+        reader.readStartArray();
+        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT)
         {
-          case DOCUMENT -> map.put(key, decode(reader, decoderContext)); // recursive
-          case STRING -> map.put(key, reader.readString());
-          case INT32 -> map.put(key, reader.readInt32());
-          case INT64 -> map.put(key, reader.readInt64());
-          case DOUBLE -> map.put(key, reader.readDouble());
-          case BOOLEAN -> map.put(key, reader.readBoolean());
-          default -> reader.skipValue(); // ignore unknown types
+          list.add(decode(reader, decoderContext));
         }
+        reader.readEndArray();
+        yield list;
       }
-      reader.readEndDocument();
-      return map;
-    }
-    else if (currentType == BsonType.STRING)
-    {
-      return reader.readString(); // fallback
-    }
-    else
-    {
-      reader.skipValue();
-      return null;
-    }
+      case DOCUMENT ->
+      {
+        Map<String, Object> map = new LinkedHashMap<>();
+        reader.readStartDocument();
+        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT)
+        {
+          String key = reader.readName();
+          map.put(key, decode(reader, decoderContext));
+        }
+        reader.readEndDocument();
+        yield map;
+      }
+      default -> throw new BsonInvalidOperationException("Tipo BSON no soportado: " + type);
+    };
   }
 
   @Override

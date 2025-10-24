@@ -310,7 +310,7 @@ public class TaskService
     }
 
     Task task = tasks.get(taskName);
-    if (task == null || metadata.getCreationDate() > task.getCreationDate())
+    if (task == null || metadata.getLastModifiedDate() > task.getCreationDate())
     {
       if (task != null) task.destroy();
 

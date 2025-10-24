@@ -94,7 +94,7 @@ public class MongoClientManager
           .build());
 
       CodecRegistry codecRegistry = fromRegistries(
-        MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry, fromCodecs(new ObjectCodec()));
+        MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry, fromCodecs(new ObjectCodec(pojoCodecRegistry)));
 
       MongoClientSettings clientSettings = MongoClientSettings.builder()
         .applyConnectionString(connectionString)

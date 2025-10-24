@@ -6,8 +6,8 @@ import java.util.*;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.types.ObjectId;
 
-public class ObjectCodec implements Codec<Object> {
-
+public class ObjectCodec implements Codec<Object>
+{
   private final CodecRegistry registry;
 
   public ObjectCodec(CodecRegistry registry)
@@ -32,37 +32,43 @@ public class ObjectCodec implements Codec<Object> {
       }
       writer.writeEndDocument();
     }
-    else if (value instanceof List<?> list)
+    else if (value instanceof Collection<?> col)
     {
       writer.writeStartArray();
-      for (Object item : list)
+      for (Object item : col)
       {
         encode(writer, item, encoderContext);
       }
       writer.writeEndArray();
-    } else if (value instanceof String s)
+    }
+    else if (value instanceof String s)
     {
       writer.writeString(s);
-    } else if (value instanceof Integer i)
+    }
+    else if (value instanceof Integer i)
     {
       writer.writeInt32(i);
-    } else if (value instanceof Long l)
+    }
+    else if (value instanceof Long l)
     {
       writer.writeInt64(l);
-    } else if (value instanceof Double d)
+    }
+    else if (value instanceof Double d)
     {
       writer.writeDouble(d);
-    } else if (value instanceof Boolean b)
+    }
+    else if (value instanceof Boolean b)
     {
       writer.writeBoolean(b);
-    } else if (value instanceof ObjectId oid)
+    }
+    else if (value instanceof ObjectId oid)
     {
       writer.writeObjectId(oid);
-    } else
+    }
+    else
     {
-      // Si es otro tipo, intentamos usar un codec ya existente
       @SuppressWarnings("unchecked")
-      Codec<Object> codec = (Codec<Object>) registry.get(value.getClass());
+      Codec<Object> codec = (Codec<Object>)registry.get(value.getClass());
       codec.encode(writer, value, encoderContext);
     }
   }
@@ -103,7 +109,7 @@ public class ObjectCodec implements Codec<Object> {
         reader.readEndDocument();
         yield map;
       }
-      default -> throw new BsonInvalidOperationException("Tipo BSON no soportado: " + type);
+      default -> throw new BsonInvalidOperationException("Unsupported BSON type: " + type);
     };
   }
 

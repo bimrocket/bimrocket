@@ -34,7 +34,7 @@ class HistogramTool extends Tool
     this.panel = this.application.createPanel(this.label, "left", "panel_histogram");
     this.panel.minimumHeight = 200;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.psetSelect = Controls.addSelectField(this.panel.bodyElem,
       "pset", "label.property_set");

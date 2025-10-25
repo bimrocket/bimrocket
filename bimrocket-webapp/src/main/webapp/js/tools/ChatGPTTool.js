@@ -39,7 +39,7 @@ class ChatGPTTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left", "panel_chatgpt");
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.conversationElem = document.createElement("div");
     this.conversationElem.classList.add("conversation");

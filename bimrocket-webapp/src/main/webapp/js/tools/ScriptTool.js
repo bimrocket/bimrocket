@@ -36,7 +36,7 @@ class ScriptTool extends Tool
     const panel = new FileExplorer(application, false);
     this.panel = panel;
     panel.showFileSize = false;
-    panel.onHide = () => this.application.useTool(null);
+    panel.onClose = () => this.application.useTool(null);
 
     this.edit = false;
 

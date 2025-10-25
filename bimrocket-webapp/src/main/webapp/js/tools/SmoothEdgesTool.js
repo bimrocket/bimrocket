@@ -33,7 +33,7 @@ class SmoothEdgesTool extends Tool
       "panel_smooth_edges");
     this.panel.preferredHeight = 100;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.smoothAngleElem = Controls.addNumberField(this.panel.bodyElem,
       "smooth_angle", "label.smooth_angle", 20, "row");

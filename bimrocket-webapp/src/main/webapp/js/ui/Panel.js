@@ -72,7 +72,12 @@ class Panel
       this.minimized = false);
 
     this.closeButtonElem.addEventListener("click", () =>
-      this.visible = false);
+    {
+      if (this.onClose())
+      {
+        this.visible = false;
+      }
+    });
 
     this._position = null;
     this.position = "left";
@@ -230,6 +235,11 @@ class Panel
     let headerOpacity = Math.min(opacity + 0.2, 1);
     this.headerElem.style.background =
       "rgba(255,255,255," + headerOpacity + ")";
+  }
+
+  onClose()
+  {
+    return true;
   }
 
   onShow()

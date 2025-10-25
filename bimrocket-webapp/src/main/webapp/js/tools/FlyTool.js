@@ -4,12 +4,12 @@
  * @author realor
  */
 
-import { Tool } from "./Tool.js";
+import { CameraTool } from "./CameraTool.js";
 import { Dialog } from "../ui/Dialog.js";
 import { I18N } from "../i18n/I18N.js";
 import * as THREE from "three";
 
-class FlyTool extends Tool
+class FlyTool extends CameraTool
 {
   static SUBPANELS = [
     {
@@ -159,7 +159,7 @@ class FlyTool extends Tool
     this.panel.preferredHeight = 120;
     this.panel.mininumHeight = 120;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => CameraTool.restoreTool(this.application);
 
     this.panel.bodyElem.classList.add("fly_panel");
 

@@ -35,7 +35,7 @@ class PaintTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.minimumHeight = 160;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.materialListElem = Controls.addSelectField(this.panel.bodyElem,
       "materialList", "label.material_list");

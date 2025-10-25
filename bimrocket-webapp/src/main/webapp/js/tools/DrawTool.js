@@ -54,7 +54,7 @@ class DrawTool extends Tool
     this.panel = this.application.createPanel(this.label, "left", "panel_draw");
     this.panel.preferredHeight = 140;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

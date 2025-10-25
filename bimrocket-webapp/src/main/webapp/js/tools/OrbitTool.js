@@ -4,13 +4,13 @@
  * @author realor
  */
 
-import { Tool } from "./Tool.js";
+import { CameraTool } from "./CameraTool.js";
 import { I18N } from "../i18n/I18N.js";
 import { Solid } from "../core/Solid.js";
 import { GestureHandler } from "../ui/GestureHandler.js";
 import * as THREE from "three";
 
-class OrbitTool extends Tool
+class OrbitTool extends CameraTool
 {
   constructor(application, options)
   {
@@ -94,7 +94,7 @@ class OrbitTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 120;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => CameraTool.restoreTool(this.application);
 
     I18N.set(this.panel.bodyElem, "textContent", this.help);
   }

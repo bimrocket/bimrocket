@@ -36,7 +36,7 @@ class SelectByBoxTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 140;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     const helpElem = document.createElement("div");
     I18N.set(helpElem, "textContent", this.help);

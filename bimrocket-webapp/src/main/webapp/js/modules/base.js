@@ -19,6 +19,7 @@ import { SelectByNameTool } from "../tools/SelectByNameTool.js";
 import { SelectByPropertyTool } from "../tools/SelectByPropertyTool.js";
 import { SelectByQRCodeTool } from "../tools/SelectByQRCodeTool.js";
 import { ExportSelectionTool } from "../tools/ExportSelectionTool.js";
+import { CameraTool } from "../tools/CameraTool.js";
 import { OrbitTool } from "../tools/OrbitTool.js";
 import { FlyTool } from "../tools/FlyTool.js";
 import { ViewTool } from "../tools/ViewTool.js";
@@ -722,6 +723,15 @@ export function load(application)
 
   // select baseObject
   application.selection.set(application.baseObject);
+
+  // init camera tools
+  CameraTool.init(application,
+  {
+    defaultCameraToolName : "orbit",
+    activateOnStartUp : true,
+    activateOnAltKey : true,
+    activateOnClear : true
+  });
 
   // globals
   const GLOBALS =

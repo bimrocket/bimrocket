@@ -35,7 +35,7 @@ class OptionsTool extends Tool
     this.panel = application.createPanel(this.label, "left", "panel_options");
     this.panel.bodyElem.classList.add("p_4");
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
     this.tabbedPane.addClassName("h_full");

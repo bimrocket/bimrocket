@@ -79,9 +79,9 @@ class SolarSimulatorTool extends Tool
     this.panel.onHide = () =>
     {
       application.removeEventListener("scene", this._onSceneChanged);
-      this.cancel();
       application.useTool(null);
       this.resizeObverser.unobserve(this.panel.element);
+      this.cancel();
     };
 
     this.selectPositionButton = Controls.addButton(this.panel.bodyElem,

@@ -46,7 +46,7 @@ class BIMLayoutTool extends Tool
   {
     this.panel = this.application.createPanel(this.label, "left");
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.layoutPanelElem = document.createElement("div");
     this.layoutPanelElem.className = "bim_layout_panel";

@@ -109,7 +109,7 @@ class SectionTool extends Tool
     this.panel = application.createPanel(this.label, "left", "panel_section");
     this.panel.preferredHeight = 160;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

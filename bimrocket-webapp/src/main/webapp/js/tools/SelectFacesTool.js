@@ -74,7 +74,7 @@ class SelectFacesTool extends Tool
     this.panel = this.application.createPanel(this.label, "left");
     this.panel.preferredHeight = 160;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.selectModeElem = Controls.addSelectField(this.panel.bodyElem,
       "select_faces_mode", "label.select_faces_mode",

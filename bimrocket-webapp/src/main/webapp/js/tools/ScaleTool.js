@@ -46,7 +46,7 @@ class ScaleTool extends TransformationTool
     this.panel = this.application.createPanel(this.label, "left", "panel_scale");
     this.panel.preferredHeight = 180;
 
-    this.panel.onHide = () => this.application.useTool(null);
+    this.panel.onClose = () => this.application.useTool(null);
 
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);

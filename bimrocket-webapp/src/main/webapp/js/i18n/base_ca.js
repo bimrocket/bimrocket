@@ -373,6 +373,7 @@ export const translations =
   "tool.inspect_geometry.help" : "Selecciona la geometria",
 
   "tool.about.label" : "Quant a",
+  "tool.website.label" : "Lloc web",
 
   "action.ChangeMaterial" : "Canvia material",
   "action.SetBuilder" : "Assigna constructor",

@@ -476,6 +476,9 @@ export function load(application)
   const startControllersTool = new StartControllersTool(application);
   const stopControllersTool = new StopControllersTool(application);
   const aboutTool = new AboutTool(application);
+  const websiteTool = new OpenLinkTool(application,
+  { name : "website", label: "tool.website.label", url: "https://bimrocket.github.io",
+    target : "_blank"});
   const githubTool = new OpenLinkTool(application,
   { name : "github", label: "GitHub", url: "https://github.com/bimrocket/bimrocket",
     target : "_blank"});
@@ -622,6 +625,7 @@ export function load(application)
 
   const helpMenu = menuBar.addMenu("menu.help");
   helpMenu.addMenuItem(aboutTool);
+  helpMenu.addMenuItem(websiteTool);
   helpMenu.addMenuItem(githubTool);
 
   // add tools to toolbar

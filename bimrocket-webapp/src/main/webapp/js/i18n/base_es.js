@@ -373,6 +373,7 @@ export const translations =
   "tool.inspect_geometry.help" : "Selecciona la geometría",
 
   "tool.about.label" : "Acerca de",
+  "tool.website.label" : "Sitio web",
 
   "action.ChangeMaterial" : "Cambiar material",
   "action.SetBuilder" : "Asignar constructor",

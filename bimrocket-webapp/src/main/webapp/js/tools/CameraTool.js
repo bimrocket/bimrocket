@@ -65,6 +65,7 @@ class CameraTool extends Tool
       }
       else if (event.key === "Alt" && cameraSetup.activateOnAltKey)
       {
+        event.preventDefault();
         const tool = this.getDefaultCameraTool(application);
         if (tool)
         {

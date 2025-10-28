@@ -762,7 +762,6 @@ class IfcProjectHelper extends IfcHelper
 
         const vx = mapConversion.XAxisAbscissa;
         const vy = mapConversion.XAxisOrdinate;
-        console.info(vx, vy);
         if (typeof vx === "number" && typeof vy === "number")
         {
           model.rotation.z = Math.atan2(vy, vx);
@@ -903,18 +902,33 @@ class IfcProductRepresentationHelper extends IfcHelper
     let reprObject3D = null;
     const productRepr = this.entity;
     const loader = this.loader;
+    let otherRepr = null;
 
     for (let repr of productRepr.Representations)
     {
       if (repr.RepresentationIdentifier === representationIdentifier)
       {
         reprObject3D = this.helper(repr).getObject3D();
-        if (reprObject3D === null)
+        if (!reprObject3D)
         {
           console.warn("Unsupported representation",
-            representationIdentifier, repr);
+           representationIdentifier, repr);
         }
-        break;
+        return reprObject3D;
+      }
+      else if (!otherRepr)
+      {
+        otherRepr = repr;
+      }
+    }
+
+    // if repr not found by identifier, take otherRepr
+    if (otherRepr)
+    {
+      reprObject3D = this.helper(otherRepr).getObject3D();
+      if (!reprObject3D)
+      {
+        console.warn("Unsupported representation", otherRepr);
       }
     }
     return reprObject3D;

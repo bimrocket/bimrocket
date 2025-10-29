@@ -106,7 +106,7 @@ class OrbitTool extends CameraTool
 
     const application = this.application;
     const container = application.container;
-    container.addEventListener('wheel', this._onWheel, false);
+    container.addEventListener('wheel', this._onWheel, { passive : false });
     application.addEventListener('animation', this._animate);
     application.addEventListener('scene', this._onScene);
     this.gestureHandler.enable();
@@ -118,7 +118,7 @@ class OrbitTool extends CameraTool
 
     const application = this.application;
     const container = application.container;
-    container.removeEventListener('wheel', this._onWheel, false);
+    container.removeEventListener('wheel', this._onWheel);
     application.removeEventListener('animation', this._animate);
     application.removeEventListener('scene', this._onScene);
     this.gestureHandler.disable();

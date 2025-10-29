@@ -167,7 +167,7 @@ class SectionTool extends Tool
     const application = this.application;
     const container = application.container;
     this.panel.visible = true;
-    container.addEventListener("wheel", this._onWheel, false);
+    container.addEventListener('wheel', this._onWheel, { passive : false });
     this.gestureHandler.enable();
   }
 
@@ -176,7 +176,7 @@ class SectionTool extends Tool
     const application = this.application;
     const container = application.container;
     this.panel.visible = false;
-    container.removeEventListener("wheel", this._onWheel, false);
+    container.removeEventListener('wheel', this._onWheel);
     this.gestureHandler.disable();
   }
 

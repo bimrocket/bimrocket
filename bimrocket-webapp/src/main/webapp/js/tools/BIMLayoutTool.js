@@ -78,7 +78,7 @@ class BIMLayoutTool extends Tool
     const container = application.container;
 
     this.gestureHandler.enable();
-    container.addEventListener('wheel', this._onWheel, false);
+    container.addEventListener('wheel', this._onWheel, { passive : false });
     application.addEventListener('animation', this._animate);
 
     this.sites = [];
@@ -209,7 +209,7 @@ class BIMLayoutTool extends Tool
     const container = application.container;
 
     this.gestureHandler.disable();
-    container.removeEventListener('wheel', this._onWheel, false);
+    container.removeEventListener('wheel', this._onWheel);
     application.removeEventListener('animation', this._animate);
   }
 

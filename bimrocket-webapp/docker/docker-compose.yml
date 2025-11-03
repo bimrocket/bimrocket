@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   bimrocket-webapp:
     build:
@@ -14,7 +12,6 @@ services:
       - "8181:8080"
     volumes:
       - ../target/bimrocket.war:/usr/local/tomcat/webapps/bimrocket.war
-      - ../src/main/webapp/js/Environment.js:/root/bimrocket/js/Environment.js
     networks:
       - bimrocket_network
 

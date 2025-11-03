@@ -15,10 +15,37 @@ class BCFService extends Service
     super(parameters);
   }
 
-  getProjects(onCompleted, onError)
+  getProjects(odataFilter, odataOrderBy, onCompleted, onError) 
   {
-    this.invoke("GET", "projects", null, onCompleted, onError);
+    let query = "";
+
+    const nameFilter = odataFilter ? odataFilter.nameFilter : null;
+    const conditions = [];
+
+    if (nameFilter && nameFilter.trim()) 
+    {
+      const nameEscaped = nameFilter.trim().replace(/'/g, "''").toLowerCase();
+      conditions.push(`contains(tolower(name),'${nameEscaped}')`);
+    }
+
+    if (conditions.length > 0 || odataOrderBy) 
+    {
+      query = "?";
+      if (conditions.length > 0) 
+      {
+        const filterText = conditions.join(" and ");
+        query += "$filter=" + encodeURIComponent(filterText);
+        if (odataOrderBy) query += "&";
+      }
+      if (odataOrderBy) 
+      {
+        query += "$orderby=" + encodeURIComponent(odataOrderBy);
+      }
+    }
+
+    this.invoke("GET", "projects" + query, null, onCompleted, onError);
   }
+    
 
   getProject(projectId, onCompleted, onError)
   {
@@ -48,43 +75,18 @@ class BCFService extends Service
       extensions, onCompleted, onError);
   }
 
-  getTopics(projectId, filter, onCompleted, onError)
+  getTopics(projectId, odataFilter, odataOrderBy, onCompleted, onError)
   {
-    let type = filter.topic_type;
-    let status = filter.topic_status;
-    let priority = filter.priority;
-    let assignedTo = filter.assigned_to;
-
-    let filters = [];
-    if (type)
-    {
-      filters.push("topic_type eq '" + type + "'");
-    }
-    if (status)
-    {
-      filters.push("topic_status eq '" + status + "'");
-    }
-    if (priority)
-    {
-      filters.push("priority eq '" + priority + "'");
-    }
-    if (assignedTo)
-    {
-      filters.push("assigned_to eq '" + assignedTo + "'");
-    }
-    let filterText = filters.length > 0 ? filters.join(" and ") : "";
-    let orderBy = "creation_date,index";
-
     let query = "";
-    if (filterText.length > 0 || orderBy.length > 0)
+    if (odataFilter.length > 0 || odataOrderBy.length > 0)
     {
       query = "?";
-      if (filterText)
+      if (odataFilter)
       {
-        query += "$filter=" + filterText;
-        if (orderBy) query += "&";
+        query += "$filter=" + odataFilter;
+        if (odataOrderBy) query += "&";
       }
-      if (orderBy) query += "$orderBy=" + orderBy;
+      if (odataOrderBy) query += "$orderBy=" + odataOrderBy;
     }
 
     this.invoke("GET", "projects/" + projectId + "/topics" + query,

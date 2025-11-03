@@ -92,6 +92,8 @@ public class BcfService
 
   public static final Map<String, Field> topicFieldMap =
     EntityDefinition.getInstance(BcfTopic.class).getFieldMap();
+  public static final Map<String, Field> projectFieldMap =
+    EntityDefinition.getInstance(BcfProject.class).getFieldMap();
 
   // Topic actions
   static final String READ = "read";
@@ -178,14 +180,14 @@ public class BcfService
 
   /* Projects */
 
-  public List<BcfProject> getProjects()
+  public List<BcfProject> getProjects(Expression filter, List<OrderByExpression> orderBy)
   {
     LOGGER.log(Level.FINE, "getProjects");
 
     try (var conn = daoStore.getConnection())
     {
-      Set<String> roleIds = securityService.getCurrentUser().getRoleIds();
-      List<BcfProject> projects = conn.findProjects(roleIds);
+      Dao<BcfProject, String> projectDao = conn.getProjectDao();
+      List<BcfProject> projects = projectDao.find(filter, orderBy);
 
       if (!securityService.getCurrentUser().getRoleIds().contains(ADMIN_ROLE))
       {

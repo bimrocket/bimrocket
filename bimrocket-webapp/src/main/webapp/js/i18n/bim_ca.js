@@ -14,6 +14,7 @@ export const translations =
   "button.references" : "Referències",
   "button.save_extensions" : "Desa extensions",
   "button.new_user" : "Usuari nou",
+  "button.back_topics" : "Torna als projectes",
   "button.new_role" : "Rol nou",
 
   "tool.bim_inventory.label" : "Inventari BIM",
@@ -106,6 +107,8 @@ export const translations =
   "label.bim_explode_yoffset" : "Desplaçament eix Y:",
   "label.bim_explode_zoffset" : "Desplaçament eix Z:",
   "label.select_components" : "Selecciona els objectes de la vista:",
+  "label.filter_projects" : "Filtra projectes",
+  "label.filter_project_name": "Per nom:",
 
   "label.admin_service" : "Servidor Admin:",
   "label.users" : "Gestió d'usuaris",
@@ -216,5 +219,7 @@ export const translations =
 
   "placeholder.keep_password": "Deixa en blanc per mantenir la paraula de pas actual",
   "placeholder.confirm_password": "Repeteix la nova paraula de pas",
-  "placeholder.add_tags": "Escriu i prem Enter per afegir etiquetes"
+  "placeholder.add_tags": "Escriu i prem Enter per afegir etiquetes",
+
+  "action.ShowProjectSetup" : "Configuració",
 };

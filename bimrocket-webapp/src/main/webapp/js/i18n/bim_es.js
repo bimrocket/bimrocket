@@ -14,6 +14,7 @@ export const translations =
   "button.references" : "Referencias",
   "button.save_extensions" : "Guardar extensiones",
   "button.new_user" : "Usuario nuevo",
+  "button.back_topicss" : "Volver a proyectos",
   "button.new_role" : "Rol nuevo",
 
   "tool.bim_inventory.label" : "Inventario BIM",
@@ -106,6 +107,8 @@ export const translations =
   "label.bim_explode_yoffset" : "Desplazamiento eje Y:",
   "label.bim_explode_zoffset" : "Desplazamiento eje Z:",
   "label.select_components" : "Selecciona los objetos de la vista:",
+  "label.filter_projects" : "Filtrar proyectos",
+  "label.filter_project_name": "Por nombre:",
 
   "label.admin_service" : "Servidor Admin:",
   "label.users" : "Gestión de usuarios",
@@ -214,4 +217,6 @@ export const translations =
   "placeholder.keep_password": "Dejar en blanco para mantener la contraseña actual",
   "placeholder.confirm_password": "Repite la nueva contraseña",
   "placeholder.add_tags": "Escribe y pulsa Enter para añadir etiquetas",
+
+  "action.ShowProjectSetup" : "Configuración",
 };

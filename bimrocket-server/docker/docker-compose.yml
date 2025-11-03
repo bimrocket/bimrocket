@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   bimrocket-server:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ..
+      dockerfile: docker/Dockerfile.backend
     image: bimrocket-server
     container_name: bimrocket-server
     restart: always
@@ -15,23 +13,67 @@ services:
     volumes:
       - ../target/bimrocket-server.war:/usr/local/tomcat/webapps/bimrocket-server.war
       - ../src/main/resources/application.yaml:/root/bimrocket/bimrocket-server.yaml
+      - ../../data:/root/bimrocket/cloudfs
     networks:
       - bimrocket_network
-
+  
+  # ----------------------------- BBDD Version 1: ORIENTDB  ----------------------------------------------------------- #
   orientdb:
-    image: orientdb:latest
+    image: orientdb:3.2.39
     container_name: orientdb
     restart: always
     environment:
       - ORIENTDB_ROOT_PASSWORD=orientdb
     ports:
-      - "2424:2424" # Binary protocol
-      - "2480:2480" # HTTP protocol
+      - "2424:2424" 
+      - "2480:2480" 
     volumes:
-      - ./orientdb_data:/orientdb/databases
-      - ./orientdb_backup:/orientdb/backup
+      - ../orientdb_data:/orientdb/databases
+      - ../orientdb_backup:/orientdb/backup
     networks:
       - bimrocket_network
+ 
+  # ----------------------------- BBDD Version 2: MONGODB -------------------------------------------------------------- #
+  # mongodb:
+  #   image: mongo:8.0.13
+  #   container_name: mongodb
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: mongodb
+  #   volumes:
+  #     - ../mongo_data/db:/data/db
+  #   networks:
+  #     - bimrocket_network
+
+  # ----------------------------- FileStore Version 2: AZUREBLOB -------------------------------------------------------- #
+  # azurite:
+  #   image: mcr.microsoft.com/azure-storage/azurite
+  #   container_name: azurite
+  #   ports:
+  #     - "10000:10000"
+  #   command: "azurite-blob --blobHost 0.0.0.0 --loose  --location /data"
+  #   volumes:
+  #     - ../azurite_data:/data
+  #   restart: always
+  #   environment:
+  #     - AZURITE_ACCOUNTS=devstoreaccount1:Eby8vdM02xNOcqFeqCnb3w==
+  #   networks:
+  #     - bimrocket_network
+
+  # azure-cli:
+  #   image: mcr.microsoft.com/azure-cli
+  #   container_name: azure-cli
+  #   stdin_open: true
+  #   tty: true
+  #   restart: always
+  #   depends_on:
+  #     - azurite
+  #   networks:
+  #     - bimrocket_network
+# ---------------------------------------------------------------------------------------------------------------------- #
 
 networks:
   bimrocket_network:

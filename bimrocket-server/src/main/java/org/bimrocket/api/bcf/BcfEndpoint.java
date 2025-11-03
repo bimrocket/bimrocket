@@ -55,6 +55,8 @@ import static org.bimrocket.api.ApiResult.OK;
 import org.bimrocket.dao.expression.Expression;
 import org.bimrocket.dao.expression.OrderByExpression;
 import org.bimrocket.dao.expression.io.odata.ODataParser;
+
+import static org.bimrocket.service.bcf.BcfService.projectFieldMap;
 import static org.bimrocket.service.bcf.BcfService.topicFieldMap;
 
 /**
@@ -89,9 +91,15 @@ public class BcfEndpoint
   @Path("/projects")
   @Produces(APPLICATION_JSON)
   @Operation(summary = "Get projects")
-  public List<BcfProject> getProjects()
+  public List<BcfProject> getProjects(
+      @QueryParam("$filter") String odataFilter,
+      @QueryParam("$orderBy") String odataOrderBy)
   {
-    return bcfService.getProjects();
+    ODataParser parser = new ODataParser(projectFieldMap);
+    Expression filter = parser.parseFilter(odataFilter);
+    List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
+
+    return bcfService.getProjects(filter, orderBy);
   }
 
   @GET

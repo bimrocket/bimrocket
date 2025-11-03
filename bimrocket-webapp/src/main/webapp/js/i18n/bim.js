@@ -14,6 +14,7 @@ export const translations =
   "button.references" : "References",
   "button.save_extensions" : "Save extensions",
   "button.new_user" : "New user",
+  "button.back_topics" : "Back to projects",
   "button.new_role" : "New role",
 
   "tool.bim_inventory.label" : "BIM inventory",
@@ -106,6 +107,8 @@ export const translations =
   "label.bim_explode_yoffset" : "Y axis offset:",
   "label.bim_explode_zoffset" : "Z axis offset:",
   "label.select_components" : "Select components in view:",
+  "label.filter_projects" : "Filter projects",
+  "label.filter_project_name": "Project name:",
 
   "label.admin_service" : "Admin server:",
   "label.users" : "User management",
@@ -211,5 +214,7 @@ export const translations =
 
   "placeholder.keep_password": "Leave blank to keep current password",
   "placeholder.confirm_password": "Repeat new password",
-  "placeholder.add_tags": "Write and press Enter to add tags"
+  "placeholder.add_tags": "Write and press Enter to add tags",
+
+  "action.ShowProjectSetup" : "Setup",
 };

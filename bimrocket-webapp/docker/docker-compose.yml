@@ -1,8 +1,8 @@
 services:
   bimrocket-webapp:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
     image: bimrocket-webapp
     container_name: bimrocket-webapp
     restart: always
@@ -11,7 +11,7 @@ services:
     ports:
       - "8181:8080"
     volumes:
-      - ../target/bimrocket.war:/usr/local/tomcat/webapps/bimrocket.war
+      - ./Environment.js:/root/bimrocket/js/Environment.js
     networks:
       - bimrocket_network
 

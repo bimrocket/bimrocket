@@ -1,0 +1,41 @@
+services:
+  bimrocket-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    image: bimrocket-server
+    container_name: bimrocket-server
+    restart: always
+    environment:
+      - BIMROCKET_DATA_PATH=/root/bimrocket
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./application.mongodb.yml:/root/bimrocket/bimrocket-server.yaml
+      - bimrocket_data:/root/bimrocket/cloudfs
+    networks:
+      - bimrocket_network
+ 
+  mongodb:
+    image: mongo:8.0.13
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mongodb
+    volumes:
+      - mongodb_databases:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - bimrocket_network
+
+volumes: 
+  bimrocket_data: 
+  mongodb_databases:
+  mongodb_config:
+
+networks:
+  bimrocket_network:
+    driver: bridge

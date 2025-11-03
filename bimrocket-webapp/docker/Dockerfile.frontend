@@ -1,8 +1,8 @@
 FROM tomcat:10.1
 
-EXPOSE 8181
+COPY target/bimrocket.war /usr/local/tomcat/webapps/
 
-RUN mkdir -p /root/bimrocket/js
+EXPOSE 8181
 
 CMD ["catalina.sh", "run"]
 

@@ -1,0 +1,107 @@
+# bimrocket-server config
+
+# BIMROCKET_DATA_PATH is set by default to ${user.home}/bimrocket
+# but can be changed via JVM property or environ variable.
+
+# service config
+services:
+
+  # security service
+  security:
+    adminPassword: bimrocket
+    passwordPattern: '^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_\-\.])(?=\S+$).{8,}$'
+    authorizationCacheTimeout: 300
+    userCacheTimeout: 300
+    roleCacheTimeout: 300
+    ldap:
+      enabled: false
+      url: ldap://dc1.santfeliu.local
+      domain: santfeliu.local
+      searchBase: DC=santfeliu,DC=local
+      adminUsername: admin
+      adminPassword: changeit
+    store:
+      class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
+      orient:
+        database: bimdb
+
+  # file service
+  file:
+    folders:
+      - models
+      - scripts
+      - reports
+      - ifc_snapshots
+      - tasks
+    store:
+      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
+      filesystem:
+        directory: ${BIMROCKET_DATA_PATH}/cloudfs
+
+  # bcf service
+  bcf:
+    templateProjectName: template
+    mail:
+      createTopic:
+        subject: '#{project.name}##{index}: #{title} [#{priority}]'
+        body: '#{description}'
+    store:
+      class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
+      orient:
+        database: bimdb
+
+  # ifcdb service
+  ifcdb:
+    schemas:
+      - IFC2X3
+      - IFC4
+    maxFileSizeMb: 200
+    store:
+      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
+
+  # task service
+  task:
+    taskCacheSize: 10
+    store:
+      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
+      orient:
+        database: bimdb
+
+  # print service
+  print:
+    directory: ${BIMROCKET_DATA_PATH}/printsvc
+    title: 'Bimrocket print'
+    creator: 'Bimrocket PrintService'
+
+  # mail service
+  mail:
+    enabled: false
+    host: helios
+    port: 25
+    startTls: false
+    auth: false
+    username: none
+    password: none
+    from: 'admin@bimrocket.org'
+    contentType: 'text/plain;charset=ISO-8859-1'
+
+  # proxy service
+  proxy:
+    validUrls:
+      - https://api.openai.com/
+      - https://api.bsdd.buildingsmart.org/
+    aliases:
+      chatgpt:
+        url: https://api.openai.com/v1/chat/completions
+        ipFilter: ''
+        authorization: changeit
+
+# database config
+databases:
+  bimdb:
+    url: mongodb://root:mongodb@mongodb:27017/bimdb?authSource=admin
+  IFC2X3:
+    url: mongodb://root:mongodb@mongodb:27017/IFC2X3?authSource=admin
+  IFC4:
+    url: mongodb://root:mongodb@mongodb:27017/IFC4?authSource=admin
+

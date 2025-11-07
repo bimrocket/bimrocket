@@ -2050,10 +2050,16 @@ class Application
         application.initTasks();
       },
       onError : error =>
-      {
+        {
         application.progressBar.visible = false;
-        dialog.show();
-      },
+  
+        if (error.includes("404"))
+        {
+          return MessageDialog.create("ERROR", "Model not found").setClassName("error").setI18N(this.i18n).show();
+        }
+  
+          dialog.show();
+        },
       options : { units : application.setup.units }
     };
 

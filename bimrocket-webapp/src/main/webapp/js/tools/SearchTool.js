@@ -32,8 +32,6 @@ class SearchTool extends Tool
     this.panel = this.application.createPanel(this.label, "left", "panel_search");
     this.panel.minimumHeight = 200;
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.textInput = Controls.addInputField(this.panel.bodyElem,
       "text", "text_to_find", "label.text_to_find");
 

@@ -54,8 +54,6 @@ class InspectGeometryTool extends Tool
     this.panel = application.createPanel(this.label, "left");
     this.panel.bodyElem.classList.add("padding");
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
 
     const geometryInventoryPanel =

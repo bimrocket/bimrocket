@@ -21,7 +21,8 @@ class IFCFile
       description : [""],
       author : [""],
       organization : [""],
-      timeStamp : null
+      timeStamp : null,
+      schemas : [""]
     };
   }
 

@@ -61,6 +61,10 @@ class IFCSTEPLoader extends IFCLoader
         {
           ifcFile.header.description = entity.Description;
         }
+        else if (entity instanceof HEADER_SCHEMA.FILE_SCHEMA)
+        {
+          ifcFile.header.schemas = entity.Schemas;
+        }
       }
 
       addEntity(entity, tag)

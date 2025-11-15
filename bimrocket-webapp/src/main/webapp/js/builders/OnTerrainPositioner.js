@@ -41,20 +41,20 @@ class OnTerrainPositioner extends ObjectBuilder
     const elevationMap = ElevationMap.getInstance(this.terrainObject);
     if (elevationMap === null) return true;
 
-    const positionWorld = new THREE.Vector3();
-    positionWorld.copy(object.position).applyMatrix4(object.parent.matrixWorld);
+    elevationMap.updateTerrainMatrix();
 
-    const x = positionWorld.x;
-    const y = positionWorld.y;
+    const vertex = new THREE.Vector3();
+    vertex.copy(object.position);
+    vertex.applyMatrix4(object.parent.matrixWorld);
+
+    const x = vertex.x;
+    const y = vertex.y;
     let z = elevationMap.getElevation(x, y);
     if (z === -Infinity) z = 0;
-    z += this.offset;
-    positionWorld.z = z;
 
-    const inverseMatrixWorld = new THREE.Matrix4();
-    inverseMatrixWorld.copy(object.parent.matrixWorld).invert();
+    const delta = z - vertex.z;
 
-    object.position.copy(positionWorld).applyMatrix4(inverseMatrixWorld);
+    object.position.z = delta + this.offset;
     object.updateMatrix();
 
     return true;

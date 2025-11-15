@@ -64,13 +64,18 @@ class OnTerrainExtruder extends SweptSolidBuilder
     const elevationMap = ElevationMap.getInstance(this.terrainObject);
     if (elevationMap === null) return true;
 
+    elevationMap.updateTerrainMatrix();
+
     if (this.flatProfile)
     {
       let minZ = Infinity;
       let vertex = new THREE.Vector3();
+      vertex.applyMatrix4(profile.matrixWorld);
+
       for (let point of outerRing)
       {
         vertex.set(point.x, point.y, 0).applyMatrix4(profile.matrixWorld);
+
         let z = elevationMap.getElevation(vertex.x, vertex.y);
         if (z > -Infinity && z < minZ) minZ = z;
       }
@@ -95,8 +100,11 @@ class OnTerrainExtruder extends SweptSolidBuilder
 
       geometry.isManifold = true;
 
+      vertex.set(0, 0, 0).applyMatrix4(solid.parent.matrixWorld);
+      const delta = minZ - vertex.z;
+
       solid.updateGeometry(geometry);
-      solid.position.z = minZ + this.offset;
+      solid.position.z = delta + this.offset;
       solid.updateMatrix();
     }
     else
@@ -116,10 +124,13 @@ class OnTerrainExtruder extends SweptSolidBuilder
       }
       if (minZ === Infinity) minZ = 0;
 
+      const parentMatrix = solid.parent.matrixWorld.clone().invert();
+
       for (let vertex of verticesBottom)
       {
         if (vertex.z === -Infinity) vertex.z = minZ + this.offset;
         else vertex.z += this.offset;
+        vertex.applyMatrix4(parentMatrix);
 
         let vertexTop = vertex.clone();
         vertexTop.z += this.depth;
@@ -135,6 +146,7 @@ class OnTerrainExtruder extends SweptSolidBuilder
           vertex.z = elevationMap.getElevation(vertex.x, vertex.y);
           if (vertex.z === -Infinity) vertex.z = minZ + this.offset;
           else vertex.z += this.offset;
+          vertex.applyMatrix4(parentMatrix);
           verticesBottom.push(vertex);
 
           let vertexTop = vertex.clone();

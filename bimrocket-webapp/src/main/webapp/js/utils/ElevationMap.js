@@ -15,6 +15,7 @@ class ElevationMap
     this.terrainObject = terrainObject;
     this.map = new Map();
     this.tileSize = tileSize;
+    this._terrainMatrix = new THREE.Matrix4(); // WCS => TCS matrx
     this.create();
   }
 
@@ -40,6 +41,7 @@ class ElevationMap
     let t0 = Date.now();
 
     this.map.clear();
+    this.updateTerrainMatrix();
 
     if (this.terrainObject instanceof THREE.Object3D)
     {
@@ -59,26 +61,33 @@ class ElevationMap
 
   processMesh(mesh)
   {
-    const indexAttribute = mesh.geometry.getIndex();
-    if (indexAttribute)
+    const geometry = mesh.geometry;
+    const indexAttribute = geometry.getIndex();
+    const positionAttribute = geometry.getAttribute("position");
+    const triangleCount = indexAttribute ?
+      indexAttribute.array.length / 3 :
+      positionAttribute.array.length / (positionAttribute.itemSize * 3);
+
+    const pointA = new THREE.Vector3();
+    const pointB = new THREE.Vector3();
+    const pointC = new THREE.Vector3();
+
+    for (let ti = 0; ti < triangleCount; ti++)
     {
-      const indexArray = indexAttribute.array;
-      const triangleCount = indexArray.length / 3;
-
-      const pointA = new THREE.Vector3();
-      const pointB = new THREE.Vector3();
-      const pointC = new THREE.Vector3();
-
-      for (let ti = 0; ti < triangleCount; ti++)
-      {
-        if (this.getTriangleVertices(mesh, ti, pointA, pointB, pointC))
-        {
-          this.processTriangle(mesh, ti, pointA, pointB, pointC);
-        }
-      }
+      this.getTriangleVertices(mesh, ti, pointA, pointB, pointC);
+      this.processTriangle(mesh, ti, pointA, pointB, pointC);
     }
   }
 
+  /**
+   * Put triangle in ElevationMap cells.
+   *
+   * @param {Mesh} mesh - the Mesh to process
+   * @param {Number} ti - the triangle index in the Mesh
+   * @param {Vector3} pointA - triangle vertex A in terrainObject CS (input)
+   * @param {Vector3} pointB - triangle vertex B in terrainObject CS (input)
+   * @param {Vector3} pointC - triangle vertex C in terrainObject CS (input)
+   */
   processTriangle(mesh, ti, pointA, pointB, pointC)
   {
     const tax = Math.floor(pointA.x / this.tileSize);
@@ -124,50 +133,78 @@ class ElevationMap
     }
   }
 
+  /**
+   * Returns the triangle coordinates is terrainObject CS.
+   *
+   * @param {Mesh} mesh - the Mesh to process
+   * @param {Number} ti - the triangle index in the Mesh
+   * @param {Vector3} pointA - triangle vertex A in terrainObject CS (output)
+   * @param {Vector3} pointB - triangle vertex B in terrainObject CS (output)
+   * @param {Vector3} pointC - triangle vertex C in terrainObject CS (output)
+   */
   getTriangleVertices(mesh, ti, pointA, pointB, pointC)
   {
     const geometry = mesh.geometry;
     const matrixWorld = mesh.matrixWorld;
     const positionAttribute = geometry.getAttribute("position");
+    const positionArray = positionAttribute.array;
+    const itemSize = positionAttribute.itemSize;
     const indexAttribute = geometry.getIndex();
-    if (positionAttribute && indexAttribute)
+    const terrainMatrix = this._terrainMatrix;
+
+    let v0 = 3 * ti;
+    let v1 = v0 + 1;
+    let v2 = v0 + 2;
+
+    if (indexAttribute)
     {
-      const positionArray = positionAttribute.array;
-      const itemSize = positionAttribute.itemSize;
       const indexArray = indexAttribute.array;
-      const triangleCount = indexArray.length / 3;
-
-      let v0 = indexArray[3 * ti];
-      let v1 = indexArray[3 * ti + 1];
-      let v2 = indexArray[3 * ti + 2];
-
-      pointA.set(positionArray[itemSize * v0],
-        positionArray[itemSize * v0 + 1],
-        positionArray[itemSize * v0 + 2]);
-      pointA.applyMatrix4(matrixWorld);
-
-      pointB.set(positionArray[itemSize * v1],
-        positionArray[itemSize * v1 + 1],
-        positionArray[itemSize * v1 + 2]);
-      pointB.applyMatrix4(matrixWorld);
-
-      pointC.set(positionArray[itemSize * v2],
-        positionArray[itemSize * v2 + 1],
-        positionArray[itemSize * v2 + 2]);
-      pointC.applyMatrix4(matrixWorld);
-      return true;
+      v0 = indexArray[v0];
+      v1 = indexArray[v1];
+      v2 = indexArray[v2];
     }
-    return false;
+
+    const vi0 = itemSize * v0;
+    const vi1 = itemSize * v1;
+    const vi2 = itemSize * v2;
+
+    pointA.set(positionArray[vi0],
+      positionArray[vi0 + 1],
+      itemSize === 3 ? positionArray[vi0 + 2] : 0);
+
+    pointB.set(positionArray[vi1],
+      positionArray[vi1 + 1],
+      itemSize === 3 ? positionArray[vi1 + 2] : 0);
+
+    pointC.set(positionArray[vi2],
+      positionArray[vi2 + 1],
+      itemSize === 3 ? positionArray[vi2 + 2] : 0);
+
+    pointA.applyMatrix4(matrixWorld).applyMatrix4(terrainMatrix);
+    pointB.applyMatrix4(matrixWorld).applyMatrix4(terrainMatrix);
+    pointC.applyMatrix4(matrixWorld).applyMatrix4(terrainMatrix);
   }
 
+  /**
+   * Gets terrain elevation for (x, y) in WCS
+   *
+   * @param {Number} x - the X coordinate in WCS
+   * @param {Number} y - the Y coordinate in WCS
+   * @returns {Number} - The elevation for (x, y) in WCS
+   */
   getElevation(x, y)
   {
     const origin = new THREE.Vector3(x, y, 10000);
+    const terrainMatrix = this._terrainMatrix;
+
+    // transform to terrainObject CS
+    origin.applyMatrix4(terrainMatrix);
+
     const direction = new THREE.Vector3(0, 0, -1);
     const ray = new THREE.Ray(origin, direction);
 
-    const tx = Math.floor(x / this.tileSize);
-    const ty = Math.floor(y / this.tileSize);
+    const tx = Math.floor(origin.x / this.tileSize);
+    const ty = Math.floor(origin.y / this.tileSize);
     const key = tx + "/" + ty;
     let array = this.map.get(key);
     if (array)
@@ -182,8 +219,11 @@ class ElevationMap
         let mesh = item[0];
         let ti = item[1];
         this.getTriangleVertices(mesh, ti, pointA, pointB, pointC);
+
         if (ray.intersectTriangle(pointA, pointB, pointC, false, target))
         {
+          // transform to WCS
+          target.applyMatrix4(this.terrainObject.matrixWorld);
           return target.z;
         }
       }
@@ -191,20 +231,9 @@ class ElevationMap
     return -Infinity;
   }
 
-  getRaycasterElevation(x, y)
+  updateTerrainMatrix()
   {
-    const origin = new THREE.Vector3(x, y, 10000);
-    const direction = new THREE.Vector3(0, 0, -1);
-    const raycaster = new THREE.Raycaster(origin, direction);
-
-    const intersects = raycaster.intersectObject(this.terrainObject);
-
-    if (intersects.length > 0)
-    {
-      const intersect = intersects[0];
-      return intersect.point.z;
-    }
-    return -Infinity;
+    this._terrainMatrix.copy(this.terrainObject.matrixWorld).invert();
   }
 }
 

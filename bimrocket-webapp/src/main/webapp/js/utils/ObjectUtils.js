@@ -493,12 +493,15 @@ class ObjectUtils
   static reduceCoordinates(baseObject)
   {
     const box = ObjectUtils.getLocalBoundingBox(baseObject);
+    if (box.isEmpty()) return false;
+
     const center = new THREE.Vector3();
     box.getCenter(center).negate();
 
     baseObject.position.copy(center);
     baseObject.updateMatrix();
     baseObject.updateMatrixWorld(true);
+    return true;
   }
 
   static zoomAll(camera, objects, aspect, includeInvisible, offsetFactor = 1.1)

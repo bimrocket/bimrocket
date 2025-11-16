@@ -112,6 +112,7 @@ class WFSController extends Controller
     this.object.add(featureGroup);
     featureGroup.name = WFSController.FEATURES_NAME;
     featureGroup.updateMatrix();
+    featureGroup.updateMatrixWorld(true);
 
     if (featureGroup.userData.export === undefined)
     {
@@ -120,13 +121,9 @@ class WFSController extends Controller
     }
     featureGroup.userData.export.exportChildren = false;
 
-    const reduced = ObjectUtils.reduceCoordinates(this.application.baseObject);
     Formula.updateTree(featureGroup);
     ObjectBuilder.build(featureGroup);
-    if (!reduced)
-    {
-      ObjectUtils.reduceCoordinates(this.application.baseObject);
-    }
+    ObjectUtils.reduceCoordinates(this.application.baseObject);
 
     this.application.notifyObjectsChanged(this.object, this, "structureChanged");
     console.info("Feature " + this.layer + " loaded (" + featureCount + ").");

@@ -991,7 +991,7 @@ class Inspector extends Panel
 
   updateProperty(object, propertyName, renderer)
   {
-    let propElem = document.getElementById("inspector_" + propertyName);
+    let propElem = document.getElementById("inspector_" + propertyName)?.firstChild;
     if (propElem)
     {
       propElem.removeChild(propElem.lastChild);

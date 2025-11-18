@@ -345,6 +345,17 @@ class Controls
       labelElem.appendChild(spanElem);
       groupElem.appendChild(labelElem);
     }
+
+    hiddenElem.getValue = () =>
+    {
+      return hiddenElem.value;
+    };
+
+    hiddenElem.setValue = value =>
+    {
+      let input = groupElem.querySelector(`input[type=radio][value=${value}]`);
+      if (input) input.checked = true;
+    };
     return hiddenElem;
   }
 
@@ -509,11 +520,11 @@ class Controls
     const tagsContainer = document.createElement("div");
     tagsContainer.className = "tags-container";
 
-    if (!showInput) 
+    if (!showInput)
     {
       tagsContainer.classList.add("hidden-input");
     }
-    
+
     groupElem.appendChild(tagsContainer);
 
     const tagsInput = document.createElement("input");

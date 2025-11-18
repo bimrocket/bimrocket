@@ -58,6 +58,7 @@ class SelectByBoxTool extends Tool
   {
     this.panel.visible = true;
     this.boxHandler.enable();
+    this.selectModeElem.setValue(this.application.selectionMode);
   }
 
   deactivate()
@@ -125,6 +126,8 @@ class SelectByBoxTool extends Tool
 
   selectObject(object, vertices, box, selection)
   {
+    if (!vertices) return;
+
     const application = this.application;
     const camera = application.camera;
     const vertex = new THREE.Vector3();

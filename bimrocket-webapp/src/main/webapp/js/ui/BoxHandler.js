@@ -29,7 +29,7 @@ class BoxHandler
     boxElem.style.left = "0";
     boxElem.style.top = "0";
     boxElem.style.border = "2px dotted red";
-    boxElem.style.backgroundColor = "transparent";
+    boxElem.style.backgroundColor = "rgba(255, 255, 255, 0.25)";
     application.container.appendChild(boxElem);
   }
 

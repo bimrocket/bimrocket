@@ -81,6 +81,7 @@ class SelectTool extends Tool
     container.addEventListener("pointerdown", this._onPointerDown, false);
     container.addEventListener("pointerup", this._onPointerUp, false);
     container.addEventListener("pointerleave", this._onPointerLeave, false);
+    this.selectModeElem.setValue(this.application.selectionMode);
   }
 
   deactivate()

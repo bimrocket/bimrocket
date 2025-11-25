@@ -11,8 +11,7 @@ services:
     ports:
       - "9090:8080"
     volumes:
-      - ./application.mongodb.yml:/root/bimrocket/bimrocket-server.yaml
-      - bimrocket_data:/root/bimrocket/cloudfs
+      - ./application.mongodb.yaml:/root/bimrocket/bimrocket-server.yaml
     networks:
       - bimrocket_network
  
@@ -57,7 +56,6 @@ services:
       - bimrocket_network
 
 volumes: 
-  bimrocket_data: 
   azurite_data:
   mongodb_databases:
   mongodb_config:

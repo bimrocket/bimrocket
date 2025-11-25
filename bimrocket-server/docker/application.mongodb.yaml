@@ -22,7 +22,7 @@ services:
       adminPassword: changeit
     store:
       class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
-      orient:
+      mongo:
         database: bimdb
 
   # file service
@@ -34,9 +34,14 @@ services:
       - ifc_snapshots
       - tasks
     store:
-      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
-      filesystem:
-        directory: ${BIMROCKET_DATA_PATH}/cloudfs
+      class: org.bimrocket.service.file.store.filesystem.AzureBlobFileStore
+      azure:
+        connection-string: >
+          DefaultEndpointsProtocol=http;
+          AccountName=devstoreaccount1;
+          AccountKey=Eby8vdM02xNOcqFeqCnb3w==;
+          BlobEndpoint=http://azurite:10000/devstoreaccount1;
+        container-name: azurite
 
   # bcf service
   bcf:
@@ -46,8 +51,8 @@ services:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
     store:
-      class: org.bimrocket.service.bcf.store.orient.BcfOrientDaoStore
-      orient:
+      class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
+      mongo:
         database: bimdb
 
   # ifcdb service
@@ -64,7 +69,7 @@ services:
     taskCacheSize: 10
     store:
       class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
-      orient:
+      mongo:
         database: bimdb
 
   # print service

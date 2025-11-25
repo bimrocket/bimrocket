@@ -1,4 +1,4 @@
-FROM tomcat:10.1
+FROM tomcat:10.1-jdk17-temurin
 
 COPY target/bimrocket-server.war /usr/local/tomcat/webapps/
 

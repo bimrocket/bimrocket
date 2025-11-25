@@ -34,9 +34,14 @@ services:
       - ifc_snapshots
       - tasks
     store:
-      class: org.bimrocket.service.file.store.filesystem.FileSystemFileStore
-      filesystem:
-        directory: ${BIMROCKET_DATA_PATH}/cloudfs
+      class: org.bimrocket.service.file.store.filesystem.AzureBlobFileStore
+      azure:
+        connection-string: >
+          DefaultEndpointsProtocol=http;
+          AccountName=devstoreaccount1;
+          AccountKey=Eby8vdM02xNOcqFeqCnb3w==;
+          BlobEndpoint=http://azurite:10000/devstoreaccount1;
+        container-name: azurite
 
   # bcf service
   bcf:

@@ -31,8 +31,34 @@ services:
     networks:
       - bimrocket_network
 
+  azurite:
+      image: mcr.microsoft.com/azure-storage/azurite
+      container_name: azurite
+      ports:
+        - "10000:10000"
+      command: "azurite-blob --blobHost 0.0.0.0 --loose  --location /data"
+      volumes:
+        - azurite_data:/data
+      restart: always
+      environment:
+        - AZURITE_ACCOUNTS=devstoreaccount1:Eby8vdM02xNOcqFeqCnb3w==
+      networks:
+        - bimrocket_network
+
+  azure-cli:
+    image: mcr.microsoft.com/azure-cli
+    container_name: azure-cli
+    stdin_open: true
+    tty: true
+    restart: always
+    depends_on:
+      - azurite
+    networks:
+      - bimrocket_network
+
 volumes: 
   bimrocket_data: 
+  azurite_data:
   mongodb_databases:
   mongodb_config:
 

@@ -8,6 +8,9 @@ services:
     restart: always
     environment:
       - BIMROCKET_DATA_PATH=/root/bimrocket
+      - BIMROCKET_DATABASE_CONNETION=remote:orientdb
+      - BIMROCKET_DATABASE_USERNAME=root
+      - BIMROCKET_DATABASE_PASSWORD=orientdb
     ports:
       - "9090:8080"
     volumes:

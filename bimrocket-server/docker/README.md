@@ -22,7 +22,7 @@ OrientDB is a multi-model *NoSQL* database that combines the features of a docum
 
 From the `/docker` directory, build images and deploy the containers:
   ```sh
-  docker-compose up -f docker-compose.orientdb.yml --build -d
+  docker-compose -f docker-compose.orientdb.yml up --build -d
   ```
 
 ### Deployment in MongoDB
@@ -37,7 +37,7 @@ From the `/docker` directory, build images and deploy the containers:
 
 From the `/docker` directory, build images and deploy the containers:
   ```sh
-  docker-compose up -f docker-compose.mongodb.yml --build -d
+  docker-compose up -f docker-compose.mongodb.yml up --build -d
   ```
 
 ### Docker Compose

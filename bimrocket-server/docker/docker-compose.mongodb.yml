@@ -8,6 +8,10 @@ services:
     restart: always
     environment:
       - BIMROCKET_DATA_PATH=/root/bimrocket
+      - BIMROCKET_DATABASE_CONNETION_BIMDB=mongodb://root:mongodb@mongodb:27017/bimdb?authSource=admin
+      - BIMROCKET_DATABASE_CONNETION_IFC2X3=mongodb://root:mongodb@mongodb:27017/IFC2X3?authSource=admin
+      - BIMROCKET_DATABASE_CONNETION_IFC4=mongodb://root:mongodb@mongodb:27017/IFC4?authSource=admin
+      - BIMROCKET_SERVICES_FILE_STORE_AZURE_CONNECTION-STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFeqCnb3w==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
     ports:
       - "9090:8080"
     volumes:

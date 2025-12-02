@@ -99,16 +99,15 @@ services:
 # database config
 databases:
   bimdb:
-    url: remote:orientdb/bimdb
-    username: root
-    password: orientdb
+    url: ${BIMROCKET_DATABASE_CONNETION}/db/bimdb
+    username: ${BIMROCKET_DATABASE_USERNAME}
+    password: ${BIMROCKET_DATABASE_PASSWORD}
   IFC2X3:
-    url: remote:orientdb/IFC2X3
-    username: root
-    password: orientdb
+    url: ${BIMROCKET_DATABASE_CONNETION}/db/IFC2X3
+    username: ${BIMROCKET_DATABASE_USERNAME}
+    password: ${BIMROCKET_DATABASE_PASSWORD}
   IFC4:
-    url: remote:orientdb/IFC4
-    username: root
-    password: orientdb
-
+    url: ${BIMROCKET_DATABASE_CONNETION}/db/IFC4
+    username: ${BIMROCKET_DATABASE_USERNAME}
+    password: ${BIMROCKET_DATABASE_PASSWORD}
 

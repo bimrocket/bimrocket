@@ -37,10 +37,7 @@ services:
       class: org.bimrocket.service.file.store.filesystem.AzureBlobFileStore
       azure:
         connection-string: >
-          DefaultEndpointsProtocol=http;
-          AccountName=devstoreaccount1;
-          AccountKey=Eby8vdM02xNOcqFeqCnb3w==;
-          BlobEndpoint=http://azurite:10000/devstoreaccount1;
+          ${BIMROCKET_SERVICES_FILE_STORE_AZURE_CONNECTION-STRING}
         container-name: azurite
 
   # bcf service
@@ -51,7 +48,7 @@ services:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
     store:
-      class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
+      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
       mongo:
         database: bimdb
 
@@ -62,13 +59,13 @@ services:
       - IFC4
     maxFileSizeMb: 200
     store:
-      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
+      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
 
   # task service
   task:
     taskCacheSize: 10
     store:
-      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
+      class: org.bimrocket.service.task.store.mongo.TaskMongoDaoStore
       mongo:
         database: bimdb
 
@@ -104,9 +101,9 @@ services:
 # database config
 databases:
   bimdb:
-    url: mongodb://root:mongodb@mongodb:27017/bimdb?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION_BIMDB}
   IFC2X3:
-    url: mongodb://root:mongodb@mongodb:27017/IFC2X3?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION_IFC2X3}
   IFC4:
-    url: mongodb://root:mongodb@mongodb:27017/IFC4?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION_IFC4}
 

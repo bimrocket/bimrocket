@@ -37,10 +37,7 @@ services:
       class: org.bimrocket.service.file.store.filesystem.AzureBlobFileStore
       azure:
         connection-string: >
-          DefaultEndpointsProtocol=http;
-          AccountName=devstoreaccount1;
-          AccountKey=Eby8vdM02xNOcqFeqCnb3w==;
-          BlobEndpoint=http://azurite:10000/devstoreaccount1;
+          ${BIMROCKET_SERVICES_FILE_STORE_AZURE_CONNECTION-STRING}
         container-name: azurite
 
   # bcf service
@@ -104,9 +101,9 @@ services:
 # database config
 databases:
   bimdb:
-    url: mongodb://root:mongodb@mongodb:27017/bimdb?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION}/bimdb?authSource=admin
   IFC2X3:
-    url: mongodb://root:mongodb@mongodb:27017/IFC2X3?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION}/IFC2X3?authSource=admin
   IFC4:
-    url: mongodb://root:mongodb@mongodb:27017/IFC4?authSource=admin
+    url: ${BIMROCKET_DATABASE_CONNETION}/IFC4?{BIMROCKET_DATABASE_PARAMETERS}
 

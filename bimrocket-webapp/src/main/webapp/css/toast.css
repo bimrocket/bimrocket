@@ -14,7 +14,7 @@
   border: 1px solid #8080ff;
   text-align: center;
   vertical-align: middle;
-  padding: 2px;
+  padding: 6px;
   opacity: 0;
   transition: opacity 1s;
 }

@@ -390,6 +390,10 @@ class Controls
     const groupElem = document.createElement("div");
     groupElem.className = "code_editor";
     parent.appendChild(groupElem);
+    if (options.className)
+    {
+      groupElem.classList.add(options.className);
+    }
 
     const labelElem = document.createElement("span");
     I18N.set(labelElem, "textContent", label);

@@ -30,7 +30,6 @@
  */
 package org.bimrocket.servlet.webdav;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -80,7 +79,7 @@ public class WebdavServlet extends HttpServlet
     "HEAD,GET,POST,PUT,DELETE,OPTIONS,PROPFIND,PROPPATCH,MKCOL,ACL,LOCK,UNLOCK,COPY,MOVE";
 
   private static final String WEBDAV_HEADERS =
-    "origin,content-type,accept,authorization,depth,if-modified-since,if-none-match,x-requested-with";
+    "origin,content-type,accept,authorization,depth,if-modified-since,if-none-match,x-requested-with,destination";
 
   @Inject
   transient FileService fileService;

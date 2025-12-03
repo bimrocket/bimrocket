@@ -121,6 +121,23 @@ class Dialog
     return this;
   }
 
+  get visible()
+  {
+    return this.dialogElem.parentNode;
+  }
+
+  set visible(visible)
+  {
+    if (visible)
+    {
+      this.show();
+    }
+    else
+    {
+      this.hide();
+    }
+  }
+
   get maximized()
   {
     this._maximized;

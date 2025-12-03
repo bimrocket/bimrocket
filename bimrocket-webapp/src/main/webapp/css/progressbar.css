@@ -6,7 +6,7 @@
   right: calc(50% - var(--hbw));
   bottom: 50%;
   height: 44px;
-  z-index: 10001;
+  z-index: 10010;
 }
 
 .progress_bar.splash

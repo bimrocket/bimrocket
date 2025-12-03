@@ -18,7 +18,7 @@ class ACLEditorDialog extends Dialog
     this.fileExplorer = fileExplorer;
 
     this.setSize(500, 500);
-    
+
     this.bodyElem.classList.add("flex");
     this.bodyElem.classList.add("flex_column");
 
@@ -31,7 +31,7 @@ class ACLEditorDialog extends Dialog
       "acl_json",
       "label.acl_permissions",
       "",
-      { language: "json", height: "100%" }
+      { language: "json", className : "flex_grow_1" }
     );
 
     this.createButtons();
@@ -43,18 +43,26 @@ class ACLEditorDialog extends Dialog
     const buttonContainer = document.createElement("div");
     this.bodyElem.appendChild(buttonContainer);
 
-    const saveAction = () => {
+    const saveAction = () =>
+    {
       try
       {
         const acl = new ACL();
         const json = this.editorView.state.doc.toString();
         acl.fromJSON(json);
 
-        this.fileService.setACL(this.aclFilePath, acl, result => {
+        this.application.progressBar.message = "Writing ACL...";
+        this.application.progressBar.progress = undefined;
+        this.application.progressBar.visible = true;
+
+        this.fileService.setACL(this.aclFilePath, acl, result =>
+        {
+          this.application.progressBar.visible = false;
+
           if (result.status === Result.OK)
           {
             Toast.create("message.edit_acl_success")
-              .setI18N(application.i18n).show();            
+              .setI18N(application.i18n).show();
             this.hide();
           }
           else
@@ -71,7 +79,8 @@ class ACLEditorDialog extends Dialog
       }
     };
 
-    this.addButton("saveACL", "button.save", () => {
+    this.addButton("saveACL", "button.save", () =>
+    {
       ConfirmDialog.create("title.confirm_save", "question.confirm_save_changes")
         .setI18N(application.i18n)
         .setAcceptLabel("button.yes")
@@ -80,7 +89,8 @@ class ACLEditorDialog extends Dialog
         .show();
     });
 
-    this.addButton("cancelACL", "button.cancel", () => {
+    this.addButton("cancelACL", "button.cancel", () =>
+    {
       this.hide();
     });
   }
@@ -119,8 +129,14 @@ class ACLEditorDialog extends Dialog
 
   load()
   {
+    this.application.progressBar.message = "Reading ACL...";
+    this.application.progressBar.progress = undefined;
+    this.application.progressBar.visible = true;
+
     this.fileService.getACL(this.aclFilePath, result =>
     {
+      this.application.progressBar.visible = false;
+
       if (result.status === Result.OK)
       {
         this.setACL(result.data);

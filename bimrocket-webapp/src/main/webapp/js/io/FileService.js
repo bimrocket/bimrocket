@@ -33,9 +33,19 @@ class FileService extends Service
     readyCallback(new Result(Result.ERROR, "Not implemented."));
   }
 
+  move(sourcePath, destinationPath, readyCallback, progressCallback)
+  {
+    readyCallback(new Result(Result.ERROR, "Not implemented."));
+  }
+
+  copy(sourcePath, destinationPath, readyCallback, progressCallback)
+  {
+    readyCallback(new Result(Result.ERROR, "Not implemented."));
+  }
+
   setACL(path, acl, readyCallback)
   {
-    readyCallback(new Result(Result.ERROR, "Not implemented.")); // by default, not implemented
+    readyCallback(new Result(Result.ERROR, "Not implemented."));
   }
 
   getACL(path, readyCallback)

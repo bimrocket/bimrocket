@@ -24,37 +24,101 @@ class GISLoader extends THREE.Loader
     this.pointSize = 1;
   }
 
-  load(url, onLoad, onProgress, onError)
+  load(source, onLoad, onProgress, onError)
   {
     const options = this.options;
 
-    const request = new XMLHttpRequest();
-    request.open("GET", url, true);
-
-    if (options.username && options.password)
+    if (source instanceof File)
     {
-      const basicAutho = "Basic " +
-        window.btoa(options.username + ":" + options.password);
-      request.setRequestHeader("Authorization", basicAutho);
-    }
-    request.onreadystatechange = () =>
-    {
-      if (request.readyState === 4)
+      if (this.manager) this.manager.itemStart(source.name);
+      const reader = new FileReader();
+      reader.onload = (event) => 
       {
-        if (request.status === 0 ||
-          request.status === 200 || request.status === 207)
-        {
-          let featureGroup = this.parse(request.responseXML ?
-            request.responseXML : request.responseText);
+          this._processData(event.target.result, source.name, onLoad, onError);
+      };
+      reader.onerror = (event) =>
+      {
+        if (onError) onError(event);
+        if (this.manager) this.manager.itemError(source.name);
+      };
+      reader.readAsText(source);
+    }
+    else if (typeof source === 'string')
+    {
+      const url = source;
+      if (this.manager) this.manager.itemStart(url);
+      
+      const request = new XMLHttpRequest();
+      request.open("GET", url, true);
 
-          featureGroup.position.copy(this.getOrigin());
-          featureGroup.updateMatrix();
-
-          onLoad(featureGroup);
-        }
+      if (options.username && options.password)
+      {
+        const basicAutho = "Basic " +
+          window.btoa(options.username + ":" + options.password);
+        request.setRequestHeader("Authorization", basicAutho);
       }
-    };
-    request.send();
+      
+      request.onreadystatechange = () =>
+      {
+        if (request.readyState === 4)
+        {
+          if (request.status === 0 ||
+            request.status === 200 || request.status === 207)
+          {
+            const data = request.responseXML ? request.responseXML : request.responseText;
+            this._processData(data, url, onLoad, onError);
+          }
+          else
+          {
+              const error = new Error(`Request failed with status ${request.status}`);
+              if (onError) onError(error);
+              if (this.manager) this.manager.itemError(url);
+          }
+        }
+      };
+      
+      if (onProgress)
+      {
+        request.onprogress = onProgress;
+      }
+      
+      request.send();
+    }
+    else
+    {
+      if (onError) onError(new Error("Invalid source"));
+    }
+  }
+
+  _processData(data, itemName, onLoad, onError)
+  {
+    try
+    {
+      const result = this.parse(data);
+      Promise.resolve(result).then(featureGroup =>
+      {
+        if (featureGroup)
+        {
+          if (onLoad) onLoad(featureGroup);
+          if (this.manager) this.manager.itemEnd(itemName);
+        }
+        else
+        {
+          const error = new Error("Parsing failed.");
+          if (onError) onError(error);
+          if (this.manager) this.manager.itemError(itemName);
+        }
+      }).catch(error =>
+      {
+        if (onError) onError(error);
+        if (this.manager) this.manager.itemError(itemName);
+      });
+    }
+    catch (error)
+    {
+      if (onError) onError(error);
+      if (this.manager) this.manager.itemError(itemName);
+    }
   }
 
   parse(data) // abstract

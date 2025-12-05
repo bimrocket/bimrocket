@@ -89,7 +89,9 @@ class BRFLoader extends THREE.Loader
       {
         for (let child of entry.children)
         {
-          object.add(model.objects[child.id]._object);
+          if(model.objects[child.id]){
+            object.add(model.objects[child.id]._object);
+          }
         }
       }
       if (entry.builder)

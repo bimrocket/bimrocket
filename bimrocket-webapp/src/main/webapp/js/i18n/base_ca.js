@@ -120,6 +120,16 @@ export const translations =
   "tool.openlocal.label" : "Obre del disc local",
   "tool.openlocal.help" : "Obre del disc local",
 
+/* wms import tool */
+  "tool.wms_import.label" : "Introduir l'url del wms",
+  "tool.wms_import.help" : "Introdueix l'url del wms",
+  "tool.wms_import.title" : "Importar capa WMS",
+  "tool.wms_import.select_config" : "Selecciona configuració WMS:",
+  "tool.wms_import.url" : "URL:",
+  "tool.wms_import.layer" : "Capa:",
+  "tool.wms_import.crs" : "CRS:",
+  "tool.wms_import.use_mapbox_height" : "Utilitzar MapBox Height Provider",
+
   "tool.savelocal.label" : "Desa en disc local",
   "tool.savelocal.help" : "Desa en disc local",
 
@@ -419,6 +429,10 @@ export const translations =
   "label.service_credentials_alias" : "Àlies de credencials:",
   "label.service_user" : "Usuari:",
   "label.service_pass" : "Paraula de pas:",
+  "label.layer" : "Capa:",
+  "label.crs" : "CRS:",
+  "label.wms_select_config" : "Selecciona configuració WMS:",
+  "label.use_mapbox_height" : "Utilitzar MapBox Height Provider",
 
   "label.section_color" : "Color de secció:",
   "label.smooth_angle" : "Angle de suavitzat:",
@@ -586,6 +600,7 @@ export const translations =
   "title.object_builder" : "Constructor d'objecte",
   "title.select_by_property" : "Selecció per propietats",
   "title.select_by_qrcode" : "Selecció per codi QR",
+  "title.wms_import" : "Introdueix l'URL del servei WMS",
   "title.export_selection" : "Exporta selecció",
   "title.login" : "Identificació",
   "title.new_material" : "Nou material",
@@ -601,6 +616,7 @@ export const translations =
   "message.measure_length" : (length, units) => `Longitud: ${length} ${units}`,
   "message.measure_area" : (area, units) => `Àrea: ${area} ${units}2`,
   "message.measure_angle" : angle => `Angle: ${angle} graus`,
+  "message.wms_import_tool_fields_required" : "URL, capa i CRS són obligatoris.",
 
   "message.solid_count" : count => `Nombre de sòlids: ${count}`,
   "message.mesh_count" : count => `Nombre de malles: ${count}`,
@@ -645,6 +661,7 @@ export const translations =
   "message.action_denied" : "Acció denegada.",
 
   "message.invalid_revolution_axis" : "Eix de revolució invàlid. Aquest eix no es pot projectar sobre el pla del perfil.",
+  "message.wms_controller_invalid_crs" : params => `WMSController: El CRS ha de ser EPSG:3857, però s'ha rebut ${params.crs}.`,
 
   "message.select_source_object" : "Selecciona l'objecte origen, introdueix el nom de l'enllaç i prem el botó [Següent].",
   "message.select_target_object" : "Selecciona l'objecte destí i prem el botó [Enllaça].",

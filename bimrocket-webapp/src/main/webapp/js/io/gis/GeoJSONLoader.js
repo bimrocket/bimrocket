@@ -39,6 +39,10 @@ class GeoJSONLoader extends GISLoader
           properties, featureGroup);
       }
     }
+    
+    featureGroup.position.copy(this.getOrigin());
+    featureGroup.updateMatrix();
+
     return featureGroup;
   }
 }

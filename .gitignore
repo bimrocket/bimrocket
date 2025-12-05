@@ -5,3 +5,5 @@
 /bimrocket-server/docker/orientdb_data/
 /bimrocket-server/nbproject/
 /bimrocket-common/nbproject/
+.vscode/
+bimrocket-tomcat/target/

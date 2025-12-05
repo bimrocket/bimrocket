@@ -7,6 +7,13 @@
 import { NewSceneTool } from "../tools/NewSceneTool.js";
 import { CloudExplorerTool } from "../tools/CloudExplorerTool.js";
 import { OpenLocalTool } from "../tools/OpenLocalTool.js";
+/**********************************************
+ * Descomentar en cas que es vulgui mostrar les 
+ * eines per importar WMS a partir de interfície 
+ * d'usuari
+ **********************************************/
+// import { WMSImportTool } from "../tools/WMSImportTool.js";
+// import { MapboxTool } from "../tools/MapboxTool.js";
 import { SaveLocalTool } from "../tools/SaveLocalTool.js";
 import { OptionsTool } from "../tools/OptionsTool.js";
 import { PrintTool } from "../tools/PrintTool.js";
@@ -271,6 +278,13 @@ export function load(application)
   const newSceneTool = new NewSceneTool(application);
   const cloudExplorerTool = new CloudExplorerTool(application);
   const openLocalTool = new OpenLocalTool(application);
+  /**********************************************
+ * Descomentar en cas que es vulgui mostrar les 
+ * eines per importar WMS a partir de interfície 
+ * d'usuari
+ **********************************************/
+  // const wmsImportTool = new WMSImportTool(application);
+  // const mapboxTool = new MapboxTool(application);
   const saveLocalTool = new SaveLocalTool(application);
   const optionsTool = new OptionsTool(application);
   const printTool = new PrintTool(application);
@@ -490,6 +504,13 @@ export function load(application)
   fileMenu.addMenuItem(newSceneTool);
   fileMenu.addMenuItem(cloudExplorerTool);
   fileMenu.addMenuItem(openLocalTool);
+  /**********************************************
+   * Descomentar en cas que es vulgui mostrar les 
+   * eines per importar WMS a partir de interfície 
+   * d'usuari
+   **********************************************/
+  // fileMenu.addMenuItem(wmsImportTool);
+  // fileMenu.addMenuItem(mapboxTool);
   fileMenu.addMenuItem(saveLocalTool);
   fileMenu.addMenuItem(printTool);
   fileMenu.addMenuItem(svgExporterTool);
@@ -634,6 +655,13 @@ export function load(application)
   toolBar.addToolButton(newSceneTool);
   toolBar.addToolButton(cloudExplorerTool);
   toolBar.addToolButton(openLocalTool);
+  /**********************************************
+   * Descomentar en cas que es vulgui mostrar les 
+   * eines per importar WMS a partir de interfície 
+   * d'usuari
+   **********************************************/
+  // toolBar.addToolButton(wmsImportTool);
+  // toolBar.addToolButton(mapboxTool);
   toolBar.addToolButton(saveLocalTool);
   toolBar.addToolButton(optionsTool);
   toolBar.addToolButton(printTool);

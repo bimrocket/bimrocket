@@ -38,6 +38,7 @@ class ServerAdminDialog extends Dialog
     const connPanel = this.createContainer('admin_body', mainContainer);
     const mainWrapper = this.createContainer('admin_panel', this.bodyElem);
     const mainPanel = this.createContainer('admin_body', mainWrapper);
+
   
     this.connPanelElem = connPanel;
     this.mainContainer = mainWrapper;
@@ -50,7 +51,7 @@ class ServerAdminDialog extends Dialog
   
     const buttonsContainer = this.createContainer('admin_buttons', connPanel);
     this.connButtonsElem = buttonsContainer;
-
+    
     // hidden initially
     this.detailPanelElem = this.createContainer('admin_panel', mainContainer);
     this.detailPanelElem.style.display = "none";

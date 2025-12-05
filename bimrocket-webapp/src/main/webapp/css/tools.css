@@ -394,6 +394,16 @@
   background-image: url(images/tools/openlocal.svg);
 }
 
+.tool_button.wmsImport
+{
+  background-image: url(images/tools/wms_import.svg);
+}
+
+.tool_button.mapboxImport
+{
+  background-image: url(images/tools/mapbox.png);
+}
+
 .tool_button.savelocal
 {
   background-image: url(images/tools/savelocal.svg);

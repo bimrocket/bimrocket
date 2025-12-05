@@ -34,6 +34,8 @@ class WFSController extends Controller
     this.cqlFilter = "";
     this.count = 0;
     this.srsName = "";
+    this.version = "2.0.0";
+    this.outputFormat = "";
     this.representationMode = WFSController.ADD_OBJECT_REPR_MODE;
 
     this._onLoad = this.onLoad.bind(this);
@@ -48,6 +50,10 @@ class WFSController extends Controller
 
   onStop()
   {
+  }
+
+  flatFeatures(features) {
+    return features.flatMap(item => item.children ? [item,...this.flatFeatures(item.children)] : [item])
   }
 
   onLoad(group)
@@ -126,7 +132,6 @@ class WFSController extends Controller
     ObjectUtils.reduceCoordinates(this.application.baseObject);
 
     this.application.notifyObjectsChanged(this.object, this, "structureChanged");
-    console.info("Feature " + this.layer + " loaded (" + featureCount + ").");
   }
 
   createFeatureRepr(feature, representation)
@@ -183,14 +188,7 @@ class WFSController extends Controller
     let layer = this.layer;
     let format = this.format || "GeoJSON";
     let loader;
-    if (format === "GML")
-    {
-      loader = new GMLLoader();
-    }
-    else
-    {
-      loader = new GeoJSONLoader();
-    }
+
     if (url.indexOf("?") === -1)
     {
       url += "?";
@@ -199,8 +197,32 @@ class WFSController extends Controller
     {
       url += "&";
     }
-    url += "service=wfs&version=2.0.0&request=GetFeature&outputFormat=" +
-      loader.mimeType + "&typeName=" + layer;
+    const isGML = format.startsWith("GML");
+    if (isGML)
+    {
+      const mimeType = (format === "GML32" || format === "GML321") ? "gml32" : "gml3";
+      loader = new GMLLoader(mimeType);
+    }
+    else
+    {
+      loader = new GeoJSONLoader();
+    }
+
+    let version = this.version;
+    if (format === "GeoJSON")
+    {
+      version = "1.1.0";
+    }
+    else if (format === "GML32" || format === "GML321")
+    {
+      version = "2.0.0";
+    }
+
+    const outputFormat = this.outputFormat?.length ? this.outputFormat : loader.mimeType;
+    
+    url += "service=wfs&version=" + version + 
+         "&request=GetFeature&outputFormat=" + outputFormat + 
+         "&typeName=" + layer;
     const count = this.count;
     if (count > 0)
     {
@@ -219,16 +241,18 @@ class WFSController extends Controller
     const srsName = this.srsName;
     if (srsName && srsName.length > 0)
     {
-      url += "&srsName=" + srsName;
+        url += "&srsName=" + srsName;  
     }
-    loader.options = {
+  
+
+    loader.options =
+    {
       name: layer || "wfs",
       username: this.username,
       password: this.password,
       representation: this.object.getObjectByName("representation")
     };
 
-    console.info("Loading feature " + this.layer + "...");
     loader.load(url, this._onLoad, this._onProgress, this._onError);
   }
 

@@ -300,7 +300,7 @@ class IOManager
         loader.parse(data, path,
           result => loadCompleted(result.scene), onError);
       }
-      else // general case: BRFLoader, STLLoader, PCDLoader, OBJLoader...
+      else // general case: BRFLoader, STLLoader, PCDLoader, OBJLoader, GMLLoader...
       {
         let result = loader.parse(data);
         console.info("result", result);
@@ -414,5 +414,3 @@ class IOManager
 window.IOManager = IOManager;
 
 export { IOManager };
-
-

@@ -1139,11 +1139,6 @@ class Application
     if (save)
     {
       this.saveServices(group);
-      const alias = service.credentialsAlias;
-      if (alias)
-      {
-        CredentialsManager.saveCredentials(alias);
-      }
     }
   }
 
@@ -2076,7 +2071,7 @@ class Application
             .show();
         }
       },
-      options : { units : application.setup.units },
+      options : { units : application.setup.units }
     };
 
     dialog.login = (username, password) =>

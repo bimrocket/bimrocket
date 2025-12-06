@@ -766,31 +766,11 @@ class FileExplorer extends Panel
   {
     dialog.useProxyElem = dialog.addCheckBoxField("useProxy",
       "label.use_proxy", service?.useProxy === true);
-    dialog.proxyUsernameElem = dialog.addTextField("proxyUsername",
-      "label.proxy_user", service?.proxyUsername);
-    dialog.proxyPasswordElem = dialog.addPasswordField("proxyPassword",
-      "label.proxy_pass", service?.proxyPassword);
-
-    function enableProxyFields()
-    {
-      const enabled = dialog.useProxyElem.checked;
-      dialog.proxyUsernameElem.disabled = !enabled;
-      dialog.proxyPasswordElem.disabled = !enabled;
-    }
-
-    enableProxyFields();
-
-    dialog.useProxyElem.addEventListener("change", () => {
-      enableProxyFields();
-    });
   }
 
   setServiceParameters(dialog, service, parameters)
   {
     parameters.useProxy = dialog.useProxyElem.checked;
-    parameters.proxyUsername = dialog.proxyUsernameElem.value;
-    parameters.proxyPassword = dialog.proxyPasswordElem.value;
-
     service.setParameters(parameters);
     this.application.addService(service, this.group);
     this.refreshServices();

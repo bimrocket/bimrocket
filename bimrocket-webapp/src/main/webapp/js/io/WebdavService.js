@@ -47,8 +47,6 @@ class WebdavService extends FileService
   {
     const parameters = super.getParameters();
     parameters.useProxy = this.useProxy;
-    parameters.proxyUsername = this.proxyUsername;
-    parameters.proxyPassword = this.proxyPassword;
     return parameters;
   }
 
@@ -56,8 +54,6 @@ class WebdavService extends FileService
   {
     super.setParameters(parameters);
     this.useProxy = parameters.useProxy || false;
-    this.proxyUsername = parameters.proxyUsername || null;
-    this.proxyPassword = parameters.proxyPassword || null;
   }
 
   open(path, readyCallback, progressCallback)
@@ -464,7 +460,6 @@ class WebdavService extends FileService
 
     if (this.useProxy)
     {
-      WebUtils.setBasicAuthorization(request, this.proxyUsername, this.proxyPassword);
       if (credentials.username && credentials.password)
       {
         WebUtils.setBasicAuthorization(request,

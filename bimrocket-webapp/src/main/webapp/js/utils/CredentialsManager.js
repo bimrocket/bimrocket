@@ -4,47 +4,52 @@
  * @author realor
  */
 
+const credentialsMap = {};
+
 class CredentialsManager
 {
-  static KEY = "bimrocket.credentials.";
-  static map = {};
-
+  /**
+   * Saves the credentials associated with an alias in memory.
+   * This information will be lost when the application is restarted.
+   *
+   * @param {string} alias - The alias to associate with the credentials.
+   * @param {string | object} username - the username or credentials object.
+   * @param {string} password - the username password.
+   */
   static setCredentials(alias, username, password)
   {
-    const credentials = { username : username, password : password };
-    this.map[alias] = credentials;
+    let credentials;
+    if (typeof username === "string")
+    {
+      credentials = { username : username, password : password };
+    }
+    else
+    {
+      credentials = username;
+    }
+    credentialsMap[alias] = credentials;
   }
 
+  /**
+   * Restores the credentials associated with an alias.
+   *
+   * @param {string} alias - the credential alias.
+   * @param {boolean} create - force the creation of credentials if they do not exist.
+   * @returns {object} the credentials object associated with the alias.
+   */
   static getCredentials(alias, create = false)
   {
-    let credentials = this.map[alias];
+    let credentials = credentialsMap[alias];
     if (credentials) return credentials;
 
-    const json = window.localStorage.getItem(this.KEY + alias);
-    if (json)
+    if (create)
     {
-      credentials = JSON.parse(json);
+      credentials = { username : null, password : null };
+      credentialsMap[alias] = credentials;
+      return credentials;
     }
-    else if (create)
-    {
-      credentials = { username : null, password : null};
-    }
-    else return null;
-
-    this.map[alias] = credentials;
-    return credentials;
-  }
-
-  static saveCredentials(alias)
-  {
-    let credentials = this.map[alias];
-
-    if (credentials)
-    {
-      window.localStorage.setItem(this.KEY + alias, JSON.stringify(credentials));
-    }
+    return null;
   }
 }
 
 export { CredentialsManager };
-

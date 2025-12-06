@@ -2050,17 +2050,33 @@ class Application
         application.initTasks();
       },
       onError : error =>
-        {
+      {
         application.progressBar.visible = false;
-  
-        if (error.includes("404"))
+
+        const stringifiedError = String(error);
+
+        if (stringifiedError.includes("404"))
         {
-          return MessageDialog.create("ERROR", "Model not found").setClassName("error").setI18N(this.i18n).show();
+          return MessageDialog
+            .create("ERROR", "Model not found")
+            .setClassName("error")
+            .setI18N(this.i18n)
+            .show();
         }
-  
+        else if (stringifiedError.includes("401") || stringifiedError.includes("403"))
+        {
           dialog.show();
-        },
-      options : { units : application.setup.units }
+        }
+        else
+        {
+          return MessageDialog
+            .create("ERROR", stringifiedError)
+            .setClassName("error")
+            .setI18N(this.i18n)
+            .show();
+        }
+      },
+      options : { units : application.setup.units },
     };
 
     dialog.login = (username, password) =>

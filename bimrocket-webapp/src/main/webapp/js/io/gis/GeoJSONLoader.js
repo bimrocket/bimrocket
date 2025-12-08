@@ -18,14 +18,15 @@ class GeoJSONLoader extends GISLoader
 
   parse(data)
   {
+    if (typeof data !== "string") throw "Unsupported data";
+
     const options = this.options;
     const featureGroup = new THREE.Group();
     featureGroup.name = this.options.name || "layer";
     let jsonObject = JSON.parse(data);
     let features = jsonObject.features;
-    for (let f = 0; f < features.length; f++)
+    for (let feature of features)
     {
-      let feature = features[f];
       let properties = feature.properties;
       let geometry = feature.geometry;
       if (geometry)
@@ -39,6 +40,10 @@ class GeoJSONLoader extends GISLoader
           properties, featureGroup);
       }
     }
+
+    featureGroup.position.copy(this.getOrigin());
+    featureGroup.updateMatrix();
+
     return featureGroup;
   }
 }

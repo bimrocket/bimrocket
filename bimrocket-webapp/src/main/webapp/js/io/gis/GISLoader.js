@@ -47,9 +47,6 @@ class GISLoader extends THREE.Loader
           let featureGroup = this.parse(request.responseXML ?
             request.responseXML : request.responseText);
 
-          featureGroup.position.copy(this.getOrigin());
-          featureGroup.updateMatrix();
-
           onLoad(featureGroup);
         }
       }
@@ -61,37 +58,34 @@ class GISLoader extends THREE.Loader
   {
   }
 
-  createObject(type, name, coordinates, properties, parent)
+  createObject(geomType, name, coordinates, properties, parent)
   {
     try
     {
-      if (type === "Point")
+      switch (geomType)
       {
-        this.createPoint(name, coordinates, properties, parent);
-      }
-      else if (type === "MultiPoint")
-      {
-        this.createMultiPoint(name, coordinates, properties, parent);
-      }
-      else if (type === "LineString")
-      {
-        this.createLineString(name, coordinates, properties, parent);
-      }
-      else if (type === "MultiLineString")
-      {
-        this.createMultiLineString(name, coordinates, properties, parent);
-      }
-      else if (type === "Polygon")
-      {
-        this.createPolygon(name, coordinates, properties, parent);
-      }
-      else if (type === "MultiPolygon")
-      {
-        this.createMultiPolygon(name, coordinates, properties, parent);
-      }
-      else
-      {
-        this.createNonVisibleObject(name, properties, parent);
+        case "Point":
+          this.createPoint(name, coordinates, properties, parent);
+          break;
+        case "LineString":
+          this.createLineString(name, coordinates, properties, parent);
+          break;
+        case "Polygon":
+          this.createPolygon(name, coordinates, properties, parent);
+          break;
+        case "MultiPoint":
+          this.createMultiPoint(name, coordinates, properties, parent);
+          break;
+        case "MultiLineString":
+        case "MultiCurve":
+          this.createMultiLineString(name, coordinates, properties, parent);
+          break;
+        case "MultiPolygon":
+        case "MultiSurface":
+          this.createMultiPolygon(name, coordinates, properties, parent);
+          break;
+        default:
+          this.createNonVisibleObject(name, properties, parent);
       }
     }
     catch (ex)
@@ -120,13 +114,13 @@ class GISLoader extends THREE.Loader
   {
     if (this.pointGeometry === null)
     {
-      const path = new THREE.Path();
+      const path = new THREE.Shape();
       const radius = 0.5 * this.pointSize;
 
       path.moveTo(-radius, 0);
-      path.lineTo(0, radius);
-      path.lineTo(radius, 0);
       path.lineTo(0, -radius);
+      path.lineTo(radius, 0);
+      path.lineTo(0, radius);
       path.closePath();
       this.pointGeometry = new ProfileGeometry(path);
     }

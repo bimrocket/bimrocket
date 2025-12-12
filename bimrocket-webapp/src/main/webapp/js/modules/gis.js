@@ -20,7 +20,7 @@ export function load(application)
   {
     description : "GeoJSON (*.geojson)",
     extensions: ["geojson"],
-    mimeType : "application/json",
+    mimeType : "application/geo+json",
     dataType : "text",
     loader :
     {
@@ -31,9 +31,9 @@ export function load(application)
 
   IOManager.formats["gml"] =
   {
-    description : "GML (*.geojson)",
+    description : "GML (*.gml)",
     extensions: ["gml"],
-    mimeType : "text/xml",
+    mimeType : "application/gml+xml",
     dataType : "text",
     loader :
     {

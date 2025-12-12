@@ -11,7 +11,7 @@ class GMLLoader extends GISLoader
 {
   constructor(manager)
   {
-    super(manager, "text/xml");
+    super(manager, "application/gml+xml");
   }
 
   parse(xml)

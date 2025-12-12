@@ -13,7 +13,7 @@ class GeoJSONLoader extends GISLoader
 {
   constructor(manager)
   {
-    super(manager, "application/json");
+    super(manager, "application/geo+json");
   }
 
   parse(data)

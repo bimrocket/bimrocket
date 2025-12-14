@@ -6,5 +6,6 @@
 
 export const translations =
 {
-  "controller.WFSController" : "Loads geometry from Web Feature Service."
+  "controller.WFSController" : "Loads geometry from Web Feature Service.",
+  "controller.MapViewController" : "Load tiles from a map server."
 };

@@ -645,7 +645,7 @@ class ObjectUtils
 
     function traverse(object)
     {
-      if (object.visible || includeInvisible)
+      if ((object.visible || includeInvisible) && !ObjectUtils.isGhost(object))
       {
         if (object instanceof Solid)
         {
@@ -684,14 +684,14 @@ class ObjectUtils
     return box;
   }
 
-  static getLocalBoundingBox(object, all = false)
+  static getLocalBoundingBox(object, includeInvisible = false)
   {
     const box = new THREE.Box3(); // empty box
     const objectBox = new THREE.Box3();
 
     function extendBox(object, toBaseMatrix)
     {
-      if (object.visible || all)
+      if ((object.visible || includeInvisible) && !ObjectUtils.isGhost(object))
       {
         let geometry = object.geometry;
 
@@ -888,7 +888,7 @@ class ObjectUtils
     if (object.name && object.name.startsWith(THREE.Object3D.HIDDEN_PREFIX))
       return false; // hidden object
 
-    const exportInfo = object.userData.export;
+    const exportInfo = this.getExportOptions(object);
     if (exportInfo)
     {
       if (exportInfo.export === false) // marked as non exportable
@@ -899,9 +899,14 @@ class ObjectUtils
     return true;
   }
 
+  static setExportable(object, exportable)
+  {
+    this.getExportOptions(object, true).export = exportable;
+  }
+
   static isExportableChildren(object)
   {
-    const exportInfo = object.userData.export;
+    const exportInfo = this.getExportOptions(object);
     if (exportInfo)
     {
       if (exportInfo.exportChildren === false) // children non exportable
@@ -910,6 +915,32 @@ class ObjectUtils
       }
     }
     return true;
+  }
+
+  static setExportableChildren(object, exportChildren)
+  {
+    this.getExportOptions(object, true).exportChildren = exportChildren;
+  }
+
+  static getExportOptions(object, create = false)
+  {
+    let options = object.userData.export;
+    if (typeof options !== "object" && create)
+    {
+      options = {};
+      object.userData.export = options;
+    }
+    return options;
+  }
+
+  static isGhost(object)
+  {
+    return object.userData.ghost === true;
+  }
+
+  static setGhost(object, ghost)
+  {
+    object.userData.ghost = Boolean(ghost);
   }
 
   static scaleModel(model, toUnits = "m", fromUnits)

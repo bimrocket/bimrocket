@@ -11,6 +11,7 @@ import { OnTerrainPositioner } from "../builders/OnTerrainPositioner.js";
 import { OnTerrainExtruder } from "../builders/OnTerrainExtruder.js";
 import { IOManager } from "../io/IOManager.js";
 import { WFSController } from "../controllers/WFSController.js";
+import { MapViewController } from "../controllers/MapViewController.js";
 import { BundleManager } from "../i18n/BundleManager.js";
 
 export function load(application)

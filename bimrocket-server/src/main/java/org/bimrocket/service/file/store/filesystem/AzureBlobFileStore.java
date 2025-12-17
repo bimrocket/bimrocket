@@ -2,8 +2,14 @@ package org.bimrocket.service.file.store.filesystem;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.*;
-import com.azure.storage.blob.models.*;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobHttpHeaders;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.annotation.PostConstruct;
@@ -18,8 +24,14 @@ import org.bimrocket.service.file.util.MutableMetadata;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class AzureBlobFileStore implements FileStore
 {
@@ -357,14 +369,34 @@ public class AzureBlobFileStore implements FileStore
     BlobClient blobClient = containerClient.getBlobClient(aclBlobPath);
 
     String filename = isDirectoryPath(path)
-           ? ACLFile.ANY_FILENAME
-           : path.getName();
+            ? ACLFile.ANY_FILENAME
+            : path.getName();
 
+    // Read current ACL if found
     ACLFile.FileMap fileMap = new ACLFile.FileMap();
+
+    if (blobClient.exists())
+    {
+      try (InputStream is = blobClient.openInputStream())
+      {
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(MutableACL.class, new MutableACLDeserializer());
+        mapper.registerModule(module);
+
+        fileMap = mapper.readValue(is, ACLFile.FileMap.class);
+      }
+      catch (Exception e)
+      {
+        throw new RuntimeException("Failed to read existing ACL blob: " + aclBlobPath, e);
+      }
+    }
+
     MutableACL mutAcl = new MutableACL();
     mutAcl.copy(acl);
     fileMap.put(filename, mutAcl);
 
+    // Save ACL
     try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
     {
       ObjectMapper mapper = new ObjectMapper();
@@ -377,7 +409,7 @@ public class AzureBlobFileStore implements FileStore
 
       try (ByteArrayInputStream bais = new ByteArrayInputStream(content))
       {
-        blobClient.upload(bais, content.length, true); // overwrite=true
+        blobClient.upload(bais, content.length, true);
       }
     }
     catch (IOException e)
@@ -386,11 +418,25 @@ public class AzureBlobFileStore implements FileStore
     }
   }
 
+
   private String getACLBlobPath(Path path)
   {
-    String blobPath = normalizePath(path); // IMPORTANT: sense "/" inicial
-    if (!blobPath.isEmpty() && !blobPath.endsWith("/")) blobPath += "/";
-    return blobPath + ACL_FILENAME;
+    String blobPath = normalizePath(path);
+
+    if (isDirectoryPath(path))
+    {
+      if (!blobPath.isEmpty() && !blobPath.endsWith("/")) blobPath += "/";
+      return blobPath + ACL_FILENAME;
+    }
+
+    int idx = blobPath.lastIndexOf('/');
+    if (idx < 0)
+    {
+      return ACL_FILENAME;
+    }
+
+    String parent = blobPath.substring(0, idx);
+    return parent + "/" + ACL_FILENAME;
   }
 
   @Override

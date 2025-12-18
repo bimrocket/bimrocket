@@ -912,7 +912,7 @@ class IfcProductRepresentationHelper extends IfcHelper
         if (!reprObject3D)
         {
           console.warn("Unsupported representation",
-           representationIdentifier, repr);
+            representationIdentifier, repr);
         }
         return reprObject3D;
       }
@@ -3720,6 +3720,29 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
         }
       }
     }
+    else if (propertySet instanceof schema.IfcElementQuantity || propertySet instanceof schema.IfcQuantitySet)
+    {
+      let qtoName = loader.unBox(propertySet.Name);
+      let quantities = this.helper(propertySet).getQuantities();
+      for (let relatedObject of relatedObjects)
+      {
+        if (relatedObject instanceof schema.IfcProduct)
+        {
+          let object3D = this.helper(relatedObject).getObject3D();
+          if (object3D)
+          {
+            object3D.userData["IFC_" + qtoName] = quantities;
+            object3D.userData["IFC_rel_" + qtoName] = ifcRelData;
+          }
+        }
+        else if (relatedObject instanceof schema.IfcProject)
+        {
+          const project = relatedObject;
+          loader.model.userData["IFC_" + qtoName] = quantities;
+          loader.model.userData["IFC_rel_" + qtoName] = ifcRelData;
+        }
+      }
+    }
   }
 };
 registerIfcHelperClass(IfcRelDefinesByPropertiesHelper);
@@ -4011,5 +4034,62 @@ class IfcPropertySetHelper extends IfcHelper
   }
 };
 registerIfcHelperClass(IfcPropertySetHelper);
+
+
+class IfcElementQuantityHelper extends IfcHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+    this.quantities = null;
+  }
+
+  getQuantities()
+  {
+    if (this.quantities === null)
+    {
+      const qto = this.entity;
+      const loader = this.loader;
+      const schema = qto.constructor.schema;
+
+      this.quantities = {
+        ifcClassName : qto.constructor.name,
+        GlobalId : qto.GlobalId,
+        Name : loader.unBox(qto.Name)
+      };
+
+      if (qto.Quantities)
+      {
+        for (let i = 0; i < qto.Quantities.length; i++)
+        {
+          let qty = qto.Quantities[i];
+          let qtyName = loader.unBox(qty.Name);
+          let qtyValue = loader.unBox(
+            qty.AreaValue ||
+            qty.LengthValue ||
+            qty.VolumeValue ||
+            qty.WeightValue ||
+            qty.CountValue ||
+            qty.TimeValue ||
+            qty.NumberValue
+          );
+          this.quantities[qtyName] = qtyValue;
+        }
+      }
+    }
+    return this.quantities;
+  }
+};
+registerIfcHelperClass(IfcElementQuantityHelper);
+
+
+class IfcQuantitySetHelper extends IfcElementQuantityHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+};
+registerIfcHelperClass(IfcQuantitySetHelper);
 
 export { IFCLoader };

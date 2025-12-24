@@ -841,6 +841,15 @@ class ObjectUtils
     return object === parent;
   }
 
+  static createLink(object, relatedObject, name)
+  {
+    if (!object.links)
+    {
+      object.links = {};
+    }
+    object.links[name || relatedObject.name] = relatedObject;
+  }
+
   static setSelectionEnabled(object, value)
   {
     this.getSelectionOptions(object, true).enabled = value;

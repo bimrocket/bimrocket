@@ -8,6 +8,7 @@ import { I18N } from "../i18n/I18N.js";
 import { Controls } from "../ui/Controls.js";
 import { MessageDialog } from "../ui/MessageDialog.js";
 import { Toast } from "../ui/Toast.js";
+import { ObjectUtils } from "../utils/ObjectUtils.js";
 import { Tool } from "./Tool.js";
 
 class LinkTool extends Tool
@@ -107,11 +108,7 @@ class LinkTool extends Tool
     const targetObject = application.selection.object;
     if (targetObject)
     {
-      if (this.sourceObject.links === undefined)
-      {
-        this.sourceObject.links = {};
-      }
-      this.sourceObject.links[this.linkName] = targetObject;
+      ObjectUtils.createLink(this.sourceObject, targetObject, this.linkName);
       application.selection.set(this.sourceObject);
       this.panel.visible = false;
 

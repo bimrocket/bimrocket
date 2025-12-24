@@ -159,6 +159,11 @@ class IFCFile
           }
         }
       }
+      else if (rel instanceof schema.IfcRelSpaceBoundary)
+      {
+        add(rel.RelatedBuildingElement, "_ProvidesBoundaries", rel);
+        add(rel.RelatingSpace, "_BoundedBy", rel);
+      }
     }
 
     const styledItems = this.entitiesByClass.get("IfcStyledItem");

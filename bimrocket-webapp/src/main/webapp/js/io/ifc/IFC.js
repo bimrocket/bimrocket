@@ -177,7 +177,7 @@ class IFC
 
         for (let dataName of dataNames)
         {
-          this.completeIfcData(object3D, dataName, schema);
+          this.completeIfcData(object3D, dataName);
         }
       }
       else console.warn(ifcClassName +
@@ -190,101 +190,93 @@ class IFC
     }
   }
 
-  static completeIfcData(object3D, dataName, schema)
+  static completeIfcData(object3D, dataName)
   {
     let ifcData = object3D.userData[dataName];
     if (typeof ifcData !== "object") return;
 
-    let ifcClassName = ifcData.ifcClassName || null;
-    const ifcClass = schema[ifcClassName];
-    let isRoot = ifcClass && ifcClass.prototype instanceof schema.IfcRoot;
-    let name = null;
-
     if (dataName === "IFC_rel_aggregated")
     {
-      ifcClassName ||= "IfcRelAggregates";
-      name = "Aggregates";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, "IfcRelAggregates", "Aggregates");
     }
     else if (dataName === "IFC_rel_contained")
     {
-      ifcClassName ||= "IfcRelContainedInSpatialStructure";
-      name = "Contains";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, "IfcRelContainedInSpatialStructure", "Contains");
     }
     else if (dataName === "IFC_rel_fills")
     {
-      ifcClassName ||= "IfcRelFillsElement";
-      name = "Fills";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, "IfcRelFillsElement", "Fills");
     }
     else if (dataName === "IFC_rel_voids")
     {
-      ifcClassName ||= "IfcRelVoidsElement";
-      name = "Voids";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, "IfcRelVoidsElement", "Voids");
     }
     else if (dataName === "IFC_type")
     {
-      // TODO: complete
-      name = "Type";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, null, "Type");
     }
     else if (dataName === "IFC_group")
     {
-      // TODO: complete
-      name = "Group";
-      isRoot = true;
+      this.completeIfcRootData(ifcData, null, "Group");
     }
     else if (dataName === "IFC_material_layerset")
     {
-      ifcClassName ||= "IfcMaterialLayerSet";
+      ifcData.ifcClassName ||= "IfcMaterialLayerSet";
     }
     else if (dataName.startsWith("IFC_material_layer"))
     {
-      ifcClassName ||= "IfcMaterialLayer";
+      ifcData.ifcClassName ||= "IfcMaterialLayer";
     }
     else if (dataName === "IFC_map_conversion")
     {
-      ifcClassName ||= "IfcMapConversion";
+      ifcData.ifcClassName ||= "IfcMapConversion";
     }
     else if (dataName === "IFC_target_crs")
     {
-      ifcClassName ||= "IfcProjectedCRS";
+      ifcData.ifcClassName ||= "IfcProjectedCRS";
     }
     else if (dataName.startsWith("IFC_") &&
-            !dataName.startsWith("IFC_rel_") &&
-            (ifcClassName === null || ifcClassName === "IfcPropertySet"))
+            !dataName.startsWith("IFC_ps_") &&
+            !dataName.startsWith("IFC_rel_"))
     {
       // property set
-      ifcClassName = "IfcPropertySet";
-      isRoot = true;
       let psetName = dataName.substring(4).trim();
+
+      let attrDataName = "IFC_ps_" + psetName;
+      if (!object3D.userData[attrDataName]) // create pset attribs if not exists
+      {
+        object3D.userData[attrDataName] = {
+          ifcClassName : "IfcPropertySet",
+          GlobalId : IFC.generateIfcGlobalId(),
+          Name : psetName
+        };
+      }
+
       let relDataName = "IFC_rel_" + psetName;
       if (!object3D.userData[relDataName]) // create relationship if not exists
       {
         object3D.userData[relDataName] = {
           ifcClassName : "IfcRelDefinesByProperties",
-          GlobalId : IFC.generateIfcGlobalId()
+          GlobalId : IFC.generateIfcGlobalId(),
+          Name : "Properties"
         };
       }
     }
+  }
 
-    if (ifcClassName)
+  static completeIfcRootData(ifcData, ifcClassName, name)
+  {
+    if (typeof ifcData.ifcClassName !== "string" && ifcClassName)
     {
       ifcData.ifcClassName = ifcClassName;
-
-      if (isRoot)
-      {
-        if (typeof ifcData.GlobalId !== "string")
-        {
-          ifcData.GlobalId = this.generateIfcGlobalId();
-        }
-        if (typeof ifcData.Name !== "string")
-        {
-          ifcData.Name = name || ifcClassName;
-        }
-      }
+    }
+    if (typeof ifcData.GlobalId !== "string")
+    {
+      ifcData.GlobalId = this.generateIfcGlobalId();
+    }
+    if (typeof ifcData.Name !== "string")
+    {
+      ifcData.Name = name || ifcClassName || "";
     }
   }
 }

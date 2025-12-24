@@ -284,6 +284,7 @@ class IFCLoader extends THREE.Loader
           }
         }
       });
+
       if (types.children.length > 0)
       {
         ObjectUtils.updateVisibility(types, false);
@@ -465,6 +466,7 @@ class IFCLoader extends THREE.Loader
   getIfcData(ifcEntity)
   {
     const data = { ifcClassName: ifcEntity.constructor.name };
+    const schema = ifcEntity.constructor.schema;
 
     const attributes = Object.getOwnPropertyNames(ifcEntity)
           .filter(name => !name.startsWith("_"));
@@ -487,6 +489,10 @@ class IFCLoader extends THREE.Loader
         if (ObjectUtils.isBasicType(value) || ObjectUtils.isBasicArray(value))
         {
           data[attribute] = value;
+        }
+        else if (value instanceof schema.IfcRoot)
+        {
+          data["$" + attribute] = value.GlobalId;
         }
       }
     }
@@ -3276,11 +3282,7 @@ class IfcRelDefinesByTypeHelper extends IfcRelationshipHelper
       {
         let object3D = relatedHelper.getObject3D();
 
-        if (object3D.links === undefined)
-        {
-          object3D.links = {};
-        }
-        object3D.links.ifcType = typeGroup;
+        ObjectUtils.createLink(object3D, typeGroup, "ifcType");
 
         if (typeData)
         {
@@ -3449,9 +3451,8 @@ class IfcRelAssignsToGroupHelper extends IfcRelationshipHelper
     let groupName = ifcGroup.Name || ifcGroup.GlobalId;
     groupName = ifcGroup.constructor.name + "_" + groupName;
 
-    for (let i = 0; i < ifcObjects.length; i++)
+    for (let ifcObject of ifcObjects)
     {
-      let ifcObject = ifcObjects[i];
       let objectHelper = this.helper(ifcObject);
 
       if (objectHelper?.getObject3D)
@@ -3692,15 +3693,18 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
     const loader = this.loader;
     const schema = rel.constructor.schema;
 
-    let propertySet = rel.RelatingPropertyDefinition;
-    let relatedObjects = rel.RelatedObjects;
+    let propDefSet = rel.RelatingPropertyDefinition;
 
-    const ifcRelData = loader.getIfcData(rel);
-
-    if (propertySet instanceof schema.IfcPropertySet)
+    if (propDefSet instanceof schema.IfcPropertySetDefinition)
     {
-      let psetName = propertySet.Name;
-      let properties = this.helper(propertySet).getProperties();
+      // IfcPropertySet or IfcQuantitySet
+      const psetName = propDefSet.Name;
+      const propDefHelper = this.helper(propDefSet);
+      const attributes = propDefHelper.getAttributes();
+      const properties = propDefHelper.getProperties();
+      const ifcRelData = loader.getIfcData(rel);
+
+      const relatedObjects = rel.RelatedObjects;
       for (let relatedObject of relatedObjects)
       {
         if (relatedObject instanceof schema.IfcProduct)
@@ -3709,43 +3713,77 @@ class IfcRelDefinesByPropertiesHelper extends IfcRelationshipHelper
           if (object3D)
           {
             object3D.userData["IFC_" + psetName] = properties;
+            object3D.userData["IFC_ps_" + psetName] = attributes;
+            object3D.userData["IFC_rel_" + psetName] = ifcRelData;
           }
-          object3D.userData["IFC_rel_" + psetName] = ifcRelData;
         }
         else if (relatedObject instanceof schema.IfcProject)
         {
           const project = relatedObject;
           loader.model.userData["IFC_" + psetName] = properties;
+          loader.model.userData["IFC_ps_" + psetName] = attributes;
           loader.model.userData["IFC_rel_" + psetName] = ifcRelData;
-        }
-      }
-    }
-    else if (propertySet instanceof schema.IfcElementQuantity || propertySet instanceof schema.IfcQuantitySet)
-    {
-      let qtoName = loader.unBox(propertySet.Name);
-      let quantities = this.helper(propertySet).getQuantities();
-      for (let relatedObject of relatedObjects)
-      {
-        if (relatedObject instanceof schema.IfcProduct)
-        {
-          let object3D = this.helper(relatedObject).getObject3D();
-          if (object3D)
-          {
-            object3D.userData["IFC_" + qtoName] = quantities;
-            object3D.userData["IFC_rel_" + qtoName] = ifcRelData;
-          }
-        }
-        else if (relatedObject instanceof schema.IfcProject)
-        {
-          const project = relatedObject;
-          loader.model.userData["IFC_" + qtoName] = quantities;
-          loader.model.userData["IFC_rel_" + qtoName] = ifcRelData;
         }
       }
     }
   }
 };
 registerIfcHelperClass(IfcRelDefinesByPropertiesHelper);
+
+
+class IfcRelSpaceBoundaryHelper extends IfcRelationshipHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
+  }
+
+  relate()
+  {
+    const rel = this.entity;
+    const loader = this.loader;
+    const schema = rel.constructor.schema;
+
+    const element = rel.RelatedBuildingElement;
+    const space = rel.RelatingSpace;
+
+    if (!element)
+    {
+      console.warn("Undefined IfcRelSpaceBoundary.RelatedBuildingElement.", rel);
+      return;
+    }
+
+    if (!space)
+    {
+      console.warn("Undefined IfcRelSpaceBoundary.RelatingSpace.", rel);
+      return;
+    }
+
+    const elementObject3D = this.helper(element).getObject3D();
+    const spaceObject3D = this.helper(space).getObject3D();
+
+    if (!elementObject3D || !spaceObject3D) return;
+
+    if (elementObject3D)
+    {
+      let i = 0;
+      while (elementObject3D.userData["IFC_rel_space_boundary_" + i]) i++;
+
+      elementObject3D.userData["IFC_rel_space_boundary_" + i] = loader.getIfcData(rel);
+      ObjectUtils.createLink(elementObject3D, spaceObject3D, "ifcSpaceBoundary_" + i);
+    }
+
+    if (spaceObject3D)
+    {
+      let i = 0;
+      while (spaceObject3D.userData["IFC_rel_space_boundary_" + i]) i++;
+
+      spaceObject3D.userData["IFC_rel_space_boundary_" + i] = loader.getIfcData(rel);
+      ObjectUtils.createLink(spaceObject3D, elementObject3D, "ifcSpaceBoundary_" + i);
+    }
+  }
+}
+registerIfcHelperClass(IfcRelSpaceBoundaryHelper);
 
 
 /* Other helpers */
@@ -3995,12 +4033,35 @@ class IfcSurfaceStyleHelper extends IfcHelper
 registerIfcHelperClass(IfcSurfaceStyleHelper);
 
 
-class IfcPropertySetHelper extends IfcHelper
+class IfcPropertySetDefinitionHelper extends IfcHelper
 {
   constructor(loader, entity)
   {
     super(loader, entity);
+    this.attributes = null;
     this.properties = null;
+  }
+
+  getAttributes()
+  {
+    if (this.attributes === null)
+    {
+      const pset = this.entity;
+      const loader = this.loader;
+
+      this.attributes = loader.getIfcData(pset);
+    }
+    return this.attributes;
+  }
+}
+registerIfcHelperClass(IfcPropertySetDefinitionHelper);
+
+
+class IfcPropertySetHelper extends IfcPropertySetDefinitionHelper
+{
+  constructor(loader, entity)
+  {
+    super(loader, entity);
   }
 
   getProperties()
@@ -4011,21 +4072,23 @@ class IfcPropertySetHelper extends IfcHelper
       const loader = this.loader;
       const schema = pset.constructor.schema;
 
-      this.properties =  {
-        ifcClassName : "IfcPropertySet",
-        GlobalId : pset.GlobalId
-      };
+      this.properties = {};
 
       if (pset.HasProperties)
       {
-        for (let i = 0; i < pset.HasProperties.length; i++)
+        for (let prop of pset.HasProperties)
         {
-          let prop = pset.HasProperties[i];
           if (prop instanceof schema.IfcPropertySingleValue)
           {
             let name = loader.unBox(prop.Name);
             let value = loader.unBox(prop.NominalValue);
             this.properties[name] = value;
+            if (prop.NominalValue?.Value) // is boxed
+            {
+              this.properties[name + "_metadata"] = {
+                ifcClassName : prop.NominalValue.constructor.name
+              };
+            }
           }
         }
       }
@@ -4036,60 +4099,46 @@ class IfcPropertySetHelper extends IfcHelper
 registerIfcHelperClass(IfcPropertySetHelper);
 
 
-class IfcElementQuantityHelper extends IfcHelper
+class IfcElementQuantityHelper extends IfcPropertySetDefinitionHelper
 {
   constructor(loader, entity)
   {
     super(loader, entity);
-    this.quantities = null;
   }
 
-  getQuantities()
+  getProperties()
   {
-    if (this.quantities === null)
+    if (this.properties === null)
     {
       const qto = this.entity;
       const loader = this.loader;
       const schema = qto.constructor.schema;
 
-      this.quantities = {
-        ifcClassName : qto.constructor.name,
-        GlobalId : qto.GlobalId,
-        Name : loader.unBox(qto.Name)
-      };
+      this.properties = {};
 
       if (qto.Quantities)
       {
-        for (let i = 0; i < qto.Quantities.length; i++)
+        for (let qty of qto.Quantities)
         {
-          let qty = qto.Quantities[i];
           let qtyName = loader.unBox(qty.Name);
-          let qtyValue = loader.unBox(
-            qty.AreaValue ||
-            qty.LengthValue ||
-            qty.VolumeValue ||
-            qty.WeightValue ||
-            qty.CountValue ||
-            qty.TimeValue ||
-            qty.NumberValue
-          );
-          this.quantities[qtyName] = qtyValue;
+          let ifcClassName = qty.constructor.name;
+          let measureType = ifcClassName.substring(11);
+          let qtyValue = loader.unBox(qty[measureType + "Value"]);
+          this.properties[qtyName] = qtyValue;
+          this.properties[qtyName + "_metadata"] = {
+            ifcClassName : qty.constructor.name
+          };
+          if (qty.Formula)
+          {
+            this.properties[qtyName + "_metadata"].Formula = qty.Formula;
+          }
         }
       }
     }
-    return this.quantities;
+    return this.properties;
   }
 };
 registerIfcHelperClass(IfcElementQuantityHelper);
 
-
-class IfcQuantitySetHelper extends IfcElementQuantityHelper
-{
-  constructor(loader, entity)
-  {
-    super(loader, entity);
-  }
-};
-registerIfcHelperClass(IfcQuantitySetHelper);
 
 export { IFCLoader };

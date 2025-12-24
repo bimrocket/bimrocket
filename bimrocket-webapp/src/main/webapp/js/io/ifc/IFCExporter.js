@@ -211,7 +211,7 @@ class IFCExporter
               if (!rel)
               {
                 rel = new schema.IfcRelAggregates();
-                rel.GlobalId = globalId;
+                this.setIfcData(relData, rel);
                 rel.RelatingObject = this.getParentIfcEntity(object3D);
                 rel.RelatedObjects = [];
                 ifcFile.add(rel);
@@ -223,7 +223,7 @@ class IFCExporter
               if (!rel)
               {
                 rel = new schema.IfcRelContainedInSpatialStructure();
-                rel.GlobalId = globalId;
+                this.setIfcData(relData, rel);
                 rel.RelatingStructure = this.getSpatialIfcEntity(object3D);
                 rel.RelatedElements = [];
                 ifcFile.add(rel);
@@ -235,7 +235,7 @@ class IFCExporter
               if (!rel)
               {
                 rel = new schema.IfcRelVoidsElement();
-                rel.GlobalId = globalId;
+                this.setIfcData(relData, rel);
                 rel.RelatingBuildingElement = this.getParentIfcEntity(object3D);
                 rel.RelatedOpeningElement = entity;
                 ifcFile.add(rel);
@@ -246,7 +246,7 @@ class IFCExporter
               if (!rel)
               {
                 rel = new schema.IfcRelFillsElement();
-                rel.GlobalId = globalId;
+                this.setIfcData(relData, rel);
                 rel.RelatingOpeningElement = this.getParentIfcEntity(object3D);
                 rel.RelatedBuildingElement = entity;
                 ifcFile.add(rel);
@@ -254,12 +254,12 @@ class IFCExporter
               break;
 
             case "IfcRelDefinesByType":
-              const type = object3D.userData.IFC_type;
-              const typeGlobalId = type?.GlobalId;
               if (!rel)
               {
+                const type = object3D.userData.IFC_type;
+                const typeGlobalId = type?.GlobalId;
                 rel = new schema.IfcRelDefinesByType();
-                rel.GlobalId = globalId;
+                this.setIfcData(relData, rel);
                 rel.RelatingType =
                   ifcFile.entitiesByGlobalId.get(typeGlobalId);
                 rel.RelatedObjects = [];
@@ -268,17 +268,45 @@ class IFCExporter
               rel.RelatedObjects.push(entity);
               break;
 
-            case "IfcRelDefinesByProperties":
-              let psetName = name.substring(8);
-              let pset = object3D.userData["IFC_" + psetName];
-              const psetGlobalId = pset?.GlobalId;
-              const ifcPset = this.getIfcPropertySet(psetGlobalId, psetName, pset);
+            case "IfcRelSpaceBoundary":
               if (!rel)
               {
+                const elemGlobalId = relData.$RelatedBuildingElement;
+                const spaceGlobalId = relData.$RelatingSpace;
+                rel = new schema.IfcRelSpaceBoundary();
+                this.setIfcData(relData, rel);
+                rel.RelatedBuildingElement =
+                  ifcFile.entitiesByGlobalId.get(elemGlobalId);
+                rel.RelatingSpace =
+                  ifcFile.entitiesByGlobalId.get(spaceGlobalId);
+                ifcFile.add(rel);
+              }
+              break;
+
+            case "IfcRelDefinesByProperties":
+              if (!rel)
+              {
+                let psetName = name.substring(8);
+                let properties = object3D.userData["IFC_" + psetName];
+                let attributes = object3D.userData["IFC_ps_" + psetName];
+
+                if (!properties || !attributes) break;
+
+                let ifcSet;
+                let ifcClass = schema[attributes.ifcClassName];
+                if (ifcClass === schema.IfcPropertySet)
+                {
+                  ifcSet = this.getIfcPropertySet(attributes, properties);
+                }
+                else if (ifcClass === schema.IfcElementQuantity)
+                {
+                  ifcSet = this.getIfcElementQuantity(attributes, properties);
+                }
+                else break;
+
                 rel = new schema.IfcRelDefinesByProperties();
-                rel.GlobalId = globalId;
-                rel.RelatingPropertyDefinition = ifcPset;
-                  ifcFile.entitiesByGlobalId.get(psetGlobalId);
+                this.setIfcData(relData, rel);
+                rel.RelatingPropertyDefinition = ifcSet;
                 rel.RelatedObjects = [];
                 ifcFile.add(rel);
               }
@@ -743,49 +771,94 @@ class IFCExporter
     return direction;
   }
 
-  getIfcPropertySet(globalId, psetName, properties)
+  getIfcPropertySet(attributes, properties)
   {
-    const schema = this.schema;
     const ifcFile = this.ifcFile;
+    const globalId = attributes.GlobalId;
+
     let ifcPset = ifcFile.entitiesByGlobalId.get(globalId);
     if (!ifcPset)
     {
+      const schema = this.schema;
+
       ifcPset = new schema.IfcPropertySet();
-      ifcPset.GlobalId = globalId;
-      ifcPset.Name = psetName;
+      this.setIfcData(attributes, ifcPset);
       ifcPset.HasProperties = [];
+      ifcFile.add(ifcPset);
       for (let name in properties)
       {
-        if (name === "ifcClassName" ||
-            name === "GlobalId" ||
-            name === "Name") continue;
+        if (name.endsWith("_metadata")) continue;
+
         let value = properties[name];
-        if (value !== undefined && value !== null)
+        if (value === undefined || value === null) continue;
+
+        let sv = new schema.IfcPropertySingleValue();
+        sv.Name = name;
+
+        let metadata = properties[name + "_metadata"];
+        let ifcClassName = metadata?.ifcClassName;
+        let boxedValue;
+        if (ifcClassName && schema[ifcClassName])
         {
-          let sv = new schema.IfcPropertySingleValue();
-          sv.Name = name;
-          let boxedValue;
-          if (typeof value === "number")
-          {
-            boxedValue = new schema.IfcReal();
-            boxedValue.Value = value;
-          }
-          else if (typeof value === "boolean")
-          {
-            boxedValue = new schema.IfcBoolean();
-            boxedValue.Value = value;
-          }
-          else
-          {
-            boxedValue = new schema.IfcLabel();
-            boxedValue.Value = String(value);
-          }
-          sv.NominalValue = boxedValue;
-          ifcPset.HasProperties.push(sv);
+          boxedValue = new schema[ifcClassName];
+          boxedValue.Value = value;
         }
+        else if (typeof value === "number")
+        {
+          boxedValue = new schema.IfcReal();
+          boxedValue.Value = value;
+        }
+        else if (typeof value === "boolean")
+        {
+          boxedValue = new schema.IfcBoolean();
+          boxedValue.Value = value;
+        }
+        else
+        {
+          boxedValue = new schema.IfcLabel();
+          boxedValue.Value = String(value);
+        }
+        sv.NominalValue = boxedValue;
+        ifcPset.HasProperties.push(sv);
       }
     }
     return ifcPset;
+  }
+
+  getIfcElementQuantity(attributes, properties)
+  {
+    const ifcFile = this.ifcFile;
+    const globalId = attributes.GlobalId;
+
+    let ifcQto = ifcFile.entitiesByGlobalId.get(globalId);
+    if (!ifcQto)
+    {
+      const schema = this.schema;
+
+      ifcQto = new schema.IfcElementQuantity();
+      this.setIfcData(attributes, ifcQto);
+      ifcQto.Quantities = [];
+      ifcFile.add(ifcQto);
+      for (let name in properties)
+      {
+        if (name.endsWith("_metadata")) continue;
+
+        let value = properties[name];
+        if (typeof value !== "number") continue;
+
+        let metadata = properties[name + "_metadata"];
+        let ifcClassName = metadata?.ifcClassName || "IfcQuantityNumber";
+
+        let measureType = ifcClassName.substring(11);
+        let sq = new schema[ifcClassName];
+        sq.Name = name;
+        sq[measureType + "Value"] = value;
+        if (metadata.Formula) sq.Formula = metadata.Formula;
+        // TODO: set Unit
+        ifcQto.Quantities.push(sq);
+      }
+    }
+    return ifcQto;
   }
 
   getIfcSurfaceStyle(material)
@@ -877,7 +950,8 @@ class IFCExporter
   setIfcData(ifcData, entity)
   {
     const attributes = Object.getOwnPropertyNames(entity)
-          .filter(name => !name.startsWith("_"));
+      .filter(name => !name.startsWith("_") && !name.startsWith("$"));
+
     for (let attribute of attributes)
     {
       let value = ifcData[attribute];

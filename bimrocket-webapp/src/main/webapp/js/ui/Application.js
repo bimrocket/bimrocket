@@ -183,7 +183,7 @@ class Application
         preserveDrawingBuffer : true
       });
       renderer.shadowMap.enabled = setup.shadowsEnabled;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
       renderer.setClearColor(0x000000, 0);
     }
     else

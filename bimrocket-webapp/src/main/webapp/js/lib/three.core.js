@@ -3,7 +3,7 @@
  * Copyright 2010-2025 Three.js Authors
  * SPDX-License-Identifier: MIT
  */
-const REVISION = '178';
+const REVISION = '182';
 
 /**
  * Represents mouse buttons and interaction types in context of controls.
@@ -727,6 +727,14 @@ const UnsignedInt248Type = 1020;
 const UnsignedInt5999Type = 35902;
 
 /**
+ * An unsigned int 10_11_11 (packed) data type for textures.
+ *
+ * @type {number}
+ * @constant
+ */
+const UnsignedInt101111Type = 35899;
+
+/**
  * Discards the red, green and blue components and reads just the alpha component.
  *
  * @type {number}
@@ -903,6 +911,38 @@ const RGB_ETC2_Format = 37492;
  * @constant
  */
 const RGBA_ETC2_EAC_Format = 37496;
+
+/**
+ * EAC R11 UNORM format.
+ *
+ * @type {number}
+ * @constant
+ */
+const R11_EAC_Format = 37488; // 0x9270
+
+/**
+ * EAC R11 SNORM format.
+ *
+ * @type {number}
+ * @constant
+ */
+const SIGNED_R11_EAC_Format = 37489; // 0x9271
+
+/**
+ * EAC RG11 UNORM format.
+ *
+ * @type {number}
+ * @constant
+ */
+const RG11_EAC_Format = 37490; // 0x9272
+
+/**
+ * EAC RG11 SNORM format.
+ *
+ * @type {number}
+ * @constant
+ */
+const SIGNED_RG11_EAC_Format = 37491; // 0x9273
 
 /**
  * ASTC RGBA 4x4 format.
@@ -1188,7 +1228,7 @@ const TriangleStripDrawMode = 1;
 const TriangleFanDrawMode = 2;
 
 /**
- * Basic depth packing.
+ * The depth value is inverted (1.0 - z) for visualization purposes.
  *
  * @type {number}
  * @constant
@@ -1196,7 +1236,7 @@ const TriangleFanDrawMode = 2;
 const BasicDepthPacking = 3200;
 
 /**
- * A depth value is packed into 32 bit RGBA.
+ * The depth value is packed into 32 bit RGBA.
  *
  * @type {number}
  * @constant
@@ -1204,7 +1244,7 @@ const BasicDepthPacking = 3200;
 const RGBADepthPacking = 3201;
 
 /**
- * A depth value is packed into 24 bit RGB.
+ * The depth value is packed into 24 bit RGB.
  *
  * @type {number}
  * @constant
@@ -1212,7 +1252,7 @@ const RGBADepthPacking = 3201;
 const RGBDepthPacking = 3202;
 
 /**
- * A depth value is packed into 16 bit RG.
+ * The depth value is packed into 16 bit RG.
  *
  * @type {number}
  * @constant
@@ -1276,6 +1316,30 @@ const LinearTransfer = 'linear';
  * @constant
  */
 const SRGBTransfer = 'srgb';
+
+/**
+ * No normal map packing.
+ *
+ * @type {string}
+ * @constant
+ */
+const NoNormalPacking = '';
+
+/**
+ * Normal RG packing.
+ *
+ * @type {string}
+ * @constant
+ */
+const NormalRGPacking = 'rg';
+
+/**
+ * Normal GA packing.
+ *
+ * @type {string}
+ * @constant
+ */
+const NormalGAPacking = 'ga';
 
 /**
  * Sets the stencil buffer value to `0`.
@@ -1667,14 +1731,177 @@ const InterpolationSamplingMode = {
  * @property {string} NORMAL - Normal sampling mode.
  * @property {string} CENTROID - Centroid sampling mode.
  * @property {string} SAMPLE - Sample-specific sampling mode.
- * @property {string} FLAT_FIRST - Flat interpolation using the first vertex.
- * @property {string} FLAT_EITHER - Flat interpolation using either vertex.
+ * @property {string} FIRST - Flat interpolation using the first vertex.
+ * @property {string} EITHER - Flat interpolation using either vertex.
  */
+
+function arrayNeedsUint32( array ) {
+
+	// assumes larger values usually on last
+
+	for ( let i = array.length - 1; i >= 0; -- i ) {
+
+		if ( array[ i ] >= 65535 ) return true; // account for PRIMITIVE_RESTART_FIXED_INDEX, #24565
+
+	}
+
+	return false;
+
+}
+
+const TYPED_ARRAYS = {
+	Int8Array: Int8Array,
+	Uint8Array: Uint8Array,
+	Uint8ClampedArray: Uint8ClampedArray,
+	Int16Array: Int16Array,
+	Uint16Array: Uint16Array,
+	Int32Array: Int32Array,
+	Uint32Array: Uint32Array,
+	Float32Array: Float32Array,
+	Float64Array: Float64Array
+};
+
+function getTypedArray( type, buffer ) {
+
+	return new TYPED_ARRAYS[ type ]( buffer );
+
+}
+
+/**
+ * Returns `true` if the given object is a typed array.
+ *
+ * @param {any} array - The object to check.
+ * @return {boolean} Whether the given object is a typed array.
+ */
+function isTypedArray( array ) {
+
+	return ArrayBuffer.isView( array ) && ! ( array instanceof DataView );
+
+}
+
+function createElementNS( name ) {
+
+	return document.createElementNS( 'http://www.w3.org/1999/xhtml', name );
+
+}
+
+function createCanvasElement() {
+
+	const canvas = createElementNS( 'canvas' );
+	canvas.style.display = 'block';
+	return canvas;
+
+}
+
+const _cache = {};
+
+let _setConsoleFunction = null;
+
+function setConsoleFunction( fn ) {
+
+	_setConsoleFunction = fn;
+
+}
+
+function getConsoleFunction() {
+
+	return _setConsoleFunction;
+
+}
+
+function log( ...params ) {
+
+	const message = 'THREE.' + params.shift();
+
+	if ( _setConsoleFunction ) {
+
+		_setConsoleFunction( 'log', message, ...params );
+
+	} else {
+
+		console.log( message, ...params );
+
+	}
+
+}
+
+function warn( ...params ) {
+
+	const message = 'THREE.' + params.shift();
+
+	if ( _setConsoleFunction ) {
+
+		_setConsoleFunction( 'warn', message, ...params );
+
+	} else {
+
+		console.warn( message, ...params );
+
+	}
+
+}
+
+function error( ...params ) {
+
+	const message = 'THREE.' + params.shift();
+
+	if ( _setConsoleFunction ) {
+
+		_setConsoleFunction( 'error', message, ...params );
+
+	} else {
+
+		console.error( message, ...params );
+
+	}
+
+}
+
+function warnOnce( ...params ) {
+
+	const message = params.join( ' ' );
+
+	if ( message in _cache ) return;
+
+	_cache[ message ] = true;
+
+	warn( ...params );
+
+}
+
+function probeAsync( gl, sync, interval ) {
+
+	return new Promise( function ( resolve, reject ) {
+
+		function probe() {
+
+			switch ( gl.clientWaitSync( sync, gl.SYNC_FLUSH_COMMANDS_BIT, 0 ) ) {
+
+				case gl.WAIT_FAILED:
+					reject();
+					break;
+
+				case gl.TIMEOUT_EXPIRED:
+					setTimeout( probe, interval );
+					break;
+
+				default:
+					resolve();
+
+			}
+
+		}
+
+		setTimeout( probe, interval );
+
+	} );
+
+}
 
 /**
  * This modules allows to dispatch event objects on custom JavaScript objects.
  *
- * Main repository: [eventdispatcher.js]{@link https://github.com/mrdoob/eventdispatcher.js/}
+ * Main repository: [eventdispatcher.js](https://github.com/mrdoob/eventdispatcher.js/)
  *
  * Code Example:
  * ```js
@@ -1809,7 +2036,7 @@ const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;
 
 /**
- * Generate a [UUID]{@link https://en.wikipedia.org/wiki/Universally_unique_identifier}
+ * Generate a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier)
  * (universally unique identifier).
  *
  * @return {string} The UUID.
@@ -1922,7 +2149,7 @@ function lerp( x, y, t ) {
 /**
  * Smoothly interpolate a number from `x` to `y` in  a spring-like manner using a delta
  * time to maintain frame rate independent movement. For details, see
- * [Frame rate independent damping using lerp]{@link http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/}.
+ * [Frame rate independent damping using lerp](http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/).
  *
  * @param {number} x - The current point.
  * @param {number} y - The target point.
@@ -1957,7 +2184,7 @@ function pingpong( x, length = 1 ) {
  * moved between `min` and `max`, but smoothed or slowed down the closer `x` is to
  * the `min` and `max`.
  *
- * See [Smoothstep]{@link http://en.wikipedia.org/wiki/Smoothstep} for more details.
+ * See [Smoothstep](http://en.wikipedia.org/wiki/Smoothstep) for more details.
  *
  * @param {number} x - The value to evaluate based on its position between min and max.
  * @param {number} min - The min value. Any x value below min will be `0`.
@@ -1976,7 +2203,7 @@ function smoothstep( x, min, max ) {
 }
 
 /**
- * A [variation on smoothstep]{@link https://en.wikipedia.org/wiki/Smoothstep#Variations}
+ * A [variation on smoothstep](https://en.wikipedia.org/wiki/Smoothstep#Variations)
  * that has zero 1st and 2nd order derivatives at x=0 and x=1.
  *
  * @param {number} x - The value to evaluate based on its position between min and max.
@@ -2116,7 +2343,7 @@ function floorPowerOfTwo( value ) {
 }
 
 /**
- * Sets the given quaternion from the [Intrinsic Proper Euler Angles]{@link https://en.wikipedia.org/wiki/Euler_angles}
+ * Sets the given quaternion from the [Intrinsic Proper Euler Angles](https://en.wikipedia.org/wiki/Euler_angles)
  * defined by the given angles and order.
  *
  * Rotations are applied to the axes in the order specified by order:
@@ -2172,7 +2399,7 @@ function setQuaternionFromProperEuler( q, a, b, c, order ) {
 			break;
 
 		default:
-			console.warn( 'THREE.MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: ' + order );
+			warn( 'MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: ' + order );
 
 	}
 
@@ -2281,7 +2508,7 @@ const MathUtils = {
 	DEG2RAD: DEG2RAD,
 	RAD2DEG: RAD2DEG,
 	/**
-	 * Generate a [UUID]{@link https://en.wikipedia.org/wiki/Universally_unique_identifier}
+	 * Generate a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier)
 	 * (universally unique identifier).
 	 *
 	 * @static
@@ -2352,7 +2579,7 @@ const MathUtils = {
 	/**
 	 * Smoothly interpolate a number from `x` to `y` in  a spring-like manner using a delta
 	 * time to maintain frame rate independent movement. For details, see
-	 * [Frame rate independent damping using lerp]{@link http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/}.
+	 * [Frame rate independent damping using lerp](http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/).
 	 *
 	 * @static
 	 * @method
@@ -2379,7 +2606,7 @@ const MathUtils = {
 	 * moved between `min` and `max`, but smoothed or slowed down the closer `x` is to
 	 * the `min` and `max`.
 	 *
-	 * See [Smoothstep]{@link http://en.wikipedia.org/wiki/Smoothstep} for more details.
+	 * See [Smoothstep](http://en.wikipedia.org/wiki/Smoothstep) for more details.
 	 *
 	 * @static
 	 * @method
@@ -2390,7 +2617,7 @@ const MathUtils = {
 	 */
 	smoothstep: smoothstep,
 	/**
-	 * A [variation on smoothstep]{@link https://en.wikipedia.org/wiki/Smoothstep#Variations}
+	 * A [variation on smoothstep](https://en.wikipedia.org/wiki/Smoothstep#Variations)
 	 * that has zero 1st and 2nd order derivatives at x=0 and x=1.
 	 *
 	 * @static
@@ -2485,7 +2712,7 @@ const MathUtils = {
 	 */
 	floorPowerOfTwo: floorPowerOfTwo,
 	/**
-	 * Sets the given quaternion from the [Intrinsic Proper Euler Angles]{@link https://en.wikipedia.org/wiki/Euler_angles}
+	 * Sets the given quaternion from the [Intrinsic Proper Euler Angles](https://en.wikipedia.org/wiki/Euler_angles)
 	 * defined by the given angles and order.
 	 *
 	 * Rotations are applied to the axes in the order specified by order:
@@ -3430,7 +3657,7 @@ class Quaternion {
 
 	/**
 	 * Interpolates between two quaternions via SLERP. This implementation assumes the
-	 * quaternion data are managed  in flat arrays.
+	 * quaternion data are managed in flat arrays.
 	 *
 	 * @param {Array<number>} dst - The destination array.
 	 * @param {number} dstOffset - An offset into the destination array.
@@ -3443,65 +3670,78 @@ class Quaternion {
 	 */
 	static slerpFlat( dst, dstOffset, src0, srcOffset0, src1, srcOffset1, t ) {
 
-		// fuzz-free, array-based Quaternion SLERP operation
-
 		let x0 = src0[ srcOffset0 + 0 ],
 			y0 = src0[ srcOffset0 + 1 ],
 			z0 = src0[ srcOffset0 + 2 ],
 			w0 = src0[ srcOffset0 + 3 ];
 
-		const x1 = src1[ srcOffset1 + 0 ],
+		let x1 = src1[ srcOffset1 + 0 ],
 			y1 = src1[ srcOffset1 + 1 ],
 			z1 = src1[ srcOffset1 + 2 ],
 			w1 = src1[ srcOffset1 + 3 ];
 
-		if ( t === 0 ) {
+		if ( t <= 0 ) {
 
 			dst[ dstOffset + 0 ] = x0;
 			dst[ dstOffset + 1 ] = y0;
 			dst[ dstOffset + 2 ] = z0;
 			dst[ dstOffset + 3 ] = w0;
+
 			return;
 
 		}
 
-		if ( t === 1 ) {
+		if ( t >= 1 ) {
 
 			dst[ dstOffset + 0 ] = x1;
 			dst[ dstOffset + 1 ] = y1;
 			dst[ dstOffset + 2 ] = z1;
 			dst[ dstOffset + 3 ] = w1;
+
 			return;
 
 		}
 
 		if ( w0 !== w1 || x0 !== x1 || y0 !== y1 || z0 !== z1 ) {
 
-			let s = 1 - t;
-			const cos = x0 * x1 + y0 * y1 + z0 * z1 + w0 * w1,
-				dir = ( cos >= 0 ? 1 : -1 ),
-				sqrSin = 1 - cos * cos;
+			let dot = x0 * x1 + y0 * y1 + z0 * z1 + w0 * w1;
 
-			// Skip the Slerp for tiny steps to avoid numeric problems:
-			if ( sqrSin > Number.EPSILON ) {
+			if ( dot < 0 ) {
 
-				const sin = Math.sqrt( sqrSin ),
-					len = Math.atan2( sin, cos * dir );
+				x1 = - x1;
+				y1 = - y1;
+				z1 = - z1;
+				w1 = - w1;
 
-				s = Math.sin( s * len ) / sin;
-				t = Math.sin( t * len ) / sin;
+				dot = - dot;
 
 			}
 
-			const tDir = t * dir;
+			let s = 1 - t;
 
-			x0 = x0 * s + x1 * tDir;
-			y0 = y0 * s + y1 * tDir;
-			z0 = z0 * s + z1 * tDir;
-			w0 = w0 * s + w1 * tDir;
+			if ( dot < 0.9995 ) {
 
-			// Normalize in case we just did a lerp:
-			if ( s === 1 - t ) {
+				// slerp
+
+				const theta = Math.acos( dot );
+				const sin = Math.sin( theta );
+
+				s = Math.sin( s * theta ) / sin;
+				t = Math.sin( t * theta ) / sin;
+
+				x0 = x0 * s + x1 * t;
+				y0 = y0 * s + y1 * t;
+				z0 = z0 * s + z1 * t;
+				w0 = w0 * s + w1 * t;
+
+			} else {
+
+				// for small angles, lerp then normalize
+
+				x0 = x0 * s + x1 * t;
+				y0 = y0 * s + y1 * t;
+				z0 = z0 * s + z1 * t;
+				w0 = w0 * s + w1 * t;
 
 				const f = 1 / Math.sqrt( x0 * x0 + y0 * y0 + z0 * z0 + w0 * w0 );
 
@@ -3755,7 +3995,7 @@ class Quaternion {
 				break;
 
 			default:
-				console.warn( 'THREE.Quaternion: .setFromEuler() encountered an unknown order: ' + order );
+				warn( 'Quaternion: .setFromEuler() encountered an unknown order: ' + order );
 
 		}
 
@@ -4111,68 +4351,56 @@ class Quaternion {
 	 */
 	slerp( qb, t ) {
 
-		if ( t === 0 ) return this;
-		if ( t === 1 ) return this.copy( qb );
+		if ( t <= 0 ) return this;
 
-		const x = this._x, y = this._y, z = this._z, w = this._w;
+		if ( t >= 1 ) return this.copy( qb ); // copy calls _onChangeCallback()
 
-		// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+		let x = qb._x, y = qb._y, z = qb._z, w = qb._w;
 
-		let cosHalfTheta = w * qb._w + x * qb._x + y * qb._y + z * qb._z;
+		let dot = this.dot( qb );
 
-		if ( cosHalfTheta < 0 ) {
+		if ( dot < 0 ) {
 
-			this._w = - qb._w;
-			this._x = - qb._x;
-			this._y = - qb._y;
-			this._z = - qb._z;
+			x = - x;
+			y = - y;
+			z = - z;
+			w = - w;
 
-			cosHalfTheta = - cosHalfTheta;
+			dot = - dot;
+
+		}
+
+		let s = 1 - t;
+
+		if ( dot < 0.9995 ) {
+
+			// slerp
+
+			const theta = Math.acos( dot );
+			const sin = Math.sin( theta );
+
+			s = Math.sin( s * theta ) / sin;
+			t = Math.sin( t * theta ) / sin;
+
+			this._x = this._x * s + x * t;
+			this._y = this._y * s + y * t;
+			this._z = this._z * s + z * t;
+			this._w = this._w * s + w * t;
+
+			this._onChangeCallback();
 
 		} else {
 
-			this.copy( qb );
+			// for small angles, lerp then normalize
 
-		}
-
-		if ( cosHalfTheta >= 1.0 ) {
-
-			this._w = w;
-			this._x = x;
-			this._y = y;
-			this._z = z;
-
-			return this;
-
-		}
-
-		const sqrSinHalfTheta = 1.0 - cosHalfTheta * cosHalfTheta;
-
-		if ( sqrSinHalfTheta <= Number.EPSILON ) {
-
-			const s = 1 - t;
-			this._w = s * w + t * this._w;
-			this._x = s * x + t * this._x;
-			this._y = s * y + t * this._y;
-			this._z = s * z + t * this._z;
+			this._x = this._x * s + x * t;
+			this._y = this._y * s + y * t;
+			this._z = this._z * s + z * t;
+			this._w = this._w * s + w * t;
 
 			this.normalize(); // normalize calls _onChangeCallback()
 
-			return this;
-
 		}
-
-		const sinHalfTheta = Math.sqrt( sqrSinHalfTheta );
-		const halfTheta = Math.atan2( sinHalfTheta, cosHalfTheta );
-		const ratioA = Math.sin( ( 1 - t ) * halfTheta ) / sinHalfTheta,
-			ratioB = Math.sin( t * halfTheta ) / sinHalfTheta;
-
-		this._w = ( w * ratioA + this._w * ratioB );
-		this._x = ( x * ratioA + this._x * ratioB );
-		this._y = ( y * ratioA + this._y * ratioB );
-		this._z = ( z * ratioA + this._z * ratioB );
-
-		this._onChangeCallback();
 
 		return this;
 
@@ -5067,8 +5295,6 @@ class Vector3 {
 
 	}
 
-	// TODO lengthSquared?
-
 	/**
 	 * Computes the square of the Euclidean length (straight-line length) from
 	 * (0, 0, 0) to (x, y, z). If you are comparing the lengths of vectors, you should
@@ -5587,7 +5813,7 @@ const _quaternion$4 = /*@__PURE__*/ new Quaternion();
  * A Note on Row-Major and Column-Major Ordering:
  *
  * The constructor and {@link Matrix3#set} method take arguments in
- * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * [row-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order)
  * order, while internally they are stored in the {@link Matrix3#elements} array in column-major order.
  * This means that calling:
  * ```js
@@ -5861,7 +6087,7 @@ class Matrix3 {
 	}
 
 	/**
-	 * Inverts this matrix, using the [analytic method]{@link https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution}.
+	 * Inverts this matrix, using the [analytic method](https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution).
 	 * You can not invert with a determinant of zero. If you attempt this, the method produces
 	 * a zero matrix instead.
 	 *
@@ -6193,125 +6419,6 @@ class Matrix3 {
 
 const _m3 = /*@__PURE__*/ new Matrix3();
 
-function arrayNeedsUint32( array ) {
-
-	// assumes larger values usually on last
-
-	for ( let i = array.length - 1; i >= 0; -- i ) {
-
-		if ( array[ i ] >= 65535 ) return true; // account for PRIMITIVE_RESTART_FIXED_INDEX, #24565
-
-	}
-
-	return false;
-
-}
-
-const TYPED_ARRAYS = {
-	Int8Array: Int8Array,
-	Uint8Array: Uint8Array,
-	Uint8ClampedArray: Uint8ClampedArray,
-	Int16Array: Int16Array,
-	Uint16Array: Uint16Array,
-	Int32Array: Int32Array,
-	Uint32Array: Uint32Array,
-	Float32Array: Float32Array,
-	Float64Array: Float64Array
-};
-
-function getTypedArray( type, buffer ) {
-
-	return new TYPED_ARRAYS[ type ]( buffer );
-
-}
-
-function createElementNS( name ) {
-
-	return document.createElementNS( 'http://www.w3.org/1999/xhtml', name );
-
-}
-
-function createCanvasElement() {
-
-	const canvas = createElementNS( 'canvas' );
-	canvas.style.display = 'block';
-	return canvas;
-
-}
-
-const _cache = {};
-
-function warnOnce( message ) {
-
-	if ( message in _cache ) return;
-
-	_cache[ message ] = true;
-
-	console.warn( message );
-
-}
-
-function probeAsync( gl, sync, interval ) {
-
-	return new Promise( function ( resolve, reject ) {
-
-		function probe() {
-
-			switch ( gl.clientWaitSync( sync, gl.SYNC_FLUSH_COMMANDS_BIT, 0 ) ) {
-
-				case gl.WAIT_FAILED:
-					reject();
-					break;
-
-				case gl.TIMEOUT_EXPIRED:
-					setTimeout( probe, interval );
-					break;
-
-				default:
-					resolve();
-
-			}
-
-		}
-
-		setTimeout( probe, interval );
-
-	} );
-
-}
-
-function toNormalizedProjectionMatrix( projectionMatrix ) {
-
-	const m = projectionMatrix.elements;
-
-	// Convert [-1, 1] to [0, 1] projection matrix
-	m[ 2 ] = 0.5 * m[ 2 ] + 0.5 * m[ 3 ];
-	m[ 6 ] = 0.5 * m[ 6 ] + 0.5 * m[ 7 ];
-	m[ 10 ] = 0.5 * m[ 10 ] + 0.5 * m[ 11 ];
-	m[ 14 ] = 0.5 * m[ 14 ] + 0.5 * m[ 15 ];
-
-}
-
-function toReversedProjectionMatrix( projectionMatrix ) {
-
-	const m = projectionMatrix.elements;
-	const isPerspectiveMatrix = m[ 11 ] === -1;
-
-	// Reverse [0, 1] projection matrix
-	if ( isPerspectiveMatrix ) {
-
-		m[ 10 ] = - m[ 10 ] - 1;
-		m[ 14 ] = - m[ 14 ];
-
-	} else {
-
-		m[ 10 ] = - m[ 10 ];
-		m[ 14 ] = - m[ 14 ] + 1;
-
-	}
-
-}
-
 const LINEAR_REC709_TO_XYZ = /*@__PURE__*/ new Matrix3().set(
 	0.4123908, 0.3575843, 0.1804808,
 	0.2126390, 0.7151687, 0.0721923,
@@ -6344,7 +6451,7 @@ function createColorManagement() {
 		 *	- luminanceCoefficients: RGB luminance coefficients
 		 *
 		 * Optional:
-		 *  - outputColorSpaceConfig: { drawingBufferColorSpace: ColorSpace }
+		 *  - outputColorSpaceConfig: { drawingBufferColorSpace: ColorSpace, toneMappingMode: 'extended' | 'standard' }
 		 *  - workingColorSpaceConfig: { unpackColorSpace: ColorSpace }
 		 *
 		 * Reference:
@@ -6413,6 +6520,12 @@ function createColorManagement() {
 
 		},
 
+		getToneMappingMode: function ( colorSpace ) {
+
+			return this.spaces[ colorSpace ].outputColorSpaceConfig.toneMappingMode || 'standard';
+
+		},
+
 		getLuminanceCoefficients: function ( target, colorSpace = this.workingColorSpace ) {
 
 			return target.fromArray( this.spaces[ colorSpace ].luminanceCoefficients );
@@ -6451,7 +6564,7 @@ function createColorManagement() {
 
 		fromWorkingColorSpace: function ( color, targetColorSpace ) {
 
-			warnOnce( 'THREE.ColorManagement: .fromWorkingColorSpace() has been renamed to .workingToColorSpace().' ); // @deprecated, r177
+			warnOnce( 'ColorManagement: .fromWorkingColorSpace() has been renamed to .workingToColorSpace().' ); // @deprecated, r177
 
 			return ColorManagement.workingToColorSpace( color, targetColorSpace );
 
@@ -6459,7 +6572,7 @@ function createColorManagement() {
 
 		toWorkingColorSpace: function ( color, sourceColorSpace ) {
 
-			warnOnce( 'THREE.ColorManagement: .toWorkingColorSpace() has been renamed to .colorSpaceToWorking().' ); // @deprecated, r177
+			warnOnce( 'ColorManagement: .toWorkingColorSpace() has been renamed to .colorSpaceToWorking().' ); // @deprecated, r177
 
 			return ColorManagement.colorSpaceToWorking( color, sourceColorSpace );
 
@@ -6642,7 +6755,7 @@ class ImageUtils {
 
 		} else {
 
-			console.warn( 'THREE.ImageUtils.sRGBToLinear(): Unsupported image type. No color space conversion applied.' );
+			warn( 'ImageUtils.sRGBToLinear(): Unsupported image type. No color space conversion applied.' );
 			return image;
 
 		}
@@ -6723,13 +6836,23 @@ class Source {
 
 	}
 
+	/**
+	 * Returns the dimensions of the source into the given target vector.
+	 *
+	 * @param {(Vector2|Vector3)} target - The target object the result is written into.
+	 * @return {(Vector2|Vector3)} The dimensions of the source.
+	 */
 	getSize( target ) {
 
 		const data = this.data;
 
-		if ( data instanceof HTMLVideoElement ) {
+		if ( ( typeof HTMLVideoElement !== 'undefined' ) && ( data instanceof HTMLVideoElement ) ) {
 
-			target.set( data.videoWidth, data.videoHeight );
+			target.set( data.videoWidth, data.videoHeight, 0 );
+
+		} else if ( ( typeof VideoFrame !== 'undefined' ) && ( data instanceof VideoFrame ) ) {
+
+			target.set( data.displayHeight, data.displayWidth, 0 );
 
 		} else if ( data !== null ) {
 
@@ -6857,7 +6980,7 @@ function serializeImage( image ) {
 
 		} else {
 
-			console.warn( 'THREE.Texture: Unable to serialize Texture.' );
+			warn( 'Texture: Unable to serialize Texture.' );
 			return {};
 
 		}
@@ -7007,7 +7130,7 @@ class Texture extends EventDispatcher {
 		 * texture samples being used.
 		 *
 		 * @type {number}
-		 * @default 0
+		 * @default Texture.DEFAULT_ANISOTROPY
 		 */
 		this.anisotropy = anisotropy;
 
@@ -7371,7 +7494,7 @@ class Texture extends EventDispatcher {
 
 			if ( newValue === undefined ) {
 
-				console.warn( `THREE.Texture.setValues(): parameter '${ key }' has value of undefined.` );
+				warn( `Texture.setValues(): parameter '${ key }' has value of undefined.` );
 				continue;
 
 			}
@@ -7380,7 +7503,7 @@ class Texture extends EventDispatcher {
 
 			if ( currentValue === undefined ) {
 
-				console.warn( `THREE.Texture.setValues(): property '${ key }' does not exist.` );
+				warn( `Texture.setValues(): property '${ key }' does not exist.` );
 				continue;
 
 			}
@@ -8997,7 +9120,16 @@ class RenderTarget extends EventDispatcher {
 				this.textures[ i ].image.width = width;
 				this.textures[ i ].image.height = height;
 				this.textures[ i ].image.depth = depth;
-				this.textures[ i ].isArrayTexture = this.textures[ i ].image.depth > 1;
+
+				if ( this.textures[ i ].isData3DTexture !== true ) { // Fix for #31693
+
+					// TODO: Reconsider setting isArrayTexture flag here and in the ctor of Texture.
+					// Maybe a method `isArrayTexture()` or just a getter could replace a flag since
+					// both are evaluated on each call?
+
+					this.textures[ i ].isArrayTexture = this.textures[ i ].image.depth > 1;
+
+				}
 
 			}
 
@@ -10646,7 +10778,7 @@ class Sphere {
 	 * Returns a serialized structure of the bounding sphere.
 	 *
 	 * @param {Object} json - The serialized json to set the sphere from.
-	 * @return {Box3} A reference to this bounding sphere.
+	 * @return {Sphere} A reference to this bounding sphere.
 	 */
 	fromJSON( json ) {
 
@@ -11314,7 +11446,7 @@ class Ray {
  * Represents a 4x4 matrix.
  *
  * The most common use of a 4x4 matrix in 3D computer graphics is as a transformation matrix.
- * For an introduction to transformation matrices as used in WebGL, check out [this tutorial]{@link https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices}
+ * For an introduction to transformation matrices as used in WebGL, check out [this tutorial](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices)
  *
  * This allows a 3D vector representing a point in 3D space to undergo
  * transformations such as translation, rotation, shear, scale, reflection,
@@ -11324,7 +11456,7 @@ class Ray {
  * A Note on Row-Major and Column-Major Ordering:
  *
  * The constructor and {@link Matrix3#set} method take arguments in
- * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * [row-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order)
  * order, while internally they are stored in the {@link Matrix3#elements} array in column-major order.
  * This means that calling:
  * ```js
@@ -11543,6 +11675,16 @@ class Matrix4 {
 	 */
 	extractBasis( xAxis, yAxis, zAxis ) {
 
+		if ( this.determinant() === 0 ) {
+
+			xAxis.set( 1, 0, 0 );
+			yAxis.set( 0, 1, 0 );
+			zAxis.set( 0, 0, 1 );
+
+			return this;
+
+		}
+
 		xAxis.setFromMatrixColumn( this, 0 );
 		yAxis.setFromMatrixColumn( this, 1 );
 		zAxis.setFromMatrixColumn( this, 2 );
@@ -11583,6 +11725,12 @@ class Matrix4 {
 	 */
 	extractRotation( m ) {
 
+		if ( m.determinant() === 0 ) {
+
+			return this.identity();
+
+		}
+
 		const te = this.elements;
 		const me = m.elements;
 
@@ -11618,7 +11766,7 @@ class Matrix4 {
 	 * Sets the rotation component (the upper left 3x3 matrix) of this matrix to
 	 * the rotation specified by the given Euler angles. The rest of
 	 * the matrix is set to the identity. Depending on the {@link Euler#order},
-	 * there are six possible outcomes. See [this page]{@link https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix}
+	 * there are six possible outcomes. See [this page](https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix)
 	 * for a complete list.
 	 *
 	 * @param {Euler} euler - The Euler angles.
@@ -11748,7 +11896,7 @@ class Matrix4 {
 
 	/**
 	 * Sets the rotation component of this matrix to the rotation specified by
-	 * the given Quaternion as outlined [here]{@link https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion}
+	 * the given Quaternion as outlined [here](https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion)
 	 * The rest of the matrix is set to the identity.
 	 *
 	 * @param {Quaternion} q - The Quaternion.
@@ -11910,7 +12058,7 @@ class Matrix4 {
 	/**
 	 * Computes and returns the determinant of this matrix.
 	 *
-	 * Based on the method outlined [here]{@link http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.html}.
+	 * Based on the method outlined [here](http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.html).
 	 *
 	 * @return {number} The determinant.
 	 */
@@ -11923,43 +12071,18 @@ class Matrix4 {
 		const n31 = te[ 2 ], n32 = te[ 6 ], n33 = te[ 10 ], n34 = te[ 14 ];
 		const n41 = te[ 3 ], n42 = te[ 7 ], n43 = te[ 11 ], n44 = te[ 15 ];
 
-		//TODO: make this more efficient
+		const t11 = n23 * n34 - n24 * n33;
+		const t12 = n22 * n34 - n24 * n32;
+		const t13 = n22 * n33 - n23 * n32;
 
-		return (
-			n41 * (
-				+ n14 * n23 * n32
-				 - n13 * n24 * n32
-				 - n14 * n22 * n33
-				 + n12 * n24 * n33
-				 + n13 * n22 * n34
-				 - n12 * n23 * n34
-			) +
-			n42 * (
-				+ n11 * n23 * n34
-				 - n11 * n24 * n33
-				 + n14 * n21 * n33
-				 - n13 * n21 * n34
-				 + n13 * n24 * n31
-				 - n14 * n23 * n31
-			) +
-			n43 * (
-				+ n11 * n24 * n32
-				 - n11 * n22 * n34
-				 - n14 * n21 * n32
-				 + n12 * n21 * n34
-				 + n14 * n22 * n31
-				 - n12 * n24 * n31
-			) +
-			n44 * (
-				- n13 * n22 * n31
-				 - n11 * n23 * n32
-				 + n11 * n22 * n33
-				 + n13 * n21 * n32
-				 - n12 * n21 * n33
-				 + n12 * n23 * n31
-			)
+		const t21 = n21 * n34 - n24 * n31;
+		const t22 = n21 * n33 - n23 * n31;
+		const t23 = n21 * n32 - n22 * n31;
 
-		);
+		return n11 * ( n42 * t11 - n43 * t12 + n44 * t13 ) -
+			n12 * ( n41 * t11 - n43 * t21 + n44 * t22 ) +
+			n13 * ( n41 * t12 - n42 * t21 + n44 * t23 ) -
+			n14 * ( n41 * t13 - n42 * t22 + n43 * t23 );
 
 	}
 
@@ -12017,7 +12140,7 @@ class Matrix4 {
 	}
 
 	/**
-	 * Inverts this matrix, using the [analytic method]{@link https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution}.
+	 * Inverts this matrix, using the [analytic method](https://en.wikipedia.org/wiki/Invertible_matrix#Analytic_solution).
 	 * You can not invert with a determinant of zero. If you attempt this, the method produces
 	 * a zero matrix instead.
 	 *
@@ -12220,7 +12343,7 @@ class Matrix4 {
 	 * the given angle.
 	 *
 	 * This is a somewhat controversial but mathematically sound alternative to
-	 * rotating via Quaternions. See the discussion [here]{@link https://www.gamedev.net/articles/programming/math-and-physics/do-we-really-need-quaternions-r1199}.
+	 * rotating via Quaternions. See the discussion [here](https://www.gamedev.net/articles/programming/math-and-physics/do-we-really-need-quaternions-r1199).
 	 *
 	 * @param {Vector3} axis - The normalized rotation axis.
 	 * @param {number} angle - The rotation in radians.
@@ -12360,6 +12483,19 @@ class Matrix4 {
 
 		const te = this.elements;
 
+		position.x = te[ 12 ];
+		position.y = te[ 13 ];
+		position.z = te[ 14 ];
+
+		if ( this.determinant() === 0 ) {
+
+			scale.set( 1, 1, 1 );
+			quaternion.identity();
+
+			return this;
+
+		}
+
 		let sx = _v1$5.set( te[ 0 ], te[ 1 ], te[ 2 ] ).length();
 		const sy = _v1$5.set( te[ 4 ], te[ 5 ], te[ 6 ] ).length();
 		const sz = _v1$5.set( te[ 8 ], te[ 9 ], te[ 10 ] ).length();
@@ -12367,10 +12503,6 @@ class Matrix4 {
 		// if determine is negative, we need to invert one scale
 		const det = this.determinant();
 		if ( det < 0 ) sx = - sx;
-
-		position.x = te[ 12 ];
-		position.y = te[ 13 ];
-		position.z = te[ 14 ];
 
 		// scale the rotation part
 		_m1$2.copy( this );
@@ -12412,11 +12544,13 @@ class Matrix4 {
 	 * @param {number} near - The distance from the camera to the near plane.
 	 * @param {number} far - The distance from the camera to the far plane.
 	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} [coordinateSystem=WebGLCoordinateSystem] - The coordinate system.
+	 * @param {boolean} [reversedDepth=false] - Whether to use a reversed depth.
 	 * @return {Matrix4} A reference to this matrix.
 	 */
-	makePerspective( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem ) {
+	makePerspective( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem, reversedDepth = false ) {
 
 		const te = this.elements;
+
 		const x = 2 * near / ( right - left );
 		const y = 2 * near / ( top - bottom );
 
@@ -12425,19 +12559,28 @@ class Matrix4 {
 
 		let c, d;
 
-		if ( coordinateSystem === WebGLCoordinateSystem ) {
+		if ( reversedDepth ) {
 
-			c = - ( far + near ) / ( far - near );
-			d = ( -2 * far * near ) / ( far - near );
-
-		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
-
-			c = - far / ( far - near );
-			d = ( - far * near ) / ( far - near );
+			c = near / ( far - near );
+			d = ( far * near ) / ( far - near );
 
 		} else {
 
-			throw new Error( 'THREE.Matrix4.makePerspective(): Invalid coordinate system: ' + coordinateSystem );
+			if ( coordinateSystem === WebGLCoordinateSystem ) {
+
+				c = - ( far + near ) / ( far - near );
+				d = ( -2 * far * near ) / ( far - near );
+
+			} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
+
+				c = - far / ( far - near );
+				d = ( - far * near ) / ( far - near );
+
+			} else {
+
+				throw new Error( 'THREE.Matrix4.makePerspective(): Invalid coordinate system: ' + coordinateSystem );
+
+			}
 
 		}
 
@@ -12461,39 +12604,49 @@ class Matrix4 {
 	 * @param {number} near - The distance from the camera to the near plane.
 	 * @param {number} far - The distance from the camera to the far plane.
 	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} [coordinateSystem=WebGLCoordinateSystem] - The coordinate system.
+	 * @param {boolean} [reversedDepth=false] - Whether to use a reversed depth.
 	 * @return {Matrix4} A reference to this matrix.
 	 */
-	makeOrthographic( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem ) {
+	makeOrthographic( left, right, top, bottom, near, far, coordinateSystem = WebGLCoordinateSystem, reversedDepth = false ) {
 
 		const te = this.elements;
-		const w = 1.0 / ( right - left );
-		const h = 1.0 / ( top - bottom );
-		const p = 1.0 / ( far - near );
 
-		const x = ( right + left ) * w;
-		const y = ( top + bottom ) * h;
+		const x = 2 / ( right - left );
+		const y = 2 / ( top - bottom );
 
-		let z, zInv;
+		const a = - ( right + left ) / ( right - left );
+		const b = - ( top + bottom ) / ( top - bottom );
 
-		if ( coordinateSystem === WebGLCoordinateSystem ) {
+		let c, d;
 
-			z = ( far + near ) * p;
-			zInv = -2 * p;
+		if ( reversedDepth ) {
 
-		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
-
-			z = near * p;
-			zInv = -1 * p;
+			c = 1 / ( far - near );
+			d = far / ( far - near );
 
 		} else {
 
-			throw new Error( 'THREE.Matrix4.makeOrthographic(): Invalid coordinate system: ' + coordinateSystem );
+			if ( coordinateSystem === WebGLCoordinateSystem ) {
+
+				c = -2 / ( far - near );
+				d = - ( far + near ) / ( far - near );
+
+			} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
+
+				c = -1 / ( far - near );
+				d = - near / ( far - near );
+
+			} else {
+
+				throw new Error( 'THREE.Matrix4.makeOrthographic(): Invalid coordinate system: ' + coordinateSystem );
+
+			}
 
 		}
 
-		te[ 0 ] = 2 * w;	te[ 4 ] = 0;		te[ 8 ] = 0; 		te[ 12 ] = - x;
-		te[ 1 ] = 0; 		te[ 5 ] = 2 * h;	te[ 9 ] = 0; 		te[ 13 ] = - y;
-		te[ 2 ] = 0; 		te[ 6 ] = 0;		te[ 10 ] = zInv;	te[ 14 ] = - z;
+		te[ 0 ] = x;		te[ 4 ] = 0;		te[ 8 ] = 0; 		te[ 12 ] = a;
+		te[ 1 ] = 0; 		te[ 5 ] = y;		te[ 9 ] = 0; 		te[ 13 ] = b;
+		te[ 2 ] = 0; 		te[ 6 ] = 0;		te[ 10 ] = c;		te[ 14 ] = d;
 		te[ 3 ] = 0; 		te[ 7 ] = 0;		te[ 11 ] = 0;		te[ 15 ] = 1;
 
 		return this;
@@ -12888,7 +13041,7 @@ class Euler {
 
 			default:
 
-				console.warn( 'THREE.Euler: .setFromRotationMatrix() encountered an unknown order: ' + order );
+				warn( 'Euler: .setFromRotationMatrix() encountered an unknown order: ' + order );
 
 		}
 
@@ -13874,7 +14027,7 @@ class Object3D extends EventDispatcher {
 
 		if ( object === this ) {
 
-			console.error( 'THREE.Object3D.add: object can\'t be added as a child of itself.', object );
+			error( 'Object3D.add: object can\'t be added as a child of itself.', object );
 			return this;
 
 		}
@@ -13893,7 +14046,7 @@ class Object3D extends EventDispatcher {
 
 		} else {
 
-			console.error( 'THREE.Object3D.add: object not an instance of THREE.Object3D.', object );
+			error( 'Object3D.add: object not an instance of THREE.Object3D.', object );
 
 		}
 
@@ -15564,7 +15717,7 @@ class Color {
 	/**
 	 * Sets this color from a CSS-style string. For example, `rgb(250, 0,0)`,
 	 * `rgb(100%, 0%, 0%)`, `hsl(0, 100%, 50%)`, `#ff0000`, `#f00`, or `red` ( or
-	 * any [X11 color name]{@link https://en.wikipedia.org/wiki/X11_color_names#Color_name_chart} -
+	 * any [X11 color name](https://en.wikipedia.org/wiki/X11_color_names#Color_name_chart) -
 	 * all 140 color names are supported).
 	 *
 	 * @param {string} style - Color as a CSS-style string.
@@ -15579,7 +15732,7 @@ class Color {
 
 			if ( parseFloat( string ) < 1 ) {
 
-				console.warn( 'THREE.Color: Alpha component of ' + style + ' will be ignored.' );
+				warn( 'Color: Alpha component of ' + style + ' will be ignored.' );
 
 			}
 
@@ -15655,7 +15808,7 @@ class Color {
 
 				default:
 
-					console.warn( 'THREE.Color: Unknown color model ' + style );
+					warn( 'Color: Unknown color model ' + style );
 
 			}
 
@@ -15683,7 +15836,7 @@ class Color {
 
 			} else {
 
-				console.warn( 'THREE.Color: Invalid hex color ' + style );
+				warn( 'Color: Invalid hex color ' + style );
 
 			}
 
@@ -15723,7 +15876,7 @@ class Color {
 		} else {
 
 			// unknown color
-			console.warn( 'THREE.Color: Unknown color ' + style );
+			warn( 'Color: Unknown color ' + style );
 
 		}
 
@@ -16771,7 +16924,7 @@ class Material extends EventDispatcher {
 	 *
 	 * This method can only be used when rendering with {@link WebGLRenderer}. The
 	 * recommended approach when customizing materials is to use `WebGPURenderer` with the new
-	 * Node Material system and [TSL]{@link https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language}.
+	 * Node Material system and [TSL](https://github.com/mrdoob/three.js/wiki/Three.js-Shading-Language).
 	 *
 	 * @param {{vertexShader:string,fragmentShader:string,uniforms:Object}} shaderobject - The object holds the uniforms and the vertex and fragment shader source.
 	 * @param {WebGLRenderer} renderer - A reference to the renderer.
@@ -16810,7 +16963,7 @@ class Material extends EventDispatcher {
 
 			if ( newValue === undefined ) {
 
-				console.warn( `THREE.Material: parameter '${ key }' has value of undefined.` );
+				warn( `Material: parameter '${ key }' has value of undefined.` );
 				continue;
 
 			}
@@ -16819,7 +16972,7 @@ class Material extends EventDispatcher {
 
 			if ( currentValue === undefined ) {
 
-				console.warn( `THREE.Material: '${ key }' is not a property of THREE.${ this.type }.` );
+				warn( `Material: '${ key }' is not a property of THREE.${ this.type }.` );
 				continue;
 
 			}
@@ -16910,6 +17063,18 @@ class Material extends EventDispatcher {
 
 			data.clearcoatNormalMap = this.clearcoatNormalMap.toJSON( meta ).uuid;
 			data.clearcoatNormalScale = this.clearcoatNormalScale.toArray();
+
+		}
+
+		if ( this.sheenColorMap && this.sheenColorMap.isTexture ) {
+
+			data.sheenColorMap = this.sheenColorMap.toJSON( meta ).uuid;
+
+		}
+
+		if ( this.sheenRoughnessMap && this.sheenRoughnessMap.isTexture ) {
+
+			data.sheenRoughnessMap = this.sheenRoughnessMap.toJSON( meta ).uuid;
 
 		}
 
@@ -17068,6 +17233,7 @@ class Material extends EventDispatcher {
 		if ( this.alphaToCoverage === true ) data.alphaToCoverage = true;
 		if ( this.premultipliedAlpha === true ) data.premultipliedAlpha = true;
 		if ( this.forceSinglePass === true ) data.forceSinglePass = true;
+		if ( this.allowOverride === false ) data.allowOverride = false;
 
 		if ( this.wireframe === true ) data.wireframe = true;
 		if ( this.wireframeLinewidth > 1 ) data.wireframeLinewidth = this.wireframeLinewidth;
@@ -17203,6 +17369,7 @@ class Material extends EventDispatcher {
 		this.alphaToCoverage = source.alphaToCoverage;
 		this.premultipliedAlpha = source.premultipliedAlpha;
 		this.forceSinglePass = source.forceSinglePass;
+		this.allowOverride = source.allowOverride;
 
 		this.visible = source.visible;
 
@@ -17254,6 +17421,7 @@ class Material extends EventDispatcher {
  * This material is not affected by lights.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshBasicMaterial
  */
 class MeshBasicMaterial extends Material {
 
@@ -17287,7 +17455,7 @@ class MeshBasicMaterial extends Material {
 		 * @type {Color}
 		 * @default (1,1,1)
 		 */
-		this.color = new Color( 0xffffff ); // emissive
+		this.color = new Color( 0xffffff ); // diffuse
 
 		/**
 		 * The color map. May optionally include an alpha channel, typically combined
@@ -17639,7 +17807,7 @@ function _generateTables() {
  */
 function toHalfFloat( val ) {
 
-	if ( Math.abs( val ) > 65504 ) console.warn( 'THREE.DataUtils.toHalfFloat(): Value out of range.' );
+	if ( Math.abs( val ) > 65504 ) warn( 'DataUtils.toHalfFloat(): Value out of range.' );
 
 	val = clamp( val, -65504, 65504 );
 
@@ -18826,6 +18994,16 @@ class BufferGeometry extends EventDispatcher {
 		this.indirect = null;
 
 		/**
+		 * The offset, in bytes, into the indirect drawing buffer where the value data begins. If an array is provided, multiple indirect draw calls will be made for each offset.
+		 *
+		 * Can only be used with {@link WebGPURenderer} and a WebGPU backend.
+		 *
+		 * @type {number|Array<number>}
+		 * @default 0
+		 */
+		this.indirectOffset = 0;
+
+		/**
 		 * This dictionary has as id the name of the attribute to be set and as value
 		 * the buffer attribute to set it to. Rather than accessing this property directly,
 		 * use `setAttribute()` and `getAttribute()` to access attributes of this geometry.
@@ -18838,7 +19016,7 @@ class BufferGeometry extends EventDispatcher {
 		 * This dictionary holds the morph targets of the geometry.
 		 *
 		 * Note: Once the geometry has been rendered, the morph attribute data cannot
-		 * be changed. You will have to call `dispose()?, and create a new geometry instance.
+		 * be changed. You will have to call `dispose()`, and create a new geometry instance.
 		 *
 		 * @type {Object}
 		 */
@@ -18870,7 +19048,7 @@ class BufferGeometry extends EventDispatcher {
 		/**
 		 * Bounding box for the geometry which can be calculated with `computeBoundingBox()`.
 		 *
-		 * @type {Box3}
+		 * @type {?Box3}
 		 * @default null
 		 */
 		this.boundingBox = null;
@@ -18878,7 +19056,7 @@ class BufferGeometry extends EventDispatcher {
 		/**
 		 * Bounding sphere for the geometry which can be calculated with `computeBoundingSphere()`.
 		 *
-		 * @type {Sphere}
+		 * @type {?Sphere}
 		 * @default null
 		 */
 		this.boundingSphere = null;
@@ -18938,11 +19116,13 @@ class BufferGeometry extends EventDispatcher {
 	 * Sets the given indirect attribute to this geometry.
 	 *
 	 * @param {BufferAttribute} indirect - The attribute holding indirect draw calls.
+	 * @param {number|Array<number>} [indirectOffset=0] - The offset, in bytes, into the indirect drawing buffer where the value data begins. If an array is provided, multiple indirect draw calls will be made for each offset.
 	 * @return {BufferGeometry} A reference to this instance.
 	 */
-	setIndirect( indirect ) {
+	setIndirect( indirect, indirectOffset = 0 ) {
 
 		this.indirect = indirect;
+		this.indirectOffset = indirectOffset;
 
 		return this;
 
@@ -19310,7 +19490,7 @@ class BufferGeometry extends EventDispatcher {
 
 			if ( points.length > positionAttribute.count ) {
 
-				console.warn( 'THREE.BufferGeometry: Buffer size too small for points data. Use .dispose() and create a new geometry.' );
+				warn( 'BufferGeometry: Buffer size too small for points data. Use .dispose() and create a new geometry.' );
 
 			}
 
@@ -19340,7 +19520,7 @@ class BufferGeometry extends EventDispatcher {
 
 		if ( position && position.isGLBufferAttribute ) {
 
-			console.error( 'THREE.BufferGeometry.computeBoundingBox(): GLBufferAttribute requires a manual bounding box.', this );
+			error( 'BufferGeometry.computeBoundingBox(): GLBufferAttribute requires a manual bounding box.', this );
 
 			this.boundingBox.set(
 				new Vector3( - Infinity, - Infinity, - Infinity ),
@@ -19391,7 +19571,7 @@ class BufferGeometry extends EventDispatcher {
 
 		if ( isNaN( this.boundingBox.min.x ) || isNaN( this.boundingBox.min.y ) || isNaN( this.boundingBox.min.z ) ) {
 
-			console.error( 'THREE.BufferGeometry.computeBoundingBox(): Computed min/max have NaN values. The "position" attribute is likely to have NaN values.', this );
+			error( 'BufferGeometry.computeBoundingBox(): Computed min/max have NaN values. The "position" attribute is likely to have NaN values.', this );
 
 		}
 
@@ -19415,7 +19595,7 @@ class BufferGeometry extends EventDispatcher {
 
 		if ( position && position.isGLBufferAttribute ) {
 
-			console.error( 'THREE.BufferGeometry.computeBoundingSphere(): GLBufferAttribute requires a manual bounding sphere.', this );
+			error( 'BufferGeometry.computeBoundingSphere(): GLBufferAttribute requires a manual bounding sphere.', this );
 
 			this.boundingSphere.set( new Vector3(), Infinity );
 
@@ -19506,7 +19686,7 @@ class BufferGeometry extends EventDispatcher {
 
 			if ( isNaN( this.boundingSphere.radius ) ) {
 
-				console.error( 'THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values.', this );
+				error( 'BufferGeometry.computeBoundingSphere(): Computed radius is NaN. The "position" attribute is likely to have NaN values.', this );
 
 			}
 
@@ -19534,7 +19714,7 @@ class BufferGeometry extends EventDispatcher {
 			 attributes.normal === undefined ||
 			 attributes.uv === undefined ) {
 
-			console.error( 'THREE.BufferGeometry: .computeTangents() failed. Missing required attributes (index, position, normal or uv)' );
+			error( 'BufferGeometry: .computeTangents() failed. Missing required attributes (index, position, normal or uv)' );
 			return;
 
 		}
@@ -19844,7 +20024,7 @@ class BufferGeometry extends EventDispatcher {
 
 		if ( this.index === null ) {
 
-			console.warn( 'THREE.BufferGeometry.toNonIndexed(): BufferGeometry is already non-indexed.' );
+			warn( 'BufferGeometry.toNonIndexed(): BufferGeometry is already non-indexed.' );
 			return this;
 
 		}
@@ -20227,7 +20407,7 @@ class Mesh extends Object3D {
 		 * morph targets name, the value its attribute index. This member is `undefined`
 		 * by default and only set when morph targets are detected in the geometry.
 		 *
-		 * @type {Object<String,number>|undefined}
+		 * @type {Object<string,number>|undefined}
 		 * @default undefined
 		 */
 		this.morphTargetDictionary = undefined;
@@ -20654,6 +20834,7 @@ function checkGeometryIntersection( object, material, raycaster, ray, uv, uv1, n
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#BoxGeometry
  */
 class BoxGeometry extends BufferGeometry {
 
@@ -20854,8 +21035,20 @@ class BoxGeometry extends BufferGeometry {
 
 }
 
-// Uniform Utilities
+/**
+ * Provides utility functions for managing uniforms.
+ *
+ * @module UniformsUtils
+ */
 
+/**
+ * Clones the given uniform definitions by performing a deep-copy. That means
+ * if the value of a uniform refers to an object like a Vector3 or Texture,
+ * the cloned uniform will refer to a new object reference.
+ *
+ * @param {Object} src - An object representing uniform definitions.
+ * @return {Object} The cloned uniforms.
+ */
 function cloneUniforms( src ) {
 
 	const dst = {};
@@ -20875,7 +21068,7 @@ function cloneUniforms( src ) {
 
 				if ( property.isRenderTargetTexture ) {
 
-					console.warn( 'UniformsUtils: Textures of render targets cannot be cloned via cloneUniforms() or mergeUniforms().' );
+					warn( 'UniformsUtils: Textures of render targets cannot be cloned via cloneUniforms() or mergeUniforms().' );
 					dst[ u ][ p ] = null;
 
 				} else {
@@ -20902,6 +21095,14 @@ function cloneUniforms( src ) {
 
 }
 
+/**
+ * Merges the given uniform definitions into a single object. Since the
+ * method internally uses cloneUniforms(), it performs a deep-copy when
+ * producing the merged uniform definitions.
+ *
+ * @param {Array} uniforms - An array of objects containing uniform definitions.
+ * @return {Object} The merged uniforms.
+ */
 function mergeUniforms( uniforms ) {
 
 	const merged = {};
@@ -20979,7 +21180,7 @@ var default_fragment = "void main() {\n\tgl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0
  * - You can use the directive `#pragma unroll_loop_start` and `#pragma unroll_loop_end`
  * in order to unroll a `for` loop in GLSL by the shader preprocessor. The directive has
  * to be placed right above the loop. The loop formatting has to correspond to a defined standard.
- *   - The loop has to be [normalized]{@link https://en.wikipedia.org/wiki/Normalized_loop}.
+ *   - The loop has to be [normalized](https://en.wikipedia.org/wiki/Normalized_loop).
  *   - The loop variable has to be *i*.
  *   - The value `UNROLLED_LOOP_INDEX` will be replaced with the explicitly
  * value of *i* for the given iteration and can be used in preprocessor
@@ -21120,8 +21321,21 @@ class ShaderMaterial extends Material {
 		this.wireframeLinewidth = 1;
 
 		/**
-		 * Define whether the material color is affected by global fog settings; `true`
+		 * Defines whether the material color is affected by global fog settings; `true`
 		 * to pass fog uniforms to the shader.
+		 *
+		 * Setting this property to `true` requires the definition of fog uniforms. It is
+		 * recommended to use `UniformsUtils.merge()` to combine the custom shader uniforms
+		 * with predefined fog uniforms.
+		 *
+		 * ```js
+		 * const material = new ShaderMaterial( {
+		 *     uniforms: UniformsUtils.merge( [ UniformsLib[ 'fog' ], shaderUniforms ] );
+		 *     vertexShader: vertexShader,
+		 *     fragmentShader: fragmentShader,
+		 *     fog: true
+		 * } );
+		 * ```
 		 *
 		 * @type {boolean}
 		 * @default false
@@ -21185,7 +21399,7 @@ class ShaderMaterial extends Material {
 		};
 
 		/**
-		 * If set, this calls [gl.bindAttribLocation]{@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bindAttribLocation}
+		 * If set, this calls [gl.bindAttribLocation](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bindAttribLocation)
 		 * to bind a generic vertex index to an attribute variable.
 		 *
 		 * @type {string|undefined}
@@ -21240,6 +21454,12 @@ class ShaderMaterial extends Material {
 		this.extensions = Object.assign( {}, source.extensions );
 
 		this.glslVersion = source.glslVersion;
+
+		this.defaultAttributeValues = Object.assign( {}, source.defaultAttributeValues );
+
+		this.index0AttributeName = source.index0AttributeName;
+
+		this.uniformsNeedUpdate = source.uniformsNeedUpdate;
 
 		return this;
 
@@ -21397,6 +21617,20 @@ class Camera extends Object3D {
 		 */
 		this.coordinateSystem = WebGLCoordinateSystem;
 
+		this._reversedDepth = false;
+
+	}
+
+	/**
+	 * The flag that indicates whether the camera uses a reversed depth buffer.
+	 *
+	 * @type {boolean}
+	 * @default false
+	 */
+	get reversedDepth() {
+
+		return this._reversedDepth;
+
 	}
 
 	copy( source, recursive ) {
@@ -21458,7 +21692,7 @@ const _minTarget = /*@__PURE__*/ new Vector2();
 const _maxTarget = /*@__PURE__*/ new Vector2();
 
 /**
- * Camera that uses [perspective projection]{@link https://en.wikipedia.org/wiki/Perspective_(graphical)}.
+ * Camera that uses [perspective projection](https://en.wikipedia.org/wiki/Perspective_(graphical)).
  *
  * This projection mode is designed to mimic the way the human eye sees. It
  * is the most common projection mode used for rendering a 3D scene.
@@ -21824,7 +22058,7 @@ class PerspectiveCamera extends Camera {
 		const skew = this.filmOffset;
 		if ( skew !== 0 ) left += near * skew / this.getFilmWidth();
 
-		this.projectionMatrix.makePerspective( left, left + width, top, top - height, near, this.far, this.coordinateSystem );
+		this.projectionMatrix.makePerspective( left, left + width, top, top - height, near, this.far, this.coordinateSystem, this.reversedDepth );
 
 		this.projectionMatrixInverse.copy( this.projectionMatrix ).invert();
 
@@ -23141,7 +23375,7 @@ class Scene extends Object3D {
  * "Interleaved" means that multiple attributes, possibly of different types,
  * (e.g., position, normal, uv, color) are packed into a single array buffer.
  *
- * An introduction into interleaved arrays can be found here: [Interleaved array basics]{@link https://blog.tojicode.com/2011/05/interleaved-array-basics.html}
+ * An introduction into interleaved arrays can be found here: [Interleaved array basics](https://blog.tojicode.com/2011/05/interleaved-array-basics.html)
  */
 class InterleavedBuffer {
 
@@ -23861,7 +24095,7 @@ class InterleavedBufferAttribute {
 
 		if ( data === undefined ) {
 
-			console.log( 'THREE.InterleavedBufferAttribute.clone(): Cloning an interleaved buffer attribute will de-interleave buffer data.' );
+			log( 'InterleavedBufferAttribute.clone(): Cloning an interleaved buffer attribute will de-interleave buffer data.' );
 
 			const array = [];
 
@@ -23911,7 +24145,7 @@ class InterleavedBufferAttribute {
 
 		if ( data === undefined ) {
 
-			console.log( 'THREE.InterleavedBufferAttribute.toJSON(): Serializing an interleaved buffer attribute will de-interleave buffer data.' );
+			log( 'InterleavedBufferAttribute.toJSON(): Serializing an interleaved buffer attribute will de-interleave buffer data.' );
 
 			const array = [];
 
@@ -24138,7 +24372,7 @@ class Sprite extends Object3D {
 	/**
 	 * Constructs a new sprite.
 	 *
-	 * @param {SpriteMaterial} [material] - The sprite material.
+	 * @param {(SpriteMaterial|SpriteNodeMaterial)} [material] - The sprite material.
 	 */
 	constructor( material = new SpriteMaterial() ) {
 
@@ -24184,7 +24418,7 @@ class Sprite extends Object3D {
 		/**
 		 * The sprite material.
 		 *
-		 * @type {SpriteMaterial}
+		 * @type {(SpriteMaterial|SpriteNodeMaterial)}
 		 */
 		this.material = material;
 
@@ -24219,7 +24453,7 @@ class Sprite extends Object3D {
 
 		if ( raycaster.camera === null ) {
 
-			console.error( 'THREE.Sprite: "Raycaster.camera" needs to be set in order to raycast against sprites.' );
+			error( 'Sprite: "Raycaster.camera" needs to be set in order to raycast against sprites.' );
 
 		}
 
@@ -24513,7 +24747,7 @@ class LOD extends Object3D {
 	 * the given distance.
 	 *
 	 * @param {number} distance - The LOD distance.
-	 * @return {Object3D|null} The found 3D object. `null` if no 3D object has been found.
+	 * @return {?Object3D} The found 3D object. `null` if no 3D object has been found.
 	 */
 	getObjectForDistance( distance ) {
 
@@ -24680,6 +24914,7 @@ const _ray$2 = /*@__PURE__*/ new Ray();
  * or {@link FBXLoader } import respective models.
  *
  * @augments Mesh
+ * @demo scenes/bones-browser.html
  */
 class SkinnedMesh extends Mesh {
 
@@ -24947,7 +25182,7 @@ class SkinnedMesh extends Mesh {
 
 		} else {
 
-			console.warn( 'THREE.SkinnedMesh: Unrecognized bindMode: ' + this.bindMode );
+			warn( 'SkinnedMesh: Unrecognized bindMode: ' + this.bindMode );
 
 		}
 
@@ -25180,6 +25415,15 @@ class Skeleton {
 		this.boneMatrices = null;
 
 		/**
+		 * An array buffer holding the bone data of the previous frame.
+		 * Required for computing velocity. Maintained in {@link SkinningNode}.
+		 *
+		 * @type {?Float32Array}
+		 * @default null
+		 */
+		this.previousBoneMatrices = null;
+
+		/**
 		 * A texture holding the bone data for use
 		 * in the vertex shader.
 		 *
@@ -25216,7 +25460,7 @@ class Skeleton {
 
 			if ( bones.length !== boneInverses.length ) {
 
-				console.warn( 'THREE.Skeleton: Number of inverse bone matrices does not match amount of bones.' );
+				warn( 'Skeleton: Number of inverse bone matrices does not match amount of bones.' );
 
 				this.boneInverses = [];
 
@@ -25434,7 +25678,7 @@ class Skeleton {
 
 			if ( bone === undefined ) {
 
-				console.warn( 'THREE.Skeleton: No bone found with UUID:', uuid );
+				warn( 'Skeleton: No bone found with UUID:', uuid );
 				bone = new Bone();
 
 			}
@@ -25946,7 +26190,7 @@ const _normalMatrix = /*@__PURE__*/ new Matrix3();
 
 /**
  * A two dimensional surface that extends infinitely in 3D space, represented
- * in [Hessian normal form]{@link http://mathworld.wolfram.com/HessianNormalForm.html}
+ * in [Hessian normal form](http://mathworld.wolfram.com/HessianNormalForm.html)
  * by a unit length normal vector and a constant.
  */
 class Plane {
@@ -26388,9 +26632,10 @@ class Frustum {
 	 *
 	 * @param {Matrix4} m - The projection matrix.
 	 * @param {(WebGLCoordinateSystem|WebGPUCoordinateSystem)} coordinateSystem - The coordinate system.
+	 * @param {boolean} [reversedDepth=false] - Whether to use a reversed depth.
 	 * @return {Frustum} A reference to this frustum.
 	 */
-	setFromProjectionMatrix( m, coordinateSystem = WebGLCoordinateSystem ) {
+	setFromProjectionMatrix( m, coordinateSystem = WebGLCoordinateSystem, reversedDepth = false ) {
 
 		const planes = this.planes;
 		const me = m.elements;
@@ -26403,19 +26648,29 @@ class Frustum {
 		planes[ 1 ].setComponents( me3 + me0, me7 + me4, me11 + me8, me15 + me12 ).normalize();
 		planes[ 2 ].setComponents( me3 + me1, me7 + me5, me11 + me9, me15 + me13 ).normalize();
 		planes[ 3 ].setComponents( me3 - me1, me7 - me5, me11 - me9, me15 - me13 ).normalize();
-		planes[ 4 ].setComponents( me3 - me2, me7 - me6, me11 - me10, me15 - me14 ).normalize();
 
-		if ( coordinateSystem === WebGLCoordinateSystem ) {
+		if ( reversedDepth ) {
 
-			planes[ 5 ].setComponents( me3 + me2, me7 + me6, me11 + me10, me15 + me14 ).normalize();
-
-		} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
-
-			planes[ 5 ].setComponents( me2, me6, me10, me14 ).normalize();
+			planes[ 4 ].setComponents( me2, me6, me10, me14 ).normalize(); // far
+			planes[ 5 ].setComponents( me3 - me2, me7 - me6, me11 - me10, me15 - me14 ).normalize(); // near
 
 		} else {
 
-			throw new Error( 'THREE.Frustum.setFromProjectionMatrix(): Invalid coordinate system: ' + coordinateSystem );
+			planes[ 4 ].setComponents( me3 - me2, me7 - me6, me11 - me10, me15 - me14 ).normalize(); // far
+
+			if ( coordinateSystem === WebGLCoordinateSystem ) {
+
+				planes[ 5 ].setComponents( me3 + me2, me7 + me6, me11 + me10, me15 + me14 ).normalize(); // near
+
+			} else if ( coordinateSystem === WebGPUCoordinateSystem ) {
+
+				planes[ 5 ].setComponents( me2, me6, me10, me14 ).normalize(); // near
+
+			} else {
+
+				throw new Error( 'THREE.Frustum.setFromProjectionMatrix(): Invalid coordinate system: ' + coordinateSystem );
+
+			}
 
 		}
 
@@ -26569,7 +26824,7 @@ class Frustum {
 
 }
 
-const _projScreenMatrix$2 = /*@__PURE__*/ new Matrix4();
+const _projScreenMatrix$1 = /*@__PURE__*/ new Matrix4();
 const _frustum$1 = /*@__PURE__*/ new Frustum();
 
 /**
@@ -26614,14 +26869,15 @@ class FrustumArray {
 
 			const camera = cameraArray.cameras[ i ];
 
-			_projScreenMatrix$2.multiplyMatrices(
+			_projScreenMatrix$1.multiplyMatrices(
 				camera.projectionMatrix,
 				camera.matrixWorldInverse
 			);
 
 			_frustum$1.setFromProjectionMatrix(
-				_projScreenMatrix$2,
-				this.coordinateSystem
+				_projScreenMatrix$1,
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 			if ( _frustum$1.intersectsObject( object ) ) {
@@ -26656,14 +26912,15 @@ class FrustumArray {
 
 			const camera = cameraArray.cameras[ i ];
 
-			_projScreenMatrix$2.multiplyMatrices(
+			_projScreenMatrix$1.multiplyMatrices(
 				camera.projectionMatrix,
 				camera.matrixWorldInverse
 			);
 
 			_frustum$1.setFromProjectionMatrix(
-				_projScreenMatrix$2,
-				this.coordinateSystem
+				_projScreenMatrix$1,
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 			if ( _frustum$1.intersectsSprite( sprite ) ) {
@@ -26698,14 +26955,15 @@ class FrustumArray {
 
 			const camera = cameraArray.cameras[ i ];
 
-			_projScreenMatrix$2.multiplyMatrices(
+			_projScreenMatrix$1.multiplyMatrices(
 				camera.projectionMatrix,
 				camera.matrixWorldInverse
 			);
 
 			_frustum$1.setFromProjectionMatrix(
-				_projScreenMatrix$2,
-				this.coordinateSystem
+				_projScreenMatrix$1,
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 			if ( _frustum$1.intersectsSphere( sphere ) ) {
@@ -26740,14 +26998,15 @@ class FrustumArray {
 
 			const camera = cameraArray.cameras[ i ];
 
-			_projScreenMatrix$2.multiplyMatrices(
+			_projScreenMatrix$1.multiplyMatrices(
 				camera.projectionMatrix,
 				camera.matrixWorldInverse
 			);
 
 			_frustum$1.setFromProjectionMatrix(
-				_projScreenMatrix$2,
-				this.coordinateSystem
+				_projScreenMatrix$1,
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 			if ( _frustum$1.intersectsBox( box ) ) {
@@ -26782,14 +27041,15 @@ class FrustumArray {
 
 			const camera = cameraArray.cameras[ i ];
 
-			_projScreenMatrix$2.multiplyMatrices(
+			_projScreenMatrix$1.multiplyMatrices(
 				camera.projectionMatrix,
 				camera.matrixWorldInverse
 			);
 
 			_frustum$1.setFromProjectionMatrix(
-				_projScreenMatrix$2,
-				this.coordinateSystem
+				_projScreenMatrix$1,
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 			if ( _frustum$1.containsPoint( point ) ) {
@@ -27676,10 +27936,9 @@ class BatchedMesh extends Mesh {
 	}
 
 	/**
-	 * Repacks the sub geometries in [name] to remove any unused space remaining from
+	 * Repacks the sub geometries in BatchedMesh to remove any unused space remaining from
 	 * previously deleted geometry, freeing up space to add new geometry.
 	 *
-	 * @param {number} instanceId - The ID of the instance to remove from the batch.
 	 * @return {BatchedMesh} A reference to this batched mesh.
 	 */
 	optimize() {
@@ -27731,6 +27990,7 @@ class BatchedMesh extends Mesh {
 
 					index.array.copyWithin( nextIndexStart, indexStart, indexStart + reservedIndexCount );
 					index.addUpdateRange( nextIndexStart, reservedIndexCount );
+					index.needsUpdate = true;
 
 					geometryInfo.indexStart = nextIndexStart;
 
@@ -27751,6 +28011,7 @@ class BatchedMesh extends Mesh {
 					const { array, itemSize } = attribute;
 					array.copyWithin( nextVertexStart * itemSize, vertexStart * itemSize, ( vertexStart + reservedVertexCount ) * itemSize );
 					attribute.addUpdateRange( nextVertexStart * itemSize, reservedVertexCount * itemSize );
+					attribute.needsUpdate = true;
 
 				}
 
@@ -27767,6 +28028,8 @@ class BatchedMesh extends Mesh {
 
 		}
 
+		this._visibilityChanged = true;
+
 		return this;
 
 	}
@@ -27776,7 +28039,7 @@ class BatchedMesh extends Mesh {
 	 *
 	 * @param {number} geometryId - The ID of the geometry to return the bounding box for.
 	 * @param {Box3} target - The target object that is used to store the method's result.
-	 * @return {Box3|null} The geometry's bounding box. Returns `null` if no geometry has been found for the given ID.
+	 * @return {?Box3} The geometry's bounding box. Returns `null` if no geometry has been found for the given ID.
 	 */
 	getBoundingBoxAt( geometryId, target ) {
 
@@ -27821,7 +28084,7 @@ class BatchedMesh extends Mesh {
 	 *
 	 * @param {number} geometryId - The ID of the geometry to return the bounding sphere for.
 	 * @param {Sphere} target - The target object that is used to store the method's result.
-	 * @return {Sphere|null} The geometry's bounding sphere. Returns `null` if no geometry has been found for the given ID.
+	 * @return {?Sphere} The geometry's bounding sphere. Returns `null` if no geometry has been found for the given ID.
 	 */
 	getBoundingSphereAt( geometryId, target ) {
 
@@ -28056,7 +28319,7 @@ class BatchedMesh extends Mesh {
 		const availableInstanceIds = this._availableInstanceIds;
 		const instanceInfo = this._instanceInfo;
 		availableInstanceIds.sort( ascIdSort );
-		while ( availableInstanceIds[ availableInstanceIds.length - 1 ] === instanceInfo.length ) {
+		while ( availableInstanceIds[ availableInstanceIds.length - 1 ] === instanceInfo.length - 1 ) {
 
 			instanceInfo.pop();
 			availableInstanceIds.pop();
@@ -28334,9 +28597,11 @@ class BatchedMesh extends Mesh {
 			_matrix$1
 				.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse )
 				.multiply( this.matrixWorld );
+
 			_frustum.setFromProjectionMatrix(
 				_matrix$1,
-				renderer.coordinateSystem
+				camera.coordinateSystem,
+				camera.reversedDepth
 			);
 
 		}
@@ -28645,7 +28910,7 @@ class Line extends Object3D {
 		 * morph targets name, the value its attribute index. This member is `undefined`
 		 * by default and only set when morph targets are detected in the geometry.
 		 *
-		 * @type {Object<String,number>|undefined}
+		 * @type {Object<string,number>|undefined}
 		 * @default undefined
 		 */
 		this.morphTargetDictionary = undefined;
@@ -28707,7 +28972,7 @@ class Line extends Object3D {
 
 		} else {
 
-			console.warn( 'THREE.Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
+			warn( 'Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
 
 		}
 
@@ -28948,7 +29213,7 @@ class LineSegments extends Line {
 
 		} else {
 
-			console.warn( 'THREE.LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
+			warn( 'LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.' );
 
 		}
 
@@ -29079,7 +29344,7 @@ class PointsMaterial extends Material {
 		/**
 		 * Defines the size of the points in pixels.
 		 *
-		 * Might be capped if the value exceeds hardware dependent parameters like [gl.ALIASED_POINT_SIZE_RANGE]{@link https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getParamete}.
+		 * Might be capped if the value exceeds hardware dependent parameters like [gl.ALIASED_POINT_SIZE_RANGE](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getParamete).
 		 *
 		 * @type {number}
 		 * @default 1
@@ -29180,7 +29445,7 @@ class Points extends Object3D {
 		 * morph targets name, the value its attribute index. This member is `undefined`
 		 * by default and only set when morph targets are detected in the geometry.
 		 *
-		 * @type {Object<String,number>|undefined}
+		 * @type {Object<string,number>|undefined}
 		 * @default undefined
 		 */
 		this.morphTargetDictionary = undefined;
@@ -29355,6 +29620,9 @@ function testPoint( point, index, localThresholdSq, matrixWorld, raycaster, inte
  * const texture = new THREE.VideoTexture( video );
  * ```
  *
+ * Note: When using video textures with {@link WebGPURenderer}, {@link Texture#colorSpace} must be
+ * set to THREE.SRGBColorSpace.
+ *
  * Note: After the initial use of a texture, its dimensions, format, and type
  * cannot be changed. Instead, call {@link Texture#dispose} on the texture and instantiate a new one.
  *
@@ -29398,18 +29666,28 @@ class VideoTexture extends Texture {
 		 */
 		this.generateMipmaps = false;
 
+		/**
+		 * The video frame request callback identifier, which is a positive integer.
+		 *
+		 * Value of 0 represents no scheduled rVFC.
+		 *
+		 * @private
+		 * @type {number}
+		 */
+		this._requestVideoFrameCallbackId = 0;
+
 		const scope = this;
 
 		function updateVideo() {
 
 			scope.needsUpdate = true;
-			video.requestVideoFrameCallback( updateVideo );
+			scope._requestVideoFrameCallbackId = video.requestVideoFrameCallback( updateVideo );
 
 		}
 
 		if ( 'requestVideoFrameCallback' in video ) {
 
-			video.requestVideoFrameCallback( updateVideo );
+			this._requestVideoFrameCallbackId = video.requestVideoFrameCallback( updateVideo );
 
 		}
 
@@ -29437,6 +29715,20 @@ class VideoTexture extends Texture {
 			this.needsUpdate = true;
 
 		}
+
+	}
+
+	dispose() {
+
+		if ( this._requestVideoFrameCallbackId !== 0 ) {
+
+			this.source.data.cancelVideoFrameCallback( this._requestVideoFrameCallbackId );
+
+			this._requestVideoFrameCallbackId = 0;
+
+		}
+
+		super.dispose();
 
 	}
 
@@ -29540,8 +29832,8 @@ class FramebufferTexture extends Texture {
 	/**
 	 * Constructs a new framebuffer texture.
 	 *
-	 * @param {number} width - The width of the texture.
-	 * @param {number} height - The height of the texture.
+	 * @param {number} [width] - The width of the texture.
+	 * @param {number} [height] - The height of the texture.
 	 */
 	constructor( width, height ) {
 
@@ -29946,6 +30238,131 @@ class DepthTexture extends Texture {
 }
 
 /**
+ * This class can be used to automatically save the depth information of a
+ * cube rendering into a cube texture with depth format. Used for PointLight shadows.
+ *
+ * @augments DepthTexture
+ */
+class CubeDepthTexture extends DepthTexture {
+
+	/**
+	 * Constructs a new cube depth texture.
+	 *
+	 * @param {number} size - The size (width and height) of each cube face.
+	 * @param {number} [type=UnsignedIntType] - The texture type.
+	 * @param {number} [mapping=CubeReflectionMapping] - The texture mapping.
+	 * @param {number} [wrapS=ClampToEdgeWrapping] - The wrapS value.
+	 * @param {number} [wrapT=ClampToEdgeWrapping] - The wrapT value.
+	 * @param {number} [magFilter=NearestFilter] - The mag filter value.
+	 * @param {number} [minFilter=NearestFilter] - The min filter value.
+	 * @param {number} [anisotropy=Texture.DEFAULT_ANISOTROPY] - The anisotropy value.
+	 * @param {number} [format=DepthFormat] - The texture format.
+	 */
+	constructor( size, type = UnsignedIntType, mapping = CubeReflectionMapping, wrapS, wrapT, magFilter = NearestFilter, minFilter = NearestFilter, anisotropy, format = DepthFormat ) {
+
+		// Create 6 identical image descriptors for the cube faces
+		const image = { width: size, height: size, depth: 1 };
+		const images = [ image, image, image, image, image, image ];
+
+		// Call DepthTexture constructor with width, height
+		super( size, size, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, format );
+
+		// Replace the single image with the array of 6 images
+		this.image = images;
+
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
+		this.isCubeDepthTexture = true;
+
+		/**
+		 * Set to true for cube texture handling in WebGLTextures.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
+		this.isCubeTexture = true;
+
+	}
+
+	/**
+	 * Alias for {@link CubeDepthTexture#image}.
+	 *
+	 * @type {Array<Image>}
+	 */
+	get images() {
+
+		return this.image;
+
+	}
+
+	set images( value ) {
+
+		this.image = value;
+
+	}
+
+}
+
+/**
+ * Represents a texture created externally with the same renderer context.
+ *
+ * This may be a texture from a protected media stream, device camera feed,
+ * or other data feeds like a depth sensor.
+ *
+ * Note that this class is only supported in {@link WebGLRenderer}, and in
+ * the {@link WebGPURenderer} WebGPU backend.
+ *
+ * @augments Texture
+ */
+class ExternalTexture extends Texture {
+
+	/**
+	 * Creates a new raw texture.
+	 *
+	 * @param {?(WebGLTexture|GPUTexture)} [sourceTexture=null] - The external texture.
+	 */
+	constructor( sourceTexture = null ) {
+
+		super();
+
+		/**
+		 * The external source texture.
+		 *
+		 * @type {?(WebGLTexture|GPUTexture)}
+		 * @default null
+		 */
+		this.sourceTexture = sourceTexture;
+
+		/**
+		 * This flag can be used for type testing.
+		 *
+		 * @type {boolean}
+		 * @readonly
+		 * @default true
+		 */
+		this.isExternalTexture = true;
+
+	}
+
+	copy( source ) {
+
+		super.copy( source );
+
+		this.sourceTexture = source.sourceTexture;
+
+		return this;
+
+	}
+
+}
+
+/**
  * A geometry class for representing a capsule.
  *
  * ```js
@@ -29956,6 +30373,7 @@ class DepthTexture extends Texture {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#CapsuleGeometry
  */
 class CapsuleGeometry extends BufferGeometry {
 
@@ -30173,6 +30591,7 @@ class CapsuleGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#CircleGeometry
  */
 class CircleGeometry extends BufferGeometry {
 
@@ -30302,6 +30721,7 @@ class CircleGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#CylinderGeometry
  */
 class CylinderGeometry extends BufferGeometry {
 
@@ -30627,6 +31047,7 @@ class CylinderGeometry extends BufferGeometry {
  * ```
  *
  * @augments CylinderGeometry
+ * @demo scenes/geometry-browser.html#ConeGeometry
  */
 class ConeGeometry extends CylinderGeometry {
 
@@ -31018,7 +31439,7 @@ class PolyhedronGeometry extends BufferGeometry {
 	 */
 	static fromJSON( data ) {
 
-		return new PolyhedronGeometry( data.vertices, data.indices, data.radius, data.details );
+		return new PolyhedronGeometry( data.vertices, data.indices, data.radius, data.detail );
 
 	}
 
@@ -31035,6 +31456,7 @@ class PolyhedronGeometry extends BufferGeometry {
  * ```
  *
  * @augments PolyhedronGeometry
+ * @demo scenes/geometry-browser.html#DodecahedronGeometry
  */
 class DodecahedronGeometry extends PolyhedronGeometry {
 
@@ -31354,7 +31776,7 @@ class Curve {
 	 */
 	getPoint( /* t, optionalTarget */ ) {
 
-		console.warn( 'THREE.Curve: .getPoint() not implemented.' );
+		warn( 'Curve: .getPoint() not implemented.' );
 
 	}
 
@@ -32412,7 +32834,13 @@ class CatmullRomCurve3 extends Curve {
 
 }
 
-// Bezier Curves formulas obtained from: https://en.wikipedia.org/wiki/B%C3%A9zier_curve
+/**
+ * Interpolations contains spline and Bézier functions internally used by concrete curve classes.
+ *
+ * Bezier Curves formulas obtained from: https://en.wikipedia.org/wiki/B%C3%A9zier_curve
+ *
+ * @module Interpolations
+ */
 
 /**
  * Computes a point on a Catmull-Rom spline.
@@ -34194,8 +34622,8 @@ class Shape extends Path {
 }
 
 /* eslint-disable */
-// copy of mapbox/earcut version 3.0.1
-// https://github.com/mapbox/earcut/tree/v3.0.1
+// copy of mapbox/earcut version 3.0.2
+// https://github.com/mapbox/earcut/tree/v3.0.2
 
 function earcut(data, holeIndices, dim = 2) {
 
@@ -34212,10 +34640,10 @@ function earcut(data, holeIndices, dim = 2) {
 
     // if the shape is not too simple, we'll use z-order curve hash later; calculate polygon bbox
     if (data.length > 80 * dim) {
-        minX = Infinity;
-        minY = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
+        minX = data[0];
+        minY = data[1];
+        let maxX = minX;
+        let maxY = minY;
 
         for (let i = dim; i < outerLen; i += dim) {
             const x = data[i];
@@ -34491,7 +34919,7 @@ function compareXYSlope(a, b) {
     return result;
 }
 
-// find a bridge between vertices that connects hole with an outer ring and and link it
+// find a bridge between vertices that connects hole with an outer ring and link it
 function eliminateHole(hole, outerNode) {
     const bridge = findHoleBridge(hole, outerNode);
     if (!bridge) {
@@ -34682,7 +35110,7 @@ function pointInTriangleExceptFirst(ax, ay, bx, by, cx, cy, px, py) {
 
 // check if a diagonal between two polygon nodes is valid (lies in polygon interior)
 function isValidDiagonal(a, b) {
-    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) && // dones't intersect other edges
+    return a.next.i !== b.i && a.prev.i !== b.i && !intersectsPolygon(a, b) && // doesn't intersect other edges
            (locallyInside(a, b) && locallyInside(b, a) && middleInside(a, b) && // locally visible
             (area(a.prev, a, b.prev) || area(a, b.prev, b)) || // does not create opposite-facing sectors
             equals(a, b) && area(a.prev, a, a.next) > 0 && area(b.prev, b, b.next) > 0); // special zero-length case
@@ -34829,6 +35257,12 @@ function signedArea(data, start, end, dim) {
     return sum;
 }
 
+/**
+ * An implementation of the earcut polygon triangulation algorithm.
+ * The code is a port of [mapbox/earcut](https://github.com/mapbox/earcut).
+ *
+ * @see https://github.com/mapbox/earcut
+ */
 class Earcut {
 
 	/**
@@ -34979,6 +35413,7 @@ function addContour( vertices, contour ) {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#ExtrudeGeometry
  */
 class ExtrudeGeometry extends BufferGeometry {
 
@@ -35063,11 +35498,11 @@ class ExtrudeGeometry extends BufferGeometry {
 
 				// SETUP TNB variables
 
-				// TODO1 - have a .isClosed in spline?
+				const isClosed = extrudePath.isCatmullRomCurve3 ? extrudePath.closed : false;
 
-				splineTube = extrudePath.computeFrenetFrames( steps, false );
+				splineTube = extrudePath.computeFrenetFrames( steps, isClosed );
 
-				// console.log(splineTube, 'splineTube', splineTube.normals.length, 'steps', steps, 'extrudePts', extrudePts.length);
+				// log(splineTube, 'splineTube', splineTube.normals.length, 'steps', steps, 'extrudePts', extrudePts.length);
 
 				binormal = new Vector3();
 				normal = new Vector3();
@@ -35172,7 +35607,7 @@ class ExtrudeGeometry extends BufferGeometry {
 
 			function scalePt2( pt, vec, size ) {
 
-				if ( ! vec ) console.error( 'THREE.ExtrudeGeometry: vec does not exist' );
+				if ( ! vec ) error( 'ExtrudeGeometry: vec does not exist' );
 
 				return pt.clone().addScaledVector( vec, size );
 
@@ -35287,14 +35722,14 @@ class ExtrudeGeometry extends BufferGeometry {
 
 					if ( direction_eq ) {
 
-						// console.log("Warning: lines are a straight sequence");
+						// log("Warning: lines are a straight sequence");
 						v_trans_x = - v_prev_y;
 						v_trans_y = v_prev_x;
 						shrink_by = Math.sqrt( v_prev_lensq );
 
 					} else {
 
-						// console.log("Warning: lines are a straight spike");
+						// log("Warning: lines are a straight spike");
 						v_trans_x = v_prev_x;
 						v_trans_y = v_prev_y;
 						shrink_by = Math.sqrt( v_prev_lensq / 2 );
@@ -35316,7 +35751,7 @@ class ExtrudeGeometry extends BufferGeometry {
 				if ( k === il ) k = 0;
 
 				//  (j)---(i)---(k)
-				// console.log('i,j,k', i, j , k)
+				// log('i,j,k', i, j , k)
 
 				contourMovements[ i ] = getBevelVec( contour[ i ], contour[ j ], contour[ k ] );
 
@@ -35613,7 +36048,7 @@ class ExtrudeGeometry extends BufferGeometry {
 					let k = i - 1;
 					if ( k < 0 ) k = contour.length - 1;
 
-					//console.log('b', i,j, i-1, k,vertices.length);
+					//log('b', i,j, i-1, k,vertices.length);
 
 					for ( let s = 0, sl = ( steps + bevelSegments * 2 ); s < sl; s ++ ) {
 
@@ -35853,6 +36288,7 @@ function toJSON$1( shapes, options, data ) {
  * ```
  *
  * @augments PolyhedronGeometry
+ * @demo scenes/geometry-browser.html#IcosahedronGeometry
  */
 class IcosahedronGeometry extends PolyhedronGeometry {
 
@@ -35927,6 +36363,7 @@ class IcosahedronGeometry extends PolyhedronGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#LatheGeometry
  */
 class LatheGeometry extends BufferGeometry {
 
@@ -36144,6 +36581,7 @@ class LatheGeometry extends BufferGeometry {
  * ```
  *
  * @augments PolyhedronGeometry
+ * @demo scenes/geometry-browser.html#OctahedronGeometry
  */
 class OctahedronGeometry extends PolyhedronGeometry {
 
@@ -36210,6 +36648,7 @@ class OctahedronGeometry extends PolyhedronGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#PlaneGeometry
  */
 class PlaneGeometry extends BufferGeometry {
 
@@ -36338,6 +36777,7 @@ class PlaneGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#RingGeometry
  */
 class RingGeometry extends BufferGeometry {
 
@@ -36499,6 +36939,7 @@ class RingGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#ShapeGeometry
  */
 class ShapeGeometry extends BufferGeometry {
 
@@ -36720,6 +37161,7 @@ function toJSON( shapes, data ) {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#SphereGeometry
  */
 class SphereGeometry extends BufferGeometry {
 
@@ -36889,6 +37331,7 @@ class SphereGeometry extends BufferGeometry {
  * ```
  *
  * @augments PolyhedronGeometry
+ * @demo scenes/geometry-browser.html#TetrahedronGeometry
  */
 class TetrahedronGeometry extends PolyhedronGeometry {
 
@@ -36952,6 +37395,7 @@ class TetrahedronGeometry extends PolyhedronGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#TorusGeometry
  */
 class TorusGeometry extends BufferGeometry {
 
@@ -37104,6 +37548,7 @@ class TorusGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#TorusKnotGeometry
  */
 class TorusKnotGeometry extends BufferGeometry {
 
@@ -37316,6 +37761,7 @@ class TorusKnotGeometry extends BufferGeometry {
  * ```
  *
  * @augments BufferGeometry
+ * @demo scenes/geometry-browser.html#TubeGeometry
  */
 class TubeGeometry extends BufferGeometry {
 
@@ -37863,9 +38309,9 @@ class RawShaderMaterial extends ShaderMaterial {
  * A standard physically based material, using Metallic-Roughness workflow.
  *
  * Physically based rendering (PBR) has recently become the standard in many
- * 3D applications, such as [Unity]{@link https://blogs.unity3d.com/2014/10/29/physically-based-shading-in-unity-5-a-primer/},
- * [Unreal]{@link https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/} and
- * [3D Studio Max]{@link http://area.autodesk.com/blogs/the-3ds-max-blog/what039s-new-for-rendering-in-3ds-max-2017}.
+ * 3D applications, such as [Unity](https://blogs.unity3d.com/2014/10/29/physically-based-shading-in-unity-5-a-primer/),
+ * [Unreal](https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/) and
+ * [3D Studio Max](http://area.autodesk.com/blogs/the-3ds-max-blog/what039s-new-for-rendering-in-3ds-max-2017).
  *
  * This approach differs from older approaches in that instead of using
  * approximations for the way in which light interacts with a surface, a
@@ -37881,16 +38327,17 @@ class RawShaderMaterial extends ShaderMaterial {
  * Note that for best results you should always specify an environment map when using this material.
  *
  * For a non-technical introduction to the concept of PBR and how to set up a
- * PBR material, check out these articles by the people at [marmoset]{@link https://www.marmoset.co}:
+ * PBR material, check out these articles by the people at [marmoset](https://www.marmoset.co):
  *
- * - [Basic Theory of Physically Based Rendering]{@link https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/}
- * - [Physically Based Rendering and You Can Too]{@link https://www.marmoset.co/posts/physically-based-rendering-and-you-can-too/}
+ * - [Basic Theory of Physically Based Rendering](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
+ * - [Physically Based Rendering and You Can Too](https://www.marmoset.co/posts/physically-based-rendering-and-you-can-too/)
  *
  * Technical details of the approach used in three.js (and most other PBR systems) can be found is this
- * [paper from Disney]{@link https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf}
+ * [paper from Disney](https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf)
  * (pdf), by Brent Burley.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshStandardMaterial
  */
 class MeshStandardMaterial extends Material {
 
@@ -38300,6 +38747,7 @@ class MeshStandardMaterial extends Material {
  * best results, always specify an environment map when using this material.
  *
  * @augments MeshStandardMaterial
+ * @demo scenes/material-browser.html#MeshPhysicalMaterial
  */
 class MeshPhysicalMaterial extends MeshStandardMaterial {
 
@@ -38596,7 +39044,7 @@ class MeshPhysicalMaterial extends MeshStandardMaterial {
 	}
 
 	/**
-	 * The anisotropy strength.
+	 * The anisotropy strength, from `0.0` to `1.0`.
 	 *
 	 * @type {number}
 	 * @default 0
@@ -38808,7 +39256,7 @@ class MeshPhysicalMaterial extends MeshStandardMaterial {
 /**
  * A material for shiny surfaces with specular highlights.
  *
- * The material uses a non-physically based [Blinn-Phong]{@link https://en.wikipedia.org/wiki/Blinn-Phong_shading_model}
+ * The material uses a non-physically based [Blinn-Phong](https://en.wikipedia.org/wiki/Blinn-Phong_shading_model)
  * model for calculating reflectance. Unlike the Lambertian model used in the
  * {@link MeshLambertMaterial} this can simulate shiny surfaces with specular
  * highlights (such as varnished wood). `MeshPhongMaterial` uses per-fragment shading.
@@ -38818,6 +39266,7 @@ class MeshPhysicalMaterial extends MeshStandardMaterial {
  * some graphical accuracy.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshPhongMaterial
  */
 class MeshPhongMaterial extends Material {
 
@@ -39213,6 +39662,7 @@ class MeshPhongMaterial extends Material {
  * A material implementing toon shading.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshToonMaterial
  */
 class MeshToonMaterial extends Material {
 
@@ -39527,6 +39977,7 @@ class MeshToonMaterial extends Material {
  * A material that maps the normal vectors to RGB colors.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshNormalMaterial
  */
 class MeshNormalMaterial extends Material {
 
@@ -39695,7 +40146,7 @@ class MeshNormalMaterial extends Material {
 /**
  * A material for non-shiny surfaces, without specular highlights.
  *
- * The material uses a non-physically based [Lambertian]{@link https://en.wikipedia.org/wiki/Lambertian_reflectance}
+ * The material uses a non-physically based [Lambertian](https://en.wikipedia.org/wiki/Lambertian_reflectance)
  * model for calculating reflectance. This can simulate some surfaces (such
  * as untreated wood or stone) well, but cannot simulate shiny surfaces with
  * specular highlights (such as varnished wood). `MeshLambertMaterial` uses per-fragment
@@ -39707,6 +40158,7 @@ class MeshNormalMaterial extends Material {
  * {@link MeshPhysicalMaterial}, at the cost of some graphical accuracy.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshLambertMaterial
  */
 class MeshLambertMaterial extends Material {
 
@@ -40082,6 +40534,7 @@ class MeshLambertMaterial extends Material {
  * near and far plane. White is nearest, black is farthest.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshDepthMaterial
  */
 class MeshDepthMaterial extends Material {
 
@@ -40227,7 +40680,7 @@ class MeshDepthMaterial extends Material {
  * Can also be used to customize the shadow casting of an object by assigning
  * an instance of `MeshDistanceMaterial` to {@link Object3D#customDistanceMaterial}.
  * The following examples demonstrates this approach in order to ensure
- * transparent parts of objects do no cast shadows.
+ * transparent parts of objects do not cast shadows.
  *
  * @augments Material
  */
@@ -40346,6 +40799,7 @@ class MeshDistanceMaterial extends Material {
  * shadows.
  *
  * @augments Material
+ * @demo scenes/material-browser.html#MeshMatcapMaterial
  */
 class MeshMatcapMaterial extends Material {
 
@@ -40498,6 +40952,24 @@ class MeshMatcapMaterial extends Material {
 		this.alphaMap = null;
 
 		/**
+		 * Renders the geometry as a wireframe.
+		 *
+		 * @type {boolean}
+		 * @default false
+		 */
+		this.wireframe = false;
+
+		/**
+		 * Controls the thickness of the wireframe.
+		 *
+		 * Can only be used with {@link SVGRenderer}.
+		 *
+		 * @type {number}
+		 * @default 1
+		 */
+		this.wireframeLinewidth = 1;
+
+		/**
 		 * Whether the material is rendered with flat shading or not.
 		 *
 		 * @type {boolean}
@@ -40542,6 +41014,9 @@ class MeshMatcapMaterial extends Material {
 		this.displacementBias = source.displacementBias;
 
 		this.alphaMap = source.alphaMap;
+
+		this.wireframe = source.wireframe;
+		this.wireframeLinewidth = source.wireframeLinewidth;
 
 		this.flatShading = source.flatShading;
 
@@ -40654,18 +41129,6 @@ function convertArray( array, type ) {
 	}
 
 	return Array.prototype.slice.call( array ); // create Array
-
-}
-
-/**
- * Returns `true` if the given object is a typed array.
- *
- * @param {any} object - The object to check.
- * @return {boolean} Whether the given object is a typed array.
- */
-function isTypedArray( object ) {
-
-	return ArrayBuffer.isView( object ) && ! ( object instanceof DataView );
 
 }
 
@@ -41692,7 +42155,7 @@ class KeyframeTrack {
 	 *
 	 * @param {string} name - The keyframe track's name.
 	 * @param {Array<number>} times - A list of keyframe times.
-	 * @param {Array<number>} values - A list of keyframe values.
+	 * @param {Array<number|string|boolean>} values - A list of keyframe values.
 	 * @param {(InterpolateLinear|InterpolateDiscrete|InterpolateSmooth)} [interpolation] - The interpolation type.
 	 */
 	constructor( name, times, values, interpolation ) {
@@ -41863,7 +42326,7 @@ class KeyframeTrack {
 
 			}
 
-			console.warn( 'THREE.KeyframeTrack:', message );
+			warn( 'KeyframeTrack:', message );
 			return this;
 
 		}
@@ -42023,7 +42486,7 @@ class KeyframeTrack {
 		const valueSize = this.getValueSize();
 		if ( valueSize - Math.floor( valueSize ) !== 0 ) {
 
-			console.error( 'THREE.KeyframeTrack: Invalid value size in track.', this );
+			error( 'KeyframeTrack: Invalid value size in track.', this );
 			valid = false;
 
 		}
@@ -42035,7 +42498,7 @@ class KeyframeTrack {
 
 		if ( nKeys === 0 ) {
 
-			console.error( 'THREE.KeyframeTrack: Track is empty.', this );
+			error( 'KeyframeTrack: Track is empty.', this );
 			valid = false;
 
 		}
@@ -42048,7 +42511,7 @@ class KeyframeTrack {
 
 			if ( typeof currTime === 'number' && isNaN( currTime ) ) {
 
-				console.error( 'THREE.KeyframeTrack: Time is not a valid number.', this, i, currTime );
+				error( 'KeyframeTrack: Time is not a valid number.', this, i, currTime );
 				valid = false;
 				break;
 
@@ -42056,7 +42519,7 @@ class KeyframeTrack {
 
 			if ( prevTime !== null && prevTime > currTime ) {
 
-				console.error( 'THREE.KeyframeTrack: Out of order keys.', this, i, currTime, prevTime );
+				error( 'KeyframeTrack: Out of order keys.', this, i, currTime, prevTime );
 				valid = false;
 				break;
 
@@ -42076,7 +42539,7 @@ class KeyframeTrack {
 
 					if ( isNaN( value ) ) {
 
-						console.error( 'THREE.KeyframeTrack: Value is not a valid number.', this, i, value );
+						error( 'KeyframeTrack: Value is not a valid number.', this, i, value );
 						valid = false;
 						break;
 
@@ -42236,7 +42699,7 @@ class KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default ''
  */
 KeyframeTrack.prototype.ValueTypeName = '';
@@ -42280,7 +42743,7 @@ class BooleanKeyframeTrack extends KeyframeTrack {
 	 *
 	 * @param {string} name - The keyframe track's name.
 	 * @param {Array<number>} times - A list of keyframe times.
-	 * @param {Array<number>} values - A list of keyframe values.
+	 * @param {Array<boolean>} values - A list of keyframe values.
 	 */
 	constructor( name, times, values ) {
 
@@ -42293,7 +42756,7 @@ class BooleanKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'bool'
  */
 BooleanKeyframeTrack.prototype.ValueTypeName = 'bool';
@@ -42342,7 +42805,7 @@ class ColorKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'color'
  */
 ColorKeyframeTrack.prototype.ValueTypeName = 'color';
@@ -42373,7 +42836,7 @@ class NumberKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'number'
  */
 NumberKeyframeTrack.prototype.ValueTypeName = 'number';
@@ -42460,7 +42923,7 @@ class QuaternionKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'quaternion'
  */
 QuaternionKeyframeTrack.prototype.ValueTypeName = 'quaternion';
@@ -42483,7 +42946,7 @@ class StringKeyframeTrack extends KeyframeTrack {
 	 *
 	 * @param {string} name - The keyframe track's name.
 	 * @param {Array<number>} times - A list of keyframe times.
-	 * @param {Array<number>} values - A list of keyframe values.
+	 * @param {Array<string>} values - A list of keyframe values.
 	 */
 	constructor( name, times, values ) {
 
@@ -42496,7 +42959,7 @@ class StringKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'string'
  */
 StringKeyframeTrack.prototype.ValueTypeName = 'string';
@@ -42545,7 +43008,7 @@ class VectorKeyframeTrack extends KeyframeTrack {
 /**
  * The value type name.
  *
- * @type {String}
+ * @type {string}
  * @default 'vector'
  */
 VectorKeyframeTrack.prototype.ValueTypeName = 'vector';
@@ -42608,6 +43071,14 @@ class AnimationClip {
 		 */
 		this.uuid = generateUUID();
 
+		/**
+		 * An object that can be used to store custom data about the animation clip.
+		 * It should not hold references to functions as these will not be cloned.
+		 *
+		 * @type {Object}
+		 */
+		this.userData = {};
+
 		// this means it should figure out its duration by scanning the tracks
 		if ( this.duration < 0 ) {
 
@@ -42639,6 +43110,8 @@ class AnimationClip {
 		const clip = new this( json.name, json.duration, tracks, json.blendMode );
 		clip.uuid = json.uuid;
 
+		clip.userData = JSON.parse( json.userData || '{}' );
+
 		return clip;
 
 	}
@@ -42661,7 +43134,8 @@ class AnimationClip {
 			'duration': clip.duration,
 			'tracks': tracks,
 			'uuid': clip.uuid,
-			'blendMode': clip.blendMode
+			'blendMode': clip.blendMode,
+			'userData': JSON.stringify( clip.userData ),
 
 		};
 
@@ -42835,11 +43309,11 @@ class AnimationClip {
 	 */
 	static parseAnimation( animation, bones ) {
 
-		console.warn( 'THREE.AnimationClip: parseAnimation() is deprecated and will be removed with r185' );
+		warn( 'AnimationClip: parseAnimation() is deprecated and will be removed with r185' );
 
 		if ( ! animation ) {
 
-			console.error( 'THREE.AnimationClip: No animation in JSONLoader data.' );
+			error( 'AnimationClip: No animation in JSONLoader data.' );
 			return null;
 
 		}
@@ -43056,7 +43530,11 @@ class AnimationClip {
 
 		}
 
-		return new this.constructor( this.name, this.duration, tracks, this.blendMode );
+		const clip = new this.constructor( this.name, this.duration, tracks, this.blendMode );
+
+		clip.userData = JSON.parse( JSON.stringify( this.userData ) );
+
+		return clip;
 
 	}
 
@@ -43187,7 +43665,7 @@ const Cache = {
 
 		if ( this.enabled === false ) return;
 
-		// console.log( 'THREE.Cache', 'Adding key:', key );
+		// log( 'Cache', 'Adding key:', key );
 
 		this.files[ key ] = file;
 
@@ -43204,7 +43682,7 @@ const Cache = {
 
 		if ( this.enabled === false ) return;
 
-		// console.log( 'THREE.Cache', 'Checking key:', key );
+		// log( 'Cache', 'Checking key:', key );
 
 		return this.files[ key ];
 
@@ -43305,6 +43783,14 @@ class LoadingManager {
 		 * @default undefined
 		 */
 		this.onError = onError;
+
+		/**
+		 * Used for aborting ongoing requests in loaders using this manager.
+		 *
+		 * @private
+		 * @type {AbortController | null}
+		 */
+		this._abortController = null;
 
 		/**
 		 * This should be called by any loader using the manager when the loader
@@ -43506,6 +43992,43 @@ class LoadingManager {
 
 		};
 
+		/**
+		 * Can be used to abort ongoing loading requests in loaders using this manager.
+		 * The abort only works if the loaders implement {@link Loader#abort} and `AbortSignal.any()`
+		 * is supported in the browser.
+		 *
+		 * @return {LoadingManager} A reference to this loading manager.
+		 */
+		this.abort = function () {
+
+
+			this.abortController.abort();
+			this._abortController = null;
+
+			return this;
+
+		};
+
+	}
+
+	// TODO: Revert this back to a single member variable once this issue has been fixed
+	// https://github.com/cloudflare/workerd/issues/3657
+
+	/**
+	 * Used for aborting ongoing requests in loaders using this manager.
+	 *
+	 * @type {AbortController}
+	 */
+	get abortController() {
+
+		if ( ! this._abortController ) {
+
+			this._abortController = new AbortController();
+
+		}
+
+		return this._abortController;
+
 	}
 
 }
@@ -43572,7 +44095,7 @@ class Loader {
 		this.resourcePath = '';
 
 		/**
-		 * The [request header]{@link https://developer.mozilla.org/en-US/docs/Glossary/Request_header}
+		 * The [request header](https://developer.mozilla.org/en-US/docs/Glossary/Request_header)
 		 * used in HTTP request.
 		 *
 		 * @type {Object<string, any>}
@@ -43585,6 +44108,7 @@ class Loader {
 	 * This method needs to be implemented by all concrete loaders. It holds the
 	 * logic for loading assets from the backend.
 	 *
+	 * @abstract
 	 * @param {string} url - The path/URL of the file to be loaded.
 	 * @param {Function} onLoad - Executed when the loading process has been finished.
 	 * @param {onProgressCallback} [onProgress] - Executed while the loading is in progress.
@@ -43615,6 +44139,7 @@ class Loader {
 	 * This method needs to be implemented by all concrete loaders. It holds the
 	 * logic for parsing the asset into three.js entities.
 	 *
+	 * @abstract
 	 * @param {any} data - The data to parse.
 	 */
 	parse( /* data */ ) {}
@@ -43635,7 +44160,7 @@ class Loader {
 
 	/**
 	 * Whether the XMLHttpRequest uses credentials such as cookies, authorization
-	 * headers or TLS client certificates, see [XMLHttpRequest.withCredentials]{@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials}.
+	 * headers or TLS client certificates, see [XMLHttpRequest.withCredentials](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials).
 	 *
 	 * Note: This setting has no effect if you are loading files locally or from the same domain.
 	 *
@@ -43678,13 +44203,25 @@ class Loader {
 	/**
 	 * Sets the given request header.
 	 *
-	 * @param {Object} requestHeader - A [request header]{@link https://developer.mozilla.org/en-US/docs/Glossary/Request_header}
+	 * @param {Object} requestHeader - A [request header](https://developer.mozilla.org/en-US/docs/Glossary/Request_header)
 	 * for configuring the HTTP request.
 	 * @return {Loader} A reference to this instance.
 	 */
 	setRequestHeader( requestHeader ) {
 
 		this.requestHeader = requestHeader;
+		return this;
+
+	}
+
+	/**
+	 * This method can be implemented in loaders for aborting ongoing requests.
+	 *
+	 * @abstract
+	 * @return {Loader} A reference to this instance.
+	 */
+	abort() {
+
 		return this;
 
 	}
@@ -43757,7 +44294,8 @@ class FileLoader extends Loader {
 		super( manager );
 
 		/**
-		 * The expected mime type.
+		 * The expected mime type. Valid values can be found
+		 * [here](hhttps://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString#mimetype)
 		 *
 		 * @type {string}
 		 */
@@ -43770,6 +44308,14 @@ class FileLoader extends Loader {
 		 * @default ''
 		 */
 		this.responseType = '';
+
+		/**
+		 * Used for aborting requests.
+		 *
+		 * @private
+		 * @type {AbortController}
+		 */
+		this._abortController = new AbortController();
 
 	}
 
@@ -43837,7 +44383,7 @@ class FileLoader extends Loader {
 		const req = new Request( url, {
 			headers: new Headers( this.requestHeader ),
 			credentials: this.withCredentials ? 'include' : 'same-origin',
-			// An abort controller could be added within a future PR
+			signal: ( typeof AbortSignal.any === 'function' ) ? AbortSignal.any( [ this._abortController.signal, this.manager.abortController.signal ] ) : this._abortController.signal
 		} );
 
 		// record states ( avoid data race )
@@ -43855,7 +44401,7 @@ class FileLoader extends Loader {
 
 					if ( response.status === 0 ) {
 
-						console.warn( 'THREE.FileLoader: HTTP Status 0 received.' );
+						warn( 'FileLoader: HTTP Status 0 received.' );
 
 					}
 
@@ -44054,6 +44600,20 @@ class FileLoader extends Loader {
 
 	}
 
+	/**
+	 * Aborts ongoing fetch requests.
+	 *
+	 * @return {FileLoader} A reference to this instance.
+	 */
+	abort() {
+
+		this._abortController.abort();
+		this._abortController = new AbortController();
+
+		return this;
+
+	}
+
 }
 
 /**
@@ -44111,7 +44671,7 @@ class AnimationLoader extends Loader {
 
 				} else {
 
-					console.error( e );
+					error( e );
 
 				}
 
@@ -44306,7 +44866,7 @@ const _loading = new WeakMap();
  * ```
  * Please note that `ImageLoader` has dropped support for progress
  * events in `r84`. For an `ImageLoader` that supports progress events, see
- * [this thread]{@link https://github.com/mrdoob/three.js/issues/10439#issuecomment-275785639}.
+ * [this thread](https://github.com/mrdoob/three.js/issues/10439#issuecomment-275785639).
  *
  * @augments Loader
  */
@@ -44615,7 +45175,7 @@ class DataTextureLoader extends Loader {
 
 				} else {
 
-					console.error( error );
+					error( error );
 					return;
 
 				}
@@ -44710,7 +45270,7 @@ class DataTextureLoader extends Loader {
  * ```
  * Please note that `TextureLoader` has dropped support for progress
  * events in `r84`. For a `TextureLoader` that supports progress events, see
- * [this thread]{@link https://github.com/mrdoob/three.js/issues/10439#issuecomment-293260145}.
+ * [this thread](https://github.com/mrdoob/three.js/issues/10439#issuecomment-293260145).
  *
  * @augments Loader
  */
@@ -44819,7 +45379,7 @@ class Light extends Object3D {
 	 */
 	dispose() {
 
-		// Empty here in base class; some subclasses override.
+		this.dispatchEvent( { type: 'dispose' } );
 
 	}
 
@@ -44840,16 +45400,6 @@ class Light extends Object3D {
 
 		data.object.color = this.color.getHex();
 		data.object.intensity = this.intensity;
-
-		if ( this.groundColor !== undefined ) data.object.groundColor = this.groundColor.getHex();
-
-		if ( this.distance !== undefined ) data.object.distance = this.distance;
-		if ( this.angle !== undefined ) data.object.angle = this.angle;
-		if ( this.decay !== undefined ) data.object.decay = this.decay;
-		if ( this.penumbra !== undefined ) data.object.penumbra = this.penumbra;
-
-		if ( this.shadow !== undefined ) data.object.shadow = this.shadow.toJSON();
-		if ( this.target !== undefined ) data.object.target = this.target.uuid;
 
 		return data;
 
@@ -44916,11 +45466,21 @@ class HemisphereLight extends Light {
 
 	}
 
+	toJSON( meta ) {
+
+		const data = super.toJSON( meta );
+
+		data.object.groundColor = this.groundColor.getHex();
+
+		return data;
+
+	}
+
 }
 
-const _projScreenMatrix$1 = /*@__PURE__*/ new Matrix4();
-const _lightPositionWorld$1 = /*@__PURE__*/ new Vector3();
-const _lookTarget$1 = /*@__PURE__*/ new Vector3();
+const _projScreenMatrix = /*@__PURE__*/ new Matrix4();
+const _lightPositionWorld = /*@__PURE__*/ new Vector3();
+const _lookTarget = /*@__PURE__*/ new Vector3();
 
 /**
  * Abstract base class for light shadow classes. These classes
@@ -44981,9 +45541,6 @@ class LightShadow {
 		 * High values will cause unwanted banding effects in the shadows - a greater
 		 * map size will allow for a higher value to be used here before these effects
 		 * become visible.
-		 *
-		 * The property has no effect when the shadow map type is `PCFSoftShadowMap` and
-		 * and it is recommended to increase softness by decreasing the shadow map size instead.
 		 *
 		 * The property has no effect when the shadow map type is `BasicShadowMap`.
 		 *
@@ -45109,24 +45666,37 @@ class LightShadow {
 		const shadowCamera = this.camera;
 		const shadowMatrix = this.matrix;
 
-		_lightPositionWorld$1.setFromMatrixPosition( light.matrixWorld );
-		shadowCamera.position.copy( _lightPositionWorld$1 );
+		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
+		shadowCamera.position.copy( _lightPositionWorld );
 
-		_lookTarget$1.setFromMatrixPosition( light.target.matrixWorld );
-		shadowCamera.lookAt( _lookTarget$1 );
+		_lookTarget.setFromMatrixPosition( light.target.matrixWorld );
+		shadowCamera.lookAt( _lookTarget );
 		shadowCamera.updateMatrixWorld();
 
-		_projScreenMatrix$1.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
-		this._frustum.setFromProjectionMatrix( _projScreenMatrix$1 );
+		_projScreenMatrix.multiplyMatrices( shadowCamera.projectionMatrix, shadowCamera.matrixWorldInverse );
+		this._frustum.setFromProjectionMatrix( _projScreenMatrix, shadowCamera.coordinateSystem, shadowCamera.reversedDepth );
 
-		shadowMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
-			0.0, 0.0, 0.0, 1.0
-		);
+		if ( shadowCamera.reversedDepth ) {
 
-		shadowMatrix.multiply( _projScreenMatrix$1 );
+			shadowMatrix.set(
+				0.5, 0.0, 0.0, 0.5,
+				0.0, 0.5, 0.0, 0.5,
+				0.0, 0.0, 1.0, 0.0,
+				0.0, 0.0, 0.0, 1.0
+			);
+
+		} else {
+
+			shadowMatrix.set(
+				0.5, 0.0, 0.0, 0.5,
+				0.0, 0.5, 0.0, 0.5,
+				0.0, 0.0, 0.5, 0.5,
+				0.0, 0.0, 0.0, 1.0
+			);
+
+		}
+
+		shadowMatrix.multiply( _projScreenMatrix );
 
 	}
 
@@ -45455,6 +46025,8 @@ class SpotLight extends Light {
 
 	dispose() {
 
+		super.dispose();
+
 		this.shadow.dispose();
 
 	}
@@ -45469,18 +46041,33 @@ class SpotLight extends Light {
 		this.decay = source.decay;
 
 		this.target = source.target.clone();
-
+		this.map = source.map;
 		this.shadow = source.shadow.clone();
 
 		return this;
 
 	}
 
-}
+	toJSON( meta ) {
 
-const _projScreenMatrix = /*@__PURE__*/ new Matrix4();
-const _lightPositionWorld = /*@__PURE__*/ new Vector3();
-const _lookTarget = /*@__PURE__*/ new Vector3();
+		const data = super.toJSON( meta );
+
+		data.object.distance = this.distance;
+		data.object.angle = this.angle;
+		data.object.decay = this.decay;
+		data.object.penumbra = this.penumbra;
+
+		data.object.target = this.target.uuid;
+
+		if ( this.map && this.map.isTexture ) data.object.map = this.map.toJSON( meta ).uuid;
+
+		data.object.shadow = this.shadow.toJSON();
+
+		return data;
+
+	}
+
+}
 
 /**
  * Represents the shadow configuration of point lights.
@@ -45504,84 +46091,6 @@ class PointLightShadow extends LightShadow {
 		 * @default true
 		 */
 		this.isPointLightShadow = true;
-
-		this._frameExtents = new Vector2( 4, 2 );
-
-		this._viewportCount = 6;
-
-		this._viewports = [
-			// These viewports map a cube-map onto a 2D texture with the
-			// following orientation:
-			//
-			//  xzXZ
-			//   y Y
-			//
-			// X - Positive x direction
-			// x - Negative x direction
-			// Y - Positive y direction
-			// y - Negative y direction
-			// Z - Positive z direction
-			// z - Negative z direction
-
-			// positive X
-			new Vector4( 2, 1, 1, 1 ),
-			// negative X
-			new Vector4( 0, 1, 1, 1 ),
-			// positive Z
-			new Vector4( 3, 1, 1, 1 ),
-			// negative Z
-			new Vector4( 1, 1, 1, 1 ),
-			// positive Y
-			new Vector4( 3, 0, 1, 1 ),
-			// negative Y
-			new Vector4( 1, 0, 1, 1 )
-		];
-
-		this._cubeDirections = [
-			new Vector3( 1, 0, 0 ), new Vector3( -1, 0, 0 ), new Vector3( 0, 0, 1 ),
-			new Vector3( 0, 0, -1 ), new Vector3( 0, 1, 0 ), new Vector3( 0, -1, 0 )
-		];
-
-		this._cubeUps = [
-			new Vector3( 0, 1, 0 ), new Vector3( 0, 1, 0 ), new Vector3( 0, 1, 0 ),
-			new Vector3( 0, 1, 0 ), new Vector3( 0, 0, 1 ),	new Vector3( 0, 0, -1 )
-		];
-
-	}
-
-	/**
-	 * Update the matrices for the camera and shadow, used internally by the renderer.
-	 *
-	 * @param {Light} light - The light for which the shadow is being rendered.
-	 * @param {number} [viewportIndex=0] - The viewport index.
-	 */
-	updateMatrices( light, viewportIndex = 0 ) {
-
-		const camera = this.camera;
-		const shadowMatrix = this.matrix;
-
-		const far = light.distance || camera.far;
-
-		if ( far !== camera.far ) {
-
-			camera.far = far;
-			camera.updateProjectionMatrix();
-
-		}
-
-		_lightPositionWorld.setFromMatrixPosition( light.matrixWorld );
-		camera.position.copy( _lightPositionWorld );
-
-		_lookTarget.copy( camera.position );
-		_lookTarget.add( this._cubeDirections[ viewportIndex ] );
-		camera.up.copy( this._cubeUps[ viewportIndex ] );
-		camera.lookAt( _lookTarget );
-		camera.updateMatrixWorld();
-
-		shadowMatrix.makeTranslation( - _lightPositionWorld.x, - _lightPositionWorld.y, - _lightPositionWorld.z );
-
-		_projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
-		this._frustum.setFromProjectionMatrix( _projScreenMatrix );
 
 	}
 
@@ -45680,6 +46189,8 @@ class PointLight extends Light {
 
 	dispose() {
 
+		super.dispose();
+
 		this.shadow.dispose();
 
 	}
@@ -45697,10 +46208,23 @@ class PointLight extends Light {
 
 	}
 
+	toJSON( meta ) {
+
+		const data = super.toJSON( meta );
+
+		data.object.distance = this.distance;
+		data.object.decay = this.decay;
+
+		data.object.shadow = this.shadow.toJSON();
+
+		return data;
+
+	}
+
 }
 
 /**
- * Camera that uses [orthographic projection]{@link https://en.wikipedia.org/wiki/Orthographic_projection}.
+ * Camera that uses [orthographic projection](https://en.wikipedia.org/wiki/Orthographic_projection).
  *
  * In this projection mode, an object's size in the rendered image stays
  * constant regardless of its distance from the camera. This can be useful
@@ -45915,7 +46439,7 @@ class OrthographicCamera extends Camera {
 
 		}
 
-		this.projectionMatrix.makeOrthographic( left, right, top, bottom, this.near, this.far, this.coordinateSystem );
+		this.projectionMatrix.makeOrthographic( left, right, top, bottom, this.near, this.far, this.coordinateSystem, this.reversedDepth );
 
 		this.projectionMatrixInverse.copy( this.projectionMatrix ).invert();
 
@@ -46046,6 +46570,8 @@ class DirectionalLight extends Light {
 
 	dispose() {
 
+		super.dispose();
+
 		this.shadow.dispose();
 
 	}
@@ -46058,6 +46584,17 @@ class DirectionalLight extends Light {
 		this.shadow = source.shadow.clone();
 
 		return this;
+
+	}
+
+	toJSON( meta ) {
+
+		const data = super.toJSON( meta );
+
+		data.object.shadow = this.shadow.toJSON();
+		data.object.target = this.target.uuid;
+
+		return data;
 
 	}
 
@@ -46611,21 +47148,6 @@ class LightProbe extends Light {
 
 	}
 
-	/**
-	 * Deserializes the light prove from the given JSON.
-	 *
-	 * @param {Object} json - The JSON holding the serialized light probe.
-	 * @return {LightProbe} A reference to this light probe.
-	 */
-	fromJSON( json ) {
-
-		this.intensity = json.intensity; // TODO: Move this bit to Light.fromJSON();
-		this.sh.fromArray( json.sh );
-
-		return this;
-
-	}
-
 	toJSON( meta ) {
 
 		const data = super.toJSON( meta );
@@ -46639,7 +47161,7 @@ class LightProbe extends Light {
 }
 
 /**
- * Class for loading geometries. The files are internally
+ * Class for loading materials. The files are internally
  * loaded via {@link FileLoader}.
  *
  * ```js
@@ -46700,7 +47222,7 @@ class MaterialLoader extends Loader {
 
 				} else {
 
-					console.error( e );
+					error( e );
 
 				}
 
@@ -46726,7 +47248,7 @@ class MaterialLoader extends Loader {
 
 			if ( textures[ name ] === undefined ) {
 
-				console.warn( 'THREE.MaterialLoader: Undefined texture', name );
+				warn( 'MaterialLoader: Undefined texture', name );
 
 			}
 
@@ -46813,6 +47335,7 @@ class MaterialLoader extends Loader {
 		if ( json.alphaToCoverage !== undefined ) material.alphaToCoverage = json.alphaToCoverage;
 		if ( json.premultipliedAlpha !== undefined ) material.premultipliedAlpha = json.premultipliedAlpha;
 		if ( json.forceSinglePass !== undefined ) material.forceSinglePass = json.forceSinglePass;
+		if ( json.allowOverride !== undefined ) material.allowOverride = json.allowOverride;
 
 		if ( json.visible !== undefined ) material.visible = json.visible;
 
@@ -47218,7 +47741,7 @@ class BufferGeometryLoader extends Loader {
 
 				} else {
 
-					console.error( e );
+					error( e );
 
 				}
 
@@ -47391,7 +47914,7 @@ class BufferGeometryLoader extends Loader {
 }
 
 /**
- * A loader for loading a JSON resource in the [JSON Object/Scene format]{@link https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4}.
+ * A loader for loading a JSON resource in the [JSON Object/Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
  * The files are internally loaded via {@link FileLoader}.
  *
  * ```js
@@ -47450,7 +47973,7 @@ class ObjectLoader extends Loader {
 
 				if ( onError !== undefined ) onError( error );
 
-				console.error( 'THREE:ObjectLoader: Can\'t parse ' + url + '.', error.message );
+				error( 'ObjectLoader: Can\'t parse ' + url + '.', error.message );
 
 				return;
 
@@ -47462,7 +47985,7 @@ class ObjectLoader extends Loader {
 
 				if ( onError !== undefined ) onError( new Error( 'THREE.ObjectLoader: Can\'t load ' + url ) );
 
-				console.error( 'THREE.ObjectLoader: Can\'t load ' + url );
+				error( 'ObjectLoader: Can\'t load ' + url );
 				return;
 
 			}
@@ -47672,7 +48195,7 @@ class ObjectLoader extends Loader {
 
 						} else {
 
-							console.warn( `THREE.ObjectLoader: Unsupported geometry type "${ data.type }"` );
+							warn( `ObjectLoader: Unsupported geometry type "${ data.type }"` );
 
 						}
 
@@ -47963,7 +48486,7 @@ class ObjectLoader extends Loader {
 
 			if ( typeof value === 'number' ) return value;
 
-			console.warn( 'THREE.ObjectLoader.parseTexture: Constant should be in numeric form.', value );
+			warn( 'ObjectLoader.parseTexture: Constant should be in numeric form.', value );
 
 			return type[ value ];
 
@@ -47979,13 +48502,13 @@ class ObjectLoader extends Loader {
 
 				if ( data.image === undefined ) {
 
-					console.warn( 'THREE.ObjectLoader: No "image" specified for', data.uuid );
+					warn( 'ObjectLoader: No "image" specified for', data.uuid );
 
 				}
 
 				if ( images[ data.image ] === undefined ) {
 
-					console.warn( 'THREE.ObjectLoader: Undefined image', data.image );
+					warn( 'ObjectLoader: Undefined image', data.image );
 
 				}
 
@@ -48073,7 +48596,7 @@ class ObjectLoader extends Loader {
 
 			if ( geometries[ name ] === undefined ) {
 
-				console.warn( 'THREE.ObjectLoader: Undefined geometry', name );
+				warn( 'ObjectLoader: Undefined geometry', name );
 
 			}
 
@@ -48095,7 +48618,7 @@ class ObjectLoader extends Loader {
 
 					if ( materials[ uuid ] === undefined ) {
 
-						console.warn( 'THREE.ObjectLoader: Undefined material', uuid );
+						warn( 'ObjectLoader: Undefined material', uuid );
 
 					}
 
@@ -48109,7 +48632,7 @@ class ObjectLoader extends Loader {
 
 			if ( materials[ name ] === undefined ) {
 
-				console.warn( 'THREE.ObjectLoader: Undefined material', name );
+				warn( 'ObjectLoader: Undefined material', name );
 
 			}
 
@@ -48121,7 +48644,7 @@ class ObjectLoader extends Loader {
 
 			if ( textures[ uuid ] === undefined ) {
 
-				console.warn( 'THREE.ObjectLoader: Undefined texture', uuid );
+				warn( 'ObjectLoader: Undefined texture', uuid );
 
 			}
 
@@ -48247,7 +48770,8 @@ class ObjectLoader extends Loader {
 
 			case 'LightProbe':
 
-				object = new LightProbe().fromJSON( data );
+				const sh = new SphericalHarmonics3().fromArray( data.sh );
+				object = new LightProbe( sh, data.intensity );
 
 				break;
 
@@ -48522,7 +49046,7 @@ class ObjectLoader extends Loader {
 
 				if ( skeleton === undefined ) {
 
-					console.warn( 'THREE.ObjectLoader: No skeleton found with UUID:', child.skeleton );
+					warn( 'ObjectLoader: No skeleton found with UUID:', child.skeleton );
 
 				} else {
 
@@ -48591,7 +49115,7 @@ const TEXTURE_FILTER = {
 const _errorMap = new WeakMap();
 
 /**
- * A loader for loading images as an [ImageBitmap]{@link https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap}.
+ * A loader for loading images as an [ImageBitmap](https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap).
  * An `ImageBitmap` provides an asynchronous and resource efficient pathway to prepare
  * textures for rendering.
  *
@@ -48635,13 +49159,13 @@ class ImageBitmapLoader extends Loader {
 
 		if ( typeof createImageBitmap === 'undefined' ) {
 
-			console.warn( 'THREE.ImageBitmapLoader: createImageBitmap() not supported.' );
+			warn( 'ImageBitmapLoader: createImageBitmap() not supported.' );
 
 		}
 
 		if ( typeof fetch === 'undefined' ) {
 
-			console.warn( 'THREE.ImageBitmapLoader: fetch() not supported.' );
+			warn( 'ImageBitmapLoader: fetch() not supported.' );
 
 		}
 
@@ -48653,11 +49177,19 @@ class ImageBitmapLoader extends Loader {
 		 */
 		this.options = { premultiplyAlpha: 'none' };
 
+		/**
+		 * Used for aborting requests.
+		 *
+		 * @private
+		 * @type {AbortController}
+		 */
+		this._abortController = new AbortController();
+
 	}
 
 	/**
 	 * Sets the given loader options. The structure of the object must match the `options` parameter of
-	 * [createImageBitmap]{@link https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap}.
+	 * [createImageBitmap](https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap).
 	 *
 	 * @param {Object} options - The loader options to set.
 	 * @return {ImageBitmapLoader} A reference to this image bitmap loader.
@@ -48741,6 +49273,7 @@ class ImageBitmapLoader extends Loader {
 		const fetchOptions = {};
 		fetchOptions.credentials = ( this.crossOrigin === 'anonymous' ) ? 'same-origin' : 'include';
 		fetchOptions.headers = this.requestHeader;
+		fetchOptions.signal = ( typeof AbortSignal.any === 'function' ) ? AbortSignal.any( [ this._abortController.signal, this.manager.abortController.signal ] ) : this._abortController.signal;
 
 		const promise = fetch( url, fetchOptions ).then( function ( res ) {
 
@@ -48775,6 +49308,20 @@ class ImageBitmapLoader extends Loader {
 
 		Cache.add( `image-bitmap:${url}`, promise );
 		scope.manager.itemStart( url );
+
+	}
+
+	/**
+	 * Aborts ongoing fetch requests.
+	 *
+	 * @return {ImageBitmapLoader} A reference to this instance.
+	 */
+	abort() {
+
+		this._abortController.abort();
+		this._abortController = new AbortController();
+
+		return this;
 
 	}
 
@@ -48898,7 +49445,7 @@ class AudioLoader extends Loader {
 
 			} else {
 
-				console.error( e );
+				error( e );
 
 			}
 
@@ -48917,8 +49464,8 @@ const _projectionMatrix = /*@__PURE__*/ new Matrix4();
 /**
  * A special type of camera that uses two perspective cameras with
  * stereoscopic projection. Can be used for rendering stereo effects
- * like [3D Anaglyph]{@link https://en.wikipedia.org/wiki/Anaglyph_3D} or
- * [Parallax Barrier]{@link https://en.wikipedia.org/wiki/parallax_barrier}.
+ * like [3D Anaglyph](https://en.wikipedia.org/wiki/Anaglyph_3D) or
+ * [Parallax Barrier](https://en.wikipedia.org/wiki/parallax_barrier).
  */
 class StereoCamera {
 
@@ -49441,7 +49988,7 @@ class AudioListener extends Object3D {
 /**
  * Represents a non-positional ( global ) audio object.
  *
- * This and related audio modules make use of the [Web Audio API]{@link https://www.w3.org/TR/webaudio-1.1/}.
+ * This and related audio modules make use of the [Web Audio API](https://www.w3.org/TR/webaudio-1.1/).
  *
  * ```js
  * // create an AudioListener and add it to the camera
@@ -49752,14 +50299,14 @@ class Audio extends Object3D {
 
 		if ( this.isPlaying === true ) {
 
-			console.warn( 'THREE.Audio: Audio is already playing.' );
+			warn( 'Audio: Audio is already playing.' );
 			return;
 
 		}
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return;
 
 		}
@@ -49796,7 +50343,7 @@ class Audio extends Object3D {
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return;
 
 		}
@@ -49838,7 +50385,7 @@ class Audio extends Object3D {
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return;
 
 		}
@@ -50031,7 +50578,7 @@ class Audio extends Object3D {
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return;
 
 		}
@@ -50080,7 +50627,7 @@ class Audio extends Object3D {
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return false;
 
 		}
@@ -50101,7 +50648,7 @@ class Audio extends Object3D {
 
 		if ( this.hasPlaybackControl === false ) {
 
-			console.warn( 'THREE.Audio: this Audio has no playback control.' );
+			warn( 'Audio: this Audio has no playback control.' );
 			return;
 
 		}
@@ -50179,7 +50726,7 @@ class Audio extends Object3D {
 
 		if ( source.sourceType !== 'buffer' ) {
 
-			console.warn( 'THREE.Audio: Audio source type cannot be copied.' );
+			warn( 'Audio: Audio source type cannot be copied.' );
 
 			return this;
 
@@ -50364,7 +50911,7 @@ class PositionalAudio extends Audio {
 	 * Defines which algorithm to use to reduce the volume of the audio source
 	 * as it moves away from the listener.
 	 *
-	 * Read [the spec]{@link https://www.w3.org/TR/webaudio-1.1/#enumdef-distancemodeltype}
+	 * Read [the spec](https://www.w3.org/TR/webaudio-1.1/#enumdef-distancemodeltype)
 	 * for more details.
 	 *
 	 * @param {('linear'|'inverse'|'exponential')} value - The distance model to set.
@@ -51446,7 +51993,7 @@ class PropertyBinding {
 		// ensure there is a value node
 		if ( ! targetObject ) {
 
-			console.warn( 'THREE.PropertyBinding: No target node found for track: ' + this.path + '.' );
+			warn( 'PropertyBinding: No target node found for track: ' + this.path + '.' );
 			return;
 
 		}
@@ -51462,14 +52009,14 @@ class PropertyBinding {
 
 					if ( ! targetObject.material ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to material as node does not have a material.', this );
+						error( 'PropertyBinding: Can not bind to material as node does not have a material.', this );
 						return;
 
 					}
 
 					if ( ! targetObject.material.materials ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to material.materials as node.material does not have a materials array.', this );
+						error( 'PropertyBinding: Can not bind to material.materials as node.material does not have a materials array.', this );
 						return;
 
 					}
@@ -51482,7 +52029,7 @@ class PropertyBinding {
 
 					if ( ! targetObject.skeleton ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to bones as node does not have a skeleton.', this );
+						error( 'PropertyBinding: Can not bind to bones as node does not have a skeleton.', this );
 						return;
 
 					}
@@ -51517,14 +52064,14 @@ class PropertyBinding {
 
 					if ( ! targetObject.material ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to material as node does not have a material.', this );
+						error( 'PropertyBinding: Can not bind to material as node does not have a material.', this );
 						return;
 
 					}
 
 					if ( ! targetObject.material.map ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to material.map as node.material does not have a map.', this );
+						error( 'PropertyBinding: Can not bind to material.map as node.material does not have a map.', this );
 						return;
 
 					}
@@ -51536,7 +52083,7 @@ class PropertyBinding {
 
 					if ( targetObject[ objectName ] === undefined ) {
 
-						console.error( 'THREE.PropertyBinding: Can not bind to objectName of node undefined.', this );
+						error( 'PropertyBinding: Can not bind to objectName of node undefined.', this );
 						return;
 
 					}
@@ -51550,7 +52097,7 @@ class PropertyBinding {
 
 				if ( targetObject[ objectIndex ] === undefined ) {
 
-					console.error( 'THREE.PropertyBinding: Trying to bind to objectIndex of objectName, but is undefined.', this, targetObject );
+					error( 'PropertyBinding: Trying to bind to objectIndex of objectName, but is undefined.', this, targetObject );
 					return;
 
 				}
@@ -51568,7 +52115,7 @@ class PropertyBinding {
 
 			const nodeName = parsedPath.nodeName;
 
-			console.error( 'THREE.PropertyBinding: Trying to update property for track: ' + nodeName +
+			error( 'PropertyBinding: Trying to update property for track: ' + nodeName +
 				'.' + propertyName + ' but it wasn\'t found.', targetObject );
 			return;
 
@@ -51603,14 +52150,14 @@ class PropertyBinding {
 				// support resolving morphTarget names into indices.
 				if ( ! targetObject.geometry ) {
 
-					console.error( 'THREE.PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.', this );
+					error( 'PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.', this );
 					return;
 
 				}
 
 				if ( ! targetObject.geometry.morphAttributes ) {
 
-					console.error( 'THREE.PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.morphAttributes.', this );
+					error( 'PropertyBinding: Can not bind to morphTargetInfluences because node does not have a geometry.morphAttributes.', this );
 					return;
 
 				}
@@ -51902,7 +52449,7 @@ class AnimationObjectGroup {
 
 			} else if ( objects[ index ] !== knownObject ) {
 
-				console.error( 'THREE.AnimationObjectGroup: Different objects with the same UUID ' +
+				error( 'AnimationObjectGroup: Different objects with the same UUID ' +
 					'detected. Clean the caches or recreate your infrastructure when reloading scenes.' );
 
 			} // else the object is already where we want it to be
@@ -53697,7 +54244,7 @@ class AnimationMixer extends EventDispatcher {
 	/**
 	 * Deactivates all previously scheduled actions on this mixer.
 	 *
-	 * @return {AnimationMixer} A reference to thi animation mixer.
+	 * @return {AnimationMixer} A reference to this animation mixer.
 	 */
 	stopAllAction() {
 
@@ -53721,7 +54268,7 @@ class AnimationMixer extends EventDispatcher {
 	 * time from {@link Clock} or {@link Timer}.
 	 *
 	 * @param {number} deltaTime - The delta time in seconds.
-	 * @return {AnimationMixer} A reference to thi animation mixer.
+	 * @return {AnimationMixer} A reference to this animation mixer.
 	 */
 	update( deltaTime ) {
 
@@ -53767,7 +54314,7 @@ class AnimationMixer extends EventDispatcher {
 	 * input parameter will be scaled by {@link AnimationMixer#timeScale}
 	 *
 	 * @param {number} time - The time to set in seconds.
-	 * @return {AnimationMixer} A reference to thi animation mixer.
+	 * @return {AnimationMixer} A reference to this animation mixer.
 	 */
 	setTime( time ) {
 
@@ -54448,7 +54995,7 @@ class Raycaster {
 		this.near = near;
 
 		/**
-		 * All results returned are further away than near. Near can't be negative.
+		 * All results returned are closer than far. Far can't be lower than near.
 		 *
 		 * @type {number}
 		 * @default Infinity
@@ -54542,7 +55089,7 @@ class Raycaster {
 
 		} else {
 
-			console.error( 'THREE.Raycaster: Unsupported camera type: ' + camera.type );
+			error( 'Raycaster: Unsupported camera type: ' + camera.type );
 
 		}
 
@@ -54577,7 +55124,7 @@ class Raycaster {
 	 * @property {Object3D} object - The 3D object that has been intersected.
 	 * @property {Vector2} uv - U,V coordinates at point of intersection.
 	 * @property {Vector2} uv1 - Second set of U,V coordinates at point of intersection.
-	 * @property {Vector3} uv1 - Interpolated normal vector at point of intersection.
+	 * @property {Vector3} normal - Interpolated normal vector at point of intersection.
 	 * @property {number} instanceId - The index number of the instance where the ray
 	 * intersects the {@link InstancedMesh}.
 	 */
@@ -54670,8 +55217,191 @@ function intersect( object, raycaster, intersects, recursive ) {
 }
 
 /**
+ * This class is an alternative to {@link Clock} with a different API design and behavior.
+ * The goal is to avoid the conceptual flaws that became apparent in `Clock` over time.
+ *
+ * - `Timer` has an `update()` method that updates its internal state. That makes it possible to
+ * call `getDelta()` and `getElapsed()` multiple times per simulation step without getting different values.
+ * - The class can make use of the Page Visibility API to avoid large time delta values when the app
+ * is inactive (e.g. tab switched or browser hidden).
+ *
+ * ```js
+ * const timer = new Timer();
+ * timer.connect( document ); // use Page Visibility API
+ * ```
+ */
+class Timer {
+
+	/**
+	 * Constructs a new timer.
+	 */
+	constructor() {
+
+		this._previousTime = 0;
+		this._currentTime = 0;
+		this._startTime = performance.now();
+
+		this._delta = 0;
+		this._elapsed = 0;
+
+		this._timescale = 1;
+
+		this._document = null;
+		this._pageVisibilityHandler = null;
+
+	}
+
+	/**
+	 * Connect the timer to the given document.Calling this method is not mandatory to
+	 * use the timer but enables the usage of the Page Visibility API to avoid large time
+	 * delta values.
+	 *
+	 * @param {Document} document - The document.
+	 */
+	connect( document ) {
+
+		this._document = document;
+
+		// use Page Visibility API to avoid large time delta values
+
+		if ( document.hidden !== undefined ) {
+
+			this._pageVisibilityHandler = handleVisibilityChange.bind( this );
+
+			document.addEventListener( 'visibilitychange', this._pageVisibilityHandler, false );
+
+		}
+
+	}
+
+	/**
+	 * Disconnects the timer from the DOM and also disables the usage of the Page Visibility API.
+	 */
+	disconnect() {
+
+		if ( this._pageVisibilityHandler !== null ) {
+
+			this._document.removeEventListener( 'visibilitychange', this._pageVisibilityHandler );
+			this._pageVisibilityHandler = null;
+
+		}
+
+		this._document = null;
+
+	}
+
+	/**
+	 * Returns the time delta in seconds.
+	 *
+	 * @return {number} The time delta in second.
+	 */
+	getDelta() {
+
+		return this._delta / 1000;
+
+	}
+
+	/**
+	 * Returns the elapsed time in seconds.
+	 *
+	 * @return {number} The elapsed time in second.
+	 */
+	getElapsed() {
+
+		return this._elapsed / 1000;
+
+	}
+
+	/**
+	 * Returns the timescale.
+	 *
+	 * @return {number} The timescale.
+	 */
+	getTimescale() {
+
+		return this._timescale;
+
+	}
+
+	/**
+	 * Sets the given timescale which scale the time delta computation
+	 * in `update()`.
+	 *
+	 * @param {number} timescale - The timescale to set.
+	 * @return {Timer} A reference to this timer.
+	 */
+	setTimescale( timescale ) {
+
+		this._timescale = timescale;
+
+		return this;
+
+	}
+
+	/**
+	 * Resets the time computation for the current simulation step.
+	 *
+	 * @return {Timer} A reference to this timer.
+	 */
+	reset() {
+
+		this._currentTime = performance.now() - this._startTime;
+
+		return this;
+
+	}
+
+	/**
+	 * Can be used to free all internal resources. Usually called when
+	 * the timer instance isn't required anymore.
+	 */
+	dispose() {
+
+		this.disconnect();
+
+	}
+
+	/**
+	 * Updates the internal state of the timer. This method should be called
+	 * once per simulation step and before you perform queries against the timer
+	 * (e.g. via `getDelta()`).
+	 *
+	 * @param {number} timestamp - The current time in milliseconds. Can be obtained
+	 * from the `requestAnimationFrame` callback argument. If not provided, the current
+	 * time will be determined with `performance.now`.
+	 * @return {Timer} A reference to this timer.
+	 */
+	update( timestamp ) {
+
+		if ( this._pageVisibilityHandler !== null && this._document.hidden === true ) {
+
+			this._delta = 0;
+
+		} else {
+
+			this._previousTime = this._currentTime;
+			this._currentTime = ( timestamp !== undefined ? timestamp : performance.now() ) - this._startTime;
+
+			this._delta = ( this._currentTime - this._previousTime ) * this._timescale;
+			this._elapsed += this._delta; // _elapsed is the accumulation of all previous deltas
+
+		}
+
+		return this;
+
+	}
+
+}
+
+function handleVisibilityChange() {
+
+	if ( this._document.hidden === false ) this.reset();
+
+}
+
+/**
  * This class can be used to represent points in 3D space as
- * [Spherical coordinates]{@link https://en.wikipedia.org/wiki/Spherical_coordinate_system}.
+ * [Spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
  */
 class Spherical {
 
@@ -54776,8 +55506,8 @@ class Spherical {
 	 * Sets the spherical components from the given Cartesian coordinates.
 	 *
 	 * @param {number} x - The x value.
-	 * @param {number} y - The x value.
-	 * @param {number} z - The x value.
+	 * @param {number} y - The y value.
+	 * @param {number} z - The z value.
 	 * @return {Spherical} A reference to this spherical.
 	 */
 	setFromCartesianCoords( x, y, z ) {
@@ -54815,7 +55545,7 @@ class Spherical {
 
 /**
  * This class can be used to represent points in 3D space as
- * [Cylindrical coordinates]{@link https://en.wikipedia.org/wiki/Cylindrical_coordinate_system}.
+ * [Cylindrical coordinates](https://en.wikipedia.org/wiki/Cylindrical_coordinate_system).
  */
 class Cylindrical {
 
@@ -54938,7 +55668,7 @@ class Cylindrical {
  * A Note on Row-Major and Column-Major Ordering:
  *
  * The constructor and {@link Matrix2#set} method take arguments in
- * [row-major]{@link https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order}
+ * [row-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order#Column-major_order)
  * order, while internally they are stored in the {@link Matrix2#elements} array in column-major order.
  * This means that calling:
  * ```js
@@ -55438,6 +56168,12 @@ class Box2 {
 const _startP = /*@__PURE__*/ new Vector3();
 const _startEnd = /*@__PURE__*/ new Vector3();
 
+const _d1 = /*@__PURE__*/ new Vector3();
+const _d2 = /*@__PURE__*/ new Vector3();
+const _r = /*@__PURE__*/ new Vector3();
+const _c1 = /*@__PURE__*/ new Vector3();
+const _c2 = /*@__PURE__*/ new Vector3();
+
 /**
  * An analytical line segment in 3D space represented by a start and end point.
  */
@@ -55585,11 +56321,11 @@ class Line3 {
 	}
 
 	/**
-	 * Returns the closets point on the line for a given point.
+	 * Returns the closest point on the line for a given point.
 	 *
 	 * @param {Vector3} point - The point to compute the closest point on the line for.
 	 * @param {boolean} clampToLine - Whether to clamp the result to the range `[0,1]` or not.
-	 * @param {Vector3} target -  The target vector that is used to store the method's result.
+	 * @param {Vector3} target - The target vector that is used to store the method's result.
 	 * @return {Vector3} The closest point on the line.
 	 */
 	closestPointToPoint( point, clampToLine, target ) {
@@ -55597,6 +56333,127 @@ class Line3 {
 		const t = this.closestPointToPointParameter( point, clampToLine );
 
 		return this.delta( target ).multiplyScalar( t ).add( this.start );
+
+	}
+
+	/**
+	 * Returns the closest squared distance between this line segment and the given one.
+	 *
+	 * @param {Line3} line - The line segment to compute the closest squared distance to.
+	 * @param {Vector3} [c1] - The closest point on this line segment.
+	 * @param {Vector3} [c2] - The closest point on the given line segment.
+	 * @return {number} The squared distance between this line segment and the given one.
+	 */
+	distanceSqToLine3( line, c1 = _c1, c2 = _c2 ) {
+
+		// from Real-Time Collision Detection by Christer Ericson, chapter 5.1.9
+
+		// Computes closest points C1 and C2 of S1(s)=P1+s*(Q1-P1) and
+		// S2(t)=P2+t*(Q2-P2), returning s and t. Function result is squared
+		// distance between between S1(s) and S2(t)
+
+		const EPSILON = 1e-8 * 1e-8; // must be squared since we compare squared length
+		let s, t;
+
+		const p1 = this.start;
+		const p2 = line.start;
+		const q1 = this.end;
+		const q2 = line.end;
+
+		_d1.subVectors( q1, p1 ); // Direction vector of segment S1
+		_d2.subVectors( q2, p2 ); // Direction vector of segment S2
+		_r.subVectors( p1, p2 );
+
+		const a = _d1.dot( _d1 ); // Squared length of segment S1, always nonnegative
+		const e = _d2.dot( _d2 ); // Squared length of segment S2, always nonnegative
+		const f = _d2.dot( _r );
+
+		// Check if either or both segments degenerate into points
+
+		if ( a <= EPSILON && e <= EPSILON ) {
+
+			// Both segments degenerate into points
+
+			c1.copy( p1 );
+			c2.copy( p2 );
+
+			c1.sub( c2 );
+
+			return c1.dot( c1 );
+
+		}
+
+		if ( a <= EPSILON ) {
+
+			// First segment degenerates into a point
+
+			s = 0;
+			t = f / e; // s = 0 => t = (b*s + f) / e = f / e
+			t = clamp( t, 0, 1 );
+
+
+		} else {
+
+			const c = _d1.dot( _r );
+
+			if ( e <= EPSILON ) {
+
+				// Second segment degenerates into a point
+
+				t = 0;
+				s = clamp( - c / a, 0, 1 ); // t = 0 => s = (b*t - c) / a = -c / a
+
+			} else {
+
+				// The general nondegenerate case starts here
+
+				const b = _d1.dot( _d2 );
+				const denom = a * e - b * b; // Always nonnegative
+
+				// If segments not parallel, compute closest point on L1 to L2 and
+				// clamp to segment S1. Else pick arbitrary s (here 0)
+
+				if ( denom !== 0 ) {
+
+					s = clamp( ( b * f - c * e ) / denom, 0, 1 );
+
+				} else {
+
+					s = 0;
+
+				}
+
+				// Compute point on L2 closest to S1(s) using
+				// t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
+
+				t = ( b * s + f ) / e;
+
+				// If t in [0,1] done. Else clamp t, recompute s for the new value
+				// of t using s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a
+				// and clamp s to [0, 1]
+
+				if ( t < 0 ) {
+
+					t = 0.;
+					s = clamp( - c / a, 0, 1 );
+
+				} else if ( t > 1 ) {
+
+					t = 1;
+					s = clamp( ( b - c ) / a, 0, 1 );
+
+				}
+
+			}
+
+		}
+
+		c1.copy( p1 ).add( _d1.multiplyScalar( s ) );
+		c2.copy( p2 ).add( _d2.multiplyScalar( t ) );
+
+		c1.sub( c2 );
+
+		return c1.dot( c1 );
 
 	}
 
@@ -55799,7 +56656,7 @@ const _matrixWorldInv = /*@__PURE__*/ new Matrix4();
 class SkeletonHelper extends LineSegments {
 
 	/**
-	 * Constructs a new hemisphere light helper.
+	 * Constructs a new skeleton helper.
 	 *
 	 * @param {Object3D} object -  Usually an instance of {@link SkinnedMesh}. However, any 3D object
 	 * can be used if it represents a hierarchy of bones (see {@link Bone}).
@@ -55813,9 +56670,6 @@ class SkeletonHelper extends LineSegments {
 		const vertices = [];
 		const colors = [];
 
-		const color1 = new Color( 0, 0, 1 );
-		const color2 = new Color( 0, 1, 0 );
-
 		for ( let i = 0; i < bones.length; i ++ ) {
 
 			const bone = bones[ i ];
@@ -55824,8 +56678,8 @@ class SkeletonHelper extends LineSegments {
 
 				vertices.push( 0, 0, 0 );
 				vertices.push( 0, 0, 0 );
-				colors.push( color1.r, color1.g, color1.b );
-				colors.push( color2.r, color2.g, color2.b );
+				colors.push( 0, 0, 0 );
+				colors.push( 0, 0, 0 );
 
 			}
 
@@ -55866,6 +56720,13 @@ class SkeletonHelper extends LineSegments {
 		this.matrix = object.matrixWorld;
 		this.matrixAutoUpdate = false;
 
+		// colors
+
+		const color1 = new Color( 0x0000ff );
+		const color2 = new Color( 0x00ff00 );
+
+		this.setColors( color1, color2 );
+
 	}
 
 	updateMatrixWorld( force ) {
@@ -55900,6 +56761,31 @@ class SkeletonHelper extends LineSegments {
 		geometry.getAttribute( 'position' ).needsUpdate = true;
 
 		super.updateMatrixWorld( force );
+
+	}
+
+	/**
+	 * Defines the colors of the helper.
+	 *
+	 * @param {Color} color1 - The first line color for each bone.
+	 * @param {Color} color2 - The second line color for each bone.
+	 * @return {SkeletonHelper} A reference to this helper.
+	 */
+	setColors( color1, color2 ) {
+
+		const geometry = this.geometry;
+		const colorAttribute = geometry.getAttribute( 'color' );
+
+		for ( let i = 0; i < colorAttribute.count; i += 2 ) {
+
+			colorAttribute.setXYZ( i, color1.r, color1.g, color1.b );
+			colorAttribute.setXYZ( i + 1, color2.r, color2.g, color2.b );
+
+		}
+
+		colorAttribute.needsUpdate = true;
+
+		return this;
 
 	}
 
@@ -55973,7 +56859,7 @@ class PointLightHelper extends Mesh {
 		/**
 		 * The light being visualized.
 		 *
-		 * @type {HemisphereLight}
+		 * @type {PointLight}
 		 */
 		this.light = light;
 
@@ -56518,7 +57404,7 @@ const _camera = /*@__PURE__*/ new Camera();
  * This helps with visualizing what a camera contains in its frustum. It
  * visualizes the frustum of a camera using a line segments.
  *
- * Based on frustum visualization in [lightgl.js shadowmap example]{@link https://github.com/evanw/lightgl.js/blob/master/tests/shadowmap.html}.
+ * Based on frustum visualization in [lightgl.js shadowmap example](https://github.com/evanw/lightgl.js/blob/master/tests/shadowmap.html).
  *
  * `CameraHelper` must be a child of the scene.
  *
@@ -56663,6 +57549,7 @@ class CameraHelper extends LineSegments {
 	 * @param {Color} up - The up line color.
 	 * @param {Color} target - The target line color.
 	 * @param {Color} cross - The cross line color.
+	 * @return {CameraHelper} A reference to this helper.
 	 */
 	setColors( frustum, cone, up, target, cross ) {
 
@@ -56719,6 +57606,8 @@ class CameraHelper extends LineSegments {
 
 		colorAttribute.needsUpdate = true;
 
+		return this;
+
 	}
 
 	/**
@@ -56731,17 +57620,44 @@ class CameraHelper extends LineSegments {
 
 		const w = 1, h = 1;
 
+		let nearZ, farZ;
+
 		// we need just camera projection matrix inverse
 		// world matrix must be identity
 
 		_camera.projectionMatrixInverse.copy( this.camera.projectionMatrixInverse );
 
 		// Adjust z values based on coordinate system
-		const nearZ = this.camera.coordinateSystem === WebGLCoordinateSystem ? -1 : 0;
+
+		if ( this.camera.reversedDepth === true ) {
+
+			nearZ = 1;
+			farZ = 0;
+
+		} else {
+
+			if ( this.camera.coordinateSystem === WebGLCoordinateSystem ) {
+
+				nearZ = -1;
+				farZ = 1;
+
+			} else if ( this.camera.coordinateSystem === WebGPUCoordinateSystem ) {
+
+				nearZ = 0;
+				farZ = 1;
+
+			} else {
+
+				throw new Error( 'THREE.CameraHelper.update(): Invalid coordinate system: ' + this.camera.coordinateSystem );
+
+			}
+
+		}
+
 
 		// center / target
 		setPoint( 'c', pointMap, geometry, _camera, 0, 0, nearZ );
-		setPoint( 't', pointMap, geometry, _camera, 0, 0, 1 );
+		setPoint( 't', pointMap, geometry, _camera, 0, 0, farZ );
 
 		// near
 
@@ -56752,10 +57668,10 @@ class CameraHelper extends LineSegments {
 
 		// far
 
-		setPoint( 'f1', pointMap, geometry, _camera, - w, - h, 1 );
-		setPoint( 'f2', pointMap, geometry, _camera, w, - h, 1 );
-		setPoint( 'f3', pointMap, geometry, _camera, - w, h, 1 );
-		setPoint( 'f4', pointMap, geometry, _camera, w, h, 1 );
+		setPoint( 'f1', pointMap, geometry, _camera, - w, - h, farZ );
+		setPoint( 'f2', pointMap, geometry, _camera, w, - h, farZ );
+		setPoint( 'f3', pointMap, geometry, _camera, - w, h, farZ );
+		setPoint( 'f4', pointMap, geometry, _camera, w, h, farZ );
 
 		// up
 
@@ -56765,10 +57681,10 @@ class CameraHelper extends LineSegments {
 
 		// cross
 
-		setPoint( 'cf1', pointMap, geometry, _camera, - w, 0, 1 );
-		setPoint( 'cf2', pointMap, geometry, _camera, w, 0, 1 );
-		setPoint( 'cf3', pointMap, geometry, _camera, 0, - h, 1 );
-		setPoint( 'cf4', pointMap, geometry, _camera, 0, h, 1 );
+		setPoint( 'cf1', pointMap, geometry, _camera, - w, 0, farZ );
+		setPoint( 'cf2', pointMap, geometry, _camera, w, 0, farZ );
+		setPoint( 'cf3', pointMap, geometry, _camera, 0, - h, farZ );
+		setPoint( 'cf4', pointMap, geometry, _camera, 0, h, farZ );
 
 		setPoint( 'cn1', pointMap, geometry, _camera, - w, 0, nearZ );
 		setPoint( 'cn2', pointMap, geometry, _camera, w, 0, nearZ );
@@ -57600,7 +58516,7 @@ class ShapePath {
 		let holesFirst = ! isClockWise( subPaths[ 0 ].getPoints() );
 		holesFirst = isCCW ? ! holesFirst : holesFirst;
 
-		// console.log("Holes first", holesFirst);
+		// log("Holes first", holesFirst);
 
 		const betterShapeHoles = [];
 		const newShapes = [];
@@ -57628,13 +58544,13 @@ class ShapePath {
 				if ( holesFirst )	mainIdx ++;
 				newShapeHoles[ mainIdx ] = [];
 
-				//console.log('cw', i);
+				//log('cw', i);
 
 			} else {
 
 				newShapeHoles[ mainIdx ].push( { h: tmpPath, p: tmpPoints[ 0 ] } );
 
-				//console.log('ccw', i);
+				//log('ccw', i);
 
 			}
 
@@ -57719,7 +58635,7 @@ class ShapePath {
 
 		}
 
-		//console.log("shape", shapes);
+		//log("shape", shapes);
 
 		return shapes;
 
@@ -57739,7 +58655,7 @@ class Controls extends EventDispatcher {
 	 * Constructs a new controls instance.
 	 *
 	 * @param {Object3D} object - The object that is managed by the controls.
-	 * @param {?HTMLDOMElement} domElement - The HTML element used for event listeners.
+	 * @param {?HTMLElement} domElement - The HTML element used for event listeners.
 	 */
 	constructor( object, domElement = null ) {
 
@@ -57755,7 +58671,7 @@ class Controls extends EventDispatcher {
 		/**
 		 * The HTML element used for event listeners.
 		 *
-		 * @type {?HTMLDOMElement}
+		 * @type {?HTMLElement}
 		 * @default null
 		 */
 		this.domElement = domElement;
@@ -57805,13 +58721,13 @@ class Controls extends EventDispatcher {
 	 * Connects the controls to the DOM. This method has so called "side effects" since
 	 * it adds the module's event listeners to the DOM.
 	 *
-	 * @param {HTMLDOMElement} element - The DOM element to connect to.
+	 * @param {HTMLElement} element - The DOM element to connect to.
 	 */
 	connect( element ) {
 
 		if ( element === undefined ) {
 
-			console.warn( 'THREE.Controls: connect() now requires an element.' ); // @deprecated, the warning can be removed with r185
+			warn( 'Controls: connect() now requires an element.' ); // @deprecated, the warning can be removed with r185
 			return;
 
 		}
@@ -57983,8 +58899,12 @@ function getByteLength( width, height, format, type ) {
 		// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_etc/
 		case RGB_ETC1_Format:
 		case RGB_ETC2_Format:
+		case R11_EAC_Format:
+		case SIGNED_R11_EAC_Format:
 			return Math.floor( ( width + 3 ) / 4 ) * Math.floor( ( height + 3 ) / 4 ) * 8;
 		case RGBA_ETC2_EAC_Format:
+		case RG11_EAC_Format:
+		case SIGNED_RG11_EAC_Format:
 			return Math.floor( ( width + 3 ) / 4 ) * Math.floor( ( height + 3 ) / 4 ) * 16;
 
 		// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_astc/
@@ -58058,6 +58978,7 @@ function getTextureTypeByteLength( type ) {
 		case FloatType:
 			return { byteLength: 4, components: 1 };
 		case UnsignedInt5999Type:
+		case UnsignedInt101111Type:
 			return { byteLength: 4, components: 3 };
 
 	}
@@ -58144,7 +59065,7 @@ if ( typeof window !== 'undefined' ) {
 
 	if ( window.__THREE__ ) {
 
-		console.warn( 'WARNING: Multiple instances of Three.js being imported.' );
+		warn( 'WARNING: Multiple instances of Three.js being imported.' );
 
 	} else {
 
@@ -58154,4 +59075,4 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
-export { ACESFilmicToneMapping, AddEquation, AddOperation, AdditiveAnimationBlendMode, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AnimationAction, AnimationClip, AnimationLoader, AnimationMixer, AnimationObjectGroup, AnimationUtils, ArcCurve, ArrayCamera, ArrowHelper, AttachedBindMode, Audio, AudioAnalyser, AudioContext, AudioListener, AudioLoader, AxesHelper, BackSide, BasicDepthPacking, BasicShadowMap, BatchedMesh, Bone, BooleanKeyframeTrack, Box2, Box3, Box3Helper, BoxGeometry, BoxHelper, BufferAttribute, BufferGeometry, BufferGeometryLoader, ByteType, Cache, Camera, CameraHelper, CanvasTexture, CapsuleGeometry, CatmullRomCurve3, CineonToneMapping, CircleGeometry, ClampToEdgeWrapping, Clock, Color, ColorKeyframeTrack, ColorManagement, CompressedArrayTexture, CompressedCubeTexture, CompressedTexture, CompressedTextureLoader, ConeGeometry, ConstantAlphaFactor, ConstantColorFactor, Controls, CubeCamera, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureLoader, CubeUVReflectionMapping, CubicBezierCurve, CubicBezierCurve3, CubicInterpolant, CullFaceBack, CullFaceFront, CullFaceFrontBack, CullFaceNone, Curve, CurvePath, CustomBlending, CustomToneMapping, CylinderGeometry, Cylindrical, Data3DTexture, DataArrayTexture, DataTexture, DataTextureLoader, DataUtils, DecrementStencilOp, DecrementWrapStencilOp, DefaultLoadingManager, DepthFormat, DepthStencilFormat, DepthTexture, DetachedBindMode, DirectionalLight, DirectionalLightHelper, DiscreteInterpolant, DodecahedronGeometry, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicCopyUsage, DynamicDrawUsage, DynamicReadUsage, EdgesGeometry, EllipseCurve, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, Euler, EventDispatcher, ExtrudeGeometry, FileLoader, Float16BufferAttribute, Float32BufferAttribute, FloatType, Fog, FogExp2, FramebufferTexture, FrontSide, Frustum, FrustumArray, GLBufferAttribute, GLSL1, GLSL3, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, GridHelper, Group, HalfFloatType, HemisphereLight, HemisphereLightHelper, IcosahedronGeometry, ImageBitmapLoader, ImageLoader, ImageUtils, IncrementStencilOp, IncrementWrapStencilOp, InstancedBufferAttribute, InstancedBufferGeometry, InstancedInterleavedBuffer, InstancedMesh, Int16BufferAttribute, Int32BufferAttribute, Int8BufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, InterpolateSmooth, InterpolationSamplingMode, InterpolationSamplingType, InvertStencilOp, KeepStencilOp, KeyframeTrack, LOD, LatheGeometry, Layers, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, Light, LightProbe, Line, Line3, LineBasicMaterial, LineCurve, LineCurve3, LineDashedMaterial, LineLoop, LineSegments, LinearFilter, LinearInterpolant, LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoaderUtils, LoadingManager, LoopOnce, LoopPingPong, LoopRepeat, MOUSE, Material, MaterialLoader, MathUtils, Matrix2, Matrix3, Matrix4, MaxEquation, Mesh, MeshBasicMaterial, MeshDepthMaterial, MeshDistanceMaterial, MeshLambertMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipMapLinearFilter, NearestMipMapNearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeutralToneMapping, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoToneMapping, NormalAnimationBlendMode, NormalBlending, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, NumberKeyframeTrack, Object3D, ObjectLoader, ObjectSpaceNormalMap, OctahedronGeometry, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OrthographicCamera, PCFShadowMap, PCFSoftShadowMap, Path, PerspectiveCamera, Plane, PlaneGeometry, PlaneHelper, PointLight, PointLightHelper, Points, PointsMaterial, PolarGridHelper, PolyhedronGeometry, PositionalAudio, PropertyBinding, PropertyMixer, QuadraticBezierCurve, QuadraticBezierCurve3, Quaternion, QuaternionKeyframeTrack, QuaternionLinearInterpolant, RAD2DEG, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RGBADepthPacking, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGBDepthPacking, RGBFormat, RGBIntegerFormat, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGDepthPacking, RGFormat, RGIntegerFormat, RawShaderMaterial, Ray, Raycaster, RectAreaLight, RedFormat, RedIntegerFormat, ReinhardToneMapping, RenderTarget, RenderTarget3D, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RingGeometry, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SRGBColorSpace, SRGBTransfer, Scene, ShaderMaterial, ShadowMaterial, Shape, ShapeGeometry, ShapePath, ShapeUtils, ShortType, Skeleton, SkeletonHelper, SkinnedMesh, Source, Sphere, SphereGeometry, Spherical, SphericalHarmonics3, SplineCurve, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StaticCopyUsage, StaticDrawUsage, StaticReadUsage, StereoCamera, StreamCopyUsage, StreamDrawUsage, StreamReadUsage, StringKeyframeTrack, SubtractEquation, SubtractiveBlending, TOUCH, TangentSpaceNormalMap, TetrahedronGeometry, Texture, TextureLoader, TextureUtils, TimestampQuery, TorusGeometry, TorusKnotGeometry, Triangle, TriangleFanDrawMode, TriangleStripDrawMode, TrianglesDrawMode, TubeGeometry, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, Uint8BufferAttribute, Uint8ClampedBufferAttribute, Uniform, UniformsGroup, UniformsUtils, UnsignedByteType, UnsignedInt248Type, UnsignedInt5999Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, VSMShadowMap, Vector2, Vector3, Vector4, VectorKeyframeTrack, VideoFrameTexture, VideoTexture, WebGL3DRenderTarget, WebGLArrayRenderTarget, WebGLCoordinateSystem, WebGLCubeRenderTarget, WebGLRenderTarget, WebGPUCoordinateSystem, WebXRController, WireframeGeometry, WrapAroundEnding, ZeroCurvatureEnding, ZeroFactor, ZeroSlopeEnding, ZeroStencilOp, arrayNeedsUint32, cloneUniforms, createCanvasElement, createElementNS, getByteLength, getUnlitUniformColorSpace, mergeUniforms, probeAsync, toNormalizedProjectionMatrix, toReversedProjectionMatrix, warnOnce };
+export { ACESFilmicToneMapping, AddEquation, AddOperation, AdditiveAnimationBlendMode, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AnimationAction, AnimationClip, AnimationLoader, AnimationMixer, AnimationObjectGroup, AnimationUtils, ArcCurve, ArrayCamera, ArrowHelper, AttachedBindMode, Audio, AudioAnalyser, AudioContext, AudioListener, AudioLoader, AxesHelper, BackSide, BasicDepthPacking, BasicShadowMap, BatchedMesh, Bone, BooleanKeyframeTrack, Box2, Box3, Box3Helper, BoxGeometry, BoxHelper, BufferAttribute, BufferGeometry, BufferGeometryLoader, ByteType, Cache, Camera, CameraHelper, CanvasTexture, CapsuleGeometry, CatmullRomCurve3, CineonToneMapping, CircleGeometry, ClampToEdgeWrapping, Clock, Color, ColorKeyframeTrack, ColorManagement, CompressedArrayTexture, CompressedCubeTexture, CompressedTexture, CompressedTextureLoader, ConeGeometry, ConstantAlphaFactor, ConstantColorFactor, Controls, CubeCamera, CubeDepthTexture, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureLoader, CubeUVReflectionMapping, CubicBezierCurve, CubicBezierCurve3, CubicInterpolant, CullFaceBack, CullFaceFront, CullFaceFrontBack, CullFaceNone, Curve, CurvePath, CustomBlending, CustomToneMapping, CylinderGeometry, Cylindrical, Data3DTexture, DataArrayTexture, DataTexture, DataTextureLoader, DataUtils, DecrementStencilOp, DecrementWrapStencilOp, DefaultLoadingManager, DepthFormat, DepthStencilFormat, DepthTexture, DetachedBindMode, DirectionalLight, DirectionalLightHelper, DiscreteInterpolant, DodecahedronGeometry, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicCopyUsage, DynamicDrawUsage, DynamicReadUsage, EdgesGeometry, EllipseCurve, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, Euler, EventDispatcher, ExternalTexture, ExtrudeGeometry, FileLoader, Float16BufferAttribute, Float32BufferAttribute, FloatType, Fog, FogExp2, FramebufferTexture, FrontSide, Frustum, FrustumArray, GLBufferAttribute, GLSL1, GLSL3, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, GridHelper, Group, HalfFloatType, HemisphereLight, HemisphereLightHelper, IcosahedronGeometry, ImageBitmapLoader, ImageLoader, ImageUtils, IncrementStencilOp, IncrementWrapStencilOp, InstancedBufferAttribute, InstancedBufferGeometry, InstancedInterleavedBuffer, InstancedMesh, Int16BufferAttribute, Int32BufferAttribute, Int8BufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, InterpolateSmooth, InterpolationSamplingMode, InterpolationSamplingType, InvertStencilOp, KeepStencilOp, KeyframeTrack, LOD, LatheGeometry, Layers, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, Light, LightProbe, Line, Line3, LineBasicMaterial, LineCurve, LineCurve3, LineDashedMaterial, LineLoop, LineSegments, LinearFilter, LinearInterpolant, LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoaderUtils, LoadingManager, LoopOnce, LoopPingPong, LoopRepeat, MOUSE, Material, MaterialLoader, MathUtils, Matrix2, Matrix3, Matrix4, MaxEquation, Mesh, MeshBasicMaterial, MeshDepthMaterial, MeshDistanceMaterial, MeshLambertMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipMapLinearFilter, NearestMipMapNearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeutralToneMapping, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoNormalPacking, NoToneMapping, NormalAnimationBlendMode, NormalBlending, NormalGAPacking, NormalRGPacking, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, NumberKeyframeTrack, Object3D, ObjectLoader, ObjectSpaceNormalMap, OctahedronGeometry, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OrthographicCamera, PCFShadowMap, PCFSoftShadowMap, Path, PerspectiveCamera, Plane, PlaneGeometry, PlaneHelper, PointLight, PointLightHelper, Points, PointsMaterial, PolarGridHelper, PolyhedronGeometry, PositionalAudio, PropertyBinding, PropertyMixer, QuadraticBezierCurve, QuadraticBezierCurve3, Quaternion, QuaternionKeyframeTrack, QuaternionLinearInterpolant, R11_EAC_Format, RAD2DEG, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RG11_EAC_Format, RGBADepthPacking, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGBDepthPacking, RGBFormat, RGBIntegerFormat, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGDepthPacking, RGFormat, RGIntegerFormat, RawShaderMaterial, Ray, Raycaster, RectAreaLight, RedFormat, RedIntegerFormat, ReinhardToneMapping, RenderTarget, RenderTarget3D, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RingGeometry, SIGNED_R11_EAC_Format, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SIGNED_RG11_EAC_Format, SRGBColorSpace, SRGBTransfer, Scene, ShaderMaterial, ShadowMaterial, Shape, ShapeGeometry, ShapePath, ShapeUtils, ShortType, Skeleton, SkeletonHelper, SkinnedMesh, Source, Sphere, SphereGeometry, Spherical, SphericalHarmonics3, SplineCurve, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StaticCopyUsage, StaticDrawUsage, StaticReadUsage, StereoCamera, StreamCopyUsage, StreamDrawUsage, StreamReadUsage, StringKeyframeTrack, SubtractEquation, SubtractiveBlending, TOUCH, TangentSpaceNormalMap, TetrahedronGeometry, Texture, TextureLoader, TextureUtils, Timer, TimestampQuery, TorusGeometry, TorusKnotGeometry, Triangle, TriangleFanDrawMode, TriangleStripDrawMode, TrianglesDrawMode, TubeGeometry, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, Uint8BufferAttribute, Uint8ClampedBufferAttribute, Uniform, UniformsGroup, UniformsUtils, UnsignedByteType, UnsignedInt101111Type, UnsignedInt248Type, UnsignedInt5999Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, VSMShadowMap, Vector2, Vector3, Vector4, VectorKeyframeTrack, VideoFrameTexture, VideoTexture, WebGL3DRenderTarget, WebGLArrayRenderTarget, WebGLCoordinateSystem, WebGLCubeRenderTarget, WebGLRenderTarget, WebGPUCoordinateSystem, WebXRController, WireframeGeometry, WrapAroundEnding, ZeroCurvatureEnding, ZeroFactor, ZeroSlopeEnding, ZeroStencilOp, arrayNeedsUint32, cloneUniforms, createCanvasElement, createElementNS, error, getByteLength, getConsoleFunction, getUnlitUniformColorSpace, isTypedArray, log, mergeUniforms, probeAsync, setConsoleFunction, warn, warnOnce };

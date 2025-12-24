@@ -4,6 +4,8 @@ div.inspector_card
 {
   height: 100%;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 div.inspector_card.list
@@ -22,6 +24,7 @@ div.inspector_properties
   height: 100%;
   padding: 2px;
   box-sizing: border-box;
+  overflow: auto;
 }
 
 div.inspector_properties .tabbed_pane > .body

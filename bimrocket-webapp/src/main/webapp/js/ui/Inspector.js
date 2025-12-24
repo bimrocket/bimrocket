@@ -253,7 +253,7 @@ class Inspector extends Panel
         }
         else
         {
-          this.showProperties(this.object);
+          this.showProperties(this.object, true);
         }
       }
     });
@@ -296,7 +296,7 @@ class Inspector extends Panel
 
     this.listCardElem.innerHTML = "";
 
-    this.objects = objects;
+    this.objects = [...objects];
     this.objectIndex = objects.length >= 0 ? 0 : -1;
 
     const infoElem = document.createElement("div");
@@ -307,21 +307,19 @@ class Inspector extends Panel
 
     const selectionTree = new Tree(this.listCardElem);
 
-    for (let i = 0; i < objects.length; i++)
+    for (let object of objects)
     {
-      let object = objects[i];
       let label = object.name || object.id;
       let className = ObjectUtils.getObjectClassNames(object);
-      selectionTree.addNode(label,
-        event =>
-        {
-          this.showProperties(object);
-          this.centerObject();
-        }, className);
+      selectionTree.addNode(label, event =>
+      {
+        this.showProperties(object);
+        this.centerObject();
+      }, className);
     }
   }
 
-  showProperties(object)
+  showProperties(object, forceUpdate = false)
   {
     if (this.edition.object) return; // edition in progress
 
@@ -341,17 +339,20 @@ class Inspector extends Panel
 
     this.showCard("object");
 
-    this.populateObjectTab();
-    this.populateGeometryTab();
-    this.populateMaterialTab();
-    this.populateBuilderTab();
-    this.populateFormulasTab();
-    this.populateUserDataTab();
-    this.populateLinksTab();
-    this.populateControllersTab();
-    this.populateFeaturedTab();
+    if (objectChanged || forceUpdate)
+    {
+      this.populateObjectTab();
+      this.populateGeometryTab();
+      this.populateMaterialTab();
+      this.populateBuilderTab();
+      this.populateFormulasTab();
+      this.populateUserDataTab();
+      this.populateLinksTab();
+      this.populateControllersTab();
+      this.populateFeaturedTab();
 
-    this.application.i18n.updateTree(this.objectCardElem);
+      this.application.i18n.updateTree(this.objectCardElem);
+    }
   }
 
   populateObjectTab()
@@ -578,7 +579,17 @@ class Inspector extends Panel
         let linkPath = ["links", linkName];
 
         let linkPropsElem = this.createSection(linksListElem, linkPath);
-        this.createReadOnlyProperty(linkPropsElem, links, linkPath, linkName);
+
+        this.createProperty(linkPropsElem, links, linkPath, linkName,
+          links[linkName], null, null, "object");
+
+        let index = linkName.lastIndexOf("_");
+        if (index !== -1)
+        {
+          // do not show properties for indexed links (link_0, link_1, ...)
+          if (typeof parseInt(linkName.substring(index + 1)) === "number")
+            continue;
+        }
         this.populateUserData(linkPropsElem, link, linkPath);
       }
     }
@@ -848,7 +859,7 @@ class Inspector extends Panel
   };
 
   createProperty(parentElem, object, objectPath, propertyName, propertyValue,
-    renderer = null, editor = null)
+    renderer = null, editor = null, propertyLabel = propertyName)
   {
     renderer = renderer || this.getRenderer(propertyValue);
     if (renderer)
@@ -865,7 +876,7 @@ class Inspector extends Panel
       itemElem.appendChild(propElem);
 
       let labelElem = document.createElement("span");
-      labelElem.textContent = propertyName + ':';
+      labelElem.textContent = propertyLabel + ':';
       labelElem.className = "label";
       labelElem.tabIndex = 0;
       propElem.appendChild(labelElem);
@@ -1423,11 +1434,24 @@ class Object3DRenderer extends PropertyRenderer
     valueElem.href = "#";
     valueElem.className = "value";
     valueElem.textContent = object.name || "object-" + object.id;
-    valueElem.addEventListener("click",
-      () => {
-        this.inspector.propertiesTabbedPane.showTab("object");
-        this.inspector.application.selection.set(object);
-      });
+    valueElem.addEventListener("click", event =>
+    {
+      event.preventDefault();
+      const inspector = this.inspector;
+      const application = inspector.application;
+      const previousObject = inspector.object;
+
+      application.userSelectObjects([object], event);
+
+      if (inspector.objects.length > 1)
+      {
+        if (inspector.objects.includes(previousObject))
+        {
+          // keep previous object properties visible
+          inspector.showProperties(previousObject);
+        }
+      }
+    });
     return valueElem;
   }
 }

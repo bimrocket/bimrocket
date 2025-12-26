@@ -20,11 +20,13 @@ class ChatGPTDialog extends Dialog
 
     this.editorView = this.addCodeEditor("editor",
       "label.chatgpt_setup", JSON.stringify(setup, null, 2),
-      { "language" : "json", "height" : "calc(100% - 30px)" });
+      { "language" : "json", className : "flex_grow_1"  });
 
     this.errorElem = document.createElement("div");
-    this.errorElem.className = "error";
+    this.errorElem.className = "error hidden";
     this.bodyElem.appendChild(this.errorElem);
+    this.bodyElem.classList.add("flex");
+    this.bodyElem.classList.add("flex_column");
 
     this.addButton("accept", "button.accept", () =>
     {
@@ -38,6 +40,12 @@ class ChatGPTDialog extends Dialog
   onShow()
   {
     this.editorView.focus();
+    this.errorElem.classList.add("hidden");
+  }
+
+  onHide()
+  {
+    this.editorView.destroy();
   }
 
   onAccept()
@@ -51,6 +59,7 @@ class ChatGPTDialog extends Dialog
     }
     catch (ex)
     {
+      this.errorElem.classList.remove("hidden");
       this.errorElem.textContent = ex;
     }
   }

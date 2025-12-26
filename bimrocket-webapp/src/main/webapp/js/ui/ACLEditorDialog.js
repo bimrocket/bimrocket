@@ -40,8 +40,6 @@ class ACLEditorDialog extends Dialog
   createButtons()
   {
     const application = this.application;
-    const buttonContainer = document.createElement("div");
-    this.bodyElem.appendChild(buttonContainer);
 
     const saveAction = () =>
     {
@@ -148,6 +146,11 @@ class ACLEditorDialog extends Dialog
           () => this.load());
       }
     });
+  }
+
+  onHide()
+  {
+    this.editorView.destroy();
   }
 }
 

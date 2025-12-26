@@ -21,11 +21,13 @@ class PropertiesDialog extends Dialog
     let json = JSON.stringify(object.userData, null, 2);
     this.editorView = this.addCodeEditor("editor",
       "label.properties", json,
-      { "language" : "json", "height" : "calc(100% - 50px" });
+      { "language" : "json", className : "flex_grow_1" });
 
     this.errorElem = document.createElement("div");
-    this.errorElem.className = "error";
+    this.errorElem.className = "error hidden";
     this.bodyElem.appendChild(this.errorElem);
+    this.bodyElem.classList.add("flex");
+    this.bodyElem.classList.add("flex_column");
 
     this.addButton("accept", "button.accept", () =>
     {
@@ -39,6 +41,12 @@ class PropertiesDialog extends Dialog
   onShow()
   {
     this.editorView.focus();
+    this.errorElem.classList.add("hidden");
+  }
+
+  onHide()
+  {
+    this.editorView.destroy();
   }
 
   onAccept()
@@ -53,6 +61,7 @@ class PropertiesDialog extends Dialog
     }
     catch (ex)
     {
+      this.errorElem.classList.remove("hidden");
       this.errorElem.textContent = String(ex);
     }
   }

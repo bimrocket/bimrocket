@@ -384,6 +384,7 @@ class SolarSimulatorTool extends Tool
       progressBar.progress = undefined;
       progressBar.message = "";
 
+      this.startExposureButton.style.display = "";
       this.stopExposureButton.style.display = "none";
 
       if (shadowGenerator.interrupted) return;
@@ -440,6 +441,7 @@ class SolarSimulatorTool extends Tool
     progressBar.visible = true;
     progressBar.progress = undefined;
 
+    this.startExposureButton.style.display = "none";
     this.stopExposureButton.style.display = "";
 
     shadowGenerator.start();

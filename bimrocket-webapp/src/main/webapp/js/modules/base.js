@@ -488,9 +488,11 @@ export function load(application)
 
   const fileMenu = menuBar.addMenu("menu.file");
   fileMenu.addMenuItem(newSceneTool);
+  fileMenu.addSeparator();
   fileMenu.addMenuItem(cloudExplorerTool);
   fileMenu.addMenuItem(openLocalTool);
   fileMenu.addMenuItem(saveLocalTool);
+  fileMenu.addSeparator();
   fileMenu.addMenuItem(printTool);
   fileMenu.addMenuItem(svgExporterTool);
 
@@ -500,30 +502,33 @@ export function load(application)
   editMenu.addMenuItem(pasteTool);
   editMenu.addMenuItem(removeTool);
   editMenu.addMenuItem(linkTool);
+  editMenu.addSeparator();
   editMenu.addMenuItem(optionsTool);
 
   const viewMenu = menuBar.addMenu("menu.view");
   viewMenu.addMenuItem(orbitTool);
   viewMenu.addMenuItem(flyTool);
   viewMenu.addMenuItem(zoomAllTool);
+  viewMenu.addMenuItem(centerSelectionTool);
+  viewMenu.addMenuItem(focusSelectionTool);
   const standardViewMenu = viewMenu.addMenu("menu.view.standard_view");
   standardViewMenu.addMenuItem(topViewTool);
   standardViewMenu.addMenuItem(frontViewTool);
   standardViewMenu.addMenuItem(backViewTool);
   standardViewMenu.addMenuItem(leftViewTool);
   standardViewMenu.addMenuItem(rightViewTool);
-  viewMenu.addMenuItem(showTool);
-  viewMenu.addMenuItem(hideTool);
+  viewMenu.addSeparator();
   const styleMenu = viewMenu.addMenu("menu.view.style");
   styleMenu.addMenuItem(edgesStyleTool);
   styleMenu.addMenuItem(facesStyleTool);
   styleMenu.addMenuItem(facesEdgesStyleTool);
   styleMenu.addMenuItem(hiddenStyleTool);
-  viewMenu.addMenuItem(centerSelectionTool);
-  viewMenu.addMenuItem(focusSelectionTool);
   const projectionMenu = viewMenu.addMenu("menu.view.projection");
   projectionMenu.addMenuItem(perspectiveTool);
   projectionMenu.addMenuItem(orthographicTool);
+  viewMenu.addMenuItem(showTool);
+  viewMenu.addMenuItem(hideTool);
+  viewMenu.addSeparator();
   viewMenu.addMenuItem(activateCameraTool);
   viewMenu.addMenuItem(sectionTool);
   viewMenu.addMenuItem(fullscreenTool);
@@ -536,7 +541,9 @@ export function load(application)
   const selectContextMenu = selectMenu.addMenu("menu.select_context");
   selectContextMenu.addMenuItem(selectParentTool);
   selectContextMenu.addMenuItem(selectReprTool);
+  selectMenu.addSeparator();
   selectMenu.addMenuItem(exportSelectionTool);
+  selectMenu.addSeparator();
   selectMenu.addMenuItem(selectFacesTool);
 
   const designMenu = menuBar.addMenu("menu.design");
@@ -579,14 +586,15 @@ export function load(application)
   transformMenu.addMenuItem(rotateTool);
   transformMenu.addMenuItem(scaleTool);
   transformMenu.addMenuItem(placeTool);
+  designMenu.addSeparator();
+  designMenu.addMenuItem(drawTool);
+  designMenu.addMenuItem(extrudeTool);
+  designMenu.addMenuItem(revolveTool);
   const booleanOperationMenu = designMenu.addMenu("menu.design.boolean_operation");
   booleanOperationMenu.addMenuItem(unionTool);
   booleanOperationMenu.addMenuItem(intersectionTool);
   booleanOperationMenu.addMenuItem(subtractionTool);
-  designMenu.addMenuItem(drawTool);
-  designMenu.addMenuItem(extrudeTool);
-  designMenu.addMenuItem(revolveTool);
-  designMenu.addMenuItem(decomposeTool);
+  designMenu.addSeparator();
   const geometryMenu = designMenu.addMenu("menu.design.geometry");
   geometryMenu.addMenuItem(inspectGeometryTool);
   geometryMenu.addMenuItem(meshToSolidTool);
@@ -596,8 +604,10 @@ export function load(application)
   geometryMenu.addMenuItem(resetMatrixTool);
   geometryMenu.addMenuItem(smoothEdgesTool);
   geometryMenu.addMenuItem(reduceCoordinatesTool);
-  designMenu.addMenuItem(paintTool);
   designMenu.addMenuItem(rebuildTool);
+  designMenu.addMenuItem(decomposeTool);
+  designMenu.addMenuItem(paintTool);
+  designMenu.addSeparator();
   designMenu.addMenuItem(scriptTool);
 
   const analysisMenu = menuBar.addMenu("menu.analysis");

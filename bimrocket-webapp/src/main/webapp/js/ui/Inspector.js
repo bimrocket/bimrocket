@@ -9,7 +9,7 @@ import { Tree } from "./Tree.js";
 import { Dialog } from "./Dialog.js";
 import { Action } from "./Action.js";
 import { TabbedPane } from "./TabbedPane.js";
-import { ContextMenu } from "./ContextMenu.js";
+import { ContextMenu } from "./Menu.js";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 import { Application } from "./Application.js";
 import { Solid } from "../core/Solid.js";
@@ -46,7 +46,7 @@ class Inspector extends Panel
 
     this.renderers = {};
     this.editors = {};
-    this.contextActions = [];
+    this.contextMenu = new ContextMenu(this.application);
 
     this.addRenderer(StringRenderer);
     this.addRenderer(NumberRenderer);
@@ -211,8 +211,11 @@ class Inspector extends Panel
       this.showContextMenu(event, ["controllers"]);
     });
 
-    this.featuredTabElem.addEventListener("contextmenu",
-      event => event.preventDefault());
+    this.featuredTabElem.addEventListener("contextmenu", event =>
+    {
+      event => event.preventDefault();
+      this.showContextMenu(event, ["featured"]);
+    });
 
     this.objectIndex = -1;
 
@@ -260,9 +263,6 @@ class Inspector extends Panel
     this.title = "tool.inspector.label";
 
     this.loadFeaturedProperties();
-
-    this.contextMenu = new ContextMenu(this.application);
-    this.contextMenu.actions = this.contextActions;
   }
 
   showCard(cardName)
@@ -1048,7 +1048,7 @@ class Inspector extends Panel
 
   addContextAction(contextActionClass)
   {
-    this.contextActions.push(new contextActionClass(this));
+    this.contextMenu.addMenuItem(new contextActionClass(this));
   }
 
   getRenderer(value)
@@ -2487,6 +2487,7 @@ class RemoveAllFeaturedAction extends FeaturedAction
   isEnabled()
   {
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    console.info(tabName);
     return tabName === "featured";
   }
 

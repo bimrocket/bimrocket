@@ -129,28 +129,9 @@ class Application
 
     /* create sub elements */
 
-    const logoPanelElem = document.body.querySelector(".logo_panel");
-    this.logoPanel = logoPanelElem;
-    logoPanelElem.addEventListener("click", () => this.hideLogo());
-
-    const bigLogoImage = logoPanelElem.querySelector("img");
-    bigLogoImage.title = Application.NAME;
-    bigLogoImage.alt = Application.NAME;
-
     const headerElem = document.createElement("header");
     this.headerElem = headerElem;
     element.appendChild(headerElem);
-
-    const logoLink = document.createElement("a");
-    logoLink.className = "logo_link";
-    logoLink.addEventListener("click", event => this.showLogo());
-    headerElem.appendChild(logoLink);
-
-    const logoImage = document.createElement("img");
-    logoImage.src = "css/images/bimrocket.svg";
-    logoImage.title = Application.NAME;
-    logoImage.alt = Application.NAME;
-    logoLink.appendChild(logoImage);
 
     const toolBarElem = document.createElement("div");
     this.toolBarElem = toolBarElem;
@@ -167,6 +148,36 @@ class Application
     const progressBarElem = document.createElement("div");
     progressBarElem.className = "progress_bar";
     element.appendChild(progressBarElem);
+
+    // logo
+    const logoPanelElem = document.body.querySelector(".logo_panel");
+    this.logoPanel = logoPanelElem;
+    logoPanelElem.addEventListener("click", event =>
+    {
+      event.preventDefault();
+      this.hideLogo();
+    });
+    logoPanelElem.addEventListener("keydown", event =>
+    {
+      event.preventDefault();
+      this.hideLogo();
+    });
+
+    const bigLogoImage = logoPanelElem.querySelector("img");
+    bigLogoImage.title = Application.NAME;
+    bigLogoImage.alt = Application.NAME;
+
+    const logoButton = document.createElement("button");
+    this.logoButton = logoButton;
+    logoButton.className = "logo_button";
+    logoButton.addEventListener("click", event => this.showLogo());
+    headerElem.appendChild(logoButton);
+
+    const logoImage = document.createElement("img");
+    logoImage.src = "css/images/bimrocket.svg";
+    logoImage.title = Application.NAME;
+    logoImage.alt = Application.NAME;
+    logoButton.appendChild(logoImage);
 
     const setup = this.setup;
 
@@ -1953,6 +1964,7 @@ class Application
       {
         this.logoPanel.classList.remove("loading");
         this.logoPanel.querySelector(".info").innerHTML = "";
+        this.menuBar.updadeTabindex();
         this.hideLogo();
         this.loadModelFromUrl();
       };
@@ -1965,6 +1977,8 @@ class Application
     this.logoPanel.querySelector(".info").textContent = Application.VERSION;
     this.logoPanel.classList.add("show");
     this.logoPanel.classList.remove("hide");
+    this.logoPanel.setAttribute("tabindex", 0);
+    this.logoPanel.focus();
   }
 
   hideLogo()
@@ -1973,6 +1987,7 @@ class Application
     {
       this.logoPanel.classList.add("hide");
       this.logoPanel.classList.remove("show");
+      this.logoPanel.setAttribute("tabindex", -1);
     }
   }
 

@@ -37,15 +37,12 @@ class IFCDBPanel extends Panel
     this.inputFile = null;
     this.processing = false;
 
-    this.contextActions = [];
+    this.contextMenu = new ContextMenu(this.application);
 
     this.addContextAction(OpenModelAction);
     this.addContextAction(EditModelAction);
     this.addContextAction(DeleteModelAction);
     this.addContextAction(DownloadModelAction);
-
-    this.contextMenu = new ContextMenu(this.application);
-    this.contextMenu.actions = this.contextActions;
 
     // main panel
     this.mainPanelElem = document.createElement("div");
@@ -243,7 +240,7 @@ class IFCDBPanel extends Panel
 
   addContextAction(contextActionClass)
   {
-    this.contextActions.push(new contextActionClass(this));
+    this.contextMenu.addMenuItem(new contextActionClass(this));
   }
 
   onShow()

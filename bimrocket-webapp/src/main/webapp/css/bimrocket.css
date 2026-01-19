@@ -3,14 +3,11 @@
     Author     : realor
 */
 
-.container
+:root
 {
-  position: absolute;
-  top:68px;
-  bottom:0;
-  left:0;
-  right:0;
-  user-select: none;
+  --header-height: 32px;
+  --toolbar-height: 40px;
+  --header-background: #202020;
 }
 
 body *
@@ -25,39 +22,61 @@ body input, textarea, table *
   user-select: text;
 }
 
-@keyframes flash
+header
 {
-  0% {
-    background-color: #FFF2;
-    box-shadow: 32px 0 #FFF2, -32px 0 #FFF;
-  }
-  50% {
-    background-color: #FFF;
-    box-shadow: 32px 0 #FFF2, -32px 0 #FFF2;
-  }
-  100% {
-    background-color: #FFF2;
-    box-shadow: 32px 0 #FFF, -32px 0 #FFF2;
-  }
+  display: flex;
+  flex-direction: row;
+  height: var(--header-height);
+  align-items: stretch;
+  background-color: var(--header-background);
 }
 
-@keyframes fade_out_logo
+header > button
 {
-  0% {opacity: 1}
-  100% {opacity: 0; visibility: hidden; }
+  color: white;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  appearance: none;
+  box-shadow: none;
+  transition: none;
+  margin: 0;
+  flex-grow: 0;
+  font-size: 14px;
 }
 
-@keyframes fade_in_logo
+header > button:hover,
+header > button:focus
 {
-  0% {opacity: 0; visibility: visible; }
-  100% {opacity: 1; }
+  background-color: #202020;
+  border: none;
+  box-shadow: none;
 }
 
-@keyframes text_fade
+header > button.logo_button
 {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
+  background-color: #B00000;
+  display: flex;
+  width: 140px;
+  transition: background-color 0.3s;
+  align-items: center;
+  justify-content: center;
+}
+
+header > button.logo_button:hover
+{
+  background-color: #A00000;
+}
+
+header > button:focus
+{
+  border-style: dotted;
+  border-color: white;
+  border-width: 1px;
+  outline: none;
+  transition: all 0.4s ease;
+  box-shadow: none;
 }
 
 .logo_panel
@@ -74,6 +93,40 @@ body input, textarea, table *
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+menu.menubar
+{
+  position: inherit;
+  flex-grow: 0;
+  height: 100%;
+}
+
+menu.menubar > li > button
+{
+  height: var(--header-height);
+}
+
+.toolbar
+{
+  position:absolute;
+  top: var(--header-height);
+  left:0px;
+  right:0px;
+  height: 40px;
+  text-align: left;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}
+
+.container
+{
+  position: absolute;
+  top:calc(var(--header-height) + var(--toolbar-height));
+  bottom:0;
+  left:0;
+  right:0;
+  user-select: none;
 }
 
 .logo_panel > img
@@ -113,45 +166,37 @@ body input, textarea, table *
   animation-fill-mode: forwards;
 }
 
-header > a.logo_link
+@keyframes flash
 {
-  background-color: #B00000;
-  height: 28px;
-  display: inline-block;
-  width: 140px;
-  padding-top: 0;
-  text-align: center;
-  cursor: pointer;
-  position: absolute;
-  z-index: 8000;
-  left: 0;
-  top: 0;
-  user-select: none;
+  0% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF;
+  }
+  50% {
+    background-color: #FFF;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF2;
+  }
+  100% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF, -32px 0 #FFF2;
+  }
 }
 
-header > a.logo_link > img
+@keyframes fade_out_logo
 {
-  height: 28px;
+  0% {opacity: 1}
+  100% {opacity: 0; visibility: hidden; }
 }
 
-header nav
+@keyframes fade_in_logo
 {
-  position: absolute;
-  top: 0;
-  left: 140px;
-  right:0;
-  bottom:0;
-  background-color: #254441;
+  0% {opacity: 0; visibility: visible; }
+  100% {opacity: 1; }
 }
 
-.toolbar
+@keyframes text_fade
 {
-  position:absolute;
-  top:28px;
-  left:0px;
-  right:0px;
-  height: 40px;
-  text-align: left;
-  background-color: #f0f0f0;
-  overflow: hidden;
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }

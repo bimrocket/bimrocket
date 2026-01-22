@@ -684,5 +684,8 @@ export const translations =
   "controller.KnobController" : "Mostra una perilla.",
   "controller.TranslationController" : "Desplaça un objecte.",
   "controller.ScriptController" : "Executa un programa en llenguatge JavaScript.",
-  "controller.RestPollController" : "Crida un servei REST periòdicament."
+  "controller.RestPollController" : "Crida un servei REST periòdicament.",
+
+  "drop.text" : "Arrossegueu un fitxer IFC aquí",
+  "drop.error.invalid_files" : "Format de fitxer no vàlid. Només s'admeten fitxers IFC."
 };

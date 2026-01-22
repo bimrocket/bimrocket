@@ -684,5 +684,8 @@ export const translations =
   "controller.KnobController" : "Shows a knob.",
   "controller.TranslationController" : "Translates an object.",
   "controller.ScriptController" : "Executes a program in JavaScript language.",
-  "controller.RestPollController" : "Polls a REST service."
+  "controller.RestPollController" : "Polls a REST service.",
+
+  "drop.text" : "Drop IFC file here",
+  "drop.error.invalid_files" : "Invalid file format. Only IFC files are supported."
 };

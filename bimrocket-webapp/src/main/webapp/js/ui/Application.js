@@ -39,6 +39,7 @@ import { ObjectBatcher } from "../utils/ObjectBatcher.js";
 import { I18N } from "../i18n/I18N.js";
 import WebGL from "../utils/WebGL.js";
 import { Environment } from "../Environment.js";
+import { DragDropHandler } from "./DragDropHandler.js";
 import * as THREE from "three";
 
 class Application
@@ -436,6 +437,9 @@ class Application
     };
 
     animate();
+
+    this.dragDropHandler = new DragDropHandler(this);
+
     this.loadModules();
   }
 

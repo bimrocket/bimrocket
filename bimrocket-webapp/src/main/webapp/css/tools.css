@@ -3,6 +3,98 @@
     Author     : realor
 */
 
+/* Drag & Drop */
+
+.drop_overlay
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  transition: background-color 0.2s ease;
+}
+
+.drop_overlay.outside
+{
+  background-color: rgba(200, 0, 0, 0.3);
+  cursor: not-allowed;
+}
+
+.drop_overlay.inside
+{
+  background-color: rgba(0, 0, 0, 0.7);
+  cursor: copy;
+}
+
+.drop_overlay > .drop_message
+{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.drop_overlay.outside > .drop_message > .drop_icon
+{
+  width: 80px;
+  height: 80px;
+  border: 4px dashed #ff6666;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 100, 100, 0.2);
+}
+
+.drop_overlay.inside > .drop_message > .drop_icon
+{
+  width: 80px;
+  height: 80px;
+  border: 4px dashed #66ff66;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(100, 255, 100, 0.2);
+}
+
+.drop_overlay > .drop_message > .drop_icon::before
+{
+  content: "+";
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+}
+
+.drop_overlay.outside > .drop_message > .drop_icon::before
+{
+  content: "✕";
+  color: #ff6666;
+}
+
+.drop_overlay.inside > .drop_message > .drop_icon::before
+{
+  content: "+";
+  color: #66ff66;
+}
+
+.drop_overlay > .drop_message > .drop_text
+{
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 .service_panel
 {
   display: flex;

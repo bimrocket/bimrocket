@@ -684,5 +684,8 @@ export const translations =
   "controller.KnobController" : "Muestra una perilla.",
   "controller.TranslationController" : "Desplaza un objeto.",
   "controller.ScriptController" : "Ejecuta un programa en lenguaje JavaScript.",
-  "controller.RestPollController" : "Llama un servicio REST periódicamente."
+  "controller.RestPollController" : "Llama un servicio REST periódicamente.",
+
+  "drop.text" : "Arrastra un archivo IFC aquí",
+  "drop.error.invalid_files" : "Formato de archivo no válido. Solo se admiten archivos IFC."
 };

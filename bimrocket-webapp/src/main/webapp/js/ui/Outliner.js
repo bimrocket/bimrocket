@@ -6,8 +6,8 @@
 
 import { Panel } from "./Panel.js";
 import { Tree } from "./Tree.js";
+import { ContextMenu } from "./Menu.js";
 import { ObjectUtils } from "../utils/ObjectUtils.js";
-
 import * as THREE from "three";
 
 class Outliner extends Panel
@@ -19,11 +19,32 @@ class Outliner extends Panel
     this.position = "right";
     this.title = "tool.outliner.label";
 
-    this.tree = new Tree(this.bodyElem);
-    this.tree.rootsElem.className = "tree outliner";
-
     this.map = new Map();
     this.autoScroll = true;
+
+    this.contextMenu = new ContextMenu(application);
+
+    this.tree = new Tree(this.bodyElem);
+    this.tree.rootsElem.className = "tree outliner";
+    this.tree.addEventListener("contextmenu", event =>
+    {
+      const originalEvent = event.originalEvent;
+      const object = event.node?.value;
+      if (object)
+      {
+        if (!application.selection.contains(object))
+        {
+          this.autoScroll = false;
+          application.selection.set(object);
+        }
+        this.contextMenu.show(originalEvent);
+      }
+    });
+
+    this.bodyElem.addEventListener("contextmenu", event =>
+    {
+      event.preventDefault();
+    });
 
     this.tree.getNodeLabel = object =>
     {

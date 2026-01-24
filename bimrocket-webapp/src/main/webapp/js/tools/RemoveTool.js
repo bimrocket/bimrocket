@@ -20,6 +20,11 @@ class RemoveTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    return this.application.isCopyCutRemoveEnabled();
+  }
+
   execute()
   {
     const application = this.application;

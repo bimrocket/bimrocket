@@ -2487,7 +2487,6 @@ class RemoveAllFeaturedAction extends FeaturedAction
   isEnabled()
   {
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
-    console.info(tabName);
     return tabName === "featured";
   }
 

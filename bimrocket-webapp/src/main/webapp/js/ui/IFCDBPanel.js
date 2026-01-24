@@ -15,7 +15,7 @@ import { TabbedPane } from "./TabbedPane.js";
 import { Tree } from "./Tree.js";
 import { Toast } from "./Toast.js";
 import { Action } from "./Action.js";
-import { ContextMenu } from "./ContextMenu.js";
+import { ContextMenu } from "./Menu.js";
 import { WebUtils } from "../utils/WebUtils.js";
 import { I18N } from "../i18n/I18N.js";
 import { ServiceManager } from "../io/ServiceManager.js";

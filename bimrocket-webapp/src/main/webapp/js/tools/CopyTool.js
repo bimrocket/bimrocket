@@ -21,6 +21,11 @@ class CopyTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    return this.application.isCopyCutRemoveEnabled();
+  }
+
   execute()
   {
     this.application.copyObjects();

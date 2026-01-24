@@ -1247,7 +1247,7 @@ class ContextMenu extends MenuItemContainer
   {
     console.warn("ContextMenu.actions is deprecated. Add actions to menuItems instead.");
     const menuItems = this.menuItems;
-    if (menuItems.length == 0)
+    if (menuItems.length === 0)
     {
       for (let action of actions)
       {

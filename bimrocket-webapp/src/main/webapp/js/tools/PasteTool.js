@@ -20,6 +20,11 @@ class PasteTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    return this.application.isPasteEnabled();
+  }
+
   execute()
   {
     this.application.pasteObjects();

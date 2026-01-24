@@ -669,6 +669,26 @@ export function load(application)
   toolBar.addToolButton(selectByQRCodeTool);
   toolBar.addToolButton(chatGPTTool);
 
+  const outlinerMenu = outlinerTool.panel.contextMenu;
+  outlinerMenu.addMenuItem(showTool);
+  outlinerMenu.addMenuItem(hideTool);
+  outlinerMenu.addSeparator();
+  outlinerMenu.addMenuItem(centerSelectionTool);
+  outlinerMenu.addMenuItem(focusSelectionTool);
+  outlinerMenu.addSeparator();
+  outlinerMenu.addMenuItem(copyTool);
+  outlinerMenu.addMenuItem(cutTool);
+  outlinerMenu.addMenuItem(pasteTool);
+  outlinerMenu.addSeparator();
+  outlinerMenu.addMenuItem(removeTool);
+  outlinerMenu.addSeparator();
+  const outlinerAddMenu = outlinerMenu.addMenu("menu.design.add");
+  outlinerAddMenu.addMenuItem(addGroupTool);
+  outlinerAddMenu.addMenuItem(addBoxTool);
+  outlinerAddMenu.addMenuItem(addCylinderTool);
+  outlinerAddMenu.addMenuItem(addObject3DTool);
+  outlinerAddMenu.addMenuItem(addText2DTool);
+
   // restore services
   application.restoreServices("model");
   application.restoreServices("script");

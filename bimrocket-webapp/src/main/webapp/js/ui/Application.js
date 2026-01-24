@@ -701,6 +701,7 @@ class Application
   render()
   {
     const clippingEnabled = this.clippingPlane !== null;
+    const baseObjectVisible = this.baseObject.visible;
 
     if (this.batchedGroup)
     {
@@ -718,7 +719,7 @@ class Application
       this.renderer.render(this.scene, this.camera);
     }
 
-    this.baseObject.visible = true;
+    this.baseObject.visible = baseObjectVisible;
 
     // css renderer
     this.cssRenderer.render(this.scene, this.camera);
@@ -1595,6 +1596,41 @@ class Application
       this.notifyEventListeners("scene", pasteEvent);
       this.selection.set(...pastedObjects);
     }
+  }
+
+  /**
+   * Indicate if any of the selected objects can be copied, cut or removed.
+   *
+   * @returns {Boolean} - true if any of the selected objects can be
+   * copied, cut or removed, false otherwise.
+   */
+  isCopyCutRemoveEnabled()
+  {
+    const scene = this.scene;
+    let selectedObjects = this.selection.roots;
+    selectedObjects = selectedObjects.filter(
+      root => root !== scene && root.parent !== scene);
+    return selectedObjects.length > 0;
+  }
+
+  /**
+   * Indicates whether copied or cut objects can be pasted.
+   *
+   * @returns {Boolean} - true if paste is enabled, false otherwise.
+   */
+  isPasteEnabled()
+  {
+    const scene = this.scene;
+    const selectedObject = this.selection.object;
+    if (!selectedObject ||
+        selectedObject === scene ||
+        selectedObject.parent === scene &&
+        selectedObject !== this.baseObject) return false;
+
+    let copyObjects = this._copyObjects;
+    let cutObjects = this._cutObjects;
+
+    return copyObjects.length > 0 || cutObjects.length > 0;
   }
 
   notifyObjectsChanged(objects, source = this, type = "nodeChanged",

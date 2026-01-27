@@ -119,6 +119,8 @@ export const translations =
 
   "tool.openlocal.label" : "Abrir del disco local",
   "tool.openlocal.help" : "Abrir del disco local",
+  "tool.openlocal.drop_here" : "Suelta los archivos IFC aquí",
+  "tool.openlocal.no_drop" : "✕ Suelta solo en el canvas",
 
   "tool.savelocal.label" : "Guardar en local",
   "tool.savelocal.help" : "Guardar en local",

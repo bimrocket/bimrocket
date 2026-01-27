@@ -119,6 +119,8 @@ export const translations =
 
   "tool.openlocal.label" : "Obre del disc local",
   "tool.openlocal.help" : "Obre del disc local",
+  "tool.openlocal.drop_here" : "Deixa els fitxers IFC aquí",
+  "tool.openlocal.no_drop" : "✕ Deixa-ho només al canvas",
 
   "tool.savelocal.label" : "Desa en disc local",
   "tool.savelocal.help" : "Desa en disc local",

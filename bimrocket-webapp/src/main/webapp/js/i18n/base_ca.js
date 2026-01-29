@@ -119,6 +119,8 @@ export const translations =
 
   "tool.openlocal.label" : "Obre del disc local",
   "tool.openlocal.help" : "Obre del disc local",
+  "tool.openlocal.drop_here" : "Deixa els fitxers aquí",
+  "tool.openlocal.no_drop" : "✕ Deixa-ho només al canvas",
 
   "tool.savelocal.label" : "Desa en disc local",
   "tool.savelocal.help" : "Desa en disc local",
@@ -653,6 +655,8 @@ export const translations =
   "message.link_created" : "Enllaç creat.",
 
   "message.solar_simulator_select_faces" : "Selecciona la superfície sobre la qual vols calcular l'exposició solar mitjançant l'eina de selecció de cares.",
+
+  "message.file_open_error" : (fileName, error) => `El fitxer ${fileName} no es pot obrir:\n\n${error}`,
 
   "message.edit_acl_success": "Els permisos s'han actualitzat correctament.",
   "message.invalid_privileges": "Hi ha errors en els privilegis introduïts.",

@@ -90,6 +90,7 @@ div.dialog > .header > button.minimize
   flex-grow: 1;
   overflow:auto;
   padding: 6px;
+  white-space: pre-wrap;
 }
 
 .dialog > .footer

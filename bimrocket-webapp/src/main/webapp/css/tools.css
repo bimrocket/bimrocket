@@ -1477,3 +1477,48 @@ div.script_code
   to { width: 24px; }
 }
 
+.drop-indicator,
+.no-drop-indicator
+{
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.drop-indicator .drop-text
+{
+  font-family: Montserrat, Arial;
+  font-size: 14px;
+  color: #404040;
+  background-color: #f0f0f0;
+  padding: 8px 16px;
+  border-radius: 3px;
+  border: 1px solid #ff8080;
+  box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
+}
+
+.no-drop-indicator .no-drop-text
+{
+  font-family: Montserrat, Arial;
+  font-size: 13px;
+  color: #606060;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px;
+  border-radius: 2px;
+  border: 1px solid #c0c0c0;
+  box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
+}
+
+@media all and (max-width : 768px)
+{
+  .drop-indicator,
+  .no-drop-indicator
+  {
+    top: 20%;
+    transform: translate(-50%, -50%);
+  }
+}

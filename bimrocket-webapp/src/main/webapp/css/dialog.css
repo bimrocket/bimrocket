@@ -267,6 +267,7 @@ div.dialog > .header > button:focus
   align-items: center;
   word-break: break-word;
   user-select: text;
+  white-space: pre-wrap;
 }
 
 .dialog .body.confirm span,

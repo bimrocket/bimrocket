@@ -1477,3 +1477,39 @@ div.script_code
   to { width: 24px; }
 }
 
+#container.file_drop
+{
+  outline: 3px dashed red;
+  outline-offset: -3px;
+}
+
+#container .drop_indicator
+{
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  pointer-events: none;
+  color: #404040;
+  background-color: #f0f0f0;
+  padding: 8px 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  border: 1px solid #ff8080;
+  box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.2);
+}
+
+#container .drop_indicator.hidden
+{
+  display: none;
+}
+
+@media all and (max-width : 768px)
+{
+  #container .drop_indicator
+  {
+    top: 20%;
+  }
+}

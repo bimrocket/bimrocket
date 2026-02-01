@@ -119,6 +119,7 @@ export const translations =
 
   "tool.openlocal.label" : "Abrir del disco local",
   "tool.openlocal.help" : "Abrir del disco local",
+  "tool.openlocal.drop_here" : "Suelta los archivos aquí",
 
   "tool.savelocal.label" : "Guardar en local",
   "tool.savelocal.help" : "Guardar en local",
@@ -653,6 +654,8 @@ export const translations =
   "message.link_created" : "Enlace creado.",
 
   "message.solar_simulator_select_faces" : "Selecciona la superficie sobre la que quieres calcular la exposición solar mediante la herramienta de selección de caras.",
+
+  "message.file_open_error" : (fileName, error) => `El fichero ${fileName} no se puede abrir:\n\n${error}`,
 
   "message.edit_acl_success" : "Los permisos se han actualizado correctamente.",
   "message.invalid_privileges": "Hay errores en los privilegios introducidos.",

@@ -119,6 +119,7 @@ export const translations =
 
   "tool.openlocal.label" : "Open from local disk",
   "tool.openlocal.help" : "Open from local disk",
+  "tool.openlocal.drop_here" : "Drop files here",
 
   "tool.savelocal.label" : "Save to local disk",
   "tool.savelocal.help" : "Save to local disk",
@@ -653,6 +654,8 @@ export const translations =
   "message.link_created" : "Link created.",
 
   "message.solar_simulator_select_faces" : "Select the surface for which you want to calculate solar exposure using the face selection tool.",
+
+  "message.file_open_error" : (fileName, error) => `The file ${fileName} cannot be opened:\n\n${error}`,
 
   "message.edit_acl_success": "Permissions were updated successfully.",
   "message.invalid_privileges": "Errors found in the input privileges.",

@@ -134,11 +134,10 @@ class IOManager
 
     try
     {
-      if (!formatName && url)
-      {
-        formatName = this.getFormat(url);
-      }
-      if (!formatName) throw "Can't determinate format";
+      if (!formatName && !url) throw "Can't determinate format";
+
+      formatName = this.getFormat(url);
+      if (!formatName) throw "Unsupported format";
 
       let formatInfo = this.formats[formatName];
 

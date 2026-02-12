@@ -640,37 +640,42 @@ class Inspector extends Panel
   {
     this.featuredTabElem.innerHTML = "";
 
-    const object = this.object;
-    const featured = this.featuredProperties;
+    if (!this.object) return;
 
+    const featured = this.featuredProperties;
     let favListElem = document.createElement("ul");
     favListElem.className = "inspector";
     this.featuredTabElem.appendChild(favListElem);
 
-    const populateGroup = (elem, object, group, path) =>
+    const populateFilteredProperties = (elem, currentObject, group, path) =>
     {
+      if (!currentObject) return;
+  
       for (let name in group)
       {
-        let value = object ? object[name] : undefined;
+        const subPath = [...path, name];
 
         if (group[name] === true)
         {
-          if (value === undefined) value = "?";
-
-          this.createReadOnlyProperty(elem, object,
-            path, name, value);
+          if (Object.hasOwn(currentObject, name))
+          {
+            this.createWriteableProperty(elem, currentObject, subPath, name);
+          }
         }
         else
         {
-          let subPath = [...path, name];
-          let subElem = this.createSection(elem, subPath);
-          let subGroup = group[name];
-          populateGroup(subElem, value, subGroup, subPath);
+          if (currentObject.hasOwnProperty(name))
+          {
+            const subObject = currentObject[name];
+            const subElem = this.createSection(elem, subPath);
+            const subGroup = group[name];
+            populateFilteredProperties(subElem, subObject, subGroup, subPath);
+          }
         }
       }
     };
-
-    populateGroup(favListElem, object, featured, []);
+  
+    populateFilteredProperties(favListElem, this.object, featured, []);
   }
 
   populateUserData(listElem, object, objectPath)

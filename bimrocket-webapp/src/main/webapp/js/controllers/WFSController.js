@@ -240,29 +240,20 @@ class WFSController extends Controller
       }
     }
 
-    url += "service=wfs&version=" + version +
-         "&request=GetFeature&outputFormat=" + outputFormat +
-         "&typeName=" + layer;
+    const typeParam = (version === "1.1.0" || version === "1.0.0") ? "typeName" : "typeNames";
+
+    url += `service=wfs&version=${version}&request=GetFeature&outputFormat=${outputFormat}&${typeParam}=${layer}`;
+
     const count = this.count;
-    if (count > 0)
-    {
-      url += "&count=" + count;
-    }
     const bbox = this.bbox;
-    if (bbox && bbox.length > 0)
-    {
-      url += "&bbox=" + bbox;
-    }
     const cqlFilter = this.cqlFilter;
-    if (cqlFilter && cqlFilter.length > 0)
-    {
-      url += "&CQL_FILTER=" + cqlFilter;
-    }
     const srsName = this.srsName;
-    if (srsName && srsName.length > 0)
-    {
-      url += "&srsName=" + srsName;
-    }
+
+    if (count > 0) url += "&count=" + count;
+    if (bbox && bbox.length > 0) url += "&bbox=" + bbox;
+    if (cqlFilter && cqlFilter.length > 0) url += "&CQL_FILTER=" + cqlFilter;
+    if (srsName && srsName.length > 0) url += "&srsName=" + srsName;
+
     loader.options =
     {
       name: layer || "wfs",

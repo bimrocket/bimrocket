@@ -559,6 +559,11 @@
   background-image: url(images/tools/select_by_qrcode.svg);
 }
 
+.tool_button.hide_panels
+{
+  background-image: url(images/tools/hide_panels.svg);
+}
+
 div.row
 {
   margin-top:2px;

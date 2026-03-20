@@ -424,6 +424,8 @@ export const translations =
   "tool.about.label" : "Quant a",
   "tool.website.label" : "Lloc web",
 
+  "tool.hide_panels.label": "Amagar panells",
+
   "action.ChangeMaterial" : "Canvia material",
   "action.SetBuilder" : "Assigna constructor",
   "action.AddProperty" : "Afegeix propietat",

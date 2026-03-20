@@ -129,9 +129,28 @@ class Application
 
     /* create sub elements */
 
+    const logoPanelElem = document.body.querySelector(".logo_panel");
+    this.logoPanel = logoPanelElem;
+    logoPanelElem.addEventListener("click", () => this.hideLogo());
+
+    const bigLogoImage = logoPanelElem.querySelector("img");
+    bigLogoImage.title = Application.NAME;
+    bigLogoImage.alt = Application.NAME;
+
     const headerElem = document.createElement("header");
     this.headerElem = headerElem;
     element.appendChild(headerElem);
+
+    const logoLink = document.createElement("a");
+    logoLink.className = "logo_link";
+    logoLink.addEventListener("click", event => this.showLogo());
+    headerElem.appendChild(logoLink);
+
+    const logoImage = document.createElement("img");
+    logoImage.src = "css/images/bimrocket.svg";
+    logoImage.title = Application.NAME;
+    logoImage.alt = Application.NAME;
+    logoLink.appendChild(logoImage);
 
     const toolBarElem = document.createElement("div");
     this.toolBarElem = toolBarElem;
@@ -148,36 +167,6 @@ class Application
     const progressBarElem = document.createElement("div");
     progressBarElem.className = "progress_bar";
     element.appendChild(progressBarElem);
-
-    // logo
-    const logoPanelElem = document.body.querySelector(".logo_panel");
-    this.logoPanel = logoPanelElem;
-    logoPanelElem.addEventListener("click", event =>
-    {
-      event.preventDefault();
-      this.hideLogo();
-    });
-    logoPanelElem.addEventListener("keydown", event =>
-    {
-      event.preventDefault();
-      this.hideLogo();
-    });
-
-    const bigLogoImage = logoPanelElem.querySelector("img");
-    bigLogoImage.title = Application.NAME;
-    bigLogoImage.alt = Application.NAME;
-
-    const logoButton = document.createElement("button");
-    this.logoButton = logoButton;
-    logoButton.className = "logo_button";
-    logoButton.addEventListener("click", event => this.showLogo());
-    headerElem.appendChild(logoButton);
-
-    const logoImage = document.createElement("img");
-    logoImage.src = "css/images/bimrocket.svg";
-    logoImage.title = Application.NAME;
-    logoImage.alt = Application.NAME;
-    logoButton.appendChild(logoImage);
 
     const setup = this.setup;
 
@@ -701,7 +690,6 @@ class Application
   render()
   {
     const clippingEnabled = this.clippingPlane !== null;
-    const baseObjectVisible = this.baseObject.visible;
 
     if (this.batchedGroup)
     {
@@ -719,7 +707,7 @@ class Application
       this.renderer.render(this.scene, this.camera);
     }
 
-    this.baseObject.visible = baseObjectVisible;
+    this.baseObject.visible = true;
 
     // css renderer
     this.cssRenderer.render(this.scene, this.camera);
@@ -1598,41 +1586,6 @@ class Application
     }
   }
 
-  /**
-   * Indicate if any of the selected objects can be copied, cut or removed.
-   *
-   * @returns {Boolean} - true if any of the selected objects can be
-   * copied, cut or removed, false otherwise.
-   */
-  isCopyCutRemoveEnabled()
-  {
-    const scene = this.scene;
-    let selectedObjects = this.selection.roots;
-    selectedObjects = selectedObjects.filter(
-      root => root !== scene && root.parent !== scene);
-    return selectedObjects.length > 0;
-  }
-
-  /**
-   * Indicates whether copied or cut objects can be pasted.
-   *
-   * @returns {Boolean} - true if paste is enabled, false otherwise.
-   */
-  isPasteEnabled()
-  {
-    const scene = this.scene;
-    const selectedObject = this.selection.object;
-    if (!selectedObject ||
-        selectedObject === scene ||
-        selectedObject.parent === scene &&
-        selectedObject !== this.baseObject) return false;
-
-    let copyObjects = this._copyObjects;
-    let cutObjects = this._cutObjects;
-
-    return copyObjects.length > 0 || cutObjects.length > 0;
-  }
-
   notifyObjectsChanged(objects, source = this, type = "nodeChanged",
     properties = null) // properties: array of property names or null
   {
@@ -1939,6 +1892,17 @@ class Application
 
     return panel;
   }
+  
+  hidePanels()
+  {
+    this.panelManager.panels.forEach(panel =>
+    {
+      if (!panel.isPersistent) 
+      {
+        panel.visible = false;
+      }
+    });
+  }
 
   setUserLanguage(userLanguage)
   {
@@ -2000,7 +1964,6 @@ class Application
       {
         this.logoPanel.classList.remove("loading");
         this.logoPanel.querySelector(".info").innerHTML = "";
-        this.menuBar.updadeTabindex();
         this.hideLogo();
         this.loadModelFromUrl();
       };
@@ -2013,8 +1976,6 @@ class Application
     this.logoPanel.querySelector(".info").textContent = Application.VERSION;
     this.logoPanel.classList.add("show");
     this.logoPanel.classList.remove("hide");
-    this.logoPanel.setAttribute("tabindex", 0);
-    this.logoPanel.focus();
   }
 
   hideLogo()
@@ -2023,7 +1984,6 @@ class Application
     {
       this.logoPanel.classList.add("hide");
       this.logoPanel.classList.remove("show");
-      this.logoPanel.setAttribute("tabindex", -1);
     }
   }
 

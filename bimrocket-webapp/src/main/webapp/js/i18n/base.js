@@ -424,6 +424,8 @@ export const translations =
   "tool.about.label" : "About",
   "tool.website.label" : "Website",
 
+  "tool.hide_panels.label": "Hide panels",
+
   "action.ChangeMaterial" : "Change material",
   "action.SetBuilder" : "Set builder",
   "action.AddProperty" : "Add property",

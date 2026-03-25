@@ -213,7 +213,7 @@ class Inspector extends Panel
 
     this.featuredTabElem.addEventListener("contextmenu", event =>
     {
-      event => event.preventDefault();
+      event.preventDefault();
       this.showContextMenu(event, ["featured"]);
     });
 
@@ -650,7 +650,7 @@ class Inspector extends Panel
     const populateFilteredProperties = (elem, currentObject, group, path) =>
     {
       if (!currentObject) return;
-  
+
       for (let name in group)
       {
         const subPath = [...path, name];
@@ -674,7 +674,7 @@ class Inspector extends Panel
         }
       }
     };
-  
+
     populateFilteredProperties(favListElem, this.object, featured, []);
   }
 
@@ -1081,8 +1081,7 @@ class Inspector extends Panel
     }
     return null;
   }
-};
-
+}
 /* PropertyRenderers */
 
 class PropertyRenderer
@@ -2448,7 +2447,14 @@ class RemoveFeaturedAction extends FeaturedAction
 
   isEnabled()
   {
-    return this.getPropertyName() !== null && this.isFeatured();
+    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
+    const propertyName = this.getPropertyName();
+
+    if (propertyName === null) return false;
+
+    if (tabName === "featured") return true;
+
+    return this.isFeatured();
   }
 
   perform()

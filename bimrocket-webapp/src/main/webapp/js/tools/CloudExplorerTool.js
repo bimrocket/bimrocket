@@ -19,6 +19,9 @@ import { CreateReportAction } from "../ui/file/CreateReportAction.js";
 import { EditScriptAction } from "../ui/file/EditScriptAction.js";
 import { RunScriptAction } from "../ui/file/RunScriptAction.js";
 import { CreateScriptAction } from "../ui/file/CreateScriptAction.js";
+import { CreateModelValidationAction } from "../ui/file/CreateModelValidationAction.js";
+import { EditModelValidationAction } from "../ui/file/EditModelValidationAction.js";
+import { SaveModelValidationAction } from "../ui/file/SaveModelValidationAction.js";
 
 class CloudExplorerTool extends Tool
 {
@@ -48,13 +51,16 @@ class CloudExplorerTool extends Tool
     contextMenu.addMenuItem(action(OpenFileAction), "default");
 
     contextMenu.addMenuItem(action(EditScriptAction), "edit");
+    contextMenu.addMenuItem(action(EditModelValidationAction), "edit");
     contextMenu.addMenuItem(action(EditReportAction), "edit");
 
     const addMenu = contextMenu.getMenu("menu.file.create");
     addMenu.addMenuItem(action(CreateScriptAction, { label : "action.script" }));
     addMenu.addMenuItem(action(CreateReportAction, { label : "action.report" }));
+    addMenu.addMenuItem(action(CreateModelValidationAction));
 
     contextMenu.addMenuItem(action(SaveModelAction), "save");
+    contextMenu.addMenuItem(action(SaveModelValidationAction), "save");
 
     fileExplorer.onClose = () => this.application.useTool(null);
   }

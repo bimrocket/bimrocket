@@ -443,14 +443,16 @@ class PanelManager
       // set panel bottom
       panel.element.style.bottom = bottom + "px";
 
-      // set panel width
+      // set panel width (clamped so left and right panels never overlap)
       if (this.isLargeScreen())
       {
         let resizer = this.resizers[panel.position];
         if (resizer)
         {
-          panel.element.style.width =
-            (resizer.width - Panel.MARGIN) + "px";
+          // Clamp to maxWidth at render time (container dimensions are known here).
+          // Write back so the resizer bar position and saved value stay in sync.
+          resizer.width = Math.min(resizer.width, resizer.maxWidth);
+          panel.element.style.width = (resizer.width - Panel.MARGIN) + "px";
         }
       }
       else
@@ -497,6 +499,10 @@ class PanelManager
 
 class PanelResizer
 {
+  // Minimum pixels of 3D viewport that must remain visible between the two
+  // panel columns.  Prevents left and right panels from overlapping.
+  static MIN_CENTER_WIDTH = 200;
+
   constructor(panelManager, side)
   {
     this.panelManager = panelManager;
@@ -552,10 +558,26 @@ class PanelResizer
     this.element.style.display = enabled ? "" : "none";
   }
 
+  // Maximum width this resizer may occupy without overlapping the opposite
+  // side's panel column.  Leaves at least MIN_CENTER_WIDTH px for the 3D viewport.
+  get maxWidth()
+  {
+    const containerWidth = this.panelManager.container.clientWidth;
+    const resizers = this.panelManager.resizers;
+    const opposite = this.side === "left" ? resizers.right : resizers.left;
+    const oppositeWidth = (opposite && opposite.enabled) ? opposite.width : 0;
+    return Math.max(
+      Panel.DEFAULT_WIDTH,
+      containerWidth - oppositeWidth - PanelResizer.MIN_CENTER_WIDTH
+    );
+  }
+
   restoreWidth()
   {
     const application = this.panelManager.application;
     let value = application.setup.getItem("resizer." + this.side);
+    // Do NOT clamp here — the container may not be in the DOM yet (clientWidth = 0).
+    // Clamping happens in getCurrentWidth() (drag) and layoutElements() (render).
     this.width = parseInt(value) || Panel.DEFAULT_WIDTH;
   }
 

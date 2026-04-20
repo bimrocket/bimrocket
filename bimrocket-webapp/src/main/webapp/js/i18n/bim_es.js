@@ -223,4 +223,7 @@ export const translations =
   "placeholder.add_tags": "Escribe y pulsa Enter para añadir etiquetas",
 
   "action.ShowProjectSetup" : "Configuración",
+
+  "tool.ids_editor.label" : "Editor IDS",
+  "tool.ids_editor.help"  : "Editor visual de IDS (Information Delivery Specification)",
 };

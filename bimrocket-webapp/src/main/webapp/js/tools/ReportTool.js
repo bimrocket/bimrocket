@@ -12,6 +12,9 @@ import { CreateReportAction } from "../ui/file/CreateReportAction.js";
 import { RunScriptAction } from "../ui/file/RunScriptAction.js";
 import { EditScriptAction } from "../ui/file/EditScriptAction.js";
 import { CreateScriptAction } from "../ui/file/CreateScriptAction.js";
+import { CreateIDSAction } from "../ui/file/CreateIDSAction.js";
+import { EditIDSAction } from "../ui/file/EditIDSAction.js";
+import { SaveIDSAction } from "../ui/file/SaveIDSAction.js";
 
 class ReportTool extends Tool
 {
@@ -43,6 +46,10 @@ class ReportTool extends Tool
     contextMenu.addMenuItem(action(RunScriptAction), "default");
     contextMenu.addMenuItem(action(EditScriptAction), "edit");
     contextMenu.addMenuItem(action(CreateScriptAction), "create");
+
+    contextMenu.addMenuItem(action(EditIDSAction), "edit");
+    contextMenu.addMenuItem(action(CreateIDSAction), "create");
+    contextMenu.addMenuItem(action(SaveIDSAction), "save");
   }
 
   activate()

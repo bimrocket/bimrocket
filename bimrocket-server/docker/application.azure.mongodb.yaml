@@ -23,6 +23,13 @@ services:
       class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
       mongo:
         database: bimdb
+    ldap:
+      enabled: false
+      url: ldap://dc1.santfeliu.local
+      domain: santfeliu.local
+      searchBase: DC=santfeliu,DC=local
+      adminUsername: admin
+      adminPassword: changeit
     oauth2:
       active: []
       providers:
@@ -66,14 +73,10 @@ services:
       - ifc_snapshots
       - tasks
     store:
-      class: org.bimrocket.service.file.store.filesystem.AzureBlobFileStore
+      class: org.bimrocket.service.file.store.azure.AzureBlobFileStore
       azure:
-        connection-string: >
-          DefaultEndpointsProtocol=http;
-          AccountName=devstoreaccount1;
-          AccountKey=Eby8vdM02xNOcqFeqCnb3w==;
-          BlobEndpoint=http://azurite:10000/devstoreaccount1;
-        container-name: azurite
+        connection-string: # Docker-compose variable
+        container-name: # Docker-compose variable
 
   # bcf service
   bcf:
@@ -83,7 +86,7 @@ services:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
     store:
-      class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
+      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
       mongo:
         database: bimdb
 
@@ -94,13 +97,13 @@ services:
       - IFC4
     maxFileSizeMb: 200
     store:
-      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
+      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
 
   # task service
   task:
     taskCacheSize: 10
     store:
-      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
+      class: org.bimrocket.service.task.store.mongo.TaskMongoDaoStore
       mongo:
         database: bimdb
 
@@ -136,9 +139,8 @@ services:
 # database config
 databases:
   bimdb:
-    url: mongodb://root:mongodb@mongodb:27017/bimdb?authSource=admin
+    url: # Docker-compose variable
   IFC2X3:
-    url: mongodb://root:mongodb@mongodb:27017/IFC2X3?authSource=admin
+    url: # Docker-compose variable
   IFC4:
-    url: mongodb://root:mongodb@mongodb:27017/IFC4?authSource=admin
-
+    url: # Docker-compose variable

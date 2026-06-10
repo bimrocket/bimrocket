@@ -22,7 +22,7 @@ OrientDB is a multi-model *NoSQL* database that combines the features of a docum
 
 From the `/docker` directory, build images and deploy the containers:
   ```sh
-  docker-compose up -f docker-compose.file.orientdb.yml --build -d
+  docker-compose -f docker-compose.file.orientdb.yml up --build -d
   ```
 
 ### Deployment in MongoDB
@@ -34,17 +34,19 @@ From the `/docker` directory, build images and deploy the containers:
 **Files:**
 
 For Azure deployment
-- [application.azure.mongodb.yaml](.\application.mongodb.yaml)
-- [docker-compose.azure.mongodb.yml](.\docker-compose.mongodb.yml)
+- [application.azure.mongodb.yaml](.\application.azure.mongodb.yaml)
+- [docker-compose.azure.mongodb.yml](.\docker-compose.azure.mongodb.yml)
 
 For File System deployment
-- [application.file.mongodb.yaml](.\application.mongodb.yaml)
-- [docker-compose.file.mongodb.yml](.\docker-compose.mongodb.yml)
+- [application.file.mongodb.yaml](.\application.file.mongodb.yaml)
+- [docker-compose.file.mongodb.yml](.\docker-compose.file.mongodb.yml)
 
 
 From the `/docker` directory, build images and deploy the containers:
   ```sh
-  docker-compose up -f docker-compose.azure.mongodb.yml --build -d
+  docker-compose -f docker-compose.azure.mongodb.yml up --build -d
+  or
+  docker-compose -f docker-compose.file.mongodb.yml up --build -d
   ```
 
 ### Docker Compose

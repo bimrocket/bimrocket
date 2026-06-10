@@ -13,6 +13,8 @@ import com.azure.storage.blob.models.ListBlobsOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+
 import org.bimrocket.exception.InvalidRequestException;
 import org.bimrocket.exception.NotFoundException;
 import org.bimrocket.service.file.*;
@@ -38,7 +40,7 @@ import org.bimrocket.service.file.store.filesystem.ACLFile;
  *
  * @author jordi.hernandez@i2cat.net
  */
-
+@ApplicationScoped
 public class AzureBlobFileStore implements FileStore
 {
   static final String BASE = "services.file.store.azure.";

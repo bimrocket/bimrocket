@@ -23,6 +23,13 @@ services:
       class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
       mongo:
         database: bimdb
+    ldap:
+      enabled: false
+      url: ldap://dc1.santfeliu.local
+      domain: santfeliu.local
+      searchBase: DC=santfeliu,DC=local
+      adminUsername: admin
+      adminPassword: changeit
     oauth2:
       active: []
       providers:
@@ -78,7 +85,7 @@ services:
         subject: '#{project.name}##{index}: #{title} [#{priority}]'
         body: '#{description}'
     store:
-      class: org.bimrocket.service.security.store.mongo.SecurityMongoDaoStore
+      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
       mongo:
         database: bimdb
 
@@ -89,13 +96,13 @@ services:
       - IFC4
     maxFileSizeMb: 200
     store:
-      class: org.bimrocket.service.bcf.store.mongo.BcfMongoDaoStore
+      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
 
   # task service
   task:
     taskCacheSize: 10
     store:
-      class: org.bimrocket.service.ifcdb.store.mongo.MongoIfcStore
+      class: org.bimrocket.service.task.store.mongo.TaskMongoDaoStore
       mongo:
         database: bimdb
 

@@ -49,7 +49,7 @@ public class CORSFilter implements ContainerResponseFilter
     ContainerResponseContext responseContext) throws IOException
   {
     MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-    headers.add("Access-Control-Allow-Origin", "http://localhost:8181");
+    headers.add("Access-Control-Allow-Origin", "*");
     headers.add("Access-Control-Allow-Credentials", "true");
     headers.add("Access-Control-Allow-Headers",
      "origin,content-type,accept,authorization,depth,if-modified-since,if-none-match,x-requested-with,destination");

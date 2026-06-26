@@ -1,0 +1,651 @@
+/* ============================================================
+   ModelValidation Panel — Validació de Models
+   ============================================================ */
+
+.mv_panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 12px;
+  font-size: 13px;
+  box-sizing: border-box;
+  color: #404040;
+  background: #ffffff;
+}
+
+/* Panel body scrolls vertically; inner sections (e.g. class list) handle their own scroll. */
+div.panel > .body.mv_panel {
+  overflow-y: auto;
+}
+
+/* ── Section that grows to fill remaining height ── */
+.mv_section_grow {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Sections ── */
+.mv_section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.mv_section.mv_section_grow {
+  display: flex;
+  flex-direction: column;
+}
+
+.mv_section_title {
+  background: #f6f6f6;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #808080;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mv_section_title::after {
+  content: "▾";
+  font-size: 13px;
+  line-height: 1;
+}
+
+.mv_section.mv_collapsed .mv_section_title::after {
+  content: "▸";
+}
+
+.mv_section_body {
+  display: block;
+}
+
+.mv_section.mv_collapsed .mv_section_body {
+  display: none;
+}
+
+.mv_section > .mv_section_body {
+  padding: 0;
+}
+
+.mv_section > *:not(.mv_section_title) {
+  padding: 8px 12px;
+}
+
+/* ── Rows ── */
+.mv_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.mv_labeled_row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 12px;
+}
+
+.mv_label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #808080;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Select ── */
+.mv_select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  background: #ffffff;
+  font-size: 12px;
+  color: #404040;
+  cursor: pointer;
+}
+
+.mv_select:focus {
+  outline: none;
+  border-color: #B00000;
+  box-shadow: 0 0 0 2px #F0A0A0;
+}
+
+/* ── Buttons ── */
+.mv_btn {
+  padding: 4px 10px;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  background: #f6f6f6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #404040;
+}
+
+.mv_btn:hover {
+  background: #ffb0b0;
+  border-color: #a0a0a0;
+}
+
+.mv_btn.mv_primary {
+  background: #B00000;
+  color: white;
+  border-color: #B00000;
+}
+
+.mv_btn.mv_primary:hover {
+  background: #900000;
+}
+
+.mv_btn.mv_danger {
+  background: #808080;
+  color: white;
+  border-color: #808080;
+}
+
+.mv_btn.mv_danger:hover {
+  background: #404040;
+}
+
+/* ── Mode toggle buttons ── */
+.mv_mode_row {
+  gap: 0;
+  padding: 8px 12px;
+}
+
+.mv_mode_btn {
+  flex: 1;
+  border-radius: 0;
+  border-right-width: 0;
+  font-size: 12px;
+  text-align: center;
+}
+
+.mv_mode_btn:first-child { border-radius: 4px 0 0 4px; }
+.mv_mode_btn:last-child  { border-radius: 0 4px 4px 0; border-right-width: 1px; }
+
+.mv_mode_btn.mv_mode_active {
+  background: #B00000;
+  color: white;
+  border-color: #B00000;
+}
+
+/* ── Class list ── */
+.mv_class_list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 6px 12px 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.mv_class_row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.mv_class_row input[type=checkbox] {
+  cursor: pointer;
+  accent-color: #B00000;
+}
+
+/* ── Filter row ── */
+.mv_filter_row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mv_filter_row .mv_input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── AND / OR combinator row ── */
+.mv_rule_op_row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+}
+
+.mv_rule_sep {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.mv_rule_op {
+  width: auto;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* ── Rule 2 sub-header ── */
+.mv_rule2_header {
+  font-size: 11px;
+  font-weight: 600;
+  color: #808080;
+  padding: 4px 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 4px;
+}
+
+/* ── Match mode select (auto width) ── */
+.mv_match_select {
+  width: auto;
+  flex-shrink: 0;
+}
+
+/* ── Text input ── */
+.mv_input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  background: #ffffff;
+  font-size: 12px;
+  color: #404040;
+  box-sizing: border-box;
+}
+
+.mv_input:focus {
+  outline: none;
+  border-color: #B00000;
+  box-shadow: 0 0 0 2px #F0A0A0;
+}
+
+.mv_input::placeholder {
+  color: #a0a0a0;
+}
+
+/* ── Checkbox options ── */
+.mv_check_row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.mv_check_row input[type=checkbox] {
+  accent-color: #B00000;
+  cursor: pointer;
+}
+
+/* ── Footer ── */
+.mv_footer {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0 4px;
+  justify-content: space-between;
+}
+
+.mv_footer_left,
+.mv_footer_right {
+  display: flex;
+  gap: 8px;
+}
+
+button[name="mv_save_cloud"] {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Action options dropdown panel ── */
+.mv_action_options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #F0A0A0;
+  border-top: 1px solid #B00000;
+  border-bottom: 1px solid #B00000;
+  margin-bottom: 6px;
+}
+
+.mv_action_options .mv_btn {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+/* ── Save format row ── */
+.mv_action_fmt_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+/* ── Save destination row ── */
+.mv_action_dest_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px dashed #B00000;
+  margin-top: 4px;
+}
+
+/* ── Config list ── */
+.mv_config_list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 12px 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mv_placeholder_hint {
+  font-size: 11px;
+  color: #606060;
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin: 4px 0;
+  line-height: 1.5;
+}
+
+.mv_config_empty {
+  font-size: 12px;
+  color: #808080;
+  text-align: center;
+  padding: 8px 0;
+  font-style: italic;
+}
+
+.mv_config_item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #c0c0c0;
+  border-radius: 4px;
+  background: #f6f6f6;
+}
+
+.mv_config_name {
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #404040;
+}
+
+.mv_config_name_btn {
+  cursor: pointer;
+}
+
+.mv_config_name_btn:hover {
+  color: #B00000;
+  text-decoration: underline;
+}
+
+.mv_config_actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   Llegenda (panell dret, usa div.panel de panel.css)
+══════════════════════════════════════════ */
+/* ── Legend list ── */
+ul.mv_legend_list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.mv_legend_list li.mv_legend_item > a,
+ul.mv_legend_list li.mv_legend_subitem > a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  text-decoration: none;
+  color: #404040;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+ul.mv_legend_list li.mv_legend_item > a:hover,
+ul.mv_legend_list li.mv_legend_subitem > a:hover {
+  animation: item_hover 1s;
+  background-color: #C0C0C0;
+  color: black;
+}
+
+ul.mv_legend_list li.mv_legend_group > a {
+  font-weight: 700;
+  background: #f0f0f0;
+  border-top: 1px solid #e0e0e0;
+}
+
+ul.mv_legend_list li.mv_legend_subitem > a {
+  padding-left: 24px;
+  background: #fafafa;
+  border-left: 3px solid #e0e0e0;
+  font-size: 11px;
+  color: #606060;
+}
+
+/* ── Dynamic filter rules ── */
+.mv_rules_container {
+  padding: 6px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mv_rule_row {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffffff;
+}
+
+.mv_rule_row_top {
+  display: flex;
+  gap: 6px;
+}
+
+.mv_rule_row_top .mv_select {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+}
+
+.mv_rule_row_bot {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.mv_rule_row_bot .mv_input { flex: 1; min-width: 0; }
+
+.mv_rule_del { padding: 4px 8px; flex-shrink: 0; }
+
+
+/* ── AND/OR separator between rules ── */
+.mv_op_sep {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #808080;
+  padding: 3px 0;
+  letter-spacing: 0.08em;
+}
+
+/* ── Rule entries (per-value conditions with color/override) ── */
+.mv_rule_entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.mv_rule_entry {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: #f6f6f6;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+  padding: 4px 6px;
+}
+
+.mv_rule_entry .mv_match_select {
+  flex-shrink: 0;
+  width: auto;
+  font-size: 11px;
+}
+
+.mv_entry_value {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+}
+
+.mv_color_input {
+  width: 28px;
+  height: 24px;
+  border: 1px solid #c0c0c0;
+  border-radius: 2px;
+  padding: 1px;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: none;
+}
+
+.mv_override_sel {
+  width: auto;
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 3px 4px;
+}
+
+.mv_entry_del {
+  padding: 3px 6px;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.mv_rule_add_entry_row {
+  padding: 4px 6px 3px;
+}
+
+.mv_rule_add_entry_row .mv_btn {
+  font-size: 10px;
+  padding: 3px 8px;
+}
+
+/* ── Legend subtitle (pset → param) ── */
+.mv_legend_subtitle {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #808080;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mv_legend_swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid #c0c0c0;
+  display: inline-block;
+}
+
+/* ── Inline panel warning banner ── */
+.mv_panel_warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 6px 30px 6px 10px;
+  font-size: 11px;
+  color: #7a5700;
+  margin-bottom: 6px;
+  position: relative;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.mv_panel_warning_close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: #7a5700;
+  padding: 0;
+  line-height: 1;
+}
+
+/* ══════════════════════════════════════════
+   Scrollbar Styling
+══════════════════════════════════════════ */
+.mv_panel ::-webkit-scrollbar,
+.mv_class_list::-webkit-scrollbar,
+.mv_rules_container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mv_panel ::-webkit-scrollbar-track,
+.mv_class_list::-webkit-scrollbar-track,
+.mv_rules_container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mv_panel ::-webkit-scrollbar-thumb,
+.mv_class_list::-webkit-scrollbar-thumb,
+.mv_rules_container::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 3px;
+}
+
+.mv_panel ::-webkit-scrollbar-thumb:hover,
+.mv_class_list::-webkit-scrollbar-thumb:hover,
+.mv_rules_container::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}

@@ -1,0 +1,1377 @@
+/* ── IDS Editor — design tokens ─────────────────────────────────────────── */
+
+:root {
+  --ids-red:           #B00000;
+  --ids-red-dark:      #900000;
+  --ids-red-faint:     #fff0f0;
+  --ids-red-tint:      #fff8f8;
+  --ids-border:        #c8c8c8;
+  --ids-border-section:#d0d0d0;
+  --ids-border-light:  #e8e8e8;
+  --ids-bg:            #f8f8f8;
+  --ids-bg-form:       #fafafa;
+  --ids-bg-header:     #f2f2f2;
+  --ids-text:          #202020;
+  --ids-text-mid:      #404040;
+  --ids-text-dim:      #606060;
+  --ids-text-muted:    #909090;
+  --ids-focus-shadow:  rgba(176,0,0,0.10);
+  --ids-ctrl-h:        26px;   /* standard control height (select, small btn) */
+  --ids-font-xs:       10px;
+  --ids-font-sm:       11px;
+  --ids-font-base:     12px;
+  --ids-font-md:       13px;
+  --ids-radius:        3px;
+  --ids-radius-md:     4px;
+}
+
+/* ── IDS Editor Dialog ──────────────────────────────────────────────────── */
+
+.ids_editor_body
+{
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+
+.ids_tabbed_pane
+{
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ids_tab_header
+{
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  border-bottom: 2px solid #d0d0d0;
+  padding: 0 6px;
+  background: #f8f8f8;
+}
+
+.ids_tab_link
+{
+  display: inline-block;
+  padding: 6px 16px;
+  text-decoration: none;
+  color: #606060;
+  font-size: 13px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  user-select: none;
+}
+
+.ids_tab_link:hover { color: #202020; }
+
+.ids_tab_link.selected
+{
+  color: var(--ids-text);
+  font-weight: bold;
+  border-bottom-color: var(--ids-red);
+}
+
+.ids_tab_body
+{
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ids_tab_panel
+{
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.ids_tab_panel.selected
+{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Info panel ──────────────────────────────────────────────────────────── */
+
+.ids_info_panel { gap: 4px; }
+
+/* ── Narrow / mobile mode (panel body < 480 px, toggled by ResizeObserver) ──── */
+/*
+   Problems solved here:
+   a) flex-wrap:wrap on a column-flex row creates multi-column layout → horiz. scroll
+   b) align-items:flex-start on the row base prevents children from filling width
+   c) flex-grow:1 on the textarea row (.ids_form_row_grow) consumes all remaining
+      panel height → enormous vertical gaps between fields
+*/
+
+/* Stack fields vertically, one per line, no multi-column wrap */
+.ids_ui_narrow .ids_form_row
+{
+  flex-direction: column;
+  flex-wrap: nowrap;          /* prevent multi-column wrapping (was: wrap) */
+  align-items: stretch;       /* children fill the row width (was: flex-start) */
+  gap: 4px;
+}
+
+/* Reset all field-width modifiers so every field fills the available width */
+.ids_ui_narrow .ids_form_row .ids_field,
+.ids_ui_narrow .ids_form_row .ids_field_grow,
+.ids_ui_narrow .ids_form_row .ids_wide,
+.ids_ui_narrow .ids_form_row .ids_half,
+.ids_ui_narrow .ids_form_row .ids_fw_sm,
+.ids_ui_narrow .ids_form_row .ids_full
+{
+  flex: 0 0 auto;             /* natural height in column-flex; no unwanted growing */
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+/* Textarea row: don't grow to fill panel height — use compact natural height */
+.ids_ui_narrow .ids_form_row_grow
+{
+  flex: 0 0 auto;
+}
+
+/* Textareas: a reasonable fixed height rather than the collapsing default */
+.ids_ui_narrow .ids_field_grow textarea
+{
+  min-height: 72px;
+  height: 72px;
+  resize: none;               /* no point resizing when the field is full-width */
+}
+
+/* Reduce tab panel padding in narrow mode to maximise usable space */
+.ids_ui_narrow .ids_tab_panel
+{
+  padding: 6px;
+}
+
+/* Versions row: stay horizontal (override the column-flex rule on .ids_form_row).
+   Checkboxes + labels wrap onto additional lines rather than stacking vertically. */
+.ids_ui_narrow .ids_versions_row
+{
+  flex-direction: row;          /* keep chips in a row — do NOT go column */
+  flex-wrap: wrap;              /* wrap when out of space — no horiz. scroll */
+  align-items: center;          /* vertically align pairs in each line */
+  gap: 4px 10px;
+}
+
+/* Reset width override that the generic .ids_form_row rule applies to .ids_field
+   children — version chips should be auto-width, not stretched full-width. */
+.ids_ui_narrow .ids_versions_row .ids_ver_pair,
+.ids_ui_narrow .ids_versions_row .ids_versions_label
+{
+  width: auto;
+  flex: 0 0 auto;
+}
+
+/* ── Specs tab narrow fixes ──────────────────────────────────────────────── */
+
+/* Reduce padding inside the spec form and facet cards to maximise usable width */
+.ids_ui_narrow .ids_spec_form   { padding: 6px; }
+.ids_ui_narrow .ids_facet_body  { padding: 6px; }
+
+/* Section header: let the add-facet group wrap to its own line when too narrow */
+.ids_ui_narrow .ids_section_header
+{
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ids_ui_narrow .ids_add_facet_group
+{
+  flex: 1 1 100%;             /* full-width when it wraps to the next line */
+  /* select already has flex:1 and button is flex-shrink:0 — no extra overrides needed */
+}
+
+/* Pattern builder: allow the operation selector + input to wrap onto two lines */
+.ids_ui_narrow .ids_pattern_row
+{
+  flex-wrap: wrap;
+}
+
+.ids_ui_narrow .ids_pattern_op_sel
+{
+  flex: 1 1 100%;             /* own full-width line */
+  max-width: none;
+}
+
+.ids_ui_narrow .ids_pattern_val_inp,
+.ids_ui_narrow .ids_pattern_adv_inp
+{
+  flex: 1 1 100%;
+}
+
+/* Chip selector (multi-class field): stack the select, separator and input */
+.ids_ui_narrow .ids_chips_add_row
+{
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ids_ui_narrow .ids_chips_add_row select
+{
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.ids_ui_narrow .ids_chips_sep
+{
+  display: none;              /* "or type:" label wastes space on a narrow column */
+}
+
+.ids_ui_narrow .ids_input_inline
+{
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* Value group in facet rows: remove the minimum width that causes overflow */
+.ids_ui_narrow .ids_value_group
+{
+  min-width: 0;
+  width: 100%;
+}
+
+/* Value area inputs: ensure they don't overflow */
+.ids_ui_narrow .ids_value_area
+{
+  flex-wrap: wrap;
+}
+
+.ids_ui_narrow .ids_value_area input,
+.ids_ui_narrow .ids_value_area select
+{
+  min-width: 0;
+  flex: 1 1 80px;
+}
+
+/* ── Form rows & fields ──────────────────────────────────────────────────── */
+
+.ids_form_row
+{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.ids_form_row_grow { flex: 1; min-height: 0; }
+
+.ids_field
+{
+  display: flex;
+  flex-direction: column;
+  min-width: 80px;
+}
+
+.ids_field label
+{
+  font-size: 11px;
+  font-weight: 600;
+  color: #606060;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-align: left;           /* explicit left-align — global panel CSS may inherit center */
+  align-self: flex-start;     /* width = text content, not stretched across the field */
+}
+
+/* ── Base input/select/textarea styles ───────────────────────────────────── */
+
+.ids_field input[type="text"],
+.ids_field input[type="date"],
+.ids_field input[type="url"],
+.ids_field textarea,
+.ids_field select,
+.ids_select,
+.ids_input
+{
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  padding: 4px 7px;
+  font-size: 12px;
+  background: white;
+  box-sizing: border-box;
+  width: 100%;
+  font-family: inherit;
+  color: #202020;
+}
+
+.ids_field input:focus,
+.ids_field textarea:focus,
+.ids_field select:focus,
+.ids_select:focus,
+.ids_input:focus
+{
+  outline: none;
+  border-color: var(--ids-red);
+  box-shadow: 0 0 0 2px var(--ids-focus-shadow);
+}
+
+/* IDS-value option injected when value is not in the model list */
+option.ids_sel_opt_ids { font-style: italic; }
+
+.ids_field textarea { resize: vertical; min-height: 56px; }
+
+.ids_field_grow { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.ids_field_grow textarea { flex: 1; min-height: 56px; }
+
+/* Width modifiers (applied to .ids_field children of .ids_form_row) */
+.ids_wide    { flex: 2; min-width: 160px; }
+.ids_half    { flex: 1; min-width: 110px; }
+.ids_fw_sm   { flex: 0 0 136px; }   /* renamed from ids_narrow to avoid conflict with narrow-mode class */
+.ids_full    { flex: 1 1 100%; }
+
+/* ── Spec list panel ─────────────────────────────────────────────────────── */
+
+.ids_specs_panel
+{
+  flex-direction: column !important;
+  padding: 0 !important;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* Inner row that holds the left list column and right editor column */
+.ids_specs_cols
+{
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Narrow / mobile mode ────────────────────────────────────────────────── */
+/* When the panel is narrower than ~480 px (detected by ResizeObserver in JS),
+   the "ids_narrow" class is added.  The two-column layout is replaced by a
+   single-view navigation: list first, editor after tapping a spec. */
+
+.ids_specs_cols.ids_narrow
+{
+  flex-direction: column;
+}
+
+/* In narrow mode the left list column fills the whole space… */
+.ids_specs_cols.ids_narrow .ids_specs_list_col
+{
+  width: 100%;
+  flex: 1;
+  border-right: none;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+/* …and the editor is hidden until a spec is tapped */
+.ids_specs_cols.ids_narrow:not(.ids_editor_view) .ids_spec_editor
+{
+  display: none;
+}
+
+/* Once "ids_editor_view" is added, show the editor and hide the list */
+.ids_specs_cols.ids_narrow.ids_editor_view .ids_specs_list_col
+{
+  display: none;
+}
+
+.ids_specs_cols.ids_narrow.ids_editor_view .ids_spec_editor
+{
+  display: flex;
+  flex: 1;
+}
+
+/* ── Back button ─────────────────────────────────────────────────────────── */
+
+.ids_back_btn
+{
+  display: none;          /* hidden in wide mode */
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  font-size: var(--ids-font-base);
+  font-weight: 600;
+  color: var(--ids-red);
+  background: var(--ids-red-tint);
+  border: none;
+  border-bottom: 1px solid #e8d0d0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  letter-spacing: 0.01em;
+}
+
+.ids_back_btn:hover { background: #ffeaea; }
+
+/* Show only when the panel is in narrow mode */
+.ids_specs_cols.ids_narrow .ids_back_btn
+{
+  display: flex;
+}
+
+/* ── Model mismatch warning banner ───────────────────────────────────────── */
+
+.ids_warn_banner
+{
+  flex-shrink: 0;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-bottom: 1px solid transparent;
+}
+
+.ids_warn_banner.ids_warn_mismatch
+{
+  background: #fff8e1;
+  border-color: #f0b429;
+  color: #7a5000;
+}
+
+.ids_warn_banner.ids_warn_info
+{
+  background: #e8f4fd;
+  border-color: #90caf9;
+  color: #1565c0;
+}
+
+.ids_warn_header
+{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ids_warn_icon
+{
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ids_warn_dismiss
+{
+  margin-left: auto;
+  padding: 1px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid #cca800;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+}
+
+.ids_warn_dismiss:hover { background: rgba(0,0,0,.08); }
+
+.ids_warn_list
+{
+  margin: 4px 0 0 20px;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.ids_warn_list code
+{
+  font-family: monospace;
+  background: rgba(0,0,0,.07);
+  border-radius: 2px;
+  padding: 0 3px;
+}
+
+.ids_specs_list_col
+{
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #d0d0d0;
+  background: #f8f8f8;
+}
+
+.ids_list_header
+{
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  padding: 5px;
+  border-bottom: 1px solid #d0d0d0;
+  flex-shrink: 0;
+}
+
+.ids_icon_btn
+{
+  width: 26px;
+  height: 26px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  color: #404040;
+}
+
+.ids_icon_btn:hover { background: var(--ids-red-faint); border-color: var(--ids-red); color: var(--ids-red); }
+
+.ids_spec_list
+{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ids_spec_item
+{
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+  line-height: 1.3;
+}
+
+.ids_spec_item:hover { background: #eef0f8; }
+.ids_spec_item.selected { background: var(--ids-red); color: white; }
+.ids_spec_item.selected .ids_spec_num { background: rgba(255,255,255,0.25); }
+
+.ids_spec_num
+{
+  font-size: 10px;
+  background: rgba(0,0,0,0.10);
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+/* ── Spec editor ─────────────────────────────────────────────────────────── */
+
+.ids_spec_editor
+{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.ids_empty_msg
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #a0a0a0;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.ids_spec_form
+{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 6px;
+  overflow-y: auto;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #c8c8c8 transparent;
+}
+
+.ids_spec_form::-webkit-scrollbar { width: 5px; }
+.ids_spec_form::-webkit-scrollbar-track { background: transparent; }
+.ids_spec_form::-webkit-scrollbar-thumb { background: #c8c8c8; border-radius: 3px; }
+
+.ids_spec_form.hidden { display: none; }
+
+.ids_divider
+{
+  border: none;
+  border-top: 1px solid #d8d8d8;
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+/* IFC versions row */
+.ids_versions_row { align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* One checkbox + label pair — inline-flex so they align on the same baseline */
+.ids_ver_pair
+{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.ids_versions_label
+{
+  font-size: 11px;
+  font-weight: 600;
+  color: #606060;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ids_versions_row input[type="checkbox"]
+{
+  margin: 0;                   /* reset — alignment handled by flex on the row */
+  accent-color: var(--ids-red);
+  cursor: pointer;
+  flex-shrink: 0;
+  /* vertical-align has no effect in flex; align-items:center on parent handles it */
+}
+
+.ids_versions_row label
+{
+  font-size: var(--ids-font-base);
+  cursor: pointer;
+  line-height: 1;              /* match checkbox visual height to prevent micro-shift */
+  text-align: left;
+}
+
+/* ── Facet sections (Applicability / Requirements) ───────────────────────── */
+
+.ids_facet_section
+{
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  flex-shrink: 0;           /* don't compress — the spec form scrolls overall */
+}
+
+.ids_section_header
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #f2f2f2;
+  border-bottom: 1px solid #d0d0d0;
+  border-radius: 4px 4px 0 0;
+  flex-wrap: wrap;
+}
+
+.ids_section_title
+{
+  font-size: 12px;
+  font-weight: 700;
+  color: #303030;
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+/* Add-facet control group (select + button together) */
+.ids_add_facet_group
+{
+  display: flex;
+  align-items: center;         /* vertically centre select and button regardless of browser rendering */
+  gap: 6px;                    /* clear visible space between the two controls */
+}
+
+.ids_add_facet_select
+{
+  border: 1px solid var(--ids-border);
+  border-radius: var(--ids-radius);
+  padding: 3px 6px;
+  font-size: var(--ids-font-base);
+  background: white;
+  font-family: inherit;
+  height: var(--ids-ctrl-h);
+  cursor: pointer;
+  flex: 1;                     /* takes remaining space; button stays at its natural width */
+  min-width: 0;
+}
+
+.ids_add_facet_select:focus { outline: none; border-color: var(--ids-red); }
+
+.ids_add_facet_btn
+{
+  border: 1px solid var(--ids-border);
+  border-radius: var(--ids-radius);
+  padding: 0 10px;
+  height: var(--ids-ctrl-h);
+  font-size: var(--ids-font-base);
+  background: white;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  font-family: inherit;
+  color: #303030;
+  flex-shrink: 0;
+}
+
+.ids_add_facet_btn:hover
+{
+  background: var(--ids-red-faint);
+  border-color: var(--ids-red);
+  color: var(--ids-red);
+}
+
+/* Global cardinality row (applicability) */
+.ids_global_card_row
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+  border-left: 3px solid #B00000;
+  flex-wrap: wrap;
+}
+
+/* Hide radio inputs */
+.ids_cardinality_row input[type="radio"],
+.ids_global_card_row input[type="radio"]
+{
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ids_card_label
+{
+  font-size: 11px;
+  font-weight: 600;
+  color: #606060;
+  margin-right: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ids_card_btn
+{
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1.5px solid #d0d0d0;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s;
+  background: white;
+  color: #707070;
+  font-family: inherit;
+}
+
+.ids_card_btn:hover { border-color: #a0a0a0; color: #303030; }
+
+/* Checked states */
+.ids_cardinality_row input[type="radio"]:checked + .ids_card_must,
+.ids_global_card_row  input[type="radio"]:checked + .ids_card_must
+{
+  background: #e8f5e9; border-color: #2e7d32; color: #1b5e20;
+}
+
+.ids_cardinality_row input[type="radio"]:checked + .ids_card_may,
+.ids_global_card_row  input[type="radio"]:checked + .ids_card_may
+{
+  background: #fff8e1; border-color: #f57f17; color: #e65100;
+}
+
+.ids_cardinality_row input[type="radio"]:checked + .ids_card_not,
+.ids_global_card_row  input[type="radio"]:checked + .ids_card_not
+{
+  background: #fce4ec; border-color: #c62828; color: #b71c1c;
+}
+
+/* Individual cardinality row (inside requirement card) */
+.ids_cardinality_row
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 0 7px;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── Facet items container ───────────────────────────────────────────────── */
+
+.ids_facet_items
+{
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 28px;
+}
+
+/* ── Facet card (collapsible) ────────────────────────────────────────────── */
+
+.ids_facet_card
+{
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background: white;
+  overflow: hidden;
+}
+
+.ids_facet_bar
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  background: #fafafa;
+  border-bottom: 1px solid transparent;
+}
+
+.ids_facet_card.open .ids_facet_bar
+{
+  border-bottom-color: #e8e8e8;
+  background: #f5f5f5;
+}
+
+.ids_facet_bar:hover { background: #f0f4ff; }
+
+.ids_facet_arrow
+{
+  font-size: 10px;
+  color: #909090;
+  flex-shrink: 0;
+  width: 10px;
+  text-align: center;
+}
+
+/* Cardinality badges */
+.ids_facet_badge
+{
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ids_badge_required   { background: #e8f5e9; color: #2e7d32; }
+.ids_badge_optional   { background: #fff8e1; color: #e65100; }
+.ids_badge_prohibited { background: #fce4ec; color: #c62828; }
+.ids_badge_filter     { background: #e8eaf6; color: #3949ab; }
+
+.ids_facet_type
+{
+  font-size: 11px;
+  font-weight: 700;
+  color: #404040;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ids_facet_summary_text
+{
+  flex: 1;
+  font-size: 12px;
+  color: #707070;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ids_facet_del_btn
+{
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #c0c0c0;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+.ids_facet_del_btn:hover { color: #B00000; background: #fff0f0; }
+
+/* Facet card body (collapsible) */
+.ids_facet_body
+{
+  display: none;
+  padding: 8px;
+  background: #fafafa;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ids_facet_card.open .ids_facet_body { display: flex; }
+
+.ids_facet_fields
+{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Hint text ───────────────────────────────────────────────────────────── */
+
+.ids_hint
+{
+  font-size: 11px;
+  color: #909090;
+  font-style: italic;
+  margin: 0 0 2px;
+  line-height: 1.4;
+  background: #f9f9f9;
+  border-left: 2px solid #d8d8d8;
+  padding: 3px 6px;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ── Pattern builder ─────────────────────────────────────────────────────── */
+
+/* Row: operation <select> + value input side-by-side */
+.ids_pattern_row
+{
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* The operation selector takes as much space as its content needs */
+.ids_pattern_op_sel
+{
+  flex: 0 0 auto;
+  max-width: 160px;
+}
+
+/* Text inputs fill remaining space */
+.ids_pattern_val_inp,
+.ids_pattern_adv_inp
+{
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Small dim line showing the generated regex underneath the controls */
+.ids_pattern_preview
+{
+  font-size: 10px;
+  color: #aaa;
+  font-family: monospace;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── IFC multi-class chip selector ───────────────────────────────────────── */
+
+.ids_chips_area
+{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 30px;
+  padding: 4px 6px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  background: #fafafa;
+  align-items: center;
+}
+
+.ids_chip
+{
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #e8f0fe;
+  border: 1px solid #adc4f7;
+  border-radius: 10px;
+  padding: 2px 8px 2px 10px;
+  font-size: 11px;
+  color: #1a3a8c;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ids_chip_remove
+{
+  background: none;
+  border: none;
+  color: #5060a0;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 50%;
+}
+
+.ids_chip_remove:hover { background: #c0cef5; color: #B00000; }
+
+.ids_chips_placeholder
+{
+  font-size: 11px;
+  color: #aaa;
+  font-style: italic;
+}
+
+.ids_chips_add_row
+{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.ids_chips_add_row select
+{
+  flex: 1;
+  min-width: 140px;
+  max-width: 240px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 12px;
+  background: white;
+  font-family: inherit;
+  height: 26px;
+}
+
+.ids_chips_sep
+{
+  font-size: 11px;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.ids_input_inline
+{
+  flex: 0 0 110px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  background: white;
+  height: 26px;
+  box-sizing: border-box;
+}
+
+.ids_input_inline:focus { outline: none; border-color: var(--ids-red); }
+
+.ids_btn_small
+{
+  padding: 0 10px;
+  height: 26px;
+  font-size: 12px;
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  background: #f4f4f4;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  font-weight: 600;
+  color: #404040;
+  flex-shrink: 0;
+}
+
+.ids_btn_small:hover { background: var(--ids-red-faint); border-color: var(--ids-red); color: var(--ids-red); }
+
+/* ── Value field (type selector + input area) ────────────────────────────── */
+
+.ids_value_group { flex: 1; min-width: 110px; }
+
+/* Type selector (simple / pattern / enumeration / range) */
+.ids_value_type_sel
+{
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-size: 11px;
+  color: #707070;
+  background: #f6f6f6;
+  width: 100%;
+  margin-bottom: 3px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.ids_value_type_sel:focus { outline: none; border-color: var(--ids-red); }
+
+/* Value input area — row layout for pattern/enum/range (min+max side by side) */
+.ids_value_area
+{
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+}
+
+/* Column layout for simpleValue select + custom input stacked vertically */
+.ids_value_area.ids_value_area_col
+{
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.ids_value_area input,
+.ids_value_area select
+{
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  padding: 4px 7px;
+  font-size: 12px;
+  background: white;
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #202020;
+}
+
+.ids_value_area input:focus,
+.ids_value_area select:focus
+{
+  outline: none;
+  border-color: var(--ids-red);
+  box-shadow: 0 0 0 2px var(--ids-focus-shadow);
+}
+
+/* Enumeration chips add-row input sits inside ids_value_area but must keep its
+   fixed width — override the flex:1 that ids_value_area input would impose. */
+.ids_value_area .ids_chips_add_row .ids_input_inline
+{
+  flex: 0 0 auto;
+  width: 130px;
+}
+
+/* ── Preview panel ───────────────────────────────────────────────────────── */
+
+.ids_preview_toggle
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 5px 4px;
+  user-select: none;
+  border-radius: 3px;
+}
+
+.ids_preview_toggle:hover { background: #f0f4ff; }
+
+.ids_preview_arrow { font-size: 10px; color: #909090; flex-shrink: 0; }
+
+.ids_preview_toggle_label
+{
+  font-size: 12px;
+  font-weight: 700;
+  color: #404040;
+}
+
+.ids_preview_box
+{
+  border: 1px solid #c8d8e8;
+  border-radius: 4px;
+  background: #f5f9ff;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ids_preview_box.hidden { display: none; }
+
+.ids_preview_content { display: flex; flex-direction: column; gap: 4px; }
+
+.ids_preview_title_row
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+
+.ids_preview_name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+
+.ids_preview_versions
+{
+  font-size: 10px;
+  background: #dce8f8;
+  color: #1565c0;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-weight: 700;
+}
+
+.ids_preview_id { font-size: 11px; color: #909090; margin-bottom: 2px; }
+
+.ids_preview_lead { margin: 4px 0 2px; color: #303030; font-size: 12px; }
+
+.ids_preview_empty
+{
+  color: #b0b0b0;
+  font-style: italic;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.ids_preview_list
+{
+  margin: 2px 0 6px 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ids_preview_filter_item
+{
+  padding: 4px 8px;
+  background: #eef2ff;
+  border-left: 3px solid #5c6bc0;
+  border-radius: 0 3px 3px 0;
+  font-size: 12px;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+
+.ids_preview_req_item
+{
+  padding: 4px 8px;
+  border-radius: 0 3px 3px 0;
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.5;
+}
+
+.ids_preview_card_required   { background: #f1f8f2; border-left: 3px solid #4caf50; }
+.ids_preview_card_optional   { background: #fffde7; border-left: 3px solid #ffa726; }
+.ids_preview_card_prohibited { background: #fff5f5; border-left: 3px solid #ef5350; }
+
+/* Mini badge inside preview items */
+.ids_pv_badge
+{
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Preview panel reuses the badge colours defined earlier in the file (.ids_badge_*) */
+
+.ids_pv_inst { font-size: 11px; color: #aaa; font-style: italic; }
+
+.ids_preview_req_item strong { color: #1a1a2e; }
+.ids_preview_req_item code
+{
+  font-family: monospace;
+  font-size: 11px;
+  background: #f0f0f0;
+  padding: 0 3px;
+  border-radius: 2px;
+  color: #d32f2f;
+}
+
+/* ── Scrollbar styling (spec form, spec list) ────────────────────────────── */
+
+.ids_spec_list::-webkit-scrollbar { width: 5px; }
+.ids_spec_list::-webkit-scrollbar-track { background: transparent; }
+.ids_spec_list::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+
+/* ── Panel mode: footer toolbar ─────────────────────────────────────────── */
+
+.ids_editor_body
+{
+  /* When used as a Panel the body must fill available height and arrange
+     the tabbed pane + footer in a column.  The tabbed pane already has
+     flex:1 so it grows; the footer stays pinned at the bottom. */
+  height: 100%;
+}
+
+.ids_panel_footer
+{
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px 8px;   /* extra bottom padding so button borders aren't clipped */
+  border-top: 1px solid #d0d0d0;
+  background: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.ids_footer_btn
+{
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ids_footer_btn:hover { background: #f0f0f0; border-color: #999; }
+
+/* Primary action button — used in the Save dialog for the cloud/server option
+   when a destination is already known (mirrors mv_primary in model-validation.css). */
+.ids_primary
+{
+  background: var(--ids-red);
+  color: white;
+  border-color: var(--ids-red);
+}
+.ids_primary:hover { background: var(--ids-red-dark); }

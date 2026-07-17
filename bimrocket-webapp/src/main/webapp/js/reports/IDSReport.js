@@ -1,6 +1,19 @@
 /**
  * IDSReport.js
  *
+ * Classes for evaluating Information Delivery Specification (IDS) files
+ * against BimRocket IFC models. The IDS spec defines applicability facets
+ * (which objects to check) and requirement facets (what those objects must
+ * satisfy). Each facet type maps to a different piece of IFC model data.
+ *
+ * IFC data is stored in object.userData with the following key conventions:
+ *   userData.IFC              → IFC direct attributes (GlobalId, ifcClassName…)
+ *   userData.IFC_type         → IfcTypeObject attributes (PredefinedType…)
+ *   userData["IFC_" + pset]   → property set named <pset>
+ *   userData["IFC_rel_" + …]  → relation objects
+ *   userData["IFC_classification_" + system] → classification entry
+ *   userData["IFC_material_layer_" + n]      → material layer entry
+ *
  * @author realor
  */
 
@@ -15,6 +28,12 @@ export class IDSReport extends Report
   }
 }
 
+/**
+ * One IDS <specification> element.
+ * applicability selects which objects are subject to this specification;
+ * requirements defines what those objects must satisfy.
+ * Extends Rule so the Report engine can iterate and score objects.
+ */
 export class IDSSpecification extends Rule
 {
   constructor()
@@ -41,6 +60,7 @@ export class IDSSpecification extends Rule
 
   getMinOccurs()
   {
+    // null means the attribute was absent in the XML; default per IDS spec is 1
     return this.applicability.minOccurs === undefined ?
       1 : this.applicability.minOccurs;
   }
@@ -56,23 +76,33 @@ export class IDSSpecification extends Rule
     return "error";
   }
 
+  // Called by the Report engine to decide whether an object is in scope
   selectObject($)
   {
     if (!this.applicability) return false;
     return this.applicability.evaluate($);
   }
 
+  // Called by the Report engine to flag objects that fail requirements.
+  // Returns true when the object FAILS (convention: true = has an issue).
   checkObject($)
   {
     if (!this.requirements) return false;
-    return this.requirements.evaluate($);
+    return !this.requirements.evaluate($);
   }
 
+  // Returns the failure message for a specific failing object.
   getMessage(object)
   {
-    if (this.requirements?.instructionsArray.length > 0)
+    if (this.requirements)
     {
-      return this.requirements?.instructionsArray.join(" ");
+      const $ = (...properties) =>
+        ObjectUtils.getObjectValue(object, ...properties);
+      this.requirements.evaluate($);
+      if (this.requirements.instructionsArray.length > 0)
+      {
+        return this.requirements.instructionsArray.join(" ");
+      }
     }
     return this.instructions || "";
   }
@@ -88,6 +118,7 @@ export class IDSSpecification extends Rule
   }
 }
 
+/** Base class for a list of facets with a shared evaluate() contract */
 export class IDSFacets
 {
   constructor()
@@ -101,6 +132,10 @@ export class IDSFacets
   }
 }
 
+/**
+ * Applicability section: ALL facets must match (logical AND).
+ * An object is in scope only when every facet returns true.
+ */
 export class IDSApplicability extends IDSFacets
 {
   constructor()
@@ -120,6 +155,15 @@ export class IDSApplicability extends IDSFacets
   }
 }
 
+/**
+ * Requirements section: ALL facets must pass.
+ * Unlike applicability, failures are collected so they can be shown in the
+ * report message rather than just returning false.
+ *
+ * Returns true  → all requirements passed.
+ * Returns false → at least one requirement failed.
+ * instructionsArray is populated with the instructions of each failing facet.
+ */
 export class IDSRequirements extends IDSFacets
 {
   constructor()
@@ -139,10 +183,12 @@ export class IDSRequirements extends IDSFacets
         this.instructionsArray.push(facet.instructions || "fail!");
       }
     }
-    return this.instructionsArray.length > 0;
+    // Empty array → all passed; non-empty → at least one failed
+    return this.instructionsArray.length === 0;
   }
 }
 
+/** Base class for a single IDS facet */
 export class IDSFacet
 {
   constructor()
@@ -154,6 +200,11 @@ export class IDSFacet
     return false;
   }
 
+  /**
+   * Matches an IDS value spec (string or Restriction) against a literal value
+   * from the model. String comparison uses strict equality after coercing the
+   * literal to string; Restriction delegates to Restriction.matches().
+   */
   matchValue(idsValue, literalValue)
   {
     if (typeof idsValue === "string")
@@ -168,6 +219,11 @@ export class IDSFacet
   }
 }
 
+/**
+ * <entity> facet — matches by IFC class name and optional predefined type.
+ * ifcClassName is compared uppercase because IDS enumerations use uppercase
+ * (e.g. IFCWALL) while the model may store mixed-case names.
+ */
 export class IDSEntity extends IDSFacet
 {
   constructor()
@@ -185,6 +241,7 @@ export class IDSEntity extends IDSFacet
 
     if (this.name)
     {
+      // userData.IFC.ifcClassName may be mixed case; normalise to uppercase
       const ifcClassName = $("IFC", "ifcClassName")?.toUpperCase();
       matchClass = this.matchValue(this.name, ifcClassName);
     }
@@ -195,6 +252,7 @@ export class IDSEntity extends IDSFacet
 
     if (this.predefinedType)
     {
+      // PredefinedType lives in the IfcTypeObject entry (IFC_type), not in IFC
       const ifcType = $("IFC_type", "PredefinedType");
       matchType = this.matchValue(this.predefinedType, ifcType);
     }
@@ -206,6 +264,17 @@ export class IDSEntity extends IDSFacet
   }
 }
 
+/**
+ * <partOf> facet — checks that the object is (or is not) a child of an
+ * entity matching the inner <entity> spec, optionally via a specific relation.
+ *
+ * The BimRocket IFC tree wraps each IfcProduct in a group Object3D, so we
+ * skip that intermediate node before checking the actual parent product.
+ *
+ * Cardinality:
+ *   "required"   → parent must match (default)
+ *   "prohibited" → parent must NOT match
+ */
 export class IDSPartOf extends IDSFacet
 {
   constructor()
@@ -220,7 +289,9 @@ export class IDSPartOf extends IDSFacet
   evaluate($)
   {
     let parent = $().parent;
-    if (parent.isGroup) // is IfcProduct group
+    // Each IfcProduct is wrapped in an isGroup container; unwrap to get
+    // the actual parent IfcProduct
+    if (parent.isGroup)
     {
       parent = parent.parent;
     }
@@ -232,6 +303,7 @@ export class IDSPartOf extends IDSFacet
     {
       if (typeof this.relation === "string")
       {
+        // If a specific relation type is required, verify it exists on the object
         if (this.relationFound($()))
         {
           return this.cardinality === "required";
@@ -239,12 +311,17 @@ export class IDSPartOf extends IDSFacet
       }
       else
       {
+        // No relation type filter — parent entity match is sufficient
         return this.cardinality === "required";
       }
     }
     return this.cardinality === "prohibited";
   }
 
+  /**
+   * Checks whether any IFC_rel_* entry on the object matches the required
+   * relation type (e.g. IFCRELAGGREGATES).
+   */
   relationFound(object)
   {
     const relationName = this.relation.toUpperCase();
@@ -261,6 +338,24 @@ export class IDSPartOf extends IDSFacet
   }
 }
 
+/**
+ * <material> facet — checks material layers stored as IFC_material_layer_N.
+ *
+ * Cardinality:
+ *   "required"   → at least one material layer must exist (and match value if given)
+ *   "prohibited" → no material layer may match
+ *   "optional"   → if layers exist they must match; absence is also accepted
+ *
+ * If value is null, only the presence of a non-empty Material name is checked.
+ * If value is specified, the Material name must also satisfy the value constraint.
+ * A non-matching value always fails, even for optional (optional only relaxes
+ * the "must exist" requirement, not the value constraint).
+ *
+ * Type-level fallback: if no material layers are found on the instance,
+ * the IFC type object's userData is also searched (accessible via object.links.ifcType).
+ * Instance materials take full precedence — the type is only consulted when the
+ * instance has none.
+ */
 export class IDSMaterial extends IDSFacet
 {
   constructor()
@@ -274,47 +369,83 @@ export class IDSMaterial extends IDSFacet
 
   evaluate($)
   {
-    const userData = $().userData;
+    const obj = $();
+
+    // IFC allows material layers to be defined at type level (IfcMaterialLayerSetUsage
+    // on IfcWallType) rather than on each instance. The loader stores type-level data
+    // in the object linked as "ifcType". We check instance first; if no layers are
+    // found there we fall back to the type. Instance always wins if it has any layers.
+    const userDatas = [obj.userData];
+    const typeUserData = obj.links?.["ifcType"]?.userData;
+    if (typeUserData) userDatas.push(typeUserData);
+
     let matchCount = 0;
+    // For value constraints on multi-layer elements: "required" means at least ONE
+    // layer must match the value (not ALL layers). This flag tracks whether a match
+    // was found so we can apply that check after the full loop.
+    let valueMatchFound = false;
 
-    for (let name in userData)
+    for (const userData of userDatas)
     {
-      if (name.startsWith("IFC_material_Layer_"))
+      // Instance had layers → type is not consulted (instance takes precedence)
+      if (matchCount > 0 && userData !== obj.userData) break;
+
+      for (let name in userData)
       {
-        matchCount++;
-
-        const materialLayerData = userData[name];
-        let value = materialLayerData["Material"] || "";
-
-        if (this.value) // check the Material value condition
+        if (name.startsWith("IFC_material_layer_"))
         {
-          if (this.matchValue(this.value, value))
+          matchCount++;
+
+          const materialLayerData = userData[name];
+          let value = materialLayerData["Material"] || "";
+
+          if (this.value) // IDS specifies a value constraint on the material name
           {
-            if (this.cardinality === "prohibited") return false;
+            if (this.matchValue(this.value, value))
+            {
+              // A matching layer found: prohibited cardinality fails immediately
+              if (this.cardinality === "prohibited") return false;
+              valueMatchFound = true; // at least one layer matches
+            }
+            // Non-matching layer: do NOT fail here — other layers may still match.
+            // The final verdict is deferred until all layers are inspected.
           }
-          else
+          else // IDS only checks whether a material name is present or absent
           {
-            if (this.cardinality !== "prohibited") return false;
-          }
-        }
-        else // check if Material has a value
-        {
-          if (value)
-          {
-            if (this.cardinality === "prohibited") return false;
-          }
-          else
-          {
-            if (this.cardinality === "required") return false;
+            if (value)
+            {
+              if (this.cardinality === "prohibited") return false;
+            }
+            else
+            {
+              if (this.cardinality === "required") return false;
+            }
           }
         }
       }
     }
+    // No layers found at all
     if (this.cardinality === "required" && matchCount === 0) return false;
+    // Value constraint specified but no layer matched — fail unless prohibited
+    if (this.value && this.cardinality !== "prohibited" && matchCount > 0 && !valueMatchFound)
+    {
+      return false;
+    }
     return true;
   }
 }
 
+/**
+ * <classification> facet — checks classification references stored as
+ * IFC_classification_<systemName> entries in userData.
+ *
+ * system matches the classification system name (e.g. "Uniclass").
+ * value matches the ItemReference code within that system.
+ * Same cardinality semantics as IDSMaterial.
+ *
+ * Type-level fallback: same as IDSMaterial — if no matching classification system
+ * is found on the instance, the IFC type's userData is consulted as a fallback.
+ */
 export class IDSClassification extends IDSFacet
 {
   constructor()
@@ -329,51 +460,92 @@ export class IDSClassification extends IDSFacet
 
   evaluate($)
   {
-    const userData = $().userData;
+    const obj = $();
+
+    // Same instance-first, type-fallback pattern as IDSMaterial.
+    // Classification references can be assigned at type level in some IFC workflows.
+    const userDatas = [obj.userData];
+    const typeUserData = obj.links?.["ifcType"]?.userData;
+    if (typeUserData) userDatas.push(typeUserData);
+
     let matchCount = 0;
 
-    for (let name in userData)
+    for (const userData of userDatas)
     {
-      if (name.startsWith("IFC_classification_"))
+      // Instance had a matching classification system → skip type
+      if (matchCount > 0 && userData !== obj.userData) break;
+
+      for (let name in userData)
       {
-        const systemName = name.substring(19);
-        if (this.matchValue(this.system, systemName))
+        if (name.startsWith("IFC_classification_"))
         {
-          matchCount++;
-
-          const system = userData[name];
-          let value = system["ItemReference"] || "";
-
-          if (this.value) // check the Classification value condition
+          // Key format: "IFC_classification_<systemName>" → extract system name
+          const systemName = name.substring(19);
+          if (this.matchValue(this.system, systemName))
           {
-            if (this.matchValue(this.value, value))
+            matchCount++;
+
+            const system = userData[name];
+            let value = system["ItemReference"] || "";
+
+            if (this.value) // IDS specifies a value constraint on the classification code
             {
-              if (this.cardinality === "prohibited") return false;
+              if (this.matchValue(this.value, value))
+              {
+                // Code matches: prohibited means this is a violation
+                if (this.cardinality === "prohibited") return false;
+              }
+              else
+              {
+                // Code does not match: required/optional means constraint is violated
+                if (this.cardinality !== "prohibited") return false;
+              }
             }
-            else
+            else // IDS only checks whether a code is present or absent
             {
-              if (this.cardinality !== "prohibited") return false;
-            }
-          }
-          else // check if Classification has a value
-          {
-            if (value)
-            {
-              if (this.cardinality === "prohibited") return false;
-            }
-            else
-            {
-              if (this.cardinality === "required") return false;
+              if (value)
+              {
+                if (this.cardinality === "prohibited") return false;
+              }
+              else
+              {
+                if (this.cardinality === "required") return false;
+              }
             }
           }
         }
       }
     }
+    // No matching classification system found at instance or type level
     if (this.cardinality === "required" && matchCount === 0) return false;
     return true;
   }
 }
 
+/**
+ * <property> facet — checks properties inside IfcPropertySets.
+ *
+ * Property sets are stored as userData["IFC_" + psetName]. The "IFC_" prefix
+ * is stripped when extracting psetName so it can be matched against the IDS
+ * propertySet value. Non-pset IFC_ keys (IFC_rel_*, IFC_material_*, etc.)
+ * are explicitly excluded to avoid false matches.
+ *
+ * IMPORTANT — pset name convention:
+ *   BimRocket's property panel displays pset keys with the "IFC_" prefix
+ *   (e.g. "IFC_01-Identificador"). However, the IDS propertySet field must
+ *   contain the ACTUAL IFC pset name WITHOUT that prefix (e.g. "01-Identificador"),
+ *   because the "IFC_" is added internally by the loader and stripped here before
+ *   matching. Writing the BimRocket display name into the IDS will cause all
+ *   elements to fail silently.
+ *
+ * Type-level fallback: IFC allows psets to be defined on the IfcTypeProduct
+ * (e.g. IfcWallType) and inherited by all instances. The loader stores type-level
+ * psets in the type group's userData, accessible from the instance via
+ * object.links.ifcType. If the pset is not found at instance level, the type's
+ * userData is searched as a fallback. Instance psets take full precedence.
+ *
+ * Same cardinality semantics as IDSMaterial.
+ */
 export class IDSProperty extends IDSFacet
 {
   constructor()
@@ -390,45 +562,73 @@ export class IDSProperty extends IDSFacet
 
   evaluate($)
   {
-    const userData = $().userData;
+    const obj = $();
+
+    // IFC allows psets to be defined on the IfcTypeProduct (e.g. IfcWallType)
+    // and shared by all instances of that type via IFCRELDEFINESBYTYPE.
+    // The loader stores type-level psets in the typeGroup linked as "ifcType".
+    // We check instance psets first; the type is only consulted if the pset is
+    // absent at instance level — matching standard IFC inheritance semantics.
+    const userDatas = [obj.userData];
+    const typeUserData = obj.links?.["ifcType"]?.userData;
+    if (typeUserData) userDatas.push(typeUserData);
+
     let matchCount = 0;
 
-    for (let name in userData)
+    for (const userData of userDatas)
     {
-      if (name.startsWith("IFC_"))
+      // A matching pset was found at instance level → type-level lookup is skipped.
+      // This preserves instance-overrides-type semantics even when both levels
+      // define the same pset with different values.
+      if (matchCount > 0 && userData !== obj.userData) break;
+
+      for (let name in userData)
       {
-        const psetName = name.substring(4);
-        if (this.matchValue(this.propertySet, psetName))
+        // Only consider property set keys; skip relation, material, classification
+        // and type entries that share the "IFC_" prefix
+        if (name.startsWith("IFC_") &&
+            !name.startsWith("IFC_classification_") &&
+            !name.startsWith("IFC_material_") &&
+            !name.startsWith("IFC_rel_") &&
+            name !== "IFC_type")
         {
-          const pset = userData[name];
-          for (let propertyName in pset)
+          // Key format: "IFC_<psetName>" → extract the actual IFC pset name
+          const psetName = name.substring(4);
+          if (this.matchValue(this.propertySet, psetName))
           {
-            if (this.matchValue(this.baseName, propertyName))
+            const pset = userData[name];
+            for (let propertyName in pset)
             {
-              matchCount++;
-
-              let value = pset[propertyName] || "";
-
-              if (this.value) // check the Property value condition
+              if (this.matchValue(this.baseName, propertyName))
               {
-                if (this.matchValue(this.value, value))
+                matchCount++;
+
+                let value = pset[propertyName] || "";
+
+                if (this.value) // IDS specifies a value constraint on the property
                 {
-                  if (this.cardinality === "prohibited") return false;
+                  if (this.matchValue(this.value, value))
+                  {
+                    // Value matches: prohibited means this is a violation
+                    if (this.cardinality === "prohibited") return false;
+                  }
+                  else
+                  {
+                    // Value does not match: required/optional means constraint is violated
+                    // (optional relaxes existence, not the value constraint itself)
+                    if (this.cardinality !== "prohibited") return false;
+                  }
                 }
-                else
+                else // IDS only checks whether the property has any non-empty value
                 {
-                  if (this.cardinality !== "prohibited") return false;
-                }
-              }
-              else // check if Property has a value
-              {
-                if (value)
-                {
-                  if (this.cardinality === "prohibited") return false;
-                }
-                else
-                {
-                  if (this.cardinality === "required") return false;
+                  if (value)
+                  {
+                    if (this.cardinality === "prohibited") return false;
+                  }
+                  else
+                  {
+                    if (this.cardinality === "required") return false;
+                  }
                 }
               }
             }
@@ -436,11 +636,17 @@ export class IDSProperty extends IDSFacet
         }
       }
     }
+    // Property not found at instance or type level
     if (this.cardinality === "required" && matchCount === 0) return false;
     return true;
   }
 }
 
+/**
+ * <attribute> facet — checks direct IFC attributes stored in userData.IFC
+ * (e.g. GlobalId, Name, Description, ObjectType…).
+ * Same cardinality semantics as IDSMaterial.
+ */
 export class IDSAttribute extends IDSFacet
 {
   constructor()
@@ -454,6 +660,7 @@ export class IDSAttribute extends IDSFacet
 
   evaluate($)
   {
+    // IFC direct attributes live under the "IFC" userData key
     const attributes = $("IFC");
     let matchCount = 0;
 
@@ -494,6 +701,11 @@ export class IDSAttribute extends IDSFacet
   }
 }
 
+// ---------------------------------------------------------------------------
+// XSD restriction facets — each corresponds to an xs:* constraint element
+// ---------------------------------------------------------------------------
+
+/** Base class for a single xs:* restriction constraint */
 export class RestrictionFacet
 {
   constructor(value)
@@ -501,6 +713,11 @@ export class RestrictionFacet
     this.value = value;
   }
 
+  /**
+   * Returns true if this facet is a "required" (AND) constraint.
+   * Enumeration overrides this to return false so multiple enumerations
+   * are combined with OR instead of AND.
+   */
   isRequired()
   {
     return true;
@@ -564,6 +781,11 @@ export class MaxExclusiveFacet extends RestrictionFacet
   }
 }
 
+/**
+ * xs:enumeration — each allowed value is a separate facet.
+ * isRequired() returns false so the Restriction engine combines multiple
+ * enumerations with OR (value must equal ANY of the listed options).
+ */
 export class EnumerationFacet extends RestrictionFacet
 {
   constructor(value)
@@ -582,6 +804,7 @@ export class EnumerationFacet extends RestrictionFacet
   }
 }
 
+/** xs:pattern — value must match the XSD regular expression */
 export class PatternFacet extends RestrictionFacet
 {
   constructor(value)
@@ -635,6 +858,18 @@ class MaxLengthFacet extends RestrictionFacet
   }
 }
 
+/**
+ * Represents an xs:restriction element — a set of RestrictionFacets that
+ * collectively determine whether a value is valid.
+ *
+ * Combining logic mirrors XSD semantics:
+ *   - Required facets (range constraints) are ANDed: ALL must pass.
+ *   - Non-required facets (enumerations) are ORed: ANY one match is enough.
+ *   - Mixed: required facets are ANDed with the result of the OR group.
+ *
+ * base controls type conversion of constraint values read from XML so that
+ * numeric comparisons work correctly (e.g. base="decimal" → parseFloat).
+ */
 export class Restriction
 {
   static facetTypes = {
@@ -670,6 +905,7 @@ export class Restriction
     }
   }
 
+  /** Converts a string value from XML to the appropriate JS type based on base */
   convertValue(value)
   {
     switch (this.base)
@@ -686,8 +922,19 @@ export class Restriction
     return value;
   }
 
+  /**
+   * Returns true if the value satisfies all constraints in this restriction.
+   * An empty facet list (no constraints) matches everything.
+   *
+   * Iteration logic:
+   *   - First facet always initialises the result.
+   *   - Subsequent required facets (range): AND with current result.
+   *   - Subsequent non-required facets (enumeration): OR with current result.
+   */
   matches(value)
   {
+    if (this.facets.length === 0) return true;
+
     let match = undefined;
     let required = true;
 
@@ -711,6 +958,6 @@ export class Restriction
         }
       }
     }
-    return match;
+    return !!match;
   }
 }

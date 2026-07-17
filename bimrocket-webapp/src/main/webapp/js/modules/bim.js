@@ -14,6 +14,7 @@ import { BIMDeltaTool } from "../tools/BIMDeltaTool.js";
 import { BIMResetViewTool } from "../tools/BIMResetViewTool.js";
 import { BIMExplodeTool } from "../tools/BIMExplodeTool.js";
 import { ServerAdminTool } from "../tools/ServerAdminTool.js";
+import { IDSEditorTool } from "../tools/IDSEditorTool.js";
 import { IFCSTEPLoader } from "../io/ifc/IFCSTEPLoader.js";
 import { IFCSTEPExporter } from "../io/ifc/IFCSTEPExporter.js";
 import { BCFService } from "../io/BCFService.js";
@@ -81,6 +82,7 @@ export function load(application)
   const bimExplodeTool = new BIMExplodeTool(application);
   const bimResetViewTool = new BIMResetViewTool(application);
   const adminTool = new ServerAdminTool(application);
+  const idsEditorTool = new IDSEditorTool(application);
 
   // create menus
   const menuBar = application.menuBar;
@@ -95,6 +97,7 @@ export function load(application)
   bimMenu.addMenuItem(bimDeltaTool);
   bimMenu.addMenuItem(bimExplodeTool);
   bimMenu.addMenuItem(bimResetViewTool);
+  bimMenu.addMenuItem(idsEditorTool);
   bimMenu.addMenuItem(adminTool);
 
   const toolBar = application.toolBar;

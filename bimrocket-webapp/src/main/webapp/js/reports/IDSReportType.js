@@ -1,6 +1,12 @@
 /**
  * IDSReportType.js
  *
+ * Parses buildingSMART IDS 1.0 XML files into an IDSReport object tree.
+ * Registered as the "ids" report type so the Report engine can load .ids files.
+ *
+ * XML namespace prefixes (ids:, xs:, xsi:) are stripped when matching tag
+ * names so the parser works regardless of which prefix the file uses.
+ *
  * @author realor
  */
 
@@ -50,6 +56,10 @@ class IDSReportType extends ReportType
 `;
   }
 
+  /**
+   * Parses IDS XML source text into an IDSReport with IDSSpecification rules.
+   * Throws the parser error text if the XML is malformed.
+   */
   parse(source)
   {
     const report = new IDSReport();
@@ -61,6 +71,8 @@ class IDSReportType extends ReportType
     {
       throw errorNode.textContent;
     }
+
+    // Parse <info> metadata block
     let info = xmlDoc.querySelector("info");
     if (info)
     {
@@ -73,6 +85,8 @@ class IDSReportType extends ReportType
       report.purpose = info.querySelector("purpose")?.textContent || null;
       report.milestone = info.querySelector("milestone")?.textContent || null;
     }
+
+    // Parse each <specification> child into an IDSSpecification rule
     let specifications = xmlDoc.querySelector("specifications");
     if (specifications)
     {
@@ -105,6 +119,11 @@ class IDSReportType extends ReportType
   {
   }
 
+  /**
+   * Populates an IDSApplicability or IDSRequirements with facets parsed from
+   * the given XML node. Also reads minOccurs/maxOccurs for applicability.
+   * "unbounded" maxOccurs is stored as null (no upper limit).
+   */
   parseSpecification(appReq, node)
   {
     if (appReq instanceof IDSApplicability)
@@ -191,7 +210,10 @@ class IDSReportType extends ReportType
 
   parseProperty(property, node)
   {
-    property.propertySet = this.parseValue(node.querySelector("propertySet"));
+    let ps = this.parseValue(node.querySelector("propertySet"));
+    // Strip accidental "IFC_" prefix written by old versions of the IDS editor
+    if (typeof ps === "string" && ps.startsWith("IFC_")) ps = ps.substring(4);
+    property.propertySet = ps;
     property.baseName = this.parseValue(node.querySelector("baseName"));
     property.value = this.parseValue(node.querySelector("value"));
     property.dataType = node.getAttribute("dataType");
@@ -208,11 +230,18 @@ class IDSReportType extends ReportType
     attribute.instructions = node.getAttribute("instructions");
   }
 
+  /**
+   * Parses a value node that may contain either:
+   *   <ids:simpleValue>text</ids:simpleValue>  → returns the string
+   *   <xs:restriction base="xs:string">…</xs:restriction> → returns a Restriction
+   * Returns null if the node is absent or has no recognised child element.
+   */
   parseValue(node)
   {
     if (node)
     {
       const childNode = node.firstElementChild;
+      if (!childNode) return null; // empty value node — no constraint
       const tagName = this.getTagName(childNode);
       if (tagName === "simpleValue")
       {
@@ -224,6 +253,7 @@ class IDSReportType extends ReportType
         let base = childNode.getAttribute("base");
         if (base)
         {
+          // Strip namespace prefix (xs:string → string, xs:decimal → decimal…)
           let index = base.lastIndexOf(":");
           if (index !== -1) base = base.substring(index + 1);
         }
@@ -243,8 +273,14 @@ class IDSReportType extends ReportType
     return null;
   }
 
+  /**
+   * Returns the local tag name (without namespace prefix).
+   * e.g. "ids:entity" → "entity", "xs:restriction" → "restriction".
+   * Returns null if node is null (guards callers that may pass null).
+   */
   getTagName(node)
   {
+    if (!node) return null;
     let tagName = node.tagName;
     let index = tagName.indexOf(":");
     if (index !== -1)

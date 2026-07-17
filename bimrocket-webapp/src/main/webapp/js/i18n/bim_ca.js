@@ -227,4 +227,7 @@ export const translations =
   "placeholder.add_tags": "Escriu i prem Enter per afegir etiquetes",
 
   "action.ShowProjectSetup" : "Configuració",
+
+  "tool.ids_editor.label" : "Editor IDS",
+  "tool.ids_editor.help"  : "Editor visual d'IDS (Information Delivery Specification)",
 };

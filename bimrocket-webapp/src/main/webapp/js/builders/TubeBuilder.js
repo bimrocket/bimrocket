@@ -9,13 +9,12 @@ import * as THREE from "three";
 
 class TubeBuilder extends ObjectBuilder 
 {
-  constructor(radius = 6.0, zScale = 0.001, zOffset = -1, segmentsMultiplier = 4, profileEdges = 8, looping = false) 
+  constructor(radius = 6.0, zScale = 0.001, segmentsMultiplier = 4, profileEdges = 8, looping = false) 
   {
     super();
     this.type = "tube";
     this.radius = radius;
     this.zScale = zScale;
-    this.zOffset = zOffset;
     this.segmentsMultiplier = segmentsMultiplier;
     this.profileEdges = profileEdges;
     this.looping = looping;
@@ -60,8 +59,7 @@ class TubeBuilder extends ObjectBuilder
           object.edgesVisible = false;
           object.scale.set(1, 1, this.zScale);
 
-          let randomOffset = this.zOffset + Math.floor(Math.random() * 10);
-          object.position.z += randomOffset;
+          object.position.z = Math.floor(Math.random() * 5);
 
           // if source is child (WFS ADD_OBJECT mode), we hidden it to avoid duplication
           if (source !== object) source.visible = false;

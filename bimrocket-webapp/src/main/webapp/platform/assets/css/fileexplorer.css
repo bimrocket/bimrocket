@@ -1,0 +1,230 @@
+/*
+    Created on : 29 mar 2026, 10:00:31
+    Author     : realor
+*/
+
+:root
+{
+  --fileexplorer-color: var(--text-color);
+  --fileexplorer-icon-size: 20px;
+  --fileexplorer-icon-margin: 4px;
+  --fileexplorer-entry-selected: var(--selection-text-color);
+  --fileexplorer-entry-padding: 4px;
+  --fileexplorer-entry-margin: 1px;
+  --fileexplorer-directory-radius: calc(var(--border-radius) / 2);
+  --fileexplorer-entry-border-radius: calc(var(--border-radius) / 2);
+}
+
+.fileexplorer-panel
+{
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  height:100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+}
+
+.fileexplorer-panel .header
+{
+  flex-grow: 0;
+  display: flex;
+  flex-direction: row;
+  margin: 2px;
+  align-items: center;
+  column-gap: 2px;
+  align-items: center;
+}
+
+.fileexplorer-panel > .header > .directory
+{
+  flex-grow: 1;
+  font-size: 13px;
+  font-weight:normal;
+  text-align: left;
+  line-height: 20px;
+  padding:4px;
+  color: var(--fileexplorer-color);
+  direction: rtl;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: var(--surface-field);
+  border-radius: var(--fileexplorer-directory-radius);
+  transform: translate(0.5px, 0.5px);
+}
+
+.fileexplorer-panel > .path-entries
+{
+  flex-grow: 1;
+  padding-left: 0;
+  overflow-y: auto;
+  margin:2px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+  padding-bottom: 40px;
+}
+
+.fileexplorer-panel > .footer
+{
+  width:100%;
+  flex-grow: 0;
+}
+
+.fileexplorer-panel > .footer > .buttons-panel
+{
+  text-align: center;
+}
+
+.fileexplorer-panel .entry
+{
+  list-style-type: none;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  border-radius: calc(var(--border-radius) / 2);
+  margin-top: var(--fileexplorer-entry-margin);
+}
+
+.fileexplorer-panel .entry > div
+{
+  position: relative;
+  display: inline;
+  align-items: center;
+  text-decoration: none;
+  color: var(--fileexplorer-color);
+  cursor:pointer;
+  padding: var(--fileexplorer-entry-padding);
+  padding-left: calc(var(--fileexplorer-icon-size) + 2 * var(--fileexplorer-icon-margin));
+  border-radius: var(--fileexplorer-entry-border-radius);
+  border: 1px solid;
+  border-color: transparent;
+  flex-grow: 1;
+  flex-shrink: 1;
+  word-break: break-all;
+}
+
+.fileexplorer-panel .entry > div::before
+{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--fileexplorer-color);
+  mask-repeat: no-repeat;
+  mask-position: var(--fileexplorer-icon-margin) center;
+  mask-size: var(--fileexplorer-icon-size);
+  pointer-events: none;
+}
+
+.fileexplorer-panel .entry > button
+{
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.fileexplorer-panel .entry:hover
+{
+  background-color: var(--surface-hover);
+}
+
+.fileexplorer-panel .entry > div:focus
+{
+  border-color: var(--border-color);
+  outline: none;
+}
+
+.fileexplorer-panel .entry.service > div
+{
+  font-weight:bold;
+}
+
+.fileexplorer-panel .entry.service > div::before
+{
+  mask-image: url(../icons/file.svg#service);
+}
+
+.fileexplorer-panel .entry.collection > div::before
+{
+  mask-image: url(../icons/file.svg#collection);
+}
+
+.fileexplorer-panel .entry.file > div::before
+{
+  mask-image: url(../icons/file.svg#file);
+}
+
+.fileexplorer-panel .entry.selected,
+.fileexplorer-panel .entry.selected:hover,
+.fileexplorer-panel .entry.selected > div,
+.fileexplorer-panel .entry.selected:hover > div
+{
+  color: var(--fileexplorer-entry-selected);
+  background-color: var(--surface-selection);
+}
+
+.fileexplorer-panel .entry.copy > div,
+.fileexplorer-panel .entry.copy:hover > div
+{
+  font-style: italic;
+  color: var(--copy-color);
+}
+
+.fileexplorer-panel .entry.cut > div,
+.fileexplorer-panel .entry.cut:hover > div
+{
+  font-style: italic;
+  color: var(--cut-color);
+}
+
+.fileexplorer-panel .entry div span.size
+{
+  margin-left: 4px;
+  white-space: nowrap;
+  color: var(--label-text-color);
+}
+
+.fileexplorer-panel .entry.file.brf > div::before
+{
+  mask-image: url(../icons/file.svg#brf);
+}
+
+.fileexplorer-panel .entry.file.ifc > div::before
+{
+  mask-image: url(../icons/file.svg#ifc);
+}
+
+.fileexplorer-panel .entry.file.image > div::before
+{
+  mask-image: url(../icons/file.svg#image);
+}
+
+.fileexplorer-panel .entry.file.model3d > div::before
+{
+  mask-image: url(../icons/file.svg#model3d);
+}
+
+.fileexplorer-panel .entry.file.pdf > div::before
+{
+  mask-image: url(../icons/file.svg#pdf);
+}
+
+.fileexplorer-panel .entry.file.report > div::before
+{
+  mask-image: url(../icons/file.svg#report);
+}
+
+.fileexplorer-panel .entry.file.script > div::before
+{
+  mask-image: url(../icons/file.svg#script);
+}
+
+.fileexplorer-panel .entry.file.snapshot > div::before
+{
+  mask-image: url(../icons/file.svg#snapshot);
+}

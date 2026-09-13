@@ -1,0 +1,138 @@
+:root
+{
+  --progressbar-max-width: 200px;
+  --progressbar-undeterminate-max-width: 100px;
+  --progressbar-color: var(--color-2);
+  --progressbar-background: var(--surface-ground);
+  --progressbar-radius: 12px;
+  --progressbar-padding: 12px;
+  --progressbar-shadow: var(--box-shadow-2);
+  --progressbar-gap: 6px;
+  --progressbar-bar-color: var(--primary-color);
+  --progressbar-bar-background: var(--surface-3);
+  --progressbar-bar-height: 10px;
+  --progressbar-bar-radius: 5px;
+  --progressbar-progress-padding: 2px;
+  --progressbar-progress-margin: 6px;
+}
+
+.progressbar
+{
+  --hbw: min(50%, var(--progressbar-max-width)) + 16px;
+
+  border-radius: var(--progressbar-radius);
+  color: var(--progressbar-color);
+  background-color: var(--progressbar-background);
+  box-shadow: var(--progressbar-shadow);
+  padding: var(--progressbar-padding);
+  position: absolute;
+  left: calc(50% - var(--hbw));
+  right: calc(50% - var(--hbw));
+  bottom: 50%;
+  z-index: 10010;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--progressbar-gap);
+}
+
+.progressbar .message
+{
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+}
+
+.progressbar .bar
+{
+  padding: 0;
+  background-color: var(--progressbar-bar-background);
+  color:black;
+  text-align: center;
+  border-radius: var(--progressbar-bar-radius);
+}
+
+.progressbar .bar .done
+{
+  padding: 0;
+  background-color: var(--progressbar-bar-color);
+  border: none;
+  border-radius: var(--progressbar-bar-radius);
+  height: var(--progressbar-bar-height);
+}
+
+.progressbar .progress
+{
+  padding: var(--progressbar-progress-padding);
+  height: 16px;
+}
+
+.progressbar .progress .percent
+{
+}
+
+.progressbar .progress .remaining-label
+{
+}
+
+.progressbar .progress .remaining-label::before
+{
+  content: "-";
+  margin-left: var(--progressbar-progress-margin);
+  margin-right: var(--progressbar-progress-margin);
+}
+
+.progressbar .progress .remaining-time
+{
+  margin-left: var(--progressbar-progress-margin);
+}
+
+
+/* undeterminate */
+
+.progressbar.undeterminate
+{
+  --hbw: min(50%, var(--progressbar-undeterminate-max-width)) + 16px;
+}
+
+.progressbar.undeterminate:after
+{
+  content: " ";
+  display: inline-block;
+  text-align: center;
+  width: 32px;
+  height: 32px;
+  margin: 24px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 50%;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--progressbar-bar-background) var(--progressbar-bar-color)
+                var(--progressbar-bar-background) var(--progressbar-bar-color);
+  animation: progress-undeterminate 1.2s linear infinite;
+}
+
+.progressbar.undeterminate .message
+{
+  text-align: center;
+}
+
+.progressbar.undeterminate .bar
+{
+  display: none;
+}
+
+@keyframes progress-undeterminate
+ {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+

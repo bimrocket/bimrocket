@@ -1,0 +1,939 @@
+/**
+ * Controls.js
+ *
+ * @author realor
+ */
+
+import { I18N } from "platform/i18n/I18N.js";
+import { IconManager } from "platform/ui/IconManager.js";
+import * as CM from "platform/lib/codemirror.js";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+class Controls
+{
+  static nextId = 0;
+
+  static addText(parent, text, className)
+  {
+    const textElem = document.createElement("span");
+    I18N.set(textElem, "textContent", text);
+    if (className) textElem.className = className;
+
+    parent.appendChild(textElem);
+    return textElem;
+  }
+
+  static addTextWithArgs(parent, text, args = [], className)
+  {
+    const textElem = document.createElement("span");
+    I18N.set(textElem, "textContent", text, ...args);
+    if (className) textElem.className = className;
+
+    parent.appendChild(textElem);
+    return textElem;
+  }
+
+  static addCode(parent, text, className)
+  {
+    const textElem = document.createElement("pre");
+    textElem.textContent = text;
+    if (className) textElem.className = className;
+
+    parent.appendChild(textElem);
+    return textElem;
+  }
+
+  static addIcon(parent, iconName, className)
+  {
+    const svgElem = document.createElementNS(SVG_NS, "svg");
+    svgElem.setAttribute("aria-hidden", "true");
+    svgElem.setAttribute("class", className || "icon-24");
+
+    if (iconName) this.setIcon(svgElem, iconName);
+
+    parent.appendChild(svgElem);
+    return svgElem;
+  }
+
+  static setIcon(svgElem, iconName)
+  {
+    svgElem.dataset.icon = iconName;
+    IconManager.update(svgElem);
+  }
+
+  static addLink(parent, label, url, title, className, action)
+  {
+    const linkElem = document.createElement("a");
+    parent.appendChild(linkElem);
+
+    if (className) linkElem.className = className;
+    if (label) I18N.set(linkElem, "textContent", label);
+    if (url) linkElem.href = url;
+    if (title)
+    {
+      I18N.set(linkElem, "title", title);
+      I18N.set(linkElem, "alt", title);
+    }
+    if (action)
+    {
+      linkElem.addEventListener("click", action, false);
+    }
+    return linkElem;
+  }
+
+  static addTextField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "text", name, label, value,
+      className);
+  }
+
+  static addNumberField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "number", name, label, value,
+      className);
+  }
+
+  static addPasswordField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "password", name, label, value,
+      className);
+  }
+
+  static addDateField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "date", name, label, value,
+      className);
+  }
+
+  static addColorField(parent, name, label, value, className)
+  {
+    return Controls.addInputField(parent, "color", name, label, value,
+      className);
+  }
+
+  static addCheckBoxField(parent, name, label, checked, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const labelElem = groupElem.childNodes[0];
+
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    inputElem.type = "checkbox";
+    inputElem.className = "checkbox";
+    inputElem.checked = Boolean(checked);
+    groupElem.insertBefore(inputElem, labelElem);
+
+    return inputElem;
+  }
+
+  static addCheckBox(parent, name, label, checked, className)
+  {
+    const id = this.getNextId();
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    I18N.set(inputElem, "title", label);
+    I18N.set(inputElem, "aria-labelledby", label);
+    inputElem.type = "checkbox";
+    inputElem.className = className || "checkbox";
+    inputElem.checked = Boolean(checked);
+
+    parent.appendChild(inputElem);
+
+    return inputElem;
+  }
+
+  static addSwitchField(parent, name, label, checked, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const labelElem = groupElem.childNodes[0];
+
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    inputElem.type = "checkbox";
+    inputElem.className = "switch";
+    inputElem.checked = Boolean(checked);
+    groupElem.appendChild(inputElem, labelElem);
+
+    return inputElem;
+  }
+
+  static addSwitch(parent, name, label, checked, className)
+  {
+    const id = this.getNextId();
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    I18N.set(inputElem, "title", label);
+    I18N.set(inputElem, "aria-labelledby", label);
+    inputElem.type = "checkbox";
+    inputElem.className = className || "switch";
+    inputElem.checked = Boolean(checked);
+
+    parent.appendChild(inputElem);
+
+    return inputElem;
+  }
+
+  static addInputField(parent, type, name, label, value, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const inputElem = document.createElement("input");
+    inputElem.id = id;
+    inputElem.name = name;
+    inputElem.type = type || "text";
+    if (value !== undefined && value !== null) inputElem.value = value;
+    groupElem.appendChild(inputElem);
+
+    return inputElem;
+  }
+
+  static addTextAreaField(parent, name, label, value, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const textAreaElem = document.createElement("textarea");
+    textAreaElem.id = id;
+    textAreaElem.name = name;
+    if (value) textAreaElem.value = value;
+    groupElem.appendChild(textAreaElem);
+
+    return textAreaElem;
+  }
+
+  static addSelectField(parent, name, label, options, value, className)
+  {
+    const id = this.getNextId();
+    const groupElem = Controls.addField(parent, id, label, className);
+
+    const selectElem = document.createElement("select");
+    selectElem.id = id;
+    selectElem.name = name;
+    groupElem.appendChild(selectElem);
+
+    if (options)
+    {
+      Controls.setSelectOptions(selectElem, options);
+    }
+
+    if (value)
+    {
+      Controls.setSelectValue(selectElem, value);
+    }
+    return selectElem;
+  }
+
+  static setSelectOptions(selectElem, options, value = selectElem.value, create)
+  {
+    selectElem.innerHTML = "";
+    if (options instanceof Array)
+    {
+      for (let option of options)
+      {
+        let optionValue;
+        let optionLabel;
+        let optionDisabled;
+        if (option instanceof Array)
+        {
+          optionValue = option[0];
+          optionLabel = option[1] || optionValue;
+          optionDisabled = option[2] || false;
+        }
+        else if (typeof option === "string")
+        {
+          optionValue = option;
+          optionLabel = option;
+          optionDisabled = false;
+        }
+        else continue;
+
+        let optionElem = document.createElement("option");
+        optionElem.value = optionValue;
+        I18N.set(optionElem, "textContent", optionLabel);
+        if (optionDisabled)
+        {
+          optionElem.disabled = true;
+        }
+        selectElem.appendChild(optionElem);
+      }
+      if (value)
+      {
+        Controls.setSelectValue(selectElem, value, create);
+      }
+    }
+  }
+
+  static setSelectValue(selectElem, value = selectElem.value, create)
+  {
+    let found = false;
+    for (let option of selectElem.options)
+    {
+      if (option.value === value)
+      {
+        found = true;
+        break;
+      }
+    }
+    if (found)
+    {
+      selectElem.value = value;
+    }
+    else if (value && create)
+    {
+      let optionElem = document.createElement("option");
+      optionElem.value = value;
+      optionElem.textContent = value;
+      selectElem.appendChild(optionElem);
+      selectElem.value = value;
+    }
+    else if (selectElem.options.length > 0)
+    {
+      // select first
+      selectElem.value = selectElem.options[0].value;
+    }
+  }
+
+  static addRangeField(parent, name, label, min = 0, max = 100,
+    step = 1, value, className)
+  {
+    const id = this.getNextId();
+
+    const rangeDiv = document.createElement("div");
+    rangeDiv.className = className || "field-row";
+    parent.appendChild(rangeDiv);
+
+    const rangeValueDiv = document.createElement("div");
+    rangeDiv.appendChild(rangeValueDiv);
+
+    const rangeLabel = document.createElement("label");
+    I18N.set(rangeLabel, "textContent", label);
+    rangeLabel.htmlFor = id;
+    rangeLabel.style.verticalAlign = "middle";
+    rangeValueDiv.appendChild(rangeLabel);
+
+    const rangeValue = document.createElement("span");
+    rangeValue.textContent = value;
+    rangeValue.id = id + "_value";
+    rangeValue.style.marginLeft = "4px";
+    rangeValue.style.verticalAlign = "middle";
+    rangeValueDiv.appendChild(rangeValue);
+
+    const range = document.createElement("input");
+    range.id = id;
+    range.name = name;
+    range.type = "range";
+    range.min = min;
+    range.max = max;
+    range.value = value;
+    range.step = step;
+    range.style.display = "inline-block";
+    range.style.marginLeft = "auto";
+    range.style.marginRight = "auto";
+    range.formatValue = value => value;
+
+    Object.defineProperty(range, 'rangeValue',
+    {
+      get: function()
+      {
+        return range.value;
+      },
+
+      set: function(value)
+      {
+        range.value = value;
+        rangeValue.textContent = range.formatValue(value);
+      }
+    });
+
+    range.addEventListener("input", () =>
+    {
+      rangeValue.textContent = range.formatValue(range.value);
+    });
+
+    rangeDiv.appendChild(range);
+
+    return range;
+  }
+
+  static addRadioButtons(parent, name, label, options, value, className,
+    clickListener)
+  {
+    const groupElem = document.createElement("fieldset");
+    parent.appendChild(groupElem);
+    if (className) groupElem.className = className;
+
+    if (label)
+    {
+      const legendElem = document.createElement("legend");
+      groupElem.appendChild(legendElem);
+      I18N.set(legendElem, "textContent",label);
+    }
+
+    const id = this.getNextId();
+    const hiddenElem = document.createElement("input");
+    hiddenElem.type = "hidden";
+    hiddenElem.id = id;
+    groupElem.appendChild(hiddenElem);
+
+    for (let i = 0; i < options.length; i++)
+    {
+      let option = options[i];
+
+      let radioElem = document.createElement("input");
+      radioElem.id = id + "_" + i;
+      radioElem.type = "radio";
+      radioElem.name = name;
+      radioElem.value = option instanceof Array ? option[0] : option;
+      if (value === radioElem.value)
+      {
+        radioElem.checked = true;
+        hiddenElem.value = radioElem.value;
+      }
+      radioElem.addEventListener("click", function(event)
+      {
+        let elem = event.target;
+        hiddenElem.value = elem.value;
+        if (clickListener) clickListener(event);
+      }, false);
+
+      let labelElem = document.createElement("label");
+      let spanElem = document.createElement("span");
+
+      I18N.set(spanElem, "textContent",
+        option instanceof Array ? option[1] : option);
+      labelElem.htmlFor = radioElem.id;
+
+      labelElem.appendChild(radioElem);
+      labelElem.appendChild(spanElem);
+      groupElem.appendChild(labelElem);
+    }
+
+    hiddenElem.getValue = () =>
+    {
+      return hiddenElem.value;
+    };
+
+    hiddenElem.setValue = value =>
+    {
+      let input = groupElem.querySelector(`input[type=radio][value=${value}]`);
+      if (input) input.checked = true;
+    };
+    return hiddenElem;
+  }
+
+  static addButton(parent, name, label, action, className)
+  {
+    const buttonElem = document.createElement("button");
+    buttonElem.name = name;
+    I18N.set(buttonElem, "textContent", label);
+    if (className) buttonElem.className = className;
+    buttonElem.addEventListener("click", event => action(event), false);
+    parent.appendChild(buttonElem);
+
+    return buttonElem;
+  }
+
+  static addImageButton(parent, name, label, imageUrl, action, className)
+  {
+    const buttonElem = document.createElement("button");
+    buttonElem.name = name;
+    I18N.set(buttonElem, "title", label);
+    if (className) buttonElem.className = className;
+
+    const imgElem = document.createElement("img");
+
+    imgElem.onerror = () =>
+    {
+      imgElem.remove();
+      I18N.set(buttonElem, "textContent", label);
+    };
+
+    imgElem.src = imageUrl;
+    imgElem.alt = label;
+
+    buttonElem.appendChild(imgElem);
+    buttonElem.addEventListener("click", event => action(event));
+    parent.appendChild(buttonElem);
+
+    return buttonElem;
+  }
+
+  static addIconButton(parent, name, label, iconName, action, className)
+  {
+    const buttonElem = document.createElement("button");
+    buttonElem.name = name;
+    buttonElem.className = className || "icon-button-24";
+    I18N.set(buttonElem, "title", label);
+    I18N.set(buttonElem, "alt", label);
+
+    Controls.addIcon(buttonElem, iconName);
+
+    buttonElem.addEventListener("click", event => action(event), false);
+    parent.appendChild(buttonElem);
+
+    return buttonElem;
+  }
+
+  static addAccordion(parent, label, contentElem)
+  {
+    const accordionElem = document.createElement("div");
+    accordionElem.className = "accordion";
+    parent.appendChild(accordionElem);
+
+    const buttonElem = document.createElement("div");
+    buttonElem.className = "accordion-button";
+    buttonElem.tabIndex = "0";
+    buttonElem.setAttribute("role", "button");
+    accordionElem.appendChild(buttonElem);
+
+    const descElem = document.createElement("div");
+    I18N.set(descElem, "textContent", label);
+    buttonElem.appendChild(descElem);
+
+    const svgElem = Controls.addIcon(buttonElem, "chevron-down", "icon-24");
+
+    const containerElem = document.createElement("div");
+    containerElem.className = "accordion-container";
+    accordionElem.appendChild(containerElem);
+
+    containerElem.appendChild(contentElem);
+    contentElem.className = "accordion-content";
+    contentElem.inert = true;
+
+    const toggle = () =>
+    {
+      accordionElem.classList.toggle("open");
+      contentElem.inert = !contentElem.inert;
+    };
+    accordionElem.toggle = toggle;
+
+    buttonElem.addEventListener("click", toggle);
+
+    buttonElem.addEventListener("keydown", event =>
+    {
+      if (event.keyCode === 13) toggle();
+    });
+
+    return accordionElem;
+  }
+
+  static addCodeEditor(parent, name, label, value = "", options = {})
+  {
+    const groupElem = document.createElement("div");
+    groupElem.className = "code_editor";
+    parent.appendChild(groupElem);
+    if (options.className)
+    {
+      groupElem.classList.add(options.className);
+    }
+
+    const labelElem = document.createElement("span");
+    I18N.set(labelElem, "textContent", label);
+    groupElem.appendChild(labelElem);
+
+    if (options.height)
+    {
+      groupElem.style.height = options.height;
+    }
+
+    const editorElem = document.createElement("div");
+    editorElem.className = "cm-editor-holder";
+    groupElem.appendChild(editorElem);
+
+    const editorView = new CM.EditorView(
+    {
+      parent: editorElem
+    });
+
+    this.setCodeEditorDocument(editorView, value, options);
+
+    return editorView;
+  }
+
+  static setCodeEditorDocument(editorView, value = "", options)
+  {
+    const tooltipContainerId = "cm-tooltip-container";
+    let tooltipContainer = document.getElementById(tooltipContainerId);
+    if (!tooltipContainer)
+    {
+      tooltipContainer = document.createElement("div");
+      tooltipContainer.id = tooltipContainerId;
+      document.body.appendChild(tooltipContainer);
+    }
+
+    let theme = CM.EditorView.theme({
+      "&.cm-focused .cm-cursor": {
+        borderLeftColor: "#000",
+        borderLeftWidth: "2px"
+      },
+      "&.cm-focused .cm-matchingBracket": {
+        "backgroundColor": "#e0e040",
+        "color": "black"
+      },
+      "& .ͼb": {
+        "color": "#444",
+        "fontWeight": "bold"
+      },
+      "& .ͼe": {
+        "color": "#2020ff"
+      },
+      "& .ͼf": {
+        "color": "#8080e0"
+      },
+      "& .ͼg": {
+        "color": "#444"
+      },
+      "& .ͼi": {
+        "color": "#44b",
+        "font-weight": "bold"
+      },
+      "& .ͼm": {
+        "color": "#808080"
+      },
+      "& .cm-tooltip": {
+        "z-index": 100000
+      },
+      "& .cm-wrap": {
+        "height": "100%"
+      },
+      "& .cm-scroller": {
+        "overflow": "auto"
+      }
+    });
+
+    const extensions = [
+      CM.lineNumbers(),
+      CM.highlightActiveLineGutter(),
+      CM.highlightSpecialChars(),
+      CM.history(),
+      CM.drawSelection(),
+      CM.dropCursor(),
+      CM.indentOnInput(),
+      CM.syntaxHighlighting(CM.defaultHighlightStyle),
+      CM.bracketMatching(),
+      CM.foldGutter(),
+      CM.autocompletion(),
+      CM.rectangularSelection(),
+      CM.crosshairCursor(),
+      CM.highlightSelectionMatches(),
+      CM.keymap.of([
+        ...CM.defaultKeymap,
+        ...CM.historyKeymap,
+        ...CM.searchKeymap,
+        ...CM.completionKeymap
+      ]),
+      CM.EditorState.allowMultipleSelections.of(true),
+      CM.highlightActiveLine(),
+      CM.tooltips({ parent : tooltipContainer }),
+      theme];
+
+    const language = options?.language;
+    switch (language)
+    {
+      case "json":
+        extensions.push(CM.json());
+        break;
+
+      case "javascript":
+        extensions.push(CM.javascript());
+        break;
+
+      case "xml":
+        extensions.push(CM.xml({ autoCloseTags : true }));
+        break;
+
+      case "sql":
+        extensions.push(CM.sql(options.sqlConfig));
+        break;
+
+      case "html":
+        extensions.push(CM.jinja({ base: CM.html() }));
+        break;
+
+      case "markdown":
+        extensions.push(CM.jinja({ base: CM.markdown() }));
+        break;
+
+      case "css":
+        extensions.push(CM.css());
+        break;
+
+      case "yaml":
+        extensions.push(CM.yaml());
+        break;
+    }
+
+    const editorState = CM.EditorState.create(
+    {
+      doc: value || "",
+      extensions
+    });
+
+    editorView.setState(editorState);
+
+    return editorView;
+  }
+
+  static addTagsInput(parent, name, label, placeholderKey, initialTags = [], className, showInput = true)
+  {
+    const id = this.getNextId();
+    const groupElem = document.createElement("div");
+    groupElem.id = id;
+    if (className) groupElem.className = className;
+    parent.appendChild(groupElem);
+
+    const labelElem = document.createElement("label");
+    I18N.set(labelElem, "textContent", label);
+    groupElem.appendChild(labelElem);
+    labelElem.htmlFor = id + "_input";
+
+    const tagsContainer = document.createElement("div");
+    tagsContainer.className = "tags-container";
+
+    if (!showInput)
+    {
+      tagsContainer.classList.add("hidden-input");
+    }
+
+    groupElem.appendChild(tagsContainer);
+
+    const tagsInput = document.createElement("input");
+    tagsInput.id = id + "_input";
+    tagsInput.type = "text";
+    I18N.set(tagsInput, "placeholder", placeholderKey);
+    tagsContainer.appendChild(tagsInput);
+
+    const tagsDisplay = document.createElement("div");
+    tagsDisplay.className = "tags-display";
+    tagsContainer.appendChild(tagsDisplay);
+
+    const removeElem = document.createElement("div");
+    removeElem.className = "hidden";
+    I18N.set(removeElem, "textContent", "button.delete");
+    tagsContainer.appendChild(removeElem);
+
+    const tags = [...initialTags];
+
+    const updateTagsDisplay = () =>
+    {
+      tagsDisplay.innerHTML = "";
+
+      tags.forEach((tag, index) =>
+      {
+        const tagElement = document.createElement("span");
+        tagElement.className = "tag";
+        tagElement.textContent = tag;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "tag-remove";
+        removeBtn.title = removeElem.textContent;
+        removeBtn.addEventListener("click", (e) =>
+        {
+          e.stopPropagation();
+          tags.splice(index, 1);
+          updateTagsDisplay();
+        });
+
+        tagElement.appendChild(removeBtn);
+        tagsDisplay.appendChild(tagElement);
+      });
+    };
+
+    tagsInput.addEventListener("keydown", (e) =>
+    {
+      if (e.key === "Enter" || e.key === ",")
+      {
+        e.preventDefault();
+        const tagText = tagsInput.value.trim();
+        if (tagText && !tags.includes(tagText))
+        {
+          tags.push(tagText);
+          tagsInput.value = "";
+          updateTagsDisplay();
+        }
+      }
+    });
+
+    tagsInput.addEventListener("blur", (e) =>
+    {
+      const tagText = tagsInput.value.trim();
+      if (tagText && !tags.includes(tagText))
+      {
+        tags.push(tagText);
+        tagsInput.value = "";
+        updateTagsDisplay();
+      }
+    });
+
+    updateTagsDisplay();
+
+    return {
+      element: groupElem,
+      getTags: () => [...tags],
+      setTags: (newTags) =>
+      {
+        tags.length = 0;
+        tags.push(...newTags);
+        updateTagsDisplay();
+      },
+      addTag: (tag) =>
+      {
+        if (!tags.includes(tag))
+        {
+          tags.push(tag);
+          updateTagsDisplay();
+        }
+      },
+      removeTag: (tag) =>
+      {
+        const index = tags.indexOf(tag);
+        if (index !== -1)
+        {
+          tags.splice(index, 1);
+          updateTagsDisplay();
+        }
+      },
+      clearTags: () =>
+      {
+        tags.length = 0;
+        updateTagsDisplay();
+      }
+    };
+  }
+
+  static addField(parent, id, label, className)
+  {
+    const groupElem = document.createElement("div");
+    if (className) groupElem.className = className;
+    parent.appendChild(groupElem);
+
+    const labelElem = document.createElement("label");
+    labelElem.htmlFor = id;
+    I18N.set(labelElem, "textContent", label);
+    groupElem.appendChild(labelElem);
+
+    return groupElem;
+  }
+
+  static addTable(parent, name, columns, className)
+  {
+    const tableElem = document.createElement("table");
+    parent.appendChild(tableElem);
+    tableElem.id = name;
+    if (className) tableElem.className = className;
+
+    const headElem = document.createElement("thead");
+    tableElem.appendChild(headElem);
+
+    const bodyElem = document.createElement("tbody");
+    tableElem.appendChild(bodyElem);
+
+    const footElem = document.createElement("tfoot");
+    tableElem.appendChild(footElem);
+
+    if (columns)
+    {
+      const headRowElem = document.createElement("tr");
+      headElem.appendChild(headRowElem);
+
+      for (let i = 0; i < columns.length; i++)
+      {
+        const headColElem = document.createElement("th");
+        headRowElem.appendChild(headColElem);
+        I18N.set(headColElem, "textContent",  columns[i]);
+        headColElem.className = "col_" + i;
+      }
+    }
+    return tableElem;
+  }
+
+  static addTableRow(tableElem)
+  {
+    const columns = tableElem.tHead.children[0].children.length;
+    const bodyElem = tableElem.tBodies[0];
+
+    const rowElem = document.createElement("tr");
+    bodyElem.appendChild(rowElem);
+
+    for (let i = 0; i < columns; i++)
+    {
+      let colElem = document.createElement("td");
+      rowElem.appendChild(colElem);
+    }
+    return rowElem;
+  }
+
+  static getNextId()
+  {
+    return "f" + this.nextId++;
+  }
+
+  static createComponent(type, props, ...children)
+  {
+    let element;
+    if (typeof type === "string")
+    {
+      element = document.createElement(type);
+
+      for (let name in props)
+      {
+        if (name.startsWith("on"))
+        {
+          let value = props[name];
+          if (typeof value === "function")
+          {
+            let eventType = name.substring(2).toLowerCase();
+            element.addEventListener(eventType, props[name]);
+          }
+          else
+          {
+            element.setAttribute(name, value);
+          }
+        }
+        else
+        {
+          element.setAttribute(name, props[name]);
+        }
+      }
+
+      for (let child of children)
+      {
+        if (child instanceof Array)
+        {
+          for (let subchild of child)
+          {
+            element.appendChild(subchild);
+          }
+        }
+        else if (typeof child === "object")
+        {
+          element.appendChild(child);
+        }
+        else
+        {
+          element.innerHTML = child;
+        }
+      }
+      return element;
+    }
+    else if (typeof type === "function")
+    {
+      let component = new type();
+      element = component.element;
+    }
+    return element;
+  }
+}
+
+export { Controls };
+

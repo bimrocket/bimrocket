@@ -1,0 +1,24 @@
+{
+  "name": "gis",
+  "version": "1.0",
+  "priority": 50,
+  "releaseDate": "2026-09-20",
+  "license": "LGPL/EULA",
+  "translations":
+  {
+    "":
+    {
+      "description": "Basic GIS tools.",
+      "developer": "BIMROCKET TEAM",
+      "infoUrl": "https://bimrocket.org"
+    },
+    "es":
+    {
+      "description": "Herramientas GIS básicas."
+    },
+    "ca":
+    {
+      "description": "Eines GIS bàsiques."
+    }
+  }
+}

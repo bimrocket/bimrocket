@@ -1,0 +1,33 @@
+/* Toast */
+
+:root
+{
+  --toast-background: #e0e0ff;
+  --toast-color: #0000ff;
+  --toast-border-color: #8080ff;
+  --toast-border-width: 1px;
+  --toast-border-style: none;
+  --toast-padding: 12px;
+  --toast-border-radius: 16px;
+  --toast-shadow: 0px 0px 10px 0px rgba(50, 50, 50, 0.3);
+}
+
+.toast
+{
+  display: grid;
+  background: var(--toast-background);
+  color: var(--toast-color);
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  box-shadow: var(--toast-shadow);
+  border-color: var(--toast-border-color);
+  border-width: var(--toast-border-width);
+  border-style: var(--toast-border-style);
+  border-radius: var(--toast-border-radius);
+  padding: var(--toast-padding);
+  text-align: center;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity 1s;
+}

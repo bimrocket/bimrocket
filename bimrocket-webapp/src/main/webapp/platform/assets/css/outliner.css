@@ -1,0 +1,146 @@
+/* outliner.css */
+
+ul.outliner a.selected,
+ul.outliner a.selected:hover
+{
+  animation: none;
+}
+
+ul.outliner .copy,
+ul.outliner .selected.copy
+{
+  color: blue;
+  font-style: italic;
+}
+
+ul.outliner .cut,
+ul.outliner .selected.cut
+{
+  color: #C00000;
+  font-style: italic;
+}
+
+ul.outliner .active_camera
+{
+  font-weight: bold;
+}
+
+ul.outliner .invisible
+{
+  color: #C0C0C0;
+}
+
+ul.outliner .selected.invisible
+{
+  color: #606060;
+}
+
+ul.outliner li > div::before
+{
+  mask-image: url(../icons/outliner.svg#default);
+}
+
+ul.outliner li.Group > div::before
+{
+  mask-image: url(../icons/outliner.svg#group)
+}
+
+ul.outliner li.Solid > div::before
+{
+  mask-image: url(../icons/outliner.svg#solid)
+}
+
+ul.outliner li.Profile > div::before
+{
+  mask-image: url(../icons/outliner.svg#profile)
+}
+
+ul.outliner li.Cord > div::before
+{
+  mask-image: url(../icons/outliner.svg#cord)
+}
+
+ul.outliner li.Mesh > div::before
+{
+  mask-image: url(../icons/outliner.svg#mesh)
+}
+
+ul.outliner li.Points > div::before
+{
+  mask-image: url(../icons/outliner.svg#points)
+}
+
+ul.outliner li.Text2D > div::before
+{
+  mask-image: url(../icons/outliner.svg#text2D)
+}
+
+ul.outliner li.AmbientLight > div::before,
+ul.outliner li.DirectionalLight > div::before,
+ul.outliner li.PointLight > div::before,
+ul.outliner li.AreaLight > div::before,
+ul.outliner li.HemisphereLight > div::before,
+ul.outliner li.SpotLight > div::before
+{
+  mask-image: url(../icons/outliner.svg#light);
+}
+
+ul.outliner li.PerspectiveCamera > div::before,
+ul.outliner li.OrthographicCamera > div::before
+{
+  mask-image: url(../icons/outliner.svg#camera);
+}
+
+ul.outliner li.Cloner > div::before
+{
+  mask-image: url(../icons/outliner.svg#cloner);
+}
+
+ul.outliner li.CircleBuilder > div::before,
+ul.outliner li.CircleHollowBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#circle);
+}
+
+ul.outliner li.RectangleBuilder > div::before,
+ul.outliner li.RectangleHollowBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#rectangle);
+}
+
+ul.outliner li.EllipseBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#ellipse);
+}
+
+ul.outliner li.TrapeziumBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#trapezium);
+}
+
+ul.outliner li.IProfileBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#iprofile);
+}
+
+ul.outliner li.LProfileBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#lprofile);
+}
+
+ul.outliner li.TProfileBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#tprofile);
+}
+
+ul.outliner li.UProfileBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#uprofile);
+}
+
+ul.outliner li.ZProfileBuilder > div::before
+{
+  mask-image: url(../icons/outliner.svg#zprofile);
+}
+
+

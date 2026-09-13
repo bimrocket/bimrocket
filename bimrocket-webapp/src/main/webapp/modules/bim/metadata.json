@@ -1,0 +1,24 @@
+{
+  "name": "bim",
+  "priority": 40,
+  "version": "1.0",
+  "releaseDate": "2026-09-20",
+  "license": "LGPL/EULA",
+  "translations":
+  {
+    "":
+    {
+      "description": "Basic BIM tools.",
+      "developer": "BIMROCKET TEAM",
+      "infoUrl": "https://bimrocket.org"
+    },
+    "es":
+    {
+      "description": "Herramientas BIM básicas."
+    },
+    "ca":
+    {
+      "description": "Eines BIM bàsiques."
+    }
+  }
+}

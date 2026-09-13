@@ -1,0 +1,388 @@
+/* fly */
+
+.fly-panel
+{
+  --button_size: 24px;
+  --button_margin: 4px;
+  --cell_size: calc(var(--button_size) + 2 * var(--button_margin));
+  --side_margin: 10px;
+  --font-size: 12px;
+  --icon-size: 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fly-panel .keypad
+{
+  position: relative;
+  width: 100%;
+  height: calc( 3 * var(--cell_size));
+}
+
+.fly-panel .keypad .leftWheel
+{
+  position: absolute;
+  left: var(--side_margin);
+  top: 0;
+  width: calc(3 * var(--cell_size));
+  height: calc(3 * var(--cell_size));
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: calc(3 * var(--cell_size));
+}
+
+.fly-panel .keypad .pitchPanel
+{
+  left: calc(50% - var(--cell_size) / 2);
+  top: var(--cell_size);
+  position: absolute;
+  width: calc(1 * var(--cell_size));
+  height: calc(2 * var(--cell_size));
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: calc(var(--cell_size));
+}
+
+.fly-panel .keypad .rightWheel
+{
+  right: var(--side_margin);
+  top: 0;
+  position: absolute;
+  width: calc(3 * var(--cell_size));
+  height: calc(3 * var(--cell_size));
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: calc(3 * var(--cell_size));
+}
+
+.fly-panel button
+{
+  position: absolute;
+  width: var(--button_size);
+  height: var(--button_size);
+  border: none;
+  border-radius: var(--button_size);
+  font-size: var(--font-size);
+  background-color: var(--surface-field);
+  color: var(--text-color);
+  margin:0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fly-panel button svg.icon
+{
+  color: var(--text-color);
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+.fly-panel .keypad .stick
+{
+  --stick_size: 24px;
+  width: var(--stick_size);
+  height: var(--stick_size);
+  border-radius: var(--stick_size);
+  position: absolute;
+  background-color: #d0d0d0;
+  background-size: 80% 80%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border : 1px solid transparent;
+  box-sizing: border-box;
+  touch-action: none;
+}
+
+.fly-panel .keypad .leftWheel .stick
+{
+  top: calc(50% - 0.5 * var(--stick_size));
+  left: calc(50% - 0.5 * var(--stick_size));
+  background-image: url(../icons/misc/fly-drone-front.svg);
+  touch-action: none;
+}
+
+.fly-panel .keypad .rightWheel .stick
+{
+  top: calc(50% - 0.5 * var(--stick_size));
+  left: calc(50% - 0.5 * var(--stick_size));
+  background-image: url(../icons/misc/fly-drone-top.svg);
+  touch-action: none;
+}
+
+.fly-panel.stick .leftWheel button,
+.fly-panel.stick .rightWheel button
+{
+  display: none;
+}
+
+.fly-panel.stick .stick
+{
+  border-color : #404040;
+}
+
+.fly-panel button:active,
+.fly-panel button.pressed
+{
+  background-color: #FF8080;
+}
+
+.fly-panel button.forward
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.backward
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(2 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.rotateLeft
+{
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.rotateRight
+{
+  left: calc(2 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.ascend
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.descend
+{
+  left: calc(1 * var(--cell_size) + var(--button_margin));
+  top : calc(2 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.moveLeft
+{
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.moveRight
+{
+  left: calc(2 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.lookUp
+{
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(0 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.lookDown
+{
+  left: calc(0 * var(--cell_size) + var(--button_margin));
+  top : calc(1 * var(--cell_size) + var(--button_margin));
+}
+
+.fly-panel button.options
+{
+  --options_button_size : 20px;
+  left: calc(50% - var(--options_button_size) / 2 + 1px);
+  top: 0;
+  width: var(--options_button_size);
+  height: var(--options_button_size);
+  border: none;
+}
+
+.fly-options input[name=ground]
+{
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 60px;
+}
+
+/* property-selector */
+
+.property-selector
+{
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 8px);
+  row-gap: 4px;
+}
+
+.property-selector .label
+{
+  flex-grow: 0;
+}
+
+.property-selector .scroll
+{
+  flex-grow: 1;
+  overflow: auto;
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: 2px;
+  padding: 4px;
+  height: 50%;
+}
+
+.property-selector .property-toolbar
+{
+  flex-grow: 0;
+  text-align: center;
+}
+
+.property-selector .property-toolbar button
+{
+  min-width: 24px;
+}
+
+.property-selector .tree .selected
+{
+  flex-grow: 1;
+  background-color: var(--surface-selection);
+  color: black;
+}
+
+.property-selector .code_editor
+{
+  flex-grow: 1;
+}
+
+/* chatgpt */
+
+.panel-chatgpt .body
+{
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+}
+
+.panel-chatgpt .body .conversation
+{
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-end;
+  overflow-y: auto;
+}
+
+.panel-chatgpt .body .conversation .scroll
+{
+  display: block;
+  overflow-y: auto;
+}
+
+.panel-chatgpt .body .conversation .scroll .input
+{
+  text-align: left;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  color: var(--text-color);
+  user-select: text;
+}
+
+.panel-chatgpt .body .conversation .scroll .output
+{
+  text-align: left;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  color: var(--info-color);
+  user-select: text;
+}
+
+.panel-chatgpt .body .conversation .scroll .output.error
+{
+  color: var(--error-color);
+}
+
+.panel-chatgpt .body .prompt
+{
+  height: 100px;
+  min-height: 40px;
+  flex-grow: 0;
+  resize: none;
+}
+
+.panel-chatgpt .body .footer
+{
+  flex-grow: 0;
+}
+
+.ellipsis-loading
+{
+  padding: 0;
+  text-align: left;
+}
+
+.ellipsis-loading:after
+{
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  animation: ellipsis steps(4, end) 1000ms infinite;
+  content: "\2026"; /* ascii code for the ellipsis character */
+  width: 0px;
+}
+
+@keyframes ellipsis
+{
+  to { width: 24px; }
+}
+
+/* link */
+
+.panel-link .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel-link .body input[type=text]
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.panel-link .body .buttons-bar
+{
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+/* open-local */
+
+#container .drop-indicator
+{
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  pointer-events: none;
+  color: var(--text-color);
+  background-color: var(--surface-ground);
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-1);
+}
+
+#container.file-drop
+{
+  border: 3px dashed var(--primary-color);
+}
+

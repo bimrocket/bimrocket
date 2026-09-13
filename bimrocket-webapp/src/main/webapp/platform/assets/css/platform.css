@@ -1,0 +1,139 @@
+
+
+.script_box textarea
+{
+  font-family: monospace;
+  font-size: 14px;
+  color: #404040;
+  box-sizing:border-box;
+  width: 100%;
+  height: 300px;
+}
+
+.controller_dialog
+{
+  display: flex;
+  flex-direction: column;
+  height: 100px;
+}
+
+.controller_dialog > div
+{
+  flex-grow: 0;
+}
+
+.controller_dialog > ul
+{
+  flex-grow: 1;
+  overflow: auto;
+  padding: 4px;
+  margin:0;
+  margin-top: 4px;
+  border: 1px solid #c0c0c0;
+}
+
+.controller_dialog > ul li
+{
+  list-style-type: none;
+  margin:6px 3px 6px 3px;
+}
+
+.controller_dialog > ul li label
+{
+  display: block;
+  vertical-align: middle;
+}
+
+.controller_dialog > ul li input
+{
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.controller_dialog > ul li span
+{
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.controller_dialog > ul li span.type
+{
+  color: #606080;
+  margin-right: 4px;
+}
+
+.builder_dialog > ul
+{
+  flex-grow: 1;
+  overflow: auto;
+  padding: 4px;
+  margin:0;
+  margin-top: 4px;
+}
+
+.builder_dialog > ul li
+{
+  list-style-type: none;
+  margin:6px 3px 6px 3px;
+}
+
+.builder_dialog > ul li label
+{
+  display: block;
+  vertical-align: middle;
+}
+
+.builder_dialog > ul li input
+{
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.dialog .body div.script_name > label
+{
+  display: inline-block;
+  width: 80px;
+}
+
+.dialog .body div.script_name > input[type=text]
+{
+  display: inline-block;
+  width: calc(100% - 80px);
+}
+
+.dialog .body div.report_name
+{
+  display: flex;
+  align-items: center;
+}
+
+.dialog .body div.report_name > label
+{
+  flex-grow: 0;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.dialog .body div.report_name > input[type=text]
+{
+  flex-grow: 1;
+}
+
+div.script_code
+{
+  position: absolute;
+  top: 30px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid gray;
+  overflow: auto;
+  font-size: 14px;
+}
+
+.modules ul
+{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}

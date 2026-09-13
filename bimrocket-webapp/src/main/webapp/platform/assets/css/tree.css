@@ -1,0 +1,193 @@
+/* tree.css */
+
+:root
+{
+  --tree-color: var(--text-color);
+  --tree-background: transparent;
+  --tree-color-selected: var(--selection-text-color);
+  --tree-background-selected: var(--surface-selection);
+  --tree-color-hover: var(--selection-text-color);
+  --tree-background-hover: var(--surface-hover);
+  --tree-expand-margin: 4px;
+  --tree-node-indent: 8px;
+  --tree-node-padding: 4px;
+  --tree-node-margin-vertical: 1px;
+  --tree-node-gap: 4px;
+  --tree-root-indent: 20px;
+  --tree-icon-margin: 4px;
+  --tree-icon-size: 20px;
+  --tree-node-border-radius: calc(var(--border-radius) / 2);
+}
+
+ul.tree,
+ul.tree ul,
+ul.tree li
+{
+  list-style: none;
+  margin-left: var(--tree-node-indent);
+  padding-left: 0;
+  text-align: left;
+  background-color: var(--tree-background);
+}
+
+ul.tree
+{
+  margin-left: var(--tree-root-indent);
+}
+
+ul.tree li
+{
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+
+  text-align: left;
+  color: var(--tree-color);
+  vertical-align: middle;
+  white-space: nowrap;
+  padding-left: 0;
+  list-style-type: none;
+  background: none;
+  background-size: 0 0;
+}
+
+ul.tree li > ul
+{
+  grid-column: 1 / -1;
+}
+
+ul.tree li > button.ec
+{
+  padding: 0;
+  width: var(--tree-icon-size);
+  height: var(--tree-icon-size);
+  margin-left: calc(-1 * var(--tree-icon-size) + var(--tree-node-padding) * -1);
+  background-color: transparent;
+  border:none;
+  text-align: center;
+  outline: none;
+  box-shadow: none;
+  position: relative;
+}
+
+ul.tree li > button.ec::before
+{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--tree-color);
+  mask-image: url(../icons/tree.svg#chevron);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: var(--tree-icon-size);
+  transition: 0.1s transform linear;
+}
+
+ul.tree li.expanded > button.ec::before
+{
+  transform: rotate(90deg);
+}
+
+ul.tree li > button.ec:hover
+{
+  background-color: transparent;
+  cursor: pointer;
+}
+
+ul.tree li > button.ec:focus
+{
+  outline-style: solid;
+  outline-color: var(--surface-selection);
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.tree li > div
+{
+  position: relative;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  padding: var(--tree-node-padding);
+  padding-left: calc(var(--tree-node-padding) + var(--tree-icon-margin) + var(--tree-icon-size));
+  border-radius: var(--tree-node-border-radius);
+  border: 1px solid;
+  border-color: transparent;
+  margin-top: var(--tree-node-margin-vertical);
+  margin-bottom: var(--tree-node-margin-vertical);
+  gap: var(--tree-node-gap);
+  user-drag: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+}
+
+ul.tree li > div::before
+{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--tree-color);
+  mask-image: url(../icons/tree.svg#leaf);
+  mask-repeat: no-repeat;
+  mask-position: var(--tree-icon-margin) center;
+  mask-size: var(--tree-icon-size);
+  pointer-events: none;
+}
+
+ul.tree li.hc > div::before
+{
+  mask-image: url(../icons/tree.svg#node);
+}
+
+ul.tree li > div:hover
+{
+  color: var(--tree-color-hover);
+  background-color: var(--tree-background-hover);
+}
+
+ul.tree li > div:focus
+{
+  border-color: var(--border-color);
+  outline: none;
+}
+
+ul.tree li > div.selected
+{
+  color: var(--tree-color-selected);
+  background-color: var(--tree-background-selected);
+}
+
+ul.tree li.collapsed > ul
+{
+  display: none;
+}
+
+ul.tree li.expanded > ul
+{
+  display: block;
+}
+
+ul.tree li > button.contextmenu_button
+{
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+ul.tree li.string > div::before
+{
+  mask-image: url(../icons/inspector.svg#string);
+  background-color: var(--string-color);
+}
+
+ul.tree li.boolean > div::before
+{
+  mask-image: url(../icons/inspector.svg#boolean);
+  background-color: var(--boolean-color);
+}
+
+ul.tree li.number > div::before
+{
+  mask-image: url(../icons/inspector.svg#number);
+  background-color: var(--number-color);
+}

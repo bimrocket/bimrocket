@@ -1,0 +1,193 @@
+/* report-panel */
+
+.report-panel
+{
+  padding: 2px;
+  text-align: left;
+}
+
+.report-panel .report-title
+{
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.report-panel .report-summary
+{
+  margin-bottom: 4px;
+}
+
+.report-panel .report-summary.total
+{
+  margin-bottom: 8px;
+}
+
+.report-panel .report-error
+{
+  color: var(--error-color);
+  margin-bottom: 8px;
+}
+
+.report-panel .tree li.info > div::before
+{
+  mask-image: url(../icons/report.svg#info);
+  background-color: var(--info-color);
+}
+
+.report-panel .tree li.ok > div::before
+{
+  mask-image: url(../icons/report.svg#ok);
+  background-color: var(--ok-color);
+}
+
+.report-panel .tree li.warn > div::before
+{
+  mask-image: url(../icons/report.svg#warn);
+  background-color: var(--warn-color);
+}
+
+.report-panel .tree li.error > div::before
+{
+  mask-image: url(../icons/report.svg#error);
+  background-color: var(--error-color);
+}
+
+/* histogram */
+
+.panel-histogram .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel-histogram .body select
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.panel-histogram .body .buttons_bar
+{
+  text-align: center;
+}
+
+.panel-histogram .body ul
+{
+  padding-left: 0px;
+}
+
+.panel-histogram .body li
+{
+  padding-top: 0px;
+  padding-bottom: 6px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.panel-histogram .body li .item-bullet
+{
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  width: 16px;
+  min-width: 16px;
+  flex-grow: 0;
+  margin-right: 3px;
+}
+
+.panel-histogram .body li .item-cnt
+{
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 2px;
+  flex-grow: 1;
+}
+
+.panel-histogram .body li .item-cnt a
+{
+  text-decoration: none;
+}
+
+.panel-histogram .body li .item-cnt a .undefined
+{
+  font-style: italic;
+}
+
+.panel-histogram .body li .item-cnt a .string
+{
+  color: var(--string-color);
+}
+
+.panel-histogram .body li .item-cnt a .number
+{
+  color: var(--number-color);
+}
+
+.panel-histogram .body li .item-cnt a .boolean
+{
+  color: var(--boolean-color);
+}
+
+.panel-histogram .body li .item-cnt .bar
+{
+  margin-top: 3px;
+  height: 8px;
+  background: var(--surface-field);
+  border: none;
+  border-radius: calc(var(--border-radius) / 2);
+  padding-right: 2px;
+}
+
+.panel-histogram .body li .bar div
+{
+  background-color: var(--primary-color);
+  border-radius: calc(var(--border-radius) / 2);
+  height: 100%;
+}
+
+/* search */
+
+.panel-search .body
+{
+  padding: 4px;
+  text-align: left;
+}
+
+.panel-search .body input[type=text]
+{
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.panel-search .body .buttons-bar
+{
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.panel-search .body .matchings
+{
+  margin-top: 4px;
+  overflow: auto;
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: calc(var(--border-radius) / 2);
+}
+
+.panel-search .body .tree .match
+{
+  color: var(--highlighted-text-color);
+  background-color: var(--surface-highlighted);
+}
+
+/* solar-sim */
+
+.panel-solar-sim canvas
+{
+  touch-action: pan-y;
+}

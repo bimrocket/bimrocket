@@ -1,0 +1,24 @@
+{
+  "name": "base",
+  "version": "1.0",
+  "priority": 10,
+  "releaseDate": "2026-09-20",
+  "license": "LGPL/EULA",
+  "translations":
+  {
+    "":
+    {
+      "description": "General tools for object visualization and selection.",
+      "developer": "BIMROCKET TEAM",
+      "infoUrl": "https://bimrocket.org"
+    },
+    "es":
+    {
+      "description": "Herramientas generales de visualización y selección de objetos."
+    },
+    "ca":
+    {
+      "description": "Eines generals de visualizació i selecció d'objetes."
+    }
+  }
+}

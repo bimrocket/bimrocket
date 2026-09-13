@@ -1,0 +1,100 @@
+/* ifcdb panel */
+
+.ifcdb-panel
+{
+  --labelWidth: 100px;
+
+  overflow: auto;
+  text-align: left;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ifcdb-panel div > label
+{
+  margin-right: 2px;
+}
+
+.ifcdb_conn
+{
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+}
+
+.ifcdb-panel > div
+{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.ifcdb-panel .tabbed_pane
+{
+  flex-grow: 1;
+}
+
+.ifcdb-field
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--labelWidth), max-content));
+  align-items:center;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 4px;
+}
+
+.ifcdb-field select,
+.ifcdb-field input
+{
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 1000px;
+}
+
+.ifcdb-buttons
+{
+  text-align: center;
+  padding: 4px;
+}
+
+.ifcdb-panel .tab_panel
+{
+  padding: 4px;
+}
+
+.ifcdb-command
+{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ifcdb-result
+{
+  border: 1px solid #c0c0c0;
+  padding: 2px;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: text;
+  flex-grow:1;
+  min-height: 100px;
+  overflow-x: auto;
+}
+
+.ifcdb-panel ul.tree a.selected,
+.ifcdb-panel ul.tree a.selected:hover
+{
+  background-color: #F0A0A0;
+  color: black;
+  animation: none;
+}
+
+.ifcdb-panel ul.tree li.IfcModelVersion
+{
+  background-image: url(images/file.svg);
+}
+
+

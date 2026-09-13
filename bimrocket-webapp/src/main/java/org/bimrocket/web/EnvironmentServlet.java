@@ -45,7 +45,7 @@ import org.apache.commons.io.IOUtils;
  *
  * @author realor
  */
-@WebServlet(urlPatterns = {"/js/Environment.js"})
+@WebServlet(urlPatterns = {"/Environment.js"})
 public class EnvironmentServlet extends HttpServlet
 {
   public static String BIMROCKET_ENV = "BIMROCKET_ENV";

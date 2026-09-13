@@ -1,0 +1,104 @@
+/* ifc-inspector */
+
+.ifc-inspector-panel .body
+{
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ifc-inspector-panel .ifcClass,
+.ifc-inspector-panel .ifcSchema
+{
+  font-weight: bold;
+  text-align: left;
+  padding-left: 0px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.ifc-inspector-panel .tree li.object > div::before
+{
+  mask-image: url(../icons/inspector.svg#object);
+}
+
+.ifc-inspector-panel .tree li.array > div::before
+{
+  mask-image: url(../icons/inspector.svg#array);
+}
+
+.ifc-inspector-panel .tree li.constant > div::before
+{
+  mask-image: url(../icons/inspector.svg#constant);
+}
+
+.ifc-inspector-panel .tree li.enumeration > div::before
+{
+  mask-image: url(../icons/inspector.svg#enumeration);
+}
+
+.ifc-inspector-panel .tree li.select > div::before
+{
+  mask-image: url(../icons/inspector.svg#select);
+}
+
+.ifc-inspector-panel .tree li.previous > div::before
+{
+  mask-image: url(../icons/inspector.svg#previous-block);
+}
+
+.ifc-inspector-panel .tree li.next > div::before
+{
+  mask-image: url(../icons/inspector.svg#next-block);
+}
+
+.ifc-inspector-panel .tree li.inverse > a
+{
+  font-style: italic;
+}
+
+.ifc-inspector-panel .tree li > a.previous
+{
+  background-color: var(--surface-4);
+}
+
+.bim-inspector-tabs
+{
+  height: 100%;
+}
+
+
+/* bim-delta */
+
+.bim-delta-panel .body
+{
+  padding: 2px;
+}
+
+.bim-delta-panel .body .tab_panel > pre
+{
+  text-align: left;
+  user-select: text;
+}
+
+.bim-delta-panel .tree li.delta > div::before
+{
+  mask-image: url(../icons/delta.svg#delta);
+}
+
+.bim-delta-panel .tree li.changed > div::before
+{
+  mask-image: url(../icons/delta.svg#changed);
+}
+
+.bim-delta-panel .tree li.added > div::before
+{
+  mask-image: url(../icons/delta.svg#added);
+  background-color: var(--info-color);
+}
+
+.bim-delta-panel .tree li.removed > div::before
+{
+  mask-image: url(../icons/delta.svg#removed);
+  background-color: var(--danger-color);
+}

@@ -1,0 +1,437 @@
+/* inspector.css */
+
+div.inspector_card
+{
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+div.inspector_card.list
+{
+  height: auto;
+}
+
+div.inspector_toolbar
+{
+  border-bottom: 1px solid #b0b0b0;
+  overflow: hidden;
+}
+
+div.inspector_properties
+{
+  height: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+div.inspector_properties .tabbed_pane > .body
+{
+  min-height: 0px;
+}
+
+ul.inspector
+{
+  margin-top: 2px;
+  margin-left: 0;
+  list-style: none;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.inspector ul
+{
+  list-style: none;
+  margin-left:0px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.inspector li
+{
+  list-style: none;
+  margin-left:0px;
+  padding-left:0;
+  text-align: left;
+}
+
+ul.inspector ul.expanded
+{
+  visibility: visible;
+}
+
+ul.inspector ul.collapsed
+{
+  display :none;
+}
+
+ul.inspector li.section
+{
+  padding: 2px;
+  margin-left: 0;
+  color: #202020;
+  white-space: nowrap;
+  border-top: 1px dotted grey;
+  background-image: none;
+}
+
+ul.inspector li.section li.section
+{
+  padding-left: 8px;
+}
+
+ul.inspector li.section:first-child
+{
+  border-top: none;
+}
+
+ul.inspector li.section > div
+{
+  display:inline-block;
+  text-align: left;
+  color: var(--text-color);
+  padding:1px 3px 1px 14px;
+  background-repeat: no-repeat;
+  background-position: 2px center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+ul.inspector li.section > div:focus
+{
+  outline-style: dotted;
+  outline-color: var(--border-color);
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.section > div.collapse
+{
+  background-image:url(images/collapse.svg);
+}
+
+ul.inspector li.section > div.expand
+{
+  background-image:url(images/expand.svg);
+}
+
+ul.inspector li.section.controller.started > div > span::after
+{
+  content: ' ';
+  width: 10px;
+  height: 10px;
+  border: 1px solid #c0c0c0;
+  border-top-color: #404040;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: inline-block;
+  animation: controller_running 4s steps(16) infinite;
+  margin-left: 4px;
+}
+
+div.inspector_toolbar > button
+{
+  padding: 0px;
+  width: 16px;
+  height:16px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  vertical-align: middle;
+  margin: 5px;
+  background-size: 16px;
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+div.inspector_toolbar > span
+{
+  vertical-align: middle;
+}
+
+div.inspector_toolbar > button.list
+{
+  background-image: url(images/list.svg);
+}
+
+div.inspector_toolbar > button.select
+{
+  background-image: url(images/select.svg);
+}
+
+div.inspector_toolbar > button.previous
+{
+  background-image: url(images/previous.svg);
+}
+
+div.inspector_toolbar > button.next
+{
+  background-image: url(images/next.svg);
+}
+
+.inspector_properties button:hover
+{
+  box-shadow: 0px 0px 4px 0px #c0a0a0;
+}
+
+.inspector_properties .tabbed_pane .header a:before
+{
+  width: 20px;
+  height: 20px;
+  mask-size: 16px 16px;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  background-color: var(--text-color);
+}
+
+.inspector_properties .tabbed_pane .header a:before
+{
+  content: "\00a0";
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.inspector_properties .tabbed_pane .header a.object:before
+{
+  mask-image: url(../icons/inspector.svg#object_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.geometry:before
+{
+  mask-image: url(../icons/inspector.svg#geometry_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.material:before
+{
+  mask-image: url(../icons/inspector.svg#material_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.builder:before
+{
+  mask-image: url(../icons/inspector.svg#builder_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.userdata:before
+{
+  mask-image: url(../icons/inspector.svg#userdata_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.formulas:before
+{
+  mask-image: url(../icons/inspector.svg#formula_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.controllers:before
+{
+  mask-image: url(../icons/inspector.svg#controllers_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.featured:before
+{
+  mask-image: url(../icons/inspector.svg#featured_tab);
+}
+
+.inspector_properties .tabbed_pane .header a.links:before
+{
+  mask-image: url(../icons/inspector.svg#links_tab);
+}
+
+ul.inspector li.property
+{
+  display: flex;
+  background-image: url(images/inspector/default.svg);
+  background-position: 0 1px;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  white-space:normal;
+  vertical-align: middle;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+ul.inspector li.property > div
+{
+  display: inline-block;
+  margin-left: 6px;
+}
+
+ul.inspector li.property .label
+{
+  text-align: left;
+  color: var(--label-text-color);
+  line-height: 18px;
+  vertical-align: middle;
+  text-decoration: none;
+}
+
+ul.inspector li.property > div > .label:focus
+{
+  outline-style: dotted;
+  outline-color: var(--border-color);
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.property .value.disabled
+{
+  color: var(--disabled-text-color);
+}
+
+ul.inspector li.property .value
+{
+  text-align: left;
+  margin-left: 4px;
+  vertical-align: middle;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+ul.inspector li.property a.value:hover
+{
+  text-decoration: underline;
+}
+
+ul.inspector li.property a.value:focus
+{
+  outline-style: dotted;
+  outline-color: var(--border-color);
+  outline-offset: 1px;
+  outline-width: 1px;
+}
+
+ul.inspector li.property .value input[type=checkbox]
+{
+  vertical-align: middle;
+  margin: 0;
+}
+
+ul.inspector li.property.editable .label
+{
+  cursor: pointer;
+}
+
+ul.inspector li.property.editable .value
+{
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+ul.inspector li.property::before
+{
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  mask-repeat: no-repeat;
+  mask-position: 4px center;
+  mask-size: 16px;
+  mask-image: url(../icons/inspector.svg#default);
+  background-color: var(--text-color);
+}
+
+ul.inspector li.property.string::before
+{
+  mask-image: url(../icons/inspector.svg#string);
+}
+
+ul.inspector li.property.number::before
+{
+  mask-image: url(../icons/inspector.svg#number);
+}
+
+ul.inspector li.property.boolean::before
+{
+  mask-image: url(../icons/inspector.svg#boolean);
+}
+
+ul.inspector li.property.vector::before
+{
+  mask-image: url(../icons/inspector.svg#vector);
+}
+
+ul.inspector li.property.euler::before
+{
+  mask-image: url(../icons/inspector.svg#euler);
+}
+
+ul.inspector li.property.color::before
+{
+  mask-image: url(../icons/inspector.svg#color);
+}
+
+ul.inspector li.property.array::before
+{
+  mask-image: url(../icons/inspector.svg#array);
+}
+
+ul.inspector li.property.formula::before
+{
+  mask-image: url(../icons/inspector.svg#formula);
+}
+
+ul.inspector li.property.texture::before
+{
+  mask-image: url(../icons/inspector.svg#texture);
+}
+
+ul.inspector li.property.color > div span.value
+{
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+ul.inspector li.property.color > div span.value > span
+{
+  vertical-align: middle;
+}
+
+ul.inspector li.property.color > div span.value > .color
+{
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--border-color);
+  margin-left: 4px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+ul.inspector li.property ul.list_3 li
+{
+  margin: 3px 0px 3px 0px;
+}
+
+ul.inspector li.property ul.list_3 li label
+{
+  display: inline-block;
+  width:16px;
+}
+
+ul.inspector li.property ul.list_3 li input
+{
+  width:160px;
+}
+
+div.inspector_info
+{
+  margin-top: 2px;
+  margin-left: 4px;
+  text-align: left;
+}
+
+ul.inspector_list
+{
+  margin-top: 4px;
+  margin-left: 4px;
+  padding-left:0;
+  text-align: left;
+  list-style-type:none;
+}
+
+@keyframes controller_running
+{
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

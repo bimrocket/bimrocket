@@ -1,0 +1,142 @@
+.panel-move > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-move input[name=move_offset]
+{
+  margin-left: 4px;
+  width: 150px;
+}
+
+.panel-rotate > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-rotate input[name=rotate_angle]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
+.panel-scale > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-scale input[name=scale_factor]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
+.panel-scale input[name=scale_length]
+{
+  margin-left: 4px;
+  width: 80px;
+}
+
+.panel-scale div > input[type=checkbox],
+.panel-scale div > label
+{
+  vertical-align: middle;
+}
+
+.panel-place > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-place select[name=place_mode]
+{
+  margin-left: 4px;
+}
+
+.panel-extrude > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-extrude input[name=extrude_depth]
+{
+  margin-left: 4px;
+  width: 100px;
+}
+
+.panel-revolve > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-revolve input[name=revolve_angle]
+{
+  margin-left: 4px;
+  width: 100px;
+}
+
+.panel-draw > .body > div
+{
+  margin-top: 6px;
+}
+
+.panel-draw input[name=draw_offset]
+{
+  margin-left: 4px;
+  width: 100px;
+}
+
+.inspect-geometry ul.tree li.face > div::before
+{
+  mask-image: url(../icons/geometry.svg#loop);
+}
+
+.inspect-geometry ul.tree li.face.holes > div::before
+{
+  mask-image: url(../icons/geometry.svg#face);
+}
+
+.inspect-geometry ul.tree li.loop > div::before
+{
+  mask-image: url(../icons/geometry.svg#loop);
+}
+
+.inspect-geometry ul.tree li.hole > div::before
+{
+  mask-image: url(../icons/geometry.svg#hole);
+}
+
+.inspect-geometry ul.tree li.vertex > div::before
+{
+  mask-image: url(../icons/geometry.svg#vertex);
+}
+
+.inspect-geometry ul.tree li.normal > div::before
+{
+  mask-image: url(../icons/geometry.svg#normal);
+}
+
+.inspect-geometry ul.summary
+{
+  text-align: left;
+  padding-left: 4px;
+  margin-bottom: 0;
+}
+
+.inspect-geometry ul.summary li
+{
+  text-align: left;
+  list-style-type: none;
+}
+
+.inspect-geometry table.data a
+{
+  text-decoration: none;
+  padding: 0 5px 0 5px;
+  border-radius: 2px;
+}
+
+.inspect-geometry table.data a:hover
+{
+  background-color: var(--surface-selection);
+}

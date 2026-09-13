@@ -1,0 +1,24 @@
+{
+  "name": "design",
+  "version": "1.0",
+  "priority": 20,
+  "releaseDate": "2026-09-20",
+  "license": "LGPL/EULA",
+  "translations":
+  {
+    "":
+    {
+      "description": "Basic design tools.",
+      "developer": "BIMROCKET TEAM",
+      "infoUrl": "https://bimrocket.org"
+    },
+    "es":
+    {
+      "description": "Herramientas de diseño básicas."
+    },
+    "ca":
+    {
+      "description": "Eines de disseny bàsiques."
+    }
+  }
+}

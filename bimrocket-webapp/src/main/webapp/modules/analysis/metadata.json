@@ -1,0 +1,24 @@
+{
+  "name": "analysis",
+  "version": "1.0",
+  "priority": 30,
+  "releaseDate": "2026-09-20",
+  "license": "LGPL/EULA",
+  "translations":
+  {
+    "":
+    {
+      "description": "Basic measure and analysis tools.",
+      "developer": "BIMROCKET TEAM",
+      "infoUrl": "https://bimrocket.org"
+    },
+    "es":
+    {
+      "description": "Herramientas básicas de medición y analisis."
+    },
+    "ca":
+    {
+      "description": "Eines bàsiques de mesura i anàlisi."
+    }
+  }
+}

@@ -57,7 +57,7 @@
               <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
               <arguments>
                 <argument>schema:IFC4X3_ADD2</argument>
-                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC4X3_ADD2.js</argument>
+                <argument>${basedir}/src/main/webapp/platform/io/ifc/schemas/IFC4X3_ADD2.js</argument>
                 <argument>-v:IFC4X3_ADD2</argument>
               </arguments>
             </configuration>
@@ -72,7 +72,7 @@
               <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
               <arguments>
                 <argument>schema:IFC4</argument>
-                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC4.js</argument>
+                <argument>${basedir}/src/main/webapp/platform/io/ifc/schemas/IFC4.js</argument>
                 <argument>-v:IFC4</argument>
               </arguments>
             </configuration>
@@ -87,7 +87,7 @@
               <mainClass>org.bimrocket.generators.IfcJavascriptClassesGenerator</mainClass>
               <arguments>
                 <argument>schema:IFC2X3</argument>
-                <argument>${basedir}/src/main/webapp/js/io/ifc/schemas/IFC2X3.js</argument>
+                <argument>${basedir}/src/main/webapp/platform/io/ifc/schemas/IFC2X3.js</argument>
                 <argument>-v:IFC2X3</argument>
               </arguments>
             </configuration>
@@ -101,8 +101,85 @@
             <configuration>
               <mainClass>org.bimrocket.util.BimRocketInfo</mainClass>
               <arguments>
-                <argument>${basedir}/src/main/webapp/js/ui/Application.js</argument>
+                <argument>${basedir}/src/main/webapp/platform/ui/Application.js</argument>
                 <argument>${basedir}/target/Application.js</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>pack-svg-stroke-icons</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.bimrocket.util.SvgSpriteGenerator</mainClass>
+              <arguments>
+                <argument>-normalize</argument>
+                <!-- platform -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/misc.svg</argument>
+                <!-- analysis module -->
+                <argument>${basedir}/src/main/webapp/modules/analysis/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/analysis/assets/icons/misc.svg</argument>
+                <!-- base module -->
+                <argument>${basedir}/src/main/webapp/modules/base/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/base/assets/icons/misc.svg</argument>
+                <!-- bim module -->
+                <argument>${basedir}/src/main/webapp/modules/bim/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/bim/assets/icons/misc.svg</argument>
+                <!-- control module -->
+                <argument>${basedir}/src/main/webapp/modules/control/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/control/assets/icons/misc.svg</argument>
+                <!-- design module -->
+                <argument>${basedir}/src/main/webapp/modules/design/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/design/assets/icons/misc.svg</argument>
+                <!-- gis module -->
+                <argument>${basedir}/src/main/webapp/modules/gis/assets/icons/misc</argument>
+                <argument>${basedir}/target/bimrocket/modules/gis/assets/icons/misc.svg</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>pack-svg-mask-icons</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.bimrocket.util.SvgSpriteGenerator</mainClass>
+              <arguments>
+                <argument>-stack</argument>
+                <!-- inspector -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/inspector</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/inspector.svg</argument>
+                <!-- file -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/file</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/file.svg</argument>
+                <!-- outliner -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/outliner</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/outliner.svg</argument>
+                <!-- tree -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/tree</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/tree.svg</argument>
+                <!-- geometry -->
+                <argument>${basedir}/src/main/webapp/modules/design/assets/icons/geometry</argument>
+                <argument>${basedir}/target/bimrocket/modules/design/assets/icons/geometry.svg</argument>
+                <!-- report -->
+                <argument>${basedir}/src/main/webapp/modules/analysis/assets/icons/report</argument>
+                <argument>${basedir}/target/bimrocket/modules/analysis/assets/icons/report.svg</argument>
+                <!-- ifc -->
+                <argument>${basedir}/src/main/webapp/modules/bim/assets/icons/ifc</argument>
+                <argument>${basedir}/target/bimrocket/modules/bim/assets/icons/ifc.svg</argument>
+                <!-- bsdd -->
+                <argument>${basedir}/src/main/webapp/modules/bim/assets/icons/bsdd</argument>
+                <argument>${basedir}/target/bimrocket/modules/bim/assets/icons/bsdd.svg</argument>
+                <!-- ifc-inspector -->
+                <argument>${basedir}/src/main/webapp/modules/bim/assets/icons/inspector</argument>
+                <argument>${basedir}/target/bimrocket/modules/bim/assets/icons/inspector.svg</argument>
+                <!-- delta -->
+                <argument>${basedir}/src/main/webapp/modules/bim/assets/icons/delta</argument>
+                <argument>${basedir}/target/bimrocket/modules/bim/assets/icons/delta.svg</argument>
               </arguments>
             </configuration>
           </execution>
@@ -117,7 +194,7 @@
           <webResources>
             <resource>
               <directory>${basedir}/target</directory>
-              <targetPath>js/ui</targetPath>
+              <targetPath>platform/ui</targetPath>
               <includes>
                 <include>Application.js</include>
               </includes>

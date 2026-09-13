@@ -1,0 +1,213 @@
+/* ifc.css */
+
+ul.tree li.IfcBeam > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcBeam);
+}
+
+ul.tree li.IfcFacility > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFacility);
+}
+
+ul.tree li.IfcBuilding > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcBuilding);
+}
+
+ul.tree li.IfcBuildingElementPart > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcBuildingElementPart);
+}
+
+ul.tree li.IfcBuildingStorey > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcBuildingStorey);
+}
+
+ul.tree li.IfcRoad > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRoad);
+}
+
+ul.tree li.IfcRoadPart > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRoadPart);
+}
+
+ul.tree li.IfcEarthworksFill > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcEarthworksFill);
+}
+
+ul.tree li.IfcCourse > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcCourse);
+}
+
+ul.tree li.IfcClassification > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcClassification);
+}
+
+ul.tree li.IfcClassificationReference > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcClassificationReference);
+}
+
+ul.tree li.IfcColumn > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcColumn);
+}
+
+ul.tree li.IfcCovering > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcCovering);
+}
+
+ul.tree li.IfcPavement > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcPavement);
+}
+
+ul.tree li.IfcCurtainWall > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcCurtainWall);
+}
+
+ul.tree li.IfcDistributionFlowElement > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcDistributionFlowElement);
+}
+
+ul.tree li.IfcDoor > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcDoor);
+}
+
+ul.tree li.IfcFlowFitting > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFlowFitting);
+}
+
+ul.tree li.IfcFlowSegment > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFlowSegment);
+}
+
+ul.tree li.IfcFlowTerminal > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFlowTerminal);
+}
+
+ul.tree li.IfcFooting > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFooting);
+}
+
+ul.tree li.IfcFurnishingElement > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcFurnishingElement);
+}
+
+ul.tree li.IfcGroup > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcGroup);
+}
+
+ul.tree li.IfcMember > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcMember);
+}
+
+ul.tree li.IfcOpeningElement > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcOpeningElement);
+}
+
+ul.tree li.IfcPlate > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcPlate);
+}
+
+ul.tree li.IfcPile > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcPile);
+}
+
+ul.tree li.IfcProject > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcProject);
+}
+
+ul.tree li.IfcRailing > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRailing);
+}
+
+ul.tree li.IfcRamp > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRamp);
+}
+
+ul.tree li.IfcRampFlight > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRamp);
+}
+
+ul.tree li.IfcRoof > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcRoof);
+}
+
+ul.tree li.IfcSite > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcSite);
+}
+
+ul.tree li.IfcSlab > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcSlab);
+}
+
+ul.tree li.IfcSpace > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcSpace);
+}
+
+ul.tree li.IfcStair > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcStair);
+}
+
+ul.tree li.IfcStairFlight > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcStairFlight);
+}
+
+ul.tree li.IfcType > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcType);
+}
+
+ul.tree li.IfcWall > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcWall);
+}
+
+ul.tree li.IfcWallStandardCase > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcWallStandardCase);
+}
+
+ul.tree li.IfcWindow > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcWindow);
+}
+
+ul.tree li.IfcLayer > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcLayer);
+}
+
+

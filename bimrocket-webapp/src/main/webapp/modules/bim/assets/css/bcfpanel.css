@@ -1,0 +1,266 @@
+/* bcf panel */
+
+.bcf-panel
+{
+  --labelWidth: 100px;
+
+  overflow: auto;
+  text-align: left;
+  height: 100%;
+}
+
+.bcf-panel a
+{
+  text-decoration: none;
+}
+
+.bcf-panel td a:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+.bcf-body
+{
+  padding: 4px;
+}
+
+.bcf-body > div
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--labelWidth), max-content));
+  align-items:center;
+  margin-bottom: 4px;
+}
+
+.bcf-body > div > label
+{
+  padding: 2px;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0px;
+}
+
+.bcf-body > div > input:not([type="checkbox"], [type="radio"]),
+.bcf-body > div > select,
+.bcf-body > div > textarea,
+.bcf-body > div > div
+{
+  max-width: 100%;
+  width: 1000px;
+}
+
+.bcf-body > div.bcf-description
+{
+  display: block;
+}
+
+.bcf-body > div.bcf-description textarea
+{
+  resize: vertical;
+}
+
+.bcf-panel .bcf-buttons
+{
+  display: block;
+  text-align: center;
+}
+
+.bcf-panel .bcf-checkbox
+{
+  margin: 8px 0;
+  display: flex;
+
+  & input, label
+  {
+    width: initial;
+    cursor: pointer;
+  }
+}
+
+.bcf-body > .bcf-topic-nav
+{
+  display: grid;
+  grid-template-columns: min-content auto min-content;
+  align-items: center;
+}
+
+.bcf-body > .bcf-topic-nav > span
+{
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.bcf-body .topic-nav-button
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.bcf-body .topic-nav-button > svg
+{
+  stroke-width: 2px;
+}
+
+#bcf-config-panel
+{
+  display: flex;
+  flex-direction: column;
+}
+
+.bcf-project-setup
+{
+  padding: 4px;
+}
+
+.bcf-project-setup > div
+{
+  padding-bottom:4px;
+}
+
+.bcf-project-setup > div > label
+{
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bcf-project-setup > div > input,
+.bcf-project-setup > div > textarea
+{
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bcf-project-setup > div > textarea
+{
+  font-family: monospace;
+  resize: vertical;
+  min-height: 200px;
+}
+
+.bcf-extensions-setup
+{
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  flex-grow: 1;
+}
+
+.bcf-tabs
+{
+  padding: 4px;
+}
+
+.bcf-tabs .tab-panel
+{
+  padding: 4px;
+}
+
+.bcf-tabs .tab-panel label
+{
+  padding: 2px;
+  display: block;
+  box-sizing: border-box;
+  width:100%;
+  margin-top: 4px;
+}
+
+.bcf-tabs .tab-panel textarea
+{
+  padding: 2px;
+  display: block;
+  box-sizing: border-box;
+  width:100%;
+  margin: 0px;
+  resize: vertical;
+}
+
+ul.bcf-list
+{
+  padding-left: 2px;
+  list-style-type: none;
+  margin-top: 0;
+}
+
+ul.bcf-list li
+{
+  margin-bottom: 4px;
+}
+
+.bcf-tabs li .bcf-comment-author
+{
+}
+
+.bcf-tabs li .bcf-comment-text
+{
+  display:block;
+}
+
+.bcf-tabs .bcf-list li > div
+{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.bcf-tabs .bcf-list li > div > svg
+{
+  margin-right: 4px;
+  transform: translate(0.5px, 0.5px);
+  stroke-width: 1.25px;
+}
+
+.bcf-tabs .viewpoint-snapshot img
+{
+  width: 100%;
+  display: block;
+  border: 1px solid #b0b0b0;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
+}
+
+.bcf-tabs .viewpoint-snapshot:focus img
+{
+  border: 1px dotted #404040;
+}
+
+.bcf-tabs .bcf-list .viewpoint-container .components-list
+{
+  padding: 0 0 0 21px;
+}
+
+a.select-components
+{
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.component-item
+{
+  cursor: pointer;
+}
+
+.viewpoint-dialog
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewpoint-dialog .snapshot-zoom
+{
+  width: 100%;
+  display: block;
+  border: 1px solid #b0b0b0;
+  box-sizing: border-box;
+  background-color: #f0f0f0;
+}
+

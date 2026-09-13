@@ -1,0 +1,284 @@
+/* panel.css */
+
+:root
+{
+  --panel-color: var(--text-color);
+  --panel-background: var(--surface-ground);
+  --panel-border-radius: 16px;
+  --panel-padding: 6px;
+  --panel-border-color: var(--color-3);
+  --panel-border-style: none;
+  --panel-border-width: 0;
+  --panel-header-background: transparent;
+  --panel-shadow: var(--box-shadow-2);
+  --panel-margin: 8px;
+  --panel-button-background: var(--surface-3);
+}
+
+div.panel
+{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  box-sizing: border-box;
+  color: var(--panel-color);
+  background-color: var(--panel-background);
+  border-width: var(--panel-border-width);
+  border-radius: var(--panel-border-radius);
+  border-style: var(--panel-border-style);
+  border-color: var(--panel-border-color);
+  padding: var(--panel-padding);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+  display:none;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(6px);
+  z-index: 5000;
+  bottom:0;
+}
+
+div.panel.activated
+{
+  display:flex;
+}
+
+div.panel.activated > .header > button.minimize
+{
+  display: flex;
+}
+
+div.panel.activated.minimized > .header
+{
+  border-bottom: none;
+}
+
+div.panel.activated.minimized > .header > button.minimize
+{
+  display: none;
+}
+
+div.panel.move
+{
+  border: 3px dashed var(--primary-color);
+}
+
+div.panel.collapsed
+{
+  display: none !important;
+}
+
+div.panel > .header
+{
+  background-color: var(--panel-header-background);
+  flex-grow: 0;
+  align-items: center;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+}
+
+div.panel > .header > .title
+{
+  flex-grow: 1;
+  flex-shrink: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  text-decoration: none;
+  color: var(--text-color);
+  -webkit-user-drag: none;
+  overflow: hidden;
+}
+
+div.panel > .header > .title > svg
+{
+  margin-right: 0.25rem;
+  margin-left: -20px;
+}
+
+div.panel > .header > button
+{
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 4px;
+  padding:0;
+  cursor: pointer;
+  border-radius: 50%;
+  background-color: var(--panel-button-background);
+  border:none;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+}
+
+div.panel > .header > button > svg
+{
+  width: 10px;
+  height: 10px;
+  stroke: var(--text-color);
+  stroke-width: 2px;
+}
+
+div.panel > .header > button:hover
+{
+  background-color: var(--primary-color);
+}
+
+div.panel > .header > button:hover > svg
+{
+  stroke: var(--primary-text-color);
+}
+
+div.panel > .header > button:focus
+{
+  outline: 1px dotted black;
+}
+
+div.panel > .body
+{
+  flex-grow: 1;
+  overflow: auto;
+  height: 100%;
+}
+
+div.panel > .body.center
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+div.panel > .body.padding
+{
+  padding: 4px;
+}
+
+.animate > div.panel
+{
+  _transition: height 0.5s, bottom 0.5s;
+}
+
+button.panel-expander
+{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-ground);
+  border: none;
+  appearance: none;
+  top: calc(50%);
+  padding: 4px;
+  margin: 0;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-2);
+  z-index: 10000;
+}
+
+button.panel-expander:hover
+{
+  background-color: var(--surface-field);
+}
+
+button.panel-expander > svg
+{
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-color);
+  stroke-width: 2;
+}
+
+button.panel-expander.left
+{
+  left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+button.panel-expander.right
+{
+  right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+div.h-resizer
+{
+  width: var(--panel-margin);
+  position: absolute;
+  background: transparent;
+  _background-color: yellow;
+  z-index: 5001;
+}
+
+div.h-resizer:hover
+{
+  cursor: col-resize;
+}
+
+div.panel div.v-resizer
+{
+  background-color: transparent;
+  _background-color: yellow;
+  position: absolute;
+  top: calc(-1 * var(--panel-margin));
+  left: 0;
+  right: 0;
+  height: var(--panel-margin);
+}
+
+div.panel div.v-resizer:hover
+{
+  cursor: row-resize;
+}
+
+div.panel div.mover
+{
+  background-color: transparent;
+  _background-color: orange;
+  position: absolute;
+  top: 0;
+  left: 48px;
+  right: 48px;
+  height: 32px;
+}
+
+div.panel div.mover:hover
+{
+  cursor: grab;
+}
+
+@media all and (max-width : 768px)
+{
+  div.panel.activated
+  {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+
+  div.panel div.v-resizer
+  {
+    height: calc(var(--panel-margin) + 26px);
+    left: 48px;
+    right: 48px;
+  }
+
+  div.mover
+  {
+    display: none;
+  }
+}

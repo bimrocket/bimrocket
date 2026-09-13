@@ -1,0 +1,102 @@
+/* admin panel */
+
+.admin-panel
+{
+  --labelWidth: 190px;
+
+  overflow: auto;
+  text-align: left;
+}
+
+.admin-panel a
+{
+  text-decoration: none;
+}
+
+.admin-panel td a:focus
+{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 30, 30, 0.3);
+  transition: all 0.4s ease;
+}
+
+.admin-panel .admin-buttons
+{
+  display: block;
+  text-align: center;
+}
+
+.admin-body
+{
+  padding: 4px;
+}
+
+.admin-body > div
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--labelWidth), max-content));
+  align-items:center;
+  margin-bottom: 2px;
+}
+
+.admin-body > div > label
+{
+  padding: 2px;
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0px;
+}
+
+.admin-body > div > input,
+.admin-body > div > select,
+.admin-body > div > textarea,
+.admin-body > div > div
+{
+  max-width: 100%;
+  width: 1000px;
+}
+
+.admin-body > div > textarea
+{
+  margin-top: 2px;
+}
+
+.admin-panel .admin-buttons
+{
+  display: block;
+  text-align: center;
+}
+
+.admin-body > .admin-topic-nav
+{
+  display: grid;
+  grid-template-columns: min-content auto min-content;
+  align-items: center;
+}
+
+.admin-body > .admin-topic-nav > span
+{
+  text-align: center;
+}
+
+.tags-input
+{
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.tags-container.hidden-input input
+{
+  display: none;
+}
+
+.tags-input:focus
+{
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}

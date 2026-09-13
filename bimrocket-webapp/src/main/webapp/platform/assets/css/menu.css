@@ -1,0 +1,503 @@
+/* menu.css */
+
+:root
+{
+  --menubar-mode: desktop;
+  --menubar-background: transparent;
+  --menubar-menuitem-color: var(--text-color);
+  --menubar-menuitem-horizontal-padding: 10px;
+
+  --menu-background: var(--surface-ground);
+  --menu-box-shadow: var(--box-shadow-2);
+  --menu-border-color: var(--border-color);
+  --menu-border-width: 0px;
+  --menu-border-radius: 16px;
+  --menu-border-style: var(--border-style);
+  --menu-padding: 6px;
+
+  --menuitem-color: var(--text-color);
+  --menuitem-horizontal-padding: 6px;
+  --menuitem-vertical-padding: 6px;
+  --menuitem-font-size: 14px;
+  --menuitem-kbd-color: var(--text-color);
+  --menuitem-kbd-border-color: var(--color-5);
+  --menuitem-hover-color: var(--color-0);
+  --menuitem-hover-background: var(--surface-hover);
+  --menuitem-max-width: 240px;
+  --menuitem-border-radius: 12px;
+  --menuitem-transition: none;
+  --menuitem-icon-size: 20px;
+  --menuitem-icon-stroke: var(--text-color);
+  --menuitem-icon-stroke-width: 1.5px;
+  --menuitem-icon-toggler-stroke-width: 2px;
+  --menuitem-focus-color: var(--text-color);
+  --menuitem-focus-background: var(--surface-hover);
+  --menuitem-focus-kbd-color: var(--text-color);
+  --menuitem-drop-background: var(--surface-hover);
+
+  --separator-color: var(--border-color);
+  --separator-margin: 4px;
+
+  --mobile-menubar-background: var(--menu-background);
+  --mobile-menubar-width: 300px;
+  --mobile-menubar-top: var(--header-height);
+  --mobile-menu-padding: 20px;
+  --mobile-menu-border-color: var(--separator-color);
+  --mobile-menuitem-color: var(--menuitem-color);
+  --mobile-menuitem-padding: 6px;
+  --mobile-menuitem-focus-color: var(--menuitem-focus-color);
+  --mobile-menuitem-focus-background: var(--menuitem-focus-background);
+  --mobile-menuitem-drop-color: var(--menuitem-color);
+  --mobile-menuitem-drop-background: var(--surface-field);
+  --mobile-scrollbar-color: var(--primary-color);
+  --mobile-separator-color: var( --separator-color);
+
+  --expand-duration: 0.3s;
+  --fade-duration: 0.2s;
+  --transform-duration: 0.2s;
+}
+
+/* Menu common styles */
+
+menu
+{
+  position: absolute;
+  list-style: none;
+  background-color: var(--menu-background);
+  border-width: var(--menu-border-width);
+  border-color: var(--menu-border-color);
+  border-style: var(--menu-border-style);
+  border-radius: var(--menu-border-radius);
+  padding: var(--menu-padding);
+  margin: 0;
+  display: block;
+  box-sizing: border-box;
+  box-shadow: var(--menu-box-shadow);
+  width: auto;
+  z-index: 8000;
+  top: calc(var(--menu-padding) * -1 + var(--menu-border-width) * -1);
+  contain: layout;
+}
+
+menu li
+{
+  display:block;
+  width: auto;
+  position: relative;
+}
+
+menu li > button
+{
+  display: flex;
+  flex-direction: row;
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--menuitem-color);
+  font-size: var(--menuitem-font-size);
+  padding: var(--menuitem-vertical-padding) var(--menuitem-horizontal-padding);
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  user-drag: none;
+  max-width: var(--menuitem-max-width);
+  border-radius: var(--menuitem-border-radius);
+  transition: var(--menuitem-transition);
+}
+
+menu.menubar > li > button > svg
+{
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+menu.contextmenu li > button > svg,
+menu menu li > button > svg
+{
+  width: var(--menuitem-icon-size);
+  height: var(--menuitem-icon-size);
+  stroke: var(--menuitem-icon-stroke);
+  stroke-width: var(--menuitem-icon-stroke-width);
+  margin-right: 0.25rem;
+}
+
+menu.contextmenu li > button > svg.icon-toggler,
+menu menu li > button > svg.icon-toggler
+{
+  margin-left: 0.5rem;
+}
+
+menu.contextmenu li > button > svg.icon-toggler,
+menu li > button > svg.icon-toggler
+{
+  stroke-width: var(--menuitem-icon-toggler-stroke-width);
+}
+
+menu li > button > span.label
+{
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+menu li > button > kbd.shortcut
+{
+  flex-grow: 0;
+  font-size: 11px;
+  color: var(--menuitem-kbd-color);
+  margin-left: 6px;
+  border: 1px solid var(--menuitem-kbd-border-color);
+  border-radius: 8px;
+  padding: 2px 6px;
+}
+
+menu button:hover
+{
+  color: var(--menuitem-hover-color);
+  background-color: transparent;
+}
+
+menu li.menu.drop > button,
+menu li.menu.drop > button:hover
+{
+  color: var(--menuitem-focus-color);
+  background-color: var(--menuitem-drop-background);
+}
+
+menu button:focus,
+menu li.menu.drop > button:focus
+{
+  color: var(--menuitem-focus-color);
+  background-color: var(--menuitem-focus-background);
+  outline: none;
+  box-shadow: none;
+}
+
+menu button:focus kbd.shortcut
+{
+  color: var(--menuitem-focus-kbd-color);
+}
+
+menu.back
+{
+  transition: transform var(--transform-duration) ease-in-out;
+}
+
+menu li.back > button > svg.icon
+{
+  stroke-width: var(--menuitem-icon-toggler-stroke-width);
+}
+
+menu menu
+{
+  display: none;
+  margin-left: 100%;
+}
+
+menu li.drop > menu
+{
+  display:block;
+  animation: fade_in 0.3s;
+}
+
+menu li.separator
+{
+  border-bottom: 1px solid var(--separator-color);
+  margin-top: var(--separator-margin);
+  margin-bottom: var(--separator-margin);
+}
+
+.menu-button
+{
+  display: none;
+  color: var(--menuitem-color);
+}
+
+/* MenuBar styles */
+
+menu.menubar
+{
+  box-shadow: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background-color: var(--menubar-background);
+}
+
+menu.menubar > li
+{
+  margin: 0px;
+  display:inline-block;
+}
+
+menu.menubar > li > menu
+{
+  margin-left: 0%;
+  top: 100%;
+}
+
+menu.menubar > li > button
+{
+  color: var(--menubar-menuitem-color);
+}
+
+menu.menubar > li > button:hover
+{
+  background-color: var(--menuitem-hover-background);
+}
+
+menu.menubar > li > button:focus
+{
+  color: var(--menuitem-color);
+  background-color: var(--menuitem-focus-background);
+}
+
+menu.menubar > li.menu > button
+{
+  background-image: none;
+  padding-left: var(--menubar-menuitem-horizontal-padding);
+  padding-right: var(--menubar-menuitem-horizontal-padding);
+}
+
+/* mobile mode rules */
+@media all and (max-width : 950px)
+{
+  :root
+  {
+    --menubar-mode: mobile;
+  }
+
+  menu.menubar
+  {
+    background-color: var(--mobile-menubar-background);
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    top: var(--mobile-menubar-top);
+    left: 0;
+    max-height: calc(100% - var(--header-height)) !important;
+    height: auto;
+    width: var(--mobile-menubar-width);
+    box-shadow: var(--menu-box-shadow);
+    border: none;
+    max-width: 100% !important;
+    max-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--mobile-scrollbar-color) transparent;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s var(--fade-duration),
+                opacity var(--fade-duration) linear;
+    padding: var(--menu-border-radius);
+  }
+
+  menu.menubar menu
+  {
+    border-left: 1px solid var(--mobile-menu-border-color) !important;
+    border-radius: 0px;
+    transform: translate(16px, 0px);
+  }
+
+  menu.menubar menu > li
+  {
+    transform: translate(-16px, 0px);
+  }
+
+  menu > li > button
+  {
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+
+  menu > li > button > svg,
+  menu.menubar > li > button > svg.icon-toggler
+  {
+    display: block;
+    width: 20px;
+    height: 20px;
+  }
+
+  menu.menubar > li > button > svg.icon
+  {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  menu li > button > svg.icon-toggler
+  {
+    stroke: var(--menuitem-icon-stroke);
+    transition: transform var(--transform-duration);
+  }
+
+  menu li > button[aria-expanded=true] > svg.icon-toggler
+  {
+    transform: rotate(90deg);
+  }
+
+  menu.menubar li,
+  menu.menubar menu
+  {
+    position: static;
+    display: block;
+    background-color: var(--menubar-background);
+    box-shadow: none;
+  }
+
+  menu.menubar menu,
+  menu.menubar menu menu
+  {
+    margin-left: 0;
+    padding-left: var(--mobile-menu-padding);
+    padding-right: 0;
+    border: none;
+    overflow: hidden;
+  }
+
+  menu.menubar li > menu
+  {
+    visibility: hidden;
+    max-height: 0;
+    animation: none;
+    transition: max-height var(--expand-duration) ease-in-out,
+                visibility var(--expand-duration) step-end;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  menu.menubar li.drop > menu
+  {
+    display: block;
+    visibility: visible;
+    animation: none;
+    transition: max-height var(--expand-duration) ease-in-out,
+                visibility 0s;
+  }
+
+  menu.menubar li > button
+  {
+    color: var(--mobile-menuitem-color);
+    padding-top: var(--mobile-menuitem-padding);
+    padding-bottom: var(--mobile-menuitem-padding);
+    max-width: 100%;
+  }
+
+  menu.menubar li > button:hover
+  {
+    background-color: transparent;
+  }
+
+  menu.menubar li.menu > button > i,
+  menu.menubar > li.menu > button > i
+  {
+    display: block;
+    filter: invert(1);
+    background-position: center center;
+    transition: var(--expand-duration) transform ease-in-out;
+  }
+
+  menu.menubar li.menu.drop > button > i,
+  menu.menubar > li.menu.drop > button > i
+  {
+    transform: rotate(90deg);
+  }
+
+  menu.menubar li kbd.shortcut
+  {
+    display: none;
+  }
+
+  menu.menubar li.drop > button,
+  menu.menubar li.drop > button:hover
+  {
+    color: var(--mobile-menuitem-drop-color);
+    background-color: var(--mobile-menuitem-drop-background);
+  }
+
+  menu.menubar li > button:focus,
+  menu.menubar li.menu.drop > button:focus
+  {
+    color: var(--mobile-menuitem-focus-color);
+    background-color: var(--mobile-menuitem-focus-background);
+  }
+
+  menu.menubar li.separator
+  {
+    margin: 0;
+    color: var(--mobile-separator-color);
+  }
+
+  menu.menubar.menu_drop
+  {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity var(--fade-duration) linear;
+  }
+
+  .menu-button
+  {
+    appearance: none;
+    display: block;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    z-index: 10;
+  }
+
+  .menu-button[aria-expanded=true] > svg.icon
+  {
+    transform: rotate(90deg);
+  }
+
+  .menu-button[aria-expanded=false] > svg.icon
+  {
+  }
+}
+
+/* ContextMenu styles */
+
+menu.contextmenu
+{
+  animation: fade_in 0.3s;
+}
+
+.contextmenu-button
+{
+  border: none;
+  background: transparent;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  animation: none;
+  background-size: 12px 12px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.contextmenu-button:hover
+{
+  background-color: rgba(220, 220, 220, 0.5);
+}
+
+.contextmenu-button[aria-expanded="false"]
+{
+  background-image: url(images/ctxmenu_show.svg);
+}
+
+.contextmenu-button[aria-expanded="true"]
+{
+  background-image: url(images/ctxmenu_hide.svg);
+}
+

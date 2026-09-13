@@ -60,7 +60,7 @@ public class EnvironmentEndpoint
   Config config;
 
   @GET
-  @Path("/js")
+  @Path("/Environment.js")
   @Produces("application/javascript")
   @PermitAll
   @Operation(summary = "Get JS environment")
@@ -79,8 +79,7 @@ public class EnvironmentEndpoint
       export const Environment =
       {
         SERVER_URL : "",
-        SERVER_ALIAS : "bimrocket",
-        MODULES : ["base", "bim", "gis"]
+        MODULES : ["base", "design", "analysis", "bim", "gis", "control"]
       };
       """;
   }

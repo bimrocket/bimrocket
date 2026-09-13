@@ -1,0 +1,67 @@
+:root
+{
+  --tabbedpane-color: var(--text-color);
+  --tabbedpane-border: 0px solid var(--surface-3);
+  --tabbedpane-tab-align: center;
+  --tabbedpane-tabpanel-padding: 4px;
+}
+
+.tabbed_pane
+{
+  display: flex;
+  flex-direction: column;
+}
+
+.tabbed_pane > .header
+{
+  text-align: var(--tabbedpane-tab-align);
+}
+
+.tabbed_pane > .header > a
+{
+  display: inline-block;
+  padding: 4px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--tabbedpane-color);
+  user-select: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.tabbed_pane > .header > a:focus
+{
+  outline: none;
+  box-shadow: none;
+  border: 1px dashed var(--color-3);
+}
+
+.tabbed_pane > .header > a.selected
+{
+  border-color: #c0c0c0;
+  border-style: solid;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.tabbed_pane > .body
+{
+  border: var(--tabbedpane-border);
+  min-height: 100px;
+  margin-top: -1px;
+  flex-grow: 1;
+}
+
+.tabbed_pane > .body > .tab_panel
+{
+  display: none;
+  overflow: auto;
+  box-sizing: border-box;
+  height: 100%;
+  padding: var(--tabbedpane-tabpanel-padding);
+}
+
+.tabbed_pane > .body > .tab_panel.selected
+{
+  display: block;
+}

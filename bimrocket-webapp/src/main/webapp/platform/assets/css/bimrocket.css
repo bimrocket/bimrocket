@@ -1,0 +1,225 @@
+/*
+    Created on : 14-sep-2019, 9:07:32
+    Author     : realor
+*/
+
+:root
+{
+  --header-height: 32px;
+  --toolbar-height: 40px;
+  --header-background: #202020;
+  --background-color-1: white;
+  --background-color-2: white;
+}
+
+body *
+{
+  user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+body input, textarea, table *
+{
+  user-select: text;
+}
+
+header
+{
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: var(--header-height);
+  align-items: stretch;
+  background-color: transparent;
+  z-index: 9000;
+  left:0;
+  right:0;
+  box-shadow: 0px 0px 10px 0px rgba(50, 50, 50, 0.3);
+}
+
+header > button
+{
+  color: white;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  appearance: none;
+  box-shadow: none;
+  transition: none;
+  margin: 0;
+  flex-grow: 0;
+  font-size: 14px;
+}
+
+header > button:hover,
+header > button:focus
+{
+  border: none;
+  box-shadow: none;
+}
+
+header > button.logo_button
+{
+  background-color: #B00000;
+  display: flex;
+  width: 140px;
+  transition: background-color 0.3s;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+header > button.logo_button:hover
+{
+  background-color: #A00000;
+}
+
+header > button.logo_button svg
+{
+  width: 100%;
+  height: 100%;
+}
+
+.logo_panel
+{
+  z-index: 20000;
+  background-image: linear-gradient(black, #600000);
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo_panel svg
+{
+  width: 400px;
+  max-width: 80%;
+  color: red;
+}
+
+menu.menubar
+{
+  position: inherit;
+  flex-grow: 0;
+  top: 0;
+}
+
+menu.menubar > li > button
+{
+  height: var(--header-height);
+}
+
+.custom_bar
+{
+  flex-grow: 1;
+  z-index: 10;
+}
+
+.container
+{
+  position: absolute;
+  top: 0;
+  bottom:0;
+  left:0;
+  right:0;
+  user-select: none;
+}
+
+.container::before
+{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--background-color-1), var(--background-color-2));
+}
+
+.container > canvas,
+.container > .canvas
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.logo_panel > img
+{
+  width: 400px;
+  max-width: 80%;
+}
+
+.logo_panel > .info
+{
+  color: white;
+  min-height: 16px;
+}
+
+.logo_panel > .info > .loading
+{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 32px 0 #fff, -32px 0 #fff;
+  position: relative;
+  animation: flash 1s ease-out infinite alternate;
+}
+
+.logo_panel.show
+{
+  animation: fade_in_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.logo_panel.hide
+{
+  animation: fade_out_logo;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes flash
+{
+  0% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF;
+  }
+  50% {
+    background-color: #FFF;
+    box-shadow: 32px 0 #FFF2, -32px 0 #FFF2;
+  }
+  100% {
+    background-color: #FFF2;
+    box-shadow: 32px 0 #FFF, -32px 0 #FFF2;
+  }
+}
+
+@keyframes fade_out_logo
+{
+  0% {opacity: 1}
+  100% {opacity: 0; visibility: hidden; }
+}
+
+@keyframes fade_in_logo
+{
+  0% {opacity: 0; visibility: visible; }
+  100% {opacity: 1; }
+}
+
+@keyframes text_fade
+{
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}

@@ -23,28 +23,34 @@
     <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
 
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./platform/assets/css/styles.css">
 
     <script type="importmap">
       {
         "imports": {
-          "js/": "./js/",
-          "three": "./js/lib/three.module.js",
-          "geo-three": "./js/lib/geo-three.module.js"
+          "environment": "./Environment.js",
+          "platform/": "./platform/",
+          "modules/": "./modules/",
+          "three": "./platform/lib/three.module.js"
         }
 			}
 		</script>
+
   </head>
   <body>
     <div class="logo_panel loading">
-      <img src="css/images/bimrocket.svg" alt="bimrocket" />
-      <div class="info"><div class="loading"></div></div>
+      <svg>
+        <use href="platform/assets/icons/misc.svg#bimrocket" />
+      </svg>
+      <div class="info">
+        <div class="loading"></div>
+      </div>
     </div>
     <div id="app1" style="position:absolute;top:0;width:100%;height:50%;background:black;"></div>
     <div id="app2" style="position:absolute;top:50%;width:100%;height:50%;background:black;"></div>
 
     <script type="module">
-      import { Application } from "./js/ui/Application.js";
+      import { Application } from "platform/ui/Application.js";
 
       window.bimrocket1 = new Application(document.getElementById("app1"));
 

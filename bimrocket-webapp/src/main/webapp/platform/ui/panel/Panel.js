@@ -476,11 +476,13 @@ class Panel
         let value = setup.getItem("panel." + this.id + ".mobileHeight");
         this._mobileHeight = value === null ?
           this.defaultMobileHeight : parseInt(value);
+        this._mobileHeight = Math.max(this._mobileHeight, this.minimumHeight);
       }
       else
       {
         let value = setup.getItem("panel." + this.id + ".height");
         this._height = value === null ? this.defaultHeight : parseInt(value);
+        this._height = Math.max(this._height, this.minimumHeight);
       }
     }
     else
@@ -799,16 +801,17 @@ class PanelManager
       }
       else
       {
-        panel._actualHeight = remainingHeight;
-        remainingHeight = 0;
+        panel._actualHeight = 0;
       }
     }
 
     if (remainingHeight > 0)
     {
-      // distribute the excess height between the panels
+      // distribute the excess height between the visible panels
       for (let panel of panels)
       {
+        if (panel._actualHeight === 0) continue;
+
         let extra = panel.height - panel.minimumHeight;
 
         if (extra < remainingHeight)
@@ -820,6 +823,7 @@ class PanelManager
         {
           panel._actualHeight += remainingHeight;
           remainingHeight = 0;
+          break;
         }
       }
     }
@@ -926,7 +930,6 @@ class PanelManager
 
   notifyChange(type, panel)
   {
-    console.info(type, panel);
     const listeners = this.listeners;
     if (listeners.length > 0)
     {

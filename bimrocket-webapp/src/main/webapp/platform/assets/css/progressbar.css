@@ -8,7 +8,7 @@
   --progressbar-padding: 12px;
   --progressbar-shadow: var(--box-shadow-2);
   --progressbar-gap: 6px;
-  --progressbar-bar-color: var(--primary-color);
+  --progressbar-bar-color: var(--accent-color);
   --progressbar-bar-background: var(--surface-3);
   --progressbar-bar-height: 10px;
   --progressbar-bar-radius: 5px;

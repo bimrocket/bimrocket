@@ -52,7 +52,7 @@
   mask-image: url(../icons/inspector.svg#next-block);
 }
 
-.ifc-inspector-panel .tree li.inverse > a
+.ifc-inspector-panel .tree li.inverse > div
 {
   font-style: italic;
 }
@@ -62,7 +62,7 @@
   background-color: var(--surface-4);
 }
 
-.bim-inspector-tabs
+.ifc-inspector-tabs
 {
   height: 100%;
 }

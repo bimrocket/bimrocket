@@ -15,7 +15,7 @@ class SaveDialog extends Dialog
   {
     super(title);
 
-    this.setSize(250, 200);
+    this.setSize(280, 220);
 
     if (name === undefined || name === null || name === "")
     {

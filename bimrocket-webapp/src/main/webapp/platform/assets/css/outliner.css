@@ -9,30 +9,35 @@ ul.outliner a.selected:hover
 ul.outliner .copy,
 ul.outliner .selected.copy
 {
-  color: blue;
+  color: var(--copy-color);
   font-style: italic;
 }
 
 ul.outliner .cut,
 ul.outliner .selected.cut
 {
-  color: #C00000;
+  color: var(--cut-color);
   font-style: italic;
 }
 
-ul.outliner .active_camera
+ul.outliner .active-camera
 {
   font-weight: bold;
 }
 
-ul.outliner .invisible
+ul.outliner li > div.invisible
 {
-  color: #C0C0C0;
+  color: var(--disabled-text-color);
 }
 
-ul.outliner .selected.invisible
+ul.outliner li > div.selected.invisible
 {
-  color: #606060;
+  color: var(--readonly-text-color);
+}
+
+ul.outliner li > div.invisible::before
+{
+  background-color: var(--readonly-text-color);
 }
 
 ul.outliner li > div::before

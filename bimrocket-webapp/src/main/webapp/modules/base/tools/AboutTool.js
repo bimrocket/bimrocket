@@ -98,6 +98,7 @@ class AboutTool extends Tool
     logoElem.style.paddingBottom = "8px";
     const propsElem = dialog.bodyElem.querySelector(".properties");
     const icon = Controls.addIcon(logoElem, "bimrocket", "logo");
+
     icon.style.height = "32px";
     propsElem.style.overflow = "auto";
 

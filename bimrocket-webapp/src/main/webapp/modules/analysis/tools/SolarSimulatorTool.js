@@ -28,6 +28,7 @@ class SolarSimulatorTool extends Tool
 
     this.setOptions(options);
     application.addTool(this);
+    this.immediate = true;
 
     this.target = new THREE.Object3D();
     this.target.name = "Target";
@@ -59,7 +60,7 @@ class SolarSimulatorTool extends Tool
       side : THREE.DoubleSide
     });
 
-    this._onPointerDown = (event) => this.onPointerDown(event);
+//    this._onPointerDown = (event) => this.onPointerDown(event);
     this._onSceneChanged = (event) => this.onSceneChanged(event);
 
     this.createPanel();
@@ -73,7 +74,8 @@ class SolarSimulatorTool extends Tool
       .setClassName("panel-solar-sim")
       .setDefaultHeight(500)
       .setDefaultMobileHeight(400)
-      .setMinimumHeight(200);
+      .setMinimumHeight(200)
+      .setPriority(2);
 
     this.panel.onShow = () =>
     {
@@ -84,20 +86,25 @@ class SolarSimulatorTool extends Tool
     this.panel.onHide = () =>
     {
       application.removeEventListener("scene", this._onSceneChanged);
-      application.useTool(null);
       this.resizeObverser.unobserve(this.panel.element);
       this.cancel();
     };
-
-    this.selectPositionButton = Controls.addButton(this.panel.bodyElem,
-      "solar_position", "analysis|button.select_position",
-      () => application.useTool(this));
 
     this.helpElem = document.createElement("div");
     I18N.set(this.helpElem, "textContent",
       "analysis|tool.solar_simulator.select_position");
     this.helpElem.style.margin = "4px";
     this.panel.bodyElem.appendChild(this.helpElem);
+
+    this.selectPositionButton = Controls.addButton(this.panel.bodyElem,
+      "solar_position", "analysis|button.select_position", () =>
+      {
+        if (!application.selection.isEmpty())
+        {
+          this.setTargetPosition();
+          this.selectPositionButton.classList.add("hidden");
+        }
+      });
 
     let lon = 2.045;
     let lat = 41.380;
@@ -170,69 +177,46 @@ class SolarSimulatorTool extends Tool
     this.stopExposureButton.style.display = "none";
 
     this.cancelButton = Controls.addButton(this.exposureElem,
-      "solar_cancel", "button.cancel", () =>
-      { this.cancel(); application.useTool(this); });
+      "solar_cancel", "button.cancel", () => this.cancel());
 
     this.timeGraph.setTime(date);
   }
 
-  activate()
+  execute()
   {
-    const application = this.application;
-    const container = this.application.container;
-    this.shadowsCheckBox.checked = application.setup.shadowsEnabled;
-    container.addEventListener("pointerdown", this._onPointerDown);
-
     this.panel.visible = true;
-    this.panel.minimized = false;
-
-    this.helpElem.style.display = "";
-    this.selectPositionButton.style.display = "none";
   }
 
-  deactivate()
+  setTargetPosition()
   {
     const application = this.application;
-    const container = application.container;
-    container.removeEventListener("pointerdown", this._onPointerDown);
 
-    if (!this.target.parent)
+    if (this.target.parent === null && !application.selection.isEmpty())
     {
-      this.helpElem.style.display = "none";
-      this.selectPositionButton.style.display = "";
-    }
-  }
+      application.overlays.add(this.target);
+      this.exposureElem.style.display = "";
 
-  onPointerDown(event)
-  {
-    const application = this.application;
-    if (!application.isCanvasEvent(event)) return;
+      const object = application.selection.object;
+      const box = ObjectUtils.getBoundingBox(object, false);
 
-    const pointerPosition = application.getPointerPosition(event);
-    let intersect = this.intersect(pointerPosition, application.baseObject);
-    if (intersect)
-    {
-      if (this.target.parent === null)
+      let geolocation = BIMUtils.getGeolocation(object);
+      if (geolocation)
       {
-        this.application.overlays.add(this.target);
-        this.exposureElem.style.display = "";
-
-        let object = intersect.object;
-        let geolocation = BIMUtils.getGeolocation(object);
-
-        if (geolocation)
-        {
-          this.lonElem.value = geolocation.longitude;
-          this.latElem.value = geolocation.latitude;
-        }
-
-        this.target.position.copy(intersect.point);
-        this.target.updateMatrix();
-        this.update();
-        I18N.set(this.helpElem, "textContent",
-          "analysis|tool.solar_simulator.drag");
-        application.i18n.update(this.helpElem);
+        this.lonElem.value = geolocation.longitude;
+        this.latElem.value = geolocation.latitude;
       }
+
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      console.info(center);
+
+      this.target.position.copy(center);
+      this.target.updateMatrix();
+      this.update();
+      I18N.set(this.helpElem, "textContent",
+        "analysis|tool.solar_simulator.drag");
+      application.i18n.update(this.helpElem);
     }
   }
 
@@ -244,7 +228,7 @@ class SolarSimulatorTool extends Tool
       {
         this.cancel();
         this.helpElem.style.display = "none";
-        this.selectPositionButton.style.display = "";
+        this.selectPositionButton.classList.remove("hidden");
       }
     }
     else
@@ -492,6 +476,8 @@ class SolarSimulatorTool extends Tool
     I18N.set(this.helpElem, "textContent",
       "analysis|tool.solar_simulator.select_position");
     application.i18n.update(this.helpElem);
+
+    this.selectPositionButton.classList.remove("hidden");
 
     const simulationGroup = this.simulationGroup;
     if (simulationGroup.parent)
@@ -857,7 +843,7 @@ class TimeGraph
     ctx.arc(timeX, getAzimuthY(this.azimuthInDegrees), radius, 0, 2 * Math.PI);
     ctx.fill();
 
-    const azimuthText = i18n.get("label.azimuth") +
+    const azimuthText = i18n.get("analysis|label.azimuth") +
       this.azimuthInDegrees.toFixed(3) + "º";
     const azimuthTextWidth = ctx.measureText(azimuthText).width;
 
@@ -868,7 +854,7 @@ class TimeGraph
     ctx.arc(timeX, getElevationY(this.elevationInDegrees), radius, 0, 2 * Math.PI);
     ctx.fill();
 
-    const elevationText = i18n.get("label.elevation") +
+    const elevationText = i18n.get("analysis|label.elevation") +
       this.elevationInDegrees.toFixed(3) + "º";
 
     ctx.fillText(elevationText, graph12X + margin, graphMinY - margin);

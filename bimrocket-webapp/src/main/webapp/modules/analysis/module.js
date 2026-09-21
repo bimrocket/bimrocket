@@ -34,11 +34,11 @@ export function activate(application)
   // register formats
   IOManager.formats["brs"] =
   {
-    description : "BIMROCKET Specification (*.brs)",
-    extensions : ["brs"],
-    mimeType : "text/javascript",
-    dataType : "text",
-    icon : "report"
+    description: "BIMROCKET Specification (*.brs)",
+    extensions: ["brs"],
+    mimeType: "text/javascript",
+    dataType: "text",
+    icon: "report"
   };
 
   // create tools
@@ -85,17 +85,17 @@ export function activate(application)
     if (typeof Environment.SERVER_URL === "string")
     {
       const webdav = new WebdavService({
-        name : "reports",
-        description : "Remote",
-        url : Environment.SERVER_URL + "/api/cloudfs/reports"
+        name: "reports",
+        description: "Remote",
+        url: Environment.SERVER_URL + "/api/cloudfs/reports"
       });
       application.addService(webdav, "report", false);
     }
 
     const idbfs = new IDBFileService({
-      name : "idb_reports",
-      description : "Local",
-      url : "idb_reports"
+      name: "idb_reports",
+      description: "Local",
+      url: "idb_reports"
     });
     application.addService(idbfs, "report", false);
   }

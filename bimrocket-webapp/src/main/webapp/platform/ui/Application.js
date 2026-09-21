@@ -161,7 +161,7 @@ class Application
     container.appendChild(headerElem);
 
     // logo
-    const logoPanelElem = document.body.querySelector(".logo_panel");
+    const logoPanelElem = document.body.querySelector(".logo-panel");
     this.logoPanel = logoPanelElem;
     logoPanelElem.addEventListener("click", event =>
     {
@@ -180,7 +180,7 @@ class Application
 
     const logoButton = document.createElement("button");
     this.logoButton = logoButton;
-    logoButton.className = "logo_button";
+    logoButton.className = "logo-button";
     logoButton.title = Application.NAME;
     logoButton.addEventListener("click", event => this.showLogo());
     headerElem.appendChild(logoButton);
@@ -378,16 +378,17 @@ class Application
     });
 
     // animation
-    let animationClock = new THREE.Clock();
+    let animationTimer = new THREE.Timer();
     let _animationEvent = { delta : 0 };
     let _slownessCounter = 0;
     let slownessRepeat = 1;
 
-    let animate = () =>
+    let animate = (timestamp) =>
     {
       requestAnimationFrame(animate);
 
-      _animationEvent.delta = animationClock.getDelta();
+      animationTimer.update(timestamp);
+      _animationEvent.delta = animationTimer.getDelta();
 
       if (this._eventListeners.animation.length > 0)
       {
@@ -474,30 +475,27 @@ class Application
     let sum = 0;
     let mediumSize = 0;
 
-    if (level === 2)
+    // calc object medium size
+    this.scene.traverseVisible(object =>
     {
-      // calc object medium size
-      this.scene.traverseVisible(object =>
+      if (object instanceof Solid)
       {
-        if (object instanceof Solid)
+        let geometry = object.geometry;
+        let sphere = geometry.boundingSphere;
+        if (!sphere)
         {
-          let sphere = object.geometry.boundingSphere;
-          if (sphere === null)
-          {
-            object.geometry.computeBoundingSphere();
-            sphere = object.geometry.boundingSphere;
-          }
-          const scale = object.matrixWorld.getMaxScaleOnAxis();
-          const size = sphere.radius * scale;
-          if (size < minSize) minSize = size;
-          else if (size > maxSize) maxSize = size;
-          objectCount++;
-          sum += size;
+          geometry.computeBoundingSphere();
+          sphere = geometry.boundingSphere;
         }
-      });
-      mediumSize = sum / objectCount;
-    }
-
+        const scale = object.matrixWorld.getMaxScaleOnAxis();
+        const size = sphere.radius * scale;
+        if (size < minSize) minSize = size;
+        else if (size > maxSize) maxSize = size;
+        objectCount++;
+        sum += size;
+      }
+    });
+    mediumSize = sum / objectCount;
 
     this.scene.traverseVisible(object =>
     {
@@ -526,19 +524,22 @@ class Application
             break;
 
           case 1: // hide all edges
-            object._edgesVisible = object.edgesVisible;
-            object.edgesVisible = false;
-            break;
-
-          case 2: // hide faces objects smaller than mediumSize
             if (size < mediumSize)
             {
               object._facesVisible = object.facesVisible;
               object.facesVisible = false;
             }
             break;
+
+          case 2: // hide faces for objects smaller than mediumSize
+            //if (size < mediumSize)
+            {
+              object._edgesVisible = object.edgesVisible;
+              object.edgesVisible = false;
+            }
+            break;
+          }
         }
-      }
     });
   }
 

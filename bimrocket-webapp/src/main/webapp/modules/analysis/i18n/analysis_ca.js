@@ -35,7 +35,7 @@ export const translations =
   "tool.search.label": "Cerca",
 
   "tool.solar_simulator.label": "Simulador solar",
-  "tool.solar_simulator.select_position": "Selecciona una posició en l'escena per calcular l'azimut i l'elevació del sol.",
+  "tool.solar_simulator.select_position": "Selecciona l'objecte de l'escena on vulguis calcular l'exposició solar i prem el botó 'Selecciona posició'.",
   "tool.solar_simulator.drag": "Canvia l'hora arrossegant el punter sobre la gràfica.",
   "tool.solar_simulator.cast_shadows": "Projecta ombres",
   "tool.solar_simulator.adjust_intensity": "Ajusta la intensitat solar",

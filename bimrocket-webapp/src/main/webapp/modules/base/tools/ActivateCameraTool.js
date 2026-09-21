@@ -23,6 +23,14 @@ class ActivateCameraTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    const application = this.application;
+    let object = application.selection.object;
+    let camera = application.camera;
+    return object !== camera && object instanceof THREE.Camera;
+  }
+
   execute()
   {
     const application = this.application;

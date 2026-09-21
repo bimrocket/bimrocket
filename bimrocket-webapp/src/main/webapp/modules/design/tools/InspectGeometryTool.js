@@ -47,6 +47,12 @@ class InspectGeometryTool extends Tool
     this._onSelection = this.onSelection.bind(this);
   }
 
+  isEnabled()
+  {
+    let object = this.application.selection.object;
+    return object instanceof Solid;
+  }
+
   createPanel()
   {
     const application = this.application;

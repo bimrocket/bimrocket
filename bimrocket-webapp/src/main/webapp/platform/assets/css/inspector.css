@@ -176,64 +176,68 @@ div.inspector_toolbar > button.next
   box-shadow: 0px 0px 4px 0px #c0a0a0;
 }
 
-.inspector_properties .tabbed_pane .header a:before
+.inspector_properties .tabbed_pane .header a
 {
-  width: 20px;
-  height: 20px;
+  padding: 6px;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspector_properties .tabbed_pane .header a::before
+{
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
   mask-size: 16px 16px;
   mask-repeat: no-repeat;
   mask-position: center center;
   background-color: var(--text-color);
 }
 
-.inspector_properties .tabbed_pane .header a:before
-{
-  content: "\00a0";
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.inspector_properties .tabbed_pane .header a.object:before
+.inspector_properties .tabbed_pane .header a.object::before
 {
   mask-image: url(../icons/inspector.svg#object_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.geometry:before
+.inspector_properties .tabbed_pane .header a.geometry::before
 {
   mask-image: url(../icons/inspector.svg#geometry_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.material:before
+.inspector_properties .tabbed_pane .header a.material::before
 {
   mask-image: url(../icons/inspector.svg#material_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.builder:before
+.inspector_properties .tabbed_pane .header a.builder::before
 {
   mask-image: url(../icons/inspector.svg#builder_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.userdata:before
+.inspector_properties .tabbed_pane .header a.userdata::before
 {
   mask-image: url(../icons/inspector.svg#userdata_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.formulas:before
+.inspector_properties .tabbed_pane .header a.formulas::before
 {
   mask-image: url(../icons/inspector.svg#formula_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.controllers:before
+.inspector_properties .tabbed_pane .header a.controllers::before
 {
   mask-image: url(../icons/inspector.svg#controllers_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.featured:before
+.inspector_properties .tabbed_pane .header a.featured::before
 {
   mask-image: url(../icons/inspector.svg#featured_tab);
 }
 
-.inspector_properties .tabbed_pane .header a.links:before
+.inspector_properties .tabbed_pane .header a.links::before
 {
   mask-image: url(../icons/inspector.svg#links_tab);
 }
@@ -241,10 +245,6 @@ div.inspector_toolbar > button.next
 ul.inspector li.property
 {
   display: flex;
-  background-image: url(images/inspector/default.svg);
-  background-position: 0 1px;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
   white-space:normal;
   vertical-align: middle;
   margin-top: 2px;

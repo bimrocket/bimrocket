@@ -67,14 +67,14 @@ export function activate(application)
   const extrudeTool = new ExtrudeTool(application);
   const revolveTool = new RevolveTool(application);
   const unionTool = new BooleanOperationTool(application,
-    { name : "union", label: "design|tool.union.label",
-      operation : BooleanOperator.UNION, iconName : "design|union" });
+    { name: "union", label: "design|tool.union.label",
+      operation: BooleanOperator.UNION, iconName: "design|union" });
   const intersectionTool = new BooleanOperationTool(application,
-    { name : "intersection", label: "design|tool.intersection.label",
-      operation : BooleanOperator.INTERSECT, iconName : "design|intersect" });
+    { name: "intersection", label: "design|tool.intersection.label",
+      operation: BooleanOperator.INTERSECT, iconName: "design|intersect" });
   const subtractionTool = new BooleanOperationTool(application,
-    { name : "subtraction", label: "design|tool.subtraction.label",
-      operation : BooleanOperator.SUBTRACT, iconName : "design|subtract" });
+    { name: "subtraction", label: "design|tool.subtraction.label",
+      operation: BooleanOperator.SUBTRACT, iconName: "design|subtract" });
   const decomposeTool = new DecomposeTool(application);
   const meshToSolidTool = new MeshToSolidTool(application);
   const solidToMeshTool = new SolidToMeshTool(application);
@@ -84,88 +84,88 @@ export function activate(application)
 
   const drawTool = new DrawTool(application);
   const clonerTool = new CloneTool(application,
-    { name : "cloner", label: "design|tool.cloner.label", dynamic : true });
+    { name: "cloner", label: "design|tool.cloner.label", dynamic: true });
 
   const addBoxTool = new AddObjectTool(application,
-    { name : "add_box", label: "design|tool.add_box.label",
+    { name: "add_box", label: "design|tool.add_box.label",
       objectType: "Box", iconName: "design|box" });
   const addCylinderTool = new AddObjectTool(application,
-    { name : "add_cylinder", label: "design|tool.add_cylinder.label",
+    { name: "add_cylinder", label: "design|tool.add_cylinder.label",
       objectType: "Cylinder", iconName: "design|cylinder" });
   const addConeTool = new AddObjectTool(application,
-    { name : "add_cone", label: "design|tool.add_cone.label",
-      objectType: "Cone", iconName : "design|cone" });
+    { name: "add_cone", label: "design|tool.add_cone.label",
+      objectType: "Cone", iconName: "design|cone" });
   const addSphereTool = new AddObjectTool(application,
-    { name : "add_sphere", label: "design|tool.add_sphere.label",
-      objectType: "Sphere", iconName : "design|sphere" });
+    { name: "add_sphere", label: "design|tool.add_sphere.label",
+      objectType: "Sphere", iconName: "design|sphere" });
   const addTorusTool = new AddObjectTool(application,
-    { name : "add_torus", label: "design|tool.add_torus.label",
-      objectType: "Torus" });
+    { name: "add_torus", label: "design|tool.add_torus.label",
+      objectType: "Torus", iconName: "design|torus" });
   const addSpringTool = new AddObjectTool(application,
-    { name : "add_spring", label: "design|tool.add_spring.label",
+    { name: "add_spring", label: "design|tool.add_spring.label",
       objectType: "Spring" });
   const addRectangleTool = new AddObjectTool(application,
-    { name : "add_rectangle", label: "design|tool.add_rectangle.label",
+    { name: "add_rectangle", label: "design|tool.add_rectangle.label",
       objectType: "Profile", builderClass: RectangleBuilder });
   const addCircleTool = new AddObjectTool(application,
-    { name : "add_circle", label: "design|tool.add_circle.label",
+    { name: "add_circle", label: "design|tool.add_circle.label",
       objectType: "Profile", builderClass: CircleBuilder });
   const addEllipseTool = new AddObjectTool(application,
-    { name : "add_ellipse", label: "design|tool.add_ellipse.label",
+    { name: "add_ellipse", label: "design|tool.add_ellipse.label",
       objectType: "Profile", builderClass: EllipseBuilder });
   const addTrapeziumTool = new AddObjectTool(application,
-    { name : "add_trapezium", label: "design|tool.add_trapezium.label",
+    { name: "add_trapezium", label: "design|tool.add_trapezium.label",
       objectType: "Profile", builderClass: TrapeziumBuilder });
   const addIProfileTool = new AddObjectTool(application,
-    { name : "add_iprofile", label: "design|tool.add_iprofile.label",
+    { name: "add_iprofile", label: "design|tool.add_iprofile.label",
       objectType: "Profile", builderClass: IProfileBuilder });
   const addLProfileTool = new AddObjectTool(application,
-    { name : "add_lprofile", label: "design|tool.add_lprofile.label",
+    { name: "add_lprofile", label: "design|tool.add_lprofile.label",
       objectType: "Profile", builderClass: LProfileBuilder });
   const addTProfileTool = new AddObjectTool(application,
-    { name : "add_tprofile", label: "design|tool.add_tprofile.label",
+    { name: "add_tprofile", label: "design|tool.add_tprofile.label",
       objectType: "Profile", builderClass: TProfileBuilder });
   const addUProfileTool = new AddObjectTool(application,
-    { name : "add_uprofile", label: "design|tool.add_uprofile.label",
+    { name: "add_uprofile", label: "design|tool.add_uprofile.label",
       objectType: "Profile", builderClass: UProfileBuilder });
   const addZProfileTool = new AddObjectTool(application,
-    { name : "add_zprofile", label: "design|tool.add_zprofile.label",
+    { name: "add_zprofile", label: "design|tool.add_zprofile.label",
       objectType: "Profile", builderClass: ZProfileBuilder });
   const addHelicoidTool = new AddObjectTool(application,
-    { name : "add_helicoid", label: "design|tool.add_helicoid.label",
+    { name: "add_helicoid", label: "design|tool.add_helicoid.label",
       objectType: "Cord", builderClass: HelicoidBuilder });
   const addObject3DTool = new AddObjectTool(application,
-    { name : "add_object3D", label: "design|tool.add_object3D.label",
+    { name: "add_object3D", label: "design|tool.add_object3D.label",
       objectType: "Object3D" });
   const addGroupTool = new AddObjectTool(application,
-    { name : "add_group", label: "design|tool.add_group.label",
+    { name: "add_group", label: "design|tool.add_group.label",
       objectType: "Group", iconName: "design|group" });
   const addText2DTool = new AddObjectTool(application,
-    { name : "add_text2D", label: "design|tool.add_text2D.label",
+    { name: "add_text2D", label: "design|tool.add_text2D.label",
       objectType: "Text2D" });
   const addSpriteTool = new AddObjectTool(application,
-    { name : "add_sprite", label: "design|tool.add_sprite.label",
+    { name: "add_sprite", label: "design|tool.add_sprite.label",
       objectType: "Sprite" });
   const addPerspectiveCameraTool = new AddObjectTool(application,
-    { name : "add_perspective_camera", label: "design|tool.add_perspective_camera.label",
+    { name: "add_perspective_camera", label: "design|tool.add_perspective_camera.label",
       objectType: "PerspectiveCamera" });
   const addOrthographicCameraTool = new AddObjectTool(application,
-    { name : "add_orthographic_camera", label: "design|tool.add_orthographic_camera.label",
+    { name: "add_orthographic_camera", label: "design|tool.add_orthographic_camera.label",
       objectType: "OrthographicCamera" });
   const addAmbientLightTool = new AddObjectTool(application,
-    { name : "add_ambient_light", label: "design|tool.add_ambient_light.label",
+    { name: "add_ambient_light", label: "design|tool.add_ambient_light.label",
       objectType: "AmbientLight" });
   const addHemisphereLightTool = new AddObjectTool(application,
-    { name : "add_hemisphere_light", label: "design|tool.add_hemisphere_light.label",
+    { name: "add_hemisphere_light", label: "design|tool.add_hemisphere_light.label",
       objectType: "HemisphereLight" });
   const addDirectionalLightTool = new AddObjectTool(application,
-    { name : "add_directional_light", label: "design|tool.add_directional_light.label",
+    { name: "add_directional_light", label: "design|tool.add_directional_light.label",
       objectType: "DirectionalLight" });
   const addPointLightTool = new AddObjectTool(application,
-    { name : "add_point_light", label: "design|tool.add_point_light.label",
+    { name: "add_point_light", label: "design|tool.add_point_light.label",
       objectType: "PointLight" });
   const addSpotLightTool = new AddObjectTool(application,
-    { name : "add_spot_light", label: "design|tool.add_spot_light.label",
+    { name: "add_spot_light", label: "design|tool.add_spot_light.label",
       objectType: "SpotLight" });
 
   const paintTool = new PaintTool(application);
@@ -253,6 +253,7 @@ export function activate(application)
   if (outliner)
   {
     const outlinerMenu = outliner.contextMenu;
+    outlinerMenu.addMenuItem(inspectGeometryTool);
     const outlinerAddMenu = outlinerMenu.addMenu("design|menu.design.add");
     outlinerAddMenu.addMenuItem(addGroupTool);
     outlinerAddMenu.addMenuItem(addBoxTool);

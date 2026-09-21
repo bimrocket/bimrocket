@@ -5,6 +5,7 @@
  */
 
 import { BundleManager } from "platform/i18n/BundleManager.js";
+import * as THREE from "three";
 
 class Module
 {
@@ -26,7 +27,7 @@ class Module
     this._name = null;
     this._version = null;
     this._priority = 1000;
-    this._id = crypto.randomUUID();
+    this._id = THREE.MathUtils.generateUUID();
     this._error = null;
   }
 

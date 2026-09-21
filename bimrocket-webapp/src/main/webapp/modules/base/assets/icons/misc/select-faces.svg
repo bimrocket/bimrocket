@@ -4,23 +4,23 @@
    height="24"
    viewBox="0 0 24 24"
    fill="none"
-   stroke="currentColor"
+   stroke="#000000"
    stroke-width="2"
    stroke-linecap="round"
    stroke-linejoin="round"
-   class="icon icon-tabler icons-tabler-outline icon-tabler-pencil"
+   class="icon icon-tabler icons-tabler-outline icon-tabler-click"
    version="1.1"
-   id="svg3"
-   sodipodi:docname="draw.svg"
+   id="svg7"
+   sodipodi:docname="select-faces.svg"
    inkscape:version="1.4.4 (unknown)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs3" />
+     id="defs7" />
   <sodipodi:namedview
-     id="namedview3"
+     id="namedview7"
      pagecolor="#ffffff"
      bordercolor="#000000"
      borderopacity="0.25"
@@ -29,17 +29,17 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="true"
-     inkscape:zoom="5.855728"
-     inkscape:cx="11.868721"
-     inkscape:cy="12.295653"
+     inkscape:zoom="2.927864"
+     inkscape:cx="11.783334"
+     inkscape:cy="11.954107"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg3">
+     inkscape:current-layer="svg7">
     <inkscape:grid
-       id="grid3"
+       id="grid7"
        units="px"
        originx="0"
        originy="0"
@@ -59,11 +59,10 @@
      fill="none"
      id="path1" />
   <path
-     d="M 4,20 6,14 16,4 c 2.666666,-2.6666659 6.666666,1.3333342 4,4 L 10,18 4,20 c 0,0 4.2518912,1.515369 7,1.456604 3,-0.06415 3.517373,-2.154788 6,-2.456604 3,-0.364714 4,1 4,1"
-     id="path2"
-     sodipodi:nodetypes="ccssccssc" />
+     d="M12 12l9 3l-4 2l-2 4l-3 -9"
+     id="path7" />
   <path
-     d="m 15,5 4,4"
-     id="path3"
-     sodipodi:nodetypes="cc" />
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="M 11,20 H 3 V 3 h 18 v 8"
+     id="path8" />
 </svg>

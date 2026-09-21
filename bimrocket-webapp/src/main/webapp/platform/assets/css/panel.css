@@ -62,7 +62,7 @@ div.panel.activated.minimized > .header > button.minimize
 
 div.panel.move
 {
-  border: 3px dashed var(--primary-color);
+  border: 3px dashed var(--accent-color);
 }
 
 div.panel.collapsed
@@ -134,12 +134,12 @@ div.panel > .header > button > svg
 
 div.panel > .header > button:hover
 {
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
 }
 
 div.panel > .header > button:hover > svg
 {
-  stroke: var(--primary-text-color);
+  stroke: var(--accent-text-color);
 }
 
 div.panel > .header > button:focus

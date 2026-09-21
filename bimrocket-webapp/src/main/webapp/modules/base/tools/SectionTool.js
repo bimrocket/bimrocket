@@ -111,7 +111,8 @@ class SectionTool extends Tool
 
     this.panel = this.application.createToolPanel(this)
       .setDefaultHeight(160)
-      .setDefaultMobileHeight(160);
+      .setDefaultMobileHeight(160)
+      .setMinimumHeight(140);
 
     this.panel.onClose = () => this.application.useTool(null);
 

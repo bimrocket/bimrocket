@@ -79,7 +79,7 @@ class MeasureSelectionTool extends Tool
     const decimals = application.setup.decimals;
     const units = " " + application.setup.units;
     const dialog = new Dialog(this.label);
-    dialog.setSize(240, 160);
+    dialog.setSize(240, 200);
     dialog.setI18N(application.i18n);
     dialog.addTextWithArgs("analysis|message.solid_count", [solidCount], "row");
     dialog.addTextWithArgs("analysis|message.mesh_count", [meshCount], "row");

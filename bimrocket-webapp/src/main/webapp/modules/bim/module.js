@@ -48,38 +48,38 @@ export function activate(application)
   // register formats
   IOManager.formats["ifc"] =
   {
-    description : "Industry foundation classes (*.ifc)",
-    extensions : ["ifc"],
-    mimeType : "application/x-step",
-    dataType : "text",
-    icon : "ifc",
+    description: "Industry foundation classes (*.ifc)",
+    extensions: ["ifc"],
+    mimeType: "application/x-step",
+    dataType: "text",
+    icon: "ifc",
     loader :
     {
-      class : IFCSTEPLoader,
-      loadMethod : 2
+      class: IFCSTEPLoader,
+      loadMethod: 2
     },
     exporter :
     {
-      class : IFCSTEPExporter
+      class: IFCSTEPExporter
     }
   };
 
   IOManager.formats["ids"] =
   {
-    description : "Information Delivery Specification (*.ids)",
-    extensions : ["ids"],
-    mimeType : "application/xml",
-    dataType : "text",
-    icon : "report"
+    description: "Information Delivery Specification (*.ids)",
+    extensions: ["ids"],
+    mimeType: "application/xml",
+    dataType: "text",
+    icon: "report"
   };
 
   IOManager.formats["snp"] =
   {
-    description : "IFC snapshot (*.snp)",
-    extensions : ["snp"],
-    mimeType : "application/json",
-    dataType : "text",
-    icon : "snapshot"
+    description: "IFC snapshot (*.snp)",
+    extensions: ["snp"],
+    mimeType: "application/json",
+    dataType: "text",
+    icon: "snapshot"
   };
 
   // create tools
@@ -102,13 +102,15 @@ export function activate(application)
   const bimMenu = menuBar.addMenu("BIM", panelsMenu?.getIndex());
   bimMenu.addMenuItem(bimLayoutTool);
   bimMenu.addMenuItem(bimInventoryTool);
-  bimMenu.addMenuItem(ifcInspectorTool);
-  bimMenu.addMenuItem(ifcDBTool);
-  bimMenu.addMenuItem(bcfTool);
-  bimMenu.addMenuItem(bsddTool);
-  bimMenu.addMenuItem(bimDeltaTool);
   bimMenu.addMenuItem(bimExplodeTool);
   bimMenu.addMenuItem(bimResetViewTool);
+  bimMenu.addMenuItem(ifcInspectorTool);
+  bimMenu.addSeparator("services");
+  bimMenu.addMenuItem(bcfTool);
+  bimMenu.addMenuItem(bsddTool);
+  bimMenu.addMenuItem(ifcDBTool);
+  bimMenu.addMenuItem(bimDeltaTool);
+  bimMenu.addSeparator("server");
   bimMenu.addMenuItem(adminTool);
 
   const toolBar = application.toolBar;
@@ -129,9 +131,9 @@ export function activate(application)
     if (typeof Environment.SERVER_URL === "string")
     {
       const bcf = new BCFService({
-        name : "bcf",
-        description : application.constructor.NAME + " BCF",
-        url : Environment.SERVER_URL + "/api/bcf/2.1"
+        name: "bcf",
+        description: application.constructor.NAME + " BCF",
+        url: Environment.SERVER_URL + "/api/bcf/2.1"
       });
       application.addService(bcf, "bcf", false);
     }
@@ -142,16 +144,16 @@ export function activate(application)
     if (typeof Environment.SERVER_URL === "string")
     {
       const ifcdb_2X3 = new IFCDBService({
-        name : "ifcdb_2X3",
-        description : application.constructor.NAME + " IFCDB (IFC2X3)",
-        url : Environment.SERVER_URL + "/api/ifcdb/1.0/models/IFC2X3"
+        name: "ifcdb_2X3",
+        description: application.constructor.NAME + " IFCDB (IFC2X3)",
+        url: Environment.SERVER_URL + "/api/ifcdb/1.0/models/IFC2X3"
       });
       application.addService(ifcdb_2X3, "ifcdb", false);
 
       const ifcdb_4 = new IFCDBService({
-        name : "ifcdb_4",
-        description : application.constructor.NAME + " IFCDB (IFC4)",
-        url : Environment.SERVER_URL + "/api/ifcdb/1.0/models/IFC4"
+        name: "ifcdb_4",
+        description: application.constructor.NAME + " IFCDB (IFC4)",
+        url: Environment.SERVER_URL + "/api/ifcdb/1.0/models/IFC4"
       });
       application.addService(ifcdb_4, "ifcdb", false);
     }
@@ -162,17 +164,17 @@ export function activate(application)
     if (typeof Environment.SERVER_URL === "string")
     {
       const webdav = new WebdavService({
-        name : "ifc_snapshots",
-        description : "Remote",
-        url : Environment.SERVER_URL + "/api/cloudfs/ifc_snapshots"
+        name: "ifc_snapshots",
+        description: "Remote",
+        url: Environment.SERVER_URL + "/api/cloudfs/ifc_snapshots"
       });
       application.addService(webdav, "ifc_snapshots", false);
     }
 
     const idbfs = new IDBFileService({
-      name : "idb_ifc_snapshots",
-      description : "Local",
-      url : "idb_snapshots"
+      name: "idb_ifc_snapshots",
+      description: "Local",
+      url: "idb_snapshots"
     });
     application.addService(idbfs, "ifc_snapshots", false);
   }
@@ -182,8 +184,8 @@ export function activate(application)
     if (typeof Environment.SERVER_URL === "string")
     {
       const security = new SecurityService({
-        name : "security",
-        description : "Security",
+        name: "security",
+        description: "Security",
         url: Environment.SERVER_URL  + "/api/security"
       });
       application.addService(security, "security", false);

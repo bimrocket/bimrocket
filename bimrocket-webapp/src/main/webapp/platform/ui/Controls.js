@@ -56,6 +56,20 @@ class Controls
     return svgElem;
   }
 
+  static addIconUrl(parent, url, className)
+  {
+    const svgElem = document.createElementNS(SVG_NS, "svg");
+    svgElem.setAttribute("aria-hidden", "true");
+    svgElem.setAttribute("class", className || "icon-24");
+
+    const useElem = document.createElementNS(SVG_NS, "use");
+    useElem.setAttribute("href", url);
+    svgElem.appendChild(useElem);
+
+    parent.appendChild(svgElem);
+    return svgElem;
+  }
+
   static setIcon(svgElem, iconName)
   {
     svgElem.dataset.icon = iconName;
@@ -530,7 +544,7 @@ class Controls
   static addCodeEditor(parent, name, label, value = "", options = {})
   {
     const groupElem = document.createElement("div");
-    groupElem.className = "code_editor";
+    groupElem.className = "code-editor";
     parent.appendChild(groupElem);
     if (options.className)
     {
@@ -572,44 +586,210 @@ class Controls
     }
 
     let theme = CM.EditorView.theme({
-      "&.cm-focused .cm-cursor": {
-        borderLeftColor: "#000",
+      "&":
+      {
+        color: "var(--code-editor-text-color)",
+        backgroundColor: "var(--code-editor-background)",
+        fontSize: "var(--font-size)"
+      },
+      "&.cm-focused .cm-cursor":
+      {
+        borderLeftColor: "var(--text-color)",
         borderLeftWidth: "2px"
       },
-      "&.cm-focused .cm-matchingBracket": {
-        "backgroundColor": "#e0e040",
-        "color": "black"
+      ".cm-content":
+      {
+        caretColor: "var(--code-editor-caret)"
       },
-      "& .ͼb": {
-        "color": "#444",
-        "fontWeight": "bold"
+      ".cm-cursor, .cm-dropCursor":
+      {
+        borderLeftColor: "var(--code-editor-caret)"
       },
-      "& .ͼe": {
-        "color": "#2020ff"
+      "&.cm-focused .cm-selectionBackground, .cm-selectionBackground":
+      {
+        backgroundColor: "var(--code-editor-selection)"
       },
-      "& .ͼf": {
-        "color": "#8080e0"
+      ".cm-content ::selection":
+      {
+        backgroundColor: "var(--code-editor-selection)"
       },
-      "& .ͼg": {
-        "color": "#444"
+      ".cm-activeLine":
+      {
+        backgroundColor: "var(--code-editor-active-line)"
       },
-      "& .ͼi": {
-        "color": "#44b",
-        "font-weight": "bold"
+      ".cm-gutters":
+      {
+        color: "var(--code-editor-gutter-text-color)",
+        backgroundColor: "var(--code-editor-gutter-background)",
+        border: "none"
       },
-      "& .ͼm": {
-        "color": "#808080"
+      ".cm-gutterElement":
+      {
+        paddingLeft: "var(--code-editor-gutter-padding-left)",
+        paddingRight: "var(--code-editor-gutter-padding-right)"
       },
-      "& .cm-tooltip": {
+      ".cm-activeLineGutter":
+      {
+        backgroundColor: "var(--code-editor-active-line-gutter)",
+        color: "var(--code-editor-active-line-gutter-text-color)"
+      },
+      "&.cm-focused .cm-matchingBracket":
+      {
+        color: "var(--code-editor-matching-text-color)",
+        backgroundColor: "var(--code-editor-matching-bracket)",
+        outline: "1px solid var(--code-editor-matching-bracket-outline)"
+      },
+      ".cm-tooltip":
+      {
+        color: "var(--code-editor-tooltip-text-color)",
+        backgroundColor: "var(--code-editor-tooltip-background)",
+        border: "1px solid var(--code-editor-tooltip-border)"
+      },
+      ".cm-tooltip-autocomplete > ul > li[aria-selected]":
+      {
+        backgroundColor: "var(--code-editor-autocomplete-selected)"
+      },
+      ".cm-searchMatch":
+      {
+        backgroundColor: "var(--code-editor-search-match)"
+      },
+      ".cm-searchMatch-selected":
+      {
+        backgroundColor: "var(--code-editor-search-match-selected)"
+      },
+      ".cm-foldPlaceholder":
+      {
+        color: "var(--code-editor-fold-text-color)",
+        backgroundColor: "var(--code-editor-fold-background)",
+        border: "none"
+      },
+      ".cm-panels":
+      {
+        fontSize: "var(--font-size)",
+        backgroundColor: "var(--code-editor-panel-background)",
+        color: "var(--code-editor-panel-text-color)"
+      },
+      ".cm-textfield":
+      {
+        fontSize: "var(--font-size)",
+        backgroundColor: "var(--surface-field)",
+        color: "var(--text-color)",
+        borderRadius: "var(--border-radius-1)",
+        borderWidth: "0"
+      },
+      ".cm-button":
+      {
+        fontSize: "var(--font-size)",
+        backgroundColor: "var(--surface-button)",
+        color: "var(--button-text-color)",
+        borderWidth: "0",
+        backgroundImage: "none",
+        borderRadius: "var(--border-radius-1)"
+      },
+      ".cm-panels-top":
+      {
+        borderBottom: "1px solid var(--code-editor-panel-border)"
+      },
+      ".cm-panels-bottom":
+      {
+        borderTop: "1px solid var(--code-editor-panel-border)"
+      },
+      "& .cm-tooltip":
+      {
         "z-index": 100000
       },
-      "& .cm-wrap": {
+      "& .cm-wrap":
+      {
         "height": "100%"
       },
-      "& .cm-scroller": {
+      "& .cm-scroller":
+      {
         "overflow": "auto"
+      },
+      "& .ͼb": // keyword
+      {
+        "color": "var(--text-color)",
+        "fontWeight": "bold"
+      },
+      "& .ͼc": // boolean
+      {
+        "color": "var(--boolean-color)",
+        "fontWeight": "bold"
+      },
+      "& .ͼd": // number
+      {
+        "color": "var(--number-color)"
+      },
+      "& .ͼe": // string
+      {
+        "color": "var(--string-color)"
+      },
+      "& .ͼf":
+      {
+        "color": "#8080e0"
+      },
+      "& .ͼg": // variable
+      {
+        "color": "var(--text-color)"
+      },
+      "& .ͼi": // tag
+      {
+        "color": "var(--text-color)",
+        "font-weight": "bold"
+      },
+      "& .ͼj": // class
+      {
+        "color": "var(--text-color)"
+      },
+      "& .ͼl": // property
+      {
+        "color": "var(--text-color)"
+      },
+      "& .ͼm": // commment
+      {
+        "color": "var(--comment-color)"
       }
     });
+
+//    let theme = CM.EditorView.theme({
+//      "&.cm-focused .cm-cursor": {
+//        borderLeftColor: "#000",
+//        borderLeftWidth: "2px"
+//      },
+//      "&.cm-focused .cm-matchingBracket": {
+//        "backgroundColor": "#e0e040",
+//        "color": "black"
+//      },
+//      "& .ͼb": {
+//        "color": "#444",
+//        "fontWeight": "bold"
+//      },
+//      "& .ͼe": {
+//        "color": "#2020ff"
+//      },
+//      "& .ͼf": {
+//        "color": "#8080e0"
+//      },
+//      "& .ͼg": {
+//        "color": "#444"
+//      },
+//      "& .ͼi": {
+//        "color": "#44b",
+//        "font-weight": "bold"
+//      },
+//      "& .ͼm": {
+//        "color": "#808080"
+//      },
+//      "& .cm-tooltip": {
+//        "z-index": 100000
+//      },
+//      "& .cm-wrap": {
+//        "height": "100%"
+//      },
+//      "& .cm-scroller": {
+//        "overflow": "auto"
+//      }
+//    });
 
     const extensions = [
       CM.lineNumbers(),

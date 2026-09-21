@@ -150,6 +150,9 @@
               <mainClass>org.bimrocket.util.SvgSpriteGenerator</mainClass>
               <arguments>
                 <argument>-stack</argument>
+                <!-- menu -->
+                <argument>${basedir}/src/main/webapp/platform/assets/icons/menu</argument>
+                <argument>${basedir}/target/bimrocket/platform/assets/icons/menu.svg</argument>
                 <!-- inspector -->
                 <argument>${basedir}/src/main/webapp/platform/assets/icons/inspector</argument>
                 <argument>${basedir}/target/bimrocket/platform/assets/icons/inspector.svg</argument>

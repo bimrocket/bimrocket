@@ -35,7 +35,7 @@ export const translations =
   "tool.search.label": "Search",
 
   "tool.solar_simulator.label": "Solar simulator",
-  "tool.solar_simulator.select_position": "Select position in the scene to calculate the sun azimuth and elevation.",
+  "tool.solar_simulator.select_position": "Select the object in the scene where you want to calculate solar exposure and click the 'Select position' button.",
   "tool.solar_simulator.drag": "Change time by dragging the pointer on the graph.",
   "tool.solar_simulator.cast_shadows": "Cast shadows",
   "tool.solar_simulator.adjust_intensity": "Adjust solar intensity",

@@ -170,12 +170,12 @@ div.dialog > .header > button > svg
 
 div.dialog > .header > button:hover
 {
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
 }
 
 div.dialog > .header > button:hover > svg
 {
-  stroke: var(--primary-text-color);
+  stroke: var(--accent-text-color);
 }
 
 .dialog .body > div
@@ -312,41 +312,6 @@ div.dialog > .header > button:hover > svg
 {
   display: block;
   text-align: center;
-}
-
-.dialog div.console
-{
-  font-family: monospace;
-  font-size: 14px;
-  color: #404040;
-  border: 1px solid #C0C0C0;
-  border-radius: 2px;
-  padding: 2px 4px 2px 2px;
-  width: 100%;
-  box-sizing: border-box;
-  overflow: auto;
-  flex-grow: 1;
-  max-height: 25%;
-}
-
-.dialog div.console *
-{
-  user-select: text;
-}
-
-.dialog div.console div.info
-{
-  color: var(--info-color);
-}
-
-.dialog div.console div.warn
-{
-  color: var(--warn-color);
-}
-
-.dialog div.console div.error
-{
-  color: var(--error-color);
 }
 
 .dialog .oauth_buttons

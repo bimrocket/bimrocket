@@ -41,7 +41,7 @@
 {
   border-color: #c0c0c0;
   border-style: solid;
-  border-bottom: 3px solid var(--primary-color);
+  border-bottom: 3px solid var(--accent-color);
 }
 
 .tabbed_pane > .body

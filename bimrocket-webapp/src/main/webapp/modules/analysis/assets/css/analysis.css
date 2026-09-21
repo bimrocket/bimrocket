@@ -136,14 +136,14 @@
   height: 8px;
   background: var(--surface-field);
   border: none;
-  border-radius: calc(var(--border-radius) / 2);
+  border-radius: var(--border-radius-1);
   padding-right: 2px;
 }
 
 .panel-histogram .body li .bar div
 {
-  background-color: var(--primary-color);
-  border-radius: calc(var(--border-radius) / 2);
+  background-color: var(--accent-color);
+  border-radius: var(--border-radius-1);
   height: 100%;
 }
 
@@ -176,7 +176,7 @@
   border-width: var(--border-width);
   border-style: var(--border-style);
   border-color: var(--border-color);
-  border-radius: calc(var(--border-radius) / 2);
+  border-radius: var(--border-radius-1);
 }
 
 .panel-search .body .tree .match

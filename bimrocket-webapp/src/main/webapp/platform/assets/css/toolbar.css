@@ -10,8 +10,8 @@
   --toolbar-button-radius: 12px;
   --toolbar-button-color: var(--text-color);
   --toolbar-button-background: transparent;
-  --toolbar-button-selected-background: var(--primary-color);
-  --toolbar-button-selected-color: var(--primary-text-color);
+  --toolbar-button-selected-background: var(--accent-color);
+  --toolbar-button-selected-color: var(--accent-text-color);
   --toolbar-button-activated-background: var(--surface-selection);
   --toolbar-button-activated-color: var(--selection-text-color);
   --toolbar-button-hover-background: var(--surface-hover);

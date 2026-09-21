@@ -26,44 +26,44 @@ export function activate(application)
   // register formats
   IOManager.formats["geojson"] =
   {
-    description : "GeoJSON (*.geojson)",
+    description: "GeoJSON (*.geojson)",
     extensions: ["geojson"],
-    mimeType : "application/geo+json",
-    dataType : "text",
+    mimeType: "application/geo+json",
+    dataType: "text",
     loader :
     {
-      class : GeoJSONLoader,
-      loadMethod : 0
+      class: GeoJSONLoader,
+      loadMethod: 0
     },
     exporter :
     {
-      class : GeoJSONExporter
+      class: GeoJSONExporter
     }
   };
 
   IOManager.formats["gml"] =
   {
-    description : "GML (*.gml)",
+    description: "GML (*.gml)",
     extensions: ["gml"],
-    mimeType : "application/gml+xml",
-    dataType : "text",
+    mimeType: "application/gml+xml",
+    dataType: "text",
     loader :
     {
-      class : GMLLoader,
-      loadMethod : 0
+      class: GMLLoader,
+      loadMethod: 0
     }
   };
 
   IOManager.formats["grd"] =
   {
-    description : "ASCII Grid (*.grd, *.asc)",
+    description: "ASCII Grid (*.grd, *.asc)",
     extensions: ["grd", "asc"],
-    mimeType : "text/plain",
-    dataType : "text",
+    mimeType: "text/plain",
+    dataType: "text",
     loader :
     {
-      class : ASCIIGridLoader,
-      loadMethod : 2
+      class: ASCIIGridLoader,
+      loadMethod: 2
     }
   };
 

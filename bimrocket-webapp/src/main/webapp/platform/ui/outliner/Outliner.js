@@ -128,10 +128,10 @@ class Outliner extends Panel
       }
       else  if (event.type === "cameraActivated")
       {
-        this.clearNodeStyle("active_camera");
+        this.clearNodeStyle("active-camera");
         let camera = event.object;
         let treeNode = this.map.get(camera);
-        if (treeNode) treeNode.addClass("active_camera");
+        if (treeNode) treeNode.addClass("active-camera");
       }
       else if (event.type === "copy")
       {

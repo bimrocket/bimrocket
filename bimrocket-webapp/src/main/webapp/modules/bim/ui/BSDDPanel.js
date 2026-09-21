@@ -24,7 +24,7 @@ class BSDDPanel extends Panel
     this.title = "bSDD";
     this.position = "left";
     this.iconName = "bim|bsdd";
-    this.setClassName("bsdd_panel");
+    this.setClassName("bsdd-panel");
     this.defaultHeight = 300;
     this.defaultMobileHeight = 200;
     this.minimumHeight = 100;
@@ -277,9 +277,7 @@ class BSDDPanel extends Panel
     });
     mainElem.appendChild(selectLink);
 
-    const toggleButton = document.createElement("a");
-    toggleButton.role = "button";
-    toggleButton.href = "#";
+    const toggleButton = document.createElement("button");
     toggleButton.addEventListener("click", (event) =>
     {
       event.preventDefault();

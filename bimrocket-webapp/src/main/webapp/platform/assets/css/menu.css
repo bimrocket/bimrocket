@@ -49,7 +49,7 @@
   --mobile-menuitem-focus-background: var(--menuitem-focus-background);
   --mobile-menuitem-drop-color: var(--menuitem-color);
   --mobile-menuitem-drop-background: var(--surface-field);
-  --mobile-scrollbar-color: var(--primary-color);
+  --mobile-scrollbar-color: var(--accent-color);
   --mobile-separator-color: var( --separator-color);
 
   --expand-duration: 0.3s;
@@ -477,27 +477,39 @@ menu.contextmenu
 {
   border: none;
   background: transparent;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   margin: 0;
   animation: none;
-  background-size: 12px 12px;
-  background-repeat: no-repeat;
-  background-position: center center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .contextmenu-button:hover
 {
-  background-color: rgba(220, 220, 220, 0.5);
+  background-color: var(--surface-hover);
 }
 
-.contextmenu-button[aria-expanded="false"]
+.contextmenu-button::before
 {
-  background-image: url(images/ctxmenu_show.svg);
+  content: "";
+  background-color: var(--button-text-color);
+  width: 12px;
+  height: 12px;
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  mask-size: 12px;
+  flex-shrink: 0;
 }
 
-.contextmenu-button[aria-expanded="true"]
+.contextmenu-button[aria-expanded="false"]::before
 {
-  background-image: url(images/ctxmenu_hide.svg);
+  mask-image: url(../icons/menu.svg#context-menu-show);
+}
+
+.contextmenu-button[aria-expanded="true"]::before
+{
+  mask-image: url(../icons/menu.svg#context-menu-hide);
 }
 

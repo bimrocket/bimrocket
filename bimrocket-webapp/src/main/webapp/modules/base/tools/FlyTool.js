@@ -164,7 +164,7 @@ class FlyTool extends CameraTool
     this.panel = this.application.createToolPanel(this)
       .setDefaultHeight(140)
       .setDefaultMobileHeight(140)
-      .setMinimumHeight(120);
+      .setMinimumHeight(140);
 
     this.panel.onClose = () => CameraTool.restoreTool(this.application);
 

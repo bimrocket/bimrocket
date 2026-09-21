@@ -232,7 +232,7 @@
   border-width: var(--border-width);
   border-style: var(--border-style);
   border-color: var(--border-color);
-  border-radius: 2px;
+  border-radius: var(--border-radius-1);
   padding: 4px;
   height: 50%;
 }
@@ -363,6 +363,45 @@
   margin-bottom: 2px;
 }
 
+/* script dialog */
+
+.dialog div.console
+{
+  font-family: monospace;
+  font-size: 14px;
+  color: var(--text-color);
+  border-width: var(--border-width);
+  border-style: var(--border-style);
+  border-color: var(--border-color);
+  border-radius: var(--border-radius-1);
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  flex-grow: 1;
+  max-height: 25%;
+}
+
+.dialog div.console *
+{
+  user-select: text;
+}
+
+.dialog div.console div.info
+{
+  color: var(--info-color);
+}
+
+.dialog div.console div.warn
+{
+  color: var(--warn-color);
+}
+
+.dialog div.console div.error
+{
+  color: var(--error-color);
+}
+
 /* open-local */
 
 #container .drop-indicator
@@ -383,6 +422,5 @@
 
 #container.file-drop
 {
-  border: 3px dashed var(--primary-color);
+  border: 3px dashed var(--accent-color);
 }
-

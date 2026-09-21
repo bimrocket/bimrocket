@@ -11,8 +11,8 @@
   --fileexplorer-entry-selected: var(--selection-text-color);
   --fileexplorer-entry-padding: 4px;
   --fileexplorer-entry-margin: 1px;
-  --fileexplorer-directory-radius: calc(var(--border-radius) / 2);
-  --fileexplorer-entry-border-radius: calc(var(--border-radius) / 2);
+  --fileexplorer-directory-radius: var(--border-radius-1);
+  --fileexplorer-entry-border-radius: var(--border-radius-1);
 }
 
 .fileexplorer-panel
@@ -88,20 +88,19 @@
   display: flex;
   align-items: center;
   min-height: 20px;
-  border-radius: calc(var(--border-radius) / 2);
+  border-radius: var(--border-radius-1);
   margin-top: var(--fileexplorer-entry-margin);
 }
 
 .fileexplorer-panel .entry > div
 {
   position: relative;
-  display: inline;
+  display: flex;
   align-items: center;
   text-decoration: none;
   color: var(--fileexplorer-color);
   cursor:pointer;
   padding: var(--fileexplorer-entry-padding);
-  padding-left: calc(var(--fileexplorer-icon-size) + 2 * var(--fileexplorer-icon-margin));
   border-radius: var(--fileexplorer-entry-border-radius);
   border: 1px solid;
   border-color: transparent;
@@ -113,13 +112,15 @@
 .fileexplorer-panel .entry > div::before
 {
   content: "";
-  position: absolute;
-  inset: 0;
   background-color: var(--fileexplorer-color);
   mask-repeat: no-repeat;
-  mask-position: var(--fileexplorer-icon-margin) center;
+  mask-position: center center;
   mask-size: var(--fileexplorer-icon-size);
+  width: var(--fileexplorer-icon-size);
+  height: var(--fileexplorer-icon-size);
   pointer-events: none;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .fileexplorer-panel .entry > button

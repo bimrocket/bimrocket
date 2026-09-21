@@ -16,7 +16,7 @@
   --tree-root-indent: 20px;
   --tree-icon-margin: 4px;
   --tree-icon-size: 20px;
-  --tree-node-border-radius: calc(var(--border-radius) / 2);
+  --tree-node-border-radius: var(--border-radius-1);
 }
 
 ul.tree,
@@ -104,12 +104,10 @@ ul.tree li > button.ec:focus
 
 ul.tree li > div
 {
-  position: relative;
   display: flex;
   width: fit-content;
   align-items: center;
   padding: var(--tree-node-padding);
-  padding-left: calc(var(--tree-node-padding) + var(--tree-icon-margin) + var(--tree-icon-size));
   border-radius: var(--tree-node-border-radius);
   border: 1px solid;
   border-color: transparent;
@@ -125,14 +123,15 @@ ul.tree li > div
 ul.tree li > div::before
 {
   content: "";
-  position: absolute;
-  inset: 0;
   background-color: var(--tree-color);
   mask-image: url(../icons/tree.svg#leaf);
   mask-repeat: no-repeat;
-  mask-position: var(--tree-icon-margin) center;
+  mask-position: center center;
   mask-size: var(--tree-icon-size);
+  width: var(--tree-icon-size);
+  height: var(--tree-icon-size);
   pointer-events: none;
+  flex-shrink: 0;
 }
 
 ul.tree li.hc > div::before

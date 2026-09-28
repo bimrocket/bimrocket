@@ -8,7 +8,9 @@ import { Tool } from "platform/ui/Tool.js";
 import { TabbedPane } from "platform/ui/tabbedpane/TabbedPane.js";
 import { Tree } from "platform/ui/tree/Tree.js";
 import { Controls } from "platform/ui/Controls.js";
+import { IFC } from "platform/io/ifc/IFC.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
+import { I18N } from "platform/i18n/I18N.js";
 
 class BIMInventoryTool extends Tool
 {
@@ -42,17 +44,34 @@ class BIMInventoryTool extends Tool
 
     this.panel.onClose = () => this.application.useTool(null);
 
-    this.exploreButton = Controls.addButton(this.panel.bodyElem,
+    this.exploreAllButton = Controls.addButton(this.panel.bodyElem,
+      "bim_inventory_explore", "bim|button.explore_all",
+      () => this.exploreAll());
+
+    this.exploreSelectionButton = Controls.addButton(this.panel.bodyElem,
       "bim_inventory_explore", "bim|button.explore_selection",
-      () => this.explore());
+      () => this.exploreSelection());
 
     // tabs
-
     this.tabbedPane = new TabbedPane(this.panel.bodyElem);
     this.tabbedPane.paneElem.classList.add("bim-inventory-tabs");
+    this.tabbedPane.addClassName("mt-1");
 
     this.typesPanelElem =
       this.tabbedPane.addTab("ifc_types", "bim|tab.types");
+    this.typeSummaryElem = document.createElement("ul");
+    this.typeSummaryElem.classList.add("text-left");
+    this.totalTypesElem = document.createElement("li");
+    this.totalSubTypesElem = document.createElement("li");
+    this.totalObjectsElem = document.createElement("li");
+    this.totalItemsElem = document.createElement("li");
+    this.typeSummaryElem.appendChild(this.totalTypesElem);
+    this.typeSummaryElem.appendChild(this.totalSubTypesElem);
+    this.typeSummaryElem.appendChild(this.totalObjectsElem);
+    this.typeSummaryElem.appendChild(this.totalItemsElem);
+    this.typesPanelElem.appendChild(this.typeSummaryElem);
+    this.typeSummaryElem.className = "list-style-none text-left pl-2";
+    this.typeSummaryElem.classList.add("hidden");
     this.typesTree = new Tree(this.typesPanelElem);
 
     this.classifPanelElem =
@@ -73,13 +92,7 @@ class BIMInventoryTool extends Tool
     this.panel.visible = true;
     if (this.needsUpdate())
     {
-      this.types = {};
-      this.classifications = {};
-      this.groups = {};
-      this.typesTree.clear();
-      this.classifTree.clear();
-      this.groupsTree.clear();
-      this.layersTree.clear();
+      this.clear();
     }
   }
 
@@ -88,13 +101,24 @@ class BIMInventoryTool extends Tool
     this.panel.visible = false;
   }
 
-  explore()
+  exploreAll()
+  {
+    let baseObjects = [this.application.baseObject];
+    this.explore(baseObjects);
+  }
+
+  exploreSelection()
   {
     let baseObjects = this.application.selection.roots;
     if (baseObjects.length === 0)
     {
       baseObjects = [this.application.baseObject];
     }
+    this.explore(baseObjects);
+  }
+
+  explore(baseObjects)
+  {
     // types
     this.findTypes(baseObjects);
     this.showTypes();
@@ -112,10 +136,30 @@ class BIMInventoryTool extends Tool
     this.showLayers();
   }
 
+  clear()
+  {
+    this.types = {};
+    this.classifications = {};
+    this.groups = {};
+    this.typeSummaryElem.classList.add("hidden");
+    this.typesTree.clear();
+    this.classifTree.clear();
+    this.groupsTree.clear();
+    this.layersTree.clear();
+  }
+
   findTypes(baseObjects)
   {
     this.types = {};
+    this.typeCount =
+    {
+      types: 0,
+      subTypes: 0,
+      objects: 0,
+      representationItems: 0
+    };
     let types = this.types;
+    let typeCount = this.typeCount;
 
     for (let baseObject of baseObjects)
     {
@@ -124,6 +168,9 @@ class BIMInventoryTool extends Tool
         if (object.userData.IFC && object.userData.IFC.ifcClassName &&
             object.type === "Object3D")
         {
+          typeCount.objects++;
+          typeCount.representationItems += this.countRepresentationItems(object);
+
           let ifcClassName = object.userData.IFC.ifcClassName;
           let type = types[ifcClassName];
           if (type === undefined)
@@ -134,6 +181,7 @@ class BIMInventoryTool extends Tool
               subTypes : {}
             };
             types[ifcClassName] = type;
+            typeCount.types++;
           }
           type.objects.push(object);
 
@@ -151,6 +199,7 @@ class BIMInventoryTool extends Tool
               objects : []
             };
             type.subTypes[typeId] = subType;
+            typeCount.subTypes++;
           }
           subType.objects.push(object);
         }
@@ -275,6 +324,18 @@ class BIMInventoryTool extends Tool
 
   showTypes()
   {
+    const typeCount = this.typeCount;
+    I18N.set(this.totalTypesElem, "textContent", "bim|message.inventory_types",
+      typeCount.types);
+    I18N.set(this.totalSubTypesElem, "textContent", "bim|message.inventory_subtypes",
+      typeCount.subTypes);
+    I18N.set(this.totalObjectsElem, "textContent", "bim|message.inventory_objects",
+      typeCount.objects);
+    I18N.set(this.totalItemsElem, "textContent", "bim|message.inventory_items",
+      typeCount.representationItems);
+    this.typeSummaryElem.classList.remove("hidden");
+    this.application.i18n.updateTree(this.typeSummaryElem);
+
     let typeNames = Object.keys(this.types);
     typeNames.sort();
 
@@ -382,6 +443,28 @@ class BIMInventoryTool extends Tool
     }
   }
 
+  countRepresentationItems(object)
+  {
+    let itemCount = 0;
+    const repr = IFC.getRepresentation(object);
+    if (repr)
+    {
+      const countItems = (object) =>
+      {
+        if (object.type === "Solid") itemCount++;
+        else
+        {
+          for (let child of object.children)
+          {
+            countItems(child);
+          }
+        }
+      };
+      countItems(repr);
+    }
+    return itemCount;
+  }
+
   needsUpdate()
   {
     /* update is needed if objects were removed */
@@ -391,9 +474,8 @@ class BIMInventoryTool extends Tool
     {
       let type = types[key];
       let objects = type.objects;
-      for (let i = 0; i < objects.length; i++)
+      for (let object of objects)
       {
-        let object = objects[i];
         if (!ObjectUtils.isObjectDescendantOf(object, baseObject))
           return true;
       }

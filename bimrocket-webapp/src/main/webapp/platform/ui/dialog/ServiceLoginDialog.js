@@ -165,7 +165,7 @@ class ServiceLoginDialog extends LoginDialog
     if (!this.oauthContainer)
     {
       this.oauthContainer = document.createElement("div");
-      this.oauthContainer.className = "oauth_buttons";
+      this.oauthContainer.className = "oauth-buttons";
       this.footerElem.append(this.oauthContainer);
 
       const authSystemsElem = document.createElement("div");
@@ -191,7 +191,7 @@ class ServiceLoginDialog extends LoginDialog
           buttonLabel,
           provider.logoUrl,
           () => this.oauthWindow = Auth.openAuthPopup(authUrl),
-          "oauth_logo_btn"
+          "oauth-logo-btn"
         );
       }
       else

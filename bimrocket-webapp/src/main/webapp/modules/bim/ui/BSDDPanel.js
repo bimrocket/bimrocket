@@ -50,11 +50,11 @@ class BSDDPanel extends Panel
 
     this.dictPanelElem =
       this.tabbedPane.addTab("dictionaries", "bim|tab.bsdd_dictionaries");
-    this.dictPanelElem.classList.add("p_4");
+    this.dictPanelElem.classList.add("p-1");
 
     this.classPanelElem =
       this.tabbedPane.addTab("classes", "bim|tab.bsdd_classes");
-    this.classPanelElem.classList.add("p_4");
+    this.classPanelElem.classList.add("p-1");
 
     this.propPanelElem =
       this.tabbedPane.addTab("properties", "bim|tab.bsdd_properties");
@@ -139,8 +139,12 @@ class BSDDPanel extends Panel
       const contentElem = this.dictContentElem;
       contentElem.innerHTML = "";
 
+      let offset = 0;
+      let limit = 1000;
+
       let url = this.baseUrl +
-        "/api/Dictionary/v1&IncludeTestDictionaries=false";
+        "/api/Dictionary/v1&IncludeTestDictionaries=false" +
+        `&Offset=${offset}&Limit=${limit}`;
 
       const response = await fetch(url, { headers : this.headers });
 
@@ -202,13 +206,14 @@ class BSDDPanel extends Panel
       this.tabbedPane.showTab("classes");
 
       let offset = 0;
+      let limit = 1000;
       let json = null;
       const classes = [];
       do
       {
         let url = this.baseUrl +
-          "/api/Dictionary/v1/Classes&Uri=" + this.dictionaryUri +
-          "&ClassType=" + classType + "&Offset=" + offset + "&Limit=1000";
+          `/api/Dictionary/v1/Classes&Uri=${this.dictionaryUri}` +
+          `&ClassType=${classType}&Offset=${offset}&Limit=${limit}`;
         let response = await fetch(url, { headers : this.headers });
 
         json = await response.json();
@@ -249,6 +254,7 @@ class BSDDPanel extends Panel
       this.selectedClassCode = cls.code;
       this.showProperties();
     });
+    return detail;
   }
 
   addItem(parentElem, title, detail, action)
@@ -427,11 +433,11 @@ class BSDDPanel extends Panel
             psetElem.className = "pset";
 
             const psetHeaderElem = document.createElement("div");
-            psetHeaderElem.innerHTML = `<div>${prop.propertySet}</div><a href="#" role="button">`;
+            psetHeaderElem.innerHTML = `<div>${prop.propertySet}</div><button></button>`;
             psetHeaderElem.className = "header";
             psetElem.appendChild(psetHeaderElem);
 
-            const psetButton = psetHeaderElem.querySelector("a");
+            const psetButton = psetHeaderElem.querySelector("button");
             psetButton.addEventListener("click", event => {
               event.preventDefault();
               psetElem.classList.toggle("expanded");
@@ -479,7 +485,7 @@ class BSDDPanel extends Panel
       <div class="help">
         <div class="attr">
           <div>${prop.dataType}, ${prop.propertyValueKind}</div>
-          <a href="#" role="button" class="desc_button"></a>
+          <button class="desc-button"></button>
         </div>
         <div class="desc">${blankNull(prop.description)}</div>
       </div>
@@ -487,7 +493,7 @@ class BSDDPanel extends Panel
     const helpElem = propElem.querySelector(".help");
     const valueElem = propElem.querySelector(".value");
     const attrElem = propElem.querySelector(".attr");
-    const descButton = helpElem.querySelector(".desc_button");
+    const descButton = helpElem.querySelector(".desc-button");
 
     descButton.addEventListener("click", event => {
       helpElem.classList.toggle("expanded");

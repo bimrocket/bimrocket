@@ -25,7 +25,10 @@ class ObjectUtils
     "m"  : 1,
     "cm": 100,
     "mm": 1000,
-    "in": 39.3701
+    "in": 39.3701,
+    "ft": 3.28084,
+    "yd": 1.09361,
+    "mi": 0.000621371
   };
 
   static isBasicType(value)
@@ -1009,18 +1012,16 @@ class ObjectUtils
   static scaleModel(model, toUnits = "m", fromUnits)
   {
     fromUnits = fromUnits || model.userData.units;
-    if (fromUnits)
-    {
-      let factor1 = this.METER_CONVERSION_FACTORS[toUnits];
-      let factor2 = this.METER_CONVERSION_FACTORS[fromUnits];
 
-      if (factor1 !== undefined && factor2 !== undefined)
-      {
-        let scale = factor1 / factor2;
-        model.scale.set(scale, scale, scale);
-        model.updateMatrix();
-        return true;
-      }
+    let factor1 = this.METER_CONVERSION_FACTORS[toUnits];
+    let factor2 = this.METER_CONVERSION_FACTORS[fromUnits] || model.userData.modelFactor;
+
+    if (typeof factor1 === "number" && typeof factor2 === "number")
+    {
+      let scale = factor1 / factor2;
+      model.scale.set(scale, scale, scale);
+      model.updateMatrix();
+      return true;
     }
     return false;
   }

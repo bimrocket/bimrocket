@@ -118,7 +118,7 @@ menu.menubar > li > button
   height: var(--header-height);
 }
 
-.custom_bar
+.custom-bar
 {
   flex-grow: 1;
   z-index: 10;

@@ -38,6 +38,7 @@
   --button-text-color: var(--text-color);
 
   --surface-ground: var(--surface-2);
+  --surface-underground: #444;
   --surface-header: var(--surface-3);
   --surface-field: var(--surface-3);
   --surface-button: var(--surface-field);
@@ -56,9 +57,10 @@
   --cut-color: #f66;
 
   --number-color: #0f8;
-  --string-color: #88f;
+  --string-color: #aaf;
   --boolean-color: #f80;
   --comment-color: #a0a0a0;
+  --template-color: #8888e0;
 
   --focus-shadow: 0 0 0 2px rgba(255, 220, 220, 0.5);
 

@@ -391,9 +391,9 @@ export function activate(application)
   const zoomAllTool = new ZoomAllTool(application, { keyShortcut: "Shift+Z" });
   const fullscreenTool = new FullscreenTool(application);
   const centerSelectionTool = new CenterSelectionTool(application);
-  const focusSelectionTool = new CenterSelectionTool(application,
-    { name: "focus_selection", label: "base|tool.focus_selection.label",
-      focusOnSelection: true, iconName: "base|focus-selection" });
+  const isolateSelectionTool = new CenterSelectionTool(application,
+    { name: "isolate_selection", label: "base|tool.isolate_selection.label",
+      isolateSelection: true, iconName: "base|isolate-selection" });
 
   const showTool = new VisibilityTool(application,
     { name: "show", label: "base|tool.show.label", iconName: "show",
@@ -456,7 +456,7 @@ export function activate(application)
   viewMenu.addMenuItem(flyTool);
   viewMenu.addMenuItem(zoomAllTool);
   viewMenu.addMenuItem(centerSelectionTool);
-  viewMenu.addMenuItem(focusSelectionTool);
+  viewMenu.addMenuItem(isolateSelectionTool);
   const standardViewMenu = viewMenu.addMenu("base|menu.view.standard_view");
   standardViewMenu.addMenuItem(topViewTool);
   standardViewMenu.addMenuItem(frontViewTool);
@@ -519,7 +519,7 @@ export function activate(application)
   toolBar.addToolButton(flyTool);
   toolBar.addToolButton(zoomAllTool);
   toolBar.addToolButton(centerSelectionTool);
-  toolBar.addToolButton(focusSelectionTool);
+  toolBar.addToolButton(isolateSelectionTool);
   toolBar.addToolButton(showTool);
   toolBar.addToolButton(hideTool);
   toolBar.addToolButton(sectionTool);
@@ -536,7 +536,7 @@ export function activate(application)
     outlinerMenu.addMenuItem(hideTool);
     outlinerMenu.addSeparator();
     outlinerMenu.addMenuItem(centerSelectionTool);
-    outlinerMenu.addMenuItem(focusSelectionTool);
+    outlinerMenu.addMenuItem(isolateSelectionTool);
     outlinerMenu.addSeparator();
     outlinerMenu.addMenuItem(copyTool);
     outlinerMenu.addMenuItem(cutTool);

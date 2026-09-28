@@ -8,14 +8,17 @@ import { I18N } from "platform/i18n/I18N.js";
 
 class TabbedPane
 {
+  static nextId = 0;
+
   constructor(parent)
   {
-    this.tabs = new Map();
-    this.visibleTabName = null;
+    this.id = TabbedPane.nextId++;
 
     this.paneElem = document.createElement("div");
     parent.appendChild(this.paneElem);
-    this.paneElem.className = "tabbed_pane";
+    this.paneElem.id = "tabbed-pane-" + this.id;
+    this.paneElem.className = "tabbed-pane";
+    this.paneElem.setAttribute("role", "tablist");
 
     this.headerElem = document.createElement("div");
     this.headerElem.className = "header";
@@ -33,120 +36,153 @@ class TabbedPane
 
   addTab(name, label, title, className)
   {
-    if (!this.tabs.has(name))
+    const panelId = this._getTabPanelId(name);
+    let tabPanelElem = this.headerElem.querySelector("#" + panelId);
+    if (!tabPanelElem)
     {
-      const tabSelectorElem = document.createElement("a");
-      tabSelectorElem.href = "#";
-      tabSelectorElem.addEventListener("click", (event) =>
+      const tabId = this._getTabId(name);
+      const tabElem = document.createElement("div");
+      tabElem.tabIndex = "0";
+      tabElem.id = tabId;
+      tabElem.setAttribute("role", "tab");
+      tabElem.setAttribute("aria-controls", panelId);
+      tabElem.setAttribute("aria-selected", "false");
+      tabElem.dataset.name = name;
+
+      tabElem.addEventListener("click", (event) =>
       {
         event.preventDefault();
         this.showTab(name);
       });
-      tabSelectorElem.addEventListener("contextmenu",
-        event => event.preventDefault());
-      tabSelectorElem.className = "selector";
-      if (label) I18N.set(tabSelectorElem, "textContent", label || name);
-      if (title) I18N.set(tabSelectorElem, "title", title || name);
-      if (className) tabSelectorElem.classList.add(className);
-
-      this.headerElem.appendChild(tabSelectorElem);
-
-      const tabPanelElem = document.createElement("div");
-      this.bodyElem.appendChild(tabPanelElem);
-      tabPanelElem.className = "tab_panel";
-
-      const tabElems = {
-        "selector": tabSelectorElem,
-        "panel": tabPanelElem
-      };
-      this.tabs.set(name, tabElems);
-      if (this.tabs.size === 1) // first tab
+      tabElem.addEventListener("keyup", (event) =>
       {
-        this.selectTab(tabElems);
-        this.visibleTabName = name;
+        if (event.keyCode === 13)
+        {
+          event.preventDefault();
+          this.showTab(name);
+        }
+      });
+
+      tabElem.addEventListener("contextmenu",
+        event => event.preventDefault());
+
+      if (label) I18N.set(tabElem, "textContent", label || name);
+      if (title) I18N.set(tabElem, "title", title || name);
+      if (className) tabElem.classList.add(className);
+
+      this.headerElem.appendChild(tabElem);
+
+      tabPanelElem = document.createElement("div");
+      tabPanelElem.id = panelId;
+      tabPanelElem.className = "tab-panel";
+      tabPanelElem.setAttribute("role", "tabpanel");
+      tabPanelElem.setAttribute("aria-labelledby", tabId);
+      tabPanelElem.setAttribute("hidden", true);
+
+      this.bodyElem.appendChild(tabPanelElem);
+
+      if (this.headerElem.children.length === 1) // first tab
+      {
+        this._selectTab(tabElem);
       }
-      return tabElems.panel;
     }
-    return null;
+    return tabPanelElem;
   }
 
   removeTab(name)
   {
-    let tabElems = this.tabs.get(name);
-    if (tabElems)
+    const tabId = this._getTabId(name);
+    let tabElem = this.header.querySelector("#" + tabId);
+    if (tabElem)
     {
-      this.headerElem.removeChild(tabElems.selector);
-      this.bodyElem.removeChild(tabElems.panel);
-      this.tabs.delete(name);
-      if (this.tabs.size > 0) // not empty
-      {
-        this.visibleTabName = this.tabs.keys().next().value;
-        tabElems = this.tabs.values().next().value;
-        this.selectTab(tabElems);
-      }
-      else
-      {
-        this.visibleTabName = null;
-      }
+      tabElem.remove();
+    }
+
+    const panelId = this._getTabPanelId(name);
+    let tabPanelElem = this.bodyElem.querySelector("#" + panelId);
+    tabPanelElem?.remove();
+
+    if (this.headerElem.children.length > 0)
+    {
+      tabElem = this.headerElem.children[0];
+      this._selectTab(tabElem);
     }
   }
 
   showTab(name)
   {
-    let tabElems;
+    let tabElem = this.headerElem.querySelector("[aria-selected=true]");
+    this._unselectTab(tabElem);
 
-    for (tabElems of this.tabs.values())
-    {
-      this.unselectTab(tabElems);
-    }
-
-    tabElems = this.tabs.get(name);
-    if (tabElems)
-    {
-      this.selectTab(tabElems);
-    }
-    this.visibleTabName = name;
+    tabElem = this.headerElem.querySelector("[data-name=" + name + "]");
+    this._selectTab(tabElem);
   }
 
   getVisibleTabName()
   {
-    return this.visibleTabName;
+    let tabElem = this.headerElem.querySelector("[aria-selected=true]");
+    return tabElem ? tabElem.dataset.name : null;
   }
 
   getTab(name)
   {
-    return this.tabs.get(name);
+    const tabId = this._getTabId(name);
+    return this.headerElem.querySelector("#" + tabId);
+  }
+
+  getTabPanel(name)
+  {
+    const panelId = this._getTabPanelId(name);
+    return this.bodyElem.querySelector("#" + panelId);
   }
 
   setLabel(name, label)
   {
-    let tabElems = this.tabs.get(name);
-    if (tabElems)
+    let tabElem = this.getTab(name);
+    if (tabElem)
     {
-      tabElems.selector.textContent = label;
+      I18N.set(tabElem, "textContent", label);
     }
   }
 
   getLabel(name)
   {
-    let tabElems = this.tabs.get(name);
-    if (tabElems)
+    let tabElem = this.getTab(name);
+    if (tabElem)
     {
-      return tabElems.selector.innerHTML;
+      return tabElem.textContent;
     }
     return null;
   }
 
-  selectTab(tabElems)
+  _selectTab(tabElem)
   {
-    tabElems.selector.classList.add("selected");
-    tabElems.panel.classList.add("selected");
+    if (!tabElem) return;
+
+    tabElem.setAttribute("aria-selected", "true");
+    let name = tabElem.dataset.name;
+    let tabPanel = this.getTabPanel(name);
+    tabPanel?.removeAttribute("hidden");
   }
 
-  unselectTab(tabElems)
+  _unselectTab(tabElem)
   {
-    tabElems.selector.classList.remove("selected");
-    tabElems.panel.classList.remove("selected");
+    if (!tabElem) return;
+
+    tabElem.setAttribute("aria-selected", "false");
+    let name = tabElem.dataset.name;
+    let tabPanel = this.getTabPanel(name);
+    tabPanel?.setAttribute("hidden", "true");
+  }
+
+  _getTabId(name)
+  {
+    return "tab-" + this.id + "-" + name;
+  }
+
+  _getTabPanelId(name)
+  {
+    return "tab-panel-" + this.id + "-" + name;
   }
 }
 

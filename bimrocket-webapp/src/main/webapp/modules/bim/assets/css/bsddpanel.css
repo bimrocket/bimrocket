@@ -34,14 +34,14 @@
   animation: progress-undeterminate 1.2s linear infinite;
 }
 
-.bsdd-panel > .body .tab_panel ul.items
+.bsdd-panel > .body .tab-panel ul.items
 {
   list-style: none;
   padding-left: 0;
   margin: 0;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li
+.bsdd-panel > .body .tab-panel ul.items > li
 {
   border-width: var(--border-width);
   border-style: var(--border-style);
@@ -54,18 +54,18 @@
   word-break: break-word;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li:hover
+.bsdd-panel > .body .tab-panel ul.items > li:hover
 {
   border-color: #808080;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main
+.bsdd-panel > .body .tab-panel ul.items > li > div.main
 {
   display: flex;
   align-items: center;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main::before
+.bsdd-panel > .body .tab-panel ul.items > li > div.main::before
 {
   content: "";
   display: block;
@@ -80,41 +80,41 @@
   flex-shrink: 0;
 }
 
-.bsdd-panel > .body .tab_panel ul.items.dictionaries > li > div.main::before
+.bsdd-panel > .body .tab-panel ul.items.dictionaries > li > div.main::before
 {
   mask-image: url(../icons/bsdd.svg#dictionary);
 }
 
-.bsdd-panel > .body .tab_panel ul.items.classes > li > div.main::before
+.bsdd-panel > .body .tab-panel ul.items.classes > li > div.main::before
 {
   mask-image: url(../icons/bsdd.svg#class);
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.detail
+.bsdd-panel > .body .tab-panel ul.items > li > div.detail
 {
   max-height: 0px;
   transition: max-height 0.2s;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.detail ul
+.bsdd-panel > .body .tab-panel ul.items > li > div.detail ul
 {
   padding-left: 20px;
   list-style-type: circle;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li.expanded > div.detail
+.bsdd-panel > .body .tab-panel ul.items > li.expanded > div.detail
 {
   max-height: 150px;
   margin-left: 8px;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main a
+.bsdd-panel > .body .tab-panel ul.items > li > div.main a
 {
   flex-grow: 1;
   flex-shrink: 1;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main button
+.bsdd-panel > .body .tab-panel ul.items > li > div.main button
 {
   display: flex;
   align-items: center;
@@ -123,7 +123,6 @@
   flex-shrink: 0;
   padding: 0;
   margin-left: 4px;
-  transition: transform 0.2s;
   width: 20px;
   height: 20px;
   background-color: transparent;
@@ -132,7 +131,7 @@
   cursor: pointer;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main button::before
+.bsdd-panel > .body .tab-panel ul.items > li > div.main button::before
 {
   content: "";
   display: block;
@@ -143,39 +142,40 @@
   mask-position: center center;
   width: 20px;
   height: 20px;
+  transition: transform 0.2s;
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li > div.main button:focus
+.bsdd-panel > .body .tab-panel ul.items > li > div.main button:focus
 {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-1);
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li.expanded > div.main button
+.bsdd-panel > .body .tab-panel ul.items > li.expanded > div.main button::before
 {
   transform: rotate(180deg);
 }
 
-.bsdd-panel > .body .tab_panel ul.items > li.selected
+.bsdd-panel > .body .tab-panel ul.items > li.selected
 {
   background-color: var(--surface-selection);
   color: var(--selection-text-color);
 }
 
-.bsdd-panel > .body .tab_panel div.header
+.bsdd-panel > .body .tab-panel div.header
 {
   margin-top:6px;
   margin-bottom:2px;
   text-align: left;
 }
 
-.bsdd-panel > .body .tab_panel div.field-flex
+.bsdd-panel > .body .tab-panel div.field-flex
 {
   margin-top: 3px;
   margin-bottom: 3px;
 }
 
-.bsdd-panel > .body .tab_panel div.field-flex label
+.bsdd-panel > .body .tab-panel div.field-flex label
 {
   white-space: nowrap;
 }
@@ -186,14 +186,14 @@
   user-select: none;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form
 {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel > .form > .header
+.bsdd-panel .tabbed-pane > .body > .tab-panel > .form > .header
 {
   flex-grow: 0;
   text-align: left;
@@ -202,7 +202,7 @@
   word-break: break-all;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel > .form > .properties
+.bsdd-panel .tabbed-pane > .body > .tab-panel > .form > .properties
 {
   overflow: auto;
   text-align: left;
@@ -210,67 +210,86 @@
   padding: 4px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset
 {
   text-align: left;
   margin-top: 12px;
   margin-bottom: 4px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .header
 {
   display: flex;
   flex-direction: row;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > div
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .header > div
 {
   flex-grow: 1;
   font-weight: bold;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > a
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .header > button
 {
   flex-grow: 0;
   flex-shrink: 0;
   padding: 0;
   margin-left: 4px;
-  background-image: url(images/chevron_down.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset.expanded .header > a
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .header > button:focus
 {
-  transform: rotate(180deg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-1);
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset .header > a::before
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .header > button::before
 {
-  content: "\00a0";
+  content: "";
+  mask-image: url("../icons/bsdd.svg#chevron");
+  mask-size: 20px 20px;
+  mask-repeat: no-repeat;
+  background-color: var(--text-color);
+  mask-position: center center;
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: transform 0.2s;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset .body
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset .body
 {
   display: none;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .pset.expanded .body
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset.expanded .body
 {
   display: flex;
   flex-direction: column;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .footer
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .pset.expanded .header > button:before
+{
+  transform: rotate(180deg);
+}
+
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .footer
 {
   flex-grow: 0;
   text-align: center;
   padding: 4px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property
 {
   display: block;
   text-align: left;
@@ -283,48 +302,48 @@
   padding: 4px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property.changed
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property.changed
 {
   background-color: var(--surface-change);
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .name
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .name
 {
   display: block;
   word-break: break-word;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .value
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .value
 {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .value .control
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .value .control
 {
   flex-grow: 1;
   flex-shrink: 1;
   min-width: 10px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help .attr
 {
   display: flex;
   margin-top: 2px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr > div
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help .attr > div
 {
   flex-grow: 1;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .attr > a
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help .attr > a
 {
   flex-grow: 0;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help .desc
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help .desc
 {
   margin-top: 4px;
   max-height: 0;
@@ -332,31 +351,49 @@
   overflow: hidden;
 }
 
-.bsdd-panel .tabbed_pane > .body .tab_panel .form .properties .property .help a.desc_button
+.bsdd-panel .tabbed-pane > .body .tab-panel .form .properties .property .help button.desc-button
 {
   flex-grow: 0;
   flex-shrink: 0;
   padding: 0;
   margin-left: 4px;
-  background-image: url(images/chevron_down.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
-  transition: transform 0.2s;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
-.bsdd-panel .tabbed_pane > .body .tab_panel .form .properties .property .help a.desc_button::before
+.bsdd-panel .tabbed-pane > .body .tab-panel .form .properties .property .help button.desc-button:focus
 {
-  content: "\00a0";
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-1);
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help.expanded .desc
+.bsdd-panel .tabbed-pane > .body .tab-panel .form .properties .property .help button.desc-button::before
+{
+  content: "";
+  mask-image: url("../icons/bsdd.svg#chevron");
+  mask-size: 20px 20px;
+  mask-repeat: no-repeat;
+  background-color: var(--text-color);
+  mask-position: center center;
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: transform 0.2s;
+}
+
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help.expanded .desc
 {
   max-height: 200px;
 }
 
-.bsdd-panel .tabbed_pane > .body > .tab_panel .form .properties .property .help.expanded .attr > a
+.bsdd-panel .tabbed-pane > .body > .tab-panel .form .properties .property .help.expanded button.desc-button:before
 {
   transform: rotate(180deg);
 }

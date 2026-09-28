@@ -174,8 +174,17 @@ class BIMLayoutTool extends Tool
         for (let st = 0; st < building.storeys.length; st++)
         {
           let storey = building.storeys[st];
-
-          const storeyTreeNode = buildingTreeNode.addNode(storey.object.name,
+          let storeyLabel = storey.object.name;
+          let elevation = storey.object.userData.IFC.Elevation;
+          if (typeof elevation === "number")
+          {
+            storeyLabel +=  " (" + application.formatMeasure(elevation);
+            // get units from project node
+            let units = storey.object.parent?.parent?.parent?.userData.units;
+            if (units) storeyLabel += " " + units;
+            storeyLabel += ")";
+          }
+          const storeyTreeNode = buildingTreeNode.addNode(storeyLabel,
             event => this.focusOnObject(event, storey.object, "top"),
             "IfcBuildingStorey");
 
@@ -335,6 +344,14 @@ class BIMLayoutTool extends Tool
             }
           }
         }
+        else if (this.isCeilingElement(ifcData))
+        {
+          if (!obj.visible)
+          {
+            obj.visible = true;
+            application.notifyObjectsChanged(obj, this);
+          }
+        }
       }
     });
 
@@ -408,6 +425,14 @@ class BIMLayoutTool extends Tool
             application.notifyObjectsChanged(currObj, this);
           }
         }
+        else if (this.isCeilingElement(ifcData))
+        {
+          if (currObj.visible)
+          {
+            currObj.visible = false;
+            application.notifyObjectsChanged(currObj, this);
+          }
+        }
       }
     });
 
@@ -460,6 +485,19 @@ class BIMLayoutTool extends Tool
       if (IFC1.Elevation !== undefined && IFC1.Elevation === IFC2.Elevation)
         return true;
     }
+    return false;
+  }
+
+  isCeilingElement(ifcData)
+  {
+    if (ifcData.ifcClassName === "IfcRoof") return true;
+
+    if (ifcData.ifcClassName === "IfcSlab" &&
+        ifcData.PredefinedType === ".ROOF.") return true;
+
+    if (ifcData.ifcClassName === "IfcCovering" &&
+        ifcData.PredefinedType === ".CEILING.") return true;
+
     return false;
   }
 }

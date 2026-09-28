@@ -82,10 +82,10 @@ class MeasureAreaTool extends Tool
     const undoButton = Controls.addButton(this.panel.bodyElem,
       "undo_last", "button.undo", () => this.removeLastPoint());
 
-    this.distElem = document.createElement("div");
-    this.distElem.style.padding = "8px";
+    this.measureElem = document.createElement("div");
+    this.measureElem.style.padding = "8px";
 
-    this.panel.bodyElem.appendChild(this.distElem);
+    this.panel.bodyElem.appendChild(this.measureElem);
   }
 
   activate()
@@ -238,9 +238,10 @@ class MeasureAreaTool extends Tool
 
     let area = this.getArea();
 
-    I18N.set(this.distElem, "textContent", "analysis|message.measure_area",
-      area.toFixed(application.setup.decimals), application.setup.units);
-    application.i18n.update(this.distElem);
+    I18N.set(this.measureElem, "textContent", "analysis|message.measure_area",
+      application.formatMeasure(area), application.setup.units);
+
+    application.i18n.update(this.measureElem);
   }
 
   getArea()

@@ -120,7 +120,7 @@ class ExtrudeTool extends Tool
     });
 
     this.finishButton = Controls.addButton(this.buttonsElem,
-      "revolve_finish", "button.finish", event =>
+      "revolve_finish", "design|button.finish", event =>
     {
       this.application.selection.clear();
     });

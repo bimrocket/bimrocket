@@ -54,6 +54,11 @@ class IFCVoider extends SolidBuilder
     const unvoidedRepr = productRepr.getComponent(0);
     if (!(unvoidedRepr instanceof Solid)) return true;
 
+    if (!unvoidedRepr.geometry.isManifold)
+    {
+      unvoidedRepr.updateGeometry(unvoidedRepr.geometry, true);
+    }
+
     let productObject3D = this.findIfcProduct(productRepr);
     if (productObject3D === null) return true;
 

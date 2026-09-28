@@ -13,6 +13,7 @@ import { Inspector } from "platform/ui/inspector/Inspector.js";
 import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { ErrorHandler } from "platform/ui/ErrorHandler.js";
 import { Tool } from "platform/ui/Tool.js";
+import { LinesSelectionHighlighter } from "platform/ui/LinesSelectionHighlighter.js";
 
 import { Cord } from "platform/core/Cord.js";
 import { Profile } from "platform/core/Profile.js";
@@ -70,7 +71,10 @@ class Application
     ["m", "units.m"],
     ["cm", "units.cm"],
     ["mm", "units.mm"],
-    ["in", "units.in"]
+    ["in", "units.in"],
+    ["ft", "units.ft"],
+    ["yd", "units.yd"],
+    ["mi", "units.mi"]
   ];
   static SET_SELECTION_MODE = "set";
   static ADD_SELECTION_MODE = "add";
@@ -101,8 +105,8 @@ class Application
     /* selection */
     this.selection = new Selection(this, true);
     this.selectionMode = Application.SET_SELECTION_MODE;
-    this._selectionLines = null;
     this._axisLines = null;
+    this._selectionHighlighter = new LinesSelectionHighlighter(this);
 
     /* setup */
     this.setup = new Setup(this);
@@ -242,7 +246,7 @@ class Application
 
     // customBar
     this.customBar = document.createElement("div");
-    this.customBar.className = "custom_bar";
+    this.customBar.className = "custom-bar";
     this.headerElem.appendChild(this.customBar);
 
     // toolBar
@@ -811,242 +815,12 @@ class Application
 
   updateSelection()
   {
-    this.hideSelectionLines();
-    this.showSelectionLines();
+    this._selectionHighlighter.update();
 
     this.hideAxisLines();
     if (this.setup.showLocalAxes)
     {
       this.showAxisLines();
-    }
-  }
-
-  hideSelectionLines()
-  {
-    if (this._selectionLines !== null)
-    {
-      this.overlays.remove(this._selectionLines);
-      ObjectUtils.dispose(this._selectionLines);
-      this._selectionLines = null;
-      this.repaint();
-    }
-  }
-
-  showSelectionLines()
-  {
-    if (this._selectionLines === null && !this.selection.isEmpty())
-    {
-      const linesGroup = new THREE.Group();
-      linesGroup.renderOrder = 1;
-      linesGroup.name = "SelectionLines";
-      const iterator = this.selection.iterator;
-      let item = iterator.next();
-      while (!item.done)
-      {
-        let object = item.value;
-        this.collectLines(object, linesGroup);
-        item = iterator.next();
-      }
-      this._selectionLines = linesGroup;
-      this.overlays.add(this._selectionLines);
-      this.repaint();
-    }
-  }
-
-  transformSelectionLines(matrix)
-  {
-    if (this._selectionLines !== null)
-    {
-      const lines = this._selectionLines;
-      matrix.decompose(lines.position, lines.quaternion, lines.scale);
-      lines.updateMatrix();
-      this.repaint();
-    }
-  }
-
-  collectLines(object, linesGroup)
-  {
-    const highlight = ObjectUtils.getSelectionHighlight(object)
-          || ObjectUtils.HIGHLIGHT_EDGES;
-    if (highlight === ObjectUtils.HIGHLIGHT_NONE) return;
-
-    let material = this.getSelectionMaterial(object);
-
-    if (object instanceof Solid)
-    {
-      let solid = object;
-
-      if (this.setup.selectionPaintMode === Application.EDGES_SELECTION)
-      {
-        let edgesGeometry = solid.edgesGeometry;
-        if (edgesGeometry)
-        {
-          let lines = new THREE.LineSegments(edgesGeometry, material);
-
-          lines.name = "SelectionLines";
-          lines.raycast = function(){};
-
-          solid.updateMatrixWorld();
-          solid.matrixWorld.decompose(
-            lines.position, lines.rotation, lines.scale);
-          lines.updateMatrix();
-          linesGroup.add(lines);
-        }
-      }
-      else // show faces (triangles)
-      {
-        let geometry = solid.geometry;
-        if (geometry)
-        {
-          let edgesGeometry = geometry.getTrianglesGeometry();
-
-          let lines = new THREE.LineSegments(edgesGeometry, material);
-          lines.name = "SelectionLines";
-          lines.raycast = function(){};
-
-          solid.updateMatrixWorld();
-          solid.matrixWorld.decompose(
-            lines.position, lines.rotation, lines.scale);
-          lines.updateMatrix();
-          linesGroup.add(lines);
-        }
-      }
-    }
-    else if (object instanceof THREE.Camera)
-    {
-      let camera = object;
-      if (camera !== this.camera)
-      {
-        camera.updateMatrixWorld();
-        let lines = new THREE.CameraHelper(camera);
-        lines.updateMatrix();
-
-        lines.name = "SelectionLines";
-        lines.raycast = function(){};
-        linesGroup.add(lines);
-      }
-    }
-    else if (object instanceof THREE.DirectionalLight)
-    {
-      let light = object;
-      let lines = new THREE.DirectionalLightHelper(light, 1, 0x0);
-      lines.name = "SelectionLines";
-      lines.raycast = function(){};
-      lines.lightPlane.updateMatrix();
-      lines.targetLine.updateMatrix();
-
-      linesGroup.add(lines);
-    }
-    else if (object instanceof THREE.Mesh)
-    {
-      let mesh = object;
-
-      if (mesh.geometry.attributes?.position?.array?.length >
-          Application.LARGE_MESH_SIZE)
-      {
-        let box = ObjectUtils.getLocalBoundingBox(mesh, true);
-        if (!box.isEmpty())
-        {
-          let geometry = ObjectUtils.getBoxGeometry(box);
-
-          let lines = new THREE.LineSegments(geometry, mesh.visible ?
-            this.boxSelectionMaterial : material);
-          lines.raycast = function(){};
-
-          mesh.updateMatrixWorld();
-          mesh.matrixWorld.decompose(
-            lines.position, lines.rotation, lines.scale);
-          lines.updateMatrix();
-          linesGroup.add(lines);
-        }
-      }
-      else
-      {
-        mesh.updateMatrixWorld();
-        let edgesGeometry = new THREE.EdgesGeometry(mesh.geometry);
-
-        let lines = new THREE.LineSegments(edgesGeometry, material);
-        lines.raycast = function(){};
-        lines.name = "OuterLines";
-        mesh.matrixWorld.decompose(
-          lines.position, lines.rotation, lines.scale);
-        lines.updateMatrix();
-        linesGroup.add(lines);
-      }
-    }
-    else if (object instanceof THREE.Points)
-    {
-      object.updateMatrixWorld();
-
-      let box = ObjectUtils.getLocalBoundingBox(object, true);
-      if (!box.isEmpty())
-      {
-        let geometry = ObjectUtils.getBoxGeometry(box);
-
-        let lines = new THREE.LineSegments(geometry, object.visible ?
-          this.boxSelectionMaterial : material);
-        lines.raycast = function(){};
-
-        object.matrixWorld.decompose(
-          lines.position, lines.rotation, lines.scale);
-        lines.updateMatrix();
-        linesGroup.add(lines);
-      }
-    }
-    else if (object instanceof Cord)
-    {
-      object.updateMatrixWorld();
-
-      let lines = new THREE.LineSegments(object.geometry, material);
-      lines.raycast = function(){};
-      lines.name = "Lines";
-      object.matrixWorld.decompose(
-        lines.position, lines.rotation, lines.scale);
-      lines.updateMatrix();
-      linesGroup.add(lines);
-    }
-    else if (object instanceof Profile)
-    {
-      object.updateMatrixWorld();
-
-      let lines = new THREE.LineSegments(object.geometry, material);
-      lines.raycast = function(){};
-      lines.name = "Lines";
-      object.matrixWorld.decompose(
-        lines.position, lines.rotation, lines.scale);
-      lines.updateMatrix();
-      linesGroup.add(lines);
-    }
-    else if (object instanceof THREE.Group || object instanceof THREE.Object3D)
-    {
-      object.updateMatrixWorld();
-
-      if (highlight === ObjectUtils.HIGHLIGHT_EDGES)
-      {
-        let children = object.children;
-        for (let i = 0; i < children.length; i++)
-        {
-          var child = children[i];
-          this.collectLines(child, linesGroup);
-        }
-      }
-      else if (highlight === ObjectUtils.HIGHLIGHT_BOX)
-      {
-        let box = ObjectUtils.getLocalBoundingBox(object, true);
-        if (!box.isEmpty())
-        {
-          let geometry = ObjectUtils.getBoxGeometry(box);
-
-          let lines = new THREE.LineSegments(geometry, object.visible ?
-            this.boxSelectionMaterial : material);
-          lines.raycast = function(){};
-
-          object.matrixWorld.decompose(
-            lines.position, lines.rotation, lines.scale);
-          lines.updateMatrix();
-          linesGroup.add(lines);
-        }
-      }
     }
   }
 
@@ -1915,6 +1689,17 @@ class Application
     {
       this.notifyObjectsChanged(updatedObjects);
     }
+  }
+
+  formatMeasure(value)
+  {
+    let decimals = this.setup.decimals;
+
+    return value.toLocaleString(undefined,
+    {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
   }
 
   rebuild()

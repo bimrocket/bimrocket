@@ -30,7 +30,7 @@ export const translations =
 
   "tool.center_selection.label": "Center selection",
 
-  "tool.focus_selection.label": "Focus on selection",
+  "tool.isolate_selection.label": "Isolate selection",
 
   "tool.chatgpt.label": "ChatGPT",
 

@@ -731,7 +731,7 @@ class IfcProjectHelper extends IfcHelper
           {
             let unit = units[u];
             if (unit instanceof schema.IfcSIUnit &&
-                unit.UnitType.value === "LENGTHUNIT")
+                unit.UnitType.value === "LENGTHUNIT") // SI unit
             {
               // unit name = METRE
               let factor = 1;
@@ -752,6 +752,24 @@ class IfcProjectHelper extends IfcHelper
                 model.userData.units = "m";
               }
               loader.modelFactor = factor;
+            }
+            else if (unit instanceof schema.IfcConversionBasedUnit &&
+                     unit.UnitType.value === "LENGTHUNIT") // no SI unit
+            {
+              const unitName = unit.Name.toLowerCase();
+              const nsiUnit = IFC.NON_SI_UNITS[unitName];
+              if (nsiUnit)
+              {
+                model.userData.units = nsiUnit.name;
+                loader.modelFactor = nsiUnit.factor;
+              }
+              else
+              {
+                loader.modelFactor =
+                  1 / (unit.ConversionFactor?.ValueComponent?.Value || 1);
+                model.userData.units = unitName;
+                model.userData.modelFactor = loader.modelFactor;
+              }
             }
           }
         }
@@ -1219,7 +1237,7 @@ class IfcBooleanResultHelper extends IfcGeometricRepresentationItemHelper
 
       const firstHelper = this.helper(firstOperand);
       const secondHelper = this.helper(secondOperand);
-      
+
       let firstObject = firstHelper.getObject3D();
       if (firstObject.parent)
       {
@@ -1232,7 +1250,7 @@ class IfcBooleanResultHelper extends IfcGeometricRepresentationItemHelper
         // secondObject already added to scene, clone it.
         secondObject = loader.cloneObject3D(secondObject, true);
       }
-      
+
       if (firstObject instanceof Solid && firstHelper.material)
       {
         firstObject.material = firstHelper.material;

@@ -16,7 +16,7 @@ class PropertyDialog extends Dialog
     this.dictionary = dictionary;
     this.setI18N(this.application.i18n);
 
-    this.setSize(240, 210);
+    this.setSize(300, 260);
 
     this.nameElem = this.addTextField("propertyName",
       "label.property_name", "");

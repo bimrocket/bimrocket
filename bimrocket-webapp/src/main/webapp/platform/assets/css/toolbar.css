@@ -19,8 +19,7 @@
   --toolbar-button-icon-size: 24px;
   --toolbar-button-icon-stroke-width: 1.25px;
   --toolbar-margin: var(--panel-margin);
-  --toolbar-shadow-width: 16px;
-  --toolbar-shadow-intensity: 20%;
+  --toolbar-scroll-shadow-width: 24px;
   --toolbar-separator-color: var(--border-color);
   --toolbar-separator-margin: 4px;
 }
@@ -50,48 +49,86 @@
   bottom: auto;
 }
 
-.toolbar::before,
-.toolbar::after
+.toolbar > .scroll-button
 {
-  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
-  width: var(--toolbar-shadow-width);
+  width: var(--toolbar-scroll-shadow-width);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.5s;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  border: none;
+  border-radius: 0;
+  appearance: none;
+  margin: 0;
+  box-shadow: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.toolbar::before
+.toolbar > .scroll-button:focus
+{
+  border: none;
+  outline: none;
+}
+
+.toolbar > .scroll-button:hover
+{
+  cursor: pointer;
+}
+
+.toolbar > .scroll-button > svg
+{
+  stroke-width: 2px;
+  width: 20px;
+  height: 20px;
+  touch-action: none;
+}
+
+.toolbar > .scroll-button:hover > svg
+{
+  stroke: var(--color-0);
+}
+
+.toolbar > .scroll-button.before
 {
   left: 0;
   background: linear-gradient(
     to right,
-    rgb(0 0 0 / var(--toolbar-shadow-intensity)),
-    transparent
+    var(--surface-underground) 0%,
+    var(--toolbar-background) 70%,
+    transparent 100%
   );
+  justify-content: right;
 }
 
-.toolbar::after
+.toolbar > .scroll-button.after
 {
   right: 0;
   background: linear-gradient(
     to left,
-    rgb(0 0 0 / var(--toolbar-shadow-intensity)),
-    transparent
+    var(--surface-underground) 0%,
+    var(--toolbar-background) 70%,
+    transparent 100%
   );
+  justify-content: left;
 }
 
-.toolbar.has-left-shadow::before
+.toolbar.has-shadow-before > .scroll-button.before
 {
   opacity: 1;
+  pointer-events: auto;
 }
 
-.toolbar.has-right-shadow::after
+.toolbar.has-shadow-after > .scroll-button.after
 {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .toolbar-scroll

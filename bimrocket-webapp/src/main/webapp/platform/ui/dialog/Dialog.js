@@ -10,6 +10,8 @@ import { I18N } from "platform/i18n/I18N.js";
 
 class Dialog
 {
+  static zIndex = 10000;
+
   constructor(title)
   {
     this.title = title;
@@ -19,7 +21,7 @@ class Dialog
     this._height = 200;
 
     this.curtainElem = document.createElement("div");
-    this.curtainElem.className = "dialog_curtain";
+    this.curtainElem.className = "dialog-curtain";
 
     this.dialogElem = document.createElement("div");
     this.dialogElem.className = "dialog";
@@ -81,7 +83,11 @@ class Dialog
     {
       if (event.key === "Escape")
       {
-        this.hide();
+        if (!event.target?.classList.contains("cm-content")) // not editing
+        {
+          console.info(event);
+          this.hide();
+        }
       }
     };
 
@@ -118,6 +124,9 @@ class Dialog
       }
       IconManager.updateTree(this.dialogElem);
 
+      this.curtainElem.style.zIndex = Dialog.zIndex;
+      Dialog.zIndex++;
+
       parentNode = parentNode || document.body;
       parentNode.appendChild(this.curtainElem);
       parentNode.appendChild(this.dialogElem);
@@ -136,6 +145,8 @@ class Dialog
     {
       parentNode.removeChild(this.dialogElem);
       parentNode.removeChild(this.curtainElem);
+
+      Dialog.zIndex--;
 
       document.removeEventListener("keydown", this._escapeHandler);
 
@@ -209,43 +220,43 @@ class Dialog
   addTextField(name, label, value, className)
   {
     return Controls.addTextField(this.bodyElem, name, label, value,
-      className || "text_field");
+      className || "text-field");
   }
 
   addNumberField(name, label, value, className)
   {
     return Controls.addNumberField(this.bodyElem, name, label, value,
-      className || "text_field");
+      className || "text-field");
   }
 
   addTextAreaField(name, label, value, className)
   {
     return Controls.addTextAreaField(this.bodyElem, name, label, value,
-      className || "text_field");
+      className || "text-field");
   }
 
   addPasswordField(name, label, value, className)
   {
     return Controls.addPasswordField(this.bodyElem, name, label, value,
-      className || "text_field");
+      className || "text-field");
   }
 
   addSelectField(name, label, options, value, className)
   {
     return Controls.addSelectField(this.bodyElem, name, label,
-      options, value, className || "select_field");
+      options, value, className || "select-field");
   }
 
   addCheckBoxField(name, label, checked, className)
   {
     return Controls.addCheckBoxField(this.bodyElem, name, label, checked,
-      className || "checkbox_field");
+      className || "checkbox-field");
   }
 
   addRadioButtons(name, label, options, value, className, listener)
   {
     return Controls.addRadioButtons(this.bodyElem, name, label, options,
-      value, className || "radio_buttons", listener);
+      value, className || "radio-buttons", listener);
   }
 
   addButton(name, label, action)

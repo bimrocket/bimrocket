@@ -17,7 +17,7 @@ class CenterSelectionTool extends Tool
     this.label = "base|tool.center_selection.label";
     this.help = "base|tool.center_selection.help";
     this.iconName = "base|center-selection";
-    this.focusOnSelection = false;
+    this.isolateSelection = false;
     this.includeInvisible = true;
 
     this.setOptions(options);
@@ -31,7 +31,7 @@ class CenterSelectionTool extends Tool
     let objects = application.selection.roots;
     if (objects.length > 0)
     {
-      if (this.focusOnSelection)
+      if (this.isolateSelection)
       {
         application.updateVisibility(application.baseObject, false);
         application.updateVisibility(objects, true);

@@ -7,6 +7,7 @@
 export const translations =
 {
   "button.show_all": "Mostrar todo",
+  "button.explore_all": "Explorar todo",
   "button.explore_selection": "Explorar selección",
   "button.screenshot": "Capturar pantalla",
   "button.upload_image": "Subir imagen",
@@ -181,7 +182,10 @@ export const translations =
   "message.no_topic_found": "No se han encontrado incidencias.",
   "message.no_components_selected": "No se han encontrado objetos para esta vista.",
 
-  "message.operation_completed": "Operación completada.",
+  "message.inventory_types": total => `Tipos (IfcProduct): ${total}`,
+  "message.inventory_subtypes": total => `Subtipos (IfcType): ${total}`,
+  "message.inventory_objects": total => `Objetos: ${total}`,
+  "message.inventory_items": total => `Ítems representables: ${total}`,
 
   "message.bsdd_dictionary_count": count => `Diccionarios: ${count}`,
   "message.bsdd_class_count": count => `Clases: ${count}`,

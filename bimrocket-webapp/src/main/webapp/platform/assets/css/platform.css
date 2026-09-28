@@ -58,7 +58,7 @@
 
 .controller_dialog > ul li span.type
 {
-  color: #606080;
+  color: var(--string-color);
   margin-right: 4px;
 }
 

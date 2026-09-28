@@ -13,7 +13,7 @@ class ServiceDialog extends Dialog
   {
     super(title);
 
-    this.setSize(360, 320);
+    this.setSize(360, 360);
 
     this.services = null;
 

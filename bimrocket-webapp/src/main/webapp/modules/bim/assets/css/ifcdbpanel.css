@@ -31,7 +31,7 @@
   flex-grow: 1;
 }
 
-.ifcdb-panel .tabbed_pane
+.ifcdb-panel .tabbed-pane
 {
   flex-grow: 1;
 }
@@ -60,7 +60,7 @@
   padding: 4px;
 }
 
-.ifcdb-panel .tab_panel
+.ifcdb-panel .tab-panel
 {
   padding: 4px;
 }
@@ -91,10 +91,3 @@
   color: black;
   animation: none;
 }
-
-.ifcdb-panel ul.tree li.IfcModelVersion
-{
-  background-image: url(images/file.svg);
-}
-
-

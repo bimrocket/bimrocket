@@ -87,7 +87,7 @@
   text-align: left;
   display: flex;
   align-items: center;
-  min-height: 20px;
+  min-height: 26px;
   border-radius: var(--border-radius-1);
   margin-top: var(--fileexplorer-entry-margin);
 }

@@ -35,32 +35,28 @@ class SolarSimulatorTool extends Tool
 
     this.resizeObverser = new ResizeObserver(() => this.onResize());
 
-    this.simulationGroup = new THREE.Group();
-    this.simulationGroup.name = "SolarSimulation";
-
     this.edgeMaterial = new THREE.LineBasicMaterial({
-      name : "shadow_edge",
-      color : 0x0,
-      linewidth : 1
+      name: "shadow_edge",
+      color: 0x0,
+      linewidth: 1
     });
 
     this.shadowMaterial = new THREE.MeshPhongMaterial({
-      color : 0x606060,
+      color: 0x606060,
       name: "shadow_area",
-      polygonOffset : true,
-      polygonOffsetUnits : -3,
-      side : THREE.DoubleSide
+      polygonOffset: true,
+      polygonOffsetUnits: -3,
+      side: THREE.DoubleSide
     });
 
     this.sunMaterial = new THREE.MeshPhongMaterial({
-      color : 0xffff00,
+      color: 0xffff00,
       name: "sun_area",
-      polygonOffset : true,
-      polygonOffsetUnits : -3,
-      side : THREE.DoubleSide
+      polygonOffset: true,
+      polygonOffsetUnits: -3,
+      side: THREE.DoubleSide
     });
 
-//    this._onPointerDown = (event) => this.onPointerDown(event);
     this._onSceneChanged = (event) => this.onSceneChanged(event);
 
     this.createPanel();
@@ -77,6 +73,13 @@ class SolarSimulatorTool extends Tool
       .setMinimumHeight(200)
       .setPriority(2);
 
+    this.panel.onClose = () =>
+    {
+      this.cancel();
+      this.application.useTool(null);
+      return true;
+    };
+
     this.panel.onShow = () =>
     {
       application.addEventListener("scene", this._onSceneChanged);
@@ -87,7 +90,6 @@ class SolarSimulatorTool extends Tool
     {
       application.removeEventListener("scene", this._onSceneChanged);
       this.resizeObverser.unobserve(this.panel.element);
-      this.cancel();
     };
 
     this.helpElem = document.createElement("div");
@@ -209,8 +211,6 @@ class SolarSimulatorTool extends Tool
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      console.info(center);
-
       this.target.position.copy(center);
       this.target.updateMatrix();
       this.update();
@@ -229,14 +229,6 @@ class SolarSimulatorTool extends Tool
         this.cancel();
         this.helpElem.style.display = "none";
         this.selectPositionButton.classList.remove("hidden");
-      }
-    }
-    else
-    {
-      const simulationGroup = this.simulationGroup;
-      if (!simulationGroup.parent)
-      {
-        simulationGroup.clear();
       }
     }
   }
@@ -343,16 +335,6 @@ class SolarSimulatorTool extends Tool
       return;
     }
 
-    const simulationGroup = this.simulationGroup;
-    simulationGroup.visible = true;
-
-    if (simulationGroup.parent === null)
-    {
-      ObjectUtils.dispose(simulationGroup);
-      simulationGroup.clear();
-      application.addObject(simulationGroup, application.baseObject);
-    }
-
     const meshVertices = GeometryUtils.getBufferGeometryVertices(mesh.geometry);
 
     const addFace = (va, vb, vc) =>
@@ -384,7 +366,7 @@ class SolarSimulatorTool extends Tool
       if (shadowGenerator.interrupted) return;
 
       const exposureGroup = new THREE.Group();
-      exposureGroup.name = "Exposure-" + this.getDate().toISOString();
+      exposureGroup.name = "SolarExposure-" + this.getDate().toISOString();
       exposureGroup.userData = shadowGenerator.getStatistics();
 
       const surface = new THREE.Mesh(mesh.geometry, Solid.FaceMaterial);
@@ -429,7 +411,7 @@ class SolarSimulatorTool extends Tool
       sunMesh.raycast = function(){};
       exposureGroup.add(sunMesh);
 
-      this.application.addObject(exposureGroup, simulationGroup);
+      this.application.addObject(exposureGroup, application.baseObject);
     };
 
     progressBar.visible = true;
@@ -478,13 +460,6 @@ class SolarSimulatorTool extends Tool
     application.i18n.update(this.helpElem);
 
     this.selectPositionButton.classList.remove("hidden");
-
-    const simulationGroup = this.simulationGroup;
-    if (simulationGroup.parent)
-    {
-      application.removeObject(simulationGroup);
-      simulationGroup.clear();
-    }
   }
 
   getDate()
@@ -1263,18 +1238,18 @@ class ShadowGenerator
     const computeTime = (this.endMillis - this.startMillis) / 1000;
 
     return {
-      totalArea : totalArea,
-      totalTriangleCount : totalTriangleCount,
+      totalArea: totalArea,
+      totalTriangleCount: totalTriangleCount,
 
-      shadowArea : shadowArea,
-      shadowAreaPercentage : 100 * shadowArea / totalArea,
-      shadowTriangleCount : shadowTriangleCount,
+      shadowArea: shadowArea,
+      shadowAreaPercentage: 100 * shadowArea / totalArea,
+      shadowTriangleCount: shadowTriangleCount,
 
-      sunArea : sunArea,
-      sunAreaPercentage : 100 * sunArea / totalArea,
-      sunTriangleCount : sunTriangleCount,
+      sunArea: sunArea,
+      sunAreaPercentage: 100 * sunArea / totalArea,
+      sunTriangleCount: sunTriangleCount,
 
-      computeTime : computeTime
+      computeTime: computeTime
     };
   }
 

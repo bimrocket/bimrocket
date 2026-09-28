@@ -41,6 +41,7 @@
   --button-text-color: var(--text-color);
 
   --surface-ground: var(--surface-0);
+  --surface-underground: #ddd;
   --surface-header: var(--surface-2);
   --surface-field: var(--surface-2);
   --surface-button: var(--surface-field);
@@ -62,6 +63,7 @@
   --string-color: #00f;
   --boolean-color: #630;
   --comment-color: #808080;
+  --template-color: #8080e0;
 
   --border-width: 1px;
   --border-style: solid;
@@ -102,6 +104,7 @@
   --code-editor-tooltip-text-color: var(--text-color);
   --code-editor-tooltip-border: var(--border-color);
   --code-editor-autocomplete-selected: var(--surface-hover);
+  --code-editor-autocomplete-selected-text-color: var(--text-color);
   --code-editor-search-match: var(--surface-highlighted);
   --code-editor-search-match-selected: color-mix( in srgb, var(--accent-color) 40%, transparent );
   --code-editor-fold-background: var(--surface-hover);
@@ -111,13 +114,26 @@
   --code-editor-panel-border: var(--border-color);
 }
 
-/* latin */
-@font-face {
+/* Montserrat */
+@font-face
+{
   font-family: 'Montserrat';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
   src: url(fonts/montserrat.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face
+{
+  font-family: 'Montserrat';
+  font-style: bold;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/montserrat-bold.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
     U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -450,19 +466,62 @@ button.tag-remove
   line-height: 1;
   color: #666;
   border: none;
-  background-color: #e8e8e8;
-  background-image: url(images/close.svg);
-  background-position: center center;
-  background-repeat: no-repeat;
   width: 14px;
   height: 14px;
   transition: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+button.tag-remove:before
+{
+  content: "";
+  background-color: var(--text-color);
+  mask-image: url(../icons/misc/close.svg);
+  mask-position: center center;
+  mask-repeat: no-repeat;
+  mask-size: 10px 10px;
+  width: 10px;
+  height: 10px;
 }
 
 button.tag-remove:hover,
 button.tag-remove:focus
 {
   background-color: #f4f4f4;
+}
+
+button.icon-button-20
+{
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px;
+  cursor: pointer;
+  border-radius: var(--border-radius-1);
+  background-color: var(--surface-ground);
+  border:none;
+  box-shadow: none;
+  transform: translate(0.5px, 0.5px);
+}
+
+button.icon-button-20 > svg
+{
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-color);
+  stroke-width: 1.5px;
+}
+
+button.icon-button-20:hover,
+button.icon-button-20:focus
+{
+  background-color: var(--surface-3);
 }
 
 button.icon-button-24
@@ -475,7 +534,7 @@ button.icon-button-24
   justify-content: center;
   margin: 0px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--border-radius-1);
   background-color: var(--surface-ground);
   border:none;
   box-shadow: none;
@@ -487,6 +546,7 @@ button.icon-button-24 > svg
   width: 24px;
   height: 24px;
   stroke: var(--text-color);
+  stroke-width: 1.25px;
 }
 
 button.icon-button-24:hover,
@@ -1023,7 +1083,7 @@ svg.icon-20
   width: 20px;
   height: 20px;
   stroke: var(--text-color);
-  stroke-width: 1.25px;
+  stroke-width: 1.5px;
   flex-shrink: 0;
 }
 
@@ -1032,7 +1092,7 @@ svg.icon-24
   width: 24px;
   height: 24px;
   stroke: var(--text-color);
-  stroke-width: 1px;
+  stroke-width: 1.25px;
   flex-shrink: 0;
 }
 

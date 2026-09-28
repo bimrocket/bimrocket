@@ -20,15 +20,67 @@ class ToolBar
     parent.appendChild(this.element);
 
     this.scrollElem = document.createElement("div");
-    this.scrollElem.className = "toolbar-scroll";
-    this.element.appendChild(this.scrollElem);
+    const scrollElem = this.scrollElem;
+    scrollElem.className = "toolbar-scroll";
+    this.element.appendChild(scrollElem);
 
     const panelManager = application.panelManager;
     panelManager.addEventListener(event => this.onPanelChange(event));
 
     this.addSeparator("extra");
 
-    this.scrollElem.addEventListener("scroll", () => this.updateShadows());
+    scrollElem.addEventListener("scroll", () => this.updateShadows());
+
+    this.intervalId = null;
+    this.scrollIncrement = 2;
+    this.scrollInterval = 4;
+
+    const startScroll = amount =>
+    {
+      if (this.intervalId === null)
+      {
+        const scrollElem = this.scrollElem;
+        scrollElem.scrollLeft += amount;
+        this.intervalId = setInterval(() =>
+          scrollElem.scrollLeft += amount, this.scrollInterval);
+      }
+    };
+
+    const stopScroll = () =>
+    {
+      if (this.intervalId !== null)
+      {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
+    };
+
+    const setupListeners = (button, amount) =>
+    {
+      button.addEventListener("pointerdown", event =>
+      {
+        if (event.button === 0) startScroll(amount);
+      });
+      button.addEventListener("contextmenu", event => event.preventDefault());
+      button.addEventListener("pointerup", stopScroll);
+      button.addEventListener("pointerleave", stopScroll);
+      button.addEventListener("touchstart",
+        event => event.preventDefault(), { passive: false });
+    };
+
+    // left shadow button
+    this.shadowBeforeButton = document.createElement("button");
+    this.shadowBeforeButton.className = "scroll-button before";
+    Controls.addIcon(this.shadowBeforeButton, "chevron-left");
+    this.element.appendChild(this.shadowBeforeButton);
+    setupListeners(this.shadowBeforeButton, -this.scrollIncrement);
+
+    // right shadow button
+    this.shadowAfterButton = document.createElement("button");
+    this.shadowAfterButton.className = "scroll-button after";
+    Controls.addIcon(this.shadowAfterButton, "chevron-right");
+    this.element.appendChild(this.shadowAfterButton);
+    setupListeners(this.shadowAfterButton, this.scrollIncrement);
 
     window.addEventListener("resize", () => this.updateShadows());
   }
@@ -178,13 +230,13 @@ class ToolBar
     const element = this.element;
     const scrollElem = this.scrollElem;
 
-    const hasLeft = scrollElem.scrollLeft > 0;
+    const hasBefore = scrollElem.scrollLeft > 0;
 
-    const hasRight = scrollElem.scrollLeft + scrollElem.clientWidth <
+    const hasAfter = scrollElem.scrollLeft + scrollElem.clientWidth <
       scrollElem.scrollWidth - 1;
 
-    element.classList.toggle("has-left-shadow", hasLeft);
-    element.classList.toggle("has-right-shadow", hasRight);
+    element.classList.toggle("has-shadow-before", hasBefore);
+    element.classList.toggle("has-shadow-after", hasAfter);
   }
 
   onPanelChange(event)
@@ -253,7 +305,7 @@ class ToolButton
 
     const buttonRect = buttonElem.getBoundingClientRect();
     const scrollRect = scrollElem.getBoundingClientRect();
-    const margin = 20;
+    const margin = 24;
 
     if (buttonRect.left < scrollRect.left + margin)
     {

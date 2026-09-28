@@ -7,6 +7,7 @@
 export const translations =
 {
   "button.show_all": "Show all",
+  "button.explore_all": "Explore all",
   "button.explore_selection": "Explore selection",
   "button.screenshot": "Screenshot",
   "button.upload_image": "Upload image",
@@ -180,6 +181,11 @@ export const translations =
   "message.no_project_found": "No project found.",
   "message.no_topic_found": "No topic found.",
   "message.no_components_selected": "No objects were found for this view",
+
+  "message.inventory_types": total => `Types (IfcProduct): ${total}`,
+  "message.inventory_subtypes": total => `Subtypes (IfcType): ${total}`,
+  "message.inventory_objects": total => `Objects: ${total}`,
+  "message.inventory_items": total => `Representation items: ${total}`,
 
   "message.bsdd_dictionary_count": count => `Dictionaries: ${count}`,
   "message.bsdd_class_count": count => `Classes: ${count}`,

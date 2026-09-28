@@ -94,62 +94,62 @@ class Inspector extends Panel
 
     this.objectCardElem = document.createElement("div");
     this.bodyElem.appendChild(this.objectCardElem);
-    this.objectCardElem.className = "inspector_card";
+    this.objectCardElem.className = "inspector-card";
 
     this.listCardElem = document.createElement("div");
     this.bodyElem.appendChild(this.listCardElem);
-    this.listCardElem.className = "inspector_card list";
+    this.listCardElem.className = "inspector-card list";
 
     this.toolBarElem = document.createElement("div");
     this.objectCardElem.appendChild(this.toolBarElem);
-    this.toolBarElem.className = "inspector_toolbar";
+    this.toolBarElem.className = "inspector-toolbar";
 
-    this.listButton = Controls.addButton(this.toolBarElem,
-      "list", null, event =>
+    this.listButton = Controls.addIconButton(this.toolBarElem,
+      "list", null, "list", event =>
     {
       this.listCardElem.style.display = "";
       this.objectCardElem.style.display = "none";
-    }, "list");
+    }, "icon-button-20");
     I18N.set(this.listButton, "title", "button.list");
     I18N.set(this.listButton, "alt", "button.list");
 
-    this.previousButton = Controls.addButton(this.toolBarElem,
-      "previous", null, event =>
+    this.previousButton = Controls.addIconButton(this.toolBarElem,
+      "previous", null, "chevron-left", event =>
     {
       if (this.objectIndex > 0)
       {
         this.showProperties(this.objects[this.objectIndex - 1]);
         this.centerObject();
       }
-    }, "previous");
+    }, "icon-button-20");
     I18N.set(this.previousButton, "title", "button.previous");
     I18N.set(this.previousButton, "alt", "button.previous");
 
-    this.indexElem = document.createElement("span");
+    this.indexElem = document.createElement("div");
     this.toolBarElem.appendChild(this.indexElem);
 
-    this.nextButton = Controls.addButton(this.toolBarElem,
-      "next", null, event =>
+    this.nextButton = Controls.addIconButton(this.toolBarElem,
+      "next", null, "chevron-right", event =>
     {
       if (this.objectIndex < this.objects.length - 1)
       {
         this.showProperties(this.objects[this.objectIndex + 1]);
         this.centerObject();
       }
-    }, "next");
+    }, "icon-button-20");
     I18N.set(this.nextButton, "title", "button.next");
     I18N.set(this.nextButton, "alt", "button.next");
 
-    this.selectButton = Controls.addButton(this.toolBarElem,
-      "select", null, event =>
+    this.selectButton = Controls.addIconButton(this.toolBarElem,
+      "select", null, "chevron-up", event =>
     {
       this.application.selection.set(this.object);
-    }, "select");
+    }, "icon-button-20");
     I18N.set(this.selectButton, "title", "button.select");
     I18N.set(this.selectButton, "alt", "button.select");
 
     this.propertiesElem = document.createElement("div");
-    this.propertiesElem.className = "inspector_properties";
+    this.propertiesElem.className = "inspector-properties";
     this.objectCardElem.appendChild(this.propertiesElem);
     this.propertiesTabbedPane = new TabbedPane(this.propertiesElem);
     this.propertiesTabbedPane.addClassName("h-full");
@@ -306,7 +306,7 @@ class Inspector extends Panel
     this.objectIndex = objects.length >= 0 ? 0 : -1;
 
     const infoElem = document.createElement("div");
-    infoElem.className = "inspector_info";
+    infoElem.className = "inspector-info";
     I18N.set(infoElem, "textContent", "message.objects_selected", objects.length);
     this.application.i18n.update(infoElem);
     this.listCardElem.appendChild(infoElem);
@@ -808,7 +808,7 @@ class Inspector extends Panel
     let labelListener = event =>
     {
       let labelElem = event.target;
-      if (labelElem.nodeName.toUpperCase() === "SPAN")
+      if (labelElem.classList.contains("section-name"))
       {
         labelElem = labelElem.parentNode;
       }
@@ -829,8 +829,9 @@ class Inspector extends Panel
     let labelElem = document.createElement("div");
     labelElem.tabIndex = 0;
 
-    let nameElem = document.createElement("span");
+    let nameElem = document.createElement("div");
     nameElem.textContent = sectionName;
+    nameElem.className = "section-name";
     labelElem.appendChild(nameElem);
 
     sectionElem.appendChild(labelElem);
@@ -2069,6 +2070,11 @@ class ChangeMaterialAction extends InspectorAction
     return material && this.getFirstPathName() === "material";
   }
 
+  getIconName()
+  {
+    return "palette";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2089,6 +2095,11 @@ class SetBuilderAction extends InspectorAction
   {
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
     return tabName === "builder";
+  }
+
+  getIconName()
+  {
+    return "set-builder";
   }
 
   perform()
@@ -2143,6 +2154,11 @@ class RemovePropertyAction extends InspectorAction
            && this.getPropertyName() !== null;
   }
 
+  getIconName()
+  {
+    return "trash";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2178,6 +2194,11 @@ class EditPropertiesAction extends InspectorAction
     return this.getFirstPathName() === "userData";
   }
 
+  getIconName()
+  {
+    return "edit";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2202,6 +2223,11 @@ class EditFormulaAction extends InspectorAction
       return false;
 
     return this.getPropertyName() !== null || tabName === "formulas";
+  }
+
+  getIconName()
+  {
+    return "formula";
   }
 
   perform()
@@ -2254,6 +2280,11 @@ class AddControllerAction extends InspectorAction
     return this.getFirstPathName() === "controllers";
   }
 
+  getIconName()
+  {
+    return "add-controller";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2280,6 +2311,11 @@ class RemoveControllerAction extends InspectorAction
     return objectPath.length === 2 &&
            objectPath[0] === "controllers" &&
            this.getPropertyName() === null;
+  }
+
+  getIconName()
+  {
+    return "trash";
   }
 
   perform()
@@ -2321,6 +2357,11 @@ class StartControllerAction extends InspectorAction
            !this.inspector.object.controllers[objectPath[1]]?.isStarted();
   }
 
+  getIconName()
+  {
+    return "start";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2355,6 +2396,11 @@ class StopControllerAction extends InspectorAction
            objectPath[0] === "controllers" &&
            this.getPropertyName() === null &&
            this.inspector.object.controllers[objectPath[1]]?.isStarted();
+  }
+
+  getIconName()
+  {
+    return "stop";
   }
 
   perform()
@@ -2421,6 +2467,11 @@ class AddFeaturedAction extends FeaturedAction
     return !this.isFeatured();
   }
 
+  getIconName()
+  {
+    return "star";
+  }
+
   perform()
   {
     const inspector = this.inspector;
@@ -2461,6 +2512,11 @@ class RemoveFeaturedAction extends FeaturedAction
     if (tabName === "featured") return true;
 
     return this.isFeatured();
+  }
+
+  getIconName()
+  {
+    return "star-off";
   }
 
   perform()
@@ -2505,6 +2561,11 @@ class RemoveAllFeaturedAction extends FeaturedAction
   {
     const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
     return tabName === "featured";
+  }
+
+  getIconName()
+  {
+    return "trash";
   }
 
   perform()

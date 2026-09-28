@@ -84,12 +84,12 @@ class MeasureSelectionTool extends Tool
     dialog.addTextWithArgs("analysis|message.solid_count", [solidCount], "row");
     dialog.addTextWithArgs("analysis|message.mesh_count", [meshCount], "row");
     dialog.addTextWithArgs("analysis|message.total_area",
-      [area.toFixed(decimals), units], "row");
+      [application.formatMeasure(area), units], "row");
     dialog.addTextWithArgs("analysis|message.total_volume",
-      [volume.toFixed(decimals), units], "row");
+      [application.formatMeasure(volume), units], "row");
     let av = volume === 0 ? 0 : area/volume;
     dialog.addTextWithArgs("analysis|message.area_volume_ratio",
-      [av.toFixed(decimals)], "row");
+      [application.formatMeasure(av)], "row");
     let button = dialog.addButton("accept", "button.accept",
       () => dialog.hide());
     dialog.onShow = () => button.focus();

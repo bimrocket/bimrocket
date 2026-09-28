@@ -60,10 +60,10 @@ class MeasureLengthTool extends Tool
     const undoButton = Controls.addButton(this.panel.bodyElem,
       "undo_last", "button.undo", () => this.removeLastPoint());
 
-    this.distElem = document.createElement("div");
-    this.distElem.style.padding = "8px";
+    this.measureElem = document.createElement("div");
+    this.measureElem.style.padding = "8px";
 
-    this.panel.bodyElem.appendChild(this.distElem);
+    this.panel.bodyElem.appendChild(this.measureElem);
   }
 
   activate()
@@ -185,9 +185,9 @@ class MeasureLengthTool extends Tool
 
     let length = this.getLineStringLength();
 
-    I18N.set(this.distElem, "textContent", "analysis|message.measure_length",
-      length.toFixed(application.setup.decimals), application.setup.units);
-    application.i18n.update(this.distElem);
+    I18N.set(this.measureElem, "textContent", "analysis|message.measure_length",
+      application.formatMeasure(length), application.setup.units);
+    application.i18n.update(this.measureElem);
   }
 
   getLineStringLength()

@@ -7,6 +7,7 @@
 export const translations =
 {
   "button.show_all": "Mostra tot",
+  "button.explore_all": "Explora-ho tot",
   "button.explore_selection": "Explora selecció",
   "button.screenshot": "Captura pantalla",
   "button.upload_image": "Puja imatge",
@@ -181,10 +182,10 @@ export const translations =
   "message.no_topic_found": "No s'ha trobat cap incidència.",
   "message.no_components_selected": "No s'han trobat objectes per a aquesta vista.",
 
-  "message.extensions_phase_started": "Fase de revisió iniciada correctament.",
-  "message.extensions_phase_ended": "Fase de revisió finalitzada correctament.",
-  "message.extensions_phase_published": "Fase pública iniciada correctament.",
-  "message.operation_completed": "Operació completada",
+  "message.inventory_types": total => `Tipus (IfcProduct): ${total}`,
+  "message.inventory_subtypes": total => `Subtipus (IfcType): ${total}`,
+  "message.inventory_objects": total => `Objectes: ${total}`,
+  "message.inventory_items": total => `Ítems representables: ${total}`,
 
   "message.bsdd_dictionary_count": count => `Diccionaris: ${count}`,
   "message.bsdd_class_count": count => `Classes: ${count}`,

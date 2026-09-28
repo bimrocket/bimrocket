@@ -77,6 +77,9 @@ export const translations =
   "units.cm": "centímetres",
   "units.mm": "mil·límetres",
   "units.in": "polzades",
+  "units.ft": "peus",
+  "units.yd": "iardes",
+  "units.mi": "milles",
 
   "tool.center_selection.label": "Centra selecció",
 

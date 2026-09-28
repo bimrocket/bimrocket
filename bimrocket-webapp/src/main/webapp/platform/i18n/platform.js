@@ -77,6 +77,9 @@ export const translations =
   "units.cm": "centimeters",
   "units.mm": "millimeters",
   "units.in": "inches",
+  "units.ft": "feet",
+  "units.yd": "yards",
+  "units.mi": "miles",
 
   "tool.outliner.label": "Outliner",
   "tool.outliner.help": "Outliner",

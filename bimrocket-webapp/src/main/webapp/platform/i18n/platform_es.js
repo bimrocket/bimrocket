@@ -77,6 +77,9 @@ export const translations =
   "units.cm": "centímetros",
   "units.mm": "milímetros",
   "units.in": "pulgadas",
+  "units.ft": "pies",
+  "units.yd": "yardas",
+  "units.mi": "millas",
 
   "tool.outliner.label": "Esquema",
   "tool.outliner.help": "Esquema",

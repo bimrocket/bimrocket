@@ -647,7 +647,8 @@ class Controls
       },
       ".cm-tooltip-autocomplete > ul > li[aria-selected]":
       {
-        backgroundColor: "var(--code-editor-autocomplete-selected)"
+        backgroundColor: "var(--code-editor-autocomplete-selected)",
+        color: "var(--code-editor-autocomplete-selected-text-color)"
       },
       ".cm-searchMatch":
       {
@@ -726,7 +727,7 @@ class Controls
       },
       "& .ͼf":
       {
-        "color": "#8080e0"
+        "color": "var(--template-color)"
       },
       "& .ͼg": // variable
       {
@@ -750,46 +751,6 @@ class Controls
         "color": "var(--comment-color)"
       }
     });
-
-//    let theme = CM.EditorView.theme({
-//      "&.cm-focused .cm-cursor": {
-//        borderLeftColor: "#000",
-//        borderLeftWidth: "2px"
-//      },
-//      "&.cm-focused .cm-matchingBracket": {
-//        "backgroundColor": "#e0e040",
-//        "color": "black"
-//      },
-//      "& .ͼb": {
-//        "color": "#444",
-//        "fontWeight": "bold"
-//      },
-//      "& .ͼe": {
-//        "color": "#2020ff"
-//      },
-//      "& .ͼf": {
-//        "color": "#8080e0"
-//      },
-//      "& .ͼg": {
-//        "color": "#444"
-//      },
-//      "& .ͼi": {
-//        "color": "#44b",
-//        "font-weight": "bold"
-//      },
-//      "& .ͼm": {
-//        "color": "#808080"
-//      },
-//      "& .cm-tooltip": {
-//        "z-index": 100000
-//      },
-//      "& .cm-wrap": {
-//        "height": "100%"
-//      },
-//      "& .cm-scroller": {
-//        "overflow": "auto"
-//      }
-//    });
 
     const extensions = [
       CM.lineNumbers(),

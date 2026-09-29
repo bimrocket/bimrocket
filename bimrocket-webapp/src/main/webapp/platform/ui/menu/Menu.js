@@ -68,16 +68,6 @@ const MenuItemList = (BaseClass = class {}) => class extends BaseClass
   }
 
   /**
-   * Indicates whether this MenuItemList has children.
-   *
-   * @returns {boolean} false if this list is empty or true otherwise.
-   */
-  hasChildren()
-  {
-    return this.menuItems.length > 0;
-  }
-
-  /**
    * Returns the Menu with the specified label.
    *
    * @param {string} label - the label of the Menu
@@ -90,15 +80,45 @@ const MenuItemList = (BaseClass = class {}) => class extends BaseClass
   }
 
   /**
-   * Returns the MenuItem with the specified label.
+   * Returns the BaseMenuItem with the specified label.
    *
    * @param {string} label - the label of the MenuItem
-   * @returns {MenuItem} the MenuItem with the specified label
+   * @returns {BaseMenuItem} the BaseMenuItem with the specified label
    */
   getMenuItem(label)
   {
-    return this.menuItems.find(
-      menuItem => menuItem instanceof MenuItem && menuItem.label === label);
+    return this.menuItems.find(menuItem => menuItem.label === label);
+  }
+
+  /**
+   * Returns the BaseMenuItem at the specified index
+   *
+   * @param {number} index - the menu item index
+   * @returns {BaseMenuItem} the BaseMenuItem at index position
+   */
+  getMenuItemAt(index)
+  {
+    return this.menuItems[index];
+  }
+
+  /**
+   * Returns the number of menu items that holds this Menu.
+   *
+   * @return {number} the number of child menu items
+   */
+  getMenuItemCount()
+  {
+    return this.menuItems.length;
+  }
+
+  /**
+   * Indicates whether this MenuItemList has children.
+   *
+   * @returns {boolean} false if this list is empty or true otherwise.
+   */
+  hasChildren()
+  {
+    return this.menuItems.length > 0;
   }
 
   /**
@@ -111,6 +131,31 @@ const MenuItemList = (BaseClass = class {}) => class extends BaseClass
   {
     return this.menuItems.find(
       menuItem => menuItem instanceof Separator && menuItem.name === name);
+  }
+
+  /**
+   * Returns the first MenuItem that holds the given action searching from
+   * this Menu recursivelly.
+   *
+   * @param {Action} action - the Action or Tool to find
+   * @returns {MenuItem} the MenuItem that holds the action or null if the
+   * action is not contained in this Menu.
+   */
+  getActionMenuItem(action)
+  {
+    for (let menuItem of this.menuItems)
+    {
+      if (menuItem instanceof MenuItem && menuItem.action === action)
+      {
+        return menuItem;
+      }
+      else if (menuItem instanceof Menu)
+      {
+        let foundMenuItem = menuItem.getActionMenuItem(action);
+        if (foundMenuItem) return foundMenuItem;
+      }
+    }
+    return null;
   }
 
   /**

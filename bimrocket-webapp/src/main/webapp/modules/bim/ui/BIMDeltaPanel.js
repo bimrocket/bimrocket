@@ -11,7 +11,7 @@ import { TabbedPane } from "platform/ui/tabbedpane/TabbedPane.js";
 import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { IFC, Constant } from "platform/io/ifc/IFC.js";
 import { I18N } from "platform/i18n/I18N.js";
-import { ModelSnapshot } from "platform/utils/ModelSnapshot.js";
+import { ModelSnapshot } from "../utils/ModelSnapshot.js";
 
 class BIMDeltaPanel extends Panel
 {
@@ -117,7 +117,7 @@ class BIMDeltaPanel extends Panel
                     changes : [] };
                   diff.push(currentDiffObject);
                 }
-                let label = psetName + "." + key + ": " + value2 + " â " + value1;
+                let label = psetName + "." + key + ": " + value2 + " -> " + value1;
                 objectNode.addNode(label, onClick, "changed");
                 changes++;
                 currentDiffObject.changes.push(label);

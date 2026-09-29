@@ -11,8 +11,8 @@ import { TabbedPane } from "platform/ui/tabbedpane/TabbedPane.js";
 import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { FileExplorer } from "platform/ui/file/FileExplorer.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
-import { ModelSnapshot } from "platform/utils/ModelSnapshot.js";
-import { CompareSnapshotAction } from "../ui/file/CompareSnapshotAction.js";
+import { ModelSnapshot } from "../utils/ModelSnapshot.js";
+import { CompareModelAction } from "../ui/file/CompareModelAction.js";
 import { SaveSnapshotAction } from "../ui/file/SaveSnapshotAction.js";
 import { I18N } from "platform/i18n/I18N.js";
 
@@ -51,7 +51,16 @@ class BIMDeltaTool extends Tool
     const contextMenu = fileExplorer.contextMenu;
     const action = fileExplorer.createContextAction;
 
-    contextMenu.addMenuItem(action(CompareSnapshotAction), "default:top");
+    let openModelmenuItem = contextMenu.getMenuItem("base|action.open_model");
+    if (openModelmenuItem)
+    {
+      let index = openModelmenuItem.getIndex();
+      contextMenu.addMenuItem(action(CompareModelAction), index + 1);
+    }
+    else
+    {
+      contextMenu.addMenuItem(action(CompareModelAction), "default:top");
+    }
     contextMenu.addMenuItem(action(SaveSnapshotAction), "save");
 
     this.panel = fileExplorer;

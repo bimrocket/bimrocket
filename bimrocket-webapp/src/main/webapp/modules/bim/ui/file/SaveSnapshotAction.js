@@ -8,7 +8,7 @@ import { FileAction } from "platform/ui/file/FileAction.js";
 import { IOManager } from "platform/io/IOManager.js";
 import { Metadata, Result } from "platform/io/FileService.js";
 import { InputDialog } from "platform/ui/dialog/InputDialog.js";
-import { ModelSnapshot } from "platform/utils/ModelSnapshot.js";
+import { ModelSnapshot } from "../../utils/ModelSnapshot.js";
 
 class SaveSnapshotAction extends FileAction
 {

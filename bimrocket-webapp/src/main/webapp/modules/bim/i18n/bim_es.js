@@ -44,7 +44,7 @@ export const translations =
 
   "tool.server_admin.label": "Admin. del servidor",
 
-  "action.compare_snapshot": "Comparar captura",
+  "action.compare_model": "Comparar modelo",
   "action.save_snapshot": "Guardar captura",
 
   "tab.file": "Fichero",
@@ -193,7 +193,7 @@ export const translations =
   "message.bsdd_class_found": (count, total) => `Clases encontradas: ${count} de ${total}`,
 
   "message.bim_delta_changes": changes => `Cambios: ${changes}`,
-  "message.bim_delta_cannot_compare": "Esta captura IFC no es comparable con el modelo actual o se ha generado con una versión anterior de la aplicación.",
+  "message.bim_delta_cannot_compare": "Estos modelos no son comparables o la captura se ha generado con una versión anterior de la aplicación.",
   "message.bim_delta_not_ifc_object": "Selecciona el objeto IFC del cual quieres generar la captura.",
 
   "message.user_saved": "Usuario guardado.",

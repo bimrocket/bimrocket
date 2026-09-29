@@ -44,7 +44,7 @@ export const translations =
 
   "tool.server_admin.label": "Admin. del servidor",
 
-  "action.compare_snapshot": "Compara captura",
+  "action.compare_model": "Compara model",
   "action.save_snapshot": "Desa captura",
 
   "tab.file": "Fitxer",
@@ -193,7 +193,7 @@ export const translations =
   "message.bsdd_class_found": (count, total) => `Classes trobades: ${count} de ${total}`,
 
   "message.bim_delta_changes": changes => `Canvis: ${changes}`,
-  "message.bim_delta_cannot_compare": "Aquesta captura IFC no és comparable amb el model actual o s'ha generat amb una versió anterior de l'aplicació.",
+  "message.bim_delta_cannot_compare": "Aquests models no són comparables o la captura s'ha generat amb una versió anterior de l'aplicació.",
   "message.bim_delta_not_ifc_object": "Selecciona l'objecte IFC del qual vols generar la captura.",
 
   "message.user_saved": "Usuari desat.",

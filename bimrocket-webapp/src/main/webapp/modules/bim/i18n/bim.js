@@ -44,7 +44,7 @@ export const translations =
 
   "tool.server_admin.label": "Server administration",
 
-  "action.compare_snapshot": "Compare snapshot",
+  "action.compare_model": "Compare model",
   "action.save_snapshot": "Save snapshot",
 
   "tab.file": "File",
@@ -193,7 +193,7 @@ export const translations =
   "message.bsdd_class_found": (count, total) => `Classes found: ${count} of ${total}`,
 
   "message.bim_delta_changes": changes => `Changes: ${changes}`,
-  "message.bim_delta_cannot_compare": "This IFC snapshot is not comparable with the current model or it was generated with a previous version of the application.",
+  "message.bim_delta_cannot_compare": "These models are not comparable or the snapshot was generated with a previous version of the application.",
   "message.bim_delta_not_ifc_object": "Select the IFC object you want to generate the snapshot of.",
 
   "message.user_saved": "User saved.",

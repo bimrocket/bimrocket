@@ -133,7 +133,7 @@ class SelectTool extends Tool
       selPoint.setFromMatrixPosition(application.baseObject.matrix);
       selPoint.negate().add(point);
 
-      this.posElem.textContent = "(x, y ,z) = (" +
+      this.posElem.textContent = "(x, y, z) = (" +
         selPoint.x.toFixed(decimals) + ", " +
         selPoint.y.toFixed(decimals) + ", " +
         selPoint.z.toFixed(decimals) + ")";

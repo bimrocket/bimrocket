@@ -87,7 +87,7 @@ class DrawTool extends Tool
 
   activate()
   {
-    this.panel.visible = true;
+    this.panel.activated = true;
     const application = this.application;
     const container = application.container;
     container.addEventListener('pointerup', this._onPointerUp, false);
@@ -100,7 +100,7 @@ class DrawTool extends Tool
 
   deactivate()
   {
-    this.panel.visible = false;
+    this.panel.activated = false;
     const application = this.application;
     const container = application.container;
     container.removeEventListener('pointerup', this._onPointerUp, false);

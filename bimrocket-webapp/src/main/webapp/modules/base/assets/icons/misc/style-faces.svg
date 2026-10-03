@@ -8,19 +8,19 @@
    stroke-width="2"
    stroke-linecap="round"
    stroke-linejoin="round"
-   class="icon icon-tabler icons-tabler-outline icon-tabler-layers-intersect"
+   class="icon icon-tabler icons-tabler-outline icon-tabler-box"
    version="1.1"
-   id="svg3"
-   sodipodi:docname="intersect.svg"
+   id="svg5"
+   sodipodi:docname="style-faces.svg"
    inkscape:version="1.4.4 (unknown)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs3" />
+     id="defs5" />
   <sodipodi:namedview
-     id="namedview3"
+     id="namedview5"
      pagecolor="#ffffff"
      bordercolor="#000000"
      borderopacity="0.25"
@@ -29,17 +29,17 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="true"
-     inkscape:zoom="33.125"
-     inkscape:cx="12"
-     inkscape:cy="11.984906"
+     inkscape:zoom="33.333333"
+     inkscape:cx="11.985"
+     inkscape:cy="12"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg3">
+     inkscape:current-layer="svg5">
     <inkscape:grid
-       id="grid3"
+       id="grid5"
        units="px"
        originx="0"
        originy="0"
@@ -59,13 +59,8 @@
      fill="none"
      id="path1" />
   <path
-     d="M8 6a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2l0 -8"
-     id="path2" />
-  <path
-     d="M4 10a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2l0 -8"
-     id="path3" />
-  <path
-     style="fill:#000000;fill-opacity:0.3;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8;stroke:none"
-     d="m 8,8 h 6 l 2,2 v 6 H 10 L 8,14 Z"
-     id="path4" />
+     d="m 12,3 9,6 v 6 L 14,21 3,17 5,7 12,3"
+     id="path2"
+     sodipodi:nodetypes="ccccccc"
+     style="fill:#000000;fill-opacity:0.30000001;stroke:none" />
 </svg>

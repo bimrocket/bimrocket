@@ -1,32 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-tags: [video, photo, aperture, camera, content, entertainment, multimedia, broadcast, audio]
-category: Media
-version: "1.0"
-unicode: "ea54"
--->
-
 <svg
    width="24"
    height="24"
    viewBox="0 0 24 24"
    fill="none"
-   stroke="currentColor"
+   stroke="#000000"
    stroke-width="2"
    stroke-linecap="round"
    stroke-linejoin="round"
+   class="icon icon-tabler icons-tabler-outline icon-tabler-border-left-plus"
    version="1.1"
-   id="svg2"
-   sodipodi:docname="orthographic.svg"
+   id="svg15"
+   sodipodi:docname="extrude.svg"
    inkscape:version="1.4.4 (unknown)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs2" />
+     id="defs15" />
   <sodipodi:namedview
-     id="namedview2"
+     id="namedview15"
      pagecolor="#ffffff"
      bordercolor="#000000"
      borderopacity="0.25"
@@ -36,16 +30,16 @@ unicode: "ea54"
      inkscape:deskcolor="#d1d1d1"
      showgrid="true"
      inkscape:zoom="16.5625"
-     inkscape:cx="14.4"
-     inkscape:cy="13.464151"
+     inkscape:cx="12.166038"
+     inkscape:cy="12.377359"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2">
+     inkscape:current-layer="svg15">
     <inkscape:grid
-       id="grid2"
+       id="grid15"
        units="px"
        originx="0"
        originy="0"
@@ -60,29 +54,57 @@ unicode: "ea54"
        visible="true" />
   </sodipodi:namedview>
   <path
-     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8;stroke-dasharray:none"
-     d="M 14,9 V 21 M 3,19 14,21 M 14,9 3,7 v 12"
-     id="path6"
-     sodipodi:nodetypes="ccccccc" />
-  <path
-     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8;stroke-dasharray:none"
-     d="M 21,5 V 17 M 10,15 21,17 M 21,5 10,3 v 12"
-     id="path6-2"
-     sodipodi:nodetypes="ccccccc" />
-  <path
-     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
-     d="m 14,21 7,-4"
+     stroke="none"
+     d="M0 0h24v24H0z"
+     fill="none"
      id="path1" />
   <path
-     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
-     d="m 3,19 7,-4"
-     id="path2" />
+     d="M 20,21 H 4"
+     id="path2"
+     sodipodi:nodetypes="cc" />
   <path
      style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
-     d="M 14,9 21,5"
-     id="path3" />
+     d="M 4,21 V 14"
+     id="path15"
+     sodipodi:nodetypes="cc" />
   <path
      style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
-     d="M 3,7 10,3"
-     id="path4" />
+     d="M 20,21 V 14"
+     id="path16"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="M 4,14 H 20"
+     id="path17"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="M 12,10 V 3 l -2,2"
+     id="path18"
+     sodipodi:nodetypes="ccc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="m 12,3 2,2"
+     id="path19"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="M 6,3 H 4 v 2"
+     id="path20"
+     sodipodi:nodetypes="ccc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="m 18,3 h 2 v 2"
+     id="path21"
+     sodipodi:nodetypes="ccc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="m 4,9 v 2"
+     id="path3"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:3.8"
+     d="m 20,9 v 2"
+     id="path4"
+     sodipodi:nodetypes="cc" />
 </svg>

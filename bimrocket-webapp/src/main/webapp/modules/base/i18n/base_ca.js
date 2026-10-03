@@ -135,7 +135,7 @@ export const translations =
 
   "tool.edges_style.label": "Arestes",
 
-  "tool.faces_edges_style.label": "Cares i aristes",
+  "tool.faces_edges_style.label": "Cares i arestes",
 
   "tool.hidden_style.label": "Ocult",
 

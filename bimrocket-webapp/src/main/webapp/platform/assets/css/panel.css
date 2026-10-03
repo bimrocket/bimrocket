@@ -12,7 +12,8 @@
   --panel-header-background: transparent;
   --panel-shadow: var(--box-shadow-2);
   --panel-margin: 8px;
-  --panel-button-background: var(--surface-3);
+  --panel-button-background: var(--surface-button);
+  --panel-button-hover-background: var(--surface-button-hover);
 }
 
 div.panel
@@ -134,17 +135,17 @@ div.panel > .header > button > svg
 
 div.panel > .header > button:hover
 {
-  background-color: var(--accent-color);
+  background-color: var(--panel-button-hover-background);
 }
 
 div.panel > .header > button:hover > svg
 {
-  stroke: var(--accent-text-color);
+  stroke: var(--hover-text-color);
 }
 
 div.panel > .header > button:focus
 {
-  outline: 1px dotted black;
+  outline: 1px solid var(--button-outline-color);
 }
 
 div.panel > .body

@@ -74,6 +74,11 @@ class OpenModelAction extends FileAction
 
       application.notifyObjectsChanged([baseObject, camera], this);
       application.progressBar.visible = false;
+
+      if (!application.tool)
+      {
+        application.useTool("orbit");
+      }
     };
 
     // read FILE

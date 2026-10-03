@@ -678,7 +678,6 @@ class SetupPanel extends Panel
         }
       }
     }
-    console.info(checkElem);
   }
 
   applyModules()

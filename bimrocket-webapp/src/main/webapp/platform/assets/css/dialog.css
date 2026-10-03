@@ -12,7 +12,8 @@
   --dialog-header-background: transparent;
   --dialog-shadow: var(--box-shadow-2);
   --dialog-margin: 12px;
-  --dialog-button-background: var(--surface-3);
+  --dialog-button-background: var(--surface-button);
+  --dialog-button-hover-background: var(--surface-button-hover);
 }
 
 .dialog
@@ -152,7 +153,7 @@ div.dialog > .header > button
   padding:0;
   cursor: pointer;
   border-radius: 50%;
-  background-color: var(--panel-button-background);
+  background-color: var(--dialog-button-background);
   border:none;
   box-shadow: none;
   align-items: center;
@@ -169,12 +170,17 @@ div.dialog > .header > button > svg
 
 div.dialog > .header > button:hover
 {
-  background-color: var(--accent-color);
+  background-color: var(--dialog-button-hover-background);
 }
 
 div.dialog > .header > button:hover > svg
 {
-  stroke: var(--accent-text-color);
+  stroke: var(--hover-text-color);
+}
+
+div.dialog > .header > button:focus
+{
+  outline: 1px solid var(--button-outline-color);
 }
 
 .dialog .body > div

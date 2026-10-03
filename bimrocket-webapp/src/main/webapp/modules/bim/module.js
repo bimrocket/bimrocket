@@ -115,6 +115,7 @@ export function activate(application)
 
   const toolBar = application.toolBar;
   toolBar.addSeparator("bim");
+  toolBar.addToolButton(bimResetViewTool);
   toolBar.addToolButton(bimLayoutTool);
   toolBar.addToolButton(bimInventoryTool);
   toolBar.addToolButton(bcfTool);

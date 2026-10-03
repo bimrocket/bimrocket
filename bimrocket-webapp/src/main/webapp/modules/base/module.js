@@ -343,23 +343,23 @@ export function activate(application)
   const flyTool = new FlyTool(application);
   const topViewTool = new ViewTool(application,
     { name: "top", label: "base|tool.view.top", x: 0, y: 0, z: 0,
-      keyShortcut: "Shift+T"
+      keyShortcut: "Shift+T", iconName: "base|view-top"
     });
   const frontViewTool = new ViewTool(application,
     { name: "front", label: "base|tool.view.front", x: 90, y: 0, z: 0,
-      keyShortcut: "Shift+F"
+      keyShortcut: "Shift+F", iconName: "base|view-front"
     });
   const backViewTool = new ViewTool(application,
     { name: "back", label: "base|tool.view.back", x: -90, y: 0, z: 180,
-      keyShortcut: "Shift+B"
+      keyShortcut: "Shift+B", iconName: "base|view-back"
     });
   const leftViewTool = new ViewTool(application,
     { name: "left", label: "base|tool.view.left", x: 90, y: 90, z: 0,
-      keyShortcut: "Shift+L"
+      keyShortcut: "Shift+L", iconName: "base|view-left"
     });
   const rightViewTool = new ViewTool(application,
     { name: "right", label: "base|tool.view.right", x: -90, y: -90, z: 180,
-      keyShortcut: "Shift+R"
+      keyShortcut: "Shift+R", iconName: "base|view-right"
     });
   const autoOrbitTool = new AutoOrbitTool(application);
   const sectionTool = new SectionTool(application);
@@ -403,16 +403,16 @@ export function activate(application)
       visible: false });
   const facesStyleTool = new StyleTool(application,
     { name: "faces_style", label: "base|tool.faces_style.label",
-      edgesVisible: false, facesVisible: true });
+      edgesVisible: false, facesVisible: true, iconName: "base|style-faces" });
   const edgesStyleTool = new StyleTool(application,
     { name: "edges_style", label: "base|tool.edges_style.label",
-      edgesVisible: true, facesVisible: false });
+      edgesVisible: true, facesVisible: false, iconName: "base|style-edges" });
   const facesEdgesStyleTool = new StyleTool(application,
     { name: "faces_edges_style", label: "base|tool.faces_edges_style.label",
-     edgesVisible: true, facesVisible: true });
+     edgesVisible: true, facesVisible: true, iconName: "base|style-faces-edges" });
   const hiddenStyleTool = new StyleTool(application,
     { name: "hidden_style", label: "base|tool.hidden_style.label",
-      edgesVisible: false, facesVisible: false });
+      edgesVisible: false, facesVisible: false, iconName: "base|style-hidden" });
   const chatGPTTool = new ChatGPTTool(application);
 
   const outlinerTool = new OutlinerTool(application);

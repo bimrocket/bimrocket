@@ -70,7 +70,7 @@ class MeasureLengthTool extends Tool
   {
     const application = this.application;
     const container = application.container;
-    this.panel.visible = true;
+    this.panel.activated = true;
     container.addEventListener('pointerup', this._onPointerUp, false);
     application.pointSelector.activate();
     if (this.line
@@ -85,7 +85,7 @@ class MeasureLengthTool extends Tool
   {
     const application = this.application;
     const container = application.container;
-    this.panel.visible = false;
+    this.panel.activated = false;
     container.removeEventListener('pointerup', this._onPointerUp, false);
     application.pointSelector.deactivate();
   }

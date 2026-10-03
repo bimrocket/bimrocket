@@ -273,6 +273,7 @@ class IFCLoader extends THREE.Loader
             let repr = IFC.getRepresentation(object);
             if (repr)
             {
+              repr.visible = false;
               ObjectUtils.updateStyle(repr, false, false);
             }
           }

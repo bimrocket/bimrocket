@@ -18,7 +18,7 @@
 
   --surface-0: #ffffff;
   --surface-1: #f5f5f5;
-  --surface-2: #e8e8e8;
+  --surface-2: #e6e6e6;
   --surface-3: #d6d6d6;
   --surface-4: #b8b8b8;
   --surface-5: #969696;
@@ -27,7 +27,7 @@
   --surface-8: #2e2e2e;
   --surface-9: #000000;
 
-  --accent-color: #f88;
+  --accent-color: #f79;
   --accent-text-color: var(--color-0);
   --text-color: var(--color-2);
   --selection-text-color: var(--color-0);
@@ -39,6 +39,7 @@
   --label-text-color: var(--color-3);
   --field-text-color: var(--text-color);
   --button-text-color: var(--text-color);
+  --button-outline-color: #aaa;
 
   --surface-ground: var(--surface-0);
   --surface-underground: #ddd;
@@ -49,7 +50,8 @@
   --surface-highlighted: #c0ff00;
   --surface-change: #ffe0e0;
   --surface-hover: #f0f0f0;
-  --surface-field-hover: #e0e0e0;
+  --surface-field-hover: #ddd;
+  --surface-button-hover: var(--surface-field-hover);
 
   --info-color: #00f;
   --ok-color: #080;

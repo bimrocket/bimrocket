@@ -204,15 +204,21 @@
   background-color: var(--toolbar-button-activated-background);
 }
 
-.tool-button.selected
+.tool-button.activated > svg
 {
-  background-color: var(--toolbar-button-selected-background);
+  fill: var(--toolbar-button-activated-color);
+  stroke: var(--toolbar-button-activated-color);
 }
 
 .tool-button.activated.minimized
 {
   box-shadow: inset 0 0 0 2px var(--toolbar-button-activated-background);
   background-color: var(--toolbar-button-background);
+}
+
+.tool-button.selected
+{
+  background-color: var(--toolbar-button-selected-background);
 }
 
 .tool-button.activated.minimized:hover
@@ -237,10 +243,10 @@
   stroke: var(--toolbar-button-selected-color);
 }
 
-.tool-button.activated > svg
+.tool-button.selected.minimized > svg
 {
-  fill: var(--toolbar-button-activated-color);
-  stroke: var(--toolbar-button-activated-color);
+  fill: var(--toolbar-button-selected-color);
+  stroke: var(--toolbar-button-color);
 }
 
 .toolbar .separator

@@ -66,7 +66,7 @@ class OpenLocalTool extends Tool
 
     document.body.appendChild(inputFile);
     inputFile.addEventListener("change", this._onChange, false);
-    document.body.addEventListener("focus", this._onFocus, true);
+    window.addEventListener("focus", this._onFocus, true);
     inputFile.click();
   }
 
@@ -77,7 +77,7 @@ class OpenLocalTool extends Tool
       let parentNode = this.inputFile.parentNode;
       parentNode.removeChild(this.inputFile);
     }
-    document.body.removeEventListener("focus", this._onFocus, true);
+    window.removeEventListener("focus", this._onFocus, true);
   }
 
   onChange(event)

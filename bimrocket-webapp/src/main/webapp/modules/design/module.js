@@ -84,7 +84,8 @@ export function activate(application)
 
   const drawTool = new DrawTool(application);
   const clonerTool = new CloneTool(application,
-    { name: "cloner", label: "design|tool.cloner.label", dynamic: true });
+    { name: "cloner", label: "design|tool.cloner.label",
+      dynamic: true, iconName: "design|cloner" });
 
   const addBoxTool = new AddObjectTool(application,
     { name: "add_box", label: "design|tool.add_box.label",
@@ -133,7 +134,8 @@ export function activate(application)
       objectType: "Profile", builderClass: ZProfileBuilder });
   const addHelicoidTool = new AddObjectTool(application,
     { name: "add_helicoid", label: "design|tool.add_helicoid.label",
-      objectType: "Cord", builderClass: HelicoidBuilder });
+      objectType: "Cord", builderClass: HelicoidBuilder,
+      iconName: "design|helicoid" });
   const addObject3DTool = new AddObjectTool(application,
     { name: "add_object3D", label: "design|tool.add_object3D.label",
       objectType: "Object3D" });
@@ -142,31 +144,31 @@ export function activate(application)
       objectType: "Group", iconName: "design|group" });
   const addText2DTool = new AddObjectTool(application,
     { name: "add_text2D", label: "design|tool.add_text2D.label",
-      objectType: "Text2D" });
+      objectType: "Text2D", iconName: "design|text" });
   const addSpriteTool = new AddObjectTool(application,
     { name: "add_sprite", label: "design|tool.add_sprite.label",
-      objectType: "Sprite" });
+      objectType: "Sprite", iconName: "design|sprite" });
   const addPerspectiveCameraTool = new AddObjectTool(application,
     { name: "add_perspective_camera", label: "design|tool.add_perspective_camera.label",
-      objectType: "PerspectiveCamera" });
+      objectType: "PerspectiveCamera", iconName: "design|camera-perspective" });
   const addOrthographicCameraTool = new AddObjectTool(application,
     { name: "add_orthographic_camera", label: "design|tool.add_orthographic_camera.label",
-      objectType: "OrthographicCamera" });
+      objectType: "OrthographicCamera", iconName: "design|camera-orthographic" });
   const addAmbientLightTool = new AddObjectTool(application,
     { name: "add_ambient_light", label: "design|tool.add_ambient_light.label",
-      objectType: "AmbientLight" });
+      objectType: "AmbientLight", iconName: "design|light-ambient" });
   const addHemisphereLightTool = new AddObjectTool(application,
     { name: "add_hemisphere_light", label: "design|tool.add_hemisphere_light.label",
-      objectType: "HemisphereLight" });
+      objectType: "HemisphereLight", iconName: "design|light-hemisphere" });
   const addDirectionalLightTool = new AddObjectTool(application,
     { name: "add_directional_light", label: "design|tool.add_directional_light.label",
-      objectType: "DirectionalLight" });
+      objectType: "DirectionalLight", iconName: "design|light-directional" });
   const addPointLightTool = new AddObjectTool(application,
     { name: "add_point_light", label: "design|tool.add_point_light.label",
-      objectType: "PointLight" });
+      objectType: "PointLight", iconName: "design|light-point" });
   const addSpotLightTool = new AddObjectTool(application,
     { name: "add_spot_light", label: "design|tool.add_spot_light.label",
-      objectType: "SpotLight" });
+      objectType: "SpotLight", iconName: "design|light-spot" });
 
   const paintTool = new PaintTool(application);
 

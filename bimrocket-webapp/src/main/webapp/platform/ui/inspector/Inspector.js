@@ -2127,6 +2127,11 @@ class AddPropertyAction extends InspectorAction
            && this.getPropertyName() === null;
   }
 
+  getIconName()
+  {
+    return "add-property";
+  }
+
   perform()
   {
     const inspector = this.inspector;

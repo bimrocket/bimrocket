@@ -14,7 +14,7 @@ class StyleTool extends Tool
     this.name = "style";
     this.className = "style";
     this.iconName = "base|style";
-    
+
     this.edgesVisible = true;
     this.facesVisible = true;
 
@@ -25,7 +25,11 @@ class StyleTool extends Tool
 
   execute()
   {
-    this.application.updateStyle(null, this.edgesVisible, this.facesVisible);
+    const application = this.application;
+    const objects = application.selection.isEmpty() ?
+      application.baseObject : application.selection.objects;
+
+    this.application.updateStyle(objects, this.edgesVisible, this.facesVisible);
   }
 }
 

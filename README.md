@@ -51,6 +51,7 @@ Parametric design tool based on [CSG](https://en.wikipedia.org/wiki/Constructive
 - Modular design to easily extend functionality.
 - Web application with a responsive user interface. Support for touch devices.
 - Multi-language support (currently available in english, spanish and catalan).
+- Multiple CSS themes.
 - Based on the [THREE.js](https://threejs.org) graphic library.
 - Project built with Maven.
 

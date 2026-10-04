@@ -120,6 +120,7 @@ class FlyTool extends CameraTool
     this.label = "base|tool.fly.label";
     this.className = "fly";
     this.iconName = "base|fly";
+    this.selectionEnabled = true;
 
     this.linearVelocity = 2; // meters/s
     this.angularVelocity = THREE.MathUtils.degToRad(20); // radians/s
@@ -153,6 +154,7 @@ class FlyTool extends CameraTool
     this._onKeyDown = this.onKeyDown.bind(this);
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
+    this._onPointerDown = this.onPointerDown.bind(this);
 
     this.EPS = 0.00001;
     this.createPanel();
@@ -161,7 +163,8 @@ class FlyTool extends CameraTool
 
   createPanel()
   {
-    this.panel = this.application.createToolPanel(this)
+    const application = this.application;
+    this.panel = application.createToolPanel(this)
       .setDefaultHeight(140)
       .setDefaultMobileHeight(140)
       .setMinimumHeight(140);
@@ -238,10 +241,14 @@ class FlyTool extends CameraTool
         let onReleased = event =>
         {
           this[action.control] = 0;
-          button.setPointerCapture(event.pointerId);
+          if (button.hasPointerCapture(event.pointerId))
+          {
+            button.releasePointerCapture(event.pointerId);
+          }
         };
         button.addEventListener("pointerdown", onPressed);
         button.addEventListener("pointerup", onReleased);
+        button.addEventListener("pointercancel", onReleased);
         button.addEventListener("contextmenu", event => event.preventDefault());
       }
       else
@@ -281,10 +288,11 @@ class FlyTool extends CameraTool
     this.resetParameters();
     const application = this.application;
 
-    document.addEventListener('keyup', this._onKeyUp, false);
-    document.addEventListener('keydown', this._onKeyDown, false);
-    application.addEventListener('animation', this._animate);
-    application.addEventListener('scene', this._onScene);
+    document.addEventListener("keyup", this._onKeyUp, false);
+    document.addEventListener("keydown", this._onKeyDown, false);
+    application.addEventListener("animation", this._animate);
+    application.addEventListener("scene", this._onScene);
+    application.container.addEventListener("pointerdown", this._onPointerDown);
   }
 
   deactivate()
@@ -293,10 +301,11 @@ class FlyTool extends CameraTool
     this.stopMovement();
     const application = this.application;
 
-    document.removeEventListener('keyup', this._onKeyUp, false);
-    document.removeEventListener('keydown', this._onKeyDown, false);
-    application.removeEventListener('animation', this._animate);
-    application.removeEventListener('scene', this._onScene);
+    document.removeEventListener("keyup", this._onKeyUp, false);
+    document.removeEventListener("keydown", this._onKeyDown, false);
+    application.removeEventListener("animation", this._animate);
+    application.removeEventListener("scene", this._onScene);
+    application.container.removeEventListener("pointerdown", this._onPointerDown);
   }
 
   stopMovement()
@@ -784,6 +793,24 @@ class FlyTool extends CameraTool
     }
     return collidable;
   }
+
+  onPointerDown(event)
+  {
+    const application = this.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    const position = application.getPointerPosition(event);
+    let intersect = this.intersect(position, application.baseObject);
+    if (intersect)
+    {
+      let object = this.findActualSelectedObject(intersect.object);
+      application.selection.set(object);
+    }
+    else
+    {
+      application.selection.clear();
+    }
+  }
 }
 
 class Stick
@@ -880,4 +907,3 @@ class Stick
 }
 
 export { FlyTool };
-

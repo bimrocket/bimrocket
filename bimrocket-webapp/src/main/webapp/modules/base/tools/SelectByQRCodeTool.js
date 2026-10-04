@@ -70,16 +70,12 @@ class SelectByQRCodeTool extends Tool
 
     const objects = [];
 
-    console.info("1", objects);
-
     baseObject.traverse(object =>
     {
       if (object.uuid === code
           || object.name === code
           || this.dataContains(object.userData, code))
       {
-        console.info("PUSH", object);
-
         objects.push(object);
       }
     });

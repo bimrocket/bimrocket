@@ -1691,15 +1691,31 @@ class Application
     }
   }
 
-  formatMeasure(value)
+  /**
+   * Formats a value expressed in m, m2 or m3 to the specified units
+   *
+   * @param {number} value - the value in meters
+   * @param {number} dimension - the dimension (1: distance, 2: area, 3: volume)
+   * @param {string} units - the units to convert the value to
+   *   (defined in  ObjectUtils.METER_CONVERSION_FACTORS)
+   * @returns {string} the formatted value
+   */
+  formatMeasure(value, dimension = 1, units)
   {
-    let decimals = this.setup.decimals;
+    const setup = this.setup;
+    let decimals = setup.decimals;
+    if (units === undefined) units = setup.units;
+    let factor = ObjectUtils.METER_CONVERSION_FACTORS[units] || 1;
+
+    value = value * Math.pow(factor, dimension);
+
+    if (dimension > 1) units += dimension;
 
     return value.toLocaleString(undefined,
     {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
-    });
+    }) + " " + units;
   }
 
   rebuild()

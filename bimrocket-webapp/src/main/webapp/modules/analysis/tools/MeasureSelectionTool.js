@@ -77,19 +77,18 @@ class MeasureSelectionTool extends Tool
     }
 
     const decimals = application.setup.decimals;
-    const units = " " + application.setup.units;
     const dialog = new Dialog(this.label);
     dialog.setSize(240, 200);
     dialog.setI18N(application.i18n);
     dialog.addTextWithArgs("analysis|message.solid_count", [solidCount], "row");
     dialog.addTextWithArgs("analysis|message.mesh_count", [meshCount], "row");
     dialog.addTextWithArgs("analysis|message.total_area",
-      [application.formatMeasure(area), units], "row");
+      [application.formatMeasure(area, 2)], "row");
     dialog.addTextWithArgs("analysis|message.total_volume",
-      [application.formatMeasure(volume), units], "row");
+      [application.formatMeasure(volume, 3)], "row");
     let av = volume === 0 ? 0 : area/volume;
     dialog.addTextWithArgs("analysis|message.area_volume_ratio",
-      [application.formatMeasure(av)], "row");
+      [application.formatMeasure(av, 1, "")], "row");
     let button = dialog.addButton("accept", "button.accept",
       () => dialog.hide());
     dialog.onShow = () => button.focus();

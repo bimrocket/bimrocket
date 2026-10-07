@@ -80,14 +80,14 @@ export const translations =
   "option.highlight_random_colors": "Colors aleatoris",
   "option.highlight_color_grading": "Gradació de colors",
 
-  "message.measure_length": (length, units) => `Longitud: ${length} ${units}`,
-  "message.measure_area": (area, units) => `Àrea: ${area} ${units}2`,
+  "message.measure_length": length => `Longitud: ${length}`,
+  "message.measure_area": area => `Àrea: ${area}`,
   "message.measure_angle": angle => `Angle: ${angle} graus`,
 
   "message.solid_count": count => `Nombre de sòlids: ${count}`,
   "message.mesh_count": count => `Nombre de malles: ${count}`,
-  "message.total_area": (area, units) => `Àrea: ${area} ${units}2`,
-  "message.total_volume": (volume, units) => `Volum: ${volume} ${units}3`,
+  "message.total_area": area => `Àrea: ${area}`,
+  "message.total_volume": volume => `Volum: ${volume}`,
   "message.area_volume_ratio": ratio => `Àrea/Volum: ${ratio}`,
 
   "message.no_matches": "Cap coincidència trobada.",

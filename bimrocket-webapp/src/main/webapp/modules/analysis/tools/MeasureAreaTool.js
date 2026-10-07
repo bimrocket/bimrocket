@@ -239,7 +239,7 @@ class MeasureAreaTool extends Tool
     let area = this.getArea();
 
     I18N.set(this.measureElem, "textContent", "analysis|message.measure_area",
-      application.formatMeasure(area), application.setup.units);
+      application.formatMeasure(area, 2));
 
     application.i18n.update(this.measureElem);
   }

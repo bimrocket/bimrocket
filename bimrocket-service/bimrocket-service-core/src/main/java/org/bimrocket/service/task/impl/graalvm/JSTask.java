@@ -35,6 +35,7 @@ import org.apache.commons.io.IOUtils;
 import org.bimrocket.service.task.Task;
 import org.bimrocket.api.task.TaskExecution;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import static org.bimrocket.service.task.impl.graalvm.Host.toJava;
@@ -90,8 +91,8 @@ public class JSTask extends Task
   protected Context createContext()
   {
     return Context.newBuilder("js")
-     .allowAllAccess(true)
-     .allowHostClassLookup(className -> true)
+     .allowHostAccess(HostAccess.ALL)
+     .allowHostClassLookup(className -> false)
      .option("engine.WarnInterpreterOnly", "false")
      .build();
   }

@@ -54,6 +54,13 @@ public class JSTask extends Task
 
   static List<String> allowClassLookup;
 
+  static
+  {
+    // Force interpreted mode to avoid native library reloading errors.
+    System.setProperty("truffle.TruffleRuntime",
+      "com.oracle.truffle.api.impl.DefaultTruffleRuntime");
+  }
+
   Source source;
 
   public JSTask(String name)

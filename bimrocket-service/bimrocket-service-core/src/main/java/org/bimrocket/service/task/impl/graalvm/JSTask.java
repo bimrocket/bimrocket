@@ -31,6 +31,8 @@
 package org.bimrocket.service.task.impl.graalvm;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.bimrocket.service.task.Task;
 import org.bimrocket.api.task.TaskExecution;
@@ -38,6 +40,7 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
+import org.eclipse.microprofile.config.Config;
 import static org.bimrocket.service.task.impl.graalvm.Host.toJava;
 
 /**
@@ -46,6 +49,11 @@ import static org.bimrocket.service.task.impl.graalvm.Host.toJava;
  */
 public class JSTask extends Task
 {
+  public static final String ALLOW_CLASS_LOOKUP =
+    "services.task.graalvm.allowClassLookup";
+
+  static List<String> allowClassLookup;
+
   Source source;
 
   public JSTask(String name)
@@ -54,10 +62,17 @@ public class JSTask extends Task
   }
 
   @Override
-  public void init(InputStream is) throws Exception
+  public void init(InputStream is, Config config) throws Exception
   {
     String code = IOUtils.toString(is, "UTF-8");
     source = Source.create("js", code);
+
+    if (allowClassLookup == null)
+    {
+      allowClassLookup =
+        config.getOptionalValues(ALLOW_CLASS_LOOKUP, String.class)
+        .orElse(Collections.emptyList());
+    }
   }
 
   @Override
@@ -92,7 +107,8 @@ public class JSTask extends Task
   {
     return Context.newBuilder("js")
      .allowHostAccess(HostAccess.ALL)
-     .allowHostClassLookup(className -> false)
+     .allowHostClassLookup(className ->
+         allowClassLookup.stream().anyMatch(className::startsWith))
      .option("engine.WarnInterpreterOnly", "false")
      .build();
   }

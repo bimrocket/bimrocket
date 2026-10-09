@@ -317,7 +317,7 @@ public class TaskService
       task = createTask(taskName);
       try (InputStream is = fileService.read(taskPath, null))
       {
-        task.init(is);
+        task.init(is, config);
         tasks.put(taskName, task);
       }
     }

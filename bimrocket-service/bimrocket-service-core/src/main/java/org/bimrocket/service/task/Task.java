@@ -32,6 +32,7 @@ package org.bimrocket.service.task;
 
 import org.bimrocket.api.task.TaskExecution;
 import java.io.InputStream;
+import org.eclipse.microprofile.config.Config;
 
 /**
  *
@@ -53,7 +54,7 @@ public abstract class Task
     return name;
   }
 
-  public void init(InputStream is) throws Exception
+  public void init(InputStream is, Config config) throws Exception
   {
   }
 

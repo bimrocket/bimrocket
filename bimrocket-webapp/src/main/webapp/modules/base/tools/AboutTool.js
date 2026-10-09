@@ -62,16 +62,16 @@ class AboutTool extends Tool
       document.body.removeChild(canvas);
       if (gl)
       {
-        report.push(["GL version", gl.getParameter(gl.VERSION)]);
-        report.push(["GL vendor", gl.getParameter(gl.VENDOR)]);
-        report.push(["GL renderer", gl.getParameter(gl.RENDERER)]);
+        report.push(["GL version", gl.getParameter(gl.VERSION) || "?"]);
+        report.push(["GL vendor", gl.getParameter(gl.VENDOR) || "?"]);
+        report.push(["GL renderer", gl.getParameter(gl.RENDERER) || "?"]);
         var dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
         if (dbgRenderInfo !== null)
         {
           report.push(["Unmsk. rendered",
-            gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL)]);
+            gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL || "?")]);
           report.push(["Unmsk. vendor",
-            gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL)]);
+            gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL) || "?"]);
         }
       }
       else
@@ -88,19 +88,17 @@ class AboutTool extends Tool
     dialog.bodyElem.classList.add("flex");
     dialog.bodyElem.classList.add("flex-column");
     dialog.bodyElem.innerHTML = `
-         <div class="logo flex">
-         </div>
-         <div class="properties flex-grow-1">
-         </div>`;
+      <div class="logo flex justify-center">
+      </div>
+      <div class="properties flex-grow-1 overflow-auto">
+      </div>`;
 
     const logoElem = dialog.bodyElem.querySelector(".logo");
-    logoElem.style.justifyContent = "center";
-    logoElem.style.paddingBottom = "8px";
     const propsElem = dialog.bodyElem.querySelector(".properties");
     const icon = Controls.addIcon(logoElem, "bimrocket", "logo");
 
+    icon.style.width = "250px";
     icon.style.height = "32px";
-    propsElem.style.overflow = "auto";
 
     let text = `<ul class="list-style-none p-0 ml-2 mr-2 border-1 box-shadow-1">`;
     for (let i = 0; i < report.length; i++)

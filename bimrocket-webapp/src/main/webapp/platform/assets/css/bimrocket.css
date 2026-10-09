@@ -102,6 +102,7 @@ header > button.logo-button svg
 .logo-panel > svg
 {
   width: 400px;
+  height: 100px;
   max-width: 80%;
   color: red;
 }

@@ -199,18 +199,27 @@ class Application
     if (WebGL.isWebGL2Available())
     {
       // WebGL renderer
-      renderer = new THREE.WebGLRenderer(
+      try
       {
-        antialias: true,
-        stencil: true,
-        alpha: true,
-        preserveDrawingBuffer: true
-      });
-      renderer.shadowMap.enabled = setup.shadowsEnabled;
-      renderer.shadowMap.type = THREE.PCFShadowMap;
-      renderer.setClearColor(0x000000, 0);
+        renderer = new THREE.WebGLRenderer(
+        {
+          antialias: true,
+          stencil: true,
+          alpha: true,
+          preserveDrawingBuffer: true
+        });
+        renderer.shadowMap.enabled = setup.shadowsEnabled;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
+        renderer.setClearColor(0x000000, 0);
+      }
+      catch (ex)
+      {
+        console.error(ex);
+        renderer = null;
+      }
     }
-    else
+
+    if (!renderer)
     {
       // svg renderer fallback
       renderer = new SVGRenderer();

@@ -85,9 +85,10 @@ public class TaskService
     Logger.getLogger(TaskService.class.getName());
 
   static final String BASE = "services.task.";
+  static final String PUBLIC_TASK_PREFIX = "public-";
 
   public static final Map<String, Field> executionFieldMap =
-     EntityDefinition.getInstance(TaskExecution.class).getFieldMap();
+    EntityDefinition.getInstance(TaskExecution.class).getFieldMap();
 
   ExecutorService executorService;
 
@@ -302,7 +303,14 @@ public class TaskService
     Metadata metadata;
     try
     {
-      metadata = fileService.get(taskPath, READ); // TODO: change to EXECUTE
+      if (taskName.startsWith(PUBLIC_TASK_PREFIX))
+      {
+        metadata = fileService.get(taskPath, null); // read as admin
+      }
+      else
+      {
+        metadata = fileService.get(taskPath, READ); // TODO: change to EXECUTE
+      }
     }
     catch (NotFoundException ex)
     {

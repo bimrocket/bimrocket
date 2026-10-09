@@ -1,4 +1,4 @@
-/* 
+/*
     Created on : 25-apr-2021, 18:00:00
     Author     : realor
 */
@@ -13,19 +13,23 @@ body
   font-size: 14px;
 }
 
+#logo
+{
+  display: flex;
+  align-items: center;
+}
+
 #logo span
 {
   font-size: 24px;
   font-weight: bold;
-  vertical-align: middle;
   color: #8040FF;
   margin-left: 4px;
 }
 
 #logo img
 {
-  width: 300px;
-  vertical-align: middle;
+  width: 228px;
 }
 
 a
@@ -36,5 +40,5 @@ a
 
 a:hover
 {
-  color: #8090FF;  
+  color: #8090FF;
 }

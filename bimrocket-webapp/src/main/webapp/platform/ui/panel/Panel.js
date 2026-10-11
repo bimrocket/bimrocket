@@ -168,6 +168,7 @@ class Panel
       moverElem.removeEventListener("pointermove", moveHorizontal, false);
       moverElem.removeEventListener("pointerup", endHorizontal, false);
       moverElem.releasePointerCapture(event.pointerId);
+      this.savePosition();
     };
 
     moverElem.addEventListener("pointerdown", event =>
@@ -474,30 +475,19 @@ class Panel
     {
       const setup = panelManager.application.setup;
 
-      if (isMobileScreen)
-      {
-        let value = setup.getItem("panel." + this.id + ".mobileHeight");
-        this._mobileHeight = value === null ?
-          this.defaultMobileHeight : parseInt(value);
+      let value = setup.getItem("panel." + this.id + ".height");
+      this._height = value === null ? this.defaultHeight : parseInt(value);
+      this._height = Math.max(this._height, this.minimumHeight);
+
+      value = setup.getItem("panel." + this.id + ".mobileHeight");
+      this._mobileHeight = value === null ?
+      this.defaultMobileHeight : parseInt(value);
         this._mobileHeight = Math.max(this._mobileHeight, this.minimumHeight);
-      }
-      else
-      {
-        let value = setup.getItem("panel." + this.id + ".height");
-        this._height = value === null ? this.defaultHeight : parseInt(value);
-        this._height = Math.max(this._height, this.minimumHeight);
-      }
     }
     else
     {
-      if (isMobileScreen)
-      {
-        this._mobileHeight = this.defaultMobileHeight;
-      }
-      else
-      {
-        this._height = this.defaultHeight;
-      }
+      this._mobileHeight = this.defaultMobileHeight;
+      this._height = this.defaultHeight;
     }
   }
 
@@ -518,6 +508,28 @@ class Panel
       {
         setup.setItem("panel." + this.id + ".height", Math.round(this._height));
       }
+    }
+  }
+
+  restorePosition()
+  {
+    if (this.id)
+    {
+      const panelManager = this.panelManager;
+      const setup = panelManager.application.setup;
+      const position = setup.getItem("panel." + this.id + ".position");
+      if (position) this.position = position;
+    }
+  }
+
+  savePosition()
+  {
+    if (this.id)
+    {
+      const panelManager = this.panelManager;
+      const setup = panelManager.application.setup;
+
+      setup.setItem("panel." + this.id + ".position", this.position);
     }
   }
 
@@ -552,13 +564,16 @@ class PanelManager
     this.margin = -1;
     this.top = 0;
     this.bottom = 0;
-    this.panels = []; // all panels
-    this.panelMap = new Map(); // panels with id
-    this.panelCount = {};
-    this.resizers = {};
-    this.resizers.left = new HorizontalResizer(this, "left");
-    this.resizers.right = new HorizontalResizer(this, "right");
-    this.listeners =
+    this.isMobileScreen = false;
+
+    this._panels = []; // all panels
+    this._resizers = {};
+    this._resizers.left = new HorizontalResizer(this, "left");
+    this._resizers.right = new HorizontalResizer(this, "right");
+    this._firstLayout = true;
+    this._panelMap = new Map(); // panels with id
+    this._panelCount = {};
+    this._listeners =
     {
       "activate": [],
       "deactivate": [],
@@ -567,13 +582,7 @@ class PanelManager
       "layout": []
     };
 
-    this.isMobileScreen = false;
-
-    window.addEventListener("resize", event =>
-    {
-      this.setAnimationEnabled(false);
-      this.updateLayout();
-    }, false);
+    window.addEventListener("resize", event => this.updateLayout(), false);
 
     this.leftButton = document.createElement("button");
     this.leftButton.className = "panel-expander left hidden";
@@ -582,10 +591,10 @@ class PanelManager
     this.leftButton.addEventListener("click", event =>
     {
       event.preventDefault();
-      this.resizers.left.width = Panel.DEFAULT_WIDTH;
-      this.resizers.right.fixCollision();
-      this.resizers.left.saveWidth();
-      this.resizers.right.saveWidth();
+      this._resizers.left.width = Panel.DEFAULT_WIDTH;
+      this._resizers.right.fixCollision();
+      this._resizers.left.saveWidth();
+      this._resizers.right.saveWidth();
     });
 
     this.rightButton = document.createElement("button");
@@ -595,51 +604,51 @@ class PanelManager
     this.rightButton.addEventListener("click", event =>
     {
       event.preventDefault();
-      this.resizers.right.width = Panel.DEFAULT_WIDTH;
-      this.resizers.left.fixCollision();
-      this.resizers.left.saveWidth();
-      this.resizers.right.saveWidth();
+      this._resizers.right.width = Panel.DEFAULT_WIDTH;
+      this._resizers.left.fixCollision();
+      this._resizers.left.saveWidth();
+      this._resizers.right.saveWidth();
     });
   }
 
   addPanel(panel)
   {
-    let index = this.panels.indexOf(panel);
+    let index = this._panels.indexOf(panel);
     if (index === -1)
     {
       panel.panelManager = this;
-      this.panels.push(panel);
+      this._panels.push(panel);
       this.container.appendChild(panel.element);
       if (panel.id)
       {
-        this.panelMap.set(panel.id, panel);
+        this._panelMap.set(panel.id, panel);
       }
     }
   }
 
   removePanel(panel)
   {
-    let index = this.panels.indexOf(panel);
+    let index = this._panels.indexOf(panel);
     if (index !== -1)
     {
       panel.panelManager = null;
-      this.panels.splice(index, 1);
+      this._panels.splice(index, 1);
       this.container.removeChild(panel.element);
       if (panel.id)
       {
-        this.panelMap.delete(panel.id);
+        this._panelMap.delete(panel.id);
       }
     }
   }
 
   getPanel(id)
   {
-    return this.panelMap.get(id);
+    return this._panelMap.get(id);
   }
 
   addEventListener(type, listener)
   {
-    let listeners = this.listeners[type];
+    let listeners = this._listeners[type];
     if (listeners)
     {
       listeners.push(listener);
@@ -648,7 +657,7 @@ class PanelManager
 
   removeEventListener(type, listener)
   {
-    let listeners = this.listeners[type];
+    let listeners = this._listeners[type];
     if (listeners)
     {
       let index = listeners.indexOf(listener);
@@ -656,35 +665,12 @@ class PanelManager
     }
   }
 
-  isAnimationEnabled()
-  {
-    return this.container.classList.contains("animate");
-  }
-
-  setAnimationEnabled(enabled)
-  {
-    if (enabled)
-    {
-      this.container.classList.add("animate");
-    }
-    else
-    {
-      this.container.classList.remove("animate");
-    }
-  }
-
   getPanels(position = null, activated = null)
   {
     const selection = [];
 
-    for (let panel of this.panels)
+    for (let panel of this._panels)
     {
-      let height = panel.height;
-      if (height < 0)
-      {
-        panel.restoreHeight();
-      }
-
       if (position === null || panel.position === position)
       {
         if (activated === null || panel.activated === activated)
@@ -714,28 +700,38 @@ class PanelManager
     this.isMobileScreen = container.clientWidth < Panel.MOBILE_WIDTH;
     this.margin = this.getMargin();
 
+    if (this._firstLayout)
+    {
+      for (let panel of this._panels)
+      {
+        panel.restoreHeight();
+        panel.restorePosition();
+      }
+      this._firstLayout = false;
+    }
+
     if (this.isMobileScreen)
     {
-      this.resizers.left.enabled = false;
-      this.resizers.right.enabled = false;
+      this._resizers.left.enabled = false;
+      this._resizers.right.enabled = false;
 
       let panels = this.getPanels(null, true);
       this.layoutElements(panels, null, containerHeight);
     }
     else
     {
-      this.resizers.left.enabled = true;
-      this.resizers.right.enabled = true;
+      this._resizers.left.enabled = true;
+      this._resizers.right.enabled = true;
 
       let positions = Panel.POSITIONS;
       for (let position of positions)
       {
         let panels = this.getPanels(position, true);
-        this.panelCount[position] = panels.length;
+        this._panelCount[position] = panels.length;
 
         let maxBottom = this.layoutElements(panels, position, containerHeight);
 
-        let resizer = this.resizers[position];
+        let resizer = this._resizers[position];
         if (resizer)
         {
           resizer.height = maxBottom - this.bottom;
@@ -751,8 +747,8 @@ class PanelManager
     let bottom = this.bottom; // set initial bottom to toolbar height
     let margin = this.margin;
     let container = this.container;
-    let leftWidth = this.resizers.left.width;
-    let rightWidth = this.resizers.right.width;
+    let leftWidth = this._resizers.left.width;
+    let rightWidth = this._resizers.right.width;
 
     if (panels.length === 0) return bottom;
 
@@ -867,8 +863,8 @@ class PanelManager
       }
       else if (position === "center")
       {
-        if (this.panelCount["left"] === 0) leftWidth = 0;
-        if (this.panelCount["right"] === 0) rightWidth = 0;
+        if (this._panelCount["left"] === 0) leftWidth = 0;
+        if (this._panelCount["right"] === 0) rightWidth = 0;
 
         panel.element.style.left = leftWidth + "px";
         panel.element.style.right = rightWidth + "px";
@@ -909,12 +905,12 @@ class PanelManager
 
   getLeft()
   {
-    return this.resizers.left.width;
+    return this._resizers.left.width;
   }
 
   getRight()
   {
-    return this.resizers.right.width;
+    return this._resizers.right.width;
   }
 
   getTop()
@@ -943,7 +939,7 @@ class PanelManager
 
   notifyChange(type, panel)
   {
-    const listeners = this.listeners[type];
+    const listeners = this._listeners[type];
     if (listeners.length > 0)
     {
       const event = { type, panel };

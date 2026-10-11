@@ -47,7 +47,6 @@ class AddObjectTool extends Tool
   execute()
   {
     const objectType = this.objectType || "Group";
-    console.info("objectType " + objectType);
 
     let object;
 
@@ -119,7 +118,12 @@ class AddObjectTool extends Tool
       this.counter++;
       object.name = objectType + "_" + this.counter;
 
-      this.application.addObject(object, null, false, true);
+      const application = this.application;
+      application.addObject(object, null, false, true);
+      if (!application.tool)
+      {
+        application.useTool("orbit");
+      }
     }
   }
 

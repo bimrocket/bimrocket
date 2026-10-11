@@ -292,6 +292,7 @@ class Application
     this.setUserLanguage(setup.userLanguage);
     this.setShadowMapEnabled(setup.shadowsEnabled);
     setup.applyBackground();
+    setup.applyFontSize();
 
     this.toolBar.position = setup.toolBarPosition;
 

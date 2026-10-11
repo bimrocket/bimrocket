@@ -79,7 +79,20 @@ class SetupPanel extends Panel
     this.decimalsElem.min = 0;
     this.decimalsElem.max = 15;
     this.decimalsElem.addEventListener("change", () =>
-      setup.decimals = parseInt(this.decimalsElem.value));
+    {
+      let decimals = parseInt(this.decimalsElem.value);
+      if (decimals < 0)
+      {
+        decimals = 0;
+        this.decimalsElem.value = decimals;
+      }
+      else if (decimals > 15)
+      {
+        decimals = 15;
+        this.decimalsElem.value = decimals;
+      }
+      setup.decimals = decimals;
+    });
 
     // Background color
 
@@ -150,7 +163,31 @@ class SetupPanel extends Panel
       setup.theme = this.themeSelect.value;
     });
 
-    // toolBar position
+    // Font size
+
+    this.fontSizeElem = Controls.addNumberField(uiOptionsPanel, "font_size",
+    "base|label.font_size", setup.fontSize);
+    this.fontSizeElem.parentElement.className = "field-row";
+    this.fontSizeElem.min = 10;
+    this.fontSizeElem.max = 15;
+    this.fontSizeElem.addEventListener("change", () =>
+    {
+      let fontSize = parseInt(this.fontSizeElem.value);
+      if (fontSize < 10)
+      {
+        fontSize = 10;
+        this.fontSizeElem.value = fontSize;
+      }
+      else if (fontSize > 15)
+      {
+        fontSize = 15;
+        this.fontSizeElem.value = fontSize;
+      }
+      setup.fontSize = fontSize;
+    });
+
+    // ToolBar position
+
     this.toolBarPosSelect = Controls.addSelectField(uiOptionsPanel,
       "toolbar_pos", "base|label.toolbar_position",
       [["top", "base|option.toolbar_top"],

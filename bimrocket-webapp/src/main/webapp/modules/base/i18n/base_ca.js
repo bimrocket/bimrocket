@@ -177,6 +177,7 @@ export const translations =
   "label.ambient_occlusion": "Oclusió ambiental",
   "label.ambient_occlusion_intensity": "Intensitat OA:",
   "label.theme": "Tema:",
+  "label.font_size": "Mida de la lletra:",
   "label.toolbar_position": "Barra d'eines:",
 
   "label.print_title": "Títol:",

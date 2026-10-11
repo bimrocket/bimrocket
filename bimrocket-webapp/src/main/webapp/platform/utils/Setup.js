@@ -26,6 +26,7 @@ class Setup
   static AO_INTENSITY = "aoIntensity";
   static THEME = "theme";
   static TOOLBAR_POSITION = "toolBarPosition";
+  static FONT_SIZE = "fontSize";
 
   constructor(application)
   {
@@ -70,6 +71,16 @@ class Setup
     this._ambientOcclusionEnabled = this.getItem(Setup.AO_ENABLED) === "true";
 
     this._ambientOcclusionIntensity = parseFloat(this.getItem(Setup.AO_INTENSITY) || "0.3");
+
+    let fontSizeText = this.getItem(Setup.FONT_SIZE);
+    if (!fontSizeText)
+    {
+      let fontSizeText = getComputedStyle(document.documentElement)
+        .getPropertyValue("--font-size").trim();
+      let index = fontSizeText.indexOf("px");
+      if (index !== -1) fontSizeText = fontSizeText.substring(0, index);
+    }
+    this._fontSize = parseInt(fontSizeText) || 14;
   }
 
   get userLanguage()
@@ -279,6 +290,18 @@ class Setup
     return this.getItem(Setup.TOOLBAR_POSITION) || "bottom";
   }
 
+  set fontSize(fontSize)
+  {
+    this._fontSize = fontSize;
+    this.setItem(Setup.FONT_SIZE, String(fontSize));
+    this.applyFontSize();
+  }
+
+  get fontSize()
+  {
+    return this._fontSize;
+  }
+
   applyBackground()
   {
     document.documentElement.style.setProperty(
@@ -303,6 +326,12 @@ class Setup
   {
     this.setItem(Setup.BACKGROUND_COLOR_1, this._backgroundColor1);
     this.setItem(Setup.BACKGROUND_COLOR_2, this._backgroundColor2);
+  }
+
+  applyFontSize()
+  {
+    document.documentElement.style.setProperty(
+      "--font-size", this._fontSize + "px");
   }
 
   getItem(name)

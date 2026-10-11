@@ -177,6 +177,7 @@ export const translations =
   "label.ambient_occlusion": "Ambient occlusion",
   "label.ambient_occlusion_intensity": "AO intensity:",
   "label.theme": "Theme:",
+  "label.font_size": "Font size:",
   "label.toolbar_position": "ToolBar position:",
 
   "label.print_title": "Title:",

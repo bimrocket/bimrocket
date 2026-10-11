@@ -37,8 +37,6 @@ class PrintTool extends Tool
       .setDefaultMobileHeight(140)
       .setMinimumHeight(100);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.titleElem = Controls.addTextField(this.panel.bodyElem,
       "print_title", "base|label.print_title", "", "row");
 

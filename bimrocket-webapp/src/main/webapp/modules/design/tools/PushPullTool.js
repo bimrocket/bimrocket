@@ -33,8 +33,6 @@ class PushPullTool extends Tool
       .setDefaultMobileHeight(160)
       .setMinimumHeight(100);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     const helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(helpElem);
 

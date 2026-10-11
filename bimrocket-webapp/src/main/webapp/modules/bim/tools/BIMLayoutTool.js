@@ -51,8 +51,6 @@ class BIMLayoutTool extends Tool
       .setDefaultMobileHeight(260)
       .setMinimumHeight(200);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.layoutPanelElem = document.createElement("div");
     this.layoutPanelElem.className = "bim-layout-panel";
     this.panel.bodyElem.appendChild(this.layoutPanelElem);

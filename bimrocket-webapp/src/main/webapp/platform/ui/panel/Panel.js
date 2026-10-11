@@ -11,7 +11,7 @@ class Panel
 {
   static MOBILE_WIDTH = 768;
   static POSITIONS = ["left", "right", "center"];
-  static DEFAULT_WIDTH = 300;
+  static DEFAULT_WIDTH = 350;
   static DEFAULT_HEIGHT = 200;
   static DEFAULT_MOBILE_HEIGHT = 100;
   static MIN_WIDTH = 100;
@@ -339,7 +339,10 @@ class Panel
     if (position !== this._position)
     {
       this._position = position;
-      this.panelManager?.updateLayout();
+      if (this.visible)
+      {
+        this.panelManager?.updateLayout();
+      }
     }
   }
 
@@ -555,7 +558,14 @@ class PanelManager
     this.resizers = {};
     this.resizers.left = new HorizontalResizer(this, "left");
     this.resizers.right = new HorizontalResizer(this, "right");
-    this.listeners = [];
+    this.listeners =
+    {
+      "activate": [],
+      "deactivate": [],
+      "minimize": [],
+      "restore": [],
+      "layout": []
+    };
 
     this.isMobileScreen = false;
 
@@ -627,18 +637,18 @@ class PanelManager
     return this.panelMap.get(id);
   }
 
-  addEventListener(listener)
+  addEventListener(type, listener)
   {
-    let listeners = this.listeners;
+    let listeners = this.listeners[type];
     if (listeners)
     {
       listeners.push(listener);
     }
   }
 
-  removeEventListener(listener)
+  removeEventListener(type, listener)
   {
-    let listeners = this.listeners;
+    let listeners = this.listeners[type];
     if (listeners)
     {
       let index = listeners.indexOf(listener);
@@ -733,6 +743,7 @@ class PanelManager
         }
       }
     }
+    this.notifyChange("layout", null);
   }
 
   layoutElements(panels, position, height)
@@ -911,11 +922,12 @@ class PanelManager
     const application = this.application;
     let top = application.headerElem.getBoundingClientRect().height;
     const toolBar = application.toolBar;
+    const margin = this.getMargin();
     if (toolBar.position === "top")
     {
-      top += toolBar.getClientRect().height + this.margin;
+      top += toolBar.getClientRect().height + margin;
     }
-    return top + this.margin;
+    return top + margin;
   }
 
   getBottom()
@@ -923,14 +935,15 @@ class PanelManager
     const toolBar = this.application.toolBar;
     if (toolBar?.position === "bottom")
     {
-      return this.application.toolBar.getClientRect().height + this.margin;
+      const margin = this.getMargin();
+      return this.application.toolBar.getClientRect().height + margin;
     }
     return 0;
   }
 
   notifyChange(type, panel)
   {
-    const listeners = this.listeners;
+    const listeners = this.listeners[type];
     if (listeners.length > 0)
     {
       const event = { type, panel };

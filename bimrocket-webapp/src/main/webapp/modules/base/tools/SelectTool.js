@@ -55,8 +55,6 @@ class SelectTool extends Tool
       .setDefaultMobileHeight(150)
       .setMinimumHeight(80);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     const helpElem = document.createElement("div");
     I18N.set(helpElem, "textContent", this.help);
     helpElem.style.margin = "4px 0 4px 0";

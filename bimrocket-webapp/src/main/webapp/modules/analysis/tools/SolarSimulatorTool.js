@@ -76,7 +76,6 @@ class SolarSimulatorTool extends Tool
     this.panel.onClose = () =>
     {
       this.cancel();
-      this.application.useTool(null);
       return true;
     };
 

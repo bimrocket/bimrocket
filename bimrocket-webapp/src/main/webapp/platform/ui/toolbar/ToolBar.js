@@ -25,7 +25,11 @@ class ToolBar
     this.element.appendChild(scrollElem);
 
     const panelManager = application.panelManager;
-    panelManager.addEventListener(event => this.onPanelChange(event));
+    const listener = event => this.onPanelChange(event);
+    panelManager.addEventListener("activate", listener);
+    panelManager.addEventListener("deactivate", listener);
+    panelManager.addEventListener("minimize", listener);
+    panelManager.addEventListener("restore", listener);
 
     this.addSeparator("extra");
 

@@ -78,8 +78,6 @@ class SelectFacesTool extends Tool
       .setDefaultMobileHeight(200)
       .setMinimumHeight(80);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.selectModeElem = Controls.addSelectField(this.panel.bodyElem,
       "select_faces_mode", "base|label.select_faces_mode",
       [[SelectFacesTool.SET_PLANE, "base|option.select_faces.select_plane"],

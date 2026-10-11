@@ -42,8 +42,6 @@ class BIMInventoryTool extends Tool
 
     this.panel.bodyElem.classList.add("padding");
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.exploreAllButton = Controls.addButton(this.panel.bodyElem,
       "bim_inventory_explore", "bim|button.explore_all",
       () => this.exploreAll());

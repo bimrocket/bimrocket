@@ -35,8 +35,6 @@ class SVGExporterTool extends Tool
       .setDefaultHeight(120)
       .setDefaultMobileHeight(120);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.titleElem = Controls.addTextField(this.panel.bodyElem,
       "svg_exporter_title", "base|label.svg_exporter_title", "", "row");
 

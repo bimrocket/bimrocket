@@ -38,8 +38,6 @@ class PaintTool extends Tool
       .setDefaultMobileHeight(300)
       .setMinimumHeight(160);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.materialListElem = Controls.addSelectField(this.panel.bodyElem,
       "materialList", "design|label.material_list");
     this.materialListElem.style.display = "block";

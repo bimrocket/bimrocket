@@ -35,8 +35,6 @@ class BIMExplodeTool extends Tool
       .setDefaultMobileHeight(260)
       .setMinimumHeight(140);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.helpElem = document.createElement("div");
     this.helpElem.style.padding = "8px";
     this.panel.bodyElem.appendChild(this.helpElem);

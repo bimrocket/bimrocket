@@ -59,8 +59,6 @@ class DrawTool extends Tool
       .setDefaultMobileHeight(140)
       .setMinimumHeight(80);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);
     I18N.set(this.helpElem, "textContent", "design|tool.draw.help");

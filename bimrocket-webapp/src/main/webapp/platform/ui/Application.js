@@ -1803,6 +1803,12 @@ class Application
     panel.iconName = tool.getIconName();
     panel.tool = tool;
 
+    if (!tool.immediate)
+    {
+      // release the tool when its panel is closed
+      panel.onClose = () => this.useTool(null);
+    }
+
     this.panelManager.addPanel(panel);
 
     return panel;

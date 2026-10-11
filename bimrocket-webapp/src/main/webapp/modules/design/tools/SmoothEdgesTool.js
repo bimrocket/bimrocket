@@ -36,8 +36,6 @@ class SmoothEdgesTool extends Tool
       .setDefaultMobileHeight(160)
       .setMinimumHeight(100);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.smoothAngleElem = Controls.addNumberField(this.panel.bodyElem,
       "smooth_angle", "design|label.smooth_angle", 20, "row");
 

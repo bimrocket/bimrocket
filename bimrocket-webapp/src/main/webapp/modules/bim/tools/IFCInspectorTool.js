@@ -30,7 +30,6 @@ class IFCInspectorTool extends Tool
     this.panel = new IFCInspectorPanel(this.application);
     this.panel.tool = this;
     application.panelManager.addPanel(this.panel);
-    this.panel.visible = false;
   }
 
   execute()

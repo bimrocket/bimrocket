@@ -93,8 +93,6 @@ class ExtrudeTool extends Tool
       .setDefaultMobileHeight(140)
       .setMinimumHeight(100);
 
-    this.panel.onClose = () => this.application.useTool(null);
-
     this.helpElem = document.createElement("div");
     this.panel.bodyElem.appendChild(this.helpElem);
 

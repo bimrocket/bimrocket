@@ -40,11 +40,11 @@ class ChatGPTTool extends Tool
   createPanel()
   {
     this.panel = this.application.createToolPanel(this)
-      .setPosition("center")
       .setClassName("panel-chatgpt")
       .setDefaultHeight(240)
       .setDefaultMobileHeight(220)
       .setMinimumHeight(200)
+      .setPosition("center")
       .setPriority(2);
 
     this.conversationElem = document.createElement("div");

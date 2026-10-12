@@ -2,32 +2,31 @@
 
 :root
 {
-  --toast-background: #e0e0ff;
-  --toast-color: #0000ff;
-  --toast-border-color: #8080ff;
+  --toast-background: var(--surface-ground);
+  --toast-color: var(--text-color);
+  --toast-border-radius: var(--border-radius-2);
+  --toast-border-color: var(--border-color);
   --toast-border-width: 1px;
   --toast-border-style: none;
   --toast-padding: 12px;
-  --toast-border-radius: 16px;
-  --toast-shadow: 0px 0px 10px 0px rgba(50, 50, 50, 0.3);
+  --toast-shadow: var(--box-shadow-2);
 }
 
 .toast
 {
   display: grid;
-  background: var(--toast-background);
-  color: var(--toast-color);
-  align-items: center;
-  justify-content: center;
   z-index: 10001;
-  box-shadow: var(--toast-shadow);
+  background-color: var(--toast-background);
+  color: var(--toast-color);
+  padding: var(--toast-padding);
   border-color: var(--toast-border-color);
   border-width: var(--toast-border-width);
   border-style: var(--toast-border-style);
   border-radius: var(--toast-border-radius);
-  padding: var(--toast-padding);
-  text-align: center;
-  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 1s;
+  box-shadow: var(--toast-shadow);
 }

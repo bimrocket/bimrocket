@@ -110,7 +110,7 @@ class Inspector extends Panel
       this.listCardElem.style.display = "";
       this.objectCardElem.style.display = "none";
     }, "icon-button-20");
-    I18N.set(this.listButton, "title", "button.list");
+    I18N.set(this.listButton, "data-tooltip", "button.list");
     I18N.set(this.listButton, "alt", "button.list");
 
     this.previousButton = Controls.addIconButton(this.toolBarElem,
@@ -122,7 +122,6 @@ class Inspector extends Panel
         this.centerObject();
       }
     }, "icon-button-20");
-    I18N.set(this.previousButton, "title", "button.previous");
     I18N.set(this.previousButton, "alt", "button.previous");
 
     this.indexElem = document.createElement("div");
@@ -137,7 +136,6 @@ class Inspector extends Panel
         this.centerObject();
       }
     }, "icon-button-20");
-    I18N.set(this.nextButton, "title", "button.next");
     I18N.set(this.nextButton, "alt", "button.next");
 
     this.selectButton = Controls.addIconButton(this.toolBarElem,
@@ -145,7 +143,7 @@ class Inspector extends Panel
     {
       this.application.selection.set(this.object);
     }, "icon-button-20");
-    I18N.set(this.selectButton, "title", "button.select");
+    I18N.set(this.selectButton, "data-tooltip", "button.select");
     I18N.set(this.selectButton, "alt", "button.select");
 
     this.propertiesElem = document.createElement("div");

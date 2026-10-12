@@ -283,7 +283,7 @@ class ToolButton
     this.buttonElem = document.createElement("button");
     let buttonElem = this.buttonElem;
     buttonElem.dataset.name = tool.name;
-    I18N.set(buttonElem, "title", tool.label);
+    I18N.set(buttonElem, "data-tooltip", tool.label);
     I18N.set(buttonElem, "alt", tool.label);
     buttonElem.classList.add("tool-button");
     const iconName = tool.getIconName();

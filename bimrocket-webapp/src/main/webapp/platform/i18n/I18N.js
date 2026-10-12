@@ -8,7 +8,7 @@ import { BundleManager, Bundle } from "platform/i18n/BundleManager.js";
 
 const setProperty = (element, property, key) =>
 {
-  if (property.startsWith("aria-"))
+  if (property.startsWith("aria-") || property.startsWith("data-"))
   {
     element.setAttribute(property, key);
   }

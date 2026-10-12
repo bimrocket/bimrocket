@@ -13,6 +13,7 @@ import { Inspector } from "platform/ui/inspector/Inspector.js";
 import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { ErrorHandler } from "platform/ui/ErrorHandler.js";
 import { Tool } from "platform/ui/Tool.js";
+import { Tooltip } from "platform/ui/tooltip/Tooltip.js";
 import { LinesSelectionHighlighter } from "platform/ui/LinesSelectionHighlighter.js";
 
 import { Cord } from "platform/core/Cord.js";
@@ -295,6 +296,8 @@ class Application
     setup.applyFontSize();
 
     this.toolBar.position = setup.toolBarPosition;
+
+    Tooltip.enable();
 
     // init scene
     this.initScene();

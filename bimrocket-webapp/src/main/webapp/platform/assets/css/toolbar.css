@@ -3,7 +3,7 @@
 :root
 {
   --toolbar-background: var(--surface-ground);
-  --toolbar-shadow: 0px 0px 10px 0px rgba(50, 50, 50, 0.3);
+  --toolbar-shadow: var(--box-shadow-2);
   --toolbar-border-radius: 16px;
   --toolbar-padding: 6px;
   --toolbar-button-padding: 4px;

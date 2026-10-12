@@ -30,6 +30,11 @@
   -webkit-user-drag: none;
 }
 
+.tabbed-pane > .header > div:hover
+{
+  background-color: var(--surface-hover);
+}
+
 .tabbed-pane > .header > div:focus
 {
   outline: none;

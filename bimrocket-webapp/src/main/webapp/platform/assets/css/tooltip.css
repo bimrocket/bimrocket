@@ -1,0 +1,38 @@
+/* Tooltip */
+
+:root
+{
+  --tooltip-background: var(--surface-ground);
+  --tooltip-color: var(--text-color);
+  --tooltip-border-radius: var(--border-radius);
+  --tooltip-border-color: var(--border-color);
+  --tooltip-border-width: 1px;
+  --tooltip-border-style: solid;
+  --tooltip-padding: 6px 10px;
+  --tooltip-shadow: var(--box-shadow-2);
+}
+
+.tooltip
+{
+  position: fixed;
+  z-index: 10001;
+  background-color: var(--tooltip-background);
+  color: var(--tooltip-color);
+  padding: var(--tooltip-padding);
+  border-radius: var(--tooltip-border-radius);
+  border-width: var(--tooltip-border-width);
+  border-color: var(--tooltip-border-color);
+  border-style: var(--tooltip-border-style);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease;
+  box-shadow: var(--tooltip-shadow);
+}
+
+.tooltip[aria-hidden=false]
+{
+  opacity: 1;
+  visibility: visible;
+}

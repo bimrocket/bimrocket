@@ -67,7 +67,7 @@ class TabbedPane
         event => event.preventDefault());
 
       if (label) I18N.set(tabElem, "textContent", label || name);
-      if (title) I18N.set(tabElem, "title", title || name);
+      if (title) I18N.set(tabElem, "data-tooltip", title || name);
       if (className) tabElem.classList.add(className);
 
       this.headerElem.appendChild(tabElem);

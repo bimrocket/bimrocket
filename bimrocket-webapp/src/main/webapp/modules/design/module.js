@@ -104,7 +104,7 @@ export function activate(application)
       objectType: "Torus", iconName: "design|torus" });
   const addSpringTool = new AddObjectTool(application,
     { name: "add_spring", label: "design|tool.add_spring.label",
-      objectType: "Spring" });
+      objectType: "Spring", iconName: "design|spring" });
   const addRectangleTool = new AddObjectTool(application,
     { name: "add_rectangle", label: "design|tool.add_rectangle.label",
       objectType: "Profile", builderClass: RectangleBuilder });
@@ -138,7 +138,7 @@ export function activate(application)
       iconName: "design|helicoid" });
   const addObject3DTool = new AddObjectTool(application,
     { name: "add_object3D", label: "design|tool.add_object3D.label",
-      objectType: "Object3D" });
+      objectType: "Object3D", iconName: "design|object" });
   const addGroupTool = new AddObjectTool(application,
     { name: "add_group", label: "design|tool.add_group.label",
       objectType: "Group", iconName: "design|group" });

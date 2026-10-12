@@ -336,7 +336,7 @@ export function activate(application)
   const selectByQRCodeTool = new SelectByQRCodeTool(application);
   const selectReprTool = new SelectByNameTool(application,
   { name: "IfcRepresentation", label: "IfcRepresentation",
-    propertyName: "IfcRepresentation" });
+    propertyName: "IfcRepresentation", iconName: "base|select-ifc-repr" });
   const exportSelectionTool = new ExportSelectionTool(application);
 
   const orbitTool = new OrbitTool(application);

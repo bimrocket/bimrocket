@@ -6,7 +6,6 @@
 
 import { Panel } from "platform/ui/panel/Panel.js";
 import { Tree } from "platform/ui/tree/Tree.js";
-import { ContextMenu } from "platform/ui/menu/Menu.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
 import * as THREE from "three";
 
@@ -27,7 +26,7 @@ class Outliner extends Panel
     this.map = new Map();
     this.autoScroll = true;
 
-    this.contextMenu = new ContextMenu(application);
+    this.contextMenu = this.application.contextMenu;
     this.contextMenuButton = this.contextMenu.createButton();
 
     this.tree = new Tree(this.bodyElem);

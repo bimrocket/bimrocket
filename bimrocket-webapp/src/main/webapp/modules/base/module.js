@@ -528,26 +528,22 @@ export function activate(application)
   toolBar.addToolButton(inspectorTool);
   toolBar.addToolButton(chatGPTTool);
 
-  const outliner = application.panelManager.getPanel("outliner");
-  if (outliner)
-  {
-    const outlinerMenu = outliner.contextMenu;
-    outlinerMenu.addMenuItem(showTool);
-    outlinerMenu.addMenuItem(hideTool);
-    outlinerMenu.addSeparator();
-    outlinerMenu.addMenuItem(centerSelectionTool);
-    outlinerMenu.addMenuItem(isolateSelectionTool);
-    outlinerMenu.addSeparator();
-    outlinerMenu.addMenuItem(copyTool);
-    outlinerMenu.addMenuItem(cutTool);
-    outlinerMenu.addMenuItem(pasteTool);
-    outlinerMenu.addSeparator();
-    outlinerMenu.addMenuItem(removeTool);
-    outlinerMenu.addSeparator();
-    outlinerMenu.addMenuItem(activateCameraTool);
-    outlinerMenu.addSeparator();
-
-  }
+  const contextMenu = application.contextMenu;
+  contextMenu.addMenuItem(showTool);
+  contextMenu.addMenuItem(hideTool);
+  contextMenu.addSeparator();
+  contextMenu.addMenuItem(centerSelectionTool);
+  contextMenu.addMenuItem(isolateSelectionTool);
+  contextMenu.addSeparator();
+  contextMenu.addMenuItem(copyTool);
+  contextMenu.addMenuItem(cutTool);
+  contextMenu.addMenuItem(pasteTool);
+  contextMenu.addSeparator();
+  contextMenu.addMenuItem(removeTool);
+  contextMenu.addSeparator("element_tools");
+  contextMenu.addMenuItem(activateCameraTool);
+  contextMenu.addSeparator();
+  contextMenu.addMenuItem(newSceneTool);
 
   // restore services
   application.restoreServices("model");

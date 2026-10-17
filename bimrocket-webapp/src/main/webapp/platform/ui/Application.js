@@ -7,7 +7,7 @@
 import { BundleManager } from "platform/i18n/BundleManager.js";
 import { Panel, PanelManager } from "platform/ui/panel/Panel.js";
 import { ProgressBar } from "platform/ui/progressbar/ProgressBar.js";
-import { MenuBar } from "platform/ui/menu/Menu.js";
+import { MenuBar, ContextMenu } from "platform/ui/menu/Menu.js";
 import { ToolBar } from "platform/ui/toolbar/ToolBar.js";
 import { Inspector } from "platform/ui/inspector/Inspector.js";
 import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
@@ -253,6 +253,9 @@ class Application
 
     // menuBar
     this.menuBar = new MenuBar(this, headerElem);
+
+    // contextMenu (actions on selected objects)
+    this.contextMenu = new ContextMenu(this);
 
     // customBar
     this.customBar = document.createElement("div");

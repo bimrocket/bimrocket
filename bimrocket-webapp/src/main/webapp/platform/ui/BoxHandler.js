@@ -51,13 +51,18 @@ class BoxHandler
     console.info(box);
   }
 
+  isEnabledForEvent(event)
+  {
+    return event.button === 0;
+  }
+
   onPointerDown(event)
   {
     const application = this.tool.application;
 
     if (!application.isCanvasEvent(event)) return;
 
-    if (event.button !== 0) return;
+    if (!this.isEnabledForEvent(event)) return;
 
     event.preventDefault();
 

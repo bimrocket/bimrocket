@@ -25,6 +25,11 @@ class CenterSelectionTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    return !this.application.selection.isEmpty();
+  }
+
   execute()
   {
     const application = this.application;

@@ -251,16 +251,12 @@ export function activate(application)
   toolBar.addToolButton(placeTool);
   toolBar.addToolButton(rebuildTool);
 
-  const outliner = application.panelManager.getPanel("outliner");
-  if (outliner)
-  {
-    const outlinerMenu = outliner.contextMenu;
-    outlinerMenu.addMenuItem(inspectGeometryTool);
-    const outlinerAddMenu = outlinerMenu.addMenu("design|menu.design.add");
-    outlinerAddMenu.addMenuItem(addGroupTool);
-    outlinerAddMenu.addMenuItem(addBoxTool);
-    outlinerAddMenu.addMenuItem(addCylinderTool);
-    outlinerAddMenu.addMenuItem(addObject3DTool);
-    outlinerAddMenu.addMenuItem(addText2DTool);
-  }
+  const contextMenu = application.contextMenu;
+  contextMenu.addMenuItem(inspectGeometryTool, "element_tools");
+  const contextAddMenu = contextMenu.addMenu("design|menu.design.add");
+  contextAddMenu.addMenuItem(addGroupTool);
+  contextAddMenu.addMenuItem(addBoxTool);
+  contextAddMenu.addMenuItem(addCylinderTool);
+  contextAddMenu.addMenuItem(addObject3DTool);
+  contextAddMenu.addMenuItem(addText2DTool);
 }

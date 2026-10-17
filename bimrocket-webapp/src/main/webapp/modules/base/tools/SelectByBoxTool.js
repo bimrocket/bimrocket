@@ -27,8 +27,14 @@ class SelectByBoxTool extends Tool
     this.setOptions(options);
     application.addTool(this);
 
-    this.boxHandler = new BoxHandler(this);
-    this.boxHandler.onBoxDrawn = (box, event) => this.onBoxDrawn(box, event);
+    this._boxHandler = new BoxHandler(this);
+    this._boxHandler.onBoxDrawn = (box, event) => this.onBoxDrawn(box, event);
+    this._boxHandler.isEnabledForEvent = event => true;
+
+    this._pointerDownTime = 0;
+
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onContextMenu = this.onContextMenu.bind(this);
 
     this.createPanel();
   }
@@ -59,23 +65,68 @@ class SelectByBoxTool extends Tool
   activate()
   {
     this.panel.visible = true;
-    this.boxHandler.enable();
+    this._boxHandler.enable();
+    const container = this.application.container;
+    container.addEventListener("pointerdown", this._onPointerDown, false);
+    container.addEventListener("contextmenu", this._onContextMenu, false);
     this.selectModeElem.setValue(this.application.selectionMode);
   }
 
   deactivate()
   {
     this.panel.visible = false;
-    this.boxHandler.disable();
+    this._boxHandler.disable();
+    const container = this.application.container;
+    container.removeEventListener("pointerdown", this._onPointerDown, false);
+    container.removeEventListener("contextmenu", this._onContextMenu, false);
+  }
+
+  onPointerDown(event)
+  {
+    const application = this.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    if (application.contextMenu.isVisible()) return;
+
+    this._pointerDownTime = Date.now();
+  }
+
+  onContextMenu(event)
+  {
+    const application = this.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    event.preventDefault();
   }
 
   onBoxDrawn(box, event)
   {
+    const application = this.application;
+
     let boxProjected = new THREE.Box2();
     boxProjected.expandByPoint(this.toCamera(box.min));
     boxProjected.expandByPoint(this.toCamera(box.max));
 
-    this.selectObjects(boxProjected, event);
+    const selection = [];
+    this.selectObjects(boxProjected, selection);
+
+    let showContextMenu = false;
+
+    let ellapsed = Date.now() - this._pointerDownTime;
+    if (selection.length === 0 && (ellapsed > 500 || event.button > 0))
+    {
+      showContextMenu = true;
+    }
+    else
+    {
+      application.userSelectObjects(selection, event);
+    }
+
+    if (event.button > 0)
+    {
+      showContextMenu = true;
+    }
+    if (showContextMenu) this.application.contextMenu.show(event);
   }
 
   toCamera(screenPoint)
@@ -87,18 +138,18 @@ class SelectByBoxTool extends Tool
     return pointcc;
   }
 
-  selectObjects(boxProjected, event)
+  selectObjects(boxProjected, selection)
   {
     const application = this.application;
     const baseObject = application.baseObject;
-    const selection = [];
 
-    const explore = object => {
+    const explore = object =>
+    {
       if (object.visible)
       {
         if (object instanceof Solid)
         {
-          if (object.facesVisible)
+          if (object.facesVisible || object.edgesVisible)
           {
             const geometry = object.geometry;
             const vertices = geometry.vertices;
@@ -122,8 +173,6 @@ class SelectByBoxTool extends Tool
     };
 
     explore(baseObject);
-
-    application.userSelectObjects(selection, event);
   }
 
   selectObject(object, vertices, box, selection)

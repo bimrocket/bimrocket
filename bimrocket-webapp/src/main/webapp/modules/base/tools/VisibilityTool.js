@@ -21,6 +21,11 @@ class VisibilityTool extends Tool
     this.immediate = true;
   }
 
+  isEnabled()
+  {
+    return !this.application.selection.isEmpty();
+  }
+
   execute()
   {
     this.application.updateVisibility(null, this.visible);

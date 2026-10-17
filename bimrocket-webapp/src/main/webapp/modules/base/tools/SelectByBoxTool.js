@@ -9,6 +9,9 @@ import { Controls } from "platform/ui/Controls.js";
 import { Application } from "platform/ui/Application.js";
 import { BoxHandler } from "platform/ui/BoxHandler.js";
 import { Solid } from "platform/core/Solid.js";
+import { Profile } from "platform/core/Profile.js";
+import { Cord } from "platform/core/Cord.js";
+import { Text2D } from "platform/core/Text2D.js";
 import { GeometryUtils } from "platform/utils/GeometryUtils.js";
 import { I18N } from "platform/i18n/I18N.js";
 import * as THREE from "three";
@@ -142,6 +145,7 @@ class SelectByBoxTool extends Tool
   {
     const application = this.application;
     const baseObject = application.baseObject;
+    const zeroPoint = new THREE.Vector3();
 
     const explore = object =>
     {
@@ -155,6 +159,27 @@ class SelectByBoxTool extends Tool
             const vertices = geometry.vertices;
             this.selectObject(object, vertices, boxProjected, selection);
           }
+        }
+        else if (object instanceof Profile)
+        {
+          const geometry = object.geometry;
+          const path = geometry.path;
+          const points = path.getPoints(geometry.divisions);
+          const vertices = points.map(p => new THREE.Vector3(p.x, p.y, 0));
+          this.selectObject(object, vertices, boxProjected, selection);
+        }
+        else if (object instanceof Cord)
+        {
+          const geometry = object.geometry;
+          this.selectObject(object, geometry.points, boxProjected, selection);
+        }
+        else if (object instanceof Text2D ||
+                 object instanceof THREE.Sprite ||
+                 object instanceof THREE.Camera ||
+                 object instanceof THREE.Light ||
+                 object instanceof THREE.Points)
+        {
+          this.selectObject(object, [zeroPoint], boxProjected, selection);
         }
         else if (object instanceof THREE.Mesh)
         {

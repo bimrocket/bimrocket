@@ -6,7 +6,9 @@
 
 import { Application } from "platform/ui/Application.js";
 import { SelectionHighlighter } from "platform/ui/SelectionHighlighter.js";
+import { DirectionHelper } from "platform/ui/DirectionHelper.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
+import * as THREE from "three";
 
 class LinesSelectionHighlighter extends SelectionHighlighter
 {
@@ -124,10 +126,12 @@ class LinesSelectionHighlighter extends SelectionHighlighter
       if (camera !== application.camera)
       {
         camera.updateMatrixWorld();
-        let helper = new THREE.CameraHelper(camera);
+        let helper = new DirectionHelper(1);
+        camera.matrixWorld.decompose(
+          helper.position, helper.rotation, helper.scale);
         helper.updateMatrix();
 
-        helper.name = "SelectionLines";
+        helper.name = "CameraLines";
         helper.raycast = function(){};
         linesGroup.add(helper);
       }
@@ -140,6 +144,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
       { color: 0x000000 });
 
       const helper = new THREE.Line(geometry, material);
+      helper.name = "DirectionalLightLines";
 
       light.updateWorldMatrix(true, false);
       light.target.updateWorldMatrix(true, false);

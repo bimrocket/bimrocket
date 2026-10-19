@@ -8,6 +8,7 @@ import { CameraTool } from "./CameraTool.js";
 import { I18N } from "platform/i18n/I18N.js";
 import { Solid } from "platform/core/Solid.js";
 import { GestureHandler } from "platform/ui/GestureHandler.js";
+import { SelectionHandler } from "platform/ui/SelectionHandler.js";
 import * as THREE from "three";
 
 class OrbitTool extends CameraTool
@@ -79,6 +80,9 @@ class OrbitTool extends CameraTool
     this._animate = this.animate.bind(this);
     this._onScene = this.onScene.bind(this);
 
+    this._gestureHandler = new GestureHandler(this);
+    this._selectionHander = new SelectionHandler(this);
+
     const geometry = new THREE.SphereGeometry(1, 8, 8);
     const material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
     const sphere = new THREE.Mesh(geometry, material);
@@ -86,8 +90,6 @@ class OrbitTool extends CameraTool
     this.sphere = sphere;
 
     this.createPanel();
-
-    this.gestureHandler = new GestureHandler(this);
   }
 
   createPanel()
@@ -111,7 +113,8 @@ class OrbitTool extends CameraTool
     container.addEventListener("wheel", this._onWheel, { passive : false });
     application.addEventListener("animation", this._animate);
     application.addEventListener("scene", this._onScene);
-    this.gestureHandler.enable();
+    this._gestureHandler.enable();
+    if (this.selectionEnabled) this._selectionHander.enable();
   }
 
   deactivate()
@@ -122,7 +125,8 @@ class OrbitTool extends CameraTool
     container.removeEventListener("wheel", this._onWheel);
     application.removeEventListener("animation", this._animate);
     application.removeEventListener("scene", this._onScene);
-    this.gestureHandler.disable();
+    this._gestureHandler.disable();
+    this._selectionHander.disable();
   }
 
   animate(event)
@@ -387,25 +391,6 @@ class OrbitTool extends CameraTool
     this.sphere.scale.set(scale, scale, scale);
     this.sphere.updateMatrix();
     application.notifyObjectsChanged(this.sphere, this);
-  }
-
-  onTap(position, button)
-  {
-    if (this.selectionEnabled)
-    {
-      const application = this.application;
-
-      let intersect = this.intersect(position, application.baseObject);
-      if (intersect)
-      {
-        let object = this.findActualSelectedObject(intersect.object);
-        application.selection.set(object);
-      }
-      else
-      {
-        application.selection.clear();
-      }
-    }
   }
 
   onDrag(position, direction, pointerCount, button, pointerType)

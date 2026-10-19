@@ -8,6 +8,7 @@ import { Tool } from "platform/ui/Tool.js";
 import { Controls } from "platform/ui/Controls.js";
 import { Application } from "platform/ui/Application.js";
 import { BoxHandler } from "platform/ui/BoxHandler.js";
+import { SelectionHandler } from "platform/ui/SelectionHandler.js";
 import { Solid } from "platform/core/Solid.js";
 import { Profile } from "platform/core/Profile.js";
 import { Cord } from "platform/core/Cord.js";
@@ -32,12 +33,7 @@ class SelectByBoxTool extends Tool
 
     this._boxHandler = new BoxHandler(this);
     this._boxHandler.onBoxDrawn = (box, event) => this.onBoxDrawn(box, event);
-    this._boxHandler.isEnabledForEvent = event => true;
-
-    this._pointerDownTime = 0;
-
-    this._onPointerDown = this.onPointerDown.bind(this);
-    this._onContextMenu = this.onContextMenu.bind(this);
+    this._selectionHandler = new SelectionHandler(this);
 
     this.createPanel();
   }
@@ -69,9 +65,7 @@ class SelectByBoxTool extends Tool
   {
     this.panel.visible = true;
     this._boxHandler.enable();
-    const container = this.application.container;
-    container.addEventListener("pointerdown", this._onPointerDown, false);
-    container.addEventListener("contextmenu", this._onContextMenu, false);
+    this._selectionHandler.enable();
     this.selectModeElem.setValue(this.application.selectionMode);
   }
 
@@ -79,57 +73,27 @@ class SelectByBoxTool extends Tool
   {
     this.panel.visible = false;
     this._boxHandler.disable();
-    const container = this.application.container;
-    container.removeEventListener("pointerdown", this._onPointerDown, false);
-    container.removeEventListener("contextmenu", this._onContextMenu, false);
-  }
-
-  onPointerDown(event)
-  {
-    const application = this.application;
-    if (!application.isCanvasEvent(event)) return;
-
-    if (application.contextMenu.isVisible()) return;
-
-    this._pointerDownTime = Date.now();
-  }
-
-  onContextMenu(event)
-  {
-    const application = this.application;
-    if (!application.isCanvasEvent(event)) return;
-
-    event.preventDefault();
+    this._selectionHandler.disable();
   }
 
   onBoxDrawn(box, event)
   {
     const application = this.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    const selection = application.selection;
 
     let boxProjected = new THREE.Box2();
     boxProjected.expandByPoint(this.toCamera(box.min));
     boxProjected.expandByPoint(this.toCamera(box.max));
 
-    const selection = [];
-    this.selectObjects(boxProjected, selection);
-
-    let showContextMenu = false;
-
-    let ellapsed = Date.now() - this._pointerDownTime;
-    if (selection.length === 0 && (ellapsed > 500 || event.button > 0))
+    const validBox = !box.min.equals(box.max);
+    const objectsInsideBox = [];
+    if (validBox) this.selectObjects(boxProjected, objectsInsideBox);
+    if (validBox)
     {
-      showContextMenu = true;
+      application.userSelectObjects(objectsInsideBox, event);
     }
-    else
-    {
-      application.userSelectObjects(selection, event);
-    }
-
-    if (event.button > 0)
-    {
-      showContextMenu = true;
-    }
-    if (showContextMenu) this.application.contextMenu.show(event);
   }
 
   toCamera(screenPoint)

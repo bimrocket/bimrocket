@@ -129,6 +129,7 @@ menu menu li > button > svg
   stroke: var(--menuitem-icon-stroke);
   stroke-width: var(--menuitem-icon-stroke-width);
   margin-right: 0.25rem;
+  flex-shrink: 0;
 }
 
 menu.contextmenu li > button > svg.icon-toggler,

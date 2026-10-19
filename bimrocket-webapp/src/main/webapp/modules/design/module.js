@@ -107,31 +107,53 @@ export function activate(application)
       objectType: "Spring", iconName: "design|spring" });
   const addRectangleTool = new AddObjectTool(application,
     { name: "add_rectangle", label: "design|tool.add_rectangle.label",
-      objectType: "Profile", builderClass: RectangleBuilder });
+      objectType: "Profile", builderClass: RectangleBuilder,
+      iconName: "design|profile-rectangle" });
+  const addRectangleHollowTool = new AddObjectTool(application,
+    { name: "add_rectangle_hollow",
+      label: "design|tool.add_rectangle_hollow.label",
+      objectType: "Profile", builderClass: RectangleHollowBuilder,
+      iconName: "design|profile-rectangle-hollow" });
   const addCircleTool = new AddObjectTool(application,
     { name: "add_circle", label: "design|tool.add_circle.label",
-      objectType: "Profile", builderClass: CircleBuilder });
+      objectType: "Profile", builderClass: CircleBuilder,
+      iconName: "design|profile-circle" });
+  const addCircleHollowTool = new AddObjectTool(application,
+    { name: "add_circle_hollow", label: "design|tool.add_circle_hollow.label",
+      objectType: "Profile", builderClass: CircleHollowBuilder,
+      iconName: "design|profile-circle-hollow" });
+  const addCircularSectorTool = new AddObjectTool(application,
+    { name: "add_circle_hollow", label: "design|tool.add_circular_sector.label",
+      objectType: "Profile", builderClass: CircularSectorBuilder,
+      iconName: "design|profile-circular-sector" });
   const addEllipseTool = new AddObjectTool(application,
     { name: "add_ellipse", label: "design|tool.add_ellipse.label",
-      objectType: "Profile", builderClass: EllipseBuilder });
+      objectType: "Profile", builderClass: EllipseBuilder,
+      iconName: "design|profile-ellipse" });
   const addTrapeziumTool = new AddObjectTool(application,
     { name: "add_trapezium", label: "design|tool.add_trapezium.label",
-      objectType: "Profile", builderClass: TrapeziumBuilder });
+      objectType: "Profile", builderClass: TrapeziumBuilder,
+      iconName: "design|profile-trapezium" });
   const addIProfileTool = new AddObjectTool(application,
     { name: "add_iprofile", label: "design|tool.add_iprofile.label",
-      objectType: "Profile", builderClass: IProfileBuilder });
+      objectType: "Profile", builderClass: IProfileBuilder,
+      iconName: "design|profile-i" });
   const addLProfileTool = new AddObjectTool(application,
     { name: "add_lprofile", label: "design|tool.add_lprofile.label",
-      objectType: "Profile", builderClass: LProfileBuilder });
+      objectType: "Profile", builderClass: LProfileBuilder,
+      iconName: "design|profile-l" });
   const addTProfileTool = new AddObjectTool(application,
     { name: "add_tprofile", label: "design|tool.add_tprofile.label",
-      objectType: "Profile", builderClass: TProfileBuilder });
+      objectType: "Profile", builderClass: TProfileBuilder,
+      iconName: "design|profile-t" });
   const addUProfileTool = new AddObjectTool(application,
     { name: "add_uprofile", label: "design|tool.add_uprofile.label",
-      objectType: "Profile", builderClass: UProfileBuilder });
+      objectType: "Profile", builderClass: UProfileBuilder,
+      iconName: "design|profile-u" });
   const addZProfileTool = new AddObjectTool(application,
     { name: "add_zprofile", label: "design|tool.add_zprofile.label",
-      objectType: "Profile", builderClass: ZProfileBuilder });
+      objectType: "Profile", builderClass: ZProfileBuilder,
+      iconName: "design|profile-z" });
   const addHelicoidTool = new AddObjectTool(application,
     { name: "add_helicoid", label: "design|tool.add_helicoid.label",
       objectType: "Cord", builderClass: HelicoidBuilder,
@@ -188,7 +210,10 @@ export function activate(application)
   addSolidMenu.addMenuItem(addSpringTool);
   const addProfileMenu = addMenu.addMenu("design|menu.design.add_profile");
   addProfileMenu.addMenuItem(addRectangleTool);
+  addProfileMenu.addMenuItem(addRectangleHollowTool);
   addProfileMenu.addMenuItem(addCircleTool);
+  addProfileMenu.addMenuItem(addCircleHollowTool);
+  addProfileMenu.addMenuItem(addCircularSectorTool);
   addProfileMenu.addMenuItem(addEllipseTool);
   addProfileMenu.addMenuItem(addTrapeziumTool);
   addProfileMenu.addMenuItem(addIProfileTool);

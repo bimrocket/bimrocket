@@ -35,8 +35,6 @@ import { WebUtils } from "platform/utils/WebUtils.js";
 import { PointSelector } from "platform/utils/PointSelector.js";
 import { ObjectBatcher } from "platform/utils/ObjectBatcher.js";
 
-import { LineDashedShaderMaterial } from "platform/materials/LineDashedShaderMaterial.js";
-
 import { CSS2DRenderer } from "platform/renderers/CSS2DRenderer.js";
 import { SVGRenderer } from "platform/renderers/SVGRenderer.js";
 
@@ -265,31 +263,7 @@ class Application
     // toolBar
     this.toolBar = new ToolBar(this, container);
 
-    /* selection materials */
-
-    const selectionColor = new THREE.Color(0, 0, 1);
-
-    this.selectionMaterial = new THREE.LineBasicMaterial(
-      { color: selectionColor, linewidth: 1.5,
-        depthTest: true, depthWrite: true, transparent: true });
-
-    this.deepSelectionMaterial = new THREE.LineBasicMaterial(
-      { color: selectionColor, linewidth: 1.5,
-        depthTest: false, depthWrite: false, transparent: true });
-
-    this.boxSelectionMaterial = new THREE.LineBasicMaterial(
-      { color: selectionColor, linewidth: 1.5,
-        depthTest: true, depthWrite: true });
-
-    this.invisibleSelectionMaterial = new LineDashedShaderMaterial(
-      { color: selectionColor, dashSize: 4, gapSize: 4,
-        depthTest: true, depthWrite: true });
-
-    this.deepInvisibleSelectionMaterial = new LineDashedShaderMaterial(
-      { color: selectionColor, dashSize: 4, gapSize: 4,
-        depthTest: false, depthWrite: false, transparent : true });
-
-
+    // pointSelector
     this.pointSelector = new PointSelector(this);
 
     // apply setup
@@ -837,20 +811,6 @@ class Application
     if (this.setup.showLocalAxes)
     {
       this.showAxisLines();
-    }
-  }
-
-  getSelectionMaterial(object)
-  {
-    if (object.visible)
-    {
-      return this.setup.showDeepSelection ?
-        this.deepSelectionMaterial : this.selectionMaterial;
-    }
-    else
-    {
-      return this.setup.showDeepSelection ?
-        this.deepInvisibleSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }
 

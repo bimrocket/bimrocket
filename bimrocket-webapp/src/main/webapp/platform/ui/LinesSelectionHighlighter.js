@@ -7,6 +7,7 @@
 import { Application } from "platform/ui/Application.js";
 import { SelectionHighlighter } from "platform/ui/SelectionHighlighter.js";
 import { DirectionHelper } from "platform/ui/DirectionHelper.js";
+import { LineDashedShaderMaterial } from "platform/materials/LineDashedShaderMaterial.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
 import * as THREE from "three";
 
@@ -18,6 +19,11 @@ class LinesSelectionHighlighter extends SelectionHighlighter
     this.application = application;
     this.options = {...options};
     this._selectionLines = null;
+
+    /* selection materials */
+
+    this.selectionColor =
+      this.options.selectionColor || new THREE.Color(0, 0, 1);
   }
 
   update()
@@ -25,6 +31,37 @@ class LinesSelectionHighlighter extends SelectionHighlighter
     this.hideSelectionLines();
     this.showSelectionLines();
     this.application.repaint();
+  }
+
+  set selectionColor(color)
+  {
+    super.selectionColor = color;
+
+    this.selectionMaterial?.dispose();
+    this.deepSelectionMaterial?.dispose();
+    this.invisibleSelectionMaterial?.dispose();
+    this.deepInvisibleSelectionMaterial?.dispose();
+    this.boxSelectionMaterial?.dispose();
+
+    this.selectionMaterial = new THREE.LineBasicMaterial(
+      { color, linewidth: 1.5,
+        depthTest: true, depthWrite: true, transparent: true });
+
+    this.deepSelectionMaterial = new THREE.LineBasicMaterial(
+      { color, linewidth: 1.5,
+        depthTest: false, depthWrite: false, transparent: true });
+
+    this.boxSelectionMaterial = new THREE.LineBasicMaterial(
+      { color, linewidth: 1.5,
+        depthTest: true, depthWrite: true });
+
+    this.invisibleSelectionMaterial = new LineDashedShaderMaterial(
+      { color, dashSize: 4, gapSize: 4,
+        depthTest: true, depthWrite: true });
+
+    this.deepInvisibleSelectionMaterial = new LineDashedShaderMaterial(
+      { color, dashSize: 4, gapSize: 4,
+        depthTest: false, depthWrite: false, transparent : true });
   }
 
   hideSelectionLines()
@@ -51,7 +88,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
       while (!item.done)
       {
         let object = item.value;
-        this.collectLines(object, linesGroup);
+        this.collectLines(object, linesGroup, true);
         item = iterator.next();
       }
       this._selectionLines = linesGroup;
@@ -70,7 +107,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
     }
   }
 
-  collectLines(object, linesGroup)
+  collectLines(object, linesGroup, isRoot)
   {
     const application = this.application;
 
@@ -78,11 +115,13 @@ class LinesSelectionHighlighter extends SelectionHighlighter
           || ObjectUtils.HIGHLIGHT_EDGES;
     if (highlight === ObjectUtils.HIGHLIGHT_NONE) return;
 
-    let material = application.getSelectionMaterial(object);
+    let material = this.getSelectionMaterial(object);
 
     if (object instanceof Solid)
     {
       let solid = object;
+
+      if (!isRoot && !solid.edgesVisible && !solid.facesVisible) return;
 
       if (application.setup.selectionPaintMode === Application.EDGES_SELECTION)
       {
@@ -172,7 +211,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
           let geometry = ObjectUtils.getBoxGeometry(box);
 
           let lines = new THREE.LineSegments(geometry, mesh.visible ?
-            application.boxSelectionMaterial : material);
+            this.boxSelectionMaterial : material);
           lines.raycast = function(){};
 
           mesh.updateMatrixWorld();
@@ -249,7 +288,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
         for (let i = 0; i < children.length; i++)
         {
           var child = children[i];
-          this.collectLines(child, linesGroup);
+          this.collectLines(child, linesGroup, false);
         }
       }
       else if (highlight === ObjectUtils.HIGHLIGHT_BOX)
@@ -260,7 +299,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
           let geometry = ObjectUtils.getBoxGeometry(box);
 
           let lines = new THREE.LineSegments(geometry, object.visible ?
-            application.boxSelectionMaterial : material);
+            this.boxSelectionMaterial : material);
           lines.raycast = function(){};
 
           object.matrixWorld.decompose(
@@ -269,6 +308,21 @@ class LinesSelectionHighlighter extends SelectionHighlighter
           linesGroup.add(lines);
         }
       }
+    }
+  }
+
+  getSelectionMaterial(object)
+  {
+    const setup = this.application.setup;
+    if (object.visible)
+    {
+      return setup.showDeepSelection ?
+        this.deepSelectionMaterial : this.selectionMaterial;
+    }
+    else
+    {
+      return setup.showDeepSelection ?
+        this.deepInvisibleSelectionMaterial : this.invisibleSelectionMaterial;
     }
   }
 }

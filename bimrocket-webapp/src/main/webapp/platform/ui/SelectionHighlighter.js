@@ -10,6 +10,8 @@ class SelectionHighlighter
   {
     this.application = application;
     this.options = {...options};
+
+    this._selectionColor = null;
   }
 
   getName()
@@ -19,6 +21,16 @@ class SelectionHighlighter
 
   update()
   {
+  }
+
+  set selectionColor(color)
+  {
+    this._selectionColor = color;
+  }
+
+  get selectionColor()
+  {
+    return this._selectionColor;
   }
 }
 

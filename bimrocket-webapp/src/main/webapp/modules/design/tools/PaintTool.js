@@ -33,7 +33,9 @@ class PaintTool extends Tool
 
   createPanel()
   {
-    this.panel = this.application.createToolPanel(this)
+    const application = this.application;
+
+    this.panel = application.createToolPanel(this)
       .setDefaultHeight(400)
       .setDefaultMobileHeight(300)
       .setMinimumHeight(160);

@@ -304,6 +304,14 @@ public class AzureBlobFileStore implements FileStore
   public void delete(Path path)
   {
     String blobPath = normalizePath(path);
+
+    if (blobPath.isEmpty())
+    {
+      throw new InvalidRequestException(
+              "Cannot delete container root"
+      );
+    }
+
     BlobClient blobClient = containerClient.getBlobClient(blobPath);
 
     if (blobClient.exists())
@@ -312,21 +320,68 @@ public class AzureBlobFileStore implements FileStore
       return;
     }
 
-    String prefix = blobPath.endsWith("/") ? blobPath : blobPath + "/";
+    String prefix = blobPath.endsWith("/")
+            ? blobPath
+            : blobPath + "/";
+
     PagedIterable<BlobItem> children =
-            containerClient.listBlobsByHierarchy("/", new ListBlobsOptions().setPrefix(prefix), null);
+            containerClient.listBlobsByHierarchy(
+                    "/",
+                    new ListBlobsOptions().setPrefix(prefix),
+                    null
+            );
 
     List<BlobItem> childList = new ArrayList<>();
-    for (BlobItem item : children) childList.add(item);
 
-    if (childList.size() == 1 && isACLFileName(childList.get(0).getName()))
+    for (BlobItem item : children)
     {
-      containerClient.getBlobClient(childList.get(0).getName()).delete();
+      childList.add(item);
     }
 
     for (BlobItem item : childList)
     {
-      containerClient.getBlobClient(item.getName()).delete();
+      String name = item.getName();
+
+      if (item.isPrefix())
+      {
+        throw new InvalidRequestException(
+                "Folder not empty"
+        );
+      }
+
+      if (name.equals(prefix + FOLDER_MARKER))
+      {
+        continue;
+      }
+
+      if (name.equals(prefix + ACL_FILENAME))
+      {
+        continue;
+      }
+
+      throw new InvalidRequestException(
+              "Folder not empty"
+      );
+    }
+
+    for (BlobItem item : childList)
+    {
+      String name = item.getName();
+
+      if (name.equals(prefix + FOLDER_MARKER)
+              || name.equals(prefix + ACL_FILENAME))
+      {
+        containerClient
+                .getBlobClient(name)
+                .delete();
+      }
+    }
+
+    if (childList.isEmpty())
+    {
+      throw new NotFoundException(
+              "Blob or folder not found: " + blobPath
+      );
     }
   }
 

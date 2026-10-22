@@ -15,7 +15,7 @@ class SelectionHandler
 
     this._buttonPressed = -1;
     this._showContextMenu = false;
-    this._pointerDownTime = 0;
+    this._pointerTimeoutId = null;
   }
 
   enable()
@@ -48,7 +48,9 @@ class SelectionHandler
 
     this._buttonPressed = event.button;
     this._dragging = false;
-    this._pointerDownTime = Date.now();
+
+    this.clearPointerTimeout();
+    this._pointerTimeoutId = setTimeout(() => this.onLongPress(event), 500);
 
     const container = application.container;
     container.addEventListener("pointermove", this._onPointerMove);
@@ -56,19 +58,51 @@ class SelectionHandler
 
   onPointerUp(event)
   {
-    if (this._buttonPressed === -1) return;
-
-    const tool = this.tool;
-    const application = tool.application;
-    const container = application.container;
-    const selection = application.selection;
-
+    const container = this.tool.application.container;
     container.removeEventListener("pointermove", this._onPointerMove);
 
-    if (!application.isCanvasEvent(event) || this._dragging) return;
+    if (this._buttonPressed === -1) return;
 
-    const ellapsed = Date.now() - this._pointerDownTime;
-    let showContextMenu = event.button > 0 || ellapsed > 500;
+    this.select(event, this._buttonPressed > 0);
+    this.clearPointerTimeout();
+    this._buttonPressed = -1;
+  }
+
+  onLongPress(event)
+  {
+    this.select(event, true);
+    this.clearPointerTimeout();
+    this._buttonPressed = -1;
+  }
+
+  onPointerMove(event)
+  {
+    this._dragging = true;
+
+    this.clearPointerTimeout();
+
+    const application = this.tool.application;
+    if (application.contextMenu.isVisible())
+    {
+      application.contextMenu.hide();
+      this._buttonPressed = -1;
+    }
+  }
+
+  onContextMenu(event)
+  {
+    const application = this.tool.application;
+    if (!application.isCanvasEvent(event)) return;
+
+    event.preventDefault();
+  }
+
+  select(event, showContextMenu = false)
+  {
+    const tool = this.tool;
+    const application = tool.application;
+
+    if (!application.isCanvasEvent(event) || this._dragging) return;
 
     const position = application.getPointerPosition(event);
     let intersect = tool.intersect(position, application.baseObject);
@@ -81,22 +115,17 @@ class SelectionHandler
     {
       application.userSelectObjects([], event);
     }
-    this._buttonPressed = -1;
 
     if (showContextMenu) application.contextMenu.show(event);
   }
 
-  onPointerMove(event)
+  clearPointerTimeout()
   {
-    this._dragging = true;
-  }
-
-  onContextMenu(event)
-  {
-    const application = this.tool.application;
-    if (!application.isCanvasEvent(event)) return;
-
-    event.preventDefault();
+    if (this._pointerTimeoutId !== null)
+    {
+      clearTimeout(this._pointerTimeoutId);
+      this._pointerTimeoutId = null;
+    }
   }
 }
 

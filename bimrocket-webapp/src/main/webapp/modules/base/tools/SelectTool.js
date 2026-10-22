@@ -35,7 +35,7 @@ class SelectTool extends Tool
 
     this._buttonPressed = -1;
     this._dragging = false;
-    this._pointerDownTime = 0;
+    this._pointerTimeoutId = null;
 
     this.createPanel();
 
@@ -116,65 +116,48 @@ class SelectTool extends Tool
 
     this._buttonPressed = event.button;
     this._dragging = false;
-    this._pointerDownTime = Date.now();
+
+    this.clearPointerTimeout();
+    this._pointerTimeoutId = setTimeout(() => this.onLongPress(event), 500);
 
     this.enableDragging();
   }
 
   onPointerUp(event)
   {
-    if (this._buttonPressed === -1) return;
-
-    const application = this.application;
-    const container = application.container;
-    const selection = application.selection;
-
-    if (!application.isCanvasEvent(event)) return;
-
-    const ellapsed = Date.now() - this._pointerDownTime;
-    let showContextMenu = !this._dragging &&
-      (event.button > 0 || ellapsed > 500);
-
-    if (this._buttonPressed === 0 || !this._dragging)
-    {
-      let position = this.getPointerPosition(event);
-      let intersect = this.intersect(position, application.baseObject);
-      if (intersect)
-      {
-        const point = intersect.point;
-        const selPoint = new THREE.Vector3();
-        const decimals = 3;
-
-        selPoint.setFromMatrixPosition(application.baseObject.matrix);
-        selPoint.negate().add(point);
-
-        this.posElem.textContent = "(x, y, z) = (" +
-          selPoint.x.toFixed(decimals) + ", " +
-          selPoint.y.toFixed(decimals) + ", " +
-          selPoint.z.toFixed(decimals) + ")";
-
-        let object = this.findActualSelectedObject(intersect.object);
-        application.userSelectObjects([object], event);
-      }
-      else if (!showContextMenu)
-      {
-        application.userSelectObjects([], event);
-      }
-    }
     this.disableDragging();
 
-    if (showContextMenu) this.application.contextMenu.show(event);
+    if (this._buttonPressed === -1) return;
+
+    this.select(event, !this._dragging && this._buttonPressed > 0);
+    this.clearPointerTimeout();
+    this._buttonPressed = -1;
+  }
+
+  onLongPress(event)
+  {
+    this.select(event, true);
+    this.clearPointerTimeout();
+    this._buttonPressed = -1;
   }
 
   onPointerMove(event)
   {
     this._dragging = true;
 
+    this.clearPointerTimeout();
+
+    const application = this.application;
+    if (application.contextMenu.isVisible())
+    {
+      application.contextMenu.hide();
+      this._buttonPressed = -1;
+      return;
+    }
+
     if (this._buttonPressed > 0) return;
 
     const pointerElem = this.pointerElem;
-
-    const application = this.application;
 
     if (!application.isCanvasEvent(event))
     {
@@ -217,8 +200,48 @@ class SelectTool extends Tool
 
     const pointerElem = this.pointerElem;
     pointerElem.style.display = "none";
+  }
 
-    this._buttonPressed = -1;
+  select(event, showContextMenu = false)
+  {
+    const application = this.application;
+
+    if (!application.isCanvasEvent(event)) return;
+
+    let position = this.getPointerPosition(event);
+    let intersect = this.intersect(position, application.baseObject);
+    if (intersect)
+    {
+      const point = intersect.point;
+      const selPoint = new THREE.Vector3();
+      const decimals = 3;
+
+      selPoint.setFromMatrixPosition(application.baseObject.matrix);
+      selPoint.negate().add(point);
+
+      this.posElem.textContent = "(x, y, z) = (" +
+        selPoint.x.toFixed(decimals) + ", " +
+        selPoint.y.toFixed(decimals) + ", " +
+        selPoint.z.toFixed(decimals) + ")";
+
+      let object = this.findActualSelectedObject(intersect.object);
+      application.userSelectObjects([object], event);
+    }
+    else if (!showContextMenu)
+    {
+      application.userSelectObjects([], event);
+    }
+
+    if (showContextMenu) application.contextMenu.show(event);
+  }
+
+  clearPointerTimeout()
+  {
+    if (this._pointerTimeoutId !== null)
+    {
+      clearTimeout(this._pointerTimeoutId);
+      this._pointerTimeoutId = null;
+    }
   }
 
   getPointerPosition(event)

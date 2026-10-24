@@ -387,9 +387,6 @@ class ActiveMenuItem extends BaseMenuItem
     this.setLabel(label);
     this.buttonElement.appendChild(this.labelElement);
 
-    this.buttonElement.addEventListener("contextmenu",
-      event => event.preventDefault());
-
     this.buttonElement.addEventListener("focusin",
       event => container.onMenuItemFocused(this, event));
 

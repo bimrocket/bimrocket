@@ -150,6 +150,11 @@ class Application
    	THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1);
     THREE.Object3D.HIDDEN_PREFIX = ".";
 
+    /* disable context menu by default */
+
+    document.addEventListener("contextmenu",
+      event => event.preventDefault(), { capture: true });
+
     /* create sub elements */
 
     const container = document.createElement("div");
@@ -233,12 +238,6 @@ class Application
 
     let cssRenderer = new CSS2DRenderer();
     cssRenderer.setSize(container.clientWidth, container.clientHeight);
-    cssRenderer.domElement.style.position = "absolute";
-    cssRenderer.domElement.style.top = "0";
-    cssRenderer.domElement.style.bottom = "0";
-    cssRenderer.domElement.style.left = "0";
-    cssRenderer.domElement.style.right = "0";
-    cssRenderer.domElement.style.right = "0";
     this.cssRenderer = cssRenderer;
     container.appendChild(cssRenderer.domElement);
 

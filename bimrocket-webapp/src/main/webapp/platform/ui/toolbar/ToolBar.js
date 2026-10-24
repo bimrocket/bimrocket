@@ -65,7 +65,6 @@ class ToolBar
       {
         if (event.button === 0) startScroll(amount);
       });
-      button.addEventListener("contextmenu", event => event.preventDefault());
       button.addEventListener("pointerup", stopScroll);
       button.addEventListener("pointerleave", stopScroll);
       button.addEventListener("touchstart",

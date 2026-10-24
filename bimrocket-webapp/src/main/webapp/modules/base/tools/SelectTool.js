@@ -31,7 +31,6 @@ class SelectTool extends Tool
     this._onPointerUp = this.onPointerUp.bind(this);
     this._onPointerMove = this.onPointerMove.bind(this);
     this._onPointerLeave = this.onPointerLeave.bind(this);
-    this._onContextMenu = this.onContextMenu.bind(this);
 
     this._buttonPressed = -1;
     this._dragging = false;
@@ -86,7 +85,6 @@ class SelectTool extends Tool
     container.addEventListener("pointerdown", this._onPointerDown);
     container.addEventListener("pointerup", this._onPointerUp);
     container.addEventListener("pointerleave", this._onPointerLeave);
-    container.addEventListener("contextmenu", this._onContextMenu);
     this.selectModeElem.setValue(this.application.selectionMode);
   }
 
@@ -97,7 +95,6 @@ class SelectTool extends Tool
     container.removeEventListener("pointerdown", this._onPointerDown);
     container.removeEventListener("pointerup", this._onPointerUp);
     container.removeEventListener("pointerleave", this._onPointerLeave);
-    container.removeEventListener("contextmenu", this._onContextMenu);
 
     this.disableDragging();
   }
@@ -177,14 +174,6 @@ class SelectTool extends Tool
   onPointerLeave(event)
   {
     this.disableDragging();
-  }
-
-  onContextMenu(event)
-  {
-    const application = this.application;
-    if (!application.isCanvasEvent(event)) return;
-
-    event.preventDefault();
   }
 
   enableDragging()

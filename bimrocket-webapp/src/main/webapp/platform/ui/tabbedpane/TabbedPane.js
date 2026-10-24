@@ -63,9 +63,6 @@ class TabbedPane
         }
       });
 
-      tabElem.addEventListener("contextmenu",
-        event => event.preventDefault());
-
       if (label) I18N.set(tabElem, "textContent", label || name);
       if (title) I18N.set(tabElem, "data-tooltip", title || name);
       if (className) tabElem.classList.add(className);

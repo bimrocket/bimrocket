@@ -153,6 +153,15 @@ menu.menubar > li > button
   bottom: 0;
 }
 
+html, body, canvas, .canvas
+{
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
 .logo-panel > .info
 {
   color: white;

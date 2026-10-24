@@ -250,7 +250,6 @@ class FlyTool extends CameraTool
         button.addEventListener("pointerdown", onPressed);
         button.addEventListener("pointerup", onReleased);
         button.addEventListener("pointercancel", onReleased);
-        button.addEventListener("contextmenu", event => event.preventDefault());
       }
       else
       {
@@ -836,9 +835,6 @@ class Stick
       tool[subpanel.xControl] = control.x;
       tool[subpanel.yControl] = control.y;
     };
-
-    subpanel.element.addEventListener("contextmenu",
-      event => event.preventDefault());
   }
 
   activate()

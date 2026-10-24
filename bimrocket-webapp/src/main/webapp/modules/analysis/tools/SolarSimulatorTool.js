@@ -548,10 +548,6 @@ class TimeGraph
       {
         drag = false;
       });
-    canvas.addEventListener("contextmenu", event =>
-      {
-        event.preventDefault();
-      });
   }
 
   setTime(date)

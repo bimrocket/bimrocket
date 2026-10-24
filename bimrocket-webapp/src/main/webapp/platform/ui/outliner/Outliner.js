@@ -177,6 +177,9 @@ class Outliner extends Panel
 
   updateSelection()
   {
+    // do not update selection if Outliner is not visible
+    if (!this.visible) return;
+
     // clear previous selectes nodes
     this.clearNodeStyle("selected");
     this.contextMenuButton.remove();
@@ -205,10 +208,12 @@ class Outliner extends Panel
 
   populateObject(object, parentTreeNode)
   {
+    const application = this.application;
+
     let onClick = event =>
     {
       this.autoScroll = false;
-      this.application.userSelectObjects([object], event);
+      application.userSelectObjects([object], event);
     };
     let treeNode;
     if (parentTreeNode)
@@ -218,6 +223,10 @@ class Outliner extends Panel
     else
     {
       treeNode = this.tree.addNode(object, onClick);
+    }
+    if (application.camera === object)
+    {
+      treeNode.addClass("active-camera");
     }
     this.updateNodeStyle(treeNode);
     this.populateChildren(treeNode);
@@ -307,6 +316,11 @@ class Outliner extends Panel
     {
       this.destroyMap(childTreeNode);
     }
+  }
+
+  onShow()
+  {
+    this.updateSelection();
   }
 }
 

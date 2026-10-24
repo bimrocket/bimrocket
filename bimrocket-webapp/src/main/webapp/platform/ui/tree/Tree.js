@@ -359,7 +359,7 @@ class TreeNode
     }
   }
 
-  expandAncestors(makeVisible = false)
+  expandAncestors(scrollIntoView = false)
   {
     let curr = this.parent;
     while (curr)
@@ -367,7 +367,7 @@ class TreeNode
       curr.expand();
       curr = curr.parent;
     }
-    if (makeVisible)
+    if (scrollIntoView)
     {
       this.nodeElem.scrollIntoView({ block: "center", inline: "nearest"});
     }

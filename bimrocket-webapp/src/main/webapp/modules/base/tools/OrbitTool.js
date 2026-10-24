@@ -366,35 +366,35 @@ class OrbitTool extends CameraTool
     this.radius = this.center.distanceTo(camera.position);
   }
 
-  onStartGesture()
-  {
-    this.updateCenter();
-
-    // add & update sphere
-    const application = this.application;
-    application.overlays.add(this.sphere);
-
-    const spherePosition = this.center.clone();
-    const camera = application.camera;
-    const parentMatrix = camera.parent.matrixWorld;
-    spherePosition.applyMatrix4(parentMatrix);
-    this.sphere.position.copy(spherePosition);
-    let scale;
-    if (camera instanceof THREE.PerspectiveCamera)
-    {
-      scale = this.radius * 0.01;
-    }
-    else
-    {
-      scale = 0.005 * (camera.right - camera.left) / camera.zoom;
-    }
-    this.sphere.scale.set(scale, scale, scale);
-    this.sphere.updateMatrix();
-    application.notifyObjectsChanged(this.sphere, this);
-  }
-
   onDrag(position, direction, pointerCount, button, pointerType)
   {
+    if (!this.sphere.parent && button === this.rotateButton && pointerCount === 1)
+    {
+      this.updateCenter();
+
+      // add & update sphere
+      const application = this.application;
+      application.overlays.add(this.sphere);
+
+      const spherePosition = this.center.clone();
+      const camera = application.camera;
+      const parentMatrix = camera.parent.matrixWorld;
+      spherePosition.applyMatrix4(parentMatrix);
+      this.sphere.position.copy(spherePosition);
+      let scale;
+      if (camera instanceof THREE.PerspectiveCamera)
+      {
+        scale = this.radius * 0.01;
+      }
+      else
+      {
+        scale = 0.005 * (camera.right - camera.left) / camera.zoom;
+      }
+      this.sphere.scale.set(scale, scale, scale);
+      this.sphere.updateMatrix();
+      application.notifyObjectsChanged(this.sphere, this);
+    }
+
     if ((pointerType === "mouse" && button === this.panButton) ||
          pointerCount === 2)
     {

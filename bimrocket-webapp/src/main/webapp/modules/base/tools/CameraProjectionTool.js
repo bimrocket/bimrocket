@@ -5,7 +5,7 @@
  */
 
 import { Tool } from "platform/ui/Tool.js";
-import { I18N } from "platform/i18n/I18N.js";
+import { ObjectUtils } from "platform/utils/ObjectUtils.js";
 
 class CameraProjectionTool extends Tool
 {
@@ -24,13 +24,30 @@ class CameraProjectionTool extends Tool
   execute()
   {
     const application = this.application;
+    const camera = application.camera;
+    const persp = application.perspectiveCamera;
+    const ortho = application.orthographicCamera;
+    const baseObject = application.baseObject;
+
     if (this.type === "orthographic")
     {
-      application.activateCamera(application.orthographicCamera);
+      if (camera === persp)
+      {
+        const distance = ObjectUtils.distanceByBounds(persp, baseObject);
+        ObjectUtils.copyPerspectiveToOrthographic(persp, ortho, distance);
+        application.notifyObjectsChanged(ortho);
+      }
+      application.activateCamera(ortho);
     }
-    else
+    else // perspertive
     {
-      application.activateCamera(application.perspectiveCamera);
+      if (camera === ortho)
+      {
+        const distance = ObjectUtils.distanceByBounds(ortho, baseObject);
+        ObjectUtils.copyOrthographicToPerspective(ortho, persp, distance);
+        application.notifyObjectsChanged(persp);
+      }
+      application.activateCamera(persp);
     }
   }
 }

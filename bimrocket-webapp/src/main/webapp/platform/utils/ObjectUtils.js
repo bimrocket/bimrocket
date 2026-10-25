@@ -734,6 +734,85 @@ class ObjectUtils
       camera.updateProjectionMatrix();
     }
   }
+  
+  /**
+   * Calculates the distance between the camera and the center of the scene.
+   *
+   * @param {THREE.Camera} camera - the camera (perspective or orthographic)
+   * @param {THREE.Object3D} scene - the scene or group of objects
+   * @returns {number} the distance between the camera and the scene
+   */
+  static distanceByBounds(camera, scene)
+  {
+    const box = new THREE.Box3().setFromObject(scene);
+    if (box.isEmpty()) return 10;
+
+    const dir = camera.getWorldDirection(new THREE.Vector3());
+    const d = box.getCenter(new THREE.Vector3()).sub(camera.position).dot(dir);
+    return Math.max(d, camera.near);
+  }
+
+  /**
+   * Copies the parameters from a perspective camera to an orthographic one.
+   *
+   * @param {THREE.PerspectiveCamera} persp - the perspective camera
+   * @param {THREE.OrthographicCamera} ortho - the orthographic camera
+   * @param {number} distance - the distance to the scene
+   */
+  static copyPerspectiveToOrthographic(persp, ortho, distance = 10)
+  {
+    persp.updateMatrixWorld(true);
+
+    ortho.position.copy(persp.position);
+    ortho.quaternion.copy(persp.quaternion);
+    ortho.up.copy(persp.up);
+
+    const height = 2 * distance *
+      Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2) / persp.zoom;
+    const width = height * persp.aspect;
+
+    ortho.left = -width / 2;
+    ortho.right = width / 2;
+    ortho.top = height / 2;
+    ortho.bottom = -height / 2;
+    ortho.zoom = 1;
+    ortho.near = persp.near;
+    ortho.far = persp.far;
+
+    ortho.updateMatrix();
+    ortho.updateProjectionMatrix();
+    ortho.updateMatrixWorld(true);
+  }
+
+  /**
+   * Copies the parameters from an orthographic camera to a perspective one.
+   *
+   * @param {THREE.OrthographicCamera} ortho - the orthographic camera
+   * @param {THREE.PerspectiveCamera} persp - the perspective camera
+   * @param {number} distance - the distance to the scene
+   */
+  static copyOrthographicToPerspective(ortho, persp, distance = 10)
+  {
+    ortho.updateMatrixWorld(true);
+
+    const height = (ortho.top - ortho.bottom) / ortho.zoom;
+    const newDistance = height /
+      (2 * Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2));
+
+    const dir = ortho.getWorldDirection(new THREE.Vector3());
+    const focus = ortho.position.clone().addScaledVector(dir, distance);
+
+    persp.position.copy(focus).addScaledVector(dir, -newDistance);
+    persp.quaternion.copy(ortho.quaternion);
+    persp.up.copy(ortho.up);
+    persp.aspect = (ortho.right - ortho.left) / (ortho.top - ortho.bottom);
+    persp.zoom = 1;
+    persp.far = Math.max(ortho.far, newDistance + distance);
+
+    persp.updateMatrix();
+    persp.updateProjectionMatrix();
+    persp.updateMatrixWorld(true);
+  }
 
   /**
    * Calculates the bounding box of the given objects in world CS.

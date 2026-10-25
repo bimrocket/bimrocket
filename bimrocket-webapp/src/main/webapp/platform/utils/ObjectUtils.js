@@ -31,12 +31,27 @@ class ObjectUtils
     "mi": 0.000621371
   };
 
+  /**
+   * Indicates whether the given value is a string, number or boolean.
+   *
+   * @param {any} value - the value to test
+   * @returns {boolean} true only if the given value is a string, number,
+   *   or boolean
+   */
   static isBasicType(value)
   {
     let type = typeof value;
     return type === "string" || type === "number" || type === "boolean";
   }
 
+  /**
+   * Indicates whether the given array only contains basic types:
+   *   string, number, or boolean.
+   *
+   * @param {Array} array - the array to test
+   * @returns {boolean} true only if all elements of the given array are of
+   *   basic types
+   */
   static isBasicArray(array)
   {
     if (array instanceof Array)
@@ -50,15 +65,34 @@ class ObjectUtils
     return false;
   }
 
-  static getObjectValue(object, ...properties)
+  /**
+   * Returns the value of an object property specified via a path.
+   *
+   * @param {any} object - the object to evaluate
+   * @param {any} path - elements that represents the path to the property.
+   *   Each path element can be one of the following:
+   *   - "[name]": gets the value of the object property with that name
+   *   - [index]: gets the object value at index position
+   *   - "child:[name]": gets the first child object with the given name
+   *   - "descendant:[name]": gets the first descendant object with the given name
+   *   - "ancestor:[name]": gets the closest ancestor object with the given name
+   * @returns {any} the value of the specified property of an empty string
+   *   if its value is null or undefined
+   *
+   * @example
+   *   ObjectUtils.getObjectValue(solid, "position", "x")
+   *   ObjectUtils.getObjectValue(window, "IFC", "OverallWidth")
+   *   ObjectUtils.getObjectValue(wall, "ancestor:IfcWall", "descendant:A12")
+   */
+  static getObjectValue(object, ...path)
   {
-    if (properties.length === 0) return object;
+    if (path.length === 0) return object;
 
     let data = object;
     let i = 0;
-    while (i < properties.length && data && typeof data === "object")
+    while (i < path.length && data && typeof data === "object")
     {
-      let property = properties[i];
+      let property = path[i];
 
       if (data instanceof THREE.Object3D)
       {
@@ -125,17 +159,16 @@ class ObjectUtils
   }
 
   /**
-   * Creates a function to evaluate a expression for an object
+   * Creates a function to evaluate an object expression.
    *
-   * @param {String|Function} expression : an expression with references to
-   * $ function. When expression is a String it can also have references to
-   * these object properties: object, position, rotation, scale, material,
-   * userData, builder and controllers.
+   * @param {string|Function} expression - an expression with references to
+   *   $ function. When expression is a String it can also have references to
+   *   these object properties: object, position, rotation, scale, material,
+   *   userData, builder and controllers
+   * @returns {Function} - function fn(object) that evaluates expression for
+   *   the given object
    *
-   * @returns {Function} : function fn(object) that evaluates expression for
-   * the given object.
-   *
-   * Examples:
+   * @example
    *   ObjectUtils.createEvalFunction('$("IFC", "ifcClassName") === "IfcBeam"')
    *   ObjectUtils.createEvalFunction('position.x > 0')
    *   ObjectUtils.createEvalFunction($ => $("IFC", "Name") === "House")
@@ -175,6 +208,15 @@ class ObjectUtils
     }
   }
 
+  /**
+   * Disposes object resources recursivelly.
+   *
+   * @param {THREE.Object3D} root - the root object
+   * @param {boolean} geometries - indicates whether the geometries should be
+   *   disposed
+   * @param {boolean} materials - indicates whether the materials should be
+   *   disposed
+   */
   static dispose(root, geometries = true, materials = true)
   {
     const cssObjects = [];
@@ -209,6 +251,11 @@ class ObjectUtils
     }
   }
 
+  /**
+   * Disposes the object materials.
+   *
+   * @param {THREE.Material|THREE.Material[]} material - materials to dispose
+   */
   static disposeMaterial(material)
   {
     if (material instanceof THREE.Material)
@@ -224,6 +271,17 @@ class ObjectUtils
     }
   }
 
+  /**
+   * Applies a material to an object.
+   *
+   * @param {THREE.Object3D} object - the object to apply the material
+   * @param {THREE.Material} material - the material to apply. When material
+   *   is null, the original material of the object is restored
+   * @param {boolean} original - indicates whether the material to apply is
+   *   original (true) or temporary (false). When original is false,
+   *   the original material is saved so that it can be restored later
+   * @returns {boolean} true only when the object material has changed
+   */
   static applyMaterial(object, material, original = true)
   {
     const ORIGINAL_MATERIAL = ObjectUtils.ORIGINAL_MATERIAL;
@@ -270,6 +328,13 @@ class ObjectUtils
     return changed;
   }
 
+  /**
+   * Returns a string containing the object class names (from IFC and builder).
+   *
+   * @param {THREE.Object3D} object - the object from which to obtain the
+   *  class names
+   * @returns {String} a string containing the class names separated by spaces
+   */
   static getObjectClassNames(object)
   {
     let classList = [ object.type ];
@@ -285,6 +350,18 @@ class ObjectUtils
     return classList.join(" ");
   }
 
+  /**
+   * Finds the objects that meet the specified condition.
+   *
+   * @param {function(THREE.Object3D): boolean} condition - the function that
+   *   returns true when an object meets the condition
+   * @param {THREE.Object3D} baseObject - the base object to start the
+   *   search from
+   * @param {boolean} nested - when true it also searches for child objects
+   *   of the objects that meet the condition
+   * @returns {THREE.Object3D[]} an array containing all the objects that meet
+   *   the condition
+   */
   static findObjects(condition, baseObject, nested = false)
   {
     const objects = [];
@@ -327,6 +404,20 @@ class ObjectUtils
     { edgesVisible : edgesVisible, facesVisible : facesVisible });
   }
 
+  /**
+   * Updates the appearance of the given objects.
+   *
+   * @param {THREE.Object3D[]} objects - the objects whose appearance is to be
+   *   changed
+   * @param {Object} appearance - an object describing the appearance to apply
+   * @param {boolean} appearance.visible - the object visible property
+   * @param {boolean} appearance.facesVisible - the Solid facesVisible property
+   * @param {boolean} appearance.edgesVisible - the Solid edgesVisible property
+   * @param {boolean} appearance.original - changes the original material
+   * @param {THREE.Material} appearance.meshMaterial - the mesh material
+   * @param {THREE.Material} appearance.lineMaterial - the line material
+   * @param {THREE.Material} appearance.pointMaterial - the point material
+   */
   static updateAppearance(objects, appearance)
   {
     const visited = appearance.visible ? new Set() : null;
@@ -456,6 +547,16 @@ class ObjectUtils
     }, true);
   }
 
+  /**
+   * Applies an update function to the given objects.
+   *
+   * @param {THREE.Object3D[]} objects - the objects to update
+   * @param {function(THREE.Object3D, Set):void} updateFunction - the update
+   *   function to apply to the objects
+   * @param {boolean} recursive - indicates whether the update is applied
+   *   recursivelly
+   * @returns {Set<THREE.Object3D>} a set containing the updated objects
+   */
   static updateObjects(objects, updateFunction, recursive = false)
   {
     const changed = new Set();
@@ -501,6 +602,14 @@ class ObjectUtils
     return changed;
   }
 
+  /**
+   * Applies an offset to the base object to reduce the mantissa of
+   * the object coordinates in WCS.
+   * The offset is no applied if it is lower than 10000.
+   *
+   * @param {THREE.Object3D} baseObject - the object to apply the offset
+   * @returns {boolean} true when the offset is applied
+   */
   static reduceCoordinates(baseObject)
   {
     const box = ObjectUtils.getLocalBoundingBox(baseObject);
@@ -524,6 +633,16 @@ class ObjectUtils
     return true;
   }
 
+  /**
+   * Change the camera parameters to fit the given objects on the screen.
+   *
+   * @param {THREE.Camera} camera - the camera to modify
+   * @param {THREE.Object3D[]} objects - the objects to fit on the screen
+   * @param {number} aspect - the screen aspect ratio
+   * @param {boolean} includeInvisible - indicates whether invisible objects
+   *   are included
+   * @param {number} offsetFactor - factor to enlarge the objects framing
+   */
   static zoomAll(camera, objects, aspect, includeInvisible, offsetFactor = 1.1)
   {
     if (objects instanceof THREE.Object3D)
@@ -582,6 +701,12 @@ class ObjectUtils
     this.updateCameraAspectRatio(camera, aspect);
   }
 
+  /**
+   * Updates the camera aspect ratio.
+   *
+   * @param {THREE.Camera} camera - the camera to update the aspect ratio
+   * @param {number} aspect - the aspect ratio
+   */
   static updateCameraAspectRatio(camera, aspect)
   {
     if (camera instanceof THREE.PerspectiveCamera)
@@ -610,11 +735,30 @@ class ObjectUtils
     }
   }
 
+  /**
+   * Calculates the bounding box of the given objects in world CS.
+   *
+   * @param {THREE.Object3D[]} objects - the objects whose bounding box is
+   *   to be calculated
+   * @param {boolean} includeInvisible - indicates whether invisible objects
+   *   are included
+   * @returns {THREE.Box3} the bounding box in world CS
+   */
   static getBoundingBox(objects, includeInvisible)
   {
     return this.getBoundingBoxFromView(objects, null, includeInvisible);
   }
 
+  /**
+   * Calculates the bounding box of the given objects in view CS.
+   *
+   * @param {THREE.Object3D[]} objects - the objects whose bounding box is
+   *   to be calculated
+   * @param {THREE.Matrix4} viewMatrixWorld - the camera matrix world
+   * @param {boolean} includeInvisible - indicates whether invisible objects
+   *   are included
+   * @returns {THREE.Box3} the bounding box in view CS
+   */
   static getBoundingBoxFromView(objects, viewMatrixWorld = null,
     includeInvisible = false)
   {
@@ -704,6 +848,15 @@ class ObjectUtils
     return box;
   }
 
+  /**
+   * Calculates the bounding box of the given object in local CS.
+   *
+   * @param {THREE.Object3D} object - the object for which the bounding box is
+   *   to be calculated
+   * @param {boolean} includeInvisible - indicates whether invisible objects
+   *   are included
+   * @returns {THREE.Box3} the bounding box in object local CS
+   */
   static getLocalBoundingBox(object, includeInvisible = false)
   {
     const box = new THREE.Box3(); // empty box
@@ -747,6 +900,12 @@ class ObjectUtils
     return box;
   }
 
+  /**
+   * Creates a BufferGeometry that represents the given box.
+   *
+   * @param {THREE.Box3} box - the box for which to generate the geometry
+   * @returns {THREE.BufferGeometry} the geometry of the box
+   */
   static getBoxGeometry(box)
   {
     var size = new THREE.Vector3();
@@ -802,9 +961,16 @@ class ObjectUtils
     return new THREE.BufferGeometry().setFromPoints(points);
   }
 
-  static findCameras(object, array)
+  /**
+   * Collects the cameras contained in the given object.
+   *
+   * @param {THREE.Object3D} object - the object from which to start collecting
+   *  the cameras
+   * @param {THREE.Camera[]} array - the output array
+   * @returns {THREE.Camera[]} the output array containing the cameras found
+   */
+  static findCameras(object, array = [])
   {
-    if (array === undefined) array = [];
     if (object instanceof THREE.Camera)
     {
       array.push(object);
@@ -817,19 +983,26 @@ class ObjectUtils
     return array;
   }
 
-  static findMaterials(object, array)
+  /**
+   * Collects the materials contained in the given object.
+   *
+   * @param {THREE.Object3D} object - the object from which to start collecting
+   *   the materials
+   * @returns {THREE.Material[]} the output array containing the materials found
+   */
+  static findMaterials(object)
   {
-    if (array === undefined) array = [];
-    let materialMap = new Map();
+    const array = [];
+    let materialSet = new Set();
 
     object.traverse(obj =>
     {
       let material = obj.material;
       if (material)
       {
-        if (!materialMap.has(material.uuid))
+        if (!materialSet.has(material.uuid))
         {
-          materialMap.set(material.uuid, material);
+          materialSet.add(material.uuid);
           array.push(material);
         }
       }
@@ -837,6 +1010,13 @@ class ObjectUtils
     return array;
   }
 
+  /**
+   * Puts a child object at the given position.
+   *
+   * @param {THREE.Object3D} object - the object
+   * @param {number} index - the chid position
+   * @param {THREE.Object3D} child - the child object
+   */
   static setChildAtIndex(object, index, child)
   {
     if (child.parent === object)
@@ -851,16 +1031,30 @@ class ObjectUtils
     child.parent = object;
   }
 
-  static isObjectDescendantOf(object, parent)
+  /**
+   * Tells whether an object is descendant of the specified ancestor.
+   *
+   * @param {THREE.Object3D} object - the object to test
+   * @param {THREE.Object3D} ancestor - the object ancestor
+   * @returns {boolean} true only if object is descendant of ancestor
+   */
+  static isObjectDescendantOf(object, ancestor)
   {
     object = object.parent;
-    while (object !== null && object !== parent)
+    while (object !== null && object !== ancestor)
     {
       object = object.parent;
     }
-    return object === parent;
+    return object === ancestor;
   }
 
+  /**
+   * Creates a link with the given name from one object to another.
+   *
+   * @param {THREE.Object3D} object - the source object
+   * @param {THREE.Object3D} relatedObject - the related object
+   * @param {string} name - the link name
+   */
   static createLink(object, relatedObject, name)
   {
     if (!object.links)
@@ -1009,6 +1203,13 @@ class ObjectUtils
     return options;
   }
 
+  /**
+   *
+   * @param {type} model
+   * @param {type} toUnits
+   * @param {type} fromUnits
+   * @returns {Boolean}
+   */
   static scaleModel(model, toUnits = "m", fromUnits)
   {
     fromUnits = fromUnits || model.userData.units;

@@ -199,6 +199,18 @@ public class SecurityEndpoint
   }
 
   /* Users */
+  
+  @GET
+  @Path("/currentUser")
+  @Produces(APPLICATION_JSON)
+  @PermitAll
+  @Operation(summary = "Get current user")
+  public User getCurrrentUser()
+  {
+    User user = securityService.getCurrentUser();
+    user.setPasswordHash(null);
+    return user;
+  }
 
   @GET
   @Path("/users")
@@ -211,7 +223,7 @@ public class SecurityEndpoint
     ODataParser parser = new ODataParser(userFieldMap);
     Expression filter = parser.parseFilter(odataFilter);
     List<OrderByExpression> orderBy = parser.parseOrderBy(odataOrderBy);
-
+    
     return securityService.getUsers(filter, orderBy);
   }
 

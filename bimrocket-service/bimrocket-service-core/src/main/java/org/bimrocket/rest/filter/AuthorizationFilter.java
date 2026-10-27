@@ -145,10 +145,6 @@ public class AuthorizationFilter
   {
     if (responseContext.getStatus() == 401)
     {
-      // Reset cookie
-      responseContext.getHeaders().add("Set-Cookie",
-        sessionCookieManager.getDestroyCookieString());
-
       // Check AJAX request
       String requestedWith = requestContext.getHeaderString("X-Requested-With");
 

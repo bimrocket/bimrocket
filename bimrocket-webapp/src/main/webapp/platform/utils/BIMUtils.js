@@ -139,7 +139,6 @@ class BIMUtils
       voidedSolid.rotation.copy(reprObject3D.rotation);
       voidedSolid.scale.copy(reprObject3D.scale);
       voidedSolid.builder = new IFCVoider();
-      voidedSolid._ifc = reprObject3D._ifc;
 
       ObjectUtils.setChildAtIndex(parent, index, voidedSolid);
       voidedSolid.add(reprObject3D);

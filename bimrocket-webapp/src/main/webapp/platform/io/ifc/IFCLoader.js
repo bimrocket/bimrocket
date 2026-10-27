@@ -1156,7 +1156,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
 
       const surface = halfSpace.BaseSurface;
       const base = halfSpace.Position;
-      const reverseSolid = halfSpace.AgreementFlag === false;
+      const reverseSolid = halfSpace.AgreementFlag === true;
       const boundary = halfSpace.PolygonalBoundary;
 
       if (surface instanceof schema.IfcPlane)
@@ -1164,7 +1164,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
         try
         {
           const size = loader.options.halfSpaceSize / loader.modelFactor;
-          const extruder = new Extruder(size);
+          const extruder = new Extruder(2 * size);
 
           // polygon solid
           const curvePoints = this.helper(boundary).getPoints();
@@ -1189,6 +1189,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
           let matrix = this.helper(base).getMatrix();
           matrix.decompose(polygonSolid.position, polygonSolid.rotation,
             polygonSolid.scale);
+          polygonSolid.position.z -= size;
           polygonSolid.updateMatrix();
 
           // plane solid
@@ -1198,7 +1199,7 @@ class IfcPolygonalBoundedHalfSpaceHelper extends IfcHalfSpaceSolidHelper
           halfSpaceSolid.name = "polygonalHalfSpace";
           halfSpaceSolid.add(polygonSolid);
           halfSpaceSolid.add(planeSolid);
-          halfSpaceSolid.builder = new BooleanOperator(BooleanOperator.SUBTRACT);
+          halfSpaceSolid.builder = new BooleanOperator(BooleanOperator.INTERSECT);
           halfSpaceSolid.userData.IFC = {
             ifcClassName : halfSpace.constructor.name
           };

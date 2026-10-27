@@ -744,7 +744,7 @@ class ObjectUtils
    */
   static distanceByBounds(camera, scene)
   {
-    const box = new THREE.Box3().setFromObject(scene);
+    const box = this.getBoundingBox(scene);
     if (box.isEmpty()) return 10;
 
     const dir = camera.getWorldDirection(new THREE.Vector3());

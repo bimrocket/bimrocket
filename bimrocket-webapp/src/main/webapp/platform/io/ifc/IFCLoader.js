@@ -768,6 +768,8 @@ class IfcProjectHelper extends IfcHelper
         }
       }
 
+      ObjectUtils.scaleModel(model);
+
       // process IfcMapConversion
       const mapCons = loader.ifcFile.entitiesByClass.get("IfcMapConversion");
       if (mapCons)

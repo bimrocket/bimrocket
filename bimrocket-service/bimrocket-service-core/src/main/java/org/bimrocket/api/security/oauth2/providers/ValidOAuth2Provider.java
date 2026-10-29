@@ -37,6 +37,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Locale;
+
 import org.bimrocket.api.security.User;
 import org.bimrocket.api.security.oauth2.TokenInfo;
 
@@ -83,7 +85,6 @@ public class ValidOAuth2Provider extends AbstractOAuth2Provider
 
     String identifier = userNode.get("identifier").asText();
     User user = new User();
-    user.setId(identifier);
 
     String givenName = "";
     String surnames = "";
@@ -108,10 +109,19 @@ public class ValidOAuth2Provider extends AbstractOAuth2Provider
     if (name.length() == 0) name = identifier;
     user.setName(name);
 
+    String email = "";
     if (userNode.has("email"))
     {
-      String email = userNode.get("email").asText();
+      email = userNode.get("email").asText();
       user.setEmail(email);
+    }
+
+    if (email!= null && !email.isBlank()){
+      user.setId(email);
+    }
+    else
+    {
+      user.setId(identifier.toLowerCase(Locale.ROOT));
     }
 
     user.getRoleIds().addAll(getValues("roles"));

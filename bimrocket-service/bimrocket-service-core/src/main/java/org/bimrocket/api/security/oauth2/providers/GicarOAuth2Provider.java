@@ -86,25 +86,29 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
 
     String preferredUsername = userNode.get("preferred_username").asText();
     User user = new User();
-    user.setId(preferredUsername);
 
-    String givenName = "";
-    String surnames = "";
-
-    if (userNode.has("name"))
+    String name = "";
+    if (userNode.hasNonNull("name") &&
+        !userNode.get("name").asText().trim().isEmpty())
     {
-      givenName = userNode.get("name").asText();
+      name = userNode.get("name").asText().trim();
     }
-    if (userNode.has("given_name"))
+    else
     {
-      surnames = userNode.get("given_name").asText();
-      if (userNode.has("family_name"))
+      String givenName = "";
+      String surnames = "";
+      if (userNode.hasNonNull("given_name"))
       {
-        surnames += " " + userNode.get("family_name").asText();
+        givenName = userNode.get("given_name").asText().trim();
       }
+      if (userNode.hasNonNull("family_name")) {
+        surnames = userNode.get("family_name").asText().trim();
+      }
+      name = (givenName + " " + surnames).trim();
     }
-    String name = (givenName + " " + surnames).trim();
-    if (name.length() == 0) name = preferredUsername;
+    if (name.isEmpty()) {
+      name = preferredUsername;
+    }
     user.setName(name);
 
     String email = "";
@@ -112,6 +116,14 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
     {
       email = userNode.get("email").asText();
       user.setEmail(email);
+    }
+
+    if (email!= null && !email.isBlank()){
+      user.setId(email);
+    }
+    else
+    {
+      user.setId(preferredUsername.toLowerCase(Locale.ROOT));
     }
 
     List<String> roles = getValues("roles");
@@ -129,7 +141,7 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
         user.getRoleIds().add(roles.get(1)); // PROJECTISTA
       }
     }
-    
+
     user.setPasswordHash(getName()); // invalidates login by password
 
     return user;

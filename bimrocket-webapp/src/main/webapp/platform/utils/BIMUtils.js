@@ -97,7 +97,10 @@ class BIMUtils
     {
       if (reprObject3D instanceof Solid)
       {
-        changed = this.createVoidedSolidFor(reprObject3D, voidingFilter);
+        if (this.createVoidedSolidFor(reprObject3D, voidingFilter))
+        {
+          changed = true;
+        }
       }
       else if (reprObject3D instanceof THREE.Group)
       {

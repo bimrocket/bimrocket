@@ -1283,15 +1283,18 @@ class ObjectUtils
   }
 
   /**
+   * Scales a model to the specified units.
    *
-   * @param {type} model
-   * @param {type} toUnits
-   * @param {type} fromUnits
-   * @returns {Boolean}
+   * @param {THREE.Object3D} model - the model to scale
+   * @param {string} toUnits - the target units
+   * @param {string} fromUnits - the original units of the model
+   * @returns {boolean} true only when the matrix of the model was updated
    */
   static scaleModel(model, toUnits = "m", fromUnits)
   {
     fromUnits = fromUnits || model.userData.units;
+    
+    if (fromUnits === toUnits) return false;
 
     let factor1 = this.METER_CONVERSION_FACTORS[toUnits];
     let factor2 = this.METER_CONVERSION_FACTORS[fromUnits] || model.userData.modelFactor;

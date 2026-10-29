@@ -39,6 +39,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -105,13 +107,29 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
     if (name.length() == 0) name = preferredUsername;
     user.setName(name);
 
+    String email = "";
     if (userNode.has("email"))
     {
-      String email = userNode.get("email").asText();
+      email = userNode.get("email").asText();
       user.setEmail(email);
     }
 
-    user.getRoleIds().addAll(getValues("roles"));
+    List<String> roles = getValues("roles");
+    if (roles != null && roles.size() >= 2)
+    {
+      if (email != null &&
+        (email.toLowerCase(Locale.ROOT).endsWith("@gencat.cat") ||
+         email.toLowerCase(Locale.ROOT).endsWith("@amb.cat") ||
+         email.toLowerCase(Locale.ROOT).endsWith("@bcn.cat")))
+      {
+        user.getRoleIds().add(roles.get(0)); // VECTOR-UT-OGE
+      }
+      else
+      {
+        user.getRoleIds().add(roles.get(1)); // PROJECTISTA
+      }
+    }
+    
     user.setPasswordHash(getName()); // invalidates login by password
 
     return user;

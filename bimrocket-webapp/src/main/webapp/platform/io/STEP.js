@@ -265,13 +265,27 @@ class STEPParser
 
   decodeSTEPString(str)
   {
-    return str.replace(/\\X2\\[\dA-F]{4}\\X0\\|\\X\\[\dA-F]{2}/gi,
-      match =>
+    return str.replace(
+      /\\X2\\((?:[0-9A-F]{4})+)\\X0\\|\\X4\\((?:[0-9A-F]{8})+)\\X0\\|\\X\\([0-9A-F]{2})/gi,
+      (match, x2, x4, x) =>
       {
-        const code = match.length === 12 ?
-          match.substring(4, 8) : match.substring(3, 5);
-        return String.fromCharCode(parseInt(code, 16));
-      });
+        if (x2)
+        {
+          return x2.match(/.{4}/g)
+            .map(code => String.fromCharCode(parseInt(code, 16)))
+            .join("");
+        }
+
+        if (x4)
+        {
+          return x4.match(/.{8}/g)
+            .map(code => String.fromCodePoint(parseInt(code, 16)))
+            .join("");
+        }
+
+        return String.fromCharCode(parseInt(x, 16));
+      }
+    );
   }
 };
 

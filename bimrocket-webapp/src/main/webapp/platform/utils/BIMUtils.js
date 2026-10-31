@@ -60,7 +60,7 @@ class BIMUtils
 
   static createVoidings(productObject3D, voidingFilter = [])
   {
-    let openingCount = 0;
+    let subtractCount = 0;
 
     let reprObjects = [];
 
@@ -81,13 +81,14 @@ class BIMUtils
             reprObjects.push(reprObject3D);
           }
         }
-        else if (ifcClassName === "IfcOpeningElement")
+        else if (ifcClassName === "IfcOpeningElement" ||
+                 ifcClassName === "IfcVoidingFeature")
         {
-          openingCount++;
+          subtractCount++;
         }
       }
     }
-    if (openingCount === 0 || reprObjects.length === 0) return;
+    if (subtractCount === 0 || reprObjects.length === 0) return;
 
     // voiding is required: add a parent Solid with IFCVoider for each Solid
 

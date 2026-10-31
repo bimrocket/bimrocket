@@ -260,6 +260,7 @@ class IFCLoader extends THREE.Loader
         {
           let ifcClassName = object.userData.IFC.ifcClassName;
           if (ifcClassName === "IfcOpeningElement" ||
+              ifcClassName === "IfcVoidingFeature" ||
               ifcClassName === "IfcSpace")
           {
             let repr = IFC.getRepresentation(object);

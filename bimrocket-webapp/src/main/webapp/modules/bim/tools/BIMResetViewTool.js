@@ -21,7 +21,11 @@ class BIMResetViewTool extends Tool
     this.iconName = "bim|bim-reset-view";
 
     this.view = { x : 90, y : 0, z : 0 },
-    this.hiddenIfcClasses = [ "IfcSpace", "IfcOpeningElement" ];
+    this.hiddenIfcClasses = [
+      "IfcSpace",
+      "IfcOpeningElement",
+      "IfcVoidingFeature"
+    ];
     this.setOptions(options);
     application.addTool(this);
     this.immediate = true;

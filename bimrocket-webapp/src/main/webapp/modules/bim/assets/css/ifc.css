@@ -125,6 +125,11 @@ ul.tree li.IfcOpeningElement > div::before
   mask-image: url(../icons/ifc.svg#IfcOpeningElement);
 }
 
+ul.tree li.IfcVoidingFeature > div::before
+{
+  mask-image: url(../icons/ifc.svg#IfcVoidingFeature);
+}
+
 ul.tree li.IfcPlate > div::before
 {
   mask-image: url(../icons/ifc.svg#IfcPlate);

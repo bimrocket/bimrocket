@@ -28,19 +28,13 @@ class IFCVoider extends SolidBuilder
     const unvoidedRepr = productRepr.getComponent(0);
     if (!(unvoidedRepr instanceof Solid)) return;
 
-    let productObject3D = this.findIfcProduct(productRepr);
-    if (productObject3D === null) return;
-
     action(unvoidedRepr);
 
-    action(productObject3D);
+    const subtractReprs = this.findSubtractions(productRepr);
 
-    for (let child of productObject3D.children)
+    for (let subtractRepr of subtractReprs)
     {
-      if (child.userData.IFC?.ifcClassName === "IfcOpeningElement")
-      {
-        action(child);
-      }
+      action(subtractRepr);
     }
   }
 
@@ -59,33 +53,9 @@ class IFCVoider extends SolidBuilder
       unvoidedRepr.updateGeometry(unvoidedRepr.geometry, true);
     }
 
-    let productObject3D = this.findIfcProduct(productRepr);
-    if (productObject3D === null) return true;
+    const subtractReprs = this.findSubtractions(productRepr);
 
-    const openingReprs = [];
-
-    for (let child of productObject3D.children)
-    {
-      if (child.userData.IFC?.ifcClassName === "IfcOpeningElement")
-      {
-        let openingRepr = IFC.getRepresentation(child);
-        if (openingRepr instanceof Solid)
-        {
-          openingReprs.push(openingRepr);
-        }
-        else if (openingRepr instanceof THREE.Group)
-        {
-          for (let subchild of openingRepr.children)
-          {
-            if (subchild instanceof Solid)
-            {
-              openingReprs.push(subchild);
-            }
-          }
-        }
-      }
-    }
-    if (openingReprs.length === 0)
+    if (subtractReprs.length === 0)
     {
       productRepr.updateGeometry(unvoidedRepr.geometry);
       return true;
@@ -100,11 +70,11 @@ class IFCVoider extends SolidBuilder
 
     let resultBSP = createBSP(unvoidedRepr);
 
-    for (let openingRepr of openingReprs)
+    for (let subtractRepr of subtractReprs)
     {
-      if (openingRepr.isValid())
+      if (subtractRepr.isValid())
       {
-        let otherBSP = createBSP(openingRepr);
+        let otherBSP = createBSP(subtractRepr);
         resultBSP = resultBSP.subtract(otherBSP);
       }
     }
@@ -119,21 +89,61 @@ class IFCVoider extends SolidBuilder
     return true;
   }
 
-  findIfcProduct(object)
+  findSubtractions(productRepr)
   {
-    // find the nearest ancestor object with GlobalId (IfcProduct) that is not
-    // an IfcBuildingElementPart
-
-    while (object)
+    const subtractReprs = [];
+    let ancestor = productRepr.parent;
+    while (ancestor)
     {
-      let ifcClassName = object.userData.IFC?.ifcClassName;
-      let globalId = object.userData.IFC?.GlobalId;
+      if (ancestor.name === IFC.RepresentationName)
+      {
+        ancestor = ancestor.parent;
+      }
+      else
+      {
+        let ifcClassName = ancestor.userData.IFC?.ifcClassName;
+        let globalId = ancestor.userData.IFC?.GlobalId;
+        if (ifcClassName && globalId)
+        {
+          this.findDirectSubtractions(ancestor, subtractReprs);
 
-      if (globalId && ifcClassName !== "IfcBuildingElementPart") return object;
-
-      object = object.parent;
+          ancestor = ifcClassName === "IfcBuildingElementPart" ?
+            ancestor.parent : null;
+        }
+        else
+        {
+          ancestor = null;
+        }
+      }
     }
-    return null;
+    return subtractReprs;
+  }
+
+  findDirectSubtractions(productObject3D, subtractReprs)
+  {
+    for (let child of productObject3D.children)
+    {
+      let ifcClassName = child.userData.IFC?.ifcClassName;
+      if (ifcClassName === "IfcOpeningElement" ||
+          ifcClassName === "IfcVoidingFeature")
+      {
+        let subtractRepr = IFC.getRepresentation(child);
+        if (subtractRepr instanceof Solid)
+        {
+          subtractReprs.push(subtractRepr);
+        }
+        else if (subtractRepr instanceof THREE.Group)
+        {
+          for (let subchild of subtractRepr.children)
+          {
+            if (subchild instanceof Solid)
+            {
+              subtractReprs.push(subchild);
+            }
+          }
+        }
+      }
+    }
   }
 };
 

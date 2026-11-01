@@ -1736,6 +1736,7 @@ class IfcManifoldSolidBrepHelper extends IfcGeometricRepresentationItemHelper
 
       const outerShell = brep.Outer;
       this.object3D = this.helper(outerShell).getObject3D();
+      ObjectUtils.reduceSolidCoordinates(this.object3D);
     }
     return this.object3D;
   }

@@ -15,6 +15,8 @@ class ObjectUtils
 {
   static ORIGINAL_MATERIAL = "originalMaterial";
 
+  static MAX_FLOAT32 = 10000;
+
   static HIGHLIGHT_BOX = "box";
   static HIGHLIGHT_EDGES = "edges";
   static HIGHLIGHT_NONE = "none";
@@ -621,14 +623,54 @@ class ObjectUtils
     const delta = new THREE.Vector3();
     const offset = delta.addVectors(center, baseObject.position).length();
 
-    // only reduce coordinates if offset > 10000
-    if (offset > 10000)
+    // only reduce coordinates if offset > MAX_FLOAT32
+    if (offset > this.MAX_FLOAT32)
     {
       center.negate();
       baseObject.position.copy(center);
       baseObject.updateMatrix();
     }
     baseObject.updateMatrixWorld(true);
+
+    return true;
+  }
+
+  /**
+   * Offsets the vertices of the given Solid to reduce the mantissa of the
+   * coordinates so they can be represented as a 32-bit floating-point number.
+   *
+   * @param {Solid} solid - the solid
+   * @returns {boolean} true when the offset is applied
+   */
+  static reduceSolidCoordinates(solid)
+  {
+    if (!(solid instanceof Solid)) return false;
+
+    let geometry = solid.geometry;
+
+    if (geometry.vertices.length === 0) return false;
+
+    let vertex = geometry.vertices[0];
+
+    if (Math.abs(vertex.x) < this.MAX_FLOAT32 &&
+        Math.abs(vertex.y) < this.MAX_FLOAT32 &&
+        Math.abs(vertex.z) < this.MAX_FLOAT32) return false;
+
+    // offset is required
+    geometry = geometry.clone();
+
+    const origin = vertex.clone();
+
+    // offset is required
+    const matrix = new THREE.Matrix4();
+    const offset = origin.clone().multiplyScalar(-1);
+    matrix.makeTranslation(offset);
+
+    geometry.applyMatrix4(matrix);
+
+    solid.updateGeometry(geometry, false);
+    solid.position.add(origin);
+    solid.updateMatrix();
 
     return true;
   }
@@ -734,7 +776,7 @@ class ObjectUtils
       camera.updateProjectionMatrix();
     }
   }
-  
+
   /**
    * Calculates the distance between the camera and the center of the scene.
    *
@@ -1293,7 +1335,7 @@ class ObjectUtils
   static scaleModel(model, toUnits = "m", fromUnits)
   {
     fromUnits = fromUnits || model.userData.units;
-    
+
     if (fromUnits === toUnits) return false;
 
     let factor1 = this.METER_CONVERSION_FACTORS[toUnits];

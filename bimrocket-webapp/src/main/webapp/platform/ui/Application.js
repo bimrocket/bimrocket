@@ -1962,13 +1962,17 @@ class Application
   initTasks()
   {
     const params = this.params;
-    const toolName = params.get("tool");
-    if (toolName)
+    const toolParam = params.get("tool");
+    if (toolParam)
     {
-      let tool = this.tools[toolName];
-      if (tool)
+      const toolNames = toolParam.split(",");
+      for (let toolName of toolNames)
       {
-        this.useTool(tool);
+        let tool = this.tools[toolName];
+        if (tool)
+        {
+          this.useTool(tool);
+        }
       }
     }
   }

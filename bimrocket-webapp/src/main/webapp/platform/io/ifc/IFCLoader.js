@@ -926,22 +926,27 @@ class IfcProductRepresentationHelper extends IfcHelper
 
   getObject3D(representationIdentifier)
   {
-    let reprObject3D = null;
     const productRepr = this.entity;
     const loader = this.loader;
+    let reprObject3D = null;
     let otherRepr = null;
+
+    const selectedReprObject3D = [];
 
     for (let repr of productRepr.Representations)
     {
       if (repr.RepresentationIdentifier === representationIdentifier)
       {
         reprObject3D = this.helper(repr).getObject3D();
-        if (!reprObject3D)
+        if (reprObject3D)
+        {
+          selectedReprObject3D.push(reprObject3D);
+        }
+        else
         {
           console.warn("Unsupported representation",
             representationIdentifier, repr);
         }
-        return reprObject3D;
       }
       else if (!otherRepr)
       {
@@ -949,9 +954,39 @@ class IfcProductRepresentationHelper extends IfcHelper
       }
     }
 
-    // if repr not found by identifier, take otherRepr
-    if (otherRepr)
+    if (selectedReprObject3D.length === 1)
     {
+      // normal case: one representation
+      reprObject3D = selectedReprObject3D[0];
+    }
+    else if (selectedReprObject3D.length > 1)
+    {
+      // add multiple representations to a THREE.Group
+      reprObject3D = new THREE.Group();
+      for (let i = 0; i < selectedReprObject3D.length; i++)
+      {
+        let object3D = selectedReprObject3D[i];
+        if (object3D instanceof THREE.Group)
+        {
+          // explode this group to return a flat group
+          let children = [...object3D.children];
+          for (let j = 0; j < children.length; j++)
+          {
+            let child = children[j];
+            reprObject3D.add(child);
+            child.name = "Item" + i + "-" + j;
+          }
+        }
+        else
+        {
+          reprObject3D.add(object3D);
+          object3D.name = "Item" + i;
+        }
+      }
+    }
+    else if (otherRepr)
+    {
+      // if no repr with that identifier is found, take otherRepr
       reprObject3D = this.helper(otherRepr).getObject3D();
       if (!reprObject3D)
       {

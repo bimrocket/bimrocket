@@ -1025,32 +1025,44 @@ class ObjectUtils
    * Creates a BufferGeometry that represents the given box.
    *
    * @param {THREE.Box3} box - the box for which to generate the geometry
+   * @param {THREE.Matrix4) matrix - an optional matrix to transform the
+   *   box vertices
    * @returns {THREE.BufferGeometry} the geometry of the box
    */
-  static getBoxGeometry(box)
+  static getBoxGeometry(box, matrix)
   {
-    var size = new THREE.Vector3();
-    box.getSize(size);
+    const xmin = box.min.x;
+    const ymin = box.min.y;
+    const zmin = box.min.z;
 
-    var points = [];
+    const xmax = box.max.x;
+    const ymax = box.max.y;
+    const zmax = box.max.z;
 
-    var xmin = box.min.x;
-    var ymin = box.min.y;
-    var zmin = box.min.z;
+    const b0 = box.min.clone();
+    const b1 = new THREE.Vector3(xmax, ymin, zmin);
+    const b2 = new THREE.Vector3(xmax, ymax, zmin);
+    const b3 = new THREE.Vector3(xmin, ymax, zmin);
 
-    var xmax = box.max.x;
-    var ymax = box.max.y;
-    var zmax = box.max.z;
+    const t0 = new THREE.Vector3(xmin, ymin, zmax);
+    const t1 = new THREE.Vector3(xmax, ymin, zmax);
+    const t2 = box.max.clone();
+    const t3 = new THREE.Vector3(xmin, ymax, zmax);
 
-    var b0 = box.min;
-    var b1 = new THREE.Vector3(xmax, ymin, zmin);
-    var b2 = new THREE.Vector3(xmax, ymax, zmin);
-    var b3 = new THREE.Vector3(xmin, ymax, zmin);
+    if (matrix)
+    {
+      b0.applyMatrix4(matrix);
+      b1.applyMatrix4(matrix);
+      b2.applyMatrix4(matrix);
+      b3.applyMatrix4(matrix);
 
-    var t0 = new THREE.Vector3(xmin, ymin, zmax);
-    var t1 = new THREE.Vector3(xmax, ymin, zmax);
-    var t2 = box.max;
-    var t3 = new THREE.Vector3(xmin, ymax, zmax);
+      t0.applyMatrix4(matrix);
+      t1.applyMatrix4(matrix);
+      t2.applyMatrix4(matrix);
+      t3.applyMatrix4(matrix);
+    }
+
+    const points = [];
 
     points.push(b0);
     points.push(b1);

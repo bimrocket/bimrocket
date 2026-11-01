@@ -296,14 +296,11 @@ class LinesSelectionHighlighter extends SelectionHighlighter
         let box = ObjectUtils.getLocalBoundingBox(object, true);
         if (!box.isEmpty())
         {
-          let geometry = ObjectUtils.getBoxGeometry(box);
+          let geometry = ObjectUtils.getBoxGeometry(box, object.matrixWorld);
 
           let lines = new THREE.LineSegments(geometry, object.visible ?
             this.boxSelectionMaterial : material);
           lines.raycast = function(){};
-
-          object.matrixWorld.decompose(
-            lines.position, lines.rotation, lines.scale);
           lines.updateMatrix();
           linesGroup.add(lines);
         }

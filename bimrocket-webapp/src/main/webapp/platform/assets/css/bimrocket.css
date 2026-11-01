@@ -62,7 +62,6 @@ header > button:focus
 
 header > button.logo-button
 {
-  background-color: #B00000;
   display: flex;
   width: 140px;
   transition: background-color 0.3s;
@@ -71,11 +70,17 @@ header > button.logo-button
   z-index: 10;
   padding-left: 6px;
   padding-right: 6px;
+  color: var(--text-color);
+}
+
+header > button.logo-button:focus
+{
+  background-color: rgba(200, 100, 200, 0.5);
 }
 
 header > button.logo-button:hover
 {
-  background-color: #A00000;
+  background-color: rgba(200, 100, 200, 0.5);
 }
 
 header > button.logo-button svg

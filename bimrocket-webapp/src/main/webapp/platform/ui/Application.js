@@ -189,7 +189,7 @@ class Application
     const logoButton = document.createElement("button");
     this.logoButton = logoButton;
     logoButton.className = "logo-button";
-    logoButton.title = Application.NAME;
+    logoButton.setAttribute("arial-label", Application.NAME);
     logoButton.addEventListener("click", event => this.showLogo());
     headerElem.appendChild(logoButton);
 

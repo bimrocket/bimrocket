@@ -61,6 +61,7 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
   {
     String baseUrl = getValue("baseUrl", "");
     String getUserInfoUrl = getValue("getUserInfoUrl", "/userInfo");
+    boolean emailAsId = config.getValue(BASE + "gicar.emailAsId", Boolean.class);
 
     if (getUserInfoUrl.startsWith("/")) getUserInfoUrl = baseUrl + getUserInfoUrl;
 
@@ -101,12 +102,14 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
       {
         givenName = userNode.get("given_name").asText().trim();
       }
-      if (userNode.hasNonNull("family_name")) {
+      if (userNode.hasNonNull("family_name"))
+      {
         surnames = userNode.get("family_name").asText().trim();
       }
       name = (givenName + " " + surnames).trim();
     }
-    if (name.isEmpty()) {
+    if (name.isEmpty())
+    {
       name = preferredUsername;
     }
     user.setName(name);
@@ -118,7 +121,8 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
       user.setEmail(email);
     }
 
-    if (email!= null && !email.isBlank()){
+    if (emailAsId && email!= null && !email.isBlank())
+    {
       user.setId(email);
     }
     else

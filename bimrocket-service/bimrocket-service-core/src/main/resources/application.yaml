@@ -43,6 +43,7 @@ services:
           clientId: changeit
           secretId: changeit
           roles: []
+          emailAsId: false
 
   # file service
   file:

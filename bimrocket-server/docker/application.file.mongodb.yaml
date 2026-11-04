@@ -43,6 +43,7 @@ services:
           clientId: changeit
           secretId: changeit
           roles: []
+          emailAsId: false
         keycloak:
           logoUrl: changeit
           baseUrl: changeit
@@ -63,6 +64,7 @@ services:
           clientId: changeit
           secretId: changeit
           roles: []
+          emailAsId: false
 
   # file service
   file:

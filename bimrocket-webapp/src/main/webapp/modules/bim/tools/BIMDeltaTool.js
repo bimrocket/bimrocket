@@ -8,7 +8,6 @@ import { Tool } from "platform/ui/Tool.js";
 import { Tree } from "platform/ui/tree/Tree.js";
 import { Panel } from "platform/ui/panel/Panel.js";
 import { TabbedPane } from "platform/ui/tabbedpane/TabbedPane.js";
-import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { FileExplorer } from "platform/ui/file/FileExplorer.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
 import { ModelSnapshot } from "../utils/ModelSnapshot.js";

@@ -107,7 +107,7 @@ class MapViewDialog extends Dialog
     this.maxRequestsPerSecondElem.style.marginBottom = "6px";
 
     this.acceptButton = this.addButton("accept", "button.accept",
-      () => this.onAccept());
+      () => this.onAccept(), "main");
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.hide());
 

@@ -86,7 +86,7 @@ class ACLEditorDialog extends Dialog
         .setCancelLabel("button.no")
         .setAction(saveAction)
         .show();
-    });
+    }, "main");
 
     this.addButton("cancelACL", "button.cancel", () =>
     {

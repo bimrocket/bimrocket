@@ -47,6 +47,7 @@ class DeleteFileAction extends FileAction
           fileExplorer.refreshServices();
         })
         .setAcceptLabel("button.delete")
+        .setAcceptClassName("danger")
         .setI18N(application.i18n).show();
     }
     else
@@ -57,6 +58,7 @@ class DeleteFileAction extends FileAction
       ConfirmDialog.create("title.delete_from_file_service", question, name)
         .setAction(() => fileExplorer.remove())
         .setAcceptLabel("button.delete")
+        .setAcceptClassName("danger")
         .setI18N(application.i18n).show();
     }
   }

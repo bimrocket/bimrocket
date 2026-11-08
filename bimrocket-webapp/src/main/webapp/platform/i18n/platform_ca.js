@@ -192,7 +192,6 @@ export const translations =
   "title.rename_file": "Reanomena fitxer",
   "title.add_file_service": "Afegeix servei de fitxers",
   "title.edit_file_service": "Edita servei de fitxers",
-  "title.save_to_cloud": "Desa al núvol",
   "title.create_folder_in_cloud": "Crea carpeta al núvol",
   "title.object_properties": "Propietats d'objecte",
   "title.delete_file_service": "Esborra servei de fitxers",

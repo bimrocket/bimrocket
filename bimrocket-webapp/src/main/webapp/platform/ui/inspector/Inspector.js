@@ -2171,14 +2171,17 @@ class RemovePropertyAction extends InspectorAction
     const propertyName = this.getPropertyName();
 
     ConfirmDialog.create("title.remove_property",
-      "question.remove_property", propertyName).setAction(() =>
-    {
-      delete dictionary[propertyName];
+      "question.remove_property", propertyName)
+      .setAcceptLabel("button.delete")
+      .setAcceptClassName("danger")
+      .setAction(() =>
+      {
+        delete dictionary[propertyName];
 
-      inspector.populateUserDataTab();
-      inspector.populateFeaturedTab();
-      application.notifyObjectsChanged(object, inspector);
-    }).setI18N(application.i18n).show();
+        inspector.populateUserDataTab();
+        inspector.populateFeaturedTab();
+        application.notifyObjectsChanged(object, inspector);
+      }).setI18N(application.i18n).show();
   }
 }
 

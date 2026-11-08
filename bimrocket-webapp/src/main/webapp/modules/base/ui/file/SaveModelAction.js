@@ -48,7 +48,7 @@ class SaveModelAction extends FileAction
         IOManager.normalizeFilename(object.name) : "";
     }
 
-    let dialog = new SaveDialog("title.save_to_cloud", filename);
+    let dialog = new SaveDialog("base|title.save_model", filename);
     dialog.setI18N(application.i18n);
     dialog.onSave = (name, format, onlySelection) =>
     {

@@ -32,7 +32,7 @@ class PropertiesDialog extends Dialog
     this.addButton("accept", "button.accept", () =>
     {
       this.onAccept();
-    });
+    }, "main");
 
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());

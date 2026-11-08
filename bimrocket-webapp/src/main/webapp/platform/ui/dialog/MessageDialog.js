@@ -22,7 +22,7 @@ class MessageDialog extends Dialog
 
     this.addTextWithArgs(message, args);
     this.acceptButton = this.addButton("confirm_accept", "button.accept",
-      () => this.onAccept());
+      () => this.onAccept(), "main");
   }
 
   static create(title, message, ...args)
@@ -39,6 +39,12 @@ class MessageDialog extends Dialog
   setAcceptLabel(label)
   {
     I18N.set(this.acceptButton, "textContent", label);
+    return this;
+  }
+
+  setAcceptClassName(className)
+  {
+    this.acceptButton.className = className;
     return this;
   }
 

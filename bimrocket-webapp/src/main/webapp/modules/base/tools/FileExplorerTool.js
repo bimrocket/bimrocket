@@ -6,8 +6,6 @@
 
 import { Tool } from "platform/ui/Tool.js";
 import { FileExplorer } from "platform/ui/file/FileExplorer.js";
-import { SaveDialog } from "platform/ui/dialog/SaveDialog.js";
-import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { ObjectUtils } from "platform/utils/ObjectUtils.js";
 import { OpenModelAction } from "../ui/file/OpenModelAction.js";
 import { SaveModelAction } from "../ui/file/SaveModelAction.js";

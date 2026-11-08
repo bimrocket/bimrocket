@@ -8,7 +8,6 @@ import { Panel } from "platform/ui/panel/Panel.js";
 import { Controls } from "platform/ui/Controls.js";
 import { Report } from "platform/reports/Report.js";
 import { ReportType } from "platform/reports/ReportType.js";
-import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { FileService, Result } from "platform/io/FileService.js";
 import { Toast } from "platform/ui/toast/Toast.js";
 import { I18N } from "platform/i18n/I18N.js";

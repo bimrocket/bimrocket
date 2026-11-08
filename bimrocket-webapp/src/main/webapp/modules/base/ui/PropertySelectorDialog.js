@@ -55,7 +55,7 @@ class PropertySelectorDialog extends Dialog
     this.addButton("accept", "button.accept", () =>
     {
       this.onAccept();
-    });
+    }, "main");
 
     this.addButton("cancel", "button.cancel", () =>
     {

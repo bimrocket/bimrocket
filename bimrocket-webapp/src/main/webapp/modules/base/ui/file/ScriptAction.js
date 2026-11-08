@@ -6,7 +6,6 @@
 
 import { FileExplorer } from "platform/ui/file/FileExplorer.js";
 import { FileAction } from "platform/ui/file/FileAction.js";
-import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { Metadata } from "platform/io/FileService.js";
 import { ScriptDialog } from "../ScriptDialog.js";
 

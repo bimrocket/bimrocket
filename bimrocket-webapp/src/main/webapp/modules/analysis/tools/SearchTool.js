@@ -55,7 +55,7 @@ class SearchTool extends Tool
     this.panel.bodyElem.appendChild(divElem);
 
     const searchButton = Controls.addButton(divElem,
-      "search", "button.search", () => this.search());
+      "search", "button.search", () => this.search(), "main");
 
     const clearButton = Controls.addButton(divElem,
       "clear", "button.clear", () => { this.clear(); this.textInput.focus(); });

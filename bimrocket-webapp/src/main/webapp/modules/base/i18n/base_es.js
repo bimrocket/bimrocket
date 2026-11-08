@@ -224,6 +224,8 @@ export const translations =
   "option.toolbar_top": "arriba",
   "option.toolbar_bottom": "abajo",
 
+  "title.save_model": "Guardar modelo",
+
   "title.chatgpt_setup": "Configuración de ChatGPT",
   "title.delete_conversation": "Eliminar conversación",
 

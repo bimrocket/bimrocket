@@ -49,18 +49,16 @@ class SaveSnapshotAction extends FileAction
       let filename = name.replaceAll(" ", "_") + "-" +
         (new Date()).toISOString().substring(0, 19).replaceAll(":", "-");
 
-      let dialog = new InputDialog(application,
-        "bim|tool.bim_delta.label", "bim|label.bim_delta_snapshot_name", filename);
-      dialog.setI18N(application.i18n);
-      dialog.onAccept = () =>
-      {
-        let ending = "." + ModelSnapshot.SNAPSHOT_EXTENSION;
-        let name = dialog.inputElem.value;
-        if (!name.endsWith(ending)) name += ending;
-        this.saveFile(name, object);
-        dialog.hide();
-      };
-      dialog.show();
+      let dialog = InputDialog.create("bim|tool.bim_delta.label",
+        "bim|label.bim_delta_snapshot_name", filename)
+        .setI18N(application.i18n)
+        .setAction(filename =>
+        {
+          let ending = "." + ModelSnapshot.SNAPSHOT_EXTENSION;
+          if (!filename.endsWith(ending)) name += ending;
+          this.saveFile(filename, object);
+          dialog.hide();
+        }).show();
     }
     else
     {

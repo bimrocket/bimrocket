@@ -599,23 +599,24 @@ class Controls
       },
       ".cm-content":
       {
-        caretColor: "var(--code-editor-caret)"
+        caretColor: "var(--code-editor-caret-color)"
       },
       ".cm-cursor, .cm-dropCursor":
       {
-        borderLeftColor: "var(--code-editor-caret)"
+        borderLeftColor: "var(--code-editor-caret-color)"
       },
-      "&.cm-focused .cm-selectionBackground, .cm-selectionBackground":
+      ".cm-selectionBackground":
       {
-        backgroundColor: "var(--code-editor-selection)"
+        backgroundColor: "var(--code-editor-selection-background)"
       },
-      ".cm-content ::selection":
+      "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground":
       {
-        backgroundColor: "var(--code-editor-selection)"
+        backgroundColor: "var(--code-editor-focus-selection-background)"
       },
       ".cm-activeLine":
       {
-        backgroundColor: "var(--code-editor-active-line)"
+        color: "var(--code-editor-active-line-text-color)",
+        backgroundColor: "var(--code-editor-active-line-background)"
       },
       ".cm-gutters":
       {
@@ -630,14 +631,14 @@ class Controls
       },
       ".cm-activeLineGutter":
       {
-        backgroundColor: "var(--code-editor-active-line-gutter)",
+        backgroundColor: "var(--code-editor-active-line-gutter-background)",
         color: "var(--code-editor-active-line-gutter-text-color)"
       },
       "&.cm-focused .cm-matchingBracket":
       {
         color: "var(--code-editor-matching-text-color)",
-        backgroundColor: "var(--code-editor-matching-bracket)",
-        outline: "1px solid var(--code-editor-matching-bracket-outline)"
+        backgroundColor: "var(--code-editor-matching-bracket-background)",
+        outline: "var(--code-editor-matching-bracket-outline)"
       },
       ".cm-tooltip":
       {
@@ -647,7 +648,7 @@ class Controls
       },
       ".cm-tooltip-autocomplete > ul > li[aria-selected]":
       {
-        backgroundColor: "var(--code-editor-autocomplete-selected)",
+        backgroundColor: "var(--code-editor-autocomplete-selected-background)",
         color: "var(--code-editor-autocomplete-selected-text-color)"
       },
       ".cm-searchMatch":
@@ -656,7 +657,7 @@ class Controls
       },
       ".cm-searchMatch-selected":
       {
-        backgroundColor: "var(--code-editor-search-match-selected)"
+        backgroundColor: "var(--code-editor-search-match-selected-background)"
       },
       ".cm-foldPlaceholder":
       {

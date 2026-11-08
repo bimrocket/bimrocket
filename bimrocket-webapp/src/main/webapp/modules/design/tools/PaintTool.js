@@ -283,9 +283,10 @@ class PaintTool extends Tool
 
   newMaterial()
   {
-    const dialog = new InputDialog(this.application,
-      "design|title.new_material", "design|label.material_name", "");
-    dialog.onAccept = name =>
+    const dialog = InputDialog.create("design|title.new_material",
+    "design|label.material_name", "")
+    .setI18N(this.application.i18n)
+    .setAction(name =>
     {
       let material = this.createMaterial(name);
       let optionElem = document.createElement("option");
@@ -297,8 +298,7 @@ class PaintTool extends Tool
       this.materials.set(materialId, material);
       this.loadMaterial();
       dialog.hide();
-    };
-    dialog.show();
+    }).show();
   }
 
   renameMaterial()
@@ -306,18 +306,17 @@ class PaintTool extends Tool
     let material = this.getSelectedMaterial();
     if (material)
     {
-      const dialog = new InputDialog(this.application,
-        "design|title.rename_material", "design|label.material_name",
-        material.name);
-      dialog.onAccept = name =>
+      const dialog = InputDialog.create("design|title.rename_material",
+      "design|label.material_name", material.name)
+      .setI18N(this.application.i18n)
+      .setAction(name =>
       {
         material.name = name;
         let index = this.materialListElem.selectedIndex;
         this.materialListElem.options[index].textContent =
           this.getMaterialLabel(material);
         dialog.hide();
-      };
-      dialog.show();
+      }).show();
     }
   }
 

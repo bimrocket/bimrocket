@@ -259,9 +259,9 @@ class Dialog
       value, className || "radio-buttons", listener);
   }
 
-  addButton(name, label, action)
+  addButton(name, label, action, className)
   {
-    return Controls.addButton(this.footerElem, name, label, action);
+    return Controls.addButton(this.footerElem, name, label, action, className);
   }
 
   addCodeEditor(name, label, value, options)

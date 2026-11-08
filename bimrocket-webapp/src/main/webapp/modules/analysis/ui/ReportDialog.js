@@ -50,7 +50,7 @@ class ReportDialog extends Dialog
     this.errorElem.style.color = "red";
 
     this.saveButton = this.addButton("save",
-      "button.save", () => this.onSave());
+      "button.save", () => this.onSave(), "main");
 
     this.runButton = this.addButton("run",
       "button.run", () => this.run());
@@ -136,6 +136,7 @@ class ReportDialog extends Dialog
         })
         .setI18N(application.i18n)
         .setAcceptLabel("button.yes")
+        .setAcceptClassName("main")
         .setCancelLabel("button.no")
         .show();
     }

@@ -43,7 +43,7 @@ class LoginDialog extends Dialog
     });
 
     this.acceptButton = this.addButton("login_accept", "button.accept",
-      () => this.onAccept());
+      () => this.onAccept(), "main");
 
     this.cancelButton = this.addButton("login_cancel", "button.cancel",
       () => this.onCancel());

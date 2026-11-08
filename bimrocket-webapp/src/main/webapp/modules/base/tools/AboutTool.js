@@ -113,7 +113,7 @@ class AboutTool extends Tool
     propsElem.innerHTML = text;
 
     let button = dialog.addButton("accept", "button.accept",
-      () => dialog.hide());
+      () => dialog.hide(), "main");
     dialog.onShow = () => button.focus();
     dialog.show();
   }

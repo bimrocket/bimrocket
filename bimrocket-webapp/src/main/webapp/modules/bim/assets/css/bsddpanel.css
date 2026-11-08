@@ -30,7 +30,8 @@
   margin: 8px;
   border-radius: 50%;
   border: 6px solid #fff;
-  border-color: red rgb(240, 180, 180) red rgb(240, 180, 180);
+  border-color: var(--progressbar-bar-background) var(--progressbar-bar-color)
+                var(--progressbar-bar-background) var(--progressbar-bar-color);
   animation: progress-undeterminate 1.2s linear infinite;
 }
 

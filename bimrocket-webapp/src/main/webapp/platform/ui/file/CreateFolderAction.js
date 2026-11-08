@@ -40,7 +40,8 @@ class CreateFolderAction extends FileAction
     let nameElem = dialog.addTextField("folder_name", "label.folder_name");
     nameElem.setAttribute("spellcheck", "false");
 
-    dialog.addButton("folder_accept", "button.create", () => dialog.onAccept());
+    dialog.addButton("folder_accept", "button.create",
+      () => dialog.onAccept(), "main");
     dialog.addButton("folder_cancel", "button.cancel", () => dialog.onCancel());
 
     dialog.onAccept = () =>

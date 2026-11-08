@@ -411,7 +411,7 @@ class BSDDPanel extends Panel
           "bsdd_save", "button.save", () => {
             this.saveProperties();
             this.endEdition();
-          });
+          }, "main");
 
         const cancelButton = Controls.addButton(footerElem,
           "bsdd_cancel", "button.cancel", () => {

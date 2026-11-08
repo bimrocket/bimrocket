@@ -32,8 +32,9 @@ class SVGExporterTool extends Tool
   createPanel()
   {
     this.panel = this.application.createToolPanel(this)
-      .setDefaultHeight(120)
-      .setDefaultMobileHeight(120);
+      .setDefaultHeight(160)
+      .setDefaultMobileHeight(140)
+      .setMinimumHeight(140);
 
     this.titleElem = Controls.addTextField(this.panel.bodyElem,
       "svg_exporter_title", "base|label.svg_exporter_title", "", "row");
@@ -43,7 +44,7 @@ class SVGExporterTool extends Tool
       this.scaleElem.style.width = "60px";
 
     this.svgExportButton = Controls.addButton(this.panel.bodyElem,
-      "svg_exporter_button", "button.export", () => this.exportSvg());
+      "svg_exporter_button", "button.export", () => this.exportSvg(), "main");
 
     this.openLink = document.createElement("a");
     I18N.set(this.openLink, "textContent", "button.open");

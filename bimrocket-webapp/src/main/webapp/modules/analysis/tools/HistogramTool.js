@@ -85,7 +85,7 @@ class HistogramTool extends Tool
 
     const updateButton = Controls.addButton(divElem,
       "update_histogram", "button.update", () =>
-      { this.updatePsets(); this.generateHistogram(); });
+      { this.updatePsets(); this.generateHistogram(); }, "main");
 
     const resetButton = Controls.addButton(divElem,
       "reset", "button.reset", () => this.reset());

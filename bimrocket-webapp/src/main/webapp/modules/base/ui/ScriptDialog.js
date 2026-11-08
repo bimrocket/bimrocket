@@ -91,7 +91,7 @@ class ScriptDialog extends Dialog
     this.bodyElem.appendChild(this.consoleElem);
 
     this.saveButton = this.addButton("save",
-      "button.save", () => this.onSave());
+      "button.save", () => this.onSave(), "main");
 
     this.runButton = this.addButton("run", "button.run",
       () => this.run());

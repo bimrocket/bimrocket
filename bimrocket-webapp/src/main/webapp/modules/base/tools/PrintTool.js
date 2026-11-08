@@ -45,7 +45,7 @@ class PrintTool extends Tool
     this.scaleElem.style.width = "60px";
 
     this.printButton = Controls.addButton(this.panel.bodyElem,
-      "print_button", "button.print", () => this.print());
+      "print_button", "button.print", () => this.print(), "main");
 
     this.openLink = document.createElement("a");
     I18N.set(this.openLink, "textContent", "button.open");

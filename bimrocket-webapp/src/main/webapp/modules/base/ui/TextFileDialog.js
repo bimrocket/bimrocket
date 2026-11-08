@@ -39,7 +39,7 @@ class TextFileDialog extends Dialog
       "label.content", "", { className : "flex-grow-1" });
 
     this.saveButton = this.addButton("save",
-      "button.save", () => this.onSave());
+      "button.save", () => this.onSave(), "main");
 
     this.closeButton = this.addButton("close",
       "button.close", () => this.hide());

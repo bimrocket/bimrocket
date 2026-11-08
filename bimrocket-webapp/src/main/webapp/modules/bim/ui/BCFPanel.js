@@ -285,6 +285,7 @@ class BCFPanel extends Panel
           "bim|question.delete_topic")
           .setAction(() => this.deleteTopic())
           .setAcceptLabel("button.delete")
+          .setAcceptClassName("danger")
           .setI18N(application.i18n).show();
       });
 
@@ -409,6 +410,7 @@ class BCFPanel extends Panel
           "bim|question.delete_project")
           .setAction(() => this.deleteProject())
           .setAcceptLabel("button.delete")
+          .setAcceptClassName("danger")
           .setI18N(this.application.i18n).show();
       });
 
@@ -1594,6 +1596,7 @@ class BCFPanel extends Panel
             "bim|question.delete_viewpoint")
             .setAction(() => this.deleteViewpoint(viewpoint))
             .setAcceptLabel("button.delete")
+            .setAcceptClassName("danger")
             .setI18N(this.application.i18n).show();
         }, "bcf-delete-viewpoint");
       this.application.i18n.updateTree(itemListElem);
@@ -1706,6 +1709,7 @@ class BCFPanel extends Panel
             "bim|question.delete_comment")
             .setAction(() => this.deleteComment(comment))
             .setAcceptLabel("button.delete")
+            .setAcceptClassName("danger")
             .setI18N(this.application.i18n).show();
         }, "bcf-delete-comment");
 
@@ -1745,6 +1749,7 @@ class BCFPanel extends Panel
             "bim|question.delete_doc_ref")
             .setAction(() => this.deleteDocumentReference(docRef))
             .setAcceptLabel("button.delete")
+            .setAcceptClassName("danger")
             .setI18N(this.application.i18n).show();
         }, "bcf-delete-doc-ref");
 
@@ -1991,6 +1996,7 @@ class BCFPanel extends Panel
           this.topicTableElem.style.display = "none";
         })
         .setAcceptLabel("button.delete")
+        .setAcceptClassName("danger")
         .setI18N(application.i18n).show();
     }
   }

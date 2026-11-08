@@ -171,7 +171,8 @@ class SolarSimulatorTool extends Tool
       "analysis|tool.solar_simulator.max_area_info");
 
     this.startExposureButton = Controls.addButton(this.exposureElem,
-      "solar_exposure", "analysis|button.exposure", () => this.startExposure());
+      "solar_exposure", "analysis|button.exposure", () => this.startExposure(),
+      "main");
 
     this.stopExposureButton = Controls.addButton(this.exposureElem,
       "solar_exposure", "button.stop", () => this.stopExposure());

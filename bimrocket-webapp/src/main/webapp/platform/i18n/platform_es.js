@@ -190,7 +190,6 @@ export const translations =
   "title.rename_file": "Renombrar fichero",
   "title.add_file_service": "Añadir servicio de ficheros",
   "title.edit_file_service": "Editar servicio de ficheros",
-  "title.save_to_cloud": "Guardar en la nube",
   "title.create_folder_in_cloud": "Crear carpeta en la nube",
   "title.object_properties": "Propiedades de objeto",
   "title.delete_file_service": "Eliminar servicio de ficheros",

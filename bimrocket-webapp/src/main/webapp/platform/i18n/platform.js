@@ -190,7 +190,6 @@ export const translations =
   "title.rename_file": "Rename file",
   "title.add_file_service": "Add file service",
   "title.edit_file_service": "Edit file service",
-  "title.save_to_cloud": "Save to cloud",
   "title.create_folder_in_cloud": "Create folder in cloud service",
   "title.object_properties": "Object properties",
   "title.delete_file_service": "Delete file service",

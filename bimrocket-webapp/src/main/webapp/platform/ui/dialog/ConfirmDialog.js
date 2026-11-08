@@ -55,6 +55,12 @@ class ConfirmDialog extends Dialog
     return this;
   }
 
+  setAcceptClassName(className)
+  {
+    this.acceptButton.className = className;
+    return this;
+  }
+
   setCancelLabel(label)
   {
     I18N.set(this.cancelButton, "textContent", label);

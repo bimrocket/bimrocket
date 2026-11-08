@@ -301,10 +301,10 @@ class SetupPanel extends Panel
       { "language": "json", "height": "200px" });
 
     const loaderButtonsPanel = document.createElement("div");
-    loaderButtonsPanel.className = "text-center";
+    loaderButtonsPanel.className = "button-bar text-center";
     loaderOptionsPanel.appendChild(loaderButtonsPanel);
     Controls.addButton(loaderButtonsPanel, "loader_save", "button.save",
-    () => this.saveOptions("loader", false));
+    () => this.saveOptions("loader", false), "main");
     Controls.addButton(loaderButtonsPanel, "loader_restore", "button.restore",
     () => this.saveOptions("loader", true));
   }
@@ -330,10 +330,10 @@ class SetupPanel extends Panel
       { "language": "json", "height": "200px" });
 
     const exporterButtonsPanel = document.createElement("div");
-    exporterButtonsPanel.className = "text-center";
+    exporterButtonsPanel.className = "button-bar text-center";
     exporterOptionsPanel.appendChild(exporterButtonsPanel);
     Controls.addButton(exporterButtonsPanel, "exporter_save", "button.save",
-    () => this.saveOptions("exporter", false));
+    () => this.saveOptions("exporter", false), "main");
     Controls.addButton(exporterButtonsPanel, "exporter_restore", "button.restore",
     () => this.saveOptions("exporter", true));
 
@@ -365,7 +365,7 @@ class SetupPanel extends Panel
       "mod_add", "button.add", () => this.addModule());
 
     this.applyButton = Controls.addButton(buttonsElem,
-      "mod_apply", "button.apply", () => this.applyModules());
+      "mod_apply", "button.apply", () => this.applyModules(), "main");
 
     this.applyButton = Controls.addButton(buttonsElem,
       "mod_cancel", "button.cancel", () => this.cancelModules());
@@ -683,23 +683,23 @@ class SetupPanel extends Panel
 
   addModule()
   {
-    const dialog = new InputDialog(this.application,
-      "base|title.add_module", "base|label.module_url", "").setSize(380, 160);
-
-    dialog.onAccept = async url =>
-    {
-      if (url.startsWith("http://") || url.startsWith("https://"))
+    const dialog = InputDialog.create("base|title.add_module",
+      "base|label.module_url", "")
+      .setSize(400, 160)
+      .setI18N(this.application.i18n)
+      .setAction(async url =>
       {
-        let module = ModuleManager.getModule(url);
-        if (!module)
+        if (url.startsWith("http://") || url.startsWith("https://"))
         {
-          module = ModuleManager.addModule(url);
-          this.addModuleEntry(module, true);
+          let module = ModuleManager.getModule(url);
+          if (!module)
+          {
+            module = ModuleManager.addModule(url);
+            this.addModuleEntry(module, true);
+          }
+          dialog.hide();
         }
-        dialog.hide();
-      }
-    };
-    dialog.show();
+      }).show();
   }
 
   toggle(checkElem)

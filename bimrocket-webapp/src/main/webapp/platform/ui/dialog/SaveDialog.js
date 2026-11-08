@@ -59,7 +59,7 @@ class SaveDialog extends Dialog
       this.setExtension(this.formatSelect.value);
       this.onSave(this.nameElem.value, this.formatSelect.value,
         this.saveSelectionElem.checked);
-    });
+    }, "main");
 
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.onCancel());

@@ -45,7 +45,7 @@ class ServiceDialog extends Dialog
       };
 
       this.onSave(this.serviceTypeSelect.value, parameters);
-    });
+    }, "main");
 
     this.saveButton.disabled = !this.isValidServiceName(service?.name);
     this.nameElem.addEventListener("input", () =>

@@ -9,7 +9,6 @@ import { Controls } from "platform/ui/Controls.js";
 import { Tree } from "platform/ui/tree/Tree.js";
 import { Constant } from "platform/io/ifc/IFC.js";
 import { IFCInspectorPanel } from "../ui/IFCInspectorPanel.js";
-import { MessageDialog } from "platform/ui/dialog/MessageDialog.js";
 import { I18N } from "platform/i18n/I18N.js";
 
 class IFCInspectorTool extends Tool

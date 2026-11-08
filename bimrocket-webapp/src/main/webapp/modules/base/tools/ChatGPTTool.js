@@ -71,7 +71,7 @@ class ChatGPTTool extends Tool
     this.panel.bodyElem.appendChild(this.footerElem);
 
     this.sendButton = Controls.addButton(this.footerElem,
-      "send", "button.send", () => this.send(), "send");
+      "send", "button.send", () => this.send(), "main");
 
     this.deleteButton = Controls.addButton(this.footerElem,
       "delete", "button.delete", () =>
@@ -79,6 +79,7 @@ class ChatGPTTool extends Tool
        "base|question.delete_conversation")
        .setAction(() => this.delete())
        .setAcceptLabel("button.delete")
+       .setAcceptClassName("danger")
        .setI18N(this.application.i18n).show());
 
     this.setupButton = Controls.addButton(this.footerElem,
@@ -105,7 +106,7 @@ class ChatGPTTool extends Tool
       {
         api_url: serverUrl + "/api/proxy?url=@chatgpt",
         api_key: "implicit",
-        model: "gpt-4-turbo",
+        model: "gpt-6-luna",
         temperature: 0.7,
         max_tokens: 256,
         training: [
@@ -187,8 +188,7 @@ class ChatGPTTool extends Tool
       {
         "model": this.setup.model,
         "messages": this.messages,
-        "max_tokens": this.setup.max_tokens || 256,
-        "temperature": this.setup.temperature || 0.7
+        "max_completion_tokens": this.setup.max_tokens || 256
       })
     });
 

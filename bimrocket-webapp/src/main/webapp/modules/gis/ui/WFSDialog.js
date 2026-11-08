@@ -117,7 +117,7 @@ class WFSDialog extends Dialog
     });
 
     this.acceptButton = this.addButton("accept", "button.accept",
-      () => this.onAccept());
+      () => this.onAccept(), "main");
     this.cancelButton = this.addButton("cancel", "button.cancel",
       () => this.hide());
 

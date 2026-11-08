@@ -48,10 +48,19 @@ class RenameFileAction extends FileAction
     nameElem.value = entryName;
     nameElem.addEventListener("keyup", event =>
     {
-      if (event.keyCode === 13) dialog.onAccept();
+      if (nameElem.value.trim())
+      {
+        this.renameButton.disabled = false;
+        if (event.keyCode === 13) dialog.onAccept();
+      }
+      else
+      {
+        this.renameButton.disabled = true;
+      }
     });
 
-    dialog.addButton("rename_accept", "button.accept", () => dialog.onAccept());
+    this.renameButton = dialog.addButton("rename_accept", "button.accept",
+      () => dialog.onAccept(), "main");
     dialog.addButton("rename_cancel", "button.cancel", () => dialog.onCancel());
 
     dialog.onAccept = async () =>

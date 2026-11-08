@@ -27,7 +27,7 @@ class PropertyDialog extends Dialog
        "label.property_value", "");
 
     this.acceptButton = this.addButton("accept", "button.accept",
-      () => this.onAccept());
+      () => this.onAccept(), "main");
     this.acceptButton.disabled = true;
 
     this.cancelButton = this.addButton("cancel", "button.cancel",

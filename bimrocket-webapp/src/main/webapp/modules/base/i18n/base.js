@@ -231,6 +231,8 @@ export const translations =
   "title.script_editor": "Script editor",
   "title.text_editor": "Text editor",
 
+  "title.save_model": "Save model",
+
   "title.export_selection": "Export selection",
 
   "title.module_installation": "Module installation",

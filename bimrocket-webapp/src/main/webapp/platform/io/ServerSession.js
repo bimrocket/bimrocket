@@ -305,6 +305,7 @@ class BimrocketServerSession extends ServerSession
 
     if (this.authorization)
     {
+      // send Bearer authorization if present
       fetchOptions.credentials = "omit";
       headers["Authorization"] = this.authorization;
     }
@@ -312,6 +313,7 @@ class BimrocketServerSession extends ServerSession
     {
       if (this.username)
       {
+        // send session cookie
         fetchOptions.credentials = "include";
       }
     }

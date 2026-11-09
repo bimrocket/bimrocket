@@ -116,7 +116,7 @@ class ServiceLoginDialog extends LoginDialog
         if (this.serverSession)
         {
           const securityService = this.serverSession.getSecurityService();
-
+          this.serverSession.username = "in progress";
           securityService.getCurrentUser(
             (user) =>
             {

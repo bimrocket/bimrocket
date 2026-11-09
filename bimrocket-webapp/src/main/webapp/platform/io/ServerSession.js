@@ -297,12 +297,11 @@ class BimrocketServerSession extends ServerSession
     );
   }
 
-
   setFetchOptions(fetchOptions)
   {
     const headers = fetchOptions.headers;
 
-    headers["X-Requested-With"] = "Fetch";
+    headers["X-Requested-With"] = "Fetch"; // always send Fetch.
 
     if (this.authorization)
     {

@@ -2331,16 +2331,20 @@ class RemoveControllerAction extends InspectorAction
     const controller = this.getLastObject();
 
     ConfirmDialog.create("title.remove_controller",
-      "question.remove_controller", controller.name).setAction(() =>
-    {
-      controller.destroy(application);
-      let object = controller.object;
-      delete object.controllers[controller.name];
+      "question.remove_controller", controller.name)
+      .setI18N(application.i18n)
+      .setAcceptLabel("button.delete")
+      .setAcceptClassName("danger")
+      .setAction(() =>
+      {
+        controller.destroy(application);
+        let object = controller.object;
+        delete object.controllers[controller.name];
 
-      inspector.populateControllersTab();
-      inspector.populateFeaturedTab();
-      application.notifyObjectsChanged(object, inspector);
-    }).setI18N(application.i18n).show();
+        inspector.populateControllersTab();
+        inspector.populateFeaturedTab();
+        application.notifyObjectsChanged(object, inspector);
+      }).show();
   }
 }
 

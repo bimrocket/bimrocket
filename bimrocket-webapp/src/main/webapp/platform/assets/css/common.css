@@ -205,7 +205,7 @@ button.main
 
 button.main:hover
 {
-  background-color: color-mix(in srgb, var(--accent-color), white 15%);
+  background-color: color-mix(in srgb, var(--accent-color), var(--surface-9) 10%);
 }
 
 button.main:disabled
@@ -221,7 +221,7 @@ button.danger
 
 button.danger:hover
 {
-  background-color: color-mix(in srgb, var(--danger-background), white 15%);
+  background-color: color-mix(in srgb, var(--danger-background), var(--surface-9) 10%);
 }
 
 button.danger:disabled
@@ -529,20 +529,19 @@ div.tags-display
   gap: 6px;
   min-height: 24px;
   padding: 4px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  background-color: #f9f9f9;
+  border-radius: var(--border-radius-1);
+  background-color: var(--surface-field);
 }
 
 span.tag
 {
-  background-color: #e0e0e0;
+  color: var(--accent-text-color);
+  background-color: var(--accent-color);
   border-radius: 4px;
-  padding: 0px 6px;
+  padding: 0px 2px 0px 6px;
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  color: #404040;
 }
 
 button.tag-remove
@@ -550,7 +549,7 @@ button.tag-remove
   cursor: pointer;
   margin-left: 6px;
   line-height: 1;
-  color: #666;
+  background-color: var(--accent-text);
   border: none;
   width: 14px;
   height: 14px;
@@ -564,7 +563,7 @@ button.tag-remove
 button.tag-remove:before
 {
   content: "";
-  background-color: var(--text-color);
+  background-color: var(--accent-text-color);
   mask-image: url(../icons/misc/close.svg);
   mask-position: center center;
   mask-repeat: no-repeat;
@@ -573,10 +572,14 @@ button.tag-remove:before
   height: 10px;
 }
 
-button.tag-remove:hover,
+button.tag-remove:hover
+{
+  background-color: color-mix(in srgb, var(--accent-color), var(--surface-9) 20%);
+}
+
 button.tag-remove:focus
 {
-  background-color: #f4f4f4;
+  border: 1px solid var(--accent-text-color);
 }
 
 button.icon-button-20

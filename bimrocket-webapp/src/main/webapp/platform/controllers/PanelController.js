@@ -65,7 +65,8 @@ class PanelController extends Controller
       .setPosition(position)
       .setDefaultHeight(this.height)
       .setDefaultMobileHeight(this.height)
-      .setMinimumHeight(this.height);
+      .setMinimumHeight(this.height)
+      .setPriority(1);
 
     this.panel.bodyElem.classList.add("center");
   }

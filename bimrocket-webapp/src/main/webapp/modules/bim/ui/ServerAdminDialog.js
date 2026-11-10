@@ -675,7 +675,10 @@ class ServerAdminDialog extends Dialog
       "deleteUser", "button.delete", () => {
         ConfirmDialog.create("bim|title.delete_user",
           "bim|question.delete_user")
-          .setAction(() => {
+          .setAcceptLabel("button.delete")
+          .setAcceptClassName("danger")
+          .setAction(() =>
+          {
             this.deleteUser(this.currentUserId);
             this.hideUserForm();
           })
@@ -744,6 +747,8 @@ class ServerAdminDialog extends Dialog
       "deleteRole", "button.delete", () => {
         ConfirmDialog.create("bim|title.delete_role",
           "bim|question.delete_role")
+          .setAcceptLabel("button.delete")
+          .setAcceptClassName("danger")
           .setAction(() => {
             this.deleteRole(this.currentRoleId);
             this.hideRoleForm();

@@ -125,6 +125,7 @@ class Dialog
       IconManager.updateTree(this.dialogElem);
 
       this.curtainElem.style.zIndex = Dialog.zIndex;
+      this.dialogElem.style.zIndex = Dialog.zIndex;
       Dialog.zIndex++;
 
       parentNode = parentNode || document.body;

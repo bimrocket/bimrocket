@@ -266,7 +266,35 @@ class BimrocketServerSession extends ServerSession
 
   getUsername(onCompleted, onError)
   {
-    onCompleted?.(this.username || "anonymous");
+    if (this.username && this.username !== "in progress")
+    {
+      onCompleted?.(this.username);
+      return;
+    }
+
+    this.username = "in progress";
+    const securityService = this.getSecurityService();
+  
+    securityService.getCurrentUser(
+      (user) =>
+      {
+        if (user?.id)
+        {
+          this.username = user.id;
+          onCompleted?.(this.username);
+        } 
+        else
+        {
+          this.username = null; 
+          onCompleted?.("anonymous");
+        }
+      },
+      (error) => 
+      {
+        this.username = null;
+        onCompleted?.("anonymous"); 
+      }
+    );
   }
 
   setFetchOptions(fetchOptions)

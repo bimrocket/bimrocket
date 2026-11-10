@@ -113,8 +113,29 @@ class ServiceLoginDialog extends LoginDialog
     {
       if (event.data.status === "ok")
       {
-        this.hide();
-        this.onLogin?.();
+        if (this.serverSession)
+        {
+          const securityService = this.serverSession.getSecurityService();
+          this.serverSession.username = "in progress";
+          securityService.getCurrentUser(
+            (user) =>
+            {
+              this.serverSession.username = user.id;
+              this.hide();
+              this.onLogin?.();
+            },
+            (error) =>
+            {
+              this.hide();
+              this.onLogin?.();
+            },
+          );
+        }
+        else
+        {
+          this.hide();
+          this.onLogin?.();
+        }
       }
     };
 

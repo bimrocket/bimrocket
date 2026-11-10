@@ -99,7 +99,7 @@ class SecurityService extends Service
 
   getCurrentUser(onCompleted, onError)
   {
-    return "???";
+    this.client.call("GET", "currentUser", { onCompleted, onError });
   }
 
   createUser(user, onCompleted, onError)

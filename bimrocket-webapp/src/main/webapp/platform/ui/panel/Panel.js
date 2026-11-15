@@ -570,7 +570,6 @@ class PanelManager
     this._resizers = {};
     this._resizers.left = new HorizontalResizer(this, "left");
     this._resizers.right = new HorizontalResizer(this, "right");
-    this._firstLayout = true;
     this._panelMap = new Map(); // panels with id
     this._panelCount = {};
     this._listeners =
@@ -700,14 +699,13 @@ class PanelManager
     this.isMobileScreen = container.clientWidth < Panel.MOBILE_WIDTH;
     this.margin = this.getMargin();
 
-    if (this._firstLayout)
+    for (let panel of this._panels)
     {
-      for (let panel of this._panels)
+      if (panel.height === -1)
       {
         panel.restoreHeight();
         panel.restorePosition();
       }
-      this._firstLayout = false;
     }
 
     if (this.isMobileScreen)

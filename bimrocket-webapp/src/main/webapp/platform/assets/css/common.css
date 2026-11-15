@@ -103,7 +103,7 @@
   --code-editor-selection-background: color-mix( in srgb, var(--text-selection-background) 50%, transparent );
   --code-editor-focus-selection-background: color-mix( in srgb, var(--text-selection-background) 75%, transparent );
   --code-editor-active-line-text-color: color-mix( in srgb, var(--text-color) 90%, transparent );
-  --code-editor-active-line-background: color-mix( in srgb, var(--surface-hover) 70%, transparent );
+  --code-editor-active-line-background: color-mix( in srgb, var(--surface-9) 5%, transparent );
   --code-editor-gutter-background: var(--surface-field);
   --code-editor-gutter-text-color: var(--label-text-color);
   --code-editor-active-line-gutter-background: var(--surface-hover);
@@ -183,6 +183,12 @@ input, select, textarea
   color: var(--field-text-color);
   background-color: var(--surface-field);
   box-sizing: border-box;
+}
+
+input::placeholder
+{
+  color: var(--text-color);
+  opacity: 0.5;
 }
 
 button

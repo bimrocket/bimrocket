@@ -664,12 +664,12 @@ class Inspector extends Panel
           if (Object.hasOwn(currentObject, name))
           {
             const val = currentObject[name];
-            if (val !== null && typeof val === "object" && !(val instanceof Array))
+            if (val && typeof val === "object" && !Array.isArray(val))
             {
               const subElem = this.createSection(elem, subPath);
               for (let propName in val)
               {
-                if (this.isSimpleValue(val[propName]))
+                if (Object.hasOwn(val, propName) && this.isSimpleValue(val[propName]))
                 {
                   this.createWriteableProperty(subElem, val, [...subPath, propName], propName);
                 }

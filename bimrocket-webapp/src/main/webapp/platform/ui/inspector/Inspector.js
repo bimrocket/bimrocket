@@ -663,7 +663,22 @@ class Inspector extends Panel
         {
           if (Object.hasOwn(currentObject, name))
           {
-            this.createWriteableProperty(elem, currentObject, subPath, name);
+            const val = currentObject[name];
+            if (val && typeof val === "object" && !Array.isArray(val))
+            {
+              const subElem = this.createSection(elem, subPath);
+              for (let propName in val)
+              {
+                if (Object.hasOwn(val, propName) && this.isSimpleValue(val[propName]))
+                {
+                  this.createWriteableProperty(subElem, val, [...subPath, propName], propName);
+                }
+              }
+            }
+            else
+            {
+              this.createWriteableProperty(elem, currentObject, subPath, name);
+            }
           }
         }
         else
@@ -2448,9 +2463,11 @@ class FeaturedAction extends InspectorAction
     for (let name of objectPath)
     {
       if (!group[name]) return false;
+      if (group[name] === true) return true;
       group = group[name];
     }
-    return group && group[propertyName];
+    if (propertyName === null) return group === true;
+    return Boolean(group && group[propertyName]);
   }
 }
 
@@ -2467,8 +2484,16 @@ class AddFeaturedAction extends FeaturedAction
     const tabName = inspector.propertiesTabbedPane.getVisibleTabName();
     if (tabName === "featured") return false;
 
+    const objectPath = this.getObjectPath();
     const propertyName = this.getPropertyName();
-    if (propertyName === null) return false;
+    if (propertyName === null)
+    {
+      if (objectPath && objectPath.length === 2 && objectPath[0] === "userData")
+      {
+        return !this.isFeatured();
+      }
+      return false;
+    }
 
     const lastObject = this.getLastObject();
     const value = lastObject[propertyName];
@@ -2489,16 +2514,28 @@ class AddFeaturedAction extends FeaturedAction
     const objectPath = this.getObjectPath();
     const propertyName = this.getPropertyName();
 
-    let group = featured;
-    for (let name of objectPath)
+    if (propertyName === null)
     {
-      if (!group[name])
+      if (objectPath.length === 2)
       {
-        group[name] = {};
+        if (!featured[objectPath[0]]) featured[objectPath[0]] = {};
+        featured[objectPath[0]][objectPath[1]] = true;
       }
-      group = group[name];
     }
-    group[propertyName] = true;
+    else
+    {
+      let group = featured;
+      for (let name of objectPath)
+      {
+        if (!group[name])
+        {
+          group[name] = {};
+        }
+        else if (typeof group[name] !== "object") return;
+        group = group[name];
+      }
+      group[propertyName] = true;
+    }
 
     inspector.populateFeaturedTab();
     inspector.saveFeaturedProperties();

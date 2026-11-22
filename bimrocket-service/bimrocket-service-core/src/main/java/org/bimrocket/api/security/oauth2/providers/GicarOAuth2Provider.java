@@ -128,7 +128,7 @@ public class GicarOAuth2Provider extends AbstractOAuth2Provider
     }
     else
     {
-      user.setId(preferredUsername.toLowerCase(Locale.ROOT));
+      user.setId(preferredUsername.toUpperCase(Locale.ROOT));
     }
 
     List<String> roles = getValues("roles");

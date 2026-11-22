@@ -123,7 +123,7 @@ public class ValidOAuth2Provider extends AbstractOAuth2Provider
     }
     else
     {
-      user.setId(identifier.toLowerCase(Locale.ROOT));
+      user.setId(identifier.toUpperCase(Locale.ROOT));
     }
 
     user.getRoleIds().addAll(getValues("roles"));

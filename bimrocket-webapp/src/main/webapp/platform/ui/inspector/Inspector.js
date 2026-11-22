@@ -249,9 +249,13 @@ class Inspector extends Panel
     {
       if (event.type === "nodeChanged" &&
           this.object &&
-          event.objects.includes(this.object) &&
-          event.source !== this)
+          event.objects.includes(this.object))
       {
+        // If the change originates from an inspector tab other than "featured",
+        // there is no need to refresh the properties.
+        let tabName = this.propertiesTabbedPane.getVisibleTabName();
+        if (event.source === this && tabName !== "featured") return;
+
         if (event.properties instanceof Array)
         {
           for (let propertyName of event.properties)
@@ -657,19 +661,33 @@ class Inspector extends Panel
 
       for (let name in group)
       {
-        const subPath = [...path, name];
-
-        if (group[name] === true)
+        if (Object.hasOwn(currentObject, name))
         {
-          if (Object.hasOwn(currentObject, name))
+          if (group[name] === true)
           {
-            this.createWriteableProperty(elem, currentObject, subPath, name);
+            const val = currentObject[name];
+            if (val && typeof val === "object"
+                && !Array.isArray(val) && !this.isSimpleValue(val)
+                && !(val instanceof THREE.Object3D))
+            {
+              const subPath = [...path, name];
+              const subElem = this.createSection(elem, subPath);
+              for (let propName in val)
+              {
+                if (Object.hasOwn(val, propName) && this.isSimpleValue(val[propName]))
+                {
+                  this.createWriteableProperty(subElem, val, subPath, propName);
+                }
+              }
+            }
+            else
+            {
+              this.createWriteableProperty(elem, currentObject, path, name);
+            }
           }
-        }
-        else
-        {
-          if (currentObject.hasOwnProperty(name))
+          else
           {
+            const subPath = [...path, name];
             const subObject = currentObject[name];
             const subElem = this.createSection(elem, subPath);
             const subGroup = group[name];
@@ -2175,13 +2193,13 @@ class RemovePropertyAction extends InspectorAction
       .setAcceptLabel("button.delete")
       .setAcceptClassName("danger")
       .setAction(() =>
-      {
-        delete dictionary[propertyName];
+    {
+      delete dictionary[propertyName];
 
-        inspector.populateUserDataTab();
-        inspector.populateFeaturedTab();
-        application.notifyObjectsChanged(object, inspector);
-      }).setI18N(application.i18n).show();
+      inspector.populateUserDataTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }).setI18N(application.i18n).show();
   }
 }
 
@@ -2336,15 +2354,15 @@ class RemoveControllerAction extends InspectorAction
       .setAcceptLabel("button.delete")
       .setAcceptClassName("danger")
       .setAction(() =>
-      {
-        controller.destroy(application);
-        let object = controller.object;
-        delete object.controllers[controller.name];
+    {
+      controller.destroy(application);
+      let object = controller.object;
+      delete object.controllers[controller.name];
 
-        inspector.populateControllersTab();
-        inspector.populateFeaturedTab();
-        application.notifyObjectsChanged(object, inspector);
-      }).show();
+      inspector.populateControllersTab();
+      inspector.populateFeaturedTab();
+      application.notifyObjectsChanged(object, inspector);
+    }).show();
   }
 }
 
@@ -2437,7 +2455,7 @@ class FeaturedAction extends InspectorAction
     super(inspector);
   }
 
-  isFeatured()
+  isFeatured(anyAncestor = true, anyDescendant = false)
   {
     const inspector = this.inspector;
     const featured = inspector.featuredProperties;
@@ -2445,12 +2463,25 @@ class FeaturedAction extends InspectorAction
     const propertyName = this.getPropertyName();
 
     let group = featured;
-    for (let name of objectPath)
+    let i = 0;
+    while (i < objectPath.length)
     {
-      if (!group[name]) return false;
-      group = group[name];
+      let name = objectPath[i];
+      let next = group[name];
+      if (!next) return false;
+      if (typeof next === "object")
+      {
+        group = next;
+        i++;
+      }
+      else // next == true
+      {
+        return anyAncestor ?
+          true : (i === objectPath.length - 1 && propertyName === null);
+      }
     }
-    return group && group[propertyName];
+    if (propertyName === null) return anyDescendant;
+    return Boolean(group[propertyName]);
   }
 }
 
@@ -2465,14 +2496,8 @@ class AddFeaturedAction extends FeaturedAction
   {
     const inspector = this.inspector;
     const tabName = inspector.propertiesTabbedPane.getVisibleTabName();
-    if (tabName === "featured") return false;
-
-    const propertyName = this.getPropertyName();
-    if (propertyName === null) return false;
-
-    const lastObject = this.getLastObject();
-    const value = lastObject[propertyName];
-    if (!inspector.isSimpleValue(value)) return false;
+    if (["geometry", "material", "formulas", "featured"].includes(tabName))
+      return false;
 
     return !this.isFeatured();
   }
@@ -2490,15 +2515,24 @@ class AddFeaturedAction extends FeaturedAction
     const propertyName = this.getPropertyName();
 
     let group = featured;
-    for (let name of objectPath)
+    let prevGroup = null;
+    let name = null;
+    for (name of objectPath)
     {
-      if (!group[name])
+      if (!group[name]) // undefined or false
       {
         group[name] = {};
       }
+      else if (typeof group[name] !== "object")
+      {
+        group[name] = true;
+        return;
+      }
+      prevGroup = group;
       group = group[name];
     }
-    group[propertyName] = true;
+    if (propertyName) group[propertyName] = true;
+    else prevGroup[name] = true;
 
     inspector.populateFeaturedTab();
     inspector.saveFeaturedProperties();
@@ -2514,14 +2548,11 @@ class RemoveFeaturedAction extends FeaturedAction
 
   isEnabled()
   {
-    const tabName = this.inspector.propertiesTabbedPane.getVisibleTabName();
-    const propertyName = this.getPropertyName();
+    const inspector = this.inspector;
+    const tabName = inspector.propertiesTabbedPane.getVisibleTabName();
+    if (["geometry", "material", "formulas"].includes(tabName)) return false;
 
-    if (propertyName === null) return false;
-
-    if (tabName === "featured") return true;
-
-    return this.isFeatured();
+    return this.isFeatured(false, true);
   }
 
   getIconName()
@@ -2536,25 +2567,43 @@ class RemoveFeaturedAction extends FeaturedAction
     const objectPath = this.getObjectPath();
     const propertyName = this.getPropertyName();
 
-    let group = featured;
-    let groups = [group];
-    for (let name of objectPath)
-    {
-      if (!group[name]) return;
-      group = group[name];
-      groups.push(group);
-    }
-    delete group[propertyName];
+    let block = [...objectPath];
+    if (propertyName) block.push(propertyName);
 
-    for (let i = objectPath.length - 1; i >= 0; i--)
+    let obj = featured;
+
+    for (let i = 0; i < block.length - 1; i++)
     {
-      let name = objectPath[i];
-      let igroup = groups[i];
-      if (Object.keys(igroup[name]).length === 0)
-      {
-        delete igroup[name];
-      }
+      obj = obj?.[block[i]];
+      if (!obj) break;
     }
+
+    if (obj)
+    {
+      delete obj[block.at(-1)];
+    }
+
+    const removeEmptyObjects = (group) =>
+    {
+      for (const key of Object.keys(group))
+      {
+        const value = group[key];
+
+        if (value && typeof value === "object" && !Array.isArray(value))
+        {
+          removeEmptyObjects(value);
+
+          if (Object.keys(value).length === 0)
+          {
+            delete group[key];
+          }
+        }
+      }
+      return group;
+    };
+
+    removeEmptyObjects(featured);
+
     inspector.populateFeaturedTab();
     inspector.saveFeaturedProperties();
   }

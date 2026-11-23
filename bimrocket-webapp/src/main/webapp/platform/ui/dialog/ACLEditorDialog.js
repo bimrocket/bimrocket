@@ -47,7 +47,9 @@ class ACLEditorDialog extends Dialog
       try
       {
         const acl = new ACL();
-        const json = this.editorView.state.doc.toString();
+        let json = this.editorView.state.doc.toString();
+        // remove invalid symbols before parsing the json text
+        json = json.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
         acl.fromJSON(json);
 
         this.application.progressBar.message = "Writing ACL...";

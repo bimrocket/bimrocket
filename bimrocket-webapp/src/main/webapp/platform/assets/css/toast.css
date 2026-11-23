@@ -29,4 +29,6 @@
   pointer-events: none;
   transition: opacity 1s;
   box-shadow: var(--toast-shadow);
+  height: auto;
+  text-align: center;
 }

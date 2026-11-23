@@ -21,7 +21,7 @@ class Toast
     this.toastElem.className = "toast";
     I18N.set(this.toastElem, "textContent", message, ...args);
 
-    this.setSize(180, 32);
+    this.setSize(200, 32);
     this.setTop(80);
     this.setClassName("toast");
   }
@@ -58,7 +58,7 @@ class Toast
   setSize(width, height)
   {
     this.toastElem.style.width = width + "px";
-    this.toastElem.style.height = height + "px";
+    this.toastElem.style.minHeight = height + "px";
     this.toastElem.style.marginLeft = "-" + (width / 2) + "px";
     return this;
   }

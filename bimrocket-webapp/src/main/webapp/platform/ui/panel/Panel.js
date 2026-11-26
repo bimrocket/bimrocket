@@ -347,16 +347,47 @@ class Panel
     }
   }
 
+
+  /**
+   * Indicates whether this panel is collapsed.
+   *
+   * A panel is collapsed when it is minimized or when it does not fit on
+   * the screen.
+   *
+   * @returns {boolean} the collapsed state.
+   */
   get collapsed()
   {
     return this.element.classList.contains("collapsed");
   }
 
+  /**
+   * Indicates whether this panel is activated.
+   *
+   * @returns {boolean} the activation state.
+   */
   get activated()
   {
     return this.element.classList.contains("activated");
   }
 
+  /**
+   * Activates or deactivates this panel.
+   *
+   * Activating a panel does not guarantee that it will be visible.
+   * It depends on whether it is minimized or if it fits on the screen.
+   *
+   * Deactivating a panel ensures that it will no longer be visible.
+   *
+   * The onActivate and onDeactivate methods are called when the panel
+   * activation state changes.
+   *
+   * The onShow and onHide methods are called when the panel visibility changes.
+   *
+   * An activation event is fired whe the panel activation changes.
+   *
+   * @param {boolean} activated - the next activation state
+   */
   set activated(activated)
   {
     const oldVisible = this.visible;
@@ -382,11 +413,31 @@ class Panel
     else if (!visible && oldVisible) this.onHide();
   }
 
+  /**
+   * Indicates whether this panel is visible.
+   *
+   * @returns {boolean} true if and only if this panel is visible.
+   */
   get visible()
   {
     return this.activated && !this.collapsed;
   }
 
+  /**
+   * Makes this panel visible or invisible.
+   *
+   * When the panel is made visible, it is first unminimized and activated.
+   *
+   * The onActivate and onDeactivate methods are called when the panel
+   * activation state changes.
+   *
+   * The onShow and onHide methods are called when the panel visibility changes.
+   *
+   * A restore event is fired when the panel is unminimized.
+   * An activation event is fired whe the panel activation changes.
+   *
+   * @param {boolean} visible - the panel visibility
+   */
   set visible(visible)
   {
     const oldVisible = this.visible;
@@ -394,27 +445,55 @@ class Panel
     if (visible && !this.visible)
     {
       this._activation = Date.now();
-      this._minimized = false;
-      this.element.classList.add("activated");
+      if (this._minimized)
+      {
+        this._minimized = false;
+        this.panelManager?.notifyChange("restore", this);
+      }
+      if (!this.activated)
+      {
+        this.element.classList.add("activated");
+        this.onActivate();
+        this.panelManager?.notifyChange("activate", this);
+      }
       this.panelManager?.updateLayout();
-      this.panelManager?.notifyChange("activate", this);
     }
     else if (!visible)
     {
-      this.element.classList.remove("activated");
+      if (this.activated)
+      {
+        this.element.classList.remove("activated");
+        this.onDeactivate();
+        this.panelManager?.notifyChange("deactivate", this);
+      }
       this.panelManager?.updateLayout();
-      this.panelManager?.notifyChange("deactivate", this);
     }
 
     if (visible && !oldVisible) this.onShow();
     else if (!visible && oldVisible) this.onHide();
   }
 
+  /**
+   * Indicates whether this panel is minimized.
+   *
+   * @returns {boolean} true if and only if this panel is minimized.
+   */
   get minimized()
   {
     return this._minimized;
   }
 
+  /**
+   * Sets the panel minimization.
+   *
+   * This methods does not affect the panel activation state.
+   *
+   * The onShow and onHide methods are called when the panel visibility changes.
+   *
+   * A minimize/restore event is fired when the panel minimization changes.
+   *
+   * @param {boolean} minimized - the minimization state
+   */
   set minimized(minimized)
   {
     const oldVisible = this.visible;

@@ -88,7 +88,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
       while (!item.done)
       {
         let object = item.value;
-        this.collectLines(object, linesGroup, true);
+        this.collectLines(object, linesGroup, object.visible);
         item = iterator.next();
       }
       this._selectionLines = linesGroup;
@@ -107,7 +107,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
     }
   }
 
-  collectLines(object, linesGroup, isRoot)
+  collectLines(object, linesGroup, parentVisible)
   {
     const application = this.application;
 
@@ -115,13 +115,11 @@ class LinesSelectionHighlighter extends SelectionHighlighter
           || ObjectUtils.HIGHLIGHT_EDGES;
     if (highlight === ObjectUtils.HIGHLIGHT_NONE) return;
 
-    let material = this.getSelectionMaterial(object);
+    let material = this.getSelectionMaterial(object, parentVisible);
 
     if (object instanceof Solid)
     {
       let solid = object;
-
-      if (!isRoot && !solid.edgesVisible && !solid.facesVisible) return;
 
       if (application.setup.selectionPaintMode === Application.EDGES_SELECTION)
       {
@@ -288,7 +286,7 @@ class LinesSelectionHighlighter extends SelectionHighlighter
         for (let i = 0; i < children.length; i++)
         {
           var child = children[i];
-          this.collectLines(child, linesGroup, false);
+          this.collectLines(child, linesGroup, object.visible && parentVisible);
         }
       }
       else if (highlight === ObjectUtils.HIGHLIGHT_BOX)
@@ -308,10 +306,10 @@ class LinesSelectionHighlighter extends SelectionHighlighter
     }
   }
 
-  getSelectionMaterial(object)
+  getSelectionMaterial(object, parentVisible)
   {
     const setup = this.application.setup;
-    if (object.visible)
+    if (object.visible && parentVisible)
     {
       return setup.showDeepSelection ?
         this.deepSelectionMaterial : this.selectionMaterial;

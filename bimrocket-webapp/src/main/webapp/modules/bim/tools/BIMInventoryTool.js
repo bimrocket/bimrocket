@@ -25,6 +25,10 @@ class BIMInventoryTool extends Tool
 
     this.setOptions(options);
     application.addTool(this);
+    
+    this.immediate = true;
+
+    this._onScene = this.onScene.bind(this);
 
     this.types = {};
     this.classifications = {};
@@ -35,10 +39,12 @@ class BIMInventoryTool extends Tool
 
   createPanel()
   {
-    this.panel = this.application.createToolPanel(this)
+    const application = this.application;
+    this.panel = application.createToolPanel(this)
       .setDefaultHeight(300)
       .setDefaultMobileHeight(260)
-      .setMinimumHeight(160);
+      .setMinimumHeight(160)
+      .setPriority(2);
 
     this.panel.bodyElem.classList.add("padding");
 
@@ -83,20 +89,42 @@ class BIMInventoryTool extends Tool
     this.layersPanelElem =
       this.tabbedPane.addTab("ifc_layers", "bim|tab.layers");
     this.layersTree = new Tree(this.layersPanelElem);
+
+    this.panel.onActivate = () =>
+    {
+      application.addEventListener("scene", this._onScene);
+      if (this.needsUpdate())
+      {
+        this.clear();
+      }
+    };
+
+    this.panel.onDeactivate = () =>
+    {
+      application.removeEventListener("scene", this._onScene);
+      return true;
+    };    
   }
 
-  activate()
+  execute()
   {
     this.panel.visible = true;
+  }
+  
+  onScene(event)
+  {
+    if (event.source === this) return;
+    if (event.objects?.length === 1 && event.type !== "structureChanged")
+    {
+      let object = event.objects[0];
+      if (object instanceof THREE.Camera) return;
+      if (!ObjectUtils.isObjectDescendantOf(object, this.application.baseObject))
+        return;
+    }
     if (this.needsUpdate())
     {
       this.clear();
     }
-  }
-
-  deactivate()
-  {
-    this.panel.visible = false;
   }
 
   exploreAll()
@@ -131,7 +159,7 @@ class BIMInventoryTool extends Tool
 
     // layers
     this.findLayers(baseObjects);
-    this.showLayers();
+    this.showLayers();  
   }
 
   clear()

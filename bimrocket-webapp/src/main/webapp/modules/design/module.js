@@ -258,8 +258,8 @@ export function activate(application)
   geometryMenu.addMenuItem(mergeGeometriesTool);
   geometryMenu.addMenuItem(offsetGeometriesTool);
   geometryMenu.addMenuItem(resetMatrixTool);
-  geometryMenu.addMenuItem(smoothEdgesTool);
   geometryMenu.addMenuItem(reduceCoordinatesTool);
+  geometryMenu.addMenuItem(smoothEdgesTool);
   designMenu.addMenuItem(rebuildTool);
   designMenu.addMenuItem(decomposeTool);
   designMenu.addMenuItem(paintTool);

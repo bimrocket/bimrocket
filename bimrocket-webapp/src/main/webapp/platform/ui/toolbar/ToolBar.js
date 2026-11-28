@@ -14,6 +14,7 @@ class ToolBar
   {
     this.application = application;
     this.buttonMap = new Map();
+    this.toggleMinimization = true;
 
     this.element = document.createElement("div");
     this.element.className = "toolbar";
@@ -297,8 +298,16 @@ class ToolButton
     buttonElem.addEventListener("click", () =>
     {
       this.scrollButtonIntoView();
-      this.toolBar.application.useTool(tool);
-    }, false);
+      const panel = tool.panel;
+      if (toolBar.toggleMinimization && panel?.tool === tool && panel.activated)
+      {
+        panel.minimized = !panel.minimized;
+      }
+      else
+      {
+        this.toolBar.application.useTool(tool);
+      }
+    });
   }
 
   scrollButtonIntoView()

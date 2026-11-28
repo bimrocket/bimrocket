@@ -500,7 +500,7 @@ class Panel
 
     if (minimized !== this._minimized)
     {
-      this.activated = Date.now();
+      this._activation = Date.now();
       this._minimized = minimized;
       this.panelManager?.updateLayout();
       this.panelManager?.notifyChange(minimized ? "minimize" : "restore", this);

@@ -169,6 +169,7 @@
 .tool-button:focus
 {
   box-shadow: none;
+  transition: background-color 0.2s linear;
 }
 
 .tool-button:hover,
@@ -184,6 +185,7 @@
   fill: var(--toolbar-button-color);
   stroke: var(--toolbar-button-color);
   stroke-width: var(--toolbar-button-icon-stroke-width);
+  transition: stroke 0.2s linear;
 }
 
 .tool-button:hover,
@@ -201,6 +203,7 @@
 
 .tool-button.activated
 {
+  box-shadow: inset 0 0 0 2px var(--toolbar-button-activated-background);
   background-color: var(--toolbar-button-activated-background);
 }
 
@@ -212,12 +215,12 @@
 
 .tool-button.activated.minimized
 {
-  box-shadow: inset 0 0 0 2px var(--toolbar-button-activated-background);
   background-color: var(--toolbar-button-background);
 }
 
 .tool-button.selected
 {
+  box-shadow: inset 0 0 0 2px var(--toolbar-button-selected-background);
   background-color: var(--toolbar-button-selected-background);
 }
 
